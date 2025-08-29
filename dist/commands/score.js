@@ -48,47 +48,64 @@ const score_calculator_1 = require("../scoring/score-calculator");
 const file_utils_1 = require("../utils/file-utils");
 async function scoreFafFile(file, options = {}) {
     try {
-        const fafPath = file || await (0, file_utils_1.findFafFile)();
+        const fafPath = file || (await (0, file_utils_1.findFafFile)());
         if (!fafPath) {
-            console.log(chalk_1.default.red('❌ No .faf file found'));
+            console.log(chalk_1.default.red("❌ No .faf file found"));
             console.log(chalk_1.default.yellow('💡 Run "faf init" to create one'));
             process.exit(1);
         }
         console.log(chalk_1.default.blue(`🎯 Scoring: ${fafPath}`));
         // Read and parse .faf file
-        const content = await fs_1.promises.readFile(fafPath, 'utf-8');
+        const content = await fs_1.promises.readFile(fafPath, "utf-8");
         const fafData = YAML.parse(content);
         // Calculate score
         const scoreResult = (0, score_calculator_1.calculateFafScore)(fafData);
         const percentage = Math.round(scoreResult.totalScore);
         // Color-coded score display
         let scoreColor = chalk_1.default.red;
-        let scoreEmoji = '🔴';
+        let scoreEmoji = "🔴";
         if (percentage >= 90) {
             scoreColor = chalk_1.default.green;
-            scoreEmoji = '🟢';
+            scoreEmoji = "🟢";
         }
         else if (percentage >= 70) {
             scoreColor = chalk_1.default.yellow;
-            scoreEmoji = '🟡';
+            scoreEmoji = "🟡";
         }
         console.log(scoreColor.bold(`${scoreEmoji} Score: ${percentage}%`));
         console.log(chalk_1.default.gray(`   (${scoreResult.filledSlots}/${scoreResult.totalSlots} context slots filled)`));
+        // Always show key missing items for transparency
+        const missingItems = [];
+        Object.entries(scoreResult.sectionScores).forEach(([, score]) => {
+            if (score.missing.length > 0 && score.percentage < 100) {
+                missingItems.push(...score.missing.slice(0, 2)); // Top 2 from each section
+            }
+        });
+        if (missingItems.length > 0 && !options.details) {
+            console.log(chalk_1.default.gray("\n   Missing for higher score:"));
+            missingItems.slice(0, 5).forEach((item) => {
+                console.log(chalk_1.default.gray(`   • ${item}`));
+            });
+            console.log(chalk_1.default.cyan('\n   💡 Run "faf score --details" for complete breakdown'));
+        }
         // Detailed breakdown
         if (options.details) {
-            console.log(chalk_1.default.blue('\n📊 Detailed Breakdown:'));
+            console.log(chalk_1.default.blue("\n📊 Detailed Breakdown:"));
             Object.entries(scoreResult.sectionScores).forEach(([section, score]) => {
                 const sectionPercentage = Math.round(score.percentage);
-                const sectionColor = sectionPercentage >= 70 ? chalk_1.default.green :
-                    sectionPercentage >= 40 ? chalk_1.default.yellow : chalk_1.default.red;
+                const sectionColor = sectionPercentage >= 70
+                    ? chalk_1.default.green
+                    : sectionPercentage >= 40
+                        ? chalk_1.default.yellow
+                        : chalk_1.default.red;
                 console.log(`   ${sectionColor(section)}: ${sectionPercentage}% (${score.filled}/${score.total})`);
                 if (score.missing.length > 0) {
-                    console.log(chalk_1.default.gray(`      Missing: ${score.missing.join(', ')}`));
+                    console.log(chalk_1.default.gray(`      Missing: ${score.missing.join(", ")}`));
                 }
             });
             // Improvement suggestions
             if (percentage < 100) {
-                console.log(chalk_1.default.blue('\n💡 Quick Wins:'));
+                console.log(chalk_1.default.blue("\n💡 Quick Wins:"));
                 const suggestions = scoreResult.suggestions.slice(0, 3);
                 suggestions.forEach((suggestion, index) => {
                     console.log(chalk_1.default.yellow(`   ${index + 1}. ${suggestion}`));
@@ -96,27 +113,27 @@ async function scoreFafFile(file, options = {}) {
             }
         }
         // Check minimum threshold
-        const minimumScore = parseInt(options.minimum || '50');
+        const minimumScore = parseInt(options.minimum || "50");
         if (percentage < minimumScore) {
             console.log(chalk_1.default.red(`\n🚨 Score below minimum threshold (${minimumScore}%)`));
             process.exit(1);
         }
         // Success message
         if (percentage === 100) {
-            console.log(chalk_1.default.green.bold('\n🎉 Perfect .faf file! Ready for AI collaboration!'));
+            console.log(chalk_1.default.green.bold("\n🎉 Perfect .faf file! Ready for AI collaboration!"));
         }
         else if (percentage >= 80) {
-            console.log(chalk_1.default.green('\n✨ Excellent .faf file! Minor improvements possible.'));
+            console.log(chalk_1.default.green("\n✨ Excellent .faf file! Minor improvements possible."));
         }
         else if (percentage >= 60) {
-            console.log(chalk_1.default.yellow('\n👍 Good .faf file! Some gaps to fill.'));
+            console.log(chalk_1.default.yellow("\n👍 Good .faf file! Some gaps to fill."));
         }
         else {
-            console.log(chalk_1.default.red('\n⚠️  .faf file needs improvement for optimal AI context.'));
+            console.log(chalk_1.default.red("\n⚠️  .faf file needs improvement for optimal AI context."));
         }
     }
     catch (error) {
-        console.log(chalk_1.default.red('💥 Scoring failed:'));
+        console.log(chalk_1.default.red("💥 Scoring failed:"));
         console.log(chalk_1.default.red(error instanceof Error ? error.message : String(error)));
         process.exit(1);
     }

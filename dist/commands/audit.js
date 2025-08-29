@@ -48,18 +48,18 @@ const file_utils_1 = require("../utils/file-utils");
 const score_calculator_1 = require("../scoring/score-calculator");
 async function auditFafFile(file, options = {}) {
     try {
-        const fafPath = file || await (0, file_utils_1.findFafFile)();
+        const fafPath = file || (await (0, file_utils_1.findFafFile)());
         if (!fafPath) {
-            console.log(chalk_1.default.red('❌ No .faf file found'));
+            console.log(chalk_1.default.red("❌ No .faf file found"));
             console.log(chalk_1.default.yellow('💡 Run "faf init" to create one'));
             process.exit(1);
         }
         console.log(chalk_1.default.blue(`🔍 Auditing: ${fafPath}`));
         // Read and parse .faf file
-        const content = await fs_1.promises.readFile(fafPath, 'utf-8');
+        const content = await fs_1.promises.readFile(fafPath, "utf-8");
         const fafData = YAML.parse(content);
-        const warnDays = parseInt(options.warnDays || '7');
-        const errorDays = parseInt(options.errorDays || '30');
+        const warnDays = parseInt(options.warnDays || "7");
+        const errorDays = parseInt(options.errorDays || "30");
         let auditScore = 100;
         const issues = [];
         const warnings = [];
@@ -91,12 +91,12 @@ async function auditFafFile(file, options = {}) {
                 }
             }
             catch {
-                issues.push('Invalid generated timestamp format');
+                issues.push("Invalid generated timestamp format");
                 auditScore -= 15;
             }
         }
         else {
-            issues.push('Missing generated timestamp');
+            issues.push("Missing generated timestamp");
             auditScore -= 20;
         }
         // 3. Completeness Audit
@@ -110,9 +110,9 @@ async function auditFafFile(file, options = {}) {
             warnings.push(`Moderate completeness score: ${Math.round(completenessScore)}%`);
             auditScore -= 10;
         }
-        // 4. Critical Sections Audit  
-        const criticalSections = ['project', 'ai_instructions', 'scores'];
-        criticalSections.forEach(section => {
+        // 4. Critical Sections Audit
+        const criticalSections = ["project", "ai_instructions", "scores"];
+        criticalSections.forEach((section) => {
             if (!fafData[section] || Object.keys(fafData[section]).length === 0) {
                 issues.push(`Missing critical section: ${section}`);
                 auditScore -= 15;
@@ -120,11 +120,11 @@ async function auditFafFile(file, options = {}) {
         });
         // 5. Quality Indicators Audit
         if (!scoreResult.qualityIndicators.hasAiInstructions) {
-            warnings.push('Missing AI instructions for context handoff');
+            warnings.push("Missing AI instructions for context handoff");
             auditScore -= 5;
         }
         if (!scoreResult.qualityIndicators.hasHumanContext) {
-            warnings.push('Missing human context (6 Ws) for deeper understanding');
+            warnings.push("Missing human context (6 Ws) for deeper understanding");
             auditScore -= 10;
         }
         // Display Results
@@ -140,30 +140,30 @@ async function auditFafFile(file, options = {}) {
         }
         // Show Issues
         if (issues.length > 0) {
-            console.log(chalk_1.default.red('\n🚨 Critical Issues:'));
+            console.log(chalk_1.default.red("\n🚨 Critical Issues:"));
             issues.forEach((issue, index) => {
                 console.log(chalk_1.default.red(`   ${index + 1}. ${issue}`));
             });
         }
         // Show Warnings
         if (warnings.length > 0) {
-            console.log(chalk_1.default.yellow('\n⚠️  Warnings:'));
+            console.log(chalk_1.default.yellow("\n⚠️  Warnings:"));
             warnings.forEach((warning, index) => {
                 console.log(chalk_1.default.yellow(`   ${index + 1}. ${warning}`));
             });
         }
         // Recommendations
         if (auditScore < 100) {
-            console.log(chalk_1.default.blue('\n💡 Recommendations:'));
+            console.log(chalk_1.default.blue("\n💡 Recommendations:"));
             if (auditScore < 70) {
                 console.log(chalk_1.default.blue('   • Run "faf sync" to update with latest project changes'));
                 console.log(chalk_1.default.blue('   • Run "faf score --details" to identify missing context'));
             }
-            if (issues.some(i => i.includes('days old'))) {
+            if (issues.some((i) => i.includes("days old"))) {
                 console.log(chalk_1.default.blue('   • Consider regenerating .faf file with "faf init --force"'));
             }
             if (completenessScore < 70) {
-                console.log(chalk_1.default.blue('   • Add missing context sections to improve AI understanding'));
+                console.log(chalk_1.default.blue("   • Add missing context sections to improve AI understanding"));
             }
         }
         // Exit with appropriate code
@@ -172,7 +172,7 @@ async function auditFafFile(file, options = {}) {
         }
     }
     catch (error) {
-        console.log(chalk_1.default.red('💥 Audit failed:'));
+        console.log(chalk_1.default.red("💥 Audit failed:"));
         console.log(chalk_1.default.red(error instanceof Error ? error.message : String(error)));
         process.exit(1);
     }

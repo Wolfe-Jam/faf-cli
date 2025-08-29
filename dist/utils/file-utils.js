@@ -22,6 +22,7 @@ exports.detectPythonPatterns = detectPythonPatterns;
 const fs_1 = require("fs");
 const path_1 = __importDefault(require("path"));
 const glob_1 = require("glob");
+const fafignore_parser_1 = require("./fafignore-parser");
 /**
  * Find .faf file in current directory or parent directories
  */
@@ -32,7 +33,7 @@ async function findFafFile(startDir = process.cwd()) {
         try {
             // First, try simple fs.readdir approach
             const files = await fs_1.promises.readdir(currentDir);
-            const fafFiles = files.filter(file => file.endsWith('.faf'));
+            const fafFiles = files.filter((file) => file.endsWith(".faf"));
             if (fafFiles.length > 0) {
                 const fafPath = path_1.default.join(currentDir, fafFiles[0]);
                 // Verify file is readable
@@ -89,7 +90,7 @@ async function getFileModTime(filePath) {
 async function findPackageJson(startDir = process.cwd()) {
     let currentDir = startDir;
     while (currentDir !== path_1.default.dirname(currentDir)) {
-        const packagePath = path_1.default.join(currentDir, 'package.json');
+        const packagePath = path_1.default.join(currentDir, "package.json");
         if (await fileExists(packagePath)) {
             return packagePath;
         }
@@ -103,7 +104,7 @@ async function findPackageJson(startDir = process.cwd()) {
 async function findPyprojectToml(startDir = process.cwd()) {
     let currentDir = startDir;
     while (currentDir !== path_1.default.dirname(currentDir)) {
-        const pyprojectPath = path_1.default.join(currentDir, 'pyproject.toml');
+        const pyprojectPath = path_1.default.join(currentDir, "pyproject.toml");
         if (await fileExists(pyprojectPath)) {
             return pyprojectPath;
         }
@@ -117,7 +118,7 @@ async function findPyprojectToml(startDir = process.cwd()) {
 async function findRequirementsTxt(startDir = process.cwd()) {
     let currentDir = startDir;
     while (currentDir !== path_1.default.dirname(currentDir)) {
-        const requirementsPath = path_1.default.join(currentDir, 'requirements.txt');
+        const requirementsPath = path_1.default.join(currentDir, "requirements.txt");
         if (await fileExists(requirementsPath)) {
             return requirementsPath;
         }
@@ -131,7 +132,7 @@ async function findRequirementsTxt(startDir = process.cwd()) {
 async function findTsConfig(startDir = process.cwd()) {
     let currentDir = startDir;
     while (currentDir !== path_1.default.dirname(currentDir)) {
-        const tsconfigPath = path_1.default.join(currentDir, 'tsconfig.json');
+        const tsconfigPath = path_1.default.join(currentDir, "tsconfig.json");
         if (await fileExists(tsconfigPath)) {
             return tsconfigPath;
         }
@@ -144,11 +145,11 @@ async function findTsConfig(startDir = process.cwd()) {
  */
 async function analyzeTsConfig(filePath) {
     try {
-        const content = await fs_1.promises.readFile(filePath, 'utf-8');
+        const content = await fs_1.promises.readFile(filePath, "utf-8");
         // Strip comments from JSON (tsconfig.json often has comments)
         const cleanedContent = content
-            .replace(/\/\*[\s\S]*?\*\//g, '') // Remove /* */ comments
-            .replace(/\/\/.*$/gm, ''); // Remove // comments
+            .replace(/\/\*[\s\S]*?\*\//g, "") // Remove /* */ comments
+            .replace(/\/\/.*$/gm, ""); // Remove // comments
         const config = JSON.parse(cleanedContent);
         const compilerOptions = config.compilerOptions || {};
         // Detect F1-Inspired engineering quality
@@ -156,16 +157,16 @@ async function analyzeTsConfig(filePath) {
         const frameworkIntegration = detectFrameworkIntegration(compilerOptions, config);
         const performanceOptimizations = detectPerformanceConfig(compilerOptions);
         return {
-            target: compilerOptions.target || 'ES5',
-            module: compilerOptions.module || 'CommonJS',
-            moduleResolution: compilerOptions.moduleResolution || 'node',
+            target: compilerOptions.target || "ES5",
+            module: compilerOptions.module || "CommonJS",
+            moduleResolution: compilerOptions.moduleResolution || "node",
             strict: compilerOptions.strict || false,
             strictnessLevel,
             frameworkIntegration,
             performanceOptimizations,
             includes: config.include || [],
             excludes: config.exclude || [],
-            engineeringQuality: assessEngineeringQuality(compilerOptions)
+            engineeringQuality: assessEngineeringQuality(compilerOptions),
         };
     }
     catch {
@@ -178,75 +179,82 @@ async function analyzeTsConfig(filePath) {
 async function detectProjectType(projectDir = process.cwd()) {
     // Python detection first (Option A: Dependency-based)
     const pythonType = await detectPythonProjectType(projectDir);
-    if (pythonType !== 'generic')
+    if (pythonType !== "latest-idea")
         return pythonType;
-    // TypeScript detection - tsconfig.json presence indicates TypeScript project
-    const tsconfigPath = await findTsConfig(projectDir);
+    // TypeScript detection - only check current directory for tsconfig.json
+    const tsconfigPath = path_1.default.join(projectDir, "tsconfig.json");
     let hasTypeScript = false;
-    if (tsconfigPath) {
+    if (await fileExists(tsconfigPath)) {
         hasTypeScript = true;
     }
     // JavaScript/TypeScript detection (existing logic)
-    const packageJsonPath = await findPackageJson(projectDir);
-    if (packageJsonPath) {
+    const packageJsonPath = path_1.default.join(projectDir, "package.json");
+    if (await fileExists(packageJsonPath)) {
         try {
-            const packageContent = await fs_1.promises.readFile(packageJsonPath, 'utf-8');
+            const packageContent = await fs_1.promises.readFile(packageJsonPath, "utf-8");
             const packageData = JSON.parse(packageContent);
             // Check dependencies for framework indicators
-            const deps = { ...packageData.dependencies, ...packageData.devDependencies };
+            const deps = {
+                ...packageData.dependencies,
+                ...packageData.devDependencies,
+            };
             // Detect TypeScript in dependencies
-            if (deps.typescript || deps['@types/node'] || Object.keys(deps).some(dep => dep.startsWith('@types/'))) {
+            if (deps.typescript ||
+                deps["@types/node"] ||
+                Object.keys(deps).some((dep) => dep.startsWith("@types/"))) {
                 hasTypeScript = true;
             }
             // Framework detection with TypeScript awareness
-            if (deps.svelte || deps['@sveltejs/kit']) {
-                return hasTypeScript ? 'svelte-ts' : 'svelte';
+            if (deps.svelte || deps["@sveltejs/kit"]) {
+                return hasTypeScript ? "svelte-ts" : "svelte";
             }
-            if (deps.react || deps['react-dom']) {
-                return hasTypeScript ? 'react-ts' : 'react';
+            if (deps.react || deps["react-dom"]) {
+                return hasTypeScript ? "react-ts" : "react";
             }
-            if (deps.vue || deps['@vue/core']) {
-                return hasTypeScript ? 'vue-ts' : 'vue';
+            if (deps.vue || deps["@vue/core"]) {
+                return hasTypeScript ? "vue-ts" : "vue";
             }
-            if (deps.angular || deps['@angular/core'])
-                return 'angular'; // Angular is TS by default
+            if (deps.angular || deps["@angular/core"])
+                return "angular"; // Angular is TS by default
             if (deps.express || deps.fastify) {
-                return hasTypeScript ? 'node-api-ts' : 'node-api';
+                return hasTypeScript ? "node-api-ts" : "node-api";
             }
             if (deps.next || deps.nuxt) {
-                return hasTypeScript ? 'fullstack-ts' : 'fullstack';
+                return hasTypeScript ? "fullstack-ts" : "fullstack";
             }
         }
         catch {
             // Continue with file-based detection
         }
     }
+    // Get ignore patterns from .fafignore
+    const ignorePatterns = await (0, fafignore_parser_1.parseFafIgnore)(projectDir);
     // File-based detection
-    const files = await (0, glob_1.glob)('**/*.{svelte,jsx,tsx,vue,ts,js,py}', {
+    const files = await (0, glob_1.glob)("**/*.{svelte,jsx,tsx,vue,ts,js,py}", {
         cwd: projectDir,
-        ignore: ['node_modules/**', 'dist/**', 'build/**', '__pycache__/**', '.venv/**']
+        ignore: ignorePatterns.filter((p) => !p.startsWith("*.")), // glob doesn't like *.ext patterns
     });
     // Python pattern detection (Option B)
-    if (files.some(f => f.endsWith('.py'))) {
-        const pythonPatternType = await detectPythonPatterns(projectDir, files.filter(f => f.endsWith('.py')));
-        if (pythonPatternType !== 'python-generic')
+    if (files.some((f) => f.endsWith(".py"))) {
+        const pythonPatternType = await detectPythonPatterns(projectDir, files.filter((f) => f.endsWith(".py")));
+        if (pythonPatternType !== "python-generic")
             return pythonPatternType;
-        return 'python-generic';
+        return "python-generic";
     }
     // TypeScript file detection
-    if (files.some(f => f.endsWith('.ts') && !f.endsWith('.d.ts'))) {
+    if (files.some((f) => f.endsWith(".ts") && !f.endsWith(".d.ts"))) {
         hasTypeScript = true;
     }
-    if (files.some(f => f.endsWith('.svelte')))
-        return hasTypeScript ? 'svelte-ts' : 'svelte';
-    if (files.some(f => f.endsWith('.jsx') || f.endsWith('.tsx')))
-        return hasTypeScript ? 'react-ts' : 'react';
-    if (files.some(f => f.endsWith('.vue')))
-        return hasTypeScript ? 'vue-ts' : 'vue';
+    if (files.some((f) => f.endsWith(".svelte")))
+        return hasTypeScript ? "svelte-ts" : "svelte";
+    if (files.some((f) => f.endsWith(".jsx") || f.endsWith(".tsx")))
+        return hasTypeScript ? "react-ts" : "react";
+    if (files.some((f) => f.endsWith(".vue")))
+        return hasTypeScript ? "vue-ts" : "vue";
     // Pure TypeScript project detection
     if (hasTypeScript)
-        return 'typescript';
-    return 'generic';
+        return "typescript";
+    return "latest-idea";
 }
 /**
  * Calculate days since file was modified
@@ -273,26 +281,26 @@ async function detectPythonProjectType(projectDir) {
         if (framework)
             return framework;
     }
-    return 'generic';
+    return "latest-idea";
 }
 /**
  * Analyze pyproject.toml for Python frameworks
  */
 async function analyzePyprojectToml(filePath) {
     try {
-        const content = await fs_1.promises.readFile(filePath, 'utf-8');
+        const content = await fs_1.promises.readFile(filePath, "utf-8");
         // Simple string-based detection for now (could use TOML parser later)
-        if (content.includes('fastapi'))
-            return 'python-fastapi';
-        if (content.includes('django'))
-            return 'python-django';
-        if (content.includes('flask'))
-            return 'python-flask';
-        if (content.includes('starlette'))
-            return 'python-starlette';
+        if (content.includes("fastapi"))
+            return "python-fastapi";
+        if (content.includes("django"))
+            return "python-django";
+        if (content.includes("flask"))
+            return "python-flask";
+        if (content.includes("starlette"))
+            return "python-starlette";
         // If it has Python dependencies but no specific framework
-        if (content.includes('python = '))
-            return 'python-generic';
+        if (content.includes("python = "))
+            return "python-generic";
         return null;
     }
     catch {
@@ -304,18 +312,18 @@ async function analyzePyprojectToml(filePath) {
  */
 async function analyzeRequirementsTxt(filePath) {
     try {
-        const content = await fs_1.promises.readFile(filePath, 'utf-8');
-        if (content.includes('fastapi'))
-            return 'python-fastapi';
-        if (content.includes('django'))
-            return 'python-django';
-        if (content.includes('flask'))
-            return 'python-flask';
-        if (content.includes('starlette'))
-            return 'python-starlette';
+        const content = await fs_1.promises.readFile(filePath, "utf-8");
+        if (content.includes("fastapi"))
+            return "python-fastapi";
+        if (content.includes("django"))
+            return "python-django";
+        if (content.includes("flask"))
+            return "python-flask";
+        if (content.includes("starlette"))
+            return "python-starlette";
         // Any Python packages detected
         if (content.trim().length > 0)
-            return 'python-generic';
+            return "python-generic";
         return null;
     }
     catch {
@@ -328,37 +336,41 @@ async function analyzeRequirementsTxt(filePath) {
 async function detectPythonPatterns(projectDir, pythonFiles) {
     try {
         // Check main Python files first (main.py, app.py, api.py)
-        const mainFiles = pythonFiles.filter(f => f.includes('main.py') || f.includes('app.py') || f.includes('api.py'));
+        const mainFiles = pythonFiles.filter((f) => f.includes("main.py") || f.includes("app.py") || f.includes("api.py"));
         const filesToCheck = mainFiles.length > 0 ? mainFiles : pythonFiles.slice(0, 5);
         for (const file of filesToCheck) {
             const filePath = path_1.default.join(projectDir, file);
             try {
-                const content = await fs_1.promises.readFile(filePath, 'utf-8');
+                const content = await fs_1.promises.readFile(filePath, "utf-8");
                 // FastAPI patterns
-                if (content.includes('from fastapi import') || content.includes('FastAPI()')) {
-                    return 'python-fastapi';
+                if (content.includes("from fastapi import") ||
+                    content.includes("FastAPI()")) {
+                    return "python-fastapi";
                 }
-                // Django patterns  
-                if (content.includes('from django.') || content.includes('django.http')) {
-                    return 'python-django';
+                // Django patterns
+                if (content.includes("from django.") ||
+                    content.includes("django.http")) {
+                    return "python-django";
                 }
                 // Flask patterns
-                if (content.includes('from flask import') || content.includes('Flask(')) {
-                    return 'python-flask';
+                if (content.includes("from flask import") ||
+                    content.includes("Flask(")) {
+                    return "python-flask";
                 }
                 // Starlette patterns
-                if (content.includes('from starlette.') || content.includes('Starlette(')) {
-                    return 'python-starlette';
+                if (content.includes("from starlette.") ||
+                    content.includes("Starlette(")) {
+                    return "python-starlette";
                 }
             }
             catch {
                 continue;
             }
         }
-        return 'python-generic';
+        return "python-generic";
     }
     catch {
-        return 'python-generic';
+        return "python-generic";
     }
 }
 /**
@@ -396,70 +408,72 @@ function calculateStrictnessLevel(compilerOptions) {
     if (compilerOptions.verbatimModuleSyntax)
         strictnessScore += 1;
     if (strictnessScore >= 12)
-        return 'f1_inspired';
+        return "f1_inspired";
     if (strictnessScore >= 8)
-        return 'ultra_strict';
+        return "ultra_strict";
     if (strictnessScore >= 4)
-        return 'strict';
-    return 'basic';
+        return "strict";
+    return "basic";
 }
 /**
  * Detect framework integration patterns
  */
 function detectFrameworkIntegration(compilerOptions, config) {
     const includes = config.include || [];
-    const includesStr = includes.join(' ');
+    const includesStr = includes.join(" ");
     // Svelte detection
-    if (includesStr.includes('svelte') || config.extends?.includes('svelte')) {
+    if (includesStr.includes("svelte") || config.extends?.includes("svelte")) {
         if (compilerOptions.verbatimModuleSyntax)
-            return 'svelte_5_runes_native';
-        return 'svelte_native';
+            return "svelte_5_runes_native";
+        return "svelte_native";
     }
     // React detection
     if (compilerOptions.jsx) {
-        if (compilerOptions.jsx === 'react-jsx')
-            return 'react_17_native';
-        return 'react_native';
+        if (compilerOptions.jsx === "react-jsx")
+            return "react_17_native";
+        return "react_native";
     }
-    // Next.js detection  
-    if (config.extends?.includes('next'))
-        return 'nextjs_native';
+    // Next.js detection
+    if (config.extends?.includes("next"))
+        return "nextjs_native";
     // Vue detection
-    if (includesStr.includes('vue'))
-        return 'vue_native';
+    if (includesStr.includes("vue"))
+        return "vue_native";
     // Node.js detection
-    if (compilerOptions.moduleResolution === 'NodeNext')
-        return 'nodejs_native';
-    if (compilerOptions.module === 'NodeNext')
-        return 'nodejs_esm_native';
+    if (compilerOptions.moduleResolution === "NodeNext")
+        return "nodejs_native";
+    if (compilerOptions.module === "NodeNext")
+        return "nodejs_esm_native";
     // Pure TypeScript project detection
-    if (compilerOptions.target && compilerOptions.module && !compilerOptions.jsx) {
-        return 'pure_typescript';
+    if (compilerOptions.target &&
+        compilerOptions.module &&
+        !compilerOptions.jsx) {
+        return "pure_typescript";
     }
-    return 'standard';
+    return "standard";
 }
 /**
  * Detect performance optimizations
  */
 function detectPerformanceConfig(compilerOptions) {
     const optimizations = [];
-    if (compilerOptions.target && compilerOptions.target.includes('2022')) {
-        optimizations.push('modern_target_es2022');
+    if (compilerOptions.target && compilerOptions.target.includes("2022")) {
+        optimizations.push("modern_target_es2022");
     }
-    if (compilerOptions.moduleResolution === 'NodeNext') {
-        optimizations.push('nodejs_native_modules');
+    if (compilerOptions.moduleResolution === "NodeNext") {
+        optimizations.push("nodejs_native_modules");
     }
     if (compilerOptions.verbatimModuleSyntax) {
-        optimizations.push('verbatim_module_syntax');
+        optimizations.push("verbatim_module_syntax");
     }
     if (compilerOptions.isolatedModules) {
-        optimizations.push('isolated_modules');
+        optimizations.push("isolated_modules");
     }
     if (compilerOptions.skipLibCheck) {
-        optimizations.push('skip_lib_check');
+        optimizations.push("skip_lib_check");
     }
     if (compilerOptions.allowImportingTsExtensions) {
-        optimizations.push('ts_extension_imports');
+        optimizations.push("ts_extension_imports");
     }
     return optimizations;
 }
@@ -487,9 +501,9 @@ function assessEngineeringQuality(compilerOptions) {
     if (compilerOptions.verbatimModuleSyntax)
         qualityScore += 2;
     if (qualityScore >= 8)
-        return 'f1_inspired';
+        return "f1_inspired";
     if (qualityScore >= 5)
-        return 'professional';
-    return 'standard';
+        return "professional";
+    return "standard";
 }
 //# sourceMappingURL=file-utils.js.map

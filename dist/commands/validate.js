@@ -48,31 +48,31 @@ const faf_schema_1 = require("../schema/faf-schema");
 const file_utils_1 = require("../utils/file-utils");
 async function validateFafFile(file, options = {}) {
     try {
-        const fafPath = file || await (0, file_utils_1.findFafFile)();
+        const fafPath = file || (await (0, file_utils_1.findFafFile)());
         if (!fafPath) {
-            console.log(chalk_1.default.red('❌ No .faf file found'));
+            console.log(chalk_1.default.red("❌ No .faf file found"));
             console.log(chalk_1.default.yellow('💡 Run "faf init" to create one'));
             process.exit(1);
         }
         console.log(chalk_1.default.blue(`🔍 Validating: ${fafPath}`));
         // Read and parse .faf file
-        const content = await fs_1.promises.readFile(fafPath, 'utf-8');
+        const content = await fs_1.promises.readFile(fafPath, "utf-8");
         const fafData = YAML.parse(content);
         // Validate against schema
-        const validation = (0, faf_schema_1.validateSchema)(fafData, options.schema || 'latest');
+        const validation = (0, faf_schema_1.validateSchema)(fafData, options.schema || "latest");
         if (validation.valid) {
-            console.log(chalk_1.default.green('✅ Valid .faf file'));
+            console.log(chalk_1.default.green("✅ Valid .faf file"));
             if (options.verbose) {
-                console.log(chalk_1.default.gray('📊 Validation Details:'));
+                console.log(chalk_1.default.gray("📊 Validation Details:"));
                 console.log(chalk_1.default.gray(`   Schema Version: ${validation.schemaVersion}`));
-                console.log(chalk_1.default.gray(`   Format Version: ${fafData.faf_version || 'unknown'}`));
+                console.log(chalk_1.default.gray(`   Format Version: ${fafData.faf_version || "unknown"}`));
                 console.log(chalk_1.default.gray(`   Total Sections: ${validation.sectionsFound}`));
                 console.log(chalk_1.default.gray(`   Required Fields: ${validation.requiredFieldsFound}/${validation.requiredFieldsTotal}`));
             }
         }
         else {
-            console.log(chalk_1.default.red('❌ Invalid .faf file'));
-            console.log(chalk_1.default.red('🚨 Errors found:'));
+            console.log(chalk_1.default.red("❌ Invalid .faf file"));
+            console.log(chalk_1.default.red("🚨 Errors found:"));
             validation.errors.forEach((error, index) => {
                 console.log(chalk_1.default.red(`   ${index + 1}. ${error.message}`));
                 if (error.path) {
@@ -80,7 +80,7 @@ async function validateFafFile(file, options = {}) {
                 }
             });
             if (validation.warnings.length > 0) {
-                console.log(chalk_1.default.yellow('⚠️  Warnings:'));
+                console.log(chalk_1.default.yellow("⚠️  Warnings:"));
                 validation.warnings.forEach((warning, index) => {
                     console.log(chalk_1.default.yellow(`   ${index + 1}. ${warning.message}`));
                 });
@@ -89,7 +89,7 @@ async function validateFafFile(file, options = {}) {
         }
     }
     catch (error) {
-        console.log(chalk_1.default.red('💥 Validation failed:'));
+        console.log(chalk_1.default.red("💥 Validation failed:"));
         console.log(chalk_1.default.red(error instanceof Error ? error.message : String(error)));
         process.exit(1);
     }

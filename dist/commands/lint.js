@@ -48,15 +48,15 @@ const file_utils_1 = require("../utils/file-utils");
 const faf_schema_1 = require("../schema/faf-schema");
 async function lintFafFile(file, options = {}) {
     try {
-        const fafPath = file || await (0, file_utils_1.findFafFile)();
+        const fafPath = file || (await (0, file_utils_1.findFafFile)());
         if (!fafPath) {
-            console.log(chalk_1.default.red('❌ No .faf file found'));
+            console.log(chalk_1.default.red("❌ No .faf file found"));
             console.log(chalk_1.default.yellow('💡 Run "faf init" to create one'));
             process.exit(1);
         }
         console.log(chalk_1.default.blue(`🔧 Linting: ${fafPath}`));
         // Read .faf file
-        const content = await fs_1.promises.readFile(fafPath, 'utf-8');
+        const content = await fs_1.promises.readFile(fafPath, "utf-8");
         // Parse and analyze
         let fafData;
         const issues = [];
@@ -65,29 +65,29 @@ async function lintFafFile(file, options = {}) {
         }
         catch (parseError) {
             issues.push({
-                type: 'error',
+                type: "error",
                 message: `YAML parsing error: ${parseError}`,
-                fixable: false
+                fixable: false,
             });
-            console.log(chalk_1.default.red('❌ Failed to parse .faf file'));
+            console.log(chalk_1.default.red("❌ Failed to parse .faf file"));
             console.log(chalk_1.default.red(parseError instanceof Error ? parseError.message : String(parseError)));
             process.exit(1);
         }
         // Run schema validation first
         const validation = (0, faf_schema_1.validateSchema)(fafData, options.schemaVersion);
         // Convert validation results to lint issues
-        validation.errors.forEach(error => {
+        validation.errors.forEach((error) => {
             issues.push({
-                type: 'error',
+                type: "error",
                 message: error.message,
-                fixable: false
+                fixable: false,
             });
         });
-        validation.warnings.forEach(warning => {
+        validation.warnings.forEach((warning) => {
             issues.push({
-                type: 'warning',
+                type: "warning",
                 message: warning.message,
-                fixable: false
+                fixable: false,
             });
         });
         // Additional lint checks
@@ -95,12 +95,12 @@ async function lintFafFile(file, options = {}) {
         performStyleLinting(fafData, issues);
         performBestPracticeLinting(fafData, issues);
         // Display results
-        const errors = issues.filter(i => i.type === 'error');
-        const warnings = issues.filter(i => i.type === 'warning');
-        const info = issues.filter(i => i.type === 'info');
-        const fixableIssues = issues.filter(i => i.fixable);
+        const errors = issues.filter((i) => i.type === "error");
+        const warnings = issues.filter((i) => i.type === "warning");
+        const info = issues.filter((i) => i.type === "info");
+        const fixableIssues = issues.filter((i) => i.fixable);
         if (errors.length === 0 && warnings.length === 0 && info.length === 0) {
-            console.log(chalk_1.default.green('✅ No linting issues found'));
+            console.log(chalk_1.default.green("✅ No linting issues found"));
             return;
         }
         // Show issues by type
@@ -125,15 +125,15 @@ async function lintFafFile(file, options = {}) {
         // Auto-fix if requested
         if (options.fix && fixableIssues.length > 0) {
             console.log(chalk_1.default.blue(`\n🔧 Auto-fixing ${fixableIssues.length} issue(s)...`));
-            fixableIssues.forEach(issue => {
+            fixableIssues.forEach((issue) => {
                 if (issue.fix) {
                     issue.fix();
                 }
             });
             // Write fixed content
             const fixedContent = YAML.stringify(fafData, { lineWidth: 100 });
-            await fs_1.promises.writeFile(fafPath, fixedContent, 'utf-8');
-            console.log(chalk_1.default.green('✅ Auto-fixes applied'));
+            await fs_1.promises.writeFile(fafPath, fixedContent, "utf-8");
+            console.log(chalk_1.default.green("✅ Auto-fixes applied"));
         }
         else if (fixableIssues.length > 0) {
             console.log(chalk_1.default.yellow(`\n💡 ${fixableIssues.length} issue(s) can be auto-fixed with --fix`));
@@ -144,7 +144,7 @@ async function lintFafFile(file, options = {}) {
         }
     }
     catch (error) {
-        console.log(chalk_1.default.red('💥 Linting failed:'));
+        console.log(chalk_1.default.red("💥 Linting failed:"));
         console.log(chalk_1.default.red(error instanceof Error ? error.message : String(error)));
         process.exit(1);
     }
@@ -153,16 +153,18 @@ function performFormatLinting(fafData, content, issues) {
     // Check YAML formatting
     try {
         const normalizedYaml = YAML.stringify(fafData, { lineWidth: 100 });
-        const currentLines = content.split('\n').map(line => line.trimEnd());
-        const normalizedLines = normalizedYaml.split('\n').map(line => line.trimEnd());
+        const currentLines = content.split("\n").map((line) => line.trimEnd());
+        const normalizedLines = normalizedYaml
+            .split("\n")
+            .map((line) => line.trimEnd());
         if (currentLines.length !== normalizedLines.length) {
             issues.push({
-                type: 'info',
-                message: 'YAML formatting could be improved',
+                type: "info",
+                message: "YAML formatting could be improved",
                 fixable: true,
                 fix: () => {
                     // Fix will be applied in the main function
-                }
+                },
             });
         }
     }
@@ -170,38 +172,38 @@ function performFormatLinting(fafData, content, issues) {
         // Skip formatting check if there are parsing issues
     }
     // Check for trailing whitespace
-    const lines = content.split('\n');
+    const lines = content.split("\n");
     lines.forEach((line, index) => {
         if (line.length > 0 && line !== line.trimEnd()) {
             issues.push({
-                type: 'warning',
+                type: "warning",
                 message: `Trailing whitespace on line ${index + 1}`,
                 line: index + 1,
-                fixable: true
+                fixable: true,
             });
         }
     });
 }
 function performStyleLinting(fafData, issues) {
     // Check for consistent naming
-    if (fafData.project?.name && fafData.project.name.includes('_')) {
+    if (fafData.project?.name && fafData.project.name.includes("_")) {
         issues.push({
-            type: 'info',
-            message: 'Project name contains underscores - consider kebab-case',
-            fixable: false
+            type: "info",
+            message: "Project name contains underscores - consider kebab-case",
+            fixable: false,
         });
     }
     // Check score consistency
     if (fafData.scores) {
         const fafScore = fafData.scores.faf_score;
         const slotPercentage = fafData.scores.slot_based_percentage;
-        if (typeof fafScore === 'number' && typeof slotPercentage === 'number') {
+        if (typeof fafScore === "number" && typeof slotPercentage === "number") {
             const expectedSlots = Math.round((fafScore / 100) * 21);
             if (Math.abs(slotPercentage - expectedSlots) > 2) {
                 issues.push({
-                    type: 'warning',
-                    message: 'Slot-based percentage may be inconsistent with faf_score',
-                    fixable: false
+                    type: "warning",
+                    message: "Slot-based percentage may be inconsistent with faf_score",
+                    fixable: false,
                 });
             }
         }
@@ -211,17 +213,17 @@ function performBestPracticeLinting(fafData, issues) {
     // Check for AI instructions
     if (!fafData.ai_instructions || !fafData.ai_instructions.message) {
         issues.push({
-            type: 'info',
-            message: 'Consider adding ai_instructions section for better AI context',
-            fixable: false
+            type: "info",
+            message: "Consider adding ai_instructions section for better AI context",
+            fixable: false,
         });
     }
     // Check for human context
     if (!fafData.human_context) {
         issues.push({
-            type: 'info',
-            message: 'Consider adding human_context section (who/what/why/where/when/how)',
-            fixable: false
+            type: "info",
+            message: "Consider adding human_context section (who/what/why/where/when/how)",
+            fixable: false,
         });
     }
     // Check timestamp freshness
@@ -231,33 +233,35 @@ function performBestPracticeLinting(fafData, issues) {
             const daysSince = (Date.now() - generated.getTime()) / (1000 * 60 * 60 * 24);
             if (daysSince > 30) {
                 issues.push({
-                    type: 'warning',
+                    type: "warning",
                     message: `Generated timestamp is ${Math.round(daysSince)} days old - consider updating`,
                     fixable: true,
                     fix: () => {
                         fafData.generated = new Date().toISOString();
-                    }
+                    },
                 });
             }
         }
         catch {
             issues.push({
-                type: 'warning',
-                message: 'Invalid generated timestamp format',
+                type: "warning",
+                message: "Invalid generated timestamp format",
                 fixable: true,
                 fix: () => {
                     fafData.generated = new Date().toISOString();
-                }
+                },
             });
         }
     }
     // Check for empty sections
     Object.entries(fafData).forEach(([key, value]) => {
-        if (typeof value === 'object' && value !== null && Object.keys(value).length === 0) {
+        if (typeof value === "object" &&
+            value !== null &&
+            Object.keys(value).length === 0) {
             issues.push({
-                type: 'warning',
+                type: "warning",
                 message: `Empty section detected: ${key}`,
-                fixable: false
+                fixable: false,
             });
         }
     });

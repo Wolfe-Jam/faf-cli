@@ -74,7 +74,7 @@ export interface FafSchema {
 export interface ValidationError {
     message: string;
     path?: string;
-    severity: 'error' | 'warning';
+    severity: "error" | "warning";
 }
 export interface ValidationResult {
     valid: boolean;
