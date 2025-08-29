@@ -38,7 +38,7 @@ export async function findFafFile(
         break;
       }
       currentDir = parentDir;
-    } catch (error) {
+    } catch {
       // Skip this directory if we can't read it
       const parentDir = path.dirname(currentDir);
       if (parentDir === currentDir) {
@@ -220,7 +220,7 @@ export async function detectProjectType(
 ): Promise<string> {
   // Python detection first (Option A: Dependency-based)
   const pythonType = await detectPythonProjectType(projectDir);
-  if (pythonType !== "latest-idea") return pythonType;
+  if (pythonType !== "latest-idea") {return pythonType;}
 
   // TypeScript detection - only check current directory for tsconfig.json
   const tsconfigPath = path.join(projectDir, "tsconfig.json");
@@ -263,7 +263,7 @@ export async function detectProjectType(
       if (deps.vue || deps["@vue/core"]) {
         return hasTypeScript ? "vue-ts" : "vue";
       }
-      if (deps.angular || deps["@angular/core"]) return "angular"; // Angular is TS by default
+      if (deps.angular || deps["@angular/core"]) {return "angular";} // Angular is TS by default
       if (deps.express || deps.fastify) {
         return hasTypeScript ? "node-api-ts" : "node-api";
       }
@@ -290,7 +290,7 @@ export async function detectProjectType(
       projectDir,
       files.filter((f) => f.endsWith(".py")),
     );
-    if (pythonPatternType !== "python-generic") return pythonPatternType;
+    if (pythonPatternType !== "python-generic") {return pythonPatternType;}
     return "python-generic";
   }
 
@@ -300,14 +300,14 @@ export async function detectProjectType(
   }
 
   if (files.some((f) => f.endsWith(".svelte")))
-    return hasTypeScript ? "svelte-ts" : "svelte";
+    {return hasTypeScript ? "svelte-ts" : "svelte";}
   if (files.some((f) => f.endsWith(".jsx") || f.endsWith(".tsx")))
-    return hasTypeScript ? "react-ts" : "react";
+    {return hasTypeScript ? "react-ts" : "react";}
   if (files.some((f) => f.endsWith(".vue")))
-    return hasTypeScript ? "vue-ts" : "vue";
+    {return hasTypeScript ? "vue-ts" : "vue";}
 
   // Pure TypeScript project detection
-  if (hasTypeScript) return "typescript";
+  if (hasTypeScript) {return "typescript";}
 
   return "latest-idea";
 }
@@ -331,13 +331,13 @@ export async function detectPythonProjectType(
   const pyprojectPath = await findPyprojectToml(projectDir);
   if (pyprojectPath) {
     const framework = await analyzePyprojectToml(pyprojectPath);
-    if (framework) return framework;
+    if (framework) {return framework;}
   }
 
   const requirementsPath = await findRequirementsTxt(projectDir);
   if (requirementsPath) {
     const framework = await analyzeRequirementsTxt(requirementsPath);
-    if (framework) return framework;
+    if (framework) {return framework;}
   }
 
   return "latest-idea";
@@ -351,13 +351,13 @@ async function analyzePyprojectToml(filePath: string): Promise<string | null> {
     const content = await fs.readFile(filePath, "utf-8");
 
     // Simple string-based detection for now (could use TOML parser later)
-    if (content.includes("fastapi")) return "python-fastapi";
-    if (content.includes("django")) return "python-django";
-    if (content.includes("flask")) return "python-flask";
-    if (content.includes("starlette")) return "python-starlette";
+    if (content.includes("fastapi")) {return "python-fastapi";}
+    if (content.includes("django")) {return "python-django";}
+    if (content.includes("flask")) {return "python-flask";}
+    if (content.includes("starlette")) {return "python-starlette";}
 
     // If it has Python dependencies but no specific framework
-    if (content.includes("python = ")) return "python-generic";
+    if (content.includes("python = ")) {return "python-generic";}
 
     return null;
   } catch {
@@ -374,13 +374,13 @@ async function analyzeRequirementsTxt(
   try {
     const content = await fs.readFile(filePath, "utf-8");
 
-    if (content.includes("fastapi")) return "python-fastapi";
-    if (content.includes("django")) return "python-django";
-    if (content.includes("flask")) return "python-flask";
-    if (content.includes("starlette")) return "python-starlette";
+    if (content.includes("fastapi")) {return "python-fastapi";}
+    if (content.includes("django")) {return "python-django";}
+    if (content.includes("flask")) {return "python-flask";}
+    if (content.includes("starlette")) {return "python-starlette";}
 
     // Any Python packages detected
-    if (content.trim().length > 0) return "python-generic";
+    if (content.trim().length > 0) {return "python-generic";}
 
     return null;
   } catch {
@@ -461,27 +461,27 @@ function calculateStrictnessLevel(
   let strictnessScore = 0;
 
   // Basic strictness
-  if (compilerOptions.strict) strictnessScore += 2;
-  if (compilerOptions.noImplicitAny) strictnessScore += 1;
-  if (compilerOptions.strictNullChecks) strictnessScore += 1;
+  if (compilerOptions.strict) {strictnessScore += 2;}
+  if (compilerOptions.noImplicitAny) {strictnessScore += 1;}
+  if (compilerOptions.strictNullChecks) {strictnessScore += 1;}
 
   // Advanced strictness
-  if (compilerOptions.exactOptionalPropertyTypes) strictnessScore += 2;
-  if (compilerOptions.noUncheckedIndexedAccess) strictnessScore += 2;
-  if (compilerOptions.noImplicitReturns) strictnessScore += 1;
-  if (compilerOptions.noFallthroughCasesInSwitch) strictnessScore += 1;
-  if (compilerOptions.noUnusedLocals) strictnessScore += 1;
-  if (compilerOptions.noUnusedParameters) strictnessScore += 1;
+  if (compilerOptions.exactOptionalPropertyTypes) {strictnessScore += 2;}
+  if (compilerOptions.noUncheckedIndexedAccess) {strictnessScore += 2;}
+  if (compilerOptions.noImplicitReturns) {strictnessScore += 1;}
+  if (compilerOptions.noFallthroughCasesInSwitch) {strictnessScore += 1;}
+  if (compilerOptions.noUnusedLocals) {strictnessScore += 1;}
+  if (compilerOptions.noUnusedParameters) {strictnessScore += 1;}
 
   // F1-Inspired ultra-strict
-  if (compilerOptions.allowUnreachableCode === false) strictnessScore += 1;
-  if (compilerOptions.allowUnusedLabels === false) strictnessScore += 1;
-  if (compilerOptions.noPropertyAccessFromIndexSignature) strictnessScore += 1;
-  if (compilerOptions.verbatimModuleSyntax) strictnessScore += 1;
+  if (compilerOptions.allowUnreachableCode === false) {strictnessScore += 1;}
+  if (compilerOptions.allowUnusedLabels === false) {strictnessScore += 1;}
+  if (compilerOptions.noPropertyAccessFromIndexSignature) {strictnessScore += 1;}
+  if (compilerOptions.verbatimModuleSyntax) {strictnessScore += 1;}
 
-  if (strictnessScore >= 12) return "f1_inspired";
-  if (strictnessScore >= 8) return "ultra_strict";
-  if (strictnessScore >= 4) return "strict";
+  if (strictnessScore >= 12) {return "f1_inspired";}
+  if (strictnessScore >= 8) {return "ultra_strict";}
+  if (strictnessScore >= 4) {return "strict";}
   return "basic";
 }
 
@@ -494,25 +494,25 @@ function detectFrameworkIntegration(compilerOptions: any, config: any): string {
 
   // Svelte detection
   if (includesStr.includes("svelte") || config.extends?.includes("svelte")) {
-    if (compilerOptions.verbatimModuleSyntax) return "svelte_5_runes_native";
+    if (compilerOptions.verbatimModuleSyntax) {return "svelte_5_runes_native";}
     return "svelte_native";
   }
 
   // React detection
   if (compilerOptions.jsx) {
-    if (compilerOptions.jsx === "react-jsx") return "react_17_native";
+    if (compilerOptions.jsx === "react-jsx") {return "react_17_native";}
     return "react_native";
   }
 
   // Next.js detection
-  if (config.extends?.includes("next")) return "nextjs_native";
+  if (config.extends?.includes("next")) {return "nextjs_native";}
 
   // Vue detection
-  if (includesStr.includes("vue")) return "vue_native";
+  if (includesStr.includes("vue")) {return "vue_native";}
 
   // Node.js detection
-  if (compilerOptions.moduleResolution === "NodeNext") return "nodejs_native";
-  if (compilerOptions.module === "NodeNext") return "nodejs_esm_native";
+  if (compilerOptions.moduleResolution === "NodeNext") {return "nodejs_native";}
+  if (compilerOptions.module === "NodeNext") {return "nodejs_esm_native";}
 
   // Pure TypeScript project detection
   if (
@@ -568,18 +568,18 @@ function assessEngineeringQuality(
   let qualityScore = 0;
 
   // Quality indicators
-  if (compilerOptions.declaration) qualityScore += 1;
-  if (compilerOptions.declarationMap) qualityScore += 1;
-  if (compilerOptions.sourceMap) qualityScore += 1;
-  if (compilerOptions.forceConsistentCasingInFileNames) qualityScore += 1;
-  if (compilerOptions.removeComments === false) qualityScore += 1; // Keeping docs
+  if (compilerOptions.declaration) {qualityScore += 1;}
+  if (compilerOptions.declarationMap) {qualityScore += 1;}
+  if (compilerOptions.sourceMap) {qualityScore += 1;}
+  if (compilerOptions.forceConsistentCasingInFileNames) {qualityScore += 1;}
+  if (compilerOptions.removeComments === false) {qualityScore += 1;} // Keeping docs
 
   // F1-Inspired indicators
-  if (compilerOptions.exactOptionalPropertyTypes) qualityScore += 2;
-  if (compilerOptions.noUncheckedIndexedAccess) qualityScore += 2;
-  if (compilerOptions.verbatimModuleSyntax) qualityScore += 2;
+  if (compilerOptions.exactOptionalPropertyTypes) {qualityScore += 2;}
+  if (compilerOptions.noUncheckedIndexedAccess) {qualityScore += 2;}
+  if (compilerOptions.verbatimModuleSyntax) {qualityScore += 2;}
 
-  if (qualityScore >= 8) return "f1_inspired";
-  if (qualityScore >= 5) return "professional";
+  if (qualityScore >= 8) {return "f1_inspired";}
+  if (qualityScore >= 5) {return "professional";}
   return "standard";
 }
