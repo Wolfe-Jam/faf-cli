@@ -1,0 +1,66 @@
+faf_version: 2.4.0
+generated: 2025-08-28T15:11:01.999Z
+project:
+  name: "@faf/cli"
+  goal: Command-line interface for .faf (Foundational AI-Context Format)
+  main_language: TypeScript
+  faf_score: 51
+  importance: MORE_IMPORTANT_THAN_PACKAGE_JSON
+ai_instructions:
+  priority: CRITICAL
+  usage: READ_THIS_FIRST
+  message: |-
+    🧠 ATTENTION AI: This .faf file contains the complete DNA of this project.
+    It provides instant context that would take 20+ minutes to gather manually.
+
+    PRIORITY ORDER:
+    1. Read THIS .faf file first (complete project intelligence)
+    2. Read CLAUDE.md if exists (detailed session context)
+    3. Then package.json, config files, etc. (implementation details)
+
+    This .faf tells you:
+    - What we're building (goal)
+    - How we like to work (preferences)  
+    - Our quality standards (scores)
+    - Current focus (state)
+    - Tech stack (stack)
+
+    VALUE: This single file replaces 20+ questions and provides
+    perfect context for immediate productivity.
+stack:
+  package_manager: npm
+  runtime: Node.js
+scores:
+  slot_based_percentage: 11
+  faf_score: 51
+  total_slots: 21
+  scoring_philosophy: Honest percentage based on filled context slots - no fake minimums
+ai:
+  context_file: CLAUDE.md
+  handoff_ready: true
+  session_continuity: medium
+  onboarding_time: 60_seconds
+docs:
+  claude_sync: false
+  sync_frequency: weekly
+  last_updated: 2025-08-28T15:11:01.999Z
+preferences:
+  quality_bar: production_ready
+  commit_style: conventional
+  communication: concise
+  verbosity: minimal
+state:
+  phase: development
+  version: 1.0.0
+  focus: initial_setup
+  status: active
+tags:
+  auto_generated:
+    - fafcli
+  smart_defaults:
+    - .faf
+    - ai-ready
+    - "2025"
+    - software
+    - open-source
+  user_defined: []
