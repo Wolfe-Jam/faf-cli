@@ -48,7 +48,7 @@ async function generateFafFromProject(options) {
     let packageData = {};
     if (packageJsonPath) {
         try {
-            const content = await fs_1.promises.readFile(packageJsonPath, 'utf-8');
+            const content = await fs_1.promises.readFile(packageJsonPath, "utf-8");
             packageData = JSON.parse(content);
         }
         catch {
@@ -61,7 +61,7 @@ async function generateFafFromProject(options) {
     const requirementsPath = await (0, file_utils_1.findRequirementsTxt)(projectRoot);
     if (pyprojectPath) {
         try {
-            const content = await fs_1.promises.readFile(pyprojectPath, 'utf-8');
+            const content = await fs_1.promises.readFile(pyprojectPath, "utf-8");
             pythonData = await parsePyprojectToml(content);
         }
         catch {
@@ -70,8 +70,10 @@ async function generateFafFromProject(options) {
     }
     if (requirementsPath && !pyprojectPath) {
         try {
-            const content = await fs_1.promises.readFile(requirementsPath, 'utf-8');
-            pythonData = { dependencies: content.split('\n').filter(line => line.trim()) };
+            const content = await fs_1.promises.readFile(requirementsPath, "utf-8");
+            pythonData = {
+                dependencies: content.split("\n").filter((line) => line.trim()),
+            };
         }
         catch {
             // Continue without requirements.txt data
@@ -89,46 +91,47 @@ async function generateFafFromProject(options) {
         }
     }
     // Generate .faf structure
-    const fafData = generateFafStructure(packageData, pythonData, typescriptData, projectType || 'generic', projectRoot);
+    const fafData = generateFafStructure(packageData, pythonData, typescriptData, projectType || "latest-idea");
     // Convert to YAML
     return YAML.stringify(fafData);
 }
-function generateFafStructure(packageData, pythonData, typescriptData, projectType, projectRoot) {
+function generateFafStructure(packageData, pythonData, typescriptData, projectType) {
     const now = new Date().toISOString();
     // Determine project name and version from appropriate source
-    let projectName = 'untitled-project';
-    let version = '1.0.0';
-    let description = 'Project development and deployment';
+    let projectName = "untitled-project";
+    let version = "1.0.0";
+    let description = "Project development and deployment";
     if (pythonData.name) {
         projectName = pythonData.name;
-        version = pythonData.version || '0.1.0';
+        version = pythonData.version || "0.1.0";
         description = pythonData.description || description;
     }
     else if (packageData.name) {
         projectName = packageData.name;
-        version = packageData.version || '1.0.0';
+        version = packageData.version || "1.0.0";
         description = packageData.description || description;
     }
     // Detect stack from appropriate dependency source
     const deps = { ...packageData.dependencies, ...packageData.devDependencies };
-    const stack = analyzeStackFromDependencies(deps, pythonData, typescriptData, projectType);
+    const stack = analyzeStackFromDependencies(deps, pythonData, projectType);
     // Calculate initial score (basic detection gives ~40-60%)
     const initialScore = calculateInitialScore(packageData, pythonData, typescriptData, stack, projectType);
     return {
-        faf_version: '2.4.0',
+        faf_version: "2.4.0",
         generated: now,
         // 🎯 Project Core
         project: {
             name: projectName,
             goal: description,
-            main_language: detectMainLanguage(deps, pythonData, projectType),
+            project_type: projectType || "latest-idea",
+            main_language: detectMainLanguage(deps, projectType),
             faf_score: initialScore,
-            importance: 'MORE_IMPORTANT_THAN_PACKAGE_JSON'
+            importance: "MORE_IMPORTANT_THAN_PACKAGE_JSON",
         },
         // 📢 AI INSTRUCTION SECTION - CRITICAL
         ai_instructions: {
-            priority: 'CRITICAL',
-            usage: 'READ_THIS_FIRST',
+            priority: "CRITICAL",
+            usage: "READ_THIS_FIRST",
             message: `🧠 ATTENTION AI: This .faf file contains the complete DNA of this project.
 It provides instant context that would take 20+ minutes to gather manually.
 
@@ -145,7 +148,7 @@ This .faf tells you:
 - Tech stack (stack)
 
 VALUE: This single file replaces 20+ questions and provides
-perfect context for immediate productivity.`
+perfect context for immediate productivity.`,
         },
         // 🏗️ Technical Stack
         stack,
@@ -156,7 +159,7 @@ perfect context for immediate productivity.`
                     target: typescriptData.target,
                     module: typescriptData.module,
                     module_resolution: typescriptData.moduleResolution,
-                    strict_mode: typescriptData.strict
+                    strict_mode: typescriptData.strict,
                 },
                 engineering_quality: typescriptData.engineeringQuality,
                 strictness_level: typescriptData.strictnessLevel,
@@ -164,175 +167,175 @@ perfect context for immediate productivity.`
                 performance_optimizations: typescriptData.performanceOptimizations,
                 project_structure: {
                     includes: typescriptData.includes,
-                    excludes: typescriptData.excludes
-                }
-            }
+                    excludes: typescriptData.excludes,
+                },
+            },
         }),
         // 📊 Scoring System
         scores: {
             slot_based_percentage: Math.round((initialScore / 100) * 21), // Slots filled
             faf_score: initialScore,
             total_slots: 21,
-            scoring_philosophy: 'Honest percentage based on filled context slots - no fake minimums'
+            scoring_philosophy: "Honest percentage based on filled context slots - no fake minimums",
         },
         // 🧠 AI Intelligence
         ai: {
-            context_file: 'CLAUDE.md',
+            context_file: "CLAUDE.md",
             handoff_ready: true,
-            session_continuity: 'medium',
-            onboarding_time: '60_seconds'
+            session_continuity: "medium",
+            onboarding_time: "60_seconds",
         },
         // 📚 Knowledge Sync
         docs: {
             claude_sync: false,
-            sync_frequency: 'weekly',
-            last_updated: now
+            sync_frequency: "weekly",
+            last_updated: now,
         },
         // ⚙️ Working Preferences (defaults - should be customized)
         preferences: {
-            quality_bar: 'production_ready',
-            commit_style: 'conventional',
-            communication: 'concise',
-            verbosity: 'minimal'
+            quality_bar: "production_ready",
+            commit_style: "conventional",
+            communication: "concise",
+            verbosity: "minimal",
         },
         // 🚀 Current State
         state: {
-            phase: 'development',
+            phase: "development",
             version: version,
-            focus: 'initial_setup',
-            status: 'active'
+            focus: "initial_setup",
+            status: "active",
         },
         // 🏷️ Tags System
         tags: {
             auto_generated: generateAutoTags(packageData, projectType),
             smart_defaults: generateSmartDefaults(projectType),
-            user_defined: []
-        }
+            user_defined: [],
+        },
     };
 }
-function analyzeStackFromDependencies(deps, pythonData, typescriptData, projectType) {
+function analyzeStackFromDependencies(deps, pythonData, projectType) {
     const stack = {};
     // Python stack detection
-    if (projectType.startsWith('python-')) {
+    if (projectType.startsWith("python-")) {
         // Package manager detection
         if (pythonData.name) {
-            stack.package_manager = 'poetry';
+            stack.package_manager = "poetry";
         }
         else if (pythonData.dependencies) {
-            stack.package_manager = 'pip';
+            stack.package_manager = "pip";
         }
         // Runtime detection
         if (pythonData.python_version) {
             stack.runtime = `Python ${pythonData.python_version}`;
         }
         else {
-            stack.runtime = 'Python';
+            stack.runtime = "Python";
         }
         // Framework detection from project type
         switch (projectType) {
-            case 'python-fastapi':
-                stack.backend = 'FastAPI';
-                stack.web_server = 'uvicorn';
+            case "python-fastapi":
+                stack.backend = "FastAPI";
+                stack.web_server = "uvicorn";
                 break;
-            case 'python-django':
-                stack.backend = 'Django';
-                stack.web_server = 'gunicorn';
+            case "python-django":
+                stack.backend = "Django";
+                stack.web_server = "gunicorn";
                 break;
-            case 'python-flask':
-                stack.backend = 'Flask';
-                stack.web_server = 'gunicorn';
+            case "python-flask":
+                stack.backend = "Flask";
+                stack.web_server = "gunicorn";
                 break;
-            case 'python-starlette':
-                stack.backend = 'Starlette';
-                stack.web_server = 'uvicorn';
+            case "python-starlette":
+                stack.backend = "Starlette";
+                stack.web_server = "uvicorn";
                 break;
         }
         return stack;
     }
     // TypeScript/JavaScript stack detection
     // Pure TypeScript project
-    if (projectType === 'typescript') {
-        stack.runtime = 'Node.js';
-        stack.language = 'TypeScript';
-        stack.build = 'TypeScript Compiler';
-        stack.package_manager = 'npm'; // Default for TypeScript projects
+    if (projectType === "typescript") {
+        stack.runtime = "Node.js";
+        stack.language = "TypeScript";
+        stack.build = "TypeScript Compiler";
+        stack.package_manager = "npm"; // Default for TypeScript projects
         return stack;
     }
     // JavaScript projects with potential TypeScript
-    stack.package_manager = 'npm';
+    stack.package_manager = "npm";
     // Frontend Detection
-    if (deps.svelte || deps['@sveltejs/kit']) {
-        stack.frontend = 'Svelte 5';
-        stack.build = 'Vite';
+    if (deps.svelte || deps["@sveltejs/kit"]) {
+        stack.frontend = "Svelte 5";
+        stack.build = "Vite";
     }
     else if (deps.react) {
-        stack.frontend = 'React';
-        stack.build = deps.vite ? 'Vite' : 'Webpack';
+        stack.frontend = "React";
+        stack.build = deps.vite ? "Vite" : "Webpack";
     }
     else if (deps.vue) {
-        stack.frontend = 'Vue';
-        stack.build = 'Vite';
+        stack.frontend = "Vue";
+        stack.build = "Vite";
     }
     else if (deps.angular) {
-        stack.frontend = 'Angular';
-        stack.build = 'Angular CLI';
+        stack.frontend = "Angular";
+        stack.build = "Angular CLI";
     }
     // CSS Framework Detection
     if (deps.tailwindcss)
-        stack.css_framework = 'Tailwind CSS';
+        stack.css_framework = "Tailwind CSS";
     else if (deps.bootstrap)
-        stack.css_framework = 'Bootstrap';
-    else if (deps['@emotion/react'])
-        stack.css_framework = 'Emotion';
-    else if (deps['styled-components'])
-        stack.css_framework = 'Styled Components';
+        stack.css_framework = "Bootstrap";
+    else if (deps["@emotion/react"])
+        stack.css_framework = "Emotion";
+    else if (deps["styled-components"])
+        stack.css_framework = "Styled Components";
     // Backend Detection
     if (deps.express)
-        stack.backend = 'Express.js';
+        stack.backend = "Express.js";
     else if (deps.fastify)
-        stack.backend = 'Fastify';
-    else if (deps['@nestjs/core'])
-        stack.backend = 'NestJS';
-    else if (projectType === 'node-api')
-        stack.backend = 'Node.js';
+        stack.backend = "Fastify";
+    else if (deps["@nestjs/core"])
+        stack.backend = "NestJS";
+    else if (projectType === "node-api")
+        stack.backend = "Node.js";
     // Runtime Detection
-    if (deps['@types/node'] || projectType.includes('node')) {
-        stack.runtime = 'Node.js';
+    if (deps["@types/node"] || projectType.includes("node")) {
+        stack.runtime = "Node.js";
     }
-    if (deps['@types/bun'])
-        stack.runtime = 'Bun';
+    if (deps["@types/bun"])
+        stack.runtime = "Bun";
     if (deps.deno)
-        stack.runtime = 'Deno';
+        stack.runtime = "Deno";
     // Build Tool Detection
     if (deps.vite)
-        stack.build = 'Vite';
+        stack.build = "Vite";
     else if (deps.webpack)
-        stack.build = 'Webpack';
+        stack.build = "Webpack";
     else if (deps.rollup)
-        stack.build = 'Rollup';
+        stack.build = "Rollup";
     else if (deps.esbuild)
-        stack.build = 'esbuild';
+        stack.build = "esbuild";
     return stack;
 }
-function detectMainLanguage(deps, pythonData, projectType) {
-    if (projectType.startsWith('python-'))
-        return 'Python';
+function detectMainLanguage(deps, projectType) {
+    if (projectType.startsWith("python-"))
+        return "Python";
     // TypeScript detection - enhanced for new project types
-    if (projectType === 'typescript' ||
-        projectType.includes('-ts') ||
+    if (projectType === "typescript" ||
+        projectType.includes("-ts") ||
         deps.typescript ||
-        deps['@types/node'] ||
-        Object.keys(deps).some(dep => dep.startsWith('@types/'))) {
-        return 'TypeScript';
+        deps["@types/node"] ||
+        Object.keys(deps).some((dep) => dep.startsWith("@types/"))) {
+        return "TypeScript";
     }
-    if (projectType.includes('js') || Object.keys(deps).length > 0)
-        return 'JavaScript';
-    return 'Unknown';
+    if (projectType.includes("js") || Object.keys(deps).length > 0)
+        return "JavaScript";
+    return "Unknown";
 }
 function calculateInitialScore(packageData, pythonData, typescriptData, stack, projectType) {
     let score = 30; // Base score for having a project
     // Python project completeness
-    if (projectType.startsWith('python-')) {
+    if (projectType.startsWith("python-")) {
         if (pythonData.description)
             score += 5;
         if (pythonData.author)
@@ -361,29 +364,29 @@ function calculateInitialScore(packageData, pythonData, typescriptData, stack, p
     if (typescriptData) {
         score += 5; // Base TypeScript bonus
         // F1-Inspired quality bonuses
-        if (typescriptData.engineeringQuality === 'f1_inspired')
+        if (typescriptData.engineeringQuality === "f1_inspired")
             score += 10;
-        else if (typescriptData.engineeringQuality === 'professional')
+        else if (typescriptData.engineeringQuality === "professional")
             score += 5;
         // Strictness bonuses
-        if (typescriptData.strictnessLevel === 'f1_inspired')
+        if (typescriptData.strictnessLevel === "f1_inspired")
             score += 8;
-        else if (typescriptData.strictnessLevel === 'ultra_strict')
+        else if (typescriptData.strictnessLevel === "ultra_strict")
             score += 5;
-        else if (typescriptData.strictnessLevel === 'strict')
+        else if (typescriptData.strictnessLevel === "strict")
             score += 3;
         // Modern target bonus
-        if (typescriptData.target.includes('2022'))
+        if (typescriptData.target.includes("2022"))
             score += 3;
         // Framework integration bonus
-        if (typescriptData.frameworkIntegration.includes('native'))
+        if (typescriptData.frameworkIntegration.includes("native"))
             score += 3;
     }
     // Stack completeness
     const stackKeys = Object.keys(stack);
     score += Math.min(stackKeys.length * 3, 18); // Max 18 points for stack
     // Project type bonus
-    if (projectType !== 'generic')
+    if (projectType !== "latest-idea")
         score += 5;
     return Math.min(score, 85); // Increased cap for F1-Inspired TS projects
 }
@@ -393,43 +396,50 @@ function generateAutoTags(packageData, projectType) {
     if (packageData.name) {
         const cleanName = packageData.name
             .toLowerCase()
-            .replace(/[^a-z0-9\s-]/g, '')
-            .replace(/\s+/g, '-')
+            .replace(/[^a-z0-9\s-]/g, "")
+            .replace(/\s+/g, "-")
             .substring(0, 30);
         if (cleanName)
             tags.add(cleanName);
     }
     // From project type
-    if (projectType !== 'generic') {
-        tags.add(projectType.toLowerCase().replace(/\s+/g, '-'));
+    if (projectType !== "latest-idea") {
+        tags.add(projectType.toLowerCase().replace(/\s+/g, "-"));
     }
     // From description keywords
     if (packageData.description) {
-        const keywords = packageData.description.toLowerCase()
+        const keywords = packageData.description
+            .toLowerCase()
             .match(/\b(api|library|framework|component|dashboard|tool|app|cli|server|client|web|mobile)\b/gi);
         if (keywords) {
-            keywords.slice(0, 3).forEach((keyword) => tags.add(keyword.toLowerCase()));
+            keywords
+                .slice(0, 3)
+                .forEach((keyword) => tags.add(keyword.toLowerCase()));
         }
     }
     return Array.from(tags).slice(0, 10);
 }
 function generateSmartDefaults(projectType) {
     const year = new Date().getFullYear().toString();
-    const defaults = ['.faf', 'ai-ready', year];
+    const defaults = [".faf", "ai-ready", year];
     // Project type specific
-    if (projectType.includes('web') || projectType === 'svelte' || projectType === 'react') {
-        defaults.push('web-app');
+    if (projectType.includes("web") ||
+        projectType === "svelte" ||
+        projectType === "react") {
+        defaults.push("web-app");
     }
-    else if (projectType.includes('api') || projectType.includes('node') || projectType.includes('fastapi')) {
-        defaults.push('backend-api');
+    else if (projectType.includes("api") ||
+        projectType.includes("node") ||
+        projectType.includes("fastapi")) {
+        defaults.push("backend-api");
     }
-    else if (projectType.startsWith('python-')) {
-        defaults.push('python-app');
+    else if (projectType.startsWith("python-")) {
+        defaults.push("python-app");
     }
     else {
-        defaults.push('software');
+        defaults.push("software");
     }
-    defaults.push('open-source'); // Default assumption
+    defaults.push("open-source"); // Default assumption
     return defaults;
 }
 /**
@@ -458,11 +468,11 @@ async function parsePyprojectToml(content) {
         // Extract Python version
         const pythonMatch = content.match(/python\s*=\s*"([^"]+)"/);
         if (pythonMatch) {
-            const version = pythonMatch[1].replace(/[\^~><=]/g, '').trim();
+            const version = pythonMatch[1].replace(/[\^~><=]/g, "").trim();
             data.python_version = version;
         }
         // Check for dependencies section
-        if (content.includes('[tool.poetry.dependencies]')) {
+        if (content.includes("[tool.poetry.dependencies]")) {
             data.dependencies = true;
         }
         return data;

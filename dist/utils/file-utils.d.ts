@@ -39,12 +39,12 @@ export interface TypeScriptContext {
     module: string;
     moduleResolution: string;
     strict: boolean;
-    strictnessLevel: 'basic' | 'strict' | 'ultra_strict' | 'f1_inspired';
+    strictnessLevel: "basic" | "strict" | "ultra_strict" | "f1_inspired";
     frameworkIntegration: string;
     performanceOptimizations: string[];
     includes: string[];
     excludes: string[];
-    engineeringQuality: 'standard' | 'professional' | 'f1_inspired';
+    engineeringQuality: "standard" | "professional" | "f1_inspired";
 }
 /**
  * Detect project type from files and structure
