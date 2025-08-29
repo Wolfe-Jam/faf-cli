@@ -193,10 +193,13 @@ const fafContent = await generateFafFromProject({
 
 ## 🏎️ Performance
 
+**Anti-Faff Engineering** - No bloat, just results:
+
 - **Validation**: < 50ms for typical .faf files
 - **Scoring**: < 100ms with full analysis  
 - **Generation**: < 200ms including file system scans
 - **Zero Dependencies**: Core functionality, minimal overhead
+- **Anti-Faff Philosophy**: Every millisecond matters, every feature justified
 
 ## 🧪 Testing & Validation
 
