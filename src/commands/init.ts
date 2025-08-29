@@ -12,6 +12,7 @@ import {
   fileExists,
 } from "../utils/file-utils";
 import { generateFafFromProject } from "../generators/faf-generator";
+import { calculateFafScore } from "../scoring/score-calculator";
 import { createDefaultFafIgnore } from "../utils/fafignore-parser";
 
 interface InitOptions {
@@ -74,11 +75,12 @@ export async function initFafFile(
     console.log(chalk.green(`✅ Created ${outputPath}`));
     console.log(chalk.gray(`   Generated in ${elapsedTime}ms ⚡`));
 
-    // Show initial score
+    // Show actual score using the real scoring algorithm
     const fafData = YAML.parse(fafContent);
-    const initialScore = fafData.scores?.faf_score || 0;
+    const scoreResult = calculateFafScore(fafData);
+    const actualScore = Math.round(scoreResult.totalScore);
 
-    console.log(chalk.blue(`📊 Initial score: ${initialScore}%`));
+    console.log(chalk.blue(`📊 Initial score: ${actualScore}% (${scoreResult.filledSlots}/${scoreResult.totalSlots} slots)`));
 
     // Next steps
     console.log(chalk.yellow("\n💡 Next steps:"));
@@ -92,7 +94,7 @@ export async function initFafFile(
       chalk.yellow('   3. Run "faf validate" to check format compliance'),
     );
 
-    if (initialScore < 70) {
+    if (actualScore < 70) {
       console.log(chalk.yellow("   4. Aim for 70%+ score for good AI context"));
     }
   } catch (error) {

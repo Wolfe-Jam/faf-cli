@@ -12,6 +12,8 @@ import { scoreFafFile } from './commands/score';
 import { syncFafFile } from './commands/sync';
 import { auditFafFile } from './commands/audit';
 import { lintFafFile } from './commands/lint';
+import { enhanceFafWithAI } from './commands/ai-enhance';
+import { analyzeFafWithAI } from './commands/ai-analyze';
 
 const version = require('../package.json').version;
 
@@ -141,6 +143,41 @@ Examples:
   $ faf lint --fix               # Fix formatting automatically
   $ faf lint --schema-version 2.4.0  # Use specific schema`)
   .action(lintFafFile);
+
+// 🤖 faf ai-enhance - AI-powered enhancement
+program
+  .command('ai-enhance [file]')
+  .description('🚀 NEW! Enhance .faf files with OpenAI Codex CLI')
+  .option('-m, --model <model>', 'OpenAI model to use', 'gpt-4o-mini')
+  .option('-f, --focus <area>', 'Focus area: human-context|ai-instructions|completeness|optimization')
+  .option('-i, --interactive', 'Use interactive Codex CLI mode')
+  .option('--dry-run', 'Show enhancement prompt without executing')
+  .addHelpText('after', `
+🤖 AI-Powered Enhancement:
+  $ faf ai-enhance                  # Smart enhancement with GPT-4o-mini
+  $ faf ai-enhance --focus human-context  # Focus on WHO/WHAT/WHY
+  $ faf ai-enhance --interactive    # Use interactive Codex CLI
+  $ faf ai-enhance --dry-run        # Preview enhancement prompt
+
+Requirements: npm install -g @openai/codex`)
+  .action(enhanceFafWithAI);
+
+// 🔍 faf ai-analyze - AI-powered analysis  
+program
+  .command('ai-analyze [file]')
+  .description('🚀 NEW! Get AI insights on your .faf file quality')
+  .option('-m, --model <model>', 'OpenAI model to use', 'gpt-4o-mini')
+  .option('-f, --focus <area>', 'Focus: completeness|quality|ai-readiness|human-context')
+  .option('-v, --verbose', 'Show detailed section breakdown')
+  .option('-s, --suggestions', 'Include automated suggestions')
+  .addHelpText('after', `
+🔍 AI-Powered Analysis:
+  $ faf ai-analyze                  # Comprehensive AI analysis
+  $ faf ai-analyze --focus quality  # Focus on content quality
+  $ faf ai-analyze --verbose --suggestions  # Detailed analysis + tips
+  
+Requirements: npm install -g @openai/codex`)
+  .action(analyzeFafWithAI);
 
 // Handle unknown commands with helpful suggestions
 program
