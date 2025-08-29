@@ -88,7 +88,7 @@ export async function parseFafIgnore(projectRoot: string): Promise<string[]> {
 
       // Add user patterns
       patterns = [...patterns, ...userPatterns];
-    } catch (error) {
+    } catch {
       console.warn("Warning: Could not read .fafignore file");
     }
   }

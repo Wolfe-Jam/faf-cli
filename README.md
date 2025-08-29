@@ -4,25 +4,18 @@
 ![npm version](https://img.shields.io/npm/v/@faf/cli.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
-**🚀 STOP faffing About! Generate perfect AI context files for any project.**
+**Generate comprehensive AI context files for any project.**
 
-Command-line interface for .faf (Foundational AI-Context Format) - Transform any project into perfect AI context with validation, scoring, and sync capabilities.
+Command-line interface for .faf (Foundational AI-Context Format) - Create structured context files that help AI understand your project instantly, with validation, scoring, and synchronization capabilities.
 
-**🎯 Pioneering Innovation**: The FIRST and ONLY tool to achieve true **AI/Human YinYang Balance** - intelligently weighted 50/50 context where human identity (WHO/WHAT) drives the project while technical excellence (HOW) enables it.
+## Key Features
 
-**⚡ The Power of 3 Trifecta**:
-- **AI/Human YinYang Balance** - Revolutionary 50/50 context weighting
-- **F1-Inspired Software Engineering** - Peak performance standards  
-- **Anti-Faff Philosophy** - Zero-bloat execution
+- **Balanced Context**: Combines human project context (goals, team, requirements) with technical implementation details
+- **Performance Focused**: Fast initialization and scoring (<200ms for most projects)
+- **Zero Configuration**: Intelligent project detection with sensible defaults
+- **Quality Scoring**: Objective measurement of context completeness (0-100%)
 
-*While 2 forces oppose, 3 triangulate - creating the perfect framework for humans to harness AI technology.*
-
-**The I/O Trinity**: Traditional thinking sees I/O as binary, but it's actually 3 components:
-- **I** (Human Input) 
-- **/** (AI Bridge) 
-- **O** (Enhanced Output)
-
-The slash isn't a divider - it's the AI transformer that elevates human input into breakthrough output.
+The .faf format bridges human project understanding with technical implementation, providing AI assistants with both the "why" and the "how" of your project.
 
 ## 🎯 Quick Start
 
@@ -47,7 +40,7 @@ faf sync --auto
 Generate initial .faf file from project structure
 ```bash
 faf init                           # Auto-detect project type
-faf init --template svelte         # Use specific template
+faf init --template react          # Use specific template
 faf init --force                   # Overwrite existing .faf
 faf init --output my-project.faf   # Custom output path
 ```
@@ -66,7 +59,7 @@ Calculate completeness score (0-100%)
 ```bash
 faf score                       # Show basic score
 faf score --details             # Detailed breakdown by section
-faf score --minimum 70          # Fail if score below threshold
+faf score --minimum 80          # Fail if score below threshold
 ```
 
 ### `faf sync`
@@ -95,20 +88,17 @@ faf lint --schema-version 2.4.0 # Validate against specific schema
 
 ## 🎯 Scoring System
 
-**AI/Human YinYang Balanced Intelligence** - The FIRST to achieve true 50/50 context balance:
+The CLI uses a comprehensive scoring algorithm that balances human project context with technical implementation details:
 
-The CLI uses a pioneering scoring algorithm based on:
-
-- **21 Context Slots**: Intelligently balanced between human (WHO/WHAT) and technical (HOW)
-- **YinYang Weighting**: More tech slots, but WHO and WHAT weighted higher = perfect 50/50 balance
-- **Human Context Priority**: Project identity and purpose drive the scoring
-- **AI-Ready Optimization**: Technical slots ensure AI has everything needed
-- **Smart Balance**: The ONLY tool achieving true human/AI equilibrium
+- **21 Context Slots**: Covers both project purpose (WHO/WHAT) and technical implementation (HOW)
+- **Weighted Scoring**: Human context fields have higher importance weights to prioritize project understanding
+- **Project Identity First**: Project goals and team context drive the scoring methodology
+- **Technical Completeness**: Ensures AI has all necessary technical details for effective assistance
 
 ### Score Ranges
-- 🟢 **90-100%**: Perfect - Ready for any AI
-- 🟡 **70-89%**: Good - Minor improvements possible  
-- 🔴 **Below 70%**: Needs improvement for optimal AI context
+- 🟢 **90-100%**: Comprehensive context coverage
+- 🟡 **70-89%**: Good coverage with minor gaps  
+- 🔴 **Below 70%**: Requires additional context for optimal AI assistance
 
 ## 🏗️ Project Type Detection
 
@@ -226,7 +216,7 @@ const fafContent = await generateFafFromProject({
 
 ## 🧪 Testing & Validation
 
-**Enterprise-Grade RAW Testing** - No synthetic unit tests, only real-world validation:
+**Real-World Testing** - Validated with actual AI assistants rather than synthetic tests:
 
 ### ✅ **Multi-Platform RAW Validation**
 - **Claude AI**: 85% accuracy score on cold testing
@@ -279,5 +269,5 @@ MIT © 🏎️⚡️_wolfejam.dev
 
 ---
 
-**🎯 Perfect .faf files = Perfect AI collaboration**  
-*F1-Inspired Software Engineering: Maximum context, minimum effort.*
+**🎯 Complete .faf files enable effective AI collaboration**  
+*Performance-focused engineering: Comprehensive context with minimal setup overhead.*

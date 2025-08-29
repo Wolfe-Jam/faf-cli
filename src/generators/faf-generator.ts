@@ -313,29 +313,29 @@ function analyzeStackFromDependencies(
   }
 
   // CSS Framework Detection
-  if (deps.tailwindcss) stack.css_framework = "Tailwind CSS";
-  else if (deps.bootstrap) stack.css_framework = "Bootstrap";
-  else if (deps["@emotion/react"]) stack.css_framework = "Emotion";
-  else if (deps["styled-components"]) stack.css_framework = "Styled Components";
+  if (deps.tailwindcss) {stack.css_framework = "Tailwind CSS";}
+  else if (deps.bootstrap) {stack.css_framework = "Bootstrap";}
+  else if (deps["@emotion/react"]) {stack.css_framework = "Emotion";}
+  else if (deps["styled-components"]) {stack.css_framework = "Styled Components";}
 
   // Backend Detection
-  if (deps.express) stack.backend = "Express.js";
-  else if (deps.fastify) stack.backend = "Fastify";
-  else if (deps["@nestjs/core"]) stack.backend = "NestJS";
-  else if (projectType === "node-api") stack.backend = "Node.js";
+  if (deps.express) {stack.backend = "Express.js";}
+  else if (deps.fastify) {stack.backend = "Fastify";}
+  else if (deps["@nestjs/core"]) {stack.backend = "NestJS";}
+  else if (projectType === "node-api") {stack.backend = "Node.js";}
 
   // Runtime Detection
   if (deps["@types/node"] || projectType.includes("node")) {
     stack.runtime = "Node.js";
   }
-  if (deps["@types/bun"]) stack.runtime = "Bun";
-  if (deps.deno) stack.runtime = "Deno";
+  if (deps["@types/bun"]) {stack.runtime = "Bun";}
+  if (deps.deno) {stack.runtime = "Deno";}
 
   // Build Tool Detection
-  if (deps.vite) stack.build = "Vite";
-  else if (deps.webpack) stack.build = "Webpack";
-  else if (deps.rollup) stack.build = "Rollup";
-  else if (deps.esbuild) stack.build = "esbuild";
+  if (deps.vite) {stack.build = "Vite";}
+  else if (deps.webpack) {stack.build = "Webpack";}
+  else if (deps.rollup) {stack.build = "Rollup";}
+  else if (deps.esbuild) {stack.build = "esbuild";}
 
   return stack;
 }
@@ -344,7 +344,7 @@ function detectMainLanguage(
   deps: Record<string, string>,
   projectType: string,
 ): string {
-  if (projectType.startsWith("python-")) return "Python";
+  if (projectType.startsWith("python-")) {return "Python";}
 
   // TypeScript detection - enhanced for new project types
   if (
@@ -358,7 +358,7 @@ function detectMainLanguage(
   }
 
   if (projectType.includes("js") || Object.keys(deps).length > 0)
-    return "JavaScript";
+    {return "JavaScript";}
   return "Unknown";
 }
 
@@ -373,18 +373,18 @@ function calculateInitialScore(
 
   // Python project completeness
   if (projectType.startsWith("python-")) {
-    if (pythonData.description) score += 5;
-    if (pythonData.author) score += 3;
-    if (pythonData.license) score += 2;
-    if (pythonData.dependencies) score += 5;
-    if (pythonData.python_version) score += 3;
+    if (pythonData.description) {score += 5;}
+    if (pythonData.author) {score += 3;}
+    if (pythonData.license) {score += 2;}
+    if (pythonData.dependencies) {score += 5;}
+    if (pythonData.python_version) {score += 3;}
   } else {
     // JavaScript project completeness
-    if (packageData.description) score += 5;
-    if (packageData.author) score += 3;
-    if (packageData.license) score += 2;
-    if (packageData.repository) score += 3;
-    if (packageData.scripts) score += 5;
+    if (packageData.description) {score += 5;}
+    if (packageData.author) {score += 3;}
+    if (packageData.license) {score += 2;}
+    if (packageData.repository) {score += 3;}
+    if (packageData.scripts) {score += 5;}
   }
 
   // TypeScript quality bonus (F1-Inspired engineering)
@@ -392,19 +392,19 @@ function calculateInitialScore(
     score += 5; // Base TypeScript bonus
 
     // F1-Inspired quality bonuses
-    if (typescriptData.engineeringQuality === "f1_inspired") score += 10;
-    else if (typescriptData.engineeringQuality === "professional") score += 5;
+    if (typescriptData.engineeringQuality === "f1_inspired") {score += 10;}
+    else if (typescriptData.engineeringQuality === "professional") {score += 5;}
 
     // Strictness bonuses
-    if (typescriptData.strictnessLevel === "f1_inspired") score += 8;
-    else if (typescriptData.strictnessLevel === "ultra_strict") score += 5;
-    else if (typescriptData.strictnessLevel === "strict") score += 3;
+    if (typescriptData.strictnessLevel === "f1_inspired") {score += 8;}
+    else if (typescriptData.strictnessLevel === "ultra_strict") {score += 5;}
+    else if (typescriptData.strictnessLevel === "strict") {score += 3;}
 
     // Modern target bonus
-    if (typescriptData.target.includes("2022")) score += 3;
+    if (typescriptData.target.includes("2022")) {score += 3;}
 
     // Framework integration bonus
-    if (typescriptData.frameworkIntegration.includes("native")) score += 3;
+    if (typescriptData.frameworkIntegration.includes("native")) {score += 3;}
   }
 
   // Stack completeness
@@ -412,7 +412,7 @@ function calculateInitialScore(
   score += Math.min(stackKeys.length * 3, 18); // Max 18 points for stack
 
   // Project type bonus
-  if (projectType !== "latest-idea") score += 5;
+  if (projectType !== "latest-idea") {score += 5;}
 
   return Math.min(score, 85); // Increased cap for F1-Inspired TS projects
 }
@@ -427,7 +427,7 @@ function generateAutoTags(packageData: any, projectType: string): string[] {
       .replace(/[^a-z0-9\s-]/g, "")
       .replace(/\s+/g, "-")
       .substring(0, 30);
-    if (cleanName) tags.add(cleanName);
+    if (cleanName) {tags.add(cleanName);}
   }
 
   // From project type
@@ -490,19 +490,19 @@ async function parsePyprojectToml(content: string): Promise<any> {
 
     // Extract [tool.poetry] section data
     const nameMatch = content.match(/name\s*=\s*"([^"]+)"/);
-    if (nameMatch) data.name = nameMatch[1];
+    if (nameMatch) {data.name = nameMatch[1];}
 
     const versionMatch = content.match(/version\s*=\s*"([^"]+)"/);
-    if (versionMatch) data.version = versionMatch[1];
+    if (versionMatch) {data.version = versionMatch[1];}
 
     const descriptionMatch = content.match(/description\s*=\s*"([^"]+)"/);
-    if (descriptionMatch) data.description = descriptionMatch[1];
+    if (descriptionMatch) {data.description = descriptionMatch[1];}
 
     const authorMatch = content.match(/author\s*=\s*"([^"]+)"/);
-    if (authorMatch) data.author = authorMatch[1];
+    if (authorMatch) {data.author = authorMatch[1];}
 
     const licenseMatch = content.match(/license\s*=\s*"([^"]+)"/);
-    if (licenseMatch) data.license = licenseMatch[1];
+    if (licenseMatch) {data.license = licenseMatch[1];}
 
     // Extract Python version
     const pythonMatch = content.match(/python\s*=\s*"([^"]+)"/);
