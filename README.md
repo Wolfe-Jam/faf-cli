@@ -1,8 +1,8 @@
-# 🚀 @faf/cli
+# 🚀 faf-cli
 
-**Command-line interface for .faf (Foundational AI-Context Format)**
+**🚀 STOP faffing About! Generate perfect AI context files from any project.**
 
-Transform any project into perfect AI context with validation, scoring, and sync capabilities.
+Command-line interface for .faf (Foundational AI-Context Format) - Transform any project into perfect AI context with validation, scoring, and sync capabilities.
 
 ## 🎯 Quick Start
 
