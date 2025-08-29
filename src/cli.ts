@@ -23,7 +23,7 @@ Universal AI Context Format Tooling
 
 program
   .name('faf')
-  .description('STOP faffing About! Generate perfect AI context files from any project.')
+  .description('STOP faffing About! Generate perfect AI context files for any project.')
   .version(version);
 
 // Add comprehensive help examples
