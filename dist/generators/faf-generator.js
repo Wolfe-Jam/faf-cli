@@ -43,7 +43,7 @@ const YAML = __importStar(require("yaml"));
 const file_utils_1 = require("../utils/file-utils");
 async function generateFafFromProject(options) {
     const { projectType, projectRoot } = options;
-    // Read package.json if available
+    // Read package.json if available (JavaScript projects)
     const packageJsonPath = await (0, file_utils_1.findPackageJson)(projectRoot);
     let packageData = {};
     if (packageJsonPath) {
@@ -55,28 +55,73 @@ async function generateFafFromProject(options) {
             // Continue without package.json data
         }
     }
+    // Read Python project files if available
+    let pythonData = {};
+    const pyprojectPath = await (0, file_utils_1.findPyprojectToml)(projectRoot);
+    const requirementsPath = await (0, file_utils_1.findRequirementsTxt)(projectRoot);
+    if (pyprojectPath) {
+        try {
+            const content = await fs_1.promises.readFile(pyprojectPath, 'utf-8');
+            pythonData = await parsePyprojectToml(content);
+        }
+        catch {
+            // Continue without pyproject.toml data
+        }
+    }
+    if (requirementsPath && !pyprojectPath) {
+        try {
+            const content = await fs_1.promises.readFile(requirementsPath, 'utf-8');
+            pythonData = { dependencies: content.split('\n').filter(line => line.trim()) };
+        }
+        catch {
+            // Continue without requirements.txt data
+        }
+    }
+    // Read TypeScript configuration if available
+    let typescriptData = null;
+    const tsconfigPath = await (0, file_utils_1.findTsConfig)(projectRoot);
+    if (tsconfigPath) {
+        try {
+            typescriptData = await (0, file_utils_1.analyzeTsConfig)(tsconfigPath);
+        }
+        catch {
+            // Continue without tsconfig.json data
+        }
+    }
     // Generate .faf structure
-    const fafData = generateFafStructure(packageData, projectType || 'generic', projectRoot);
+    const fafData = generateFafStructure(packageData, pythonData, typescriptData, projectType || 'generic', projectRoot);
     // Convert to YAML
     return YAML.stringify(fafData);
 }
-function generateFafStructure(packageData, projectType, projectRoot) {
+function generateFafStructure(packageData, pythonData, typescriptData, projectType, projectRoot) {
     const now = new Date().toISOString();
-    const projectName = packageData.name || 'untitled-project';
-    const version = packageData.version || '1.0.0';
-    // Detect stack from package.json
+    // Determine project name and version from appropriate source
+    let projectName = 'untitled-project';
+    let version = '1.0.0';
+    let description = 'Project development and deployment';
+    if (pythonData.name) {
+        projectName = pythonData.name;
+        version = pythonData.version || '0.1.0';
+        description = pythonData.description || description;
+    }
+    else if (packageData.name) {
+        projectName = packageData.name;
+        version = packageData.version || '1.0.0';
+        description = packageData.description || description;
+    }
+    // Detect stack from appropriate dependency source
     const deps = { ...packageData.dependencies, ...packageData.devDependencies };
-    const stack = analyzeStackFromDependencies(deps, projectType);
+    const stack = analyzeStackFromDependencies(deps, pythonData, typescriptData, projectType);
     // Calculate initial score (basic detection gives ~40-60%)
-    const initialScore = calculateInitialScore(packageData, stack, projectType);
+    const initialScore = calculateInitialScore(packageData, pythonData, typescriptData, stack, projectType);
     return {
         faf_version: '2.4.0',
         generated: now,
         // 🎯 Project Core
         project: {
             name: projectName,
-            goal: packageData.description || 'Project development and deployment',
-            main_language: detectMainLanguage(deps, projectType),
+            goal: description,
+            main_language: detectMainLanguage(deps, pythonData, projectType),
             faf_score: initialScore,
             importance: 'MORE_IMPORTANT_THAN_PACKAGE_JSON'
         },
@@ -104,6 +149,25 @@ perfect context for immediate productivity.`
         },
         // 🏗️ Technical Stack
         stack,
+        // 🏎️ TypeScript Context (F1-Inspired Quality)
+        ...(typescriptData && {
+            typescript_context: {
+                compiler: {
+                    target: typescriptData.target,
+                    module: typescriptData.module,
+                    module_resolution: typescriptData.moduleResolution,
+                    strict_mode: typescriptData.strict
+                },
+                engineering_quality: typescriptData.engineeringQuality,
+                strictness_level: typescriptData.strictnessLevel,
+                framework_integration: typescriptData.frameworkIntegration,
+                performance_optimizations: typescriptData.performanceOptimizations,
+                project_structure: {
+                    includes: typescriptData.includes,
+                    excludes: typescriptData.excludes
+                }
+            }
+        }),
         // 📊 Scoring System
         scores: {
             slot_based_percentage: Math.round((initialScore / 100) * 21), // Slots filled
@@ -146,10 +210,56 @@ perfect context for immediate productivity.`
         }
     };
 }
-function analyzeStackFromDependencies(deps, projectType) {
-    const stack = {
-        package_manager: 'npm'
-    };
+function analyzeStackFromDependencies(deps, pythonData, typescriptData, projectType) {
+    const stack = {};
+    // Python stack detection
+    if (projectType.startsWith('python-')) {
+        // Package manager detection
+        if (pythonData.name) {
+            stack.package_manager = 'poetry';
+        }
+        else if (pythonData.dependencies) {
+            stack.package_manager = 'pip';
+        }
+        // Runtime detection
+        if (pythonData.python_version) {
+            stack.runtime = `Python ${pythonData.python_version}`;
+        }
+        else {
+            stack.runtime = 'Python';
+        }
+        // Framework detection from project type
+        switch (projectType) {
+            case 'python-fastapi':
+                stack.backend = 'FastAPI';
+                stack.web_server = 'uvicorn';
+                break;
+            case 'python-django':
+                stack.backend = 'Django';
+                stack.web_server = 'gunicorn';
+                break;
+            case 'python-flask':
+                stack.backend = 'Flask';
+                stack.web_server = 'gunicorn';
+                break;
+            case 'python-starlette':
+                stack.backend = 'Starlette';
+                stack.web_server = 'uvicorn';
+                break;
+        }
+        return stack;
+    }
+    // TypeScript/JavaScript stack detection
+    // Pure TypeScript project
+    if (projectType === 'typescript') {
+        stack.runtime = 'Node.js';
+        stack.language = 'TypeScript';
+        stack.build = 'TypeScript Compiler';
+        stack.package_manager = 'npm'; // Default for TypeScript projects
+        return stack;
+    }
+    // JavaScript projects with potential TypeScript
+    stack.package_manager = 'npm';
     // Frontend Detection
     if (deps.svelte || deps['@sveltejs/kit']) {
         stack.frontend = 'Svelte 5';
@@ -204,33 +314,78 @@ function analyzeStackFromDependencies(deps, projectType) {
         stack.build = 'esbuild';
     return stack;
 }
-function detectMainLanguage(deps, projectType) {
-    if (deps.typescript || deps['@types/node'])
+function detectMainLanguage(deps, pythonData, projectType) {
+    if (projectType.startsWith('python-'))
+        return 'Python';
+    // TypeScript detection - enhanced for new project types
+    if (projectType === 'typescript' ||
+        projectType.includes('-ts') ||
+        deps.typescript ||
+        deps['@types/node'] ||
+        Object.keys(deps).some(dep => dep.startsWith('@types/'))) {
         return 'TypeScript';
+    }
     if (projectType.includes('js') || Object.keys(deps).length > 0)
         return 'JavaScript';
     return 'Unknown';
 }
-function calculateInitialScore(packageData, stack, projectType) {
+function calculateInitialScore(packageData, pythonData, typescriptData, stack, projectType) {
     let score = 30; // Base score for having a project
-    // Package.json completeness
-    if (packageData.description)
-        score += 5;
-    if (packageData.author)
-        score += 3;
-    if (packageData.license)
-        score += 2;
-    if (packageData.repository)
-        score += 3;
-    if (packageData.scripts)
-        score += 5;
+    // Python project completeness
+    if (projectType.startsWith('python-')) {
+        if (pythonData.description)
+            score += 5;
+        if (pythonData.author)
+            score += 3;
+        if (pythonData.license)
+            score += 2;
+        if (pythonData.dependencies)
+            score += 5;
+        if (pythonData.python_version)
+            score += 3;
+    }
+    else {
+        // JavaScript project completeness
+        if (packageData.description)
+            score += 5;
+        if (packageData.author)
+            score += 3;
+        if (packageData.license)
+            score += 2;
+        if (packageData.repository)
+            score += 3;
+        if (packageData.scripts)
+            score += 5;
+    }
+    // TypeScript quality bonus (F1-Inspired engineering)
+    if (typescriptData) {
+        score += 5; // Base TypeScript bonus
+        // F1-Inspired quality bonuses
+        if (typescriptData.engineeringQuality === 'f1_inspired')
+            score += 10;
+        else if (typescriptData.engineeringQuality === 'professional')
+            score += 5;
+        // Strictness bonuses
+        if (typescriptData.strictnessLevel === 'f1_inspired')
+            score += 8;
+        else if (typescriptData.strictnessLevel === 'ultra_strict')
+            score += 5;
+        else if (typescriptData.strictnessLevel === 'strict')
+            score += 3;
+        // Modern target bonus
+        if (typescriptData.target.includes('2022'))
+            score += 3;
+        // Framework integration bonus
+        if (typescriptData.frameworkIntegration.includes('native'))
+            score += 3;
+    }
     // Stack completeness
     const stackKeys = Object.keys(stack);
     score += Math.min(stackKeys.length * 3, 18); // Max 18 points for stack
     // Project type bonus
     if (projectType !== 'generic')
         score += 5;
-    return Math.min(score, 65); // Cap at 65% - human input needed for higher scores
+    return Math.min(score, 85); // Increased cap for F1-Inspired TS projects
 }
 function generateAutoTags(packageData, projectType) {
     const tags = new Set();
@@ -265,13 +420,55 @@ function generateSmartDefaults(projectType) {
     if (projectType.includes('web') || projectType === 'svelte' || projectType === 'react') {
         defaults.push('web-app');
     }
-    else if (projectType.includes('api') || projectType.includes('node')) {
+    else if (projectType.includes('api') || projectType.includes('node') || projectType.includes('fastapi')) {
         defaults.push('backend-api');
+    }
+    else if (projectType.startsWith('python-')) {
+        defaults.push('python-app');
     }
     else {
         defaults.push('software');
     }
     defaults.push('open-source'); // Default assumption
     return defaults;
+}
+/**
+ * Parse pyproject.toml content for Python project metadata
+ */
+async function parsePyprojectToml(content) {
+    try {
+        // Simple string-based parsing for key information
+        const data = {};
+        // Extract [tool.poetry] section data
+        const nameMatch = content.match(/name\s*=\s*"([^"]+)"/);
+        if (nameMatch)
+            data.name = nameMatch[1];
+        const versionMatch = content.match(/version\s*=\s*"([^"]+)"/);
+        if (versionMatch)
+            data.version = versionMatch[1];
+        const descriptionMatch = content.match(/description\s*=\s*"([^"]+)"/);
+        if (descriptionMatch)
+            data.description = descriptionMatch[1];
+        const authorMatch = content.match(/author\s*=\s*"([^"]+)"/);
+        if (authorMatch)
+            data.author = authorMatch[1];
+        const licenseMatch = content.match(/license\s*=\s*"([^"]+)"/);
+        if (licenseMatch)
+            data.license = licenseMatch[1];
+        // Extract Python version
+        const pythonMatch = content.match(/python\s*=\s*"([^"]+)"/);
+        if (pythonMatch) {
+            const version = pythonMatch[1].replace(/[\^~><=]/g, '').trim();
+            data.python_version = version;
+        }
+        // Check for dependencies section
+        if (content.includes('[tool.poetry.dependencies]')) {
+            data.dependencies = true;
+        }
+        return data;
+    }
+    catch {
+        return {};
+    }
 }
 //# sourceMappingURL=faf-generator.js.map

@@ -46,9 +46,10 @@ const fs_1 = require("fs");
 const YAML = __importStar(require("yaml"));
 const file_utils_1 = require("../utils/file-utils");
 const faf_generator_1 = require("../generators/faf-generator");
-async function initFafFile(options = {}) {
+async function initFafFile(projectPath, options = {}) {
     try {
-        const outputPath = options.output || '.faf';
+        const projectRoot = projectPath || process.cwd();
+        const outputPath = options.output ? options.output : `${projectRoot}/.faf`;
         // Check if .faf file already exists
         if (await (0, file_utils_1.fileExists)(outputPath) && !options.force) {
             console.log(chalk_1.default.yellow(`⚠️  .faf file already exists: ${outputPath}`));
@@ -58,14 +59,14 @@ async function initFafFile(options = {}) {
         console.log(chalk_1.default.blue('🚀 Initializing .faf file...'));
         // Detect project structure
         const projectType = options.template === 'auto'
-            ? await (0, file_utils_1.detectProjectType)()
-            : options.template;
+            ? await (0, file_utils_1.detectProjectType)(projectRoot)
+            : options.template || await (0, file_utils_1.detectProjectType)(projectRoot);
         console.log(chalk_1.default.gray(`   Detected project type: ${projectType}`));
         // Generate .faf content
         const fafContent = await (0, faf_generator_1.generateFafFromProject)({
             projectType,
             outputPath,
-            projectRoot: process.cwd()
+            projectRoot: projectRoot
         });
         // Write .faf file
         await fs_1.promises.writeFile(outputPath, fafContent, 'utf-8');

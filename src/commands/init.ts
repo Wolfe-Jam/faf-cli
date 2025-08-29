@@ -15,9 +15,10 @@ interface InitOptions {
   output?: string;
 }
 
-export async function initFafFile(options: InitOptions = {}) {
+export async function initFafFile(projectPath?: string, options: InitOptions = {}) {
   try {
-    const outputPath = options.output || '.faf';
+    const projectRoot = projectPath || process.cwd();
+    const outputPath = options.output ? options.output : `${projectRoot}/.faf`;
     
     // Check if .faf file already exists
     if (await fileExists(outputPath) && !options.force) {
@@ -30,8 +31,8 @@ export async function initFafFile(options: InitOptions = {}) {
     
     // Detect project structure
     const projectType = options.template === 'auto' 
-      ? await detectProjectType()
-      : options.template;
+      ? await detectProjectType(projectRoot)
+      : options.template || await detectProjectType(projectRoot);
       
     console.log(chalk.gray(`   Detected project type: ${projectType}`));
     
@@ -39,7 +40,7 @@ export async function initFafFile(options: InitOptions = {}) {
     const fafContent = await generateFafFromProject({
       projectType,
       outputPath,
-      projectRoot: process.cwd()
+      projectRoot: projectRoot
     });
     
     // Write .faf file

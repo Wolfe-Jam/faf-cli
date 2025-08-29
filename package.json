@@ -6,6 +6,11 @@
   "bin": {
     "faf": "dist/cli.js"
   },
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "ts-node src/cli.ts",

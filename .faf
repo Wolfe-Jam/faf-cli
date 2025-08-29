@@ -1,10 +1,10 @@
 faf_version: 2.4.0
-generated: 2025-08-28T15:11:01.999Z
+generated: 2025-08-28T20:56:55.986Z
 project:
   name: "@faf/cli"
   goal: Command-line interface for .faf (Foundational AI-Context Format)
   main_language: TypeScript
-  faf_score: 51
+  faf_score: 70
   importance: MORE_IMPORTANT_THAN_PACKAGE_JSON
 ai_instructions:
   priority: CRITICAL
@@ -28,11 +28,32 @@ ai_instructions:
     VALUE: This single file replaces 20+ questions and provides
     perfect context for immediate productivity.
 stack:
-  package_manager: npm
   runtime: Node.js
+  language: TypeScript
+  build: TypeScript Compiler
+  package_manager: npm
+typescript_context:
+  compiler:
+    target: ES2022
+    module: commonjs
+    module_resolution: node
+    strict_mode: true
+  engineering_quality: standard
+  strictness_level: basic
+  framework_integration: pure_typescript
+  performance_optimizations:
+    - modern_target_es2022
+    - skip_lib_check
+  project_structure:
+    includes:
+      - src*
+    excludes:
+      - node_modules
+      - dist
+      - "**/*.test.ts"
 scores:
-  slot_based_percentage: 11
-  faf_score: 51
+  slot_based_percentage: 15
+  faf_score: 70
   total_slots: 21
   scoring_philosophy: Honest percentage based on filled context slots - no fake minimums
 ai:
@@ -43,7 +64,7 @@ ai:
 docs:
   claude_sync: false
   sync_frequency: weekly
-  last_updated: 2025-08-28T15:11:01.999Z
+  last_updated: 2025-08-28T20:56:55.986Z
 preferences:
   quality_bar: production_ready
   commit_style: conventional
@@ -57,6 +78,7 @@ state:
 tags:
   auto_generated:
     - fafcli
+    - typescript
   smart_defaults:
     - .faf
     - ai-ready
