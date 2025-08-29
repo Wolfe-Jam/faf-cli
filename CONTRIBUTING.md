@@ -2,6 +2,8 @@
 
 🚀 **STOP faffing About!** Thanks for contributing to the Universal AI Context Format CLI.
 
+**Anti-Faff Development** - We eliminate unnecessary complexity and build tools that just work.
+
 ## 🎯 **Quick Start**
 
 ```bash
