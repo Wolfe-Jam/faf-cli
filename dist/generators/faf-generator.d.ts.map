@@ -1,1 +1,0 @@
-{"version":3,"file":"faf-generator.d.ts","sourceRoot":"","sources":["../../src/generators/faf-generator.ts"],"names":[],"mappings":"AAAA;;;GAGG;AAaH,MAAM,WAAW,eAAe;IAC9B,WAAW,CAAC,EAAE,MAAM,CAAC;IACrB,UAAU,EAAE,MAAM,CAAC;IACnB,WAAW,EAAE,MAAM,CAAC;CACrB;AAED,wBAAsB,sBAAsB,CAC1C,OAAO,EAAE,eAAe,GACvB,OAAO,CAAC,MAAM,CAAC,CA+DjB"}
