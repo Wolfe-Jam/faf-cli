@@ -22,7 +22,7 @@ const version = require('../package.json').version;
 // CLI Header
 console.log(chalk_1.default.cyan.bold(`
 🚀 .faf CLI v${version}
-Universal AI Context Format Tooling - Anti-Faff Engineering
+Universal AI Context Format Tooling - F1-Inspired Software Engineering
 `));
 commander_1.program
     .name('faf')

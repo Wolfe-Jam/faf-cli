@@ -18,7 +18,7 @@ const version = require('../package.json').version;
 // CLI Header
 console.log(chalk.cyan.bold(`
 🚀 .faf CLI v${version}
-Universal AI Context Format Tooling - Anti-Faff Engineering
+Universal AI Context Format Tooling - F1-Inspired Software Engineering
 `));
 
 program
