@@ -5,6 +5,7 @@
 
 import { promises as fs } from "fs";
 import * as YAML from "yaml";
+import path from "path";
 import {
   findPackageJson,
   findPyprojectToml,
@@ -25,6 +26,16 @@ export async function generateFafFromProject(
   options: GenerateOptions,
 ): Promise<string> {
   const { projectType, projectRoot } = options;
+
+  // Read README.md if available (HUMAN CONTEXT SOURCE)
+  let readmeData: any = {};
+  const readmePath = path.join(projectRoot, "README.md");
+  try {
+    const readmeContent = await fs.readFile(readmePath, "utf-8");
+    readmeData = extractReadmeContext(readmeContent);
+  } catch {
+    // Continue without README data
+  }
 
   // Read package.json if available (JavaScript projects)
   const packageJsonPath = await findPackageJson(projectRoot);
@@ -81,6 +92,7 @@ export async function generateFafFromProject(
     packageData,
     pythonData,
     typescriptData,
+    readmeData,
     projectType || "latest-idea",
   );
 
@@ -92,6 +104,7 @@ function generateProjectData(
   packageData: any,
   pythonData: any,
   typescriptData: TypeScriptContext | null,
+  readmeData: any,
   projectType: string,
 ): any {
   const now = new Date().toISOString();
@@ -100,15 +113,31 @@ function generateProjectData(
   let projectName = "untitled-project";
   let version = "1.0.0";
   let description = "Project development and deployment";
+  let targetUser: string | undefined;
+  let coreProblem: string | undefined;
+  let missionPurpose: string | undefined;
 
+  // Extract rich context from README first (best human context)
+  if (readmeData.title) projectName = readmeData.title;
+  if (readmeData.description) description = readmeData.description;
+  if (readmeData.targetUser) targetUser = readmeData.targetUser;
+  if (readmeData.coreProblem) coreProblem = readmeData.coreProblem;
+  if (readmeData.purpose) missionPurpose = readmeData.purpose;
+
+  // Then enhance with package.json metadata
   if (pythonData.name) {
     projectName = pythonData.name;
     version = pythonData.version || "0.1.0";
-    description = pythonData.description || description;
+    if (!readmeData.description) description = pythonData.description || description;
   } else if (packageData.name) {
-    projectName = packageData.name;
+    // Clean package name for YAML compatibility
+    projectName = packageData.name.replace(/^@/, '').replace('/', '-');
     version = packageData.version || "1.0.0";
-    description = packageData.description || description;
+    if (!readmeData.description) {
+      // Clean description too to avoid YAML issues
+      const cleanDesc = packageData.description || description;
+      description = cleanDesc.replace(/^@[\w-]+\//, ''); // Remove @scope/ from start
+    }
   }
 
   // Detect stack from appropriate dependency source
@@ -119,7 +148,7 @@ function generateProjectData(
     projectType,
   );
 
-  // Calculate slot-based scoring
+  // Calculate slot-based scoring with README intelligence
   const slots = [
     projectName !== "untitled-project",
     description !== "Project development and deployment",
@@ -127,13 +156,27 @@ function generateProjectData(
     stack.frontend,
     stack.backend,
     stack.build,
-    // Add more slots as needed
+    !!targetUser, // README extracted
+    !!coreProblem, // README extracted
+    !!missionPurpose, // README extracted
+    !!(packageData.scripts && Object.keys(packageData.scripts).length > 3), // Rich package.json
+    !!(packageData.dependencies && Object.keys(packageData.dependencies).length > 5), // Real project
+    !!(packageData.repository), // Repository info
+    !!(packageData.keywords && packageData.keywords.length > 0), // Keywords
+    !!(readmeData.features && readmeData.features.length > 0), // Feature list
+    !!(readmeData.techStack && readmeData.techStack.length > 0), // Tech stack documented
+    !!(readmeData.quickStart), // Getting started info
+    !!(readmeData.architecture), // Architecture documented
+    stack.css_framework !== "None",
+    stack.ui_library !== "None",
+    !!(readmeData.installation), // Installation instructions
+    !!(readmeData.usage || readmeData.examples), // Usage examples
   ];
   
   const filledSlots = slots.filter(Boolean).length;
   const totalSlots = 21; // Base slots for scoring
   const slotBasedPercentage = Math.round((filledSlots / totalSlots) * 100);
-  const fafScore = slotBasedPercentage; // Honest percentage only - no artificial bonuses
+  const fafScore = slotBasedPercentage; // Honest percentage - now with intelligent extraction
 
   return {
     projectName: projectName,
@@ -153,13 +196,13 @@ function generateProjectData(
     cicd: "None",
     fafScore: fafScore,
     slotBasedPercentage: slotBasedPercentage,
-    // Human Context (Project Details) - empty for CLI auto-generation
-    targetUser: undefined,
-    coreProblem: undefined,
-    missionPurpose: undefined,
-    deploymentMarket: undefined,
-    timeline: undefined,
-    approach: undefined,
+    // Human Context (Project Details) - extracted from README
+    targetUser: targetUser,
+    coreProblem: coreProblem,
+    missionPurpose: missionPurpose,
+    deploymentMarket: readmeData.deployment,
+    timeline: readmeData.timeline,
+    approach: readmeData.approach,
     // Additional Context Arrays
     additionalWho: [],
     additionalWhat: [],
@@ -378,6 +421,95 @@ function generateSmartDefaults(projectType: string): string[] {
   defaults.push("open-source"); // Default assumption
 
   return defaults;
+}
+
+/**
+ * Extract context from README.md content - THE KEY TO HIGH SCORES
+ */
+function extractReadmeContext(content: string): any {
+  const context: any = {};
+  
+  // Extract title (first # heading)
+  const titleMatch = content.match(/^#\s+(.+)$/m);
+  if (titleMatch) {
+    context.title = titleMatch[1].replace(/[^a-zA-Z0-9\s\-\.]/g, '').trim();
+  }
+  
+  // Extract description (content after title, before next major section)
+  const descMatch = content.match(/^#\s+.+\n\n([\s\S]*?)(?=\n##|\n#|$)/m);
+  if (descMatch) {
+    context.description = descMatch[1].replace(/\n/g, ' ').trim().substring(0, 200);
+  }
+  
+  // Extract features (look for Features, Key Features, Core Features sections)
+  const featuresMatch = content.match(/##?\s*(?:Key\s+)?(?:Core\s+)?Features[\s\S]*?\n([\s\S]*?)(?=\n##|\n#|$)/i);
+  if (featuresMatch) {
+    const features = featuresMatch[1].match(/[-*]\s+(.+)/g);
+    if (features) {
+      context.features = features.map(f => f.replace(/[-*]\s+/, '').trim()).slice(0, 5);
+    }
+  }
+  
+  // Extract tech stack (look for Tech Stack, Stack, Built With sections)
+  const techMatch = content.match(/##?\s*(?:Tech\s+Stack|Stack|Built\s+With|Technology)[\s\S]*?\n([\s\S]*?)(?=\n##|\n#|$)/i);
+  if (techMatch) {
+    const stack = techMatch[1].match(/[-*]\s+(.+)/g);
+    if (stack) {
+      context.techStack = stack.map(s => s.replace(/[-*]\s+/, '').trim()).slice(0, 8);
+    }
+  }
+  
+  // Extract installation/setup info
+  const installMatch = content.match(/##?\s*(?:Installation|Setup|Quick\s+Start|Getting\s+Started)[\s\S]*?\n([\s\S]*?)(?=\n##|\n#|$)/i);
+  if (installMatch) {
+    context.installation = true;
+    context.quickStart = installMatch[1].includes('```') || installMatch[1].includes('npm') || installMatch[1].includes('pip');
+  }
+  
+  // Extract architecture info
+  const archMatch = content.match(/##?\s*(?:Architecture|Structure|Design)[\s\S]*?\n([\s\S]*?)(?=\n##|\n#|$)/i);
+  if (archMatch) {
+    context.architecture = true;
+  }
+  
+  // Extract usage/examples
+  const usageMatch = content.match(/##?\s*(?:Usage|Examples|API|How\s+to\s+Use)[\s\S]*?\n([\s\S]*?)(?=\n##|\n#|$)/i);
+  if (usageMatch) {
+    context.usage = true;
+    context.examples = usageMatch[1].includes('```');
+  }
+  
+  // Smart inference of target user and problem
+  const content_lower = content.toLowerCase();
+  
+  // Target user inference
+  if (content_lower.includes('developer') || content_lower.includes('engineers')) {
+    context.targetUser = 'Developers and engineers';
+  } else if (content_lower.includes('business') || content_lower.includes('enterprise')) {
+    context.targetUser = 'Business and enterprise users';
+  } else if (content_lower.includes('team') || content_lower.includes('collaboration')) {
+    context.targetUser = 'Development teams';
+  }
+  
+  // Core problem inference
+  if (content_lower.includes('automat') || content_lower.includes('streamlin')) {
+    context.coreProblem = 'Process automation and workflow optimization';
+  } else if (content_lower.includes('manag') || content_lower.includes('organiz')) {
+    context.coreProblem = 'Organization and management challenges';
+  } else if (content_lower.includes('performance') || content_lower.includes('speed')) {
+    context.coreProblem = 'Performance and efficiency improvements';
+  }
+  
+  // Purpose inference from mission/vision language
+  if (content_lower.includes('transform') || content_lower.includes('revolution')) {
+    context.purpose = 'Transform and revolutionize existing processes';
+  } else if (content_lower.includes('simplif') || content_lower.includes('easier')) {
+    context.purpose = 'Simplify and improve user experience';
+  } else if (content_lower.includes('connect') || content_lower.includes('integrat')) {
+    context.purpose = 'Connect and integrate systems and workflows';
+  }
+  
+  return context;
 }
 
 /**

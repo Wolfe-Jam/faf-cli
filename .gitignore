@@ -17,6 +17,10 @@ coverage/
 .env.local
 .env.*.local
 
+# Private breakthrough documentation - NOT PUBLIC
+BREAKTHROUGH-LOG.md
+AI-CONTEXT-MANIFESTO.md
+
 # Editor directories and files
 .vscode/
 .idea/

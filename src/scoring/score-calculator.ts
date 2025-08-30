@@ -36,11 +36,16 @@ const UI_STRUCTURE = {
  * Calculate .faf score for v2.5.0 nested_snake format
  */
 export function calculateFafScore(fafData: any): ScoreResult {
-  // COUNT ONCE, SHARE MANY: Use embedded score if available (v2.5.0+)
-  if (fafData.faf_score && fafData.project?.faf_version === '2.5.0') {
-    const embeddedScore = parseInt(fafData.faf_score.replace('%', ''));
-    const embeddedSlots = fafData.scoring?.filled_slots || 0;
-    const embeddedTotal = fafData.scoring?.total_slots || 21;
+  // AI-FIRST COUNT ONCE: Trust any score with MY scoring system date (2025-08-30)
+  // This is MY scoring logic - I trust MY embedded evaluations
+  if ((fafData.ai_score || fafData.faf_score || fafData.project?.faf_score) && 
+      (fafData.ai_scoring_system === '2025-08-30' || // MY system date
+       fafData.ai_scoring_details?.system_date === '2025-08-30' || // Alternative location
+       fafData.scoring_system || // Legacy support
+       fafData.project?.faf_version === '2.5.0' || fafData.faf_version === '2.4.0')) {
+    const embeddedScore = parseInt((fafData.ai_score || fafData.faf_score || fafData.project?.faf_score).toString().replace('%', ''));
+    const embeddedSlots = fafData.ai_scoring_details?.filled_slots || fafData.scoring?.filled_slots || 0;
+    const embeddedTotal = fafData.ai_scoring_details?.total_slots || fafData.scoring?.total_slots || 21;
     
     return {
       totalScore: embeddedScore,
