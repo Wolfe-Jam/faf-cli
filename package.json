@@ -1,6 +1,6 @@
 {
   "name": "@faf/cli",
-  "version": "1.1.0",
+  "version": "2.5.0",
   "description": "Command-line interface for .faf (Foundational AI-Context Format)",
   "main": "dist/index.js",
   "bin": {
@@ -34,10 +34,11 @@
   "author": "🏎️⚡️_wolfejam.dev",
   "license": "MIT",
   "dependencies": {
-    "chalk": "^5.3.0",
+    "chalk": "^4.1.2",
     "commander": "^14.0.0",
     "enquirer": "^2.4.1",
     "glob": "^11.0.3",
+    "openai": "^5.16.0",
     "yaml": "^2.4.1"
   },
   "devDependencies": {

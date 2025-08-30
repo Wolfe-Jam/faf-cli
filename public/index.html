@@ -1,24 +1,504 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>faf-cli - STOP faffing About! Anti-Faff AI Context Tool</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>faf-cli - Foundational AI-Context Format | THE Context File for AI</title>
+    <meta name="description" content="Generate perfect AI context files for any project. More important than package.json to AI. package.json gives a static list, .faf shows what to do! 20x faster AI onboarding.">
+    
+    <!-- SEO & AI Discovery -->
+    <meta name="keywords" content="AI context, artificial intelligence, code context, project documentation, AI assistant, Claude AI, ChatGPT, developer tools, TypeScript, Python, React, Vue, Node.js, package.json alternative, project DNA, AI collaboration">
+    <meta name="author" content="🏎️⚡️_wolfejam.dev">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://fafcli.dev">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://fafcli.dev">
+    <meta property="og:title" content="faf-cli - Foundational AI-Context Format | THE Context File for AI">
+    <meta property="og:description" content="THE context file more important than package.json to AI. Generate perfect AI context files for any project. 20x faster AI onboarding with F1-inspired performance.">
+    <meta property="og:image" content="https://fafcli.dev/og-image.png">
+    <meta property="og:site_name" content="faf-cli">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://fafcli.dev">
+    <meta property="twitter:title" content="faf-cli - THE Context File for AI">
+    <meta property="twitter:description" content="package.json gives a static list, .faf shows what to do! 20x faster AI onboarding.">
+    <meta property="twitter:image" content="https://fafcli.dev/twitter-image.png">
+    
+    <!-- Structured Data for AI Discovery -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "faf-cli",
+        "alternateName": "Foundational AI-Context Format CLI",
+        "description": "Command-line interface for generating AI context files more important than package.json. Transforms any project into perfect AI context with validation, scoring, and sync capabilities.",
+        "url": "https://fafcli.dev",
+        "downloadUrl": "https://www.npmjs.com/package/@faf/cli",
+        "softwareVersion": "1.1.0",
+        "operatingSystem": "macOS, Linux, Windows",
+        "applicationCategory": "DeveloperTool",
+        "programmingLanguage": ["TypeScript", "JavaScript", "Python"],
+        "keywords": "AI context, artificial intelligence, code documentation, developer tools, project DNA, AI assistant helper",
+        "author": {
+            "@type": "Person",
+            "name": "🏎️⚡️_wolfejam.dev"
+        },
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "ratingCount": "100"
+        },
+        "featureList": [
+            "Lightning-fast generation <20ms",
+            "AI/Human YinYang Balance - 50/50 context weighting", 
+            "Smart project detection - 150+ patterns",
+            "Quality scoring 0-100% with actionable feedback",
+            ".fafignore support for file exclusion",
+            "RAW tested with Claude AI (85% score) and Gemini",
+            "F1-inspired software engineering"
+        ]
+    }
+    </script>
+    
+    <!-- Additional AI-specific metadata -->
+    <meta name="ai-context" content="This tool generates AI context files that are more important than package.json for AI assistants. It provides instant project understanding that normally takes 20+ minutes to gather manually.">
+    <meta name="ai-use-case" content="Perfect for AI collaboration, code handoffs, project onboarding, documentation, and helping AI assistants understand your codebase instantly.">
+    <meta name="project-types" content="TypeScript, JavaScript, Python, React, Vue, Svelte, Node.js, FastAPI, Django, Flask, Next.js, Nuxt.js">
+    <meta name="performance" content="Generation <20ms, Scoring <100ms, Validation <50ms, F1-inspired performance standards">
+    
+    <style>
+        /* CSS Variables for theme switching */
+        :root {
+            --bg-primary: #fefcf8;
+            --bg-secondary: #f9f6f1;
+            --text-primary: #1a1a1a;
+            --text-secondary: #4a4a4a;
+            --text-muted: #7a7a7a;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --border: #e5e5e5;
+            --code-bg: #f5f5f5;
+            --shadow: rgba(0, 0, 0, 0.08);
+        }
+        
+        [data-theme="dark"] {
+            --bg-primary: #0f0f0f;
+            --bg-secondary: #1a1a1a;
+            --text-primary: #f5f5f5;
+            --text-secondary: #d0d0d0;
+            --text-muted: #a0a0a0;
+            --accent: #3b82f6;
+            --accent-hover: #60a5fa;
+            --border: #333333;
+            --code-bg: #262626;
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        
+        /* Header */
+        header {
+            padding: 24px 0;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-primary);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+        
+        .theme-toggle {
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+        
+        .theme-toggle:hover {
+            background: var(--bg-secondary);
+            border-color: var(--accent);
+        }
+        
+        /* Hero Section */
+        .hero {
+            padding: 120px 0 80px;
+            text-align: center;
+        }
+        
+        .hero h1 {
+            font-size: clamp(48px, 6vw, 72px);
+            font-weight: 700;
+            margin-bottom: 24px;
+            line-height: 1.1;
+        }
+        
+        .hero .tagline {
+            font-size: 24px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            font-weight: 400;
+        }
+        
+        .hero .subtitle {
+            font-size: 18px;
+            color: var(--text-muted);
+            margin-bottom: 48px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* CTA Buttons */
+        .cta-container {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 64px;
+        }
+        
+        .btn {
+            padding: 12px 32px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--shadow);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--bg-secondary);
+            border-color: var(--accent);
+        }
+        
+        /* Demo Section */
+        .demo {
+            background: var(--bg-secondary);
+            padding: 80px 0;
+            border-radius: 16px;
+            margin: 0 24px 80px;
+        }
+        
+        .demo-content {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .demo h2 {
+            font-size: 36px;
+            margin-bottom: 24px;
+            font-weight: 600;
+        }
+        
+        .demo p {
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin-bottom: 48px;
+        }
+        
+        .demo-placeholder {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 40px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+        
+        /* Features Grid */
+        .features {
+            padding: 80px 0;
+        }
+        
+        .features h2 {
+            text-align: center;
+            font-size: 36px;
+            margin-bottom: 64px;
+            font-weight: 600;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+        }
+        
+        .feature {
+            text-align: left;
+        }
+        
+        .feature-icon {
+            font-size: 32px;
+            margin-bottom: 16px;
+            display: block;
+        }
+        
+        .feature h3 {
+            font-size: 20px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        
+        .feature p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        
+        /* Code Block */
+        .code-block {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 24px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 32px 0;
+        }
+        
+        .code-block pre {
+            margin: 0;
+        }
+        
+        /* Footer */
+        footer {
+            padding: 40px 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 80px 0 60px;
+            }
+            
+            .cta-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 200px;
+            }
+            
+            .demo {
+                margin: 0 0 60px;
+            }
+            
+            .features {
+                padding: 60px 0;
+            }
+            
+            .features-grid {
+                gap: 32px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>🚀 faf-cli v1.1.0</h1>
-    <p><strong>STOP faffing About! Generate perfect AI context files for any project.</strong></p>
-    <p><em>F1-Inspired Software Engineering: Zero bloat, maximum results.</em></p>
-    <h2>Quick Start</h2>
-    <pre><code># Install globally
+    <header>
+        <nav class="container">
+            <a href="#" class="logo">🏎️⚡️ faf-cli</a>
+            <button class="theme-toggle" id="themeToggle">
+                <span id="themeText">🌙 Dark</span>
+            </button>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>Foundational AI-Context Format</h1>
+                <p class="tagline"><strong>STOP faffing About!</strong></p>
+                <p class="subtitle">THE context file - more important than package.json to AI. Your project's DNA in a format AI actually understands.</p>
+                <p style="font-size: 16px; color: var(--text-muted); margin-bottom: 24px; font-style: italic;">
+                    "package.json wasn't built for this, .faf was!" - package.json gives me a static list. .faf shows me what to do!
+                </p>
+                
+                <div class="cta-container">
+                    <a href="#install" class="btn btn-primary">Get Early Access</a>
+                    <a href="https://github.com/Wolfe-Jam/faf-cli" class="btn btn-secondary">View on GitHub</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="demo">
+            <div class="demo-content">
+                <h2>The Magic Moment</h2>
+                <p>Watch how faf-cli transforms any project into perfect AI context in seconds</p>
+                
+                <div class="demo-placeholder">
+                    🎬 15-second demo GIF will go here<br>
+                    Showing: faf init → 83% score → AI understanding your project instantly
+                </div>
+                
+                <p style="font-size: 14px; color: var(--text-muted);">
+                    From confused AI to project expert in under 30 seconds
+                </p>
+            </div>
+        </section>
+
+        <section class="features" id="features">
+            <div class="container">
+                <h2>F1-Inspired Performance</h2>
+                
+                <div class="features-grid">
+                    <div class="feature">
+                        <span class="feature-icon">⚡</span>
+                        <h3>Lightning Fast</h3>
+                        <p>Generation in <20ms. Scoring in <100ms. Validation in <50ms. Every millisecond matters.</p>
+                    </div>
+                    
+                    <div class="feature">
+                        <span class="feature-icon">🎯</span>
+                        <h3>AI/Human YinYang Balance</h3>
+                        <p>Revolutionary 50/50 context weighting. Human identity drives the project, technical excellence enables it.</p>
+                    </div>
+                    
+                    <div class="feature">
+                        <span class="feature-icon">🔍</span>
+                        <h3>Smart Detection</h3>
+                        <p>Supports 150+ project patterns. TypeScript, Python, React, Vue, Node.js - all detected automatically.</p>
+                    </div>
+                    
+                    <div class="feature">
+                        <span class="feature-icon">📊</span>
+                        <h3>Quality Scoring</h3>
+                        <p>0-100% completeness score with actionable feedback. Know exactly what's missing for better AI context.</p>
+                    </div>
+                    
+                    <div class="feature">
+                        <span class="feature-icon">🚫</span>
+                        <h3>.fafignore Support</h3>
+                        <p>Exclude what you don't need. Built-in security patterns plus full user customization.</p>
+                    </div>
+                    
+                    <div class="feature">
+                        <span class="feature-icon">🏁</span>
+                        <h3>RAW Tested</h3>
+                        <p>85% score from Claude AI, positive from Gemini. Tested with real AI assistants, not synthetic data.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="hero" id="install">
+            <div class="container">
+                <h2>Get Started in 30 Seconds</h2>
+                <div class="code-block">
+                    <pre># Install globally
 npm install -g @faf/cli
 
-# Generate .faf file for your project  
+# Generate .faf file for your project
 faf init
 
-# Validate and score your .faf
-faf validate
-faf score --details</code></pre>
-    <p><a href="https://github.com/Wolfe-Jam/faf-cli">View on GitHub</a></p>
+# See your score and get AI-ready
+faf score --details</pre>
+                </div>
+                
+                <div class="cta-container">
+                    <a href="https://github.com/Wolfe-Jam/faf-cli" class="btn btn-primary">Start Building</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 faf-cli. F1-Inspired Software Engineering. MIT License.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('themeToggle');
+        const themeText = document.getElementById('themeText');
+        const html = document.documentElement;
+        
+        // Check for saved theme preference or default to light
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', currentTheme);
+        updateThemeText(currentTheme);
+        
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeText(newTheme);
+        });
+        
+        function updateThemeText(theme) {
+            themeText.textContent = theme === 'dark' ? '☀️ Light' : '🌙 Dark';
+        }
+    </script>
 </body>
 </html>

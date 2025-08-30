@@ -14,6 +14,7 @@ import { auditFafFile } from './commands/audit';
 import { lintFafFile } from './commands/lint';
 import { enhanceFafWithAI } from './commands/ai-enhance';
 import { analyzeFafWithAI } from './commands/ai-analyze';
+import { setColorOptions, type ColorScheme } from './utils/color-utils';
 
 const version = require('../package.json').version;
 
@@ -26,7 +27,9 @@ Universal AI Context Format Tooling - F1-Inspired Software Engineering
 program
   .name('faf')
   .description('STOP faffing About! Generate perfect AI context files for any project.')
-  .version(version);
+  .version(version)
+  .option('--no-color', 'Disable colored output for accessibility')
+  .option('--color-scheme <scheme>', 'Color scheme for colorblind accessibility: normal|deuteranopia|protanopia|tritanopia', 'normal');
 
 // Add comprehensive help examples
 program.on('--help', () => {
@@ -194,6 +197,22 @@ program
 
 // Parse CLI arguments
 program.parse(process.argv);
+
+// Apply color accessibility settings after parsing
+const options = program.opts();
+if (options.noColor || process.env.NO_COLOR) {
+  setColorOptions(false);
+} else if (options.colorScheme) {
+  const scheme = options.colorScheme as ColorScheme;
+  const validSchemes: ColorScheme[] = ['normal', 'deuteranopia', 'protanopia', 'tritanopia'];
+  if (validSchemes.includes(scheme)) {
+    setColorOptions(true, scheme);
+  } else {
+    console.log(chalk.red(`❌ Invalid color scheme: ${scheme}`));
+    console.log(chalk.yellow(`💡 Valid schemes: ${validSchemes.join(', ')}`));
+    process.exit(1);
+  }
+}
 
 // Enhanced onboarding for first-time users
 if (!process.argv.slice(2).length) {
