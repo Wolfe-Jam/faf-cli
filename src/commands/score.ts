@@ -8,6 +8,7 @@ import { promises as fs } from "fs";
 import * as YAML from "yaml";
 import { calculateFafScore } from "../scoring/score-calculator";
 import { findFafFile } from "../utils/file-utils";
+import { colors, getScoreColor, getScoreEmoji } from "../utils/color-utils";
 
 interface ScoreOptions {
   details?: boolean;
@@ -34,19 +35,12 @@ export async function scoreFafFile(file?: string, options: ScoreOptions = {}) {
     const scoreResult = calculateFafScore(fafData);
     const percentage = Math.round(scoreResult.totalScore);
 
-    // Color-coded score display
-    let scoreColor = chalk.red;
-    let scoreEmoji = "🔴";
+    // Accessibility-friendly score display
+    const scoreColor = getScoreColor(percentage);
+    const scoreEmoji = getScoreEmoji(percentage);
+    const scoreText = `${scoreEmoji} Score: ${percentage}%`;
 
-    if (percentage >= 90) {
-      scoreColor = chalk.green;
-      scoreEmoji = "🟢";
-    } else if (percentage >= 70) {
-      scoreColor = chalk.yellow;
-      scoreEmoji = "🟡";
-    }
-
-    console.log(scoreColor.bold(`${scoreEmoji} Score: ${percentage}%`));
+    console.log(scoreColor(chalk.bold(scoreText)));
     console.log(
       chalk.gray(
         `   (${scoreResult.filledSlots}/${scoreResult.totalSlots} context slots filled)`,

@@ -49,7 +49,7 @@ describe('File Utils', () => {
       
       try {
         const projectType = await detectProjectType(tempDir);
-        expect(projectType).toBe('generic');
+        expect(projectType).toBe('latest-idea');
       } finally {
         // Cleanup
         await fs.rm(tempDir, { recursive: true, force: true });

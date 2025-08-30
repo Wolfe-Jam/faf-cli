@@ -13,6 +13,7 @@ import {
   analyzeTsConfig,
   TypeScriptContext,
 } from "../utils/file-utils";
+import { generateFafContent } from "../utils/yaml-generator";
 
 export interface GenerateOptions {
   projectType?: string;
@@ -75,19 +76,19 @@ export async function generateFafFromProject(
     }
   }
 
-  // Generate .faf structure
-  const fafData = generateFafStructure(
+  // Generate project data from analysis
+  const projectData = generateProjectData(
     packageData,
     pythonData,
     typescriptData,
     projectType || "latest-idea",
   );
 
-  // Convert to YAML
-  return YAML.stringify(fafData);
+  // Generate AI-optimized .faf content using v2.5.0 format
+  return generateFafContent(projectData);
 }
 
-function generateFafStructure(
+function generateProjectData(
   packageData: any,
   pythonData: any,
   typescriptData: TypeScriptContext | null,
@@ -118,121 +119,56 @@ function generateFafStructure(
     projectType,
   );
 
-  // Calculate initial score (basic detection gives ~40-60%)
-  const initialScore = calculateInitialScore(
-    packageData,
-    pythonData,
-    typescriptData,
-    stack,
-    projectType,
-  );
+  // Calculate slot-based scoring
+  const slots = [
+    projectName !== "untitled-project",
+    description !== "Project development and deployment",
+    detectMainLanguage(deps, projectType) !== "Unknown",
+    stack.frontend,
+    stack.backend,
+    stack.build,
+    // Add more slots as needed
+  ];
+  
+  const filledSlots = slots.filter(Boolean).length;
+  const totalSlots = 21; // Base slots for scoring
+  const slotBasedPercentage = Math.round((filledSlots / totalSlots) * 100);
+  const fafScore = slotBasedPercentage; // Honest percentage only - no artificial bonuses
 
   return {
-    faf_version: "2.4.0",
-    generated: now,
-
-    // 🎯 Project Core
-    project: {
-      name: projectName,
-      goal: description,
-      project_type: projectType || "latest-idea",
-      main_language: detectMainLanguage(deps, projectType),
-      faf_score: initialScore,
-      importance: "MORE_IMPORTANT_THAN_PACKAGE_JSON",
-    },
-
-    // 📢 AI INSTRUCTION SECTION - CRITICAL
-    ai_instructions: {
-      priority: "CRITICAL",
-      usage: "READ_THIS_FIRST",
-      message: `🧠 ATTENTION AI: This .faf file contains the complete DNA of this project.
-It provides instant context that would take 20+ minutes to gather manually.
-
-PRIORITY ORDER:
-1. Read THIS .faf file first (complete project intelligence)
-2. Read CLAUDE.md if exists (detailed session context)
-3. Then package.json, config files, etc. (implementation details)
-
-This .faf tells you:
-- What we're building (goal)
-- How we like to work (preferences)  
-- Our quality standards (scores)
-- Current focus (state)
-- Tech stack (stack)
-
-VALUE: This single file replaces 20+ questions and provides
-perfect context for immediate productivity.`,
-    },
-
-    // 🏗️ Technical Stack
-    stack,
-
-    // 🏎️ TypeScript Context (F1-Inspired Quality)
-    ...(typescriptData && {
-      typescript_context: {
-        compiler: {
-          target: typescriptData.target,
-          module: typescriptData.module,
-          module_resolution: typescriptData.moduleResolution,
-          strict_mode: typescriptData.strict,
-        },
-        engineering_quality: typescriptData.engineeringQuality,
-        strictness_level: typescriptData.strictnessLevel,
-        framework_integration: typescriptData.frameworkIntegration,
-        performance_optimizations: typescriptData.performanceOptimizations,
-        project_structure: {
-          includes: typescriptData.includes,
-          excludes: typescriptData.excludes,
-        },
-      },
-    }),
-
-    // 📊 Scoring System
-    scores: {
-      slot_based_percentage: Math.round((initialScore / 100) * 21), // Slots filled
-      faf_score: initialScore,
-      total_slots: 21,
-      scoring_philosophy:
-        "Honest percentage based on filled context slots - no fake minimums",
-    },
-
-    // 🧠 AI Intelligence
-    ai: {
-      context_file: "CLAUDE.md",
-      handoff_ready: true,
-      session_continuity: "medium",
-      onboarding_time: "60_seconds",
-    },
-
-    // 📚 Knowledge Sync
-    docs: {
-      claude_sync: false,
-      sync_frequency: "weekly",
-      last_updated: now,
-    },
-
-    // ⚙️ Working Preferences (defaults - should be customized)
-    preferences: {
-      quality_bar: "production_ready",
-      commit_style: "conventional",
-      communication: "concise",
-      verbosity: "minimal",
-    },
-
-    // 🚀 Current State
-    state: {
-      phase: "development",
-      version: version,
-      focus: "initial_setup",
-      status: "active",
-    },
-
-    // 🏷️ Tags System
-    tags: {
-      auto_generated: generateAutoTags(packageData, projectType),
-      smart_defaults: generateSmartDefaults(projectType),
-      user_defined: [],
-    },
+    projectName: projectName,
+    projectGoal: description,
+    mainLanguage: detectMainLanguage(deps, projectType),
+    framework: stack.frontend || "None",
+    cssFramework: stack.css_framework || "None",
+    uiLibrary: stack.ui_library || "None",
+    stateManagement: stack.state_management || "None",
+    backend: stack.backend || "None",
+    server: stack.web_server || "None",
+    apiType: "REST API",
+    database: "None",
+    connection: "None",
+    hosting: "None",
+    buildTool: stack.build || "None",
+    cicd: "None",
+    fafScore: fafScore,
+    slotBasedPercentage: slotBasedPercentage,
+    // Human Context (Project Details) - empty for CLI auto-generation
+    targetUser: undefined,
+    coreProblem: undefined,
+    missionPurpose: undefined,
+    deploymentMarket: undefined,
+    timeline: undefined,
+    approach: undefined,
+    // Additional Context Arrays
+    additionalWho: [],
+    additionalWhat: [],
+    additionalWhy: [],
+    additionalWhere: [],
+    additionalWhen: [],
+    additionalHow: [],
+    projectDetailsScore: 0,
+    projectSuccessRate: 50
   };
 }
 
@@ -317,6 +253,24 @@ function analyzeStackFromDependencies(
   else if (deps.bootstrap) {stack.css_framework = "Bootstrap";}
   else if (deps["@emotion/react"]) {stack.css_framework = "Emotion";}
   else if (deps["styled-components"]) {stack.css_framework = "Styled Components";}
+  else if (deps.bulma) {stack.css_framework = "Bulma";}
+  else if (deps.foundation) {stack.css_framework = "Foundation";}
+
+  // UI Library Detection
+  if (deps["@mui/material"]) {stack.ui_library = "Material-UI (MUI)";}
+  else if (deps.antd) {stack.ui_library = "Ant Design";}
+  else if (deps["@chakra-ui/react"]) {stack.ui_library = "Chakra UI";}
+  else if (deps["@mantine/core"]) {stack.ui_library = "Mantine";}
+  else if (deps.vuetify) {stack.ui_library = "Vuetify";}
+  else if (deps.quasar) {stack.ui_library = "Quasar";}
+
+  // State Management Detection
+  if (deps.redux || deps["@reduxjs/toolkit"]) {stack.state_management = "Redux Toolkit";}
+  else if (deps.zustand) {stack.state_management = "Zustand";}
+  else if (deps.jotai) {stack.state_management = "Jotai";}
+  else if (deps.vuex) {stack.state_management = "Vuex";}
+  else if (deps.pinia) {stack.state_management = "Pinia";}
+  else if (deps.mobx) {stack.state_management = "MobX";}
 
   // Backend Detection
   if (deps.express) {stack.backend = "Express.js";}
@@ -362,60 +316,6 @@ function detectMainLanguage(
   return "Unknown";
 }
 
-function calculateInitialScore(
-  packageData: any,
-  pythonData: any,
-  typescriptData: TypeScriptContext | null,
-  stack: any,
-  projectType: string,
-): number {
-  let score = 30; // Base score for having a project
-
-  // Python project completeness
-  if (projectType.startsWith("python-")) {
-    if (pythonData.description) {score += 5;}
-    if (pythonData.author) {score += 3;}
-    if (pythonData.license) {score += 2;}
-    if (pythonData.dependencies) {score += 5;}
-    if (pythonData.python_version) {score += 3;}
-  } else {
-    // JavaScript project completeness
-    if (packageData.description) {score += 5;}
-    if (packageData.author) {score += 3;}
-    if (packageData.license) {score += 2;}
-    if (packageData.repository) {score += 3;}
-    if (packageData.scripts) {score += 5;}
-  }
-
-  // TypeScript quality bonus (F1-Inspired engineering)
-  if (typescriptData) {
-    score += 5; // Base TypeScript bonus
-
-    // F1-Inspired quality bonuses
-    if (typescriptData.engineeringQuality === "f1_inspired") {score += 10;}
-    else if (typescriptData.engineeringQuality === "professional") {score += 5;}
-
-    // Strictness bonuses
-    if (typescriptData.strictnessLevel === "f1_inspired") {score += 8;}
-    else if (typescriptData.strictnessLevel === "ultra_strict") {score += 5;}
-    else if (typescriptData.strictnessLevel === "strict") {score += 3;}
-
-    // Modern target bonus
-    if (typescriptData.target.includes("2022")) {score += 3;}
-
-    // Framework integration bonus
-    if (typescriptData.frameworkIntegration.includes("native")) {score += 3;}
-  }
-
-  // Stack completeness
-  const stackKeys = Object.keys(stack);
-  score += Math.min(stackKeys.length * 3, 18); // Max 18 points for stack
-
-  // Project type bonus
-  if (projectType !== "latest-idea") {score += 5;}
-
-  return Math.min(score, 85); // Increased cap for F1-Inspired TS projects
-}
 
 function generateAutoTags(packageData: any, projectType: string): string[] {
   const tags = new Set<string>();

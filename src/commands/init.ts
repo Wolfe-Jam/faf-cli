@@ -75,12 +75,13 @@ export async function initFafFile(
     console.log(chalk.green(`✅ Created ${outputPath}`));
     console.log(chalk.gray(`   Generated in ${elapsedTime}ms ⚡`));
 
-    // Show actual score using the real scoring algorithm
+    // Show actual score matching what's embedded in the file
     const fafData = YAML.parse(fafContent);
     const scoreResult = calculateFafScore(fafData);
-    const actualScore = Math.round(scoreResult.totalScore);
+    // Use the embedded score from the file header to match what user sees
+    const embeddedScore = fafData.faf_score ? parseInt(fafData.faf_score.replace('%', '')) : scoreResult.totalScore;
 
-    console.log(chalk.blue(`📊 Initial score: ${actualScore}% (${scoreResult.filledSlots}/${scoreResult.totalSlots} slots)`));
+    console.log(chalk.blue(`📊 Initial score: ${embeddedScore}% (${scoreResult.filledSlots}/${scoreResult.totalSlots} slots)`));
 
     // Next steps
     console.log(chalk.yellow("\n💡 Next steps:"));
@@ -94,7 +95,7 @@ export async function initFafFile(
       chalk.yellow('   3. Run "faf validate" to check format compliance'),
     );
 
-    if (actualScore < 70) {
+    if (embeddedScore < 70) {
       console.log(chalk.yellow("   4. Aim for 70%+ score for good AI context"));
     }
   } catch (error) {
