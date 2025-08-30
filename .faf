@@ -1,88 +1,97 @@
-faf_version: 2.4.0
-generated: 2025-08-28T20:56:55.986Z
+ai_scoring_system: 2025-08-30
+ai_score: 14%
+ai_confidence: LOW
+ai_value: 30_seconds_replaces_20_minutes_of_questions
+ai_tldr:
+  project: @faf/cli - Command-line interface for .faf (Foundational AI-Context Format)
+  stack: Python
+  quality_bar: ZERO_ERRORS_F1_STANDARDS
+  current_focus: Production deployment preparation
+  your_role: Build features with perfect context
+instant_context:
+  what_building: Command-line interface for .faf (Foundational AI-Context Format)
+  tech_stack: Python
+  main_language: Python
+  deployment: None
+  key_files:
+    - main.py
+    - requirements.txt
+    - package.json
+    - tsconfig.json
+context_quality:
+  slots_filled: 3/21 (14%)
+  ai_confidence: LOW
+  handoff_ready: false
+  missing_context:
+    - Target users
+    - Core problem
+    - Timeline
+    - CI/CD pipeline
+    - Database
 project:
-  name: "@faf/cli"
+  name: @faf/cli
   goal: Command-line interface for .faf (Foundational AI-Context Format)
-  main_language: TypeScript
-  faf_score: 70
-  importance: MORE_IMPORTANT_THAN_PACKAGE_JSON
+  main_language: Python
+  generated: 2025-08-30T18:38:42.624Z
 ai_instructions:
-  priority: CRITICAL
-  usage: READ_THIS_FIRST
-  message: |-
-    🧠 ATTENTION AI: This .faf file contains the complete DNA of this project.
-    It provides instant context that would take 20+ minutes to gather manually.
-
-    PRIORITY ORDER:
-    1. Read THIS .faf file first (complete project intelligence)
-    2. Read CLAUDE.md if exists (detailed session context)
-    3. Then package.json, config files, etc. (implementation details)
-
-    This .faf tells you:
-    - What we're building (goal)
-    - How we like to work (preferences)  
-    - Our quality standards (scores)
-    - Current focus (state)
-    - Tech stack (stack)
-
-    VALUE: This single file replaces 20+ questions and provides
-    perfect context for immediate productivity.
+  priority_order:
+    - 1. Read THIS .faf file first
+    - 2. Check CLAUDE.md for session context
+    - 3. Review package.json for dependencies
+  working_style:
+    code_first: true
+    explanations: minimal
+    quality_bar: zero_errors
+    testing: required
+  warnings:
+    - Never modify dial components without approval
+    - All TypeScript must pass strict mode
+    - Test coverage required for new features
 stack:
-  runtime: Node.js
-  language: TypeScript
-  build: TypeScript Compiler
+  frontend: None
+  css_framework: None
+  ui_library: None
+  state_management: None
+  backend: None
+  runtime: None
+  database: None
+  build: None
   package_manager: npm
-typescript_context:
-  compiler:
-    target: ES2022
-    module: commonjs
-    module_resolution: node
-    strict_mode: true
-  engineering_quality: standard
-  strictness_level: basic
-  framework_integration: pure_typescript
-  performance_optimizations:
-    - modern_target_es2022
-    - skip_lib_check
-  project_structure:
-    includes:
-      - src*
-    excludes:
-      - node_modules
-      - dist
-      - "**/*.test.ts"
-scores:
-  slot_based_percentage: 15
-  faf_score: 70
-  total_slots: 21
-  scoring_philosophy: Honest percentage based on filled context slots - no fake minimums
-ai:
-  context_file: CLAUDE.md
-  handoff_ready: true
-  session_continuity: medium
-  onboarding_time: 60_seconds
-docs:
-  claude_sync: false
-  sync_frequency: weekly
-  last_updated: 2025-08-28T20:56:55.986Z
+  api_type: REST API
+  hosting: None
+  cicd: None
 preferences:
-  quality_bar: production_ready
-  commit_style: conventional
-  communication: concise
-  verbosity: minimal
+  quality_bar: zero_errors
+  commit_style: conventional_emoji
+  response_style: concise_code_first
+  explanation_level: minimal
+  communication: direct
+  testing: required
+  documentation: as_needed
 state:
   phase: development
   version: 1.0.0
-  focus: initial_setup
-  status: active
+  focus: production_deployment
+  status: green_flag
+  next_milestone: npm_publication
+  blockers:
 tags:
   auto_generated:
     - fafcli
-    - typescript
+    - none
+    - python
   smart_defaults:
     - .faf
     - ai-ready
-    - "2025"
+    - 2025
     - software
     - open-source
-  user_defined: []
+  user_defined:
+ai_scoring_details:
+  system_date: 2025-08-30
+  slot_based_percentage: 14
+  ai_score: 14
+  total_slots: 21
+  filled_slots: 3
+  scoring_method: Honest percentage - no fake minimums
+  trust_embedded: COUNT ONCE architecture - trust MY embedded scores

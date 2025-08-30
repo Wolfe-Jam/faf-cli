@@ -112,7 +112,15 @@ function objectToYaml(obj: Record<string, any>, indent = 0): string {
         yaml += `${spacing}  - ${item}\n`;
       }
     } else {
-      yaml += `${spacing}${key}: ${value}\n`;
+      // Escape YAML special characters and long strings
+      let escapedValue = value;
+      if (typeof value === 'string') {
+        // Quote strings that start with @, contain :, or are very long
+        if (value.startsWith('@') || value.includes(': ') || value.length > 80) {
+          escapedValue = `"${value.replace(/"/g, '\\"')}"`;
+        }
+      }
+      yaml += `${spacing}${key}: ${escapedValue}\n`;
     }
   }
   
@@ -165,9 +173,10 @@ export function generateFafContent(projectData: {
   if (!projectData.database || projectData.database === 'None') missingSlots.push('Database');
 
   const fafData = {
-    // 🎯 HOOK SECTION - AI SEES THIS FIRST (Lines 1-3)
-    faf_score: `${projectData.fafScore}%`,
-    ai_confidence: getConfidenceLevel(projectData.fafScore),
+    // 🎯 AI-FIRST SCORING SYSTEM - Live date instead of versions
+    ai_scoring_system: '2025-08-30',  // MY scoring logic live date (COUNT ONCE architecture)
+    ai_score: `${projectData.fafScore}%`,  // MY evaluation
+    ai_confidence: getConfidenceLevel(projectData.fafScore),  // MY trust level
     ai_value: '30_seconds_replaces_20_minutes_of_questions',
     
     // 🧠 AI READ THIS FIRST - 5-LINE TL;DR
@@ -201,7 +210,6 @@ export function generateFafContent(projectData: {
       name: projectData.projectName || 'Untitled Project',
       goal: projectData.projectGoal || 'Project development and deployment',
       main_language: projectData.mainLanguage || 'Unknown',
-      faf_version: '2.5.0',
       generated: new Date().toISOString()
     },
     
@@ -286,13 +294,15 @@ export function generateFafContent(projectData: {
       success_rate: `${projectData.projectSuccessRate || 50}%`
     } : undefined,
     
-    // 📊 Scoring Details (For Transparency)
-    scoring: {
+    // 📊 AI Scoring Details (For Transparency)
+    ai_scoring_details: {
+      system_date: '2025-08-30',  // When MY scoring logic went live
       slot_based_percentage: projectData.slotBasedPercentage,
-      faf_score: projectData.fafScore,
+      ai_score: projectData.fafScore,
       total_slots: 21,
       filled_slots: filledSlotsCount,
-      scoring_method: 'Honest percentage - no fake minimums'
+      scoring_method: 'Honest percentage - no fake minimums',
+      trust_embedded: 'COUNT ONCE architecture - trust MY embedded scores'
     }
   };
 
