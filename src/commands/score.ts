@@ -8,7 +8,7 @@ import { promises as fs } from "fs";
 import * as YAML from "yaml";
 import { calculateFafScore } from "../scoring/score-calculator";
 import { findFafFile } from "../utils/file-utils";
-import { colors, getScoreColor, getScoreEmoji } from "../utils/color-utils";
+import { getScoreColor, getScoreEmoji } from "../utils/color-utils";
 
 interface ScoreOptions {
   details?: boolean;

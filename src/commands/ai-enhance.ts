@@ -88,10 +88,10 @@ function detectEnhancementFocus(fafData: any): string {
   const score = fafData.scores?.faf_score || 0;
   
   // Analyze what's missing most critically
-  if (!fafData.human_context?.who) return "human-context";
-  if (!fafData.ai_instructions?.message) return "ai-instructions";
-  if (score < 70) return "completeness";
-  if (!fafData.project?.goal) return "project-clarity";
+  if (!fafData.human_context?.who) {return "human-context";}
+  if (!fafData.ai_instructions?.message) {return "ai-instructions";}
+  if (score < 70) {return "completeness";}
+  if (!fafData.project?.goal) {return "project-clarity";}
   
   return "optimization";
 }
@@ -184,7 +184,7 @@ async function executeAIEnhancement(
             console.log(chalk.dim(`📁 Backup: ${fafPath}.backup`));
             return true;
           }
-        } catch (parseError) {
+        } catch {
           console.log(chalk.red("❌ AI returned invalid YAML"));
           console.log(chalk.yellow("🤖 AI Response:"));
           console.log(result);
