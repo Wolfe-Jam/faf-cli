@@ -5,7 +5,6 @@
 
 import chalk from "chalk";
 import { promises as fs } from "fs";
-import * as path from "path";
 import * as YAML from "yaml";
 import { findFafFile, findPackageJson } from "../utils/file-utils";
 
