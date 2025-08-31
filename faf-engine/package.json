@@ -48,7 +48,6 @@
     "url": "https://github.com/wolfejam/faf-engine.git"
   },
   "dependencies": {
-    "@faf/engine": "file:faf-engine-1.0.0.tgz",
     "glob": "^11.0.3",
     "yaml": "^2.4.1"
   },
