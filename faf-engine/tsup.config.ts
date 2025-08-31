@@ -10,11 +10,13 @@ export default defineConfig({
   splitting: false,
   sourcemap: true,
   clean: true,
-  treeshake: true,
-  minify: process.env.NODE_ENV === 'production',
+  treeshake: false,  // Disable treeshaking to avoid rollup native deps
+  minify: false,     // Disable minification to avoid rollup native deps
   external: ['openai'],
+  bundle: true,      // Ensure bundling without native optimizations
   esbuildOptions(options) {
     options.platform = 'node';
     options.target = 'node18';
+    options.packages = 'external';  // Keep dependencies external
   }
 });
