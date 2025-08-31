@@ -3,13 +3,13 @@ ai_score: 57%
 ai_confidence: LOW
 ai_value: 30_seconds_replaces_20_minutes_of_questions
 ai_tldr:
-  project: faf-cli - !CI
+  project: faf-cli - Context Incomplete
   stack: Python
   quality_bar: ZERO_ERRORS_F1_STANDARDS
   current_focus: Production deployment preparation
   your_role: Build features with perfect context
 instant_context:
-  what_building: !CI
+  what_building: Context Incomplete
   tech_stack: Python
   main_language: Python
   deployment: None
@@ -28,7 +28,7 @@ context_quality:
     - Database
 project:
   name: faf-cli
-  goal: !CI
+  goal: Context Incomplete
   main_language: Python
   generated: 2025-08-30T22:16:26.684Z
 ai_instructions:

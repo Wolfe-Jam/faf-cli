@@ -1,0 +1,81 @@
+{
+  "name": "@faf/engine",
+  "version": "1.0.0",
+  "description": "Universal .faf Context-On-Demand Engine - Platform-agnostic intelligence for any architecture",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
+    },
+    "./vercel": {
+      "require": "./dist/vercel.js",
+      "import": "./dist/vercel.mjs",
+      "types": "./dist/vercel.d.ts"
+    }
+  },
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src/**/*.ts",
+    "format": "prettier --write src/**/*.ts",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "faf",
+    "context-on-demand",
+    "ai-context",
+    "universal-engine",
+    "vercel",
+    "next.js",
+    "platform-agnostic",
+    "developer-intelligence"
+  ],
+  "author": "🏎️⚡️_wolfejam.dev",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wolfejam/faf-engine.git"
+  },
+  "dependencies": {
+    "glob": "^11.0.3",
+    "yaml": "^2.4.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/node": "^20.11.17",
+    "@typescript-eslint/eslint-plugin": "^8.41.0",
+    "@typescript-eslint/parser": "^8.41.0",
+    "eslint": "^8.56.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.2.5",
+    "ts-jest": "^29.4.1",
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "peerDependencies": {
+    "openai": "^5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "openai": {
+      "optional": true
+    }
+  }
+}
