@@ -168,6 +168,7 @@ export function generateFafContent(projectData: {
   connection: string;
   hosting: string;
   buildTool: string;
+  packageManager?: string;
   cicd: string;
   fafScore: number;
   slotBasedPercentage: number;
@@ -271,7 +272,7 @@ export function generateFafContent(projectData: {
       runtime: projectData.server || 'None',
       database: projectData.database || 'None',
       build: projectData.buildTool || 'None',
-      package_manager: 'npm',
+      package_manager: projectData.packageManager || 'npm',
       api_type: projectData.apiType || 'REST API',
       hosting: projectData.hosting || 'None',
       cicd: projectData.cicd || 'None'
