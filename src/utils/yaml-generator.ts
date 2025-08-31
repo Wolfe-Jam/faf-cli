@@ -23,6 +23,28 @@ function getConfidenceLevel(percentage: number): string {
   return 'LOW';
 }
 
+// Helper function to safely escape YAML values
+function escapeForYaml(value: string | undefined): string {
+  if (!value) return 'Not specified';
+  
+  // Clean up markdown-style lists and formatting
+  const cleaned = value
+    .replace(/^[\s]*[-*]\s*/gm, '') // Remove list markers
+    .replace(/\*\*(.+?)\*\*/g, '$1') // Remove bold
+    .replace(/\*(.+?)\*/g, '$1')     // Remove italic
+    .replace(/\n+/g, ' ')            // Replace newlines with spaces
+    .trim();
+  
+  // If it contains special characters or starts with special chars, quote it
+  if (cleaned.includes(':') || cleaned.includes('-') || cleaned.includes('[') || 
+      cleaned.includes('#') || cleaned.includes('|') || cleaned.includes('>') ||
+      cleaned.match(/^[\d\-\[\]{}]/)) {
+    return `"${cleaned.replace(/"/g, '\\"')}"`;
+  }
+  
+  return cleaned;
+}
+
 // Helper function to detect key files
 function detectKeyFiles(data: any): string[] {
   const files = [];
@@ -181,7 +203,7 @@ export function generateFafContent(projectData: {
     
     // 🧠 AI READ THIS FIRST - 5-LINE TL;DR
     ai_tldr: {
-      project: `${projectData.projectName} - ${projectData.projectGoal || 'Software project'}`,
+      project: `${projectData.projectName} - ${escapeForYaml(projectData.projectGoal) || 'Software project'}`,
       stack: generateStackString(projectData),
       quality_bar: 'ZERO_ERRORS_F1_STANDARDS',
       current_focus: 'Production deployment preparation',
@@ -190,7 +212,7 @@ export function generateFafContent(projectData: {
     
     // ⚡ INSTANT CONTEXT - Everything critical in one place
     instant_context: {
-      what_building: projectData.projectGoal || 'Software application',
+      what_building: escapeForYaml(projectData.projectGoal) || 'Software application',
       tech_stack: generateStackString(projectData),
       main_language: projectData.mainLanguage || 'TypeScript',
       deployment: projectData.hosting || 'Cloud platform',
@@ -208,7 +230,7 @@ export function generateFafContent(projectData: {
     // 🎯 Project Details (Progressive Disclosure)
     project: {
       name: projectData.projectName || 'Untitled Project',
-      goal: projectData.projectGoal || 'Project development and deployment',
+      goal: escapeForYaml(projectData.projectGoal) || 'Project development and deployment',
       main_language: projectData.mainLanguage || 'Unknown',
       generated: new Date().toISOString()
     },

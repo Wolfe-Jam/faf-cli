@@ -75,10 +75,13 @@ export async function generateFafFromProject(
     }
   }
 
-  // Read TypeScript configuration if available
+  // 🔍 FORENSIC ANALYSIS - Multi-file intelligence gathering
   let typescriptData: TypeScriptContext | null = null;
-  const tsconfigPath = await findTsConfig(projectRoot);
+  let configData: any = {};
+  let sourceCodeData: any = {};
 
+  // Analyze TypeScript configuration (compiler settings, strictness)
+  const tsconfigPath = await findTsConfig(projectRoot);
   if (tsconfigPath) {
     try {
       typescriptData = await analyzeTsConfig(tsconfigPath);
@@ -87,12 +90,28 @@ export async function generateFafFromProject(
     }
   }
 
-  // Generate project data from analysis
+  // Analyze build configurations (Vite, Svelte, Webpack)
+  try {
+    configData = await analyzeConfigFiles(projectRoot);
+  } catch {
+    // Continue without config data
+  }
+
+  // Analyze source code for actual usage patterns
+  try {
+    sourceCodeData = await analyzeSourceCode(projectRoot, packageData);
+  } catch {
+    // Continue without source analysis
+  }
+
+  // Generate project data from FORENSIC ANALYSIS
   const projectData = generateProjectData(
     packageData,
     pythonData,
     typescriptData,
     readmeData,
+    configData,
+    sourceCodeData,
     projectType || "latest-idea",
   );
 
@@ -105,6 +124,8 @@ function generateProjectData(
   pythonData: any,
   typescriptData: TypeScriptContext | null,
   readmeData: any,
+  configData: any,
+  sourceCodeData: any,
   projectType: string,
 ): any {
   const now = new Date().toISOString();
@@ -148,29 +169,38 @@ function generateProjectData(
     projectType,
   );
 
-  // Calculate slot-based scoring with README intelligence
+  // 🔍 FORENSIC SCORING - Multi-source intelligence scoring
   const slots = [
+    // Basic Project Info (5 slots)
     projectName !== "untitled-project",
-    description !== "Project development and deployment",
+    description !== "Project development and deployment", 
     detectMainLanguage(deps, projectType) !== "Unknown",
     stack.frontend,
     stack.backend,
-    stack.build,
+    
+    // README Intelligence (6 slots)
     !!targetUser, // README extracted
-    !!coreProblem, // README extracted
+    !!coreProblem, // README extracted  
     !!missionPurpose, // README extracted
-    !!(packageData.scripts && Object.keys(packageData.scripts).length > 3), // Rich package.json
+    !!(readmeData.features && readmeData.features.length > 0), // Feature list
+    !!(readmeData.quickStart), // Getting started info
+    !!(readmeData.installation), // Installation instructions
+    
+    // Package.json Analysis (3 slots)
+    !!(packageData.scripts && Object.keys(packageData.scripts).length > 3), // Rich scripts
     !!(packageData.dependencies && Object.keys(packageData.dependencies).length > 5), // Real project
     !!(packageData.repository), // Repository info
-    !!(packageData.keywords && packageData.keywords.length > 0), // Keywords
-    !!(readmeData.features && readmeData.features.length > 0), // Feature list
-    !!(readmeData.techStack && readmeData.techStack.length > 0), // Tech stack documented
-    !!(readmeData.quickStart), // Getting started info
-    !!(readmeData.architecture), // Architecture documented
-    stack.css_framework !== "None",
-    stack.ui_library !== "None",
-    !!(readmeData.installation), // Installation instructions
-    !!(readmeData.usage || readmeData.examples), // Usage examples
+    
+    // Config File Analysis (3 slots)
+    !!configData.strictMode, // TypeScript strict mode
+    !!configData.buildTool, // Build tool configured
+    !!configData.deployment, // Deployment configured
+    
+    // Source Code Analysis (4 slots)
+    !!(sourceCodeData.frameworkFeatures && sourceCodeData.frameworkFeatures.length > 0), // Modern framework features
+    !!(sourceCodeData.integrations && sourceCodeData.integrations.length > 0), // Service integrations
+    !!(configData.qualityIndicators && configData.qualityIndicators.length > 0), // Quality indicators
+    !!(configData.performanceOptimizations && configData.performanceOptimizations.length > 0), // Performance focus
   ];
   
   const filledSlots = slots.filter(Boolean).length;
@@ -191,11 +221,12 @@ function generateProjectData(
     apiType: "REST API",
     database: "None",
     connection: "None",
-    hosting: "None",
-    buildTool: stack.build || "None",
+    hosting: configData.deployment || "None", // 🔍 FORENSIC: From config analysis
+    buildTool: configData.buildTool || stack.build || "None", // 🔍 FORENSIC: From config analysis
     cicd: "None",
     fafScore: fafScore,
     slotBasedPercentage: slotBasedPercentage,
+    
     // Human Context (Project Details) - extracted from README
     targetUser: targetUser,
     coreProblem: coreProblem,
@@ -203,13 +234,27 @@ function generateProjectData(
     deploymentMarket: readmeData.deployment,
     timeline: readmeData.timeline,
     approach: readmeData.approach,
-    // Additional Context Arrays
+    
+    // 🔍 FORENSIC ANALYSIS DATA - Multi-source intelligence
+    forensicData: {
+      configAnalysis: configData,
+      sourceAnalysis: sourceCodeData,
+      qualityIndicators: [
+        ...configData.qualityIndicators || [],
+        ...sourceCodeData.qualityIndicators || []
+      ],
+      frameworkFeatures: sourceCodeData.frameworkFeatures || [],
+      integrations: sourceCodeData.integrations || [],
+      performanceOptimizations: configData.performanceOptimizations || []
+    },
+    
+    // Additional Context Arrays  
     additionalWho: [],
-    additionalWhat: [],
-    additionalWhy: [],
-    additionalWhere: [],
+    additionalWhat: sourceCodeData.frameworkFeatures || [],
+    additionalWhy: configData.qualityIndicators || [],
+    additionalWhere: [configData.deployment].filter(Boolean),
     additionalWhen: [],
-    additionalHow: [],
+    additionalHow: configData.performanceOptimizations || [],
     projectDetailsScore: 0,
     projectSuccessRate: 50
   };
@@ -435,10 +480,81 @@ function extractReadmeContext(content: string): any {
     context.title = titleMatch[1].replace(/[^a-zA-Z0-9\s\-\.]/g, '').trim();
   }
   
-  // Extract description (content after title, before next major section)
+  // If no proper title found, try to infer project purpose from sections
+  if (!titleMatch && !context.title) {
+    // Look for meaningful section titles that might indicate purpose
+    const sectionMatch = content.match(/##\s+.*?(?:Sacred|Core|Heart|Main|Purpose|About).*?\n+([^\n#][^\n]*)/i);
+    if (sectionMatch) {
+      context.title = sectionMatch[1].trim().substring(0, 50);
+    }
+  }
+  
+  // Extract description (content after title, before next major section)  
+  let realDescription = '';
+  
+  // Try title-based extraction first (normal READMEs)
   const descMatch = content.match(/^#\s+.+\n\n([\s\S]*?)(?=\n##|\n#|$)/m);
   if (descMatch) {
-    context.description = descMatch[1].replace(/\n/g, ' ').trim().substring(0, 200);
+    // Split into lines and filter out badges, quotes, and empty lines
+    const lines = descMatch[1].split('\n');
+    
+    for (const line of lines) {
+      // Skip badges (starts with [![)
+      if (line.trim().startsWith('[![')) continue;
+      // Skip quotes/taglines (starts with >)
+      if (line.trim().startsWith('>')) continue;
+      // Skip empty lines
+      if (line.trim() === '') continue;
+      // Skip lines that are just markdown formatting
+      if (/^[\*\-\_\#]+$/.test(line.trim())) continue;
+      
+      // Found real content!
+      realDescription = line.trim();
+      break;
+    }
+  }
+  
+  // If no description found, look for content after meaningful ## sections
+  if (!realDescription) {
+    const altMatch = content.match(/##\s+.*?(?:What is|About|Description|Overview|Sacred|Core|Heart|Purpose).*?\n+([^\n#][\s\S]*?)(?=\n##|\n###|$)/i);
+    if (altMatch) {
+      const altLines = altMatch[1].split('\n');
+      for (const line of altLines) {
+        if (line.trim() === '') continue;
+        if (line.trim().startsWith('[![')) continue;
+        if (line.trim().startsWith('>')) continue;
+        if (line.trim().startsWith('```')) continue; // Skip code blocks
+        if (line.trim().startsWith('//') || line.trim().startsWith('#')) continue; // Skip comments
+        realDescription = line.trim();
+        break;
+      }
+    }
+  }
+  
+  // If still no description, look for any meaningful content in the first few paragraphs
+  if (!realDescription && !descMatch) {
+    const anyContentMatch = content.match(/^([^\n#][\s\S]*?)(?=\n##|\n#|$)/m);
+    if (anyContentMatch) {
+      const contentLines = anyContentMatch[1].split('\n');
+      for (const line of contentLines) {
+        if (line.trim() === '') continue;
+        if (line.trim().startsWith('[![')) continue;
+        if (line.trim().startsWith('>')) continue;
+        if (line.trim().startsWith('```')) continue;
+        // Skip lines that look like headings without #
+        if (/^[A-Z\s]+$/.test(line.trim()) && line.trim().length < 30) continue;
+        realDescription = line.trim();
+        break;
+      }
+    }
+  }
+  
+  if (realDescription) {
+    context.description = realDescription
+      .replace(/\*\*(.+?)\*\*/g, '$1') // Remove markdown bold
+      .replace(/\*(.+?)\*/g, '$1')     // Remove markdown italic  
+      .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1') // Convert links to text
+      .substring(0, 200);
   }
   
   // Extract features (look for Features, Key Features, Core Features sections)
@@ -552,4 +668,237 @@ async function parsePyprojectToml(content: string): Promise<any> {
   } catch {
     return {};
   }
+}
+
+/**
+ * 🔍 FORENSIC ANALYSIS: Config Files Detective Work
+ * Analyzes build configurations to understand project architecture
+ */
+async function analyzeConfigFiles(projectRoot: string): Promise<any> {
+  const configData: any = {
+    buildTool: null,
+    deployment: null,
+    strictMode: false,
+    qualityIndicators: [],
+    performanceOptimizations: []
+  };
+
+  // Analyze tsconfig.json for strictness and quality
+  try {
+    const tsconfigPath = path.join(projectRoot, "tsconfig.json");
+    const tsconfigContent = await fs.readFile(tsconfigPath, "utf-8");
+    
+    // Check for strictness indicators
+    if (tsconfigContent.includes('"strict": true')) {
+      configData.strictMode = true;
+      configData.qualityIndicators.push("Strict TypeScript");
+    }
+    
+    // Look for quality comments
+    if (tsconfigContent.includes("ULTRA STRICT") || tsconfigContent.includes("STRICT")) {
+      configData.qualityIndicators.push("Ultra-strict configuration");
+    }
+    
+    // Check ES target
+    const targetMatch = tsconfigContent.match(/"target":\s*"([^"]+)"/);
+    if (targetMatch) {
+      configData.esTarget = targetMatch[1];
+    }
+  } catch {}
+
+  // Analyze Vite configuration
+  try {
+    const viteConfigPath = path.join(projectRoot, "vite.config.js");
+    let viteContent = "";
+    try {
+      viteContent = await fs.readFile(viteConfigPath, "utf-8");
+    } catch {
+      const viteConfigTsPath = path.join(projectRoot, "vite.config.ts");
+      viteContent = await fs.readFile(viteConfigTsPath, "utf-8");
+    }
+    
+    configData.buildTool = "Vite";
+    
+    // Check for performance optimizations
+    if (viteContent.includes("terser") || viteContent.includes("minify")) {
+      configData.performanceOptimizations.push("Code minification");
+    }
+  } catch {}
+
+  // Analyze Svelte configuration
+  try {
+    const svelteConfigPath = path.join(projectRoot, "svelte.config.js");
+    const svelteContent = await fs.readFile(svelteConfigPath, "utf-8");
+    
+    // Check for deployment adapter
+    if (svelteContent.includes("adapter-vercel")) {
+      configData.deployment = "Vercel Edge Runtime";
+      if (svelteContent.includes("F1") || svelteContent.includes("MAXIMUM PERFORMANCE")) {
+        configData.performanceOptimizations.push("F1-inspired optimization");
+      }
+    } else if (svelteContent.includes("adapter-netlify")) {
+      configData.deployment = "Netlify";
+    } else if (svelteContent.includes("adapter-node")) {
+      configData.deployment = "Node.js";
+    }
+  } catch {}
+
+  return configData;
+}
+
+/**
+ * 🔍 FORENSIC ANALYSIS: Source Code Detective Work  
+ * Scans actual source code for usage patterns and framework features
+ */
+async function analyzeSourceCode(projectRoot: string, packageData: any): Promise<any> {
+  const sourceData: any = {
+    frameworkFeatures: [],
+    integrations: [],
+    architecturePatterns: [],
+    qualityIndicators: []
+  };
+
+  // Analyze Svelte 5 Runes usage
+  if (packageData.dependencies?.svelte || packageData.devDependencies?.svelte) {
+    try {
+      const srcPath = path.join(projectRoot, "src");
+      
+      // Check for Svelte 5 Runes in .svelte files
+      const svelteFiles = await findSvelteFiles(srcPath);
+      for (const filePath of svelteFiles.slice(0, 5)) { // Limit to first 5 files
+        try {
+          const content = await fs.readFile(filePath, "utf-8");
+          
+          // Check for Runes usage
+          if (content.includes("$state") || content.includes("$derived") || content.includes("$effect")) {
+            sourceData.frameworkFeatures.push("Svelte 5 Runes");
+            break;
+          }
+        } catch {}
+      }
+    } catch {}
+  }
+
+  // Analyze React patterns
+  if (packageData.dependencies?.react || packageData.devDependencies?.react) {
+    try {
+      const srcPath = path.join(projectRoot, "src");
+      const reactFiles = await findReactFiles(srcPath);
+      
+      for (const filePath of reactFiles.slice(0, 3)) {
+        try {
+          const content = await fs.readFile(filePath, "utf-8");
+          
+          // Check for hooks usage
+          if (content.includes("useState") || content.includes("useEffect")) {
+            sourceData.frameworkFeatures.push("React Hooks");
+          }
+          
+          // Check for TypeScript React
+          if (content.includes("React.FC") || content.includes("JSX.Element")) {
+            sourceData.frameworkFeatures.push("TypeScript React");
+          }
+        } catch {}
+      }
+    } catch {}
+  }
+
+  // Analyze authentication integrations
+  if (packageData.dependencies?.["svelte-clerk"] || packageData.dependencies?.clerk) {
+    sourceData.integrations.push("Clerk Authentication (10k free MAUs)");
+  }
+  
+  if (packageData.dependencies?.["@supabase/supabase-js"]) {
+    sourceData.integrations.push("Supabase Database");
+  }
+  
+  if (packageData.dependencies?.stripe) {
+    sourceData.integrations.push("Stripe Payments");
+  }
+
+  // Analyze quality indicators from comments
+  try {
+    const srcPath = path.join(projectRoot, "src");
+    const allFiles = await findSourceFiles(srcPath);
+    
+    for (const filePath of allFiles.slice(0, 10)) { // Sample first 10 files
+      try {
+        const content = await fs.readFile(filePath, "utf-8");
+        
+        // Look for quality indicators in comments
+        if (content.includes("F1") && (content.includes("performance") || content.includes("quality"))) {
+          sourceData.qualityIndicators.push("F1-inspired development");
+        }
+        
+        if (content.includes("STRICT") || content.includes("strict")) {
+          sourceData.qualityIndicators.push("Strict coding standards");
+        }
+      } catch {}
+    }
+  } catch {}
+
+  return sourceData;
+}
+
+/**
+ * Helper functions for file discovery
+ */
+async function findSvelteFiles(dir: string): Promise<string[]> {
+  const files: string[] = [];
+  try {
+    const items = await fs.readdir(dir, { withFileTypes: true });
+    
+    for (const item of items) {
+      const fullPath = path.join(dir, item.name);
+      
+      if (item.isDirectory() && !item.name.startsWith('.') && item.name !== 'node_modules') {
+        const subFiles = await findSvelteFiles(fullPath);
+        files.push(...subFiles);
+      } else if (item.name.endsWith('.svelte')) {
+        files.push(fullPath);
+      }
+    }
+  } catch {}
+  
+  return files;
+}
+
+async function findReactFiles(dir: string): Promise<string[]> {
+  const files: string[] = [];
+  try {
+    const items = await fs.readdir(dir, { withFileTypes: true });
+    
+    for (const item of items) {
+      const fullPath = path.join(dir, item.name);
+      
+      if (item.isDirectory() && !item.name.startsWith('.') && item.name !== 'node_modules') {
+        const subFiles = await findReactFiles(fullPath);
+        files.push(...subFiles);
+      } else if (item.name.endsWith('.tsx') || item.name.endsWith('.jsx')) {
+        files.push(fullPath);
+      }
+    }
+  } catch {}
+  
+  return files;
+}
+
+async function findSourceFiles(dir: string): Promise<string[]> {
+  const files: string[] = [];
+  try {
+    const items = await fs.readdir(dir, { withFileTypes: true });
+    
+    for (const item of items) {
+      const fullPath = path.join(dir, item.name);
+      
+      if (item.isDirectory() && !item.name.startsWith('.') && item.name !== 'node_modules') {
+        const subFiles = await findSourceFiles(fullPath);
+        files.push(...subFiles.slice(0, 5)); // Limit depth
+      } else if (item.name.match(/\.(js|ts|jsx|tsx|svelte|vue)$/)) {
+        files.push(fullPath);
+      }
+    }
+  } catch {}
+  
+  return files;
 }
