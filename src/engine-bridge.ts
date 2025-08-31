@@ -3,13 +3,13 @@
  * Connects the CLI to the independent faf-engine Mk-1
  */
 
-import { FafEngine } from '../faf-engine/src/core/FafEngine';
-import { CLIAdapter } from '../faf-engine/src/adapters/CLIAdapter';
-import type { FafData, FafScore, ContextOnDemandResult } from '../faf-engine/src/types';
+import { FafEngine } from '@faf/engine';
+import { CLIAdapter } from '@faf/engine';
+import type { FafData, FafScore, ContextOnDemandResult } from '@faf/engine';
 
 // Export the engine for backwards compatibility
-export { FafEngine } from '../faf-engine/src/core/FafEngine';
-export type { FafData, FafScore, ContextOnDemandResult } from '../faf-engine/src/types';
+export { FafEngine } from '@faf/engine';
+export type { FafData, FafScore, ContextOnDemandResult } from '@faf/engine';
 
 /**
  * Create a CLI-configured engine instance

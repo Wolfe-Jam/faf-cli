@@ -5,7 +5,7 @@
  */
 
 import { EngineBridge } from './src/engine-bridge';
-import { FafEngine } from './faf-engine/src/core/FafEngine';
+import { FafEngine } from '@faf/engine';
 import { performance } from 'perf_hooks';
 import { promises as fs } from 'fs';
 import path from 'path';
