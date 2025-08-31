@@ -1,6 +1,6 @@
 {
   "name": "@faf/cli",
-  "version": "2.5.1",
+  "version": "2.5.2",
   "description": "Command-line interface for .faf (Foundational AI-Context Format)",
   "main": "dist/index.js",
   "bin": {
