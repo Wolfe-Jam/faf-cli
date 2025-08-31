@@ -17,7 +17,8 @@ export type {
   FafScore,
   FafValidation,
   EngineOptions,
-  PlatformAdapter
+  PlatformAdapter,
+  ContextOnDemandResult
 } from './types';
 
 // Utility Exports  
