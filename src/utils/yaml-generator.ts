@@ -58,8 +58,12 @@ function detectKeyFiles(data: any): string[] {
   } else if (data.mainLanguage?.toLowerCase().includes('python')) {
     files.push('main.py', 'requirements.txt');
   }
-  // Always include common files
-  files.push('package.json', 'tsconfig.json');
+  
+  // 🐍 PYTHON CONTEXT-ON-DEMAND: Add appropriate config files
+  if (!data.mainLanguage?.toLowerCase().includes('python')) {
+    // Only add JS/TS files for non-Python projects
+    files.push('package.json', 'tsconfig.json');
+  }
   return files.slice(0, 5); // Max 5 files
 }
 
@@ -240,7 +244,9 @@ export function generateFafContent(projectData: {
       priority_order: [
         '1. Read THIS .faf file first',
         '2. Check CLAUDE.md for session context',
-        '3. Review package.json for dependencies'
+        projectData.mainLanguage?.toLowerCase().includes('python') 
+          ? '3. Review requirements.txt and main.py for dependencies'
+          : '3. Review package.json for dependencies'
       ],
       working_style: {
         code_first: true,

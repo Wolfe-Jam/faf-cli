@@ -67,9 +67,7 @@ export async function generateFafFromProject(
   if (requirementsPath && !pyprojectPath) {
     try {
       const content = await fs.readFile(requirementsPath, "utf-8");
-      pythonData = {
-        dependencies: content.split("\n").filter((line) => line.trim()),
-      };
+      pythonData = parseRequirementsTxt(content);
     } catch {
       // Continue without requirements.txt data
     }
@@ -217,9 +215,9 @@ function generateProjectData(
     uiLibrary: stack.ui_library || "None",
     stateManagement: stack.state_management || "None",
     backend: stack.backend || "None",
-    server: stack.web_server || "None",
-    apiType: "REST API",
-    database: "None",
+    server: stack.web_server || "None", 
+    apiType: stack.api_type || "REST API",
+    database: stack.database || "None",
     connection: "None",
     hosting: configData.deployment || "None", // 🔍 FORENSIC: From config analysis
     buildTool: configData.buildTool || stack.build || "None", // 🔍 FORENSIC: From config analysis
@@ -267,13 +265,15 @@ function analyzeStackFromDependencies(
 ): any {
   const stack: any = {};
 
-  // Python stack detection
+  // 🐍 PYTHON CONTEXT-ON-DEMAND - Enhanced intelligence gathering
   if (projectType.startsWith("python-")) {
     // Package manager detection
     if (pythonData.name) {
       stack.package_manager = "poetry";
     } else if (pythonData.dependencies) {
       stack.package_manager = "pip";
+    } else {
+      stack.package_manager = "pip"; // Default for Python
     }
 
     // Runtime detection
@@ -283,24 +283,61 @@ function analyzeStackFromDependencies(
       stack.runtime = "Python";
     }
 
-    // Framework detection from project type
-    switch (projectType) {
-      case "python-fastapi":
-        stack.backend = "FastAPI";
-        stack.web_server = "uvicorn";
-        break;
-      case "python-django":
-        stack.backend = "Django";
-        stack.web_server = "gunicorn";
-        break;
-      case "python-flask":
-        stack.backend = "Flask";
-        stack.web_server = "gunicorn";
-        break;
-      case "python-starlette":
-        stack.backend = "Starlette";
-        stack.web_server = "uvicorn";
-        break;
+    // 🔍 ENHANCED FRAMEWORK DETECTION - Parse actual dependencies
+    const pythonDeps = pythonData.dependencies || [];
+    const depString = Array.isArray(pythonDeps) ? pythonDeps.join(" ") : "";
+    
+    // Web Framework Detection
+    if (depString.includes("fastapi")) {
+      stack.backend = "FastAPI";
+      stack.web_server = depString.includes("uvicorn") ? "uvicorn" : "gunicorn";
+      stack.api_type = "REST API";
+    } else if (depString.includes("django")) {
+      stack.backend = "Django";
+      stack.web_server = "gunicorn";
+      stack.api_type = depString.includes("djangorestframework") ? "REST API" : "Web Application";
+    } else if (depString.includes("flask")) {
+      stack.backend = "Flask";
+      stack.web_server = "gunicorn";
+      stack.api_type = "REST API";
+    } else if (depString.includes("starlette")) {
+      stack.backend = "Starlette";
+      stack.web_server = "uvicorn";
+      stack.api_type = "REST API";
+    }
+
+    // 🔍 DATABASE DETECTION
+    if (depString.includes("sqlalchemy")) {
+      stack.database = "SQLAlchemy";
+    } else if (depString.includes("django")) {
+      stack.database = "Django ORM";
+    } else if (depString.includes("asyncpg")) {
+      stack.database = "PostgreSQL (asyncpg)";
+    } else if (depString.includes("pymongo")) {
+      stack.database = "MongoDB";
+    }
+
+    // 🔍 TESTING FRAMEWORK DETECTION
+    if (depString.includes("pytest")) {
+      stack.testing = "pytest";
+    } else if (depString.includes("unittest")) {
+      stack.testing = "unittest";
+    }
+
+    // 🔍 IMAGE PROCESSING DETECTION
+    if (depString.includes("opencv")) {
+      stack.image_processing = "OpenCV";
+    } else if (depString.includes("pillow") || depString.includes("PIL")) {
+      stack.image_processing = "Pillow";
+    }
+
+    // 🔍 ML/AI DETECTION
+    if (depString.includes("tensorflow")) {
+      stack.ml_framework = "TensorFlow";
+    } else if (depString.includes("pytorch")) {
+      stack.ml_framework = "PyTorch";
+    } else if (depString.includes("scikit-learn")) {
+      stack.ml_framework = "scikit-learn";
     }
 
     return stack;
@@ -671,6 +708,45 @@ async function parsePyprojectToml(content: string): Promise<any> {
 }
 
 /**
+ * 🐍 PYTHON CONTEXT-ON-DEMAND: Parse requirements.txt
+ * Extract dependencies and their versions for intelligent analysis
+ */
+function parseRequirementsTxt(content: string): any {
+  const data: any = {
+    dependencies: [],
+    package_manager: "pip"
+  };
+
+  const lines = content.split("\n");
+  const cleanDeps: string[] = [];
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    
+    // Skip empty lines, comments, and pip flags
+    if (!trimmed || trimmed.startsWith("#") || trimmed.startsWith("-")) {
+      continue;
+    }
+
+    // Extract package name (remove version specifiers)
+    const packageName = trimmed.split(/[>=<~!]/)[0].trim();
+    
+    if (packageName) {
+      cleanDeps.push(trimmed); // Keep full line for version info
+      
+      // Extract just package name for easier detection
+      const cleanName = packageName.toLowerCase();
+      data.dependencies.push(cleanName);
+    }
+  }
+
+  // Store full dependency lines for detailed analysis
+  data.fullDependencies = cleanDeps;
+  
+  return data;
+}
+
+/**
  * 🔍 FORENSIC ANALYSIS: Config Files Detective Work
  * Analyzes build configurations to understand project architecture
  */
@@ -740,6 +816,88 @@ async function analyzeConfigFiles(projectRoot: string): Promise<any> {
       configData.deployment = "Netlify";
     } else if (svelteContent.includes("adapter-node")) {
       configData.deployment = "Node.js";
+    }
+  } catch {}
+
+  // 🐍 PYTHON CONTEXT-ON-DEMAND: Analyze Python-specific configs
+  
+  // Check for Dockerfile (containerization)
+  try {
+    const dockerfilePath = path.join(projectRoot, "Dockerfile");
+    const dockerContent = await fs.readFile(dockerfilePath, "utf-8");
+    
+    if (dockerContent.includes("python")) {
+      configData.deployment = "Docker";
+      configData.qualityIndicators.push("Containerized Deployment");
+    }
+    
+    // Check for multi-stage builds or optimizations
+    if (dockerContent.includes("FROM python") && dockerContent.includes("COPY requirements.txt")) {
+      configData.performanceOptimizations.push("Docker Layer Caching");
+    }
+  } catch {}
+
+  // Check for Railway deployment
+  try {
+    const railwayPath = path.join(projectRoot, "railway.json");
+    const railwayContent = await fs.readFile(railwayPath, "utf-8");
+    
+    if (railwayContent.includes("DOCKERFILE")) {
+      configData.deployment = "Railway";
+    }
+  } catch {
+    try {
+      const railwayTomlPath = path.join(projectRoot, "railway.toml");
+      await fs.readFile(railwayTomlPath, "utf-8");
+      configData.deployment = "Railway";
+    } catch {}
+  }
+
+  // Check for Vercel/Nixpacks
+  try {
+    const nixpacksPath = path.join(projectRoot, "nixpacks.toml");
+    const nixpacksContent = await fs.readFile(nixpacksPath, "utf-8");
+    
+    if (nixpacksContent.includes("python")) {
+      configData.deployment = "Vercel";
+    }
+  } catch {}
+
+  // Check for pytest configuration
+  try {
+    const pytestPath = path.join(projectRoot, "pytest.ini");
+    await fs.readFile(pytestPath, "utf-8");
+    configData.testing = "pytest";
+    configData.qualityIndicators.push("Automated Testing");
+  } catch {
+    try {
+      const pyprojectPath = path.join(projectRoot, "pyproject.toml");
+      const pyprojectContent = await fs.readFile(pyprojectPath, "utf-8");
+      
+      if (pyprojectContent.includes("[tool.pytest]")) {
+        configData.testing = "pytest";
+        configData.qualityIndicators.push("Automated Testing");
+      }
+    } catch {}
+  }
+
+  // Check for Python virtual environment indicators
+  try {
+    const venvPath = path.join(projectRoot, "venv");
+    const venvStats = await fs.stat(venvPath);
+    if (venvStats.isDirectory()) {
+      configData.qualityIndicators.push("Virtual Environment");
+    }
+  } catch {}
+
+  // Check for runtime.txt (Heroku/Python version specification)
+  try {
+    const runtimePath = path.join(projectRoot, "runtime.txt");
+    const runtimeContent = await fs.readFile(runtimePath, "utf-8");
+    
+    if (runtimeContent.includes("python-")) {
+      configData.pythonVersion = runtimeContent.trim();
+      configData.qualityIndicators.push("Python Version Pinning");
     }
   } catch {}
 
@@ -835,6 +993,71 @@ async function analyzeSourceCode(projectRoot: string, packageData: any): Promise
         }
       } catch {}
     }
+  } catch {}
+
+  // 🐍 PYTHON CONTEXT-ON-DEMAND: Analyze Python source code
+  try {
+    // Look for main Python files
+    const pythonFiles = [
+      path.join(projectRoot, "main.py"),
+      path.join(projectRoot, "app.py"), 
+      path.join(projectRoot, "__init__.py"),
+      path.join(projectRoot, "app", "main.py"),
+      path.join(projectRoot, "src", "main.py")
+    ];
+
+    for (const filePath of pythonFiles) {
+      try {
+        const content = await fs.readFile(filePath, "utf-8");
+        
+        // FastAPI patterns
+        if (content.includes("from fastapi import") || content.includes("FastAPI(")) {
+          sourceData.frameworkFeatures.push("FastAPI Application");
+        }
+        
+        // Django patterns  
+        if (content.includes("django.shortcuts") || content.includes("Django")) {
+          sourceData.frameworkFeatures.push("Django Application");
+        }
+        
+        // Flask patterns
+        if (content.includes("from flask import") || content.includes("Flask(__name__)")) {
+          sourceData.frameworkFeatures.push("Flask Application");
+        }
+
+        // CORS middleware detection
+        if (content.includes("CORSMiddleware") || content.includes("cors")) {
+          sourceData.integrations.push("CORS Configuration");
+        }
+
+        // Database integrations
+        if (content.includes("sqlalchemy") || content.includes("SQLAlchemy")) {
+          sourceData.integrations.push("SQLAlchemy ORM");
+        }
+
+        // Quality indicators from comments
+        if (content.includes("F1") || content.includes("ULTRA STRICT") || content.includes("ZERO_ERRORS")) {
+          sourceData.qualityIndicators.push("F1-Inspired Quality Standards");
+        }
+
+        // Sacred code patterns (like HEXTRA's Sacred-38)
+        if (content.includes("sacred") || content.includes("SACRED") || content.includes("threshold")) {
+          sourceData.qualityIndicators.push("Core Algorithm Implementation");
+        }
+
+        break; // Found main file, stop looking
+      } catch {}
+    }
+
+    // Check for Python services architecture
+    const servicesPath = path.join(projectRoot, "services");
+    try {
+      const serviceFiles = await fs.readdir(servicesPath);
+      if (serviceFiles.length > 2) {
+        sourceData.architecturePatterns.push("Services Architecture");
+      }
+    } catch {}
+
   } catch {}
 
   return sourceData;

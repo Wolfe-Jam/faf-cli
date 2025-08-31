@@ -17,7 +17,27 @@ interface ScoreOptions {
 
 export async function scoreFafFile(file?: string, options: ScoreOptions = {}) {
   try {
-    const fafPath = file || (await findFafFile());
+    let fafPath: string | null = null;
+    
+    if (file) {
+      // Check if the provided path is a directory
+      try {
+        const stats = await fs.stat(file);
+        if (stats.isDirectory()) {
+          // Find .faf file in the specified directory
+          fafPath = await findFafFile(file);
+        } else {
+          // Use the file path directly
+          fafPath = file;
+        }
+      } catch {
+        // If stat fails, try to use it as a file path
+        fafPath = file;
+      }
+    } else {
+      // Find .faf file in current directory
+      fafPath = await findFafFile();
+    }
 
     if (!fafPath) {
       console.log(chalk.red("❌ No .faf file found"));
