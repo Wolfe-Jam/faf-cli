@@ -139,17 +139,17 @@ function generateProjectData(
   let missionPurpose: string | undefined;
 
   // Extract rich context from README first (best human context)
-  if (readmeData.title) projectName = readmeData.title;
-  if (readmeData.description) description = readmeData.description;
-  if (readmeData.targetUser) targetUser = readmeData.targetUser;
-  if (readmeData.coreProblem) coreProblem = readmeData.coreProblem;
-  if (readmeData.purpose) missionPurpose = readmeData.purpose;
+  if (readmeData.title) {projectName = readmeData.title;}
+  if (readmeData.description) {description = readmeData.description;}
+  if (readmeData.targetUser) {targetUser = readmeData.targetUser;}
+  if (readmeData.coreProblem) {coreProblem = readmeData.coreProblem;}
+  if (readmeData.purpose) {missionPurpose = readmeData.purpose;}
 
   // Then enhance with package.json metadata
   if (pythonData.name) {
     projectName = pythonData.name;
     version = pythonData.version || "0.1.0";
-    if (!readmeData.description) description = pythonData.description || description;
+    if (!readmeData.description) {description = pythonData.description || description;}
   } else if (packageData.name) {
     // Clean package name for YAML compatibility
     projectName = packageData.name.replace(/^@/, '').replace('/', '-');
@@ -504,13 +504,13 @@ function extractReadmeContext(content: string): any {
     
     for (const line of lines) {
       // Skip badges (starts with [![)
-      if (line.trim().startsWith('[![')) continue;
+      if (line.trim().startsWith('[![')) {continue;}
       // Skip quotes/taglines (starts with >)
-      if (line.trim().startsWith('>')) continue;
+      if (line.trim().startsWith('>')) {continue;}
       // Skip empty lines
-      if (line.trim() === '') continue;
+      if (line.trim() === '') {continue;}
       // Skip lines that are just markdown formatting
-      if (/^[\*\-\_\#]+$/.test(line.trim())) continue;
+      if (/^[\*\-\_\#]+$/.test(line.trim())) {continue;}
       
       // Found real content!
       realDescription = line.trim();
@@ -524,11 +524,11 @@ function extractReadmeContext(content: string): any {
     if (altMatch) {
       const altLines = altMatch[1].split('\n');
       for (const line of altLines) {
-        if (line.trim() === '') continue;
-        if (line.trim().startsWith('[![')) continue;
-        if (line.trim().startsWith('>')) continue;
-        if (line.trim().startsWith('```')) continue; // Skip code blocks
-        if (line.trim().startsWith('//') || line.trim().startsWith('#')) continue; // Skip comments
+        if (line.trim() === '') {continue;}
+        if (line.trim().startsWith('[![')) {continue;}
+        if (line.trim().startsWith('>')) {continue;}
+        if (line.trim().startsWith('```')) {continue;} // Skip code blocks
+        if (line.trim().startsWith('//') || line.trim().startsWith('#')) {continue;} // Skip comments
         realDescription = line.trim();
         break;
       }
@@ -541,12 +541,12 @@ function extractReadmeContext(content: string): any {
     if (anyContentMatch) {
       const contentLines = anyContentMatch[1].split('\n');
       for (const line of contentLines) {
-        if (line.trim() === '') continue;
-        if (line.trim().startsWith('[![')) continue;
-        if (line.trim().startsWith('>')) continue;
-        if (line.trim().startsWith('```')) continue;
+        if (line.trim() === '') {continue;}
+        if (line.trim().startsWith('[![')) {continue;}
+        if (line.trim().startsWith('>')) {continue;}
+        if (line.trim().startsWith('```')) {continue;}
         // Skip lines that look like headings without #
-        if (/^[A-Z\s]+$/.test(line.trim()) && line.trim().length < 30) continue;
+        if (/^[A-Z\s]+$/.test(line.trim()) && line.trim().length < 30) {continue;}
         realDescription = line.trim();
         break;
       }

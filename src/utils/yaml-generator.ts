@@ -6,26 +6,26 @@
 // Helper function to generate stack string
 function generateStackString(data: any): string {
   const parts = [];
-  if (data.framework && data.framework !== 'None') parts.push(data.framework);
-  if (data.mainLanguage && data.mainLanguage !== 'Unknown') parts.push(data.mainLanguage);
-  if (data.buildTool && data.buildTool !== 'None') parts.push(data.buildTool);
-  if (data.hosting && data.hosting !== 'None') parts.push(data.hosting);
-  if (data.backend && data.backend !== 'None') parts.push(data.backend);
+  if (data.framework && data.framework !== 'None') {parts.push(data.framework);}
+  if (data.mainLanguage && data.mainLanguage !== 'Unknown') {parts.push(data.mainLanguage);}
+  if (data.buildTool && data.buildTool !== 'None') {parts.push(data.buildTool);}
+  if (data.hosting && data.hosting !== 'None') {parts.push(data.hosting);}
+  if (data.backend && data.backend !== 'None') {parts.push(data.backend);}
   return parts.join('/') || 'Not specified';
 }
 
 // Helper function to determine confidence level
 function getConfidenceLevel(percentage: number): string {
-  if (percentage >= 90) return 'VERY_HIGH';
-  if (percentage >= 80) return 'HIGH';
-  if (percentage >= 70) return 'GOOD';
-  if (percentage >= 60) return 'MODERATE';
+  if (percentage >= 90) {return 'VERY_HIGH';}
+  if (percentage >= 80) {return 'HIGH';}
+  if (percentage >= 70) {return 'GOOD';}
+  if (percentage >= 60) {return 'MODERATE';}
   return 'LOW';
 }
 
 // Helper function to safely escape YAML values
 function escapeForYaml(value: string | undefined): string {
-  if (!value) return 'Not specified';
+  if (!value) {return 'Not specified';}
   
   // Clean up markdown-style lists and formatting
   const cleaned = value
@@ -38,7 +38,7 @@ function escapeForYaml(value: string | undefined): string {
   // If it contains special characters or starts with special chars, quote it
   if (cleaned.includes(':') || cleaned.includes('-') || cleaned.includes('[') || 
       cleaned.includes('#') || cleaned.includes('|') || cleaned.includes('>') ||
-      cleaned.match(/^[\d\-\[\]{}]/)) {
+      cleaned.match(/^[\d\-[\]{}]/)) {
     return `"${cleaned.replace(/"/g, '\\"')}"`;
   }
   
@@ -77,15 +77,15 @@ function generateProjectTags(projectData: any) {
       .replace(/[^a-z0-9\s-]/g, '')
       .replace(/\s+/g, '-')
       .substring(0, 30);
-    if (cleanName) autoTags.add(cleanName);
+    if (cleanName) {autoTags.add(cleanName);}
   }
   
   // From tech stack
-  if (projectData.framework) autoTags.add(projectData.framework.toLowerCase().replace(/\s+/g, '-'));
-  if (projectData.mainLanguage) autoTags.add(projectData.mainLanguage.toLowerCase().replace(/\s+/g, '-'));
-  if (projectData.buildTool) autoTags.add(projectData.buildTool.toLowerCase().replace(/\s+/g, '-'));
-  if (projectData.hosting) autoTags.add(projectData.hosting.toLowerCase().replace(/\s+/g, '-'));
-  if (projectData.backend) autoTags.add(projectData.backend.toLowerCase().replace(/\s+/g, '-'));
+  if (projectData.framework) {autoTags.add(projectData.framework.toLowerCase().replace(/\s+/g, '-'));}
+  if (projectData.mainLanguage) {autoTags.add(projectData.mainLanguage.toLowerCase().replace(/\s+/g, '-'));}
+  if (projectData.buildTool) {autoTags.add(projectData.buildTool.toLowerCase().replace(/\s+/g, '-'));}
+  if (projectData.hosting) {autoTags.add(projectData.hosting.toLowerCase().replace(/\s+/g, '-'));}
+  if (projectData.backend) {autoTags.add(projectData.backend.toLowerCase().replace(/\s+/g, '-'));}
   
   // Remove empty tags
   autoTags.delete('');
@@ -127,7 +127,7 @@ function objectToYaml(obj: Record<string, any>, indent = 0): string {
   const spacing = '  '.repeat(indent);
   
   for (const [key, value] of Object.entries(obj)) {
-    if (value === null || value === undefined) continue;
+    if (value === null || value === undefined) {continue;}
     
     if (typeof value === 'object' && !Array.isArray(value)) {
       yaml += `${spacing}${key}:\n`;
@@ -193,11 +193,11 @@ export function generateFafContent(projectData: {
   const totalSlotsCount = 21; // Base slots
   const filledSlotsCount = Math.round((projectData.slotBasedPercentage / 100) * totalSlotsCount);
   const missingSlots = [];
-  if (!projectData.targetUser) missingSlots.push('Target users');
-  if (!projectData.coreProblem) missingSlots.push('Core problem');
-  if (!projectData.timeline) missingSlots.push('Timeline');
-  if (!projectData.cicd || projectData.cicd === 'None') missingSlots.push('CI/CD pipeline');
-  if (!projectData.database || projectData.database === 'None') missingSlots.push('Database');
+  if (!projectData.targetUser) {missingSlots.push('Target users');}
+  if (!projectData.coreProblem) {missingSlots.push('Core problem');}
+  if (!projectData.timeline) {missingSlots.push('Timeline');}
+  if (!projectData.cicd || projectData.cicd === 'None') {missingSlots.push('CI/CD pipeline');}
+  if (!projectData.database || projectData.database === 'None') {missingSlots.push('Database');}
 
   const fafData = {
     // 🎯 AI-FIRST SCORING SYSTEM - Live date instead of versions
