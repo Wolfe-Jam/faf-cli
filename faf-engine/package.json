@@ -3,18 +3,15 @@
   "version": "1.0.0",
   "description": "Universal .faf Context-On-Demand Engine - Platform-agnostic intelligence for any architecture",
   "main": "dist/index.js",
-  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "require": "./dist/index.js",
-      "import": "./dist/index.mjs",
       "types": "./dist/index.d.ts"
     },
     "./vercel": {
-      "require": "./dist/vercel.js",
-      "import": "./dist/vercel.mjs",
-      "types": "./dist/vercel.d.ts"
+      "require": "./dist/vercel/index.js",
+      "types": "./dist/vercel/index.d.ts"
     }
   },
   "files": [
@@ -23,8 +20,9 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsup",
-    "dev": "tsup --watch",
+    "build": "tsc",
+    "build:legacy": "tsup",
+    "dev": "tsc --watch",
     "test": "jest",
     "test:coverage": "jest --coverage",
     "lint": "eslint src/**/*.ts",
