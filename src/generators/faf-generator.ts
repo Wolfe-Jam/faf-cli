@@ -15,6 +15,7 @@ import {
   TypeScriptContext,
 } from "../utils/file-utils";
 import { generateFafContent } from "../utils/yaml-generator";
+import { FabFormatsEngine, FabFormatsAnalysis } from "../utils/fab-formats";
 
 export interface GenerateOptions {
   projectType?: string;
@@ -75,6 +76,22 @@ export async function generateFafFromProject(
     }
   }
 
+  // 🎯 FAB-FORMATS DISCOVERY - Activate the 200+ format knowledge base
+  const fabEngine = new FabFormatsEngine();
+  let fabAnalysis: FabFormatsAnalysis;
+  try {
+    fabAnalysis = await fabEngine.discoverFormats(projectRoot);
+  } catch {
+    // Fallback to empty analysis if discovery fails
+    fabAnalysis = {
+      discoveredFormats: [],
+      totalIntelligenceScore: 0,
+      confirmedFormats: [],
+      frameworkConfidence: {},
+      slotFillRecommendations: {}
+    };
+  }
+
   // 🔍 FORENSIC ANALYSIS - Multi-file intelligence gathering
   let typescriptData: TypeScriptContext | null = null;
   let configData: any = {};
@@ -104,7 +121,7 @@ export async function generateFafFromProject(
     // Continue without source analysis
   }
 
-  // Generate project data from FORENSIC ANALYSIS
+  // Generate project data from FORENSIC ANALYSIS + FAB-FORMATS DISCOVERY
   const projectData = generateProjectData(
     packageData,
     pythonData,
@@ -112,6 +129,7 @@ export async function generateFafFromProject(
     readmeData,
     configData,
     sourceCodeData,
+    fabAnalysis,
     projectType || "latest-idea",
   );
 
@@ -126,6 +144,7 @@ function generateProjectData(
   readmeData: any,
   configData: any,
   sourceCodeData: any,
+  fabAnalysis: FabFormatsAnalysis,
   projectType: string,
 ): any {
   const now = new Date().toISOString();
@@ -161,22 +180,42 @@ function generateProjectData(
     }
   }
 
-  // Detect stack from appropriate dependency source
+  // Detect stack from appropriate dependency source + FAB-FORMATS INTELLIGENCE
   const deps = { ...packageData.dependencies, ...packageData.devDependencies };
   const stack = analyzeStackFromDependencies(
     deps,
     pythonData,
     projectType,
   );
+  
+  // 🎯 ENHANCE WITH FAB-FORMATS INTELLIGENCE
+  const topFramework = fabAnalysis.confirmedFormats.length > 0 
+    ? Object.entries(fabAnalysis.frameworkConfidence)
+        .reduce((max, current) => current[1] > max[1] ? current : max, ['', 0])
+    : null;
+  
+  // Apply fab-formats slot recommendations
+  const fabSlots = fabAnalysis.slotFillRecommendations;
+  if (fabSlots.frontend && !stack.frontend) stack.frontend = fabSlots.frontend;
+  if (fabSlots.backend && !stack.backend) stack.backend = fabSlots.backend;
+  if (fabSlots.build && !stack.build) stack.build = fabSlots.build;
+  if (fabSlots.hosting && !configData.deployment) configData.deployment = fabSlots.hosting;
+  if (fabSlots.database && !stack.database) stack.database = fabSlots.database;
+  if (fabSlots.css_framework && !stack.css_framework) stack.css_framework = fabSlots.css_framework;
+  if (fabSlots.ui_library && !stack.ui_library) stack.ui_library = fabSlots.ui_library;
+  if (fabSlots.state_management && !stack.state_management) stack.state_management = fabSlots.state_management;
 
-  // 🔍 FORENSIC SCORING - Multi-source intelligence scoring
+  // 🎯 ENHANCED SCORING - Multi-source + FAB-FORMATS intelligence (Universal: JS/TS + Python)
+  // Base intelligence score from fab-formats discovery
+  const fabIntelligenceBonus = Math.min(fabAnalysis.totalIntelligenceScore / 10, 5); // Max 5 bonus slots
+  
   const slots = [
     // Basic Project Info (5 slots)
     projectName !== "untitled-project",
     description !== "Project development and deployment", 
     detectMainLanguage(deps, projectType) !== "Unknown",
-    stack.frontend,
-    stack.backend,
+    stack.frontend || stack.backend, // Any framework detected
+    stack.package_manager !== "npm" || Object.keys(deps).length > 0, // Dependencies managed
     
     // README Intelligence (6 slots)
     !!targetUser, // README extracted
@@ -186,27 +225,47 @@ function generateProjectData(
     !!(readmeData.quickStart), // Getting started info
     !!(readmeData.installation), // Installation instructions
     
-    // Package.json Analysis (3 slots)
-    !!(packageData.scripts && Object.keys(packageData.scripts).length > 3), // Rich scripts
-    !!(packageData.dependencies && Object.keys(packageData.dependencies).length > 5), // Real project
-    !!(packageData.repository), // Repository info
+    // Dependency Analysis (3 slots) - Universal for JS/Python
+    !!(
+      (packageData.scripts && Object.keys(packageData.scripts).length > 3) || // JS: Rich scripts
+      (pythonData.dependencies && pythonData.dependencies.length > 5) || // Python: Rich dependencies
+      (pythonData.name && pythonData.version) // Python: Project metadata
+    ),
+    !!(
+      (packageData.dependencies && Object.keys(packageData.dependencies).length > 5) || // JS: Real project
+      (pythonData.dependencies && pythonData.dependencies.length > 0) || // Python: Has requirements
+      (pythonData.python_version) // Python: Version specified
+    ),
+    !!(packageData.repository || pythonData.author || pythonData.license), // Repository/Author info
     
-    // Config File Analysis (3 slots)
-    !!configData.strictMode, // TypeScript strict mode
-    !!configData.buildTool, // Build tool configured
-    !!configData.deployment, // Deployment configured
+    // Config File Analysis (3 slots) - Universal + FAB-FORMATS Enhanced
+    !!configData.strictMode || !!(configData.qualityIndicators && configData.qualityIndicators.length > 0) || fabAnalysis.confirmedFormats.length > 5, // Quality config + format diversity
+    !!configData.buildTool || !!stack.build || !!stack.runtime || fabSlots.build, // Build/Runtime configured + fab detection
+    !!configData.deployment || !!stack.web_server || fabSlots.hosting, // Deployment configured + fab detection
     
-    // Source Code Analysis (4 slots)
-    !!(sourceCodeData.frameworkFeatures && sourceCodeData.frameworkFeatures.length > 0), // Modern framework features
-    !!(sourceCodeData.integrations && sourceCodeData.integrations.length > 0), // Service integrations
-    !!(configData.qualityIndicators && configData.qualityIndicators.length > 0), // Quality indicators
-    !!(configData.performanceOptimizations && configData.performanceOptimizations.length > 0), // Performance focus
+    // Source Code Analysis (4 slots) - Universal + FAB-FORMATS Enhanced
+    !!(sourceCodeData.frameworkFeatures && sourceCodeData.frameworkFeatures.length > 0) || fabAnalysis.confirmedFormats.length > 3, // Modern framework features + format detection
+    !!(sourceCodeData.integrations && sourceCodeData.integrations.length > 0) || topFramework, // Service integrations + framework confidence
+    !!(configData.qualityIndicators && configData.qualityIndicators.length > 0) || fabAnalysis.totalIntelligenceScore > 50, // Quality indicators + high fab score
+    !!(configData.performanceOptimizations && configData.performanceOptimizations.length > 0) || fabSlots.cicd, // Performance focus + CI/CD detection
+    
+    // 🎯 FAB-FORMATS BONUS SLOTS - Intelligent format discovery bonus
+    ...Array(Math.floor(fabIntelligenceBonus)).fill(true), // Add bonus slots based on format intelligence
   ];
   
   const filledSlots = slots.filter(Boolean).length;
   const totalSlots = 21; // Base slots for scoring
   const slotBasedPercentage = Math.round((filledSlots / totalSlots) * 100);
-  const fafScore = slotBasedPercentage; // Honest percentage - now with intelligent extraction
+  
+  // 🎯 FAB-FORMATS ENHANCEMENT - Apply intelligent scoring boost
+  let enhancedScore = slotBasedPercentage;
+  if (fabAnalysis.totalIntelligenceScore > 0) {
+    // Add percentage boost based on format discovery intelligence
+    const fabBoost = Math.min(fabAnalysis.totalIntelligenceScore / 2, 20); // Max 20% boost
+    enhancedScore = Math.min(slotBasedPercentage + fabBoost, 100);
+  }
+  
+  const fafScore = Math.round(enhancedScore); // Enhanced percentage with fab-formats intelligence
 
   return {
     projectName: projectName,
@@ -236,15 +295,28 @@ function generateProjectData(
     timeline: readmeData.timeline,
     approach: readmeData.approach,
     
-    // 🔍 FORENSIC ANALYSIS DATA - Multi-source intelligence
+    // 🎯 FORENSIC ANALYSIS DATA - Multi-source + FAB-FORMATS intelligence
     forensicData: {
       configAnalysis: configData,
       sourceAnalysis: sourceCodeData,
+      fabFormatsAnalysis: {
+        discoveredFormats: fabAnalysis.discoveredFormats.length,
+        confirmedFormats: fabAnalysis.confirmedFormats.length,
+        totalIntelligenceScore: fabAnalysis.totalIntelligenceScore,
+        topFramework: topFramework?.[0] || 'Unknown',
+        frameworkConfidence: topFramework?.[1] || 0,
+        slotEnhancements: Object.keys(fabSlots).length
+      },
       qualityIndicators: [
         ...configData.qualityIndicators || [],
-        ...sourceCodeData.qualityIndicators || []
+        ...sourceCodeData.qualityIndicators || [],
+        ...(fabAnalysis.confirmedFormats.length > 5 ? ['High Format Diversity'] : []),
+        ...(fabAnalysis.totalIntelligenceScore > 80 ? ['Ultra-High Format Intelligence'] : [])
       ],
-      frameworkFeatures: sourceCodeData.frameworkFeatures || [],
+      frameworkFeatures: [
+        ...sourceCodeData.frameworkFeatures || [],
+        ...(topFramework ? [`Detected: ${topFramework[0]} (${Math.round(topFramework[1])}% confidence)`] : [])
+      ],
       integrations: sourceCodeData.integrations || [],
       performanceOptimizations: configData.performanceOptimizations || []
     },
@@ -272,12 +344,14 @@ function analyzeStackFromDependencies(
   const stack: any = {};
 
   // Python stack detection
-  if (projectType.startsWith("python-")) {
+  if (projectType.startsWith("python-") || pythonData.name || pythonData.dependencies) {
     // Package manager detection
     if (pythonData.name) {
       stack.package_manager = "poetry";
     } else if (pythonData.dependencies) {
       stack.package_manager = "pip";
+    } else {
+      stack.package_manager = "python"; // Default for Python projects
     }
 
     // Runtime detection
@@ -663,9 +737,19 @@ async function parsePyprojectToml(content: string): Promise<any> {
       data.python_version = version;
     }
 
-    // Check for dependencies section
-    if (content.includes("[tool.poetry.dependencies]")) {
-      data.dependencies = true;
+    // Extract dependencies from [tool.poetry.dependencies] section
+    const depsSection = content.match(/\[tool\.poetry\.dependencies\]([\s\S]*?)(?=\[|$)/);
+    if (depsSection) {
+      const depsContent = depsSection[1];
+      // Match lines with dependency names (with possible indentation)
+      const depMatches = depsContent.match(/^\s*[a-zA-Z0-9_-]+\s*=/gm);
+      if (depMatches) {
+        data.dependencies = depMatches.map(match => 
+          match.replace(/^\s*/, '').replace(/\s*=.*$/, '').trim()
+        ).filter(dep => dep !== 'python'); // Exclude Python itself, count real deps
+      } else {
+        data.dependencies = []; // No additional dependencies found
+      }
     }
 
     return data;
