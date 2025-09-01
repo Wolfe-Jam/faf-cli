@@ -81,7 +81,7 @@ export async function getFileModTime(filePath: string): Promise<Date | null> {
 export async function findPackageJson(
   startDir: string = process.cwd(),
 ): Promise<string | null> {
-  let currentDir = startDir;
+  let currentDir = path.resolve(startDir); // Fix: resolve to absolute path
 
   while (currentDir !== path.dirname(currentDir)) {
     const packagePath = path.join(currentDir, "package.json");
@@ -102,7 +102,7 @@ export async function findPackageJson(
 export async function findPyprojectToml(
   startDir: string = process.cwd(),
 ): Promise<string | null> {
-  let currentDir = startDir;
+  let currentDir = path.resolve(startDir); // Fix: resolve to absolute path
 
   while (currentDir !== path.dirname(currentDir)) {
     const pyprojectPath = path.join(currentDir, "pyproject.toml");
@@ -123,7 +123,7 @@ export async function findPyprojectToml(
 export async function findRequirementsTxt(
   startDir: string = process.cwd(),
 ): Promise<string | null> {
-  let currentDir = startDir;
+  let currentDir = path.resolve(startDir); // Fix: resolve to absolute path
 
   while (currentDir !== path.dirname(currentDir)) {
     const requirementsPath = path.join(currentDir, "requirements.txt");
@@ -144,7 +144,7 @@ export async function findRequirementsTxt(
 export async function findTsConfig(
   startDir: string = process.cwd(),
 ): Promise<string | null> {
-  let currentDir = startDir;
+  let currentDir = path.resolve(startDir); // Fix: resolve to absolute path
 
   while (currentDir !== path.dirname(currentDir)) {
     const tsconfigPath = path.join(currentDir, "tsconfig.json");
