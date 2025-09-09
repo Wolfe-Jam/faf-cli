@@ -16,6 +16,7 @@ import { enhanceFafWithAI } from './commands/ai-enhance';
 import { analyzeFafWithAI } from './commands/ai-analyze';
 import { trustCommand } from './commands/trust';
 import { statusCommand } from './commands/status';
+import { verifyCommand } from './commands/verify';
 import { setColorOptions, type ColorScheme } from './utils/color-utils';
 
 const version = require('../package.json').version;
@@ -117,6 +118,36 @@ Shows:
   • Performance metrics
   • Siamese twin (claude.md) status`)
   .action((options) => statusCommand(options));
+
+// 🤖 faf verify - AI Verification System (The Trust Builder)
+program
+  .command('verify')
+  .description('🤖 Test .faf context with Claude, ChatGPT & Gemini - prove AI understanding')
+  .option('-d, --detailed', 'Show detailed verification results')
+  .option('-m, --models <models>', 'Specify models to test (comma-separated)', 'claude,chatgpt,gemini')
+  .option('-t, --timeout <ms>', 'Verification timeout in milliseconds', '30000')
+  .addHelpText('after', `
+Examples:
+  $ faf verify                       # Test with all AI models
+  $ faf verify --detailed            # Show detailed results & suggestions
+  $ faf verify -m claude,chatgpt     # Test with specific models only
+  
+AI Verification Tests:
+  • Claude: Context understanding & confidence
+  • ChatGPT: Project comprehension & clarity  
+  • Gemini: Technical stack recognition
+  • Trust Score: Updated based on AI feedback
+  
+Expected Transformation:
+  🔴 Needs improvement → ✅ Perfect context`)
+  .action((options) => {
+    const models = options.models ? options.models.split(',').map((m: string) => m.trim()) : undefined;
+    verifyCommand({
+      models,
+      timeout: parseInt(options.timeout),
+      detailed: options.detailed
+    });
+  });
 
 // ✅ faf validate - Check your .faf file is correct
 program

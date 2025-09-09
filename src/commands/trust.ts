@@ -10,6 +10,7 @@ import path from 'path';
 import chalk from 'chalk';
 import { findFafFile } from '../utils/file-utils';
 import { calculateFafScore } from '../scoring/score-calculator';
+import { getTrustCache } from '../utils/trust-cache';
 import YAML from 'yaml';
 
 export interface TrustScore {
@@ -45,8 +46,8 @@ export async function calculateTrustScore(fafPath: string): Promise<TrustScore> 
     // Calculate freshness (based on timestamp if available)
     const freshnessScore = calculateFreshness(fafData);
     
-    // AI compatibility placeholder (will be enhanced with verification system)
-    const aiCompatibility = isValid ? 85 : 45;
+    // AI compatibility enhanced with verification
+    const aiCompatibility = await calculateAICompatibility(fafPath, fafData, isValid);
     
     // Overall trust calculation (weighted average)
     const overall = Math.round(
@@ -75,6 +76,46 @@ export async function calculateTrustScore(fafPath: string): Promise<TrustScore> 
 }
 
 /**
+ * Calculate AI compatibility based on content quality and cached verification results
+ */
+async function calculateAICompatibility(fafPath: string, fafData: any, isValid: boolean): Promise<number> {
+  // Check for cached verification results first
+  const cachedResults = await getTrustCache(fafPath);
+  
+  if (cachedResults) {
+    // Use verified AI compatibility score
+    return cachedResults.aiCompatibilityScore;
+  }
+  
+  // Fallback to content-based scoring
+  if (!isValid) return 30;
+  
+  let score = 50; // Base score for valid files
+  
+  // Check for championship content (no placeholders)
+  const hasGoodGoal = fafData?.project?.goal && 
+                     !fafData.project.goal.includes('!CI') && 
+                     fafData.project.goal !== 'Project development and deployment';
+  
+  const hasGoodDescription = fafData?.instant_context?.what_building && 
+                           !fafData.instant_context.what_building.includes('!CI') &&
+                           fafData.instant_context.what_building !== 'Software application';
+  
+  const hasRevolutionaryContent = fafData?.project?.mission?.includes('Make Your AI Happy');
+  
+  const hasTechStack = fafData?.instant_context?.tech_stack && 
+                      fafData.instant_context.tech_stack !== 'Unknown';
+  
+  // Championship scoring
+  if (hasGoodGoal) score += 15;
+  if (hasGoodDescription) score += 15; 
+  if (hasRevolutionaryContent) score += 10; // Brand ambassador bonus
+  if (hasTechStack) score += 10;
+  
+  return Math.min(score, 100);
+}
+
+/**
  * Calculate freshness score based on timestamp
  */
 function calculateFreshness(fafData: any): number {
@@ -99,7 +140,7 @@ function calculateFreshness(fafData: any): number {
 /**
  * Display the Trust Dashboard - the emotional core UI
  */
-export function displayTrustDashboard(trustScore: TrustScore, detailed: boolean = false): void {
+export async function displayTrustDashboard(fafPath: string, trustScore: TrustScore, detailed: boolean = false): Promise<void> {
   const { overall, contextCompleteness, aiCompatibility, freshnessScore } = trustScore;
   
   // Choose emoji and color based on trust level
@@ -132,10 +173,21 @@ export function displayTrustDashboard(trustScore: TrustScore, detailed: boolean 
   console.log(chalk.cyan('│                                        │'));
   console.log(chalk.cyan('│') + ' AI UNDERSTANDING STATUS:              ' + chalk.cyan('│'));
   
-  // AI compatibility indicators
-  const claudeStatus = aiCompatibility >= 80 ? '✅ Claude     - Perfect context       ' : aiCompatibility >= 60 ? '🟡 Claude     - Good context          ' : '🔴 Claude     - Needs improvement     ';
-  const chatgptStatus = aiCompatibility >= 80 ? '✅ ChatGPT    - Perfect context       ' : aiCompatibility >= 60 ? '🟡 ChatGPT    - Good context          ' : '🔴 ChatGPT    - Needs improvement     ';
-  const geminiStatus = aiCompatibility >= 80 ? '✅ Gemini     - Perfect context       ' : aiCompatibility >= 60 ? '🟡 Gemini     - Good context          ' : '🔴 Gemini     - Needs improvement     ';
+  // Get verification status from cache
+  const cachedResults = await getTrustCache(fafPath);
+  let claudeStatus, chatgptStatus, geminiStatus;
+  
+  if (cachedResults && cachedResults.allPassed) {
+    // Show verified results
+    claudeStatus = `✅ Claude     - Perfect context (${cachedResults.verificationResults.claude}%)`;
+    chatgptStatus = `✅ ChatGPT    - Perfect context (${cachedResults.verificationResults.chatgpt}%)`;
+    geminiStatus = `✅ Gemini     - Perfect context (${cachedResults.verificationResults.gemini}%)`;
+  } else {
+    // Show content-based assessment
+    claudeStatus = aiCompatibility >= 80 ? '✅ Claude     - Perfect context       ' : aiCompatibility >= 60 ? '🟡 Claude     - Good context          ' : '🔴 Claude     - Needs improvement     ';
+    chatgptStatus = aiCompatibility >= 80 ? '✅ ChatGPT    - Perfect context       ' : aiCompatibility >= 60 ? '🟡 ChatGPT    - Good context          ' : '🔴 ChatGPT    - Needs improvement     ';
+    geminiStatus = aiCompatibility >= 80 ? '✅ Gemini     - Perfect context       ' : aiCompatibility >= 60 ? '🟡 Gemini     - Good context          ' : '🔴 Gemini     - Needs improvement     ';
+  }
   
   console.log(chalk.cyan('│') + ' ' + claudeStatus + ' ' + chalk.cyan('│'));
   console.log(chalk.cyan('│') + ' ' + chatgptStatus + ' ' + chalk.cyan('│'));
@@ -166,9 +218,12 @@ export function displayTrustDashboard(trustScore: TrustScore, detailed: boolean 
     if (freshnessScore < 50) {
       console.log(chalk.dim('   • Run `faf sync` to refresh stale information'));
     }
-    if (aiCompatibility < 80) {
-      console.log(chalk.dim('   • Run `faf verify` to test AI understanding (coming soon)'));
+    if (!cachedResults) {
+      console.log(chalk.dim('   • Run `faf verify` to test AI understanding and update scores'));
     }
+  } else if (cachedResults) {
+    console.log();
+    console.log(chalk.green('🎯 Verified by AI models - context is championship grade!'));
   }
   
   console.log();
@@ -193,7 +248,7 @@ export async function trustCommand(options: TrustDashboardOptions = {}): Promise
     const trustScore = await calculateTrustScore(fafPath);
     const duration = Date.now() - startTime;
     
-    displayTrustDashboard(trustScore, options.detailed);
+    await displayTrustDashboard(fafPath, trustScore, options.detailed);
     
     // Performance indicator (should be <300ms)
     if (options.detailed) {
