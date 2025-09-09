@@ -14,6 +14,8 @@ import { auditFafFile } from './commands/audit';
 import { lintFafFile } from './commands/lint';
 import { enhanceFafWithAI } from './commands/ai-enhance';
 import { analyzeFafWithAI } from './commands/ai-analyze';
+import { trustCommand } from './commands/trust';
+import { statusCommand } from './commands/status';
 import { setColorOptions, type ColorScheme } from './utils/color-utils';
 
 const version = require('../package.json').version;
@@ -81,6 +83,40 @@ Examples:
   $ faf init my-app              # Create .faf for different directory
   $ faf init -t react            # Force React template`)
   .action((directory, options) => initFafFile(directory, options));
+
+// 🎯 faf trust - AI Trust Dashboard (The Emotional Core)
+program
+  .command('trust')
+  .description('Show AI Trust Dashboard - "I don\'t worry about AI context anymore"')
+  .option('-d, --detailed', 'Show detailed trust metrics')
+  .addHelpText('after', `
+Examples:
+  $ faf trust                        # Show trust dashboard
+  $ faf trust --detailed             # Detailed metrics breakdown
+  
+The Trust Dashboard shows:
+  • Overall trust level (0-100%)
+  • AI compatibility status (Claude, ChatGPT, Gemini)
+  • Context completeness score
+  • Freshness indicators
+  • Actionable improvement suggestions`)
+  .action((options) => trustCommand(options));
+
+// 🚀 faf status - Quick context health check (git status equivalent)
+program
+  .command('status')
+  .description('Show quick .faf context health status (<200ms)')
+  .addHelpText('after', `
+Examples:
+  $ faf status                       # Quick health check
+  
+Shows:
+  • Context health score (0-100%)
+  • Files tracked and last sync time
+  • AI readiness status
+  • Performance metrics
+  • Siamese twin (claude.md) status`)
+  .action((options) => statusCommand(options));
 
 // ✅ faf validate - Check your .faf file is correct
 program

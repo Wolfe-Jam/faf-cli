@@ -279,31 +279,39 @@ export async function detectProjectType(
   const ignorePatterns = await parseFafIgnore(projectDir);
 
   // File-based detection
-  const files = await glob("**/*.{svelte,jsx,tsx,vue,ts,js,py}", {
-    cwd: projectDir,
-    ignore: ignorePatterns.filter((p) => !p.startsWith("*.")), // glob doesn't like *.ext patterns
+  const files = await new Promise<string[]>((resolve, reject) => {
+    glob("**/*.{svelte,jsx,tsx,vue,ts,js,py}", {
+      cwd: projectDir,
+      ignore: ignorePatterns.filter((p) => !p.startsWith("*.")), // glob doesn't like *.ext patterns
+    }, (err, matches) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(matches);
+      }
+    });
   });
 
   // Python pattern detection (Option B)
-  if (files.some((f) => f.endsWith(".py"))) {
+  if (files.some((f: string) => f.endsWith(".py"))) {
     const pythonPatternType = await detectPythonPatterns(
       projectDir,
-      files.filter((f) => f.endsWith(".py")),
+      files.filter((f: string) => f.endsWith(".py")),
     );
     if (pythonPatternType !== "python-generic") {return pythonPatternType;}
     return "python-generic";
   }
 
   // TypeScript file detection
-  if (files.some((f) => f.endsWith(".ts") && !f.endsWith(".d.ts"))) {
+  if (files.some((f: string) => f.endsWith(".ts") && !f.endsWith(".d.ts"))) {
     hasTypeScript = true;
   }
 
-  if (files.some((f) => f.endsWith(".svelte")))
+  if (files.some((f: string) => f.endsWith(".svelte")))
     {return hasTypeScript ? "svelte-ts" : "svelte";}
-  if (files.some((f) => f.endsWith(".jsx") || f.endsWith(".tsx")))
+  if (files.some((f: string) => f.endsWith(".jsx") || f.endsWith(".tsx")))
     {return hasTypeScript ? "react-ts" : "react";}
-  if (files.some((f) => f.endsWith(".vue")))
+  if (files.some((f: string) => f.endsWith(".vue")))
     {return hasTypeScript ? "vue-ts" : "vue";}
 
   // Pure TypeScript project detection

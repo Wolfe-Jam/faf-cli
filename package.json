@@ -36,13 +36,14 @@
   "dependencies": {
     "@faf/engine": "file:./faf-engine",
     "chalk": "^4.1.2",
-    "commander": "^14.0.0",
+    "commander": "^9.5.0",
     "enquirer": "^2.4.1",
-    "glob": "^11.0.3",
+    "glob": "^8.1.0",
     "openai": "^5.16.0",
     "yaml": "^2.4.1"
   },
   "devDependencies": {
+    "@types/glob": "^8.1.0",
     "@types/jest": "^29.5.14",
     "@types/node": "^20.11.17",
     "@typescript-eslint/eslint-plugin": "^8.41.0",
@@ -55,7 +56,7 @@
     "typescript": "^5.3.3"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=14.0.0"
   },
   "publishConfig": {
     "access": "public"

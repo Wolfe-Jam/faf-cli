@@ -11,7 +11,7 @@ import path from "path";
 import { glob } from "glob";
 
 // 🚀 Import THE MOTHER SHIP - 200+ Format Knowledge Base v1.0.0
-import { KNOWLEDGE_BASE } from './fab-formats-knowledge-base.js';
+import { KNOWLEDGE_BASE } from './fab-formats-knowledge-base';
 
 export interface FormatDiscoveryResult {
   fileName: string;
@@ -132,10 +132,18 @@ export class FabFormatsEngine {
       const extensionPatterns = ['**/*.py', '**/*.ts', '**/*.js', '**/*.svelte', '**/*.vue'];
       
       for (const pattern of extensionPatterns) {
-        const files = await glob(pattern, {
-          cwd: projectDir,
-          ignore: ['node_modules/**', '.git/**', 'dist/**', 'build/**'],
-          absolute: true
+        const files = await new Promise<string[]>((resolve, reject) => {
+          glob(pattern, {
+            cwd: projectDir,
+            ignore: ['node_modules/**', '.git/**', 'dist/**', 'build/**'],
+            absolute: true
+          }, (err, matches) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(matches);
+            }
+          });
         });
 
         // Limit to first few files per pattern (for performance)
