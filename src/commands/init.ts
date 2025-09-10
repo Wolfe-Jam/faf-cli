@@ -7,6 +7,12 @@ import chalk from "chalk";
 import { promises as fs } from "fs";
 import path from "path";
 import * as YAML from "yaml";
+import { 
+  FAF_ICONS, 
+  FAF_COLORS, 
+  BRAND_MESSAGES,
+  formatPerformance 
+} from "../utils/championship-style";
 import {
   detectProjectType,
   fileExists,
@@ -32,12 +38,15 @@ export async function initFafFile(
 
     // Check if .faf file already exists
     if ((await fileExists(outputPath)) && !options.force) {
-      console.log(chalk.yellow(`⚠️  .faf file already exists: ${outputPath}`));
-      console.log(chalk.yellow("Use --force to overwrite"));
+      console.log();
+      console.log(FAF_COLORS.fafOrange(`${FAF_ICONS.shield} .faf file already exists: `) + FAF_COLORS.fafCyan(outputPath));
+      console.log(FAF_COLORS.fafOrange(`${FAF_ICONS.magic_wand} Use `) + FAF_COLORS.fafCyan('--force') + FAF_COLORS.fafOrange(' to overwrite'));
+      console.log();
       process.exit(1);
     }
 
-    console.log(chalk.blue("🚀 Initializing .faf file..."));
+    console.log();
+    console.log(FAF_COLORS.fafCyan(`${FAF_ICONS.rocket} Initializing .faf file...`));
 
     // Check for .fafignore
     const fafIgnorePath = path.join(projectRoot, ".fafignore");
@@ -73,7 +82,7 @@ export async function initFafFile(
 
     const elapsedTime = Date.now() - startTime;
     console.log(chalk.green(`✅ Created ${outputPath}`));
-    console.log(chalk.gray(`   Generated in ${elapsedTime}ms ⚡`));
+    console.log(FAF_COLORS.fafCyan(`   ${formatPerformance(elapsedTime)} - ${BRAND_MESSAGES.speed_result}`));
 
     // Show actual score matching what's embedded in the file
     const fafData = YAML.parse(fafContent);
@@ -81,22 +90,22 @@ export async function initFafFile(
     // Use the embedded score from the file header to match what user sees
     const embeddedScore = fafData.faf_score ? parseInt(fafData.faf_score.replace('%', '')) : scoreResult.totalScore;
 
-    console.log(chalk.blue(`📊 Initial score: ${embeddedScore}% (${scoreResult.filledSlots}/${scoreResult.totalSlots} slots)`));
+    console.log();
+    console.log(FAF_COLORS.fafGreen(`${FAF_ICONS.chart_up} Initial score: ${embeddedScore}% (${scoreResult.filledSlots}/${scoreResult.totalSlots} slots)`));
 
-    // Next steps
-    console.log(chalk.yellow("\n💡 Next steps:"));
+    // Championship Next Steps
+    console.log();
+    console.log(FAF_COLORS.fafOrange(`${FAF_ICONS.magic_wand} Championship Recommendations:`));
     console.log(
-      chalk.yellow(
-        '   1. Run "faf score --details" to see improvement opportunities',
-      ),
+      FAF_COLORS.fafCyan('   1. ') + 'faf score --details' + FAF_COLORS.fafCyan(' - Discover improvement opportunities')
     );
-    console.log(chalk.yellow("   2. Edit .faf file to add missing context"));
-    console.log(
-      chalk.yellow('   3. Run "faf validate" to check format compliance'),
-    );
+    console.log(FAF_COLORS.fafCyan('   2. ') + 'faf trust --detailed' + FAF_COLORS.fafCyan(' - Boost AI happiness'));
+    console.log(FAF_COLORS.fafCyan('   3. ') + 'faf status' + FAF_COLORS.fafCyan(' - Monitor your championship performance'));
 
     if (embeddedScore < 70) {
-      console.log(chalk.yellow("   4. Aim for 70%+ score for good AI context"));
+      console.log(FAF_COLORS.fafOrange(`   4. ${FAF_ICONS.target} Target 70%+ score for championship AI context`));
+    } else if (embeddedScore >= 85) {
+      console.log(FAF_COLORS.fafGreen(`${FAF_ICONS.party} Excellent start! Championship performance! ${FAF_ICONS.trophy}`));
     }
   } catch (error) {
     console.log(chalk.red("💥 Initialization failed:"));
