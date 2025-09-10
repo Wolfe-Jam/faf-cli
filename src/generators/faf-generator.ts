@@ -4,7 +4,7 @@
  */
 
 import { promises as fs } from "fs";
-import * as YAML from "yaml";
+// YAML import removed - unused
 import path from "path";
 import {
   findPackageJson,
@@ -184,14 +184,14 @@ function generateProjectData(
   
   // Apply fab-formats slot recommendations
   const fabSlots = fabAnalysis.slotFillRecommendations;
-  if (fabSlots.frontend && !stack.frontend) stack.frontend = fabSlots.frontend;
-  if (fabSlots.backend && !stack.backend) stack.backend = fabSlots.backend;
-  if (fabSlots.build && !stack.build) stack.build = fabSlots.build;
-  if (fabSlots.hosting && !configData.deployment) configData.deployment = fabSlots.hosting;
-  if (fabSlots.database && !stack.database) stack.database = fabSlots.database;
-  if (fabSlots.css_framework && !stack.css_framework) stack.css_framework = fabSlots.css_framework;
-  if (fabSlots.ui_library && !stack.ui_library) stack.ui_library = fabSlots.ui_library;
-  if (fabSlots.state_management && !stack.state_management) stack.state_management = fabSlots.state_management;
+  if (fabSlots.frontend && !stack.frontend) {stack.frontend = fabSlots.frontend;}
+  if (fabSlots.backend && !stack.backend) {stack.backend = fabSlots.backend;}
+  if (fabSlots.build && !stack.build) {stack.build = fabSlots.build;}
+  if (fabSlots.hosting && !configData.deployment) {configData.deployment = fabSlots.hosting;}
+  if (fabSlots.database && !stack.database) {stack.database = fabSlots.database;}
+  if (fabSlots.css_framework && !stack.css_framework) {stack.css_framework = fabSlots.css_framework;}
+  if (fabSlots.ui_library && !stack.ui_library) {stack.ui_library = fabSlots.ui_library;}
+  if (fabSlots.state_management && !stack.state_management) {stack.state_management = fabSlots.state_management;}
 
   // 🎯 ENHANCED SCORING - Multi-source + FAB-FORMATS intelligence (Universal: JS/TS + Python)
   // Base intelligence score from fab-formats discovery
@@ -491,68 +491,7 @@ function detectMainLanguage(
 }
 
 
-function generateAutoTags(packageData: any, projectType: string): string[] {
-  const tags = new Set<string>();
-
-  // From project name
-  if (packageData.name) {
-    const cleanName = packageData.name
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .substring(0, 30);
-    if (cleanName) {tags.add(cleanName);}
-  }
-
-  // From project type
-  if (projectType !== "latest-idea") {
-    tags.add(projectType.toLowerCase().replace(/\s+/g, "-"));
-  }
-
-  // From description keywords
-  if (packageData.description) {
-    const keywords = packageData.description
-      .toLowerCase()
-      .match(
-        /\b(api|library|framework|component|dashboard|tool|app|cli|server|client|web|mobile)\b/gi,
-      );
-    if (keywords) {
-      keywords
-        .slice(0, 3)
-        .forEach((keyword: string) => tags.add(keyword.toLowerCase()));
-    }
-  }
-
-  return Array.from(tags).slice(0, 10);
-}
-
-function generateSmartDefaults(projectType: string): string[] {
-  const year = new Date().getFullYear().toString();
-  const defaults = [".faf", "ai-ready", year];
-
-  // Project type specific
-  if (
-    projectType.includes("web") ||
-    projectType === "svelte" ||
-    projectType === "react"
-  ) {
-    defaults.push("web-app");
-  } else if (
-    projectType.includes("api") ||
-    projectType.includes("node") ||
-    projectType.includes("fastapi")
-  ) {
-    defaults.push("backend-api");
-  } else if (projectType.startsWith("python-")) {
-    defaults.push("python-app");
-  } else {
-    defaults.push("software");
-  }
-
-  defaults.push("open-source"); // Default assumption
-
-  return defaults;
-}
+// Removed unused functions: generateAutoTags and generateSmartDefaults
 
 /**
  * Extract context from README.md content - THE KEY TO HIGH SCORES
@@ -781,9 +720,9 @@ function extractConfigDataFromFab(fabAnalysis: FabFormatsAnalysis): any {
 
   // Extract build tools from fab-formats slot recommendations
   const slots = fabAnalysis.slotFillRecommendations;
-  if (slots.build) configData.buildTool = slots.build;
-  if (slots.hosting) configData.deployment = slots.hosting;
-  if (slots.cicd) configData.cicdPipeline = slots.cicd;
+  if (slots.build) {configData.buildTool = slots.build;}
+  if (slots.hosting) {configData.deployment = slots.hosting;}
+  if (slots.cicd) {configData.cicdPipeline = slots.cicd;}
 
   // Quality indicators based on format diversity and intelligence
   if (fabAnalysis.totalIntelligenceScore > 80) {

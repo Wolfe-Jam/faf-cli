@@ -88,7 +88,7 @@ async function calculateAICompatibility(fafPath: string, fafData: any, isValid: 
   }
   
   // Fallback to content-based scoring
-  if (!isValid) return 30;
+  if (!isValid) {return 30;}
   
   let score = 50; // Base score for valid files
   
@@ -107,10 +107,10 @@ async function calculateAICompatibility(fafPath: string, fafData: any, isValid: 
                       fafData.instant_context.tech_stack !== 'Unknown';
   
   // Championship scoring
-  if (hasGoodGoal) score += 15;
-  if (hasGoodDescription) score += 15; 
-  if (hasRevolutionaryContent) score += 10; // Brand ambassador bonus
-  if (hasTechStack) score += 10;
+  if (hasGoodGoal) {score += 15;}
+  if (hasGoodDescription) {score += 15;} 
+  if (hasRevolutionaryContent) {score += 10;} // Brand ambassador bonus
+  if (hasTechStack) {score += 10;}
   
   return Math.min(score, 100);
 }
@@ -121,16 +121,16 @@ async function calculateAICompatibility(fafPath: string, fafData: any, isValid: 
 function calculateFreshness(fafData: any): number {
   try {
     const timestamp = fafData?.metadata?.updated_date || fafData?.metadata?.created_date;
-    if (!timestamp) return 50; // No timestamp = middle score
+    if (!timestamp) {return 50;} // No timestamp = middle score
     
     const lastUpdate = new Date(timestamp);
     const now = new Date();
     const daysDiff = (now.getTime() - lastUpdate.getTime()) / (1000 * 60 * 60 * 24);
     
     // Freshness scoring: 100% for <7 days, declining to 0% at 90+ days
-    if (daysDiff < 7) return 100;
-    if (daysDiff < 30) return Math.max(80 - ((daysDiff - 7) * 2), 50);
-    if (daysDiff < 90) return Math.max(50 - ((daysDiff - 30) * 0.8), 10);
+    if (daysDiff < 7) {return 100;}
+    if (daysDiff < 30) {return Math.max(80 - ((daysDiff - 7) * 2), 50);}
+    if (daysDiff < 90) {return Math.max(50 - ((daysDiff - 30) * 0.8), 10);}
     return 10; // Very stale
   } catch {
     return 50; // Default middle score
@@ -171,7 +171,7 @@ export async function displayTrustDashboard(fafPath: string, trustScore: TrustSc
   console.log(chalk.cyan('┌─ AI TRUST DASHBOARD ───────────────────┐'));
   console.log(chalk.cyan('│') + trustColor(` ${trustEmoji} TRUST LEVEL: ${overall}% (${trustMessage})`) + ' '.repeat(Math.max(0, 40 - ` ${trustEmoji} TRUST LEVEL: ${overall}% (${trustMessage})`.length)) + chalk.cyan('│'));
   console.log(chalk.cyan('│                                        │'));
-  console.log(chalk.cyan('│') + ' AI UNDERSTANDING STATUS:              ' + chalk.cyan('│'));
+  console.log(`${chalk.cyan('│')  } AI UNDERSTANDING STATUS:              ${  chalk.cyan('│')}`);
   
   // Get verification status from cache
   const cachedResults = await getTrustCache(fafPath);
@@ -189,14 +189,14 @@ export async function displayTrustDashboard(fafPath: string, trustScore: TrustSc
     geminiStatus = aiCompatibility >= 80 ? '✅ Gemini     - Perfect context       ' : aiCompatibility >= 60 ? '🟡 Gemini     - Good context          ' : '🔴 Gemini     - Needs improvement     ';
   }
   
-  console.log(chalk.cyan('│') + ' ' + claudeStatus + ' ' + chalk.cyan('│'));
-  console.log(chalk.cyan('│') + ' ' + chatgptStatus + ' ' + chalk.cyan('│'));
-  console.log(chalk.cyan('│') + ' ' + geminiStatus + ' ' + chalk.cyan('│'));
+  console.log(`${chalk.cyan('│')  } ${  claudeStatus  } ${  chalk.cyan('│')}`);
+  console.log(`${chalk.cyan('│')  } ${  chatgptStatus  } ${  chalk.cyan('│')}`);
+  console.log(`${chalk.cyan('│')  } ${  geminiStatus  } ${  chalk.cyan('│')}`);
   console.log(chalk.cyan('│                                        │'));
   
   // Action message
   const actionMessage = overall >= 85 ? '💚 GO BUILD: Context locked & loaded  ' : '🔧 ACTION: Improve context quality    ';
-  console.log(chalk.cyan('│') + ' ' + actionMessage + ' ' + chalk.cyan('│'));
+  console.log(`${chalk.cyan('│')  } ${  actionMessage  } ${  chalk.cyan('│')}`);
   console.log(chalk.cyan('└────────────────────────────────────────┘'));
   
   if (detailed) {

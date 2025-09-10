@@ -30,6 +30,7 @@ export interface FabFormatsAnalysis {
   confirmedFormats: FormatDiscoveryResult[];
   frameworkConfidence: Record<string, number>;
   slotFillRecommendations: Record<string, string>;
+  stackSignature?: string; // STACKTISTICS: Generated stack signature
 }
 
 /**
@@ -273,13 +274,48 @@ export class FabFormatsEngine {
       });
     });
 
+    // 🎯 STACKTISTICS: Generate stack signature from detected frameworks
+    const stackSignature = this.generateStackSignature(confirmedFormats, frameworkConfidence);
+
     return {
       discoveredFormats: formats,
       totalIntelligenceScore,
       confirmedFormats,
       frameworkConfidence,
-      slotFillRecommendations
+      slotFillRecommendations,
+      stackSignature
     };
+  }
+
+  /**
+   * 🎯 STACKTISTICS: Generate stack signature from detected formats
+   * Simple, fast, and extends existing fab-formats intelligence
+   */
+  private generateStackSignature(
+    confirmedFormats: FormatDiscoveryResult[], 
+    frameworkConfidence: Record<string, number>
+  ): string {
+    // Get top 3 frameworks by confidence (simple approach)
+    const topFrameworks = Object.entries(frameworkConfidence)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 3)
+      .map(([framework]) => framework.toLowerCase().replace(/[^a-z0-9]/g, ''));
+
+    // Special case mappings for common stacks
+    const signature = topFrameworks.join('-');
+    
+    // Known stack patterns (simple lookup - no complexity added)
+    const knownStacks: Record<string, string> = {
+      'nextjs-tailwind-vercel': 'next-tailwind-vercel',
+      'nextjs-tailwindcss-vercel': 'next-tailwind-vercel', 
+      'svelte-sveltekit-tailwind': 'svelte5-tailwind',
+      'react-nextjs-tailwind': 'next-tailwind',
+      'python-fastapi-postgresql': 'fastapi-postgres',
+      'python-fastapi-sqlite': 'fastapi-sqlite',
+      'typescript-nodejs-express': 'node-express-ts'
+    };
+
+    return knownStacks[signature] || signature || 'unknown-stack';
   }
 
   /**

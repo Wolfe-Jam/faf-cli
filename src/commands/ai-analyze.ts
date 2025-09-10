@@ -55,7 +55,7 @@ export async function analyzeFafWithAI(
 
     if (insights) {
       console.log(chalk.green(`\n✨ ${getModelDisplay(model)} Analysis Complete`));
-      displayAnalysisResults(insights, options);
+      displayAnalysisResults(insights);
       
       if (options.suggestions && scoreResult.suggestions.length > 0) {
         displayAutomatedSuggestions(scoreResult.suggestions);
@@ -177,7 +177,7 @@ async function generateMockAnalysis(fafData: any, scoreResult: any, focus: strin
 /**
  * Display analysis results with championship formatting
  */
-function displayAnalysisResults(insights: any, options: AnalyzeOptions): void {
+function displayAnalysisResults(insights: any): void {
   const models = Object.keys(insights);
   
   models.forEach(model => {

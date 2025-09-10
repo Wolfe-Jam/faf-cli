@@ -17,6 +17,7 @@ import { analyzeFafWithAI } from './commands/ai-analyze';
 import { trustCommand } from './commands/trust';
 import { statusCommand } from './commands/status';
 import { verifyCommand } from './commands/verify';
+import { listStacks, scanCurrentProject, exportForGallery } from './commands/stacks';
 import { setColorOptions, type ColorScheme } from './utils/color-utils';
 
 const version = require('../package.json').version;
@@ -147,6 +148,32 @@ Expected Transformation:
       timeout: parseInt(options.timeout),
       detailed: options.detailed
     });
+  });
+
+// 🎯 faf stacks - STACKTISTICS: Stack Discovery & Collection
+program
+  .command('stacks')
+  .description('🎯 Discover and collect technology stack signatures')
+  .option('-s, --scan', 'Scan current project for stack signature')
+  .option('-e, --export-gallery', 'Export stacks for Gallery-Svelte')
+  .addHelpText('after', `
+🎯 STACKTISTICS Examples:
+  $ faf stacks                       # List your discovered stacks
+  $ faf stacks --scan                # Discover current project stack
+  $ faf stacks --export-gallery      # Export for Gallery-Svelte
+
+Stack Discovery:
+  • Extends fab-formats intelligence - zero performance impact
+  • Simple YAML lookup of known stack patterns  
+  • Builds collection of your technology experiences`)
+  .action(async (options) => {
+    if (options.scan) {
+      await scanCurrentProject();
+    } else if (options['export-gallery']) {
+      await exportForGallery();
+    } else {
+      await listStacks();
+    }
   });
 
 // ✅ faf validate - Check your .faf file is correct

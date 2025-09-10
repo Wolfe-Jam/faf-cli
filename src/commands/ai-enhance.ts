@@ -9,7 +9,7 @@ import chalk from "chalk";
 import { promises as fs } from "fs";
 import * as YAML from "yaml";
 import { findFafFile } from "../utils/file-utils";
-import { verifyWithAI, VerificationResult } from './verify';
+// Removed unused imports
 
 export interface EnhanceOptions {
   model?: 'claude' | 'chatgpt' | 'gemini' | 'big3' | 'universal';
@@ -171,7 +171,7 @@ async function executeBig3Enhancement(
     const models = model === 'big3' ? ['claude', 'chatgpt', 'gemini'] : [model === 'universal' ? 'claude' : model];
     
     // Mock AI enhancement using our verification engine architecture
-    const enhancementResults = await generateMockEnhancement(fafData, focus, models);
+    const enhancementResults = await generateMockEnhancement(fafData, focus);
     
     if (options.consensus && models.length > 1) {
       console.log(chalk.yellow('🔄 Building consensus from all models...'));
@@ -211,7 +211,7 @@ async function executeBig3Enhancement(
 /**
  * Generate mock enhancement using our Big-3 architecture
  */
-async function generateMockEnhancement(fafData: any, focus: string, models: string[]): Promise<any> {
+async function generateMockEnhancement(fafData: any, focus: string): Promise<any> {
   // Simulate AI analysis delay
   await new Promise(resolve => setTimeout(resolve, 200));
   
@@ -262,7 +262,7 @@ function applyEnhancements(fafData: any, enhancements: any, focus: string): any 
       break;
     case 'completeness':
       // Fill missing slots with intelligent defaults
-      if (!enhanced.instant_context) enhanced.instant_context = {};
+      if (!enhanced.instant_context) {enhanced.instant_context = {};}
       if (!enhanced.instant_context.what_building && enhanced.project?.goal) {
         enhanced.instant_context.what_building = enhanced.project.goal;
       }

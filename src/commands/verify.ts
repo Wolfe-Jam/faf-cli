@@ -66,9 +66,9 @@ async function mockAIVerification(model: string, fafContent: string): Promise<Ve
   const suggestions: string[] = [];
   
   // Calculate confidence based on content quality
-  if (hasProjectGoal) confidence += 40;
-  if (hasStack) confidence += 30;
-  if (hasClearDescription) confidence += 30;
+  if (hasProjectGoal) {confidence += 40;}
+  if (hasStack) {confidence += 30;}
+  if (hasClearDescription) {confidence += 30;}
   
   // Add some model-specific variation
   const modelVariation = {

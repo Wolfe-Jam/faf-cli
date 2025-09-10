@@ -120,16 +120,16 @@ function displayStatus(
   console.log();
   console.log(chalk.cyan('┌─ FAF Status ──────────────────────┐'));
   console.log(chalk.cyan('│') + healthColor(` ${healthEmoji} Context Health: ${trustScore}% ${healthText}`) + ' '.repeat(Math.max(0, 34 - ` ${healthEmoji} Context Health: ${trustScore}% ${healthText}`.length)) + chalk.cyan('│'));
-  console.log(chalk.cyan('│') + ` 📁 Files Tracked: ${lines} lines` + ' '.repeat(Math.max(0, 34 - ` 📁 Files Tracked: ${lines} lines`.length)) + chalk.cyan('│'));
-  console.log(chalk.cyan('│') + ` 🔄 Last Sync: ${lastSyncText}` + ' '.repeat(Math.max(0, 34 - ` 🔄 Last Sync: ${lastSyncText}`.length)) + chalk.cyan('│'));
+  console.log(`${chalk.cyan('│')  } 📁 Files Tracked: ${lines} lines${  ' '.repeat(Math.max(0, 34 - ` 📁 Files Tracked: ${lines} lines`.length))  }${chalk.cyan('│')}`);
+  console.log(`${chalk.cyan('│')  } 🔄 Last Sync: ${lastSyncText}${  ' '.repeat(Math.max(0, 34 - ` 🔄 Last Sync: ${lastSyncText}`.length))  }${chalk.cyan('│')}`);
   
   // AI Ready status
   const aiReadyText = trustScore >= 80 ? '🤖 AI Ready: Claude, ChatGPT, Gemini' : '🤖 AI Ready: Needs improvement';
-  console.log(chalk.cyan('│') + ` ${aiReadyText}` + ' '.repeat(Math.max(0, 34 - ` ${aiReadyText}`.length)) + chalk.cyan('│'));
+  console.log(`${chalk.cyan('│')  } ${aiReadyText}${  ' '.repeat(Math.max(0, 34 - ` ${aiReadyText}`.length))  }${chalk.cyan('│')}`);
   
   // Performance indicator
   const perfText = `⚡ Performance: <${duration}ms`;
-  console.log(chalk.cyan('│') + ` ${perfText}` + ' '.repeat(Math.max(0, 34 - ` ${perfText}`.length)) + chalk.cyan('│'));
+  console.log(`${chalk.cyan('│')  } ${perfText}${  ' '.repeat(Math.max(0, 34 - ` ${perfText}`.length))  }${chalk.cyan('│')}`);
   console.log(chalk.cyan('└────────────────────────────────────┘'));
   
   // Siamese Twin status

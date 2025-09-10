@@ -321,20 +321,20 @@ function calculateAIInstructionsScore(aiInstructions: any): SectionScore {
   const total = 5; // 5 key AI instruction elements
   const missing: string[] = [];
   
-  if (aiInstructions.priority) filled++;
-  else missing.push('ai_instructions.priority');
+  if (aiInstructions.priority) {filled++;}
+  else {missing.push('ai_instructions.priority');}
   
-  if (aiInstructions.message) filled++;
-  else missing.push('ai_instructions.message');
+  if (aiInstructions.message) {filled++;}
+  else {missing.push('ai_instructions.message');}
   
-  if (aiInstructions.guidelines && Array.isArray(aiInstructions.guidelines) && aiInstructions.guidelines.length > 0) filled++;
-  else missing.push('ai_instructions.guidelines');
+  if (aiInstructions.guidelines && Array.isArray(aiInstructions.guidelines) && aiInstructions.guidelines.length > 0) {filled++;}
+  else {missing.push('ai_instructions.guidelines');}
   
-  if (aiInstructions.priority_order) filled++;
-  else missing.push('ai_instructions.priority_order');
+  if (aiInstructions.priority_order) {filled++;}
+  else {missing.push('ai_instructions.priority_order');}
   
-  if (aiInstructions.working_style) filled++;
-  else missing.push('ai_instructions.working_style');
+  if (aiInstructions.working_style) {filled++;}
+  else {missing.push('ai_instructions.working_style');}
   
   return {
     percentage: Math.round((filled / total) * 100),
@@ -352,17 +352,17 @@ function calculateTechnicalContextScore(techContext: any): SectionScore {
   const total = 4; // 4 key technical context elements
   const missing: string[] = [];
   
-  if (techContext.architecture) filled++;
-  else missing.push('technical_context.architecture');
+  if (techContext.architecture) {filled++;}
+  else {missing.push('technical_context.architecture');}
   
-  if (techContext.tech_stack) filled++;
-  else missing.push('technical_context.tech_stack');
+  if (techContext.tech_stack) {filled++;}
+  else {missing.push('technical_context.tech_stack');}
   
-  if (techContext.key_files && Array.isArray(techContext.key_files) && techContext.key_files.length > 0) filled++;
-  else missing.push('technical_context.key_files');
+  if (techContext.key_files && Array.isArray(techContext.key_files) && techContext.key_files.length > 0) {filled++;}
+  else {missing.push('technical_context.key_files');}
   
-  if (techContext.patterns || techContext.infrastructure) filled++;
-  else missing.push('technical_context.patterns');
+  if (techContext.patterns || techContext.infrastructure) {filled++;}
+  else {missing.push('technical_context.patterns');}
   
   return {
     percentage: Math.round((filled / total) * 100),
