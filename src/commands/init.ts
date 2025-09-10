@@ -13,6 +13,7 @@ import {
   BRAND_MESSAGES,
   formatPerformance 
 } from "../utils/championship-style";
+import { autoAwardCredit } from "../utils/technical-credit";
 import {
   detectProjectType,
   fileExists,
@@ -84,6 +85,9 @@ export async function initFafFile(
     console.log(chalk.green(`✅ Created ${outputPath}`));
     console.log(FAF_COLORS.fafCyan(`   ${formatPerformance(elapsedTime)} - ${BRAND_MESSAGES.speed_result}`));
 
+    // Award technical credit for successful initialization
+    await autoAwardCredit('init_success', outputPath);
+
     // Show actual score matching what's embedded in the file
     const fafData = YAML.parse(fafContent);
     const scoreResult = await calculateFafScore(fafData, outputPath);
@@ -97,10 +101,10 @@ export async function initFafFile(
     console.log();
     console.log(FAF_COLORS.fafOrange(`${FAF_ICONS.magic_wand} Championship Recommendations:`));
     console.log(
-      FAF_COLORS.fafCyan('   1. ') + 'faf score --details' + FAF_COLORS.fafCyan(' - Discover improvement opportunities')
+      `${FAF_COLORS.fafCyan('   1. ')  }faf score --details${  FAF_COLORS.fafCyan(' - Discover improvement opportunities')}`
     );
-    console.log(FAF_COLORS.fafCyan('   2. ') + 'faf trust --detailed' + FAF_COLORS.fafCyan(' - Boost AI happiness'));
-    console.log(FAF_COLORS.fafCyan('   3. ') + 'faf status' + FAF_COLORS.fafCyan(' - Monitor your championship performance'));
+    console.log(`${FAF_COLORS.fafCyan('   2. ')  }faf trust --detailed${  FAF_COLORS.fafCyan(' - Boost AI happiness')}`);
+    console.log(`${FAF_COLORS.fafCyan('   3. ')  }faf status${  FAF_COLORS.fafCyan(' - Monitor your championship performance')}`);
 
     if (embeddedScore < 70) {
       console.log(FAF_COLORS.fafOrange(`   4. ${FAF_ICONS.target} Target 70%+ score for championship AI context`));

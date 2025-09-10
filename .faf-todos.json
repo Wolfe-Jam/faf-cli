@@ -1,0 +1,82 @@
+{
+  "id": "pl629s0sucomfe3cwxs",
+  "projectId": "faf-cli",
+  "currentScore": 0,
+  "targetScore": 75,
+  "items": [
+    {
+      "id": "16re9pkzuakmfe3cwxs",
+      "title": "Improve package.json description",
+      "description": "Write clear, compelling project description",
+      "impact": 8,
+      "difficulty": "easy",
+      "category": "structure",
+      "completed": false,
+      "estimatedMinutes": 5,
+      "aiPersonality": "universal",
+      "efficiency": 1.6
+    },
+    {
+      "id": "gestg460g0nmfe3cwxs",
+      "title": "Document complete tech stack",
+      "description": "List all frameworks, libraries, and tools used",
+      "impact": 10,
+      "difficulty": "easy",
+      "category": "structure",
+      "completed": false,
+      "estimatedMinutes": 8,
+      "aiPersonality": "chatgpt",
+      "efficiency": 1.25
+    },
+    {
+      "id": "l0guj76mp2gmfe3cwxs",
+      "title": "Define clear project goals",
+      "description": "Add specific, measurable project objectives to .faf",
+      "impact": 12,
+      "difficulty": "easy",
+      "category": "context",
+      "completed": false,
+      "estimatedMinutes": 10,
+      "aiPersonality": "universal",
+      "efficiency": 1.2
+    },
+    {
+      "id": "12y845j3nofmfe3cwxs",
+      "title": "Create CONTRIBUTING.md",
+      "description": "Guide contributors on how to participate",
+      "impact": 11,
+      "difficulty": "medium",
+      "category": "documentation",
+      "completed": false,
+      "estimatedMinutes": 15,
+      "aiPersonality": "claude",
+      "efficiency": 0.7333333333333333
+    },
+    {
+      "id": "57uhivyc7qimfe3cwxs",
+      "title": "Add usage examples",
+      "description": "Create practical examples showing how to use the project",
+      "impact": 14,
+      "difficulty": "medium",
+      "category": "examples",
+      "completed": false,
+      "estimatedMinutes": 30,
+      "aiPersonality": "chatgpt",
+      "efficiency": 0.4666666666666667
+    },
+    {
+      "id": "b39spmzcenlmfe3cwxs",
+      "title": "Add API documentation",
+      "description": "Document all public APIs and endpoints",
+      "impact": 18,
+      "difficulty": "hard",
+      "category": "documentation",
+      "completed": false,
+      "estimatedMinutes": 45,
+      "aiPersonality": "claude",
+      "efficiency": 0.4
+    }
+  ],
+  "createdAt": "2025-09-10T14:45:13.024Z",
+  "updatedAt": "2025-09-10T14:45:13.024Z"
+}

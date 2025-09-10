@@ -8,6 +8,7 @@ import { promises as fs } from "fs";
 import * as YAML from "yaml";
 import { validateSchema } from "../schema/faf-schema";
 import { findFafFile } from "../utils/file-utils";
+import { autoAwardCredit } from "../utils/technical-credit";
 
 interface ValidateOptions {
   schema?: string;
@@ -38,6 +39,9 @@ export async function validateFafFile(
 
     if (validation.valid) {
       console.log(chalk.green("✅ Valid .faf file"));
+
+      // Award technical credit for successful validation
+      await autoAwardCredit('validation_passed', fafPath);
 
       if (options.verbose) {
         console.log(chalk.gray("📊 Validation Details:"));

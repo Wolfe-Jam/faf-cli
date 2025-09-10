@@ -59,6 +59,12 @@ export const FAF_ICONS = {
   file: '📄',             // Documents/Files
   folder: '📁',           // Directory/Organization
   link: '🔗',             // Connection/Integration
+  
+  // New command icons
+  magnifying_glass: '🔍', // Search
+  clipboard: '📝',        // Todo/Tasks
+  broom: '🧹',           // Clear/Clean
+  pencil: '✏️',          // Edit
 };
 
 // 🎯 Status Color Coding

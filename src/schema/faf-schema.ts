@@ -123,6 +123,39 @@ export function validateSchema(
   const errors: ValidationError[] = [];
   const warnings: ValidationError[] = [];
 
+  // 🚨 CRITICAL: Handle null/undefined/invalid data safely
+  if (data === null || data === undefined) {
+    errors.push({
+      message: "Invalid input: data is null or undefined",
+      severity: "error",
+    });
+    return {
+      valid: false,
+      errors,
+      warnings,
+      schemaVersion,
+      sectionsFound: 0,
+      requiredFieldsFound: 0,
+      requiredFieldsTotal: REQUIRED_FIELDS.length,
+    };
+  }
+
+  if (typeof data !== "object" || Array.isArray(data)) {
+    errors.push({
+      message: "Invalid input: data must be an object",
+      severity: "error",
+    });
+    return {
+      valid: false,
+      errors,
+      warnings,
+      schemaVersion,
+      sectionsFound: 0,
+      requiredFieldsFound: 0,
+      requiredFieldsTotal: REQUIRED_FIELDS.length,
+    };
+  }
+
   // Check required fields
   let requiredFieldsFound = 0;
 

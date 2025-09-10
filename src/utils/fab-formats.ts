@@ -138,7 +138,7 @@ export class FabFormatsEngine {
     try {
       // 🏎️ F1-OPTIMIZATION: Single glob with multiple extensions (10x faster)
       const files = await new Promise<string[]>((resolve, reject) => {
-        glob('**/*.{py,ts,js,svelte,vue}', {
+        glob('**/*.{py,ts,tsx,js,jsx,svelte,vue}', {
           cwd: projectDir,
           ignore: ['node_modules/**', '.git/**', 'dist/**', 'build/**', 'venv/**', '__pycache__/**'],
           absolute: true,

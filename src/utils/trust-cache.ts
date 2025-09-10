@@ -24,7 +24,7 @@ export interface CachedVerificationResult {
  * Get trust cache file path
  */
 function getTrustCachePath(): string {
-  const cacheDir = path.join(os.homedir(), '.faf');
+  const cacheDir = path.join(os.homedir(), '.faf-cli-cache');
   return path.join(cacheDir, 'trust-cache.json');
 }
 

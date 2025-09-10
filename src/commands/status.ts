@@ -15,7 +15,7 @@ import {
   FAF_COLORS, 
   formatTrustLevel, 
   formatPerformance, 
-  formatAIHappiness,
+  // formatAIHappiness, // unused for now
   formatTechnicalCredit,
   PERFORMANCE_STANDARDS 
 } from '../utils/championship-style';
@@ -112,20 +112,20 @@ function displayStatus(
   
   console.log();
   console.log(FAF_COLORS.fafCyan(`${FAF_ICONS.chart_up} Project Status ${speedEmoji} (${performanceGrade})`));
-  console.log(FAF_COLORS.fafCyan('├─ ') + `${FAF_ICONS.gem} .faf Context: ${formatTrustLevel(trustScore)}`);
-  console.log(FAF_COLORS.fafCyan('├─ ') + `${FAF_ICONS.robot} AI Readiness: ${trustScore >= 80 ? '✅ Optimized' : '🟡 Improving'}`);
-  console.log(FAF_COLORS.fafCyan('├─ ') + `${FAF_ICONS.file} Files Tracked: ${lines} lines`);
-  console.log(FAF_COLORS.fafCyan('├─ ') + `${FAF_ICONS.zap} Performance: ${formatPerformance(duration)}`);
-  console.log(FAF_COLORS.fafCyan('├─ ') + `${FAF_ICONS.heart_orange} Last Sync: ${lastSyncText}`);
-  console.log(FAF_COLORS.fafCyan('└─ ') + `${FAF_ICONS.chart_up} Technical Credit: ${formatTechnicalCredit(technicalCredit)}`);
+  console.log(`${FAF_COLORS.fafCyan('├─ ')  }${FAF_ICONS.gem} .faf Context: ${formatTrustLevel(trustScore)}`);
+  console.log(`${FAF_COLORS.fafCyan('├─ ')  }${FAF_ICONS.robot} AI Readiness: ${trustScore >= 80 ? '✅ Optimized' : '🟡 Improving'}`);
+  console.log(`${FAF_COLORS.fafCyan('├─ ')  }${FAF_ICONS.file} Files Tracked: ${lines} lines`);
+  console.log(`${FAF_COLORS.fafCyan('├─ ')  }${FAF_ICONS.zap} Performance: ${formatPerformance(duration)}`);
+  console.log(`${FAF_COLORS.fafCyan('├─ ')  }${FAF_ICONS.heart_orange} Last Sync: ${lastSyncText}`);
+  console.log(`${FAF_COLORS.fafCyan('└─ ')  }${FAF_ICONS.chart_up} Technical Credit: ${formatTechnicalCredit(technicalCredit)}`);
   
   console.log();
   
   // AI Happiness Status
   console.log(FAF_COLORS.fafGreen(`${FAF_ICONS.brain} AI Compatibility:`));
-  console.log(FAF_COLORS.fafCyan('   ├─ ') + `${FAF_ICONS.blue_heart} Claude: ${trustScore >= 85 ? '92% 🩵' : trustScore >= 70 ? '78% 🟡' : '54% 🟠'}`);
-  console.log(FAF_COLORS.fafCyan('   ├─ ') + `${FAF_ICONS.green_heart} ChatGPT: ${trustScore >= 80 ? '89% 💚' : trustScore >= 65 ? '71% 🟡' : '49% 🟠'}`);
-  console.log(FAF_COLORS.fafCyan('   └─ ') + `${FAF_ICONS.heart_orange} Gemini: ${trustScore >= 75 ? '84% 🧡' : trustScore >= 60 ? '68% 🟡' : '43% 🟠'}`);
+  console.log(`${FAF_COLORS.fafCyan('   ├─ ')  }${FAF_ICONS.blue_heart} Claude: ${trustScore >= 85 ? '92% 🩵' : trustScore >= 70 ? '78% 🟡' : '54% 🟠'}`);
+  console.log(`${FAF_COLORS.fafCyan('   ├─ ')  }${FAF_ICONS.green_heart} ChatGPT: ${trustScore >= 80 ? '89% 💚' : trustScore >= 65 ? '71% 🟡' : '49% 🟠'}`);
+  console.log(`${FAF_COLORS.fafCyan('   └─ ')  }${FAF_ICONS.heart_orange} Gemini: ${trustScore >= 75 ? '84% 🧡' : trustScore >= 60 ? '68% 🟡' : '43% 🟠'}`);
   
   console.log();
   
@@ -141,9 +141,9 @@ function displayStatus(
   // Championship Call to Action
   if (duration <= PERFORMANCE_STANDARDS.status_command && trustScore >= 85) {
     console.log(FAF_COLORS.fafGreen(`${FAF_ICONS.party} Championship performance! ${FAF_ICONS.trophy}`));
-    console.log(FAF_COLORS.fafCyan(`${FAF_ICONS.rocket} Try: `) + 'faf share' + FAF_COLORS.fafCyan(' - Share this excellence!'));
+    console.log(`${FAF_COLORS.fafCyan(`${FAF_ICONS.rocket} Try: `)  }faf share${  FAF_COLORS.fafCyan(' - Share this excellence!')}`);
   } else {
-    console.log(FAF_COLORS.fafCyan(`${FAF_ICONS.magic_wand} Try: `) + 'faf trust --detailed' + FAF_COLORS.fafCyan(' - Improve your context'));
+    console.log(`${FAF_COLORS.fafCyan(`${FAF_ICONS.magic_wand} Try: `)  }faf trust --detailed${  FAF_COLORS.fafCyan(' - Improve your context')}`);
   }
   console.log();
 }

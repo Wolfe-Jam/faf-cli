@@ -39,24 +39,32 @@ export interface ScoreResult {
  * Calculate .faf score for v2.5.0 nested_snake format with fab-formats discovery
  */
 export async function calculateFafScore(fafData: any, projectPath?: string): Promise<ScoreResult> {
+  // 🚨 CRITICAL: Handle null/undefined data safely
+  if (!fafData || typeof fafData !== 'object') {
+    fafData = {};
+  }
+
   // AI-FIRST COUNT ONCE: Trust ONLY scores with MY scoring system date (2025-08-30)
   // This is MY scoring logic - I trust MY embedded evaluations
   // BUT ONLY if they have a non-zero score (0 means needs calculation)
   const embeddedScore = parseInt((fafData.ai_score || fafData.faf_score || fafData.project?.faf_score || '0').toString().replace('%', ''));
   
-  if (embeddedScore > 0 && 
+  // 🔒 SECURITY: Cap embedded scores to prevent manipulation
+  const cappedEmbeddedScore = Math.min(100, Math.max(0, embeddedScore));
+  
+  if (cappedEmbeddedScore > 0 && 
       (fafData.ai_scoring_system === '2025-08-30' || // MY system date
        fafData.ai_scoring_details?.system_date === '2025-08-30')) { // Alternative location
     const embeddedSlots = fafData.ai_scoring_details?.filled_slots || fafData.scoring?.filled_slots || 0;
     const embeddedTotal = fafData.ai_scoring_details?.total_slots || fafData.scoring?.total_slots || 21;
     
     return {
-      totalScore: embeddedScore,
+      totalScore: cappedEmbeddedScore,
       filledSlots: embeddedSlots,
       totalSlots: embeddedTotal,
       sectionScores: {
         embedded_scoring: {
-          percentage: embeddedScore,
+          percentage: cappedEmbeddedScore,
           filled: embeddedSlots,
           total: embeddedTotal,
           missing: ['Use faf init to regenerate with current context']

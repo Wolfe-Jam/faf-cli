@@ -14,6 +14,7 @@ import {
   FAF_COLORS, 
   BRAND_MESSAGES 
 } from '../utils/championship-style';
+import { autoAwardCredit } from '../utils/technical-credit';
 
 export interface SiameseSyncOptions {
   auto?: boolean;     // Automatic sync without prompts
@@ -132,7 +133,7 @@ export function claudeMdToFaf(claudeMdContent: string, existingFafData: any): st
 /**
  * 🔗 Main Siamese Twin sync function
  */
-export async function syncSiameseTwins(options: SiameseSyncOptions = {}): Promise<SyncResult> {
+export async function syncSiameseTwins(): Promise<SyncResult> {
   const startTime = Date.now();
   const result: SyncResult = {
     success: false,
@@ -153,15 +154,15 @@ export async function syncSiameseTwins(options: SiameseSyncOptions = {}): Promis
     const claudeMdPath = path.join(projectDir, 'claude.md');
     
     // Check what exists
-    const fafExists = true; // We found it above
+    // const fafExists = true; // We found it above (unused)
     const claudeMdExists = await fs.access(claudeMdPath).then(() => true).catch(() => false);
     
     console.log(FAF_COLORS.fafCyan(`${FAF_ICONS.link} Siamese Twin Sync Engine`));
-    console.log(FAF_COLORS.fafCyan('├─ ') + `Analyzing twin files...`);
+    console.log(`${FAF_COLORS.fafCyan('├─ ')  }Analyzing twin files...`);
     
     if (!claudeMdExists) {
       // Create claude.md from .faf
-      console.log(FAF_COLORS.fafCyan('├─ ') + `Creating claude.md from .faf...`);
+      console.log(`${FAF_COLORS.fafCyan('├─ ')  }Creating claude.md from .faf...`);
       
       const fafContent = await fs.readFile(fafPath, 'utf-8');
       const claudeMdContent = fafToClaudeMd(fafContent);
@@ -172,11 +173,11 @@ export async function syncSiameseTwins(options: SiameseSyncOptions = {}): Promis
       result.direction = 'faf-to-claude';
       result.filesChanged.push('claude.md');
       
-      console.log(FAF_COLORS.fafGreen('└─ ') + `${FAF_ICONS.party} claude.md created! Siamese twins now active!`);
+      console.log(`${FAF_COLORS.fafGreen('└─ ')  }${FAF_ICONS.party} claude.md created! Siamese twins now active!`);
       
     } else {
       // Both files exist - need to sync
-      console.log(FAF_COLORS.fafCyan('├─ ') + `Both twins exist - checking sync status...`);
+      console.log(`${FAF_COLORS.fafCyan('├─ ')  }Both twins exist - checking sync status...`);
       
       // For now, update claude.md from .faf (we can enhance this later)
       const fafContent = await fs.readFile(fafPath, 'utf-8');
@@ -188,15 +189,18 @@ export async function syncSiameseTwins(options: SiameseSyncOptions = {}): Promis
       result.direction = 'faf-to-claude';
       result.filesChanged.push('claude.md');
       
-      console.log(FAF_COLORS.fafGreen('└─ ') + `${FAF_ICONS.link} Twins synchronized! Perfect harmony achieved!`);
+      console.log(`${FAF_COLORS.fafGreen('└─ ')  }${FAF_ICONS.link} Twins synchronized! Perfect harmony achieved!`);
     }
     
     result.duration = Date.now() - startTime;
     
+    // Award technical credit for successful sync
+    await autoAwardCredit('sync_success', fafPath);
+    
     // Championship success message
     console.log();
     console.log(FAF_COLORS.fafGreen(`${FAF_ICONS.trophy} Championship sync complete in ${result.duration}ms!`));
-    console.log(FAF_COLORS.fafCyan(`${FAF_ICONS.magic_wand} Try: `) + 'faf status' + FAF_COLORS.fafCyan(' - See your active twins'));
+    console.log(`${FAF_COLORS.fafCyan(`${FAF_ICONS.magic_wand} Try: `)  }faf status${  FAF_COLORS.fafCyan(' - See your active twins')}`);
     
     return result;
     
@@ -212,7 +216,7 @@ export async function syncSiameseTwins(options: SiameseSyncOptions = {}): Promis
  */
 export async function siameseSyncCommand(options: SiameseSyncOptions = {}): Promise<void> {
   try {
-    await syncSiameseTwins(options);
+    await syncSiameseTwins();
   } catch (error) {
     console.error(FAF_COLORS.fafOrange('❌ Siamese Twin sync failed:'), error);
     process.exit(1);

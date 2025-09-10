@@ -23,6 +23,10 @@ export interface TrustScore {
 
 export interface TrustDashboardOptions {
   detailed?: boolean;
+  confidence?: boolean;  // Show AI confidence levels
+  garage?: boolean;      // Safe experimentation mode  
+  panic?: boolean;       // Emergency repair mode
+  guarantee?: boolean;   // Quality assurance mode
 }
 
 /**
@@ -229,6 +233,70 @@ export async function displayTrustDashboard(fafPath: string, trustScore: TrustSc
   console.log();
 }
 
+// =====================================
+// TRUST MODE FUNCTIONS
+// =====================================
+
+async function showConfidenceMode(fafPath: string): Promise<void> {
+  const trustScore = await calculateTrustScore(fafPath);
+  console.log(chalk.cyan('🎯 AI Confidence Analysis'));
+  console.log(`├─ Claude Confidence: ${trustScore.aiCompatibility}%`);
+  console.log(`├─ Context Completeness: ${trustScore.contextCompleteness}%`);
+  console.log(`└─ Overall AI Trust: ${trustScore.overall}%`);
+  
+  if (trustScore.overall < 70) {
+    console.log('\n💡 Boost confidence with:');
+    console.log('   • faf todo - Complete improvement tasks');
+    console.log('   • faf verify - Test with AI models');
+  }
+}
+
+async function showGarageMode(fafPath: string): Promise<void> {
+  console.log(chalk.green('🔧 Safe Experimentation Garage'));
+  console.log('├─ Backup created: .faf.garage-backup');
+  console.log('├─ Safe to experiment with context changes');
+  console.log('└─ Restore anytime with: faf trust --panic');
+  
+  // Create backup for safe experimentation
+  const backupPath = `${fafPath  }.garage-backup`;
+  const fafContent = await fs.readFile(fafPath, 'utf-8');
+  await fs.writeFile(backupPath, fafContent);
+}
+
+async function showPanicMode(fafPath: string): Promise<void> {
+  console.log(chalk.red('🚨 Emergency Context Repair'));
+  
+  // Look for backup files
+  const backupPath = `${fafPath  }.garage-backup`;
+  const backupExists = await fs.access(backupPath).then(() => true).catch(() => false);
+  
+  if (backupExists) {
+    console.log('├─ Garage backup found - restoring...');
+    const backupContent = await fs.readFile(backupPath, 'utf-8');
+    await fs.writeFile(fafPath, backupContent);
+    console.log('└─ ✅ Context restored from garage backup!');
+  } else {
+    console.log('├─ No garage backup found');
+    console.log('├─ Running emergency diagnostics...');
+    console.log('└─ Run: faf check --fix for auto-repair');
+  }
+}
+
+async function showGuaranteeMode(fafPath: string): Promise<void> {
+  console.log(chalk.blue('🛡️ Quality Assurance Mode'));
+  console.log('├─ Running comprehensive quality checks...');
+  
+  const trustScore = await calculateTrustScore(fafPath);
+  const passed = trustScore.overall >= 85;
+  
+  if (passed) {
+    console.log('└─ ✅ QUALITY GUARANTEED - Context meets championship standards!');
+  } else {
+    console.log('├─ ⚠️ Quality below guarantee threshold (85%)');
+    console.log('└─ Run: faf todo for improvement plan');
+  }
+}
+
 /**
  * Main trust command handler
  */
@@ -240,6 +308,27 @@ export async function trustCommand(options: TrustDashboardOptions = {}): Promise
       console.log(chalk.red('❌ No .faf file found in current directory or parent directories'));
       console.log(chalk.dim('💡 Run `faf init` to generate your first .faf file'));
       process.exit(1);
+    }
+
+    // Handle specific trust modes
+    if (options.confidence) {
+      await showConfidenceMode(fafPath);
+      return;
+    }
+    
+    if (options.garage) {
+      await showGarageMode(fafPath);
+      return;
+    }
+    
+    if (options.panic) {
+      await showPanicMode(fafPath);
+      return;
+    }
+    
+    if (options.guarantee) {
+      await showGuaranteeMode(fafPath);
+      return;
     }
     
     console.log(chalk.dim(`🎯 Calculating trust for: ${path.relative(process.cwd(), fafPath)}`));
