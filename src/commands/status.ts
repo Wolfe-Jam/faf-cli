@@ -147,7 +147,7 @@ function displayStatus(
 /**
  * Main status command handler
  */
-export async function statusCommand(options: StatusOptions = {}): Promise<void> {
+export async function statusCommand(): Promise<void> {
   const startTime = Date.now();
   
   try {

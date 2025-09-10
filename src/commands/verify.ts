@@ -27,24 +27,6 @@ export interface AIVerificationOptions {
   detailed?: boolean;
 }
 
-/**
- * Verification prompts designed to test AI understanding
- */
-const VERIFICATION_PROMPTS = {
-  understanding: `Based on this .faf context file, please answer in 2-3 sentences:
-1. What is this project building?
-2. What's the main technology stack?
-3. What would be your first development task?
-
-.faf content:
-{FAF_CONTENT}`,
-
-  confidence: `Rate your confidence (0-100%) in understanding this project from the .faf file. 
-Then explain what makes you confident or what additional context you'd need.
-
-.faf content:
-{FAF_CONTENT}`
-};
 
 /**
  * Mock AI verification for development (will be replaced with real API calls)
@@ -226,7 +208,7 @@ export async function verifyCommand(options: AIVerificationOptions = {}): Promis
     displayVerificationResults(results, options.detailed);
     
     // Update trust score
-    const newTrustLevel = await updateTrustWithVerification(fafPath, results);
+    await updateTrustWithVerification(fafPath, results);
     
     if (options.detailed) {
       console.log();
