@@ -64,7 +64,7 @@ export async function calculateTrustScore(fafPath: string): Promise<TrustScore> 
       freshnessScore,
       verificationStatus: isValid ? 'unverified' : 'failed'
     };
-  } catch (error) {
+  } catch {
     return {
       overall: 0,
       contextCompleteness: 0,

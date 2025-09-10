@@ -93,7 +93,7 @@ export async function calculateFafScore(fafData: any, projectPath?: string): Pro
           }
         });
       }
-    } catch (error) {
+    } catch {
       // Fail silently - continue with .faf data only
     }
   }

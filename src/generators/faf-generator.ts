@@ -135,11 +135,8 @@ function generateProjectData(
   fabAnalysis: FabFormatsAnalysis,
   projectType: string,
 ): any {
-  const now = new Date().toISOString();
-
   // Determine project name and version from appropriate source
   let projectName = "untitled-project";
-  let version = "1.0.0";
   let description = "Project development and deployment";
   let targetUser: string | undefined;
   let coreProblem: string | undefined;
@@ -155,12 +152,10 @@ function generateProjectData(
   // Then enhance with package.json metadata
   if (pythonData.name) {
     projectName = pythonData.name;
-    version = pythonData.version || "0.1.0";
     if (!readmeData.description) {description = pythonData.description || description;}
   } else if (packageData.name) {
     // Clean package name for YAML compatibility
     projectName = packageData.name.replace(/^@/, '').replace('/', '-');
-    version = packageData.version || "1.0.0";
     if (!readmeData.description) {
       // Clean description too to avoid YAML issues
       const cleanDesc = packageData.description || description;
@@ -502,7 +497,7 @@ function extractReadmeContext(content: string): any {
   // Extract title (first # heading)
   const titleMatch = content.match(/^#\s+(.+)$/m);
   if (titleMatch) {
-    context.title = titleMatch[1].replace(/[^a-zA-Z0-9\s\-\.]/g, '').trim();
+    context.title = titleMatch[1].replace(/[^a-zA-Z0-9\s\-.]/g, '').trim();
   }
   
   // If no proper title found, try to infer project purpose from sections
@@ -531,7 +526,7 @@ function extractReadmeContext(content: string): any {
       // Skip empty lines
       if (line.trim() === '') {continue;}
       // Skip lines that are just markdown formatting
-      if (/^[\*\-\_\#]+$/.test(line.trim())) {continue;}
+      if (/^[*\-_#]+$/.test(line.trim())) {continue;}
       
       // Found real content!
       realDescription = line.trim();
@@ -578,7 +573,7 @@ function extractReadmeContext(content: string): any {
     context.description = realDescription
       .replace(/\*\*(.+?)\*\*/g, '$1') // Remove markdown bold
       .replace(/\*(.+?)\*/g, '$1')     // Remove markdown italic  
-      .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1') // Convert links to text
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Convert links to text
       .substring(0, 200);
   }
   
