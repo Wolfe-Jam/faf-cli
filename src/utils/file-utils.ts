@@ -21,13 +21,40 @@ export async function findFafFile(
     try {
       // First, try simple fs.readdir approach
       const files = await fs.readdir(currentDir);
-      const fafFiles = files.filter((file) => file.endsWith(".faf"));
+      // Filter for EXACTLY .faf files (not .faf.backup, .fafignore, etc.)
+      const fafFiles = files.filter((file) => {
+        // Must be exactly '.faf' or match pattern like 'project.faf'
+        // Exclude: .faf.backup*, .fafignore, faf-*, etc.
+        const isExactFaf = file === '.faf';
+        const isNamedFaf = file.match(/^[^.]+\.faf$/) !== null; // like 'project.faf'
+        const isNotBackup = !file.includes('.faf.');
+        const isNotFafIgnore = file !== '.fafignore';
+        
+        return (isExactFaf || isNamedFaf) && isNotBackup && isNotFafIgnore;
+      });
 
       if (fafFiles.length > 0) {
-        const fafPath = path.join(currentDir, fafFiles[0]);
-        // Verify file is readable
-        if (await fileExists(fafPath)) {
-          return fafPath;
+        // Sort to prioritize .faf over named files like project.faf
+        const sortedFafFiles = fafFiles.sort((a, b) => {
+          if (a === '.faf') {return -1;}  // .faf comes first
+          if (b === '.faf') {return 1;}   // .faf comes first
+          return a.localeCompare(b);    // alphabetical otherwise
+        });
+        
+        // Check all matching files, not just the first one
+        // This handles cases where .faf directory exists alongside project.faf file
+        for (const fafFile of sortedFafFiles) {
+          const fafPath = path.join(currentDir, fafFile);
+          
+          // Verify it's a file (not directory) and readable
+          try {
+            const stats = await fs.stat(fafPath);
+            if (stats.isFile() && await fileExists(fafPath)) {
+              return fafPath;
+            }
+          } catch {
+            // Skip if stat fails, continue to next file
+          }
         }
       }
 

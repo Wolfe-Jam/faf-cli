@@ -19,8 +19,16 @@ import { statusCommand } from './commands/status';
 import { verifyCommand } from './commands/verify';
 import { listStacks, scanCurrentProject, exportForGallery } from './commands/stacks';
 import { siameseSyncCommand } from './commands/siamese-sync';
+import { creditCommand } from './commands/credit';
+import { todoCommand } from './commands/todo';
+import { checkCommand } from './commands/check';
+import { clearCommand } from './commands/clear';
+import { editCommand } from './commands/edit';
+import { searchCommand } from './commands/search';
+import { indexCommand } from './commands/index';
+import { shareCommand } from './commands/share';
 import { setColorOptions, type ColorScheme } from './utils/color-utils';
-import { FAF_HEADER, BRAND_MESSAGES } from './utils/championship-style';
+import { FAF_HEADER } from './utils/championship-style';
 
 const version = require('../package.json').version;
 
@@ -85,22 +93,29 @@ Examples:
   $ faf init -t react            # Force React template`)
   .action((directory, options) => initFafFile(directory, options));
 
-// 🎯 faf trust - AI Trust Dashboard (The Emotional Core)
+// 🎯 faf trust - Consolidated Trust Dashboard (The Emotional Core)
 program
   .command('trust')
-  .description('Show AI Trust Dashboard - "I don\'t worry about AI context anymore"')
+  .description('🎯 Unified trust dashboard - confidence, garage, panic, guarantee modes')
   .option('-d, --detailed', 'Show detailed trust metrics')
+  .option('--confidence', 'Show AI confidence analysis')
+  .option('--garage', 'Safe experimentation mode with backup')
+  .option('--panic', 'Emergency context repair mode')
+  .option('--guarantee', 'Quality assurance mode (85%+ threshold)')
   .addHelpText('after', `
 Examples:
-  $ faf trust                        # Show trust dashboard
+  $ faf trust                        # Main trust dashboard
   $ faf trust --detailed             # Detailed metrics breakdown
+  $ faf trust --confidence           # AI confidence analysis
+  $ faf trust --garage               # Safe experiment mode
+  $ faf trust --panic                # Emergency repair
+  $ faf trust --guarantee            # Quality guarantee check
   
-The Trust Dashboard shows:
-  • Overall trust level (0-100%)
-  • AI compatibility status (Claude, ChatGPT, Gemini)
-  • Context completeness score
-  • Freshness indicators
-  • Actionable improvement suggestions`)
+Trust Modes:
+  • Confidence: AI confidence levels and boosting tips
+  • Garage: Safe experimentation with automatic backup  
+  • Panic: Emergency repair and restoration
+  • Guarantee: Championship quality assurance (85%+ standard)`)
   .action((options) => trustCommand(options));
 
 // 🚀 faf status - Quick context health check (git status equivalent)
@@ -118,6 +133,114 @@ Shows:
   • Performance metrics
   • Siamese twin (claude.md) status`)
   .action(() => statusCommand());
+
+// 💎 faf credit - Technical Credit Dashboard (Revolutionary Psychology)
+program
+  .command('credit')
+  .description('💎 Technical Credit Dashboard - See your accumulated development credits')
+  .option('-d, --detailed', 'Show detailed credit breakdown by category')
+  .option('-h, --history', 'Show credit earning history')
+  .option('-c, --clear', 'Clear credit history (confirmation required)')
+  .addHelpText('after', `
+Examples:
+  $ faf credit                       # Show credit dashboard
+  $ faf credit --detailed            # Detailed breakdown by category
+  $ faf credit --history             # See credit earning timeline
+  
+💎 Technical Credit System:
+  • Earn credit for every improvement (vs. technical debt)
+  • Transform developer psychology from anxiety to confidence
+  • Track AI happiness improvements and context quality
+  • Build trust through measurable technical achievements
+  • Championship levels: Beginner → Professional → Championship
+  
+Expected Impact:
+  😰 "I hope this works" → 😎 "I trust my context"`)
+  .action((options) => creditCommand(options));
+
+// 📝 faf todo - Claude-Inspired Todo System (The Gamifier)
+program
+  .command('todo')
+  .description('📝 Claude-inspired todo system - gamify your context improvements')
+  .option('-s, --show', 'Show current todo list')
+  .option('-c, --complete <task>', 'Mark task as completed (by number or keyword)')
+  .option('-r, --reset', 'Reset current todo list')
+  .addHelpText('after', `
+Examples:
+  $ faf todo                            # Generate new improvement plan
+  $ faf todo --show                     # View current todo list
+  $ faf todo --complete 1               # Complete task #1
+  $ faf todo --complete readme          # Complete README task
+  $ faf todo --reset                    # Start fresh
+  
+Philosophy:
+  • Transform low scores into exciting improvement games
+  • Claude-inspired task prioritization and celebrations
+  • Gamified progress tracking with championship rewards
+  • Turn "I need better context" → "I'm completing achievements!"
+  
+Expected Impact:
+  📉 47% score → 📈 85% score through guided achievements`)
+  .action((options) => todoCommand(options));
+
+// 📚 faf index - Universal A-Z Reference (The Everything Catalog)
+program
+  .command('index [term]')
+  .description('📚 Universal A-Z reference - commands, concepts, features, everything!')
+  .option('--category <category>', 'Filter by category (core, ai, trust, utilities, etc.)')
+  .option('--search <query>', 'Search within index entries')
+  .option('--examples', 'Show usage examples for commands')
+  .addHelpText('after', `
+Examples:
+  $ faf index                           # Full A-Z catalog
+  $ faf index trust                     # Everything about trust
+  $ faf index --category ai             # All AI-related entries
+  $ faf index --search "context"        # Search for "context" 
+  $ faf index --examples                # Show usage examples
+  
+The Everything Catalog:
+  • ⚡️ Commands: All available commands with usage
+  • 💡 Concepts: Core FAF concepts (siamese-twins, technical-credit, etc.)
+  • 🎯 Features: Specialized features (garage, panic, guarantee modes)
+  • 📂 Categories: core, ai, trust, utilities, improvement, psychology
+  
+Perfect for:
+  • New users: "What can FAF do?" → faf index
+  • Power users: "What were trust options?" → faf index trust
+  • Discovery: "Show me AI features" → faf index --category ai`)
+  .action((term, options) => indexCommand(term, options));
+
+// 🚀 faf share - Universal .faf Distribution System  
+program
+  .command('share [file]')
+  .description('🚀 Secure .faf sharing with auto-sanitization')
+  .option('-p, --private', 'Keep sensitive info (default: sanitize)')
+  .option('-f, --format <format>', 'Output format: yaml|json|url', 'yaml')
+  .option('-e, --expires <duration>', 'Expiration: 24h|7d|30d', '7d')
+  .option('--password <password>', 'Password protect shared .faf')
+  .option('-d, --description <text>', 'Share description')
+  .option('-a, --anonymous', 'Remove author information')
+  .addHelpText('after', `
+Examples:
+  $ faf share                        # Share with auto-sanitization
+  $ faf share --private              # Share with sensitive info intact
+  $ faf share --format json          # Share as JSON format
+  $ faf share --expires 24h          # Expire in 24 hours
+  $ faf share --anonymous            # Remove author info
+  $ faf share --password secret123   # Password protect
+  
+Security Features:
+  • 🔒 Auto-sanitization removes sensitive data by default
+  • 🎭 Anonymous sharing option removes author info
+  • ⏰ Configurable expiration (24h, 7d, 30d)
+  • 🔐 Optional password protection
+  • 📝 Multiple formats: YAML, JSON, shareable URLs
+  
+Perfect for:
+  • Team handoffs: Clean context sharing
+  • Community help: Sanitized project sharing
+  • Documentation: Shareable project examples`)
+  .action((file, options) => shareCommand(file, options));
 
 // 🤖 faf verify - AI Verification System (The Trust Builder)
 program
@@ -175,18 +298,27 @@ Stack Discovery:
     }
   });
 
-// ✅ faf validate - Check your .faf file is correct
+// 🔍 faf check - Comprehensive validation & audit (merged validate + audit)
 program
-  .command('validate [file]')
-  .description('Check if .faf file is valid and properly formatted')
-  .option('-s, --schema <version>', 'Schema version to validate against', 'latest')
-  .option('-v, --verbose', 'Show detailed validation results')
+  .command('check')
+  .description('🔍 Comprehensive .faf validation and freshness check')
+  .option('--format', 'Check format/validity only (old validate)')
+  .option('--fresh', 'Check freshness/completeness only (old audit)')
+  .option('--fix', 'Auto-fix issues where possible')
+  .option('-d, --detailed', 'Show detailed check results')
   .addHelpText('after', `
 Examples:
-  $ faf validate                 # Check .faf in current directory
-  $ faf validate project.faf     # Check specific file
-  $ faf validate --verbose       # See detailed validation info`)
-  .action(validateFafFile);
+  $ faf check                    # Full check (format + freshness)
+  $ faf check --format           # Format validation only
+  $ faf check --fresh            # Freshness audit only
+  $ faf check --fix              # Auto-fix issues
+  $ faf check --detailed         # Detailed diagnostics
+  
+Combines old validate + audit:
+  • Format validation (schema, YAML syntax, required fields)
+  • Freshness audit (up-to-date, completeness, staleness)
+  • Auto-fix capabilities for common issues`)
+  .action((options) => checkCommand(options));
 
 // 🎯 faf score - See how complete your context is  
 program
@@ -233,18 +365,69 @@ Examples:
     }
   });
 
-// 🔍 faf audit - Check if your .faf is fresh
+// 🧹 faf clear - Reset caches and state (Claude Code consistency)
 program
-  .command('audit [file]')
-  .description('Check if .faf file is up-to-date and complete')
-  .option('-w, --warn-days <days>', 'Warn if older than N days', '7')
-  .option('-e, --error-days <days>', 'Error if older than N days', '30')
+  .command('clear')
+  .description('🧹 Clear caches, temporary files, and reset state')
+  .option('--cache', 'Clear trust cache only')
+  .option('--todos', 'Clear todo lists only')
+  .option('--backups', 'Clear backup files only')
+  .option('--all', 'Clear everything (default)')
   .addHelpText('after', `
 Examples:
-  $ faf audit                    # Check freshness and completeness
-  $ faf audit --warn-days 14     # Warn if older than 2 weeks
-  $ faf audit --error-days 60    # Error if older than 2 months`)
-  .action(auditFafFile);
+  $ faf clear                    # Clear all caches and temp files
+  $ faf clear --cache            # Clear trust cache only
+  $ faf clear --todos            # Clear todo lists only
+  $ faf clear --backups          # Clear backup files only
+  
+Claude Code Consistency:
+  • Similar to /clear command in Claude Code
+  • Fresh start for .faf system
+  • Removes temporary files and cached data`)
+  .action((options) => clearCommand(options));
+
+// ✏️ faf edit - Interactive .faf editor (Claude Code consistency)  
+program
+  .command('edit')
+  .description('✏️ Interactive .faf editor with validation')
+  .option('--editor <editor>', 'Specific editor to use (code, vim, nano)')
+  .option('--section <section>', 'Edit specific section (project, stack, etc.)')
+  .option('--no-validate', 'Skip validation after editing')
+  .addHelpText('after', `
+Examples:
+  $ faf edit                     # Open .faf in default editor
+  $ faf edit --editor vim        # Use specific editor
+  $ faf edit --section project   # Edit project section only
+  $ faf edit --no-validate       # Skip post-edit validation
+  
+Claude Code Consistency:
+  • Similar to /edit command in Claude Code
+  • Automatic backup before editing
+  • Post-edit validation with restore on errors`)
+  .action((options) => editCommand(options));
+
+// 🔍 faf search - Search .faf content (Claude Code consistency)
+program
+  .command('search <query>')
+  .description('🔍 Search within .faf file content with highlighting')
+  .option('--section <section>', 'Search in specific section only')
+  .option('--case', 'Case sensitive search')
+  .option('--keys', 'Search keys only')
+  .option('--values', 'Search values only')  
+  .option('--count', 'Show match count only')
+  .addHelpText('after', `
+Examples:
+  $ faf search "react"           # Search for "react" anywhere
+  $ faf search "api" --section project  # Search in project section only
+  $ faf search "test" --keys     # Search in keys only
+  $ faf search "node" --case     # Case sensitive search
+  $ faf search "component" --count  # Just show match count
+  
+Claude Code Consistency:
+  • Similar to /search command in Claude Code
+  • Intelligent highlighting of matches
+  • Section-aware searching with path display`)
+  .action((query, options) => searchCommand(query, options));
 
 // 🔧 faf lint - Clean up formatting automatically
 program
