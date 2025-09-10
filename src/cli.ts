@@ -18,6 +18,7 @@ import { trustCommand } from './commands/trust';
 import { statusCommand } from './commands/status';
 import { verifyCommand } from './commands/verify';
 import { listStacks, scanCurrentProject, exportForGallery } from './commands/stacks';
+import { siameseSyncCommand } from './commands/siamese-sync';
 import { setColorOptions, type ColorScheme } from './utils/color-utils';
 import { FAF_HEADER, BRAND_MESSAGES } from './utils/championship-style';
 
@@ -200,18 +201,37 @@ Examples:
   $ faf score --minimum 80       # Fail if score below 80%`)
   .action(scoreFafFile);
 
-// 🔄 faf sync - Keep .faf up-to-date automatically
+// 🔄 faf sync - Keep .faf up-to-date automatically + Siamese Twin sync
 program
   .command('sync [file]')
-  .description('Update .faf when package.json or dependencies change')
+  .description('Update .faf when dependencies change OR sync with claude.md (Siamese Twins)')
   .option('-a, --auto', 'Automatically apply detected changes')
   .option('-d, --dry-run', 'Show changes without applying')
+  .option('-t, --twins', '🔗 Sync .faf ↔ claude.md (Siamese Twin mode)')
+  .option('-w, --watch', 'Start real-time file watching (with --twins)')
   .addHelpText('after', `
 Examples:
   $ faf sync                     # Show what needs updating
   $ faf sync --auto              # Update automatically
-  $ faf sync --dry-run           # Preview changes only`)
-  .action(syncFafFile);
+  $ faf sync --dry-run           # Preview changes only
+  
+🔗 Siamese Twin Examples:
+  $ faf sync --twins             # Create/sync claude.md with .faf
+  $ faf sync --twins --watch     # Real-time sync monitoring
+  $ faf sync --twins --auto      # Auto-sync without prompts`)
+  .action(async (file, options) => {
+    if (options.twins) {
+      // Siamese Twin sync mode
+      await siameseSyncCommand({
+        auto: options.auto,
+        watch: options.watch,
+        force: false
+      });
+    } else {
+      // Original sync functionality
+      await syncFafFile(file, options);
+    }
+  });
 
 // 🔍 faf audit - Check if your .faf is fresh
 program
