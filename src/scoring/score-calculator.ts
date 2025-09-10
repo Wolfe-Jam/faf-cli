@@ -1,7 +1,10 @@
 /**
  * 🎯 .faf Scoring Calculator
- * Advanced scoring algorithm based on your stone-cold testing feedback
+ * Advanced scoring algorithm with fab-formats discovery engine integration
  */
+
+import { FabFormatsEngine } from '../utils/fab-formats';
+import path from 'path';
 
 export interface SectionScore {
   percentage: number;
@@ -33,17 +36,17 @@ export interface ScoreResult {
 // };
 
 /**
- * Calculate .faf score for v2.5.0 nested_snake format
+ * Calculate .faf score for v2.5.0 nested_snake format with fab-formats discovery
  */
-export function calculateFafScore(fafData: any): ScoreResult {
-  // AI-FIRST COUNT ONCE: Trust any score with MY scoring system date (2025-08-30)
+export async function calculateFafScore(fafData: any, projectPath?: string): Promise<ScoreResult> {
+  // AI-FIRST COUNT ONCE: Trust ONLY scores with MY scoring system date (2025-08-30)
   // This is MY scoring logic - I trust MY embedded evaluations
-  if ((fafData.ai_score || fafData.faf_score || fafData.project?.faf_score) && 
+  // BUT ONLY if they have a non-zero score (0 means needs calculation)
+  const embeddedScore = parseInt((fafData.ai_score || fafData.faf_score || fafData.project?.faf_score || '0').toString().replace('%', ''));
+  
+  if (embeddedScore > 0 && 
       (fafData.ai_scoring_system === '2025-08-30' || // MY system date
-       fafData.ai_scoring_details?.system_date === '2025-08-30' || // Alternative location
-       fafData.scoring_system || // Legacy support
-       fafData.project?.faf_version === '2.5.0' || fafData.faf_version === '2.4.0')) {
-    const embeddedScore = parseInt((fafData.ai_score || fafData.faf_score || fafData.project?.faf_score || '0').toString().replace('%', ''));
+       fafData.ai_scoring_details?.system_date === '2025-08-30')) { // Alternative location
     const embeddedSlots = fafData.ai_scoring_details?.filled_slots || fafData.scoring?.filled_slots || 0;
     const embeddedTotal = fafData.ai_scoring_details?.total_slots || fafData.scoring?.total_slots || 21;
     
@@ -69,13 +72,39 @@ export function calculateFafScore(fafData: any): ScoreResult {
     };
   }
 
+  // ENHANCED SCORING: Use fab-formats discovery to find missing context!
+  let discoveredContext: any = {};
+  
+  if (projectPath) {
+    try {
+      // Run fab-formats discovery engine - our 200+ format knowledge base!
+      const projectDir = path.dirname(projectPath);
+      const fabEngine = new FabFormatsEngine();
+      const analysis = await fabEngine.discoverFormats(projectDir);
+      
+      // Use discovered slots to enhance scoring
+      if (analysis.slotFillRecommendations) {
+        discoveredContext = analysis.slotFillRecommendations;
+        
+        // Merge discovered context with .faf data (discovered context as fallback)
+        Object.keys(discoveredContext).forEach(key => {
+          if (!fafData[key] || fafData[key] === 'None' || fafData[key] === 'Unknown') {
+            fafData[key] = discoveredContext[key];
+          }
+        });
+      }
+    } catch (error) {
+      // Fail silently - continue with .faf data only
+    }
+  }
+  
   // LEGACY/FALLBACK: Only calculate if no embedded score (older formats)
   let pcSlots = 0;
   
-  // Map v2.5.0 nested fields to scoring logic
-  const projectName = fafData.project?.name || fafData.projectName;
-  const projectGoal = fafData.project?.goal || fafData.instant_context?.what_building || fafData.projectGoal;
-  const mainLanguage = fafData.instant_context?.main_language || fafData.project?.main_language || fafData.mainLanguage;
+  // Map v2.5.0 nested fields to scoring logic (now enhanced with fab-formats discovery!)
+  const projectName = fafData.project?.name || fafData.projectName || discoveredContext.projectName;
+  const projectGoal = fafData.project?.goal || fafData.instant_context?.what_building || fafData.projectGoal || discoveredContext.projectGoal;
+  const mainLanguage = fafData.instant_context?.main_language || fafData.project?.main_language || fafData.mainLanguage || discoveredContext.mainLanguage;
   const framework = fafData.stack?.frontend || fafData.framework;
   const cssFramework = fafData.stack?.css_framework || fafData.cssFramework;
   const uiLibrary = fafData.stack?.ui_library || fafData.uiLibrary;
@@ -108,20 +137,32 @@ export function calculateFafScore(fafData: any): ScoreResult {
   // Count PD slots (6 max) - Updated for v2.5.0 nested format
   let pdSlots = 0;
   
-  // Map v2.5.0 human_context fields to scoring logic
-  const targetUser = fafData.human_context?.who || fafData.targetUser;
-  const coreProblem = fafData.human_context?.what || fafData.coreProblem;
-  const missionPurpose = fafData.human_context?.why || fafData.missionPurpose;
-  const deploymentMarket = fafData.human_context?.where || fafData.deploymentMarket;
-  const timeline = fafData.human_context?.when || fafData.timeline;
-  const approach = fafData.human_context?.how || fafData.approach;
+  // Map v2.5.0 human_context fields to scoring logic (handle nested objects)
+  const hasWho = fafData.human_context?.who && 
+                 (typeof fafData.human_context.who === 'object' || 
+                  (typeof fafData.human_context.who === 'string' && fafData.human_context.who !== 'Not specified'));
+  const hasWhat = fafData.human_context?.what && 
+                  (typeof fafData.human_context.what === 'object' || 
+                   (typeof fafData.human_context.what === 'string' && fafData.human_context.what !== 'Not specified'));
+  const hasWhy = fafData.human_context?.why && 
+                 (typeof fafData.human_context.why === 'object' || 
+                  (typeof fafData.human_context.why === 'string' && fafData.human_context.why !== 'Not specified'));
+  const hasWhere = fafData.human_context?.where && 
+                   (typeof fafData.human_context.where === 'object' || 
+                    (typeof fafData.human_context.where === 'string' && fafData.human_context.where !== 'Not specified'));
+  const hasWhen = fafData.human_context?.when && 
+                  (typeof fafData.human_context.when === 'object' || 
+                   (typeof fafData.human_context.when === 'string' && fafData.human_context.when !== 'Not specified'));
+  const hasHow = fafData.human_context?.how && 
+                 (typeof fafData.human_context.how === 'object' || 
+                  (typeof fafData.human_context.how === 'string' && fafData.human_context.how !== 'Not specified'));
   
-  if (targetUser && targetUser !== 'Not specified') {pdSlots++;}
-  if (coreProblem && coreProblem !== 'Not specified') {pdSlots++;}
-  if (missionPurpose && missionPurpose !== 'Not specified') {pdSlots++;}
-  if (deploymentMarket && deploymentMarket !== 'Not specified') {pdSlots++;}
-  if (timeline && timeline !== 'Not specified') {pdSlots++;}
-  if (approach && approach !== 'Not specified') {pdSlots++;}
+  if (hasWho) {pdSlots++;}
+  if (hasWhat) {pdSlots++;}
+  if (hasWhy) {pdSlots++;}
+  if (hasWhere) {pdSlots++;}
+  if (hasWhen) {pdSlots++;}
+  if (hasHow) {pdSlots++;}
   
   // Count FILE slots (if files are present) - simplified for CLI
   let fileSlots = 0;
@@ -146,13 +187,13 @@ export function calculateFafScore(fafData: any): ScoreResult {
   
   // Generate section scores for detailed view
   const sectionScores: Record<string, SectionScore> = {
-    project_components: {
+    project: {
       percentage: Math.round((pcSlots / 15) * 100),
       filled: pcSlots,
       total: 15,
       missing: getProjectComponentsMissing(fafData),
     },
-    project_details: {
+    human_context: {
       percentage: Math.round((pdSlots / 6) * 100),
       filled: pdSlots,
       total: 6,
@@ -160,15 +201,31 @@ export function calculateFafScore(fafData: any): ScoreResult {
     },
   };
   
+  // Add AI instructions section if present
+  if (fafData.ai_instructions) {
+    const aiSlots = calculateAIInstructionsScore(fafData.ai_instructions);
+    sectionScores.ai_instructions = aiSlots;
+  }
+  
+  // Add technical context section if present  
+  if (fafData.technical_context) {
+    const techSlots = calculateTechnicalContextScore(fafData.technical_context);
+    sectionScores.technical_context = techSlots;
+  }
+  
   // Generate suggestions
   const suggestions: string[] = [];
-  if (pcSlots < 15) {
-    const missing = sectionScores.project_components.missing.slice(0, 2);
-    suggestions.push(`Add ${missing.join(" and ")} to project components`);
+  if (pcSlots < 15 && sectionScores.project) {
+    const missing = sectionScores.project.missing.slice(0, 2);
+    if (missing.length > 0) {
+      suggestions.push(`Add ${missing.join(" and ")} to project components`);
+    }
   }
-  if (pdSlots < 6) {
-    const missing = sectionScores.project_details.missing.slice(0, 2);
-    suggestions.push(`Add ${missing.join(" and ")} to project details (6 W's)`);
+  if (pdSlots < 6 && sectionScores.human_context) {
+    const missing = sectionScores.human_context.missing.slice(0, 2);
+    if (missing.length > 0) {
+      suggestions.push(`Add ${missing.join(" and ")} to human context (6 W's)`);
+    }
   }
   
   // Quality indicators - simplified
@@ -255,6 +312,65 @@ function getProjectDetailsMissing(fafData: any): string[] {
   return missing;
 }
 
+
+/**
+ * Calculate AI Instructions section score
+ */
+function calculateAIInstructionsScore(aiInstructions: any): SectionScore {
+  let filled = 0;
+  const total = 5; // 5 key AI instruction elements
+  const missing: string[] = [];
+  
+  if (aiInstructions.priority) filled++;
+  else missing.push('ai_instructions.priority');
+  
+  if (aiInstructions.message) filled++;
+  else missing.push('ai_instructions.message');
+  
+  if (aiInstructions.guidelines && Array.isArray(aiInstructions.guidelines) && aiInstructions.guidelines.length > 0) filled++;
+  else missing.push('ai_instructions.guidelines');
+  
+  if (aiInstructions.priority_order) filled++;
+  else missing.push('ai_instructions.priority_order');
+  
+  if (aiInstructions.working_style) filled++;
+  else missing.push('ai_instructions.working_style');
+  
+  return {
+    percentage: Math.round((filled / total) * 100),
+    filled,
+    total,
+    missing
+  };
+}
+
+/**
+ * Calculate Technical Context section score
+ */
+function calculateTechnicalContextScore(techContext: any): SectionScore {
+  let filled = 0;
+  const total = 4; // 4 key technical context elements
+  const missing: string[] = [];
+  
+  if (techContext.architecture) filled++;
+  else missing.push('technical_context.architecture');
+  
+  if (techContext.tech_stack) filled++;
+  else missing.push('technical_context.tech_stack');
+  
+  if (techContext.key_files && Array.isArray(techContext.key_files) && techContext.key_files.length > 0) filled++;
+  else missing.push('technical_context.key_files');
+  
+  if (techContext.patterns || techContext.infrastructure) filled++;
+  else missing.push('technical_context.patterns');
+  
+  return {
+    percentage: Math.round((filled / total) * 100),
+    filled,
+    total,
+    missing
+  };
+}
 
 /**
  * Check if timestamp is fresh (within 30 days)

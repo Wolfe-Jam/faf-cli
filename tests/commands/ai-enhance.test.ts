@@ -33,13 +33,12 @@ describe('AI Enhance Command', () => {
     }
   });
 
-  it('should check for OpenAI Codex CLI availability', async () => {
-    // Since OpenAI Codex CLI won't be available in test environment,
-    // this should exit with error about missing dependency
-    await enhanceFafWithAI(undefined, { model: 'gpt-4', focus: 'completeness' });
+  it('should work with Claude-first architecture (no Codex dependency)', async () => {
+    // Now uses our own Big-3 verification engine, no Codex needed
+    await enhanceFafWithAI(undefined, { model: 'claude', focus: 'completeness' });
 
-    expect(mockLog).toHaveBeenCalledWith(expect.stringContaining('❌ OpenAI Codex CLI not found'));
-    expect(mockLog).toHaveBeenCalledWith(expect.stringContaining('💡 Install with: npm install -g @openai/codex'));
+    // Should look for .faf file first
+    expect(mockLog).toHaveBeenCalledWith(expect.stringContaining('❌ No .faf file found'));
     expect(mockExit).toHaveBeenCalledWith(1);
   });
 
@@ -48,7 +47,7 @@ describe('AI Enhance Command', () => {
     // we can test the file handling logic by mocking the path
     const nonExistentPath = path.join(testDir, 'missing.faf');
     
-    await enhanceFafWithAI(nonExistentPath, { model: 'gpt-4' });
+    await enhanceFafWithAI(nonExistentPath, { model: 'claude' });
 
     // Should fail at the Codex check step
     expect(mockExit).toHaveBeenCalledWith(1);
@@ -77,7 +76,7 @@ project:
     
     for (const focus of focusAreas) {
       mockExit.mockClear();
-      await enhanceFafWithAI(undefined, { focus });
+      await enhanceFafWithAI(undefined, { focus: focus as any });
       expect(mockExit).toHaveBeenCalledWith(1); // Always fails without Codex
     }
   });

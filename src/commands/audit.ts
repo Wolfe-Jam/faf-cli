@@ -80,7 +80,7 @@ export async function auditFafFile(file?: string, options: AuditOptions = {}) {
     }
 
     // 3. Completeness Audit
-    const scoreResult = calculateFafScore(fafData);
+    const scoreResult = await calculateFafScore(fafData, fafPath);
     const completenessScore = scoreResult.totalScore;
 
     if (completenessScore < 50) {

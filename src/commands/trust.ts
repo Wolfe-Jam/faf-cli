@@ -40,7 +40,7 @@ export async function calculateTrustScore(fafPath: string): Promise<TrustScore> 
                    fafData.metadata;
     
     // Calculate context completeness using existing scoring
-    const scoreResult = calculateFafScore(fafData);
+    const scoreResult = await calculateFafScore(fafData, fafPath);
     const contextCompleteness = scoreResult.totalScore;
     
     // Calculate freshness (based on timestamp if available)

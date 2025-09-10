@@ -77,7 +77,7 @@ export async function initFafFile(
 
     // Show actual score matching what's embedded in the file
     const fafData = YAML.parse(fafContent);
-    const scoreResult = calculateFafScore(fafData);
+    const scoreResult = await calculateFafScore(fafData, outputPath);
     // Use the embedded score from the file header to match what user sees
     const embeddedScore = fafData.faf_score ? parseInt(fafData.faf_score.replace('%', '')) : scoreResult.totalScore;
 

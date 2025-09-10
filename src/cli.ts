@@ -214,39 +214,43 @@ Examples:
   $ faf lint --schema-version 2.4.0  # Use specific schema`)
   .action(lintFafFile);
 
-// 🤖 faf ai-enhance - AI-powered enhancement
+// 🚀 faf ai-enhance - Claude-First, Big-3 Compatible Enhancement
 program
   .command('ai-enhance [file]')
-  .description('🚀 NEW! Enhance .faf files with OpenAI Codex CLI')
-  .option('-m, --model <model>', 'OpenAI model to use', 'gpt-4o-mini')
-  .option('-f, --focus <area>', 'Focus area: human-context|ai-instructions|completeness|optimization')
-  .option('-i, --interactive', 'Use interactive Codex CLI mode')
+  .description('🚀 Claude-First AI Enhancement - Big-3 Compatible, Bullet-proof Universal')
+  .option('-m, --model <model>', 'AI model: claude|chatgpt|gemini|big3|universal', 'claude')
+  .option('-f, --focus <area>', 'Focus: human-context|ai-instructions|completeness|claude-exclusive', 'completeness')
+  .option('--consensus', 'Build consensus from multiple models')
   .option('--dry-run', 'Show enhancement prompt without executing')
   .addHelpText('after', `
-🤖 AI-Powered Enhancement:
-  $ faf ai-enhance                  # Smart enhancement with GPT-4o-mini
-  $ faf ai-enhance --focus human-context  # Focus on WHO/WHAT/WHY
-  $ faf ai-enhance --interactive    # Use interactive Codex CLI
-  $ faf ai-enhance --dry-run        # Preview enhancement prompt
+🎯 Claude-First Enhancement:
+  $ faf ai-enhance                        # Claude intelligence (default)
+  $ faf ai-enhance --model big3           # Big-3 consensus enhancement
+  $ faf ai-enhance --focus claude-exclusive  # Claude's F1-inspired specialty
+  $ faf ai-enhance --consensus            # Multi-model consensus
+  $ faf ai-enhance --dry-run              # Preview enhancement
 
-Requirements: npm install -g @openai/codex`)
+🚀 NO EXTERNAL DEPENDENCIES - Uses our own Big-3 verification engine!`)
   .action(enhanceFafWithAI);
 
-// 🔍 faf ai-analyze - AI-powered analysis  
+// 🔍 faf ai-analyze - Claude-First, Big-3 Compatible Analysis
 program
   .command('ai-analyze [file]')
-  .description('🚀 NEW! Get AI insights on your .faf file quality')
-  .option('-m, --model <model>', 'OpenAI model to use', 'gpt-4o-mini')
-  .option('-f, --focus <area>', 'Focus: completeness|quality|ai-readiness|human-context')
+  .description('🔍 Claude-First AI Analysis - Big-3 Compatible Intelligence')
+  .option('-m, --model <model>', 'AI model: claude|chatgpt|gemini|big3|universal', 'claude')
+  .option('-f, --focus <area>', 'Focus: completeness|quality|ai-readiness|human-context|claude-exclusive')
   .option('-v, --verbose', 'Show detailed section breakdown')
   .option('-s, --suggestions', 'Include automated suggestions')
+  .option('-c, --comparative', 'Compare perspectives from multiple models')
   .addHelpText('after', `
-🔍 AI-Powered Analysis:
-  $ faf ai-analyze                  # Comprehensive AI analysis
-  $ faf ai-analyze --focus quality  # Focus on content quality
-  $ faf ai-analyze --verbose --suggestions  # Detailed analysis + tips
-  
-Requirements: npm install -g @openai/codex`)
+🎯 Claude-First Analysis:
+  $ faf ai-analyze                         # Claude intelligence (default)
+  $ faf ai-analyze --model big3            # Big-3 perspective analysis
+  $ faf ai-analyze --focus claude-exclusive  # Claude's championship analysis
+  $ faf ai-analyze --comparative           # Multi-model comparison
+  $ faf ai-analyze --verbose --suggestions # Detailed analysis + tips
+
+🚀 NO EXTERNAL DEPENDENCIES - Uses our own Big-3 verification engine!`)
   .action(analyzeFafWithAI);
 
 // Handle unknown commands with helpful suggestions
