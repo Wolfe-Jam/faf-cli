@@ -120,7 +120,7 @@ export const BRAND_MESSAGES = {
 
 // 🏁 ASCII Art Header
 export const FAF_HEADER = `${FAF_COLORS.fafCyan('┌─────────────────────────────────────────┐')}
-${FAF_COLORS.fafCyan('│')}  ${FAF_ICONS.lightning} ${FAF_COLORS.fafCyan('███████╗ █████╗ ███████╗')} ${FAF_ICONS.checkered_flag}         ${FAF_COLORS.fafCyan('│')}
+${FAF_COLORS.fafCyan('│')} 🏎️⚡️ ${FAF_COLORS.fafCyan('███████╗ █████╗ ███████╗')} ${FAF_ICONS.checkered_flag}         ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('│')}    ${FAF_COLORS.fafCyan('██╔════╝██╔══██╗██╔════╝')}             ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('│')}    ${FAF_COLORS.fafGreen('█████╗  ███████║█████╗')}               ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('│')}    ${FAF_COLORS.fafOrange('██╔══╝  ██╔══██║██╔══╝')}               ${FAF_COLORS.fafCyan('│')}
