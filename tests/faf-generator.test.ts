@@ -20,10 +20,11 @@ describe('FAF Generator', () => {
     
     // Should contain required fields
     const parsed = YAML.parse(result);
-    expect(parsed.faf_version).toBeDefined();
+    expect(parsed.ai_scoring_system).toBeDefined();
     expect(parsed.project).toBeDefined();
     expect(parsed.project.name).toBeDefined();
-    expect(parsed.project.faf_score).toBeGreaterThan(0);
+    expect(parsed.ai_score).toBeDefined();
+    expect(parseInt(parsed.ai_score.replace('%', ''))).toBeGreaterThan(0);
   });
 
   it('should include AI instructions section', async () => {
@@ -37,8 +38,9 @@ describe('FAF Generator', () => {
     const parsed = YAML.parse(result);
     
     expect(parsed.ai_instructions).toBeDefined();
-    expect(parsed.ai_instructions.priority).toBe('CRITICAL');
-    expect(parsed.ai_instructions.message).toContain('ATTENTION AI');
+    expect(parsed.ai_instructions.priority_order).toBeDefined();
+    expect(parsed.ai_instructions.working_style).toBeDefined();
+    expect(parsed.ai_instructions.priority_order[0]).toContain('Read THIS .faf file first');
   });
 
   it('should generate different scores for different project types', async () => {
@@ -61,6 +63,8 @@ describe('FAF Generator', () => {
     const typescriptParsed = YAML.parse(typescriptResult);
     
     // TypeScript projects should typically have higher scores
-    expect(typescriptParsed.project.faf_score).toBeGreaterThanOrEqual(genericParsed.project.faf_score);
+    const genericScore = parseInt(genericParsed.ai_score.replace('%', ''));
+    const typescriptScore = parseInt(typescriptParsed.ai_score.replace('%', ''));
+    expect(typescriptScore).toBeGreaterThanOrEqual(genericScore);
   });
 });

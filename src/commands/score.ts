@@ -51,8 +51,8 @@ export async function scoreFafFile(file?: string, options: ScoreOptions = {}) {
     const content = await fs.readFile(fafPath, "utf-8");
     const fafData = YAML.parse(content);
 
-    // Calculate score
-    const scoreResult = calculateFafScore(fafData);
+    // Calculate score with fab-formats discovery for enhanced context!
+    const scoreResult = await calculateFafScore(fafData, fafPath);
     const percentage = Math.round(scoreResult.totalScore);
 
     // Accessibility-friendly score display

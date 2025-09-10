@@ -92,10 +92,8 @@ export async function generateFafFromProject(
     };
   }
 
-  // 🔍 FORENSIC ANALYSIS - Multi-file intelligence gathering
+  // 🔍 ENHANCED ANALYSIS - TypeScript + fab-formats intelligence
   let typescriptData: TypeScriptContext | null = null;
-  let configData: any = {};
-  let sourceCodeData: any = {};
 
   // Analyze TypeScript configuration (compiler settings, strictness)
   const tsconfigPath = await findTsConfig(projectRoot);
@@ -107,19 +105,9 @@ export async function generateFafFromProject(
     }
   }
 
-  // Analyze build configurations (Vite, Svelte, Webpack)
-  try {
-    configData = await analyzeConfigFiles(projectRoot);
-  } catch {
-    // Continue without config data
-  }
-
-  // Analyze source code for actual usage patterns
-  try {
-    sourceCodeData = await analyzeSourceCode(projectRoot, packageData);
-  } catch {
-    // Continue without source analysis
-  }
+  // Extract quality indicators from fab-formats analysis
+  const configData = extractConfigDataFromFab(fabAnalysis);
+  const sourceCodeData = extractSourceDataFromFab(fabAnalysis);
 
   // Generate project data from FORENSIC ANALYSIS + FAB-FORMATS DISCOVERY
   const projectData = generateProjectData(
@@ -213,7 +201,7 @@ function generateProjectData(
     // Basic Project Info (5 slots)
     projectName !== "untitled-project",
     description !== "Project development and deployment", 
-    detectMainLanguage(deps, projectType) !== "Unknown",
+    detectMainLanguage(deps, projectType, fabAnalysis) !== "Unknown",
     stack.frontend || stack.backend, // Any framework detected
     stack.package_manager !== "npm" || Object.keys(deps).length > 0, // Dependencies managed
     
@@ -270,7 +258,7 @@ function generateProjectData(
   return {
     projectName: projectName,
     projectGoal: description,
-    mainLanguage: detectMainLanguage(deps, projectType),
+    mainLanguage: detectMainLanguage(deps, projectType, fabAnalysis),
     framework: stack.frontend || "None",
     cssFramework: stack.css_framework || "None",
     uiLibrary: stack.ui_library || "None",
@@ -463,8 +451,27 @@ function analyzeStackFromDependencies(
 function detectMainLanguage(
   deps: Record<string, string>,
   projectType: string,
+  fabAnalysis?: any
 ): string {
+  // Python detection - enhanced with fab-formats intelligence
   if (projectType.startsWith("python-")) {return "Python";}
+  
+  // Use fab-formats to detect Python projects
+  if (fabAnalysis) {
+    const hasPythonFormats = fabAnalysis.confirmedFormats?.some((f: any) => 
+      f.formatType === 'requirements.txt' || 
+      f.formatType === '.py' || 
+      f.formatType === 'pyproject.toml'
+    );
+    const hasPythonFrameworks = Object.keys(fabAnalysis.frameworkConfidence || {}).some((fw: string) => 
+      fw.toLowerCase().includes('python') || 
+      fw.toLowerCase().includes('fastapi') || 
+      fw.toLowerCase().includes('django')
+    );
+    if (hasPythonFormats || hasPythonFrameworks) {
+      return "Python";
+    }
+  }
 
   // TypeScript detection - enhanced for new project types
   if (
@@ -477,7 +484,8 @@ function detectMainLanguage(
     return "TypeScript";
   }
 
-  if (projectType.includes("js") || Object.keys(deps).length > 0)
+  // JavaScript detection - only for JS projects with package.json
+  if (projectType.includes("js") || (Object.keys(deps).length > 0 && deps.name))
     {return "JavaScript";}
   return "Unknown";
 }
@@ -759,162 +767,64 @@ async function parsePyprojectToml(content: string): Promise<any> {
 }
 
 /**
- * 🔍 FORENSIC ANALYSIS: Config Files Detective Work
- * Analyzes build configurations to understand project architecture
+ * 🎯 Extract config data from fab-formats analysis (replaces analyzeConfigFiles)
  */
-async function analyzeConfigFiles(projectRoot: string): Promise<any> {
+function extractConfigDataFromFab(fabAnalysis: FabFormatsAnalysis): any {
   const configData: any = {
     buildTool: null,
     deployment: null,
     strictMode: false,
     qualityIndicators: [],
-    performanceOptimizations: []
+    performanceOptimizations: [],
+    environmentVariables: 0
   };
 
-  // Analyze tsconfig.json for strictness and quality
-  try {
-    const tsconfigPath = path.join(projectRoot, "tsconfig.json");
-    const tsconfigContent = await fs.readFile(tsconfigPath, "utf-8");
-    
-    // Check for strictness indicators
-    if (tsconfigContent.includes('"strict": true')) {
-      configData.strictMode = true;
-      configData.qualityIndicators.push("Strict TypeScript");
-    }
-    
-    // Look for quality comments
-    if (tsconfigContent.includes("ULTRA STRICT") || tsconfigContent.includes("STRICT")) {
-      configData.qualityIndicators.push("Ultra-strict configuration");
-    }
-    
-    // Check ES target
-    const targetMatch = tsconfigContent.match(/"target":\s*"([^"]+)"/);
-    if (targetMatch) {
-      configData.esTarget = targetMatch[1];
-    }
-  } catch {}
+  // Extract build tools from fab-formats slot recommendations
+  const slots = fabAnalysis.slotFillRecommendations;
+  if (slots.build) configData.buildTool = slots.build;
+  if (slots.hosting) configData.deployment = slots.hosting;
+  if (slots.cicd) configData.cicdPipeline = slots.cicd;
 
-  // Analyze Vite configuration
-  try {
-    const viteConfigPath = path.join(projectRoot, "vite.config.js");
-    let viteContent = "";
-    try {
-      viteContent = await fs.readFile(viteConfigPath, "utf-8");
-    } catch {
-      const viteConfigTsPath = path.join(projectRoot, "vite.config.ts");
-      viteContent = await fs.readFile(viteConfigTsPath, "utf-8");
-    }
-    
-    configData.buildTool = "Vite";
-    
-    // Check for performance optimizations
-    if (viteContent.includes("terser") || viteContent.includes("minify")) {
-      configData.performanceOptimizations.push("Code minification");
-    }
-  } catch {}
-
-  // Analyze Svelte configuration
-  try {
-    const svelteConfigPath = path.join(projectRoot, "svelte.config.js");
-    const svelteContent = await fs.readFile(svelteConfigPath, "utf-8");
-    
-    // Check for deployment adapter
-    if (svelteContent.includes("adapter-vercel")) {
-      configData.deployment = "Vercel Edge Runtime";
-      if (svelteContent.includes("F1") || svelteContent.includes("MAXIMUM PERFORMANCE")) {
-        configData.performanceOptimizations.push("F1-inspired optimization");
-      }
-    } else if (svelteContent.includes("adapter-netlify")) {
-      configData.deployment = "Netlify";
-    } else if (svelteContent.includes("adapter-node")) {
-      configData.deployment = "Node.js";
-    }
-  } catch {}
-
-  // 🔍 CI/CD PIPELINE DETECTION
-  try {
-    // GitHub Actions
-    const actionsDir = path.join(projectRoot, ".github", "workflows");
-    const actionFiles = await fs.readdir(actionsDir);
-    
-    if (actionFiles.length > 0) {
-      configData.qualityIndicators.push("GitHub Actions CI/CD");
-      configData.deployment = configData.deployment || "GitHub Actions";
-      configData.cicdPipeline = "GitHub Actions";
-    }
-  } catch {}
-  // GitLab CI
-  try {
-    const gitlabCIPath = path.join(projectRoot, ".gitlab-ci.yml");
-    await fs.readFile(gitlabCIPath, "utf-8");
-    configData.qualityIndicators.push("GitLab CI/CD");
-    configData.cicdPipeline = configData.cicdPipeline || "GitLab CI";
-  } catch {}
-  // Circle CI
-  try {
-    const circleCIPath = path.join(projectRoot, ".circleci", "config.yml");
-    await fs.readFile(circleCIPath, "utf-8");
-    configData.qualityIndicators.push("Circle CI");
-    configData.cicdPipeline = configData.cicdPipeline || "Circle CI";
-  } catch {}
-  
-  // 🔍 ENVIRONMENT VARIABLES DETECTION
-  const envFiles = [".env", ".env.local", ".env.example", ".env.template"];
-  let envVarCount = 0;
-  
-  for (const envFile of envFiles) {
-    try {
-      const envPath = path.join(projectRoot, envFile);
-      const envContent = await fs.readFile(envPath, "utf-8");
-      
-      // Count environment variables (lines that look like KEY=value)
-      const envLines = envContent.split("\n").filter(line => 
-        line.trim() && !line.trim().startsWith("#") && line.includes("=")
-      );
-      
-      envVarCount += envLines.length;
-      
-      if (envLines.length > 0) {
-        configData.qualityIndicators.push(`Environment Configuration (${envFile})`);
-      }
-    } catch {}
+  // Quality indicators based on format diversity and intelligence
+  if (fabAnalysis.totalIntelligenceScore > 80) {
+    configData.qualityIndicators.push("Ultra-High Format Intelligence");
+  }
+  if (fabAnalysis.confirmedFormats.length > 5) {
+    configData.qualityIndicators.push("High Format Diversity");
   }
   
-  // Store total env var count for scoring
-  if (envVarCount > 0) {
-    configData.environmentVariables = envVarCount;
+  // Check for specific quality formats
+  const hasTypeScript = fabAnalysis.confirmedFormats.some(f => 
+    f.formatType === 'tsconfig.json' || f.formatType === '.ts'
+  );
+  if (hasTypeScript) {
+    configData.strictMode = true;
+    configData.qualityIndicators.push("TypeScript Project");
   }
-  
-  // 🐍 Python-specific quality checks
-  try {
-    // Check for pytest
-    const testDir = path.join(projectRoot, "tests");
-    const testFiles = await fs.readdir(testDir);
-    if (testFiles.length > 0) {
-      configData.qualityIndicators.push("Python Tests (pytest)");
-    }
-  } catch {}
-  
-  // Check for Python virtual environment
-  try {
-    await fs.access(path.join(projectRoot, "venv"));
-    configData.qualityIndicators.push("Python Virtual Environment");
-  } catch {}
-  
-  // Check for Python requirements
-  try {
-    await fs.access(path.join(projectRoot, "requirements.txt"));
-    configData.qualityIndicators.push("Python Dependencies Managed");
-  } catch {}
+
+  // CI/CD detection from formats
+  const hasCICD = fabAnalysis.confirmedFormats.some(f => 
+    f.formatType.includes('.yml') || f.formatType.includes('actions')
+  );
+  if (hasCICD) {
+    configData.qualityIndicators.push("CI/CD Pipeline Detected");
+  }
+
+  // Performance optimizations from confirmed formats
+  const hasPerformanceFormats = fabAnalysis.confirmedFormats.some(f => 
+    f.formatType.includes('vite') || f.formatType.includes('webpack')
+  );
+  if (hasPerformanceFormats) {
+    configData.performanceOptimizations.push("Modern Build Tooling");
+  }
 
   return configData;
 }
 
 /**
- * 🔍 FORENSIC ANALYSIS: Source Code Detective Work  
- * Scans actual source code for usage patterns and framework features
+ * 🎯 Extract source data from fab-formats analysis (replaces analyzeSourceCode)
  */
-async function analyzeSourceCode(projectRoot: string, packageData: any): Promise<any> {
+function extractSourceDataFromFab(fabAnalysis: FabFormatsAnalysis): any {
   const sourceData: any = {
     frameworkFeatures: [],
     integrations: [],
@@ -922,198 +832,47 @@ async function analyzeSourceCode(projectRoot: string, packageData: any): Promise
     qualityIndicators: []
   };
 
-  // Analyze Svelte 5 Runes usage
-  if (packageData.dependencies?.svelte || packageData.devDependencies?.svelte) {
-    try {
-      const srcPath = path.join(projectRoot, "src");
-      
-      // Check for Svelte 5 Runes in .svelte files
-      const svelteFiles = await findSvelteFiles(srcPath);
-      for (const filePath of svelteFiles.slice(0, 5)) { // Limit to first 5 files
-        try {
-          const content = await fs.readFile(filePath, "utf-8");
-          
-          // Check for Runes usage
-          if (content.includes("$state") || content.includes("$derived") || content.includes("$effect")) {
-            sourceData.frameworkFeatures.push("Svelte 5 Runes");
-            break;
-          }
-        } catch {}
-      }
-    } catch {}
-  }
-
-  // Analyze React patterns
-  if (packageData.dependencies?.react || packageData.devDependencies?.react) {
-    try {
-      const srcPath = path.join(projectRoot, "src");
-      const reactFiles = await findReactFiles(srcPath);
-      
-      for (const filePath of reactFiles.slice(0, 3)) {
-        try {
-          const content = await fs.readFile(filePath, "utf-8");
-          
-          // Check for hooks usage
-          if (content.includes("useState") || content.includes("useEffect")) {
-            sourceData.frameworkFeatures.push("React Hooks");
-          }
-          
-          // Check for TypeScript React
-          if (content.includes("React.FC") || content.includes("JSX.Element")) {
-            sourceData.frameworkFeatures.push("TypeScript React");
-          }
-        } catch {}
-      }
-    } catch {}
-  }
-
-  // Analyze authentication integrations
-  if (packageData.dependencies?.["svelte-clerk"] || packageData.dependencies?.clerk) {
-    sourceData.integrations.push("Clerk Authentication (10k free MAUs)");
-  }
+  // Extract framework features from fab-formats intelligence
+  const topFramework = Object.entries(fabAnalysis.frameworkConfidence)
+    .reduce((max, current) => current[1] > max[1] ? current : max, ['', 0]);
   
-  if (packageData.dependencies?.["@supabase/supabase-js"]) {
-    sourceData.integrations.push("Supabase Database");
+  if (topFramework[0]) {
+    sourceData.frameworkFeatures.push(`${topFramework[0]} (${Math.round(topFramework[1])}% confidence)`);
   }
+
+  // Language-specific features from confirmed formats
+  const hasTypeScript = fabAnalysis.confirmedFormats.some(f => f.formatType === '.ts');
+  const hasSvelte = fabAnalysis.confirmedFormats.some(f => f.formatType === '.svelte');
+  const hasPython = fabAnalysis.confirmedFormats.some(f => f.formatType === '.py');
   
-  if (packageData.dependencies?.stripe) {
-    sourceData.integrations.push("Stripe Payments");
+  if (hasTypeScript) {
+    sourceData.frameworkFeatures.push("TypeScript Source Files");
+    sourceData.qualityIndicators.push("Type-Safe Development");
+  }
+  if (hasSvelte) {
+    sourceData.frameworkFeatures.push("Svelte Components");
+  }
+  if (hasPython) {
+    sourceData.frameworkFeatures.push("Python Scripts");
   }
 
-  // 🧠 Context-On-Demand: FastAPI Route Detection for Python projects
-  try {
-    const mainPy = path.join(projectRoot, "main.py");
-    const content = await fs.readFile(mainPy, "utf-8");
-    
-    // Count FastAPI routes
-    const routePatterns = [
-      /@app\.get\s*\(\s*["']([^"']+)["']/g,
-      /@app\.post\s*\(\s*["']([^"']+)["']/g,
-      /app\.get\s*\(\s*["']([^"']+)["']/g,
-      /app\.post\s*\(\s*["']([^"']+)["']/g,
-      /app\.put\s*\(\s*["']([^"']+)["']/g,
-      /app\.delete\s*\(\s*["']([^"']+)["']/g
-    ];
-    
-    const routes: string[] = [];
-    for (const pattern of routePatterns) {
-      let match;
-      while ((match = pattern.exec(content)) !== null) {
-        if (!routes.includes(match[1])) {
-          routes.push(match[1]);
-        }
-      }
-    }
-    
-    if (routes.length > 0) {
-      sourceData.integrations.push(`API Endpoints (${routes.length} routes)`);
-    }
-    
-    // 🐍 Python Quality Indicators
-    // Check for type hints
-    if (content.includes('->') && content.includes(':')) {
-      sourceData.qualityIndicators.push("Python Type Hints");
-    }
-    
-    // Check for docstrings
-    if (content.includes('"""') || content.includes("'''")) {
-      sourceData.qualityIndicators.push("Python Docstrings");
-    }
-    
-    // Check for async/await patterns
-    if (content.includes('async def') || content.includes('await ')) {
-      sourceData.frameworkFeatures.push("Async Python");
-    }
-    
-    // Check for FastAPI decorators
-    if (content.includes('@app.') || content.includes('@router.')) {
-      sourceData.frameworkFeatures.push("FastAPI Decorators");
-    }
-  } catch {}
+  // Quality indicators from format intelligence score
+  if (fabAnalysis.totalIntelligenceScore > 100) {
+    sourceData.qualityIndicators.push("High-Quality Project Structure");
+  }
+  if (fabAnalysis.confirmedFormats.length > 8) {
+    sourceData.qualityIndicators.push("Rich Development Environment");
+  }
 
-  // Analyze quality indicators from comments
-  try {
-    const srcPath = path.join(projectRoot, "src");
-    const allFiles = await findSourceFiles(srcPath);
-    
-    for (const filePath of allFiles.slice(0, 10)) { // Sample first 10 files
-      try {
-        const content = await fs.readFile(filePath, "utf-8");
-        
-        // Look for quality indicators in comments
-        if (content.includes("F1") && (content.includes("performance") || content.includes("quality"))) {
-          sourceData.qualityIndicators.push("F1-inspired development");
-        }
-        
-        if (content.includes("STRICT") || content.includes("strict")) {
-          sourceData.qualityIndicators.push("Strict coding standards");
-        }
-      } catch {}
-    }
-  } catch {}
+  // Extract integrations from slot recommendations
+  const slots = fabAnalysis.slotFillRecommendations;
+  if (slots.database) {
+    sourceData.integrations.push(`${slots.database} Integration`);
+  }
+  if (slots.hosting) {
+    sourceData.integrations.push(`${slots.hosting} Deployment`);
+  }
 
   return sourceData;
 }
 
-/**
- * Helper functions for file discovery
- */
-async function findSvelteFiles(dir: string): Promise<string[]> {
-  const files: string[] = [];
-  try {
-    const items = await fs.readdir(dir, { withFileTypes: true });
-    
-    for (const item of items) {
-      const fullPath = path.join(dir, item.name);
-      
-      if (item.isDirectory() && !item.name.startsWith('.') && item.name !== 'node_modules') {
-        const subFiles = await findSvelteFiles(fullPath);
-        files.push(...subFiles);
-      } else if (item.name.endsWith('.svelte')) {
-        files.push(fullPath);
-      }
-    }
-  } catch {}
-  
-  return files;
-}
-
-async function findReactFiles(dir: string): Promise<string[]> {
-  const files: string[] = [];
-  try {
-    const items = await fs.readdir(dir, { withFileTypes: true });
-    
-    for (const item of items) {
-      const fullPath = path.join(dir, item.name);
-      
-      if (item.isDirectory() && !item.name.startsWith('.') && item.name !== 'node_modules') {
-        const subFiles = await findReactFiles(fullPath);
-        files.push(...subFiles);
-      } else if (item.name.endsWith('.tsx') || item.name.endsWith('.jsx')) {
-        files.push(fullPath);
-      }
-    }
-  } catch {}
-  
-  return files;
-}
-
-async function findSourceFiles(dir: string): Promise<string[]> {
-  const files: string[] = [];
-  try {
-    const items = await fs.readdir(dir, { withFileTypes: true });
-    
-    for (const item of items) {
-      const fullPath = path.join(dir, item.name);
-      
-      if (item.isDirectory() && !item.name.startsWith('.') && item.name !== 'node_modules') {
-        const subFiles = await findSourceFiles(fullPath);
-        files.push(...subFiles.slice(0, 5)); // Limit depth
-      } else if (item.name.match(/\.(js|ts|jsx|tsx|svelte|vue)$/)) {
-        files.push(fullPath);
-      }
-    }
-  } catch {}
-  
-  return files;
-}
