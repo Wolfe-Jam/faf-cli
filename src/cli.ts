@@ -19,14 +19,12 @@ import { statusCommand } from './commands/status';
 import { verifyCommand } from './commands/verify';
 import { listStacks, scanCurrentProject, exportForGallery } from './commands/stacks';
 import { setColorOptions, type ColorScheme } from './utils/color-utils';
+import { FAF_HEADER, BRAND_MESSAGES } from './utils/championship-style';
 
 const version = require('../package.json').version;
 
-// CLI Header
-console.log(chalk.cyan.bold(`
-🚀 .faf CLI v${version}
-Universal AI Context Format Tooling - F1-Inspired Software Engineering
-`));
+// Championship Header 🏁
+console.log(FAF_HEADER);
 
 program
   .name('faf')
@@ -118,7 +116,7 @@ Shows:
   • AI readiness status
   • Performance metrics
   • Siamese twin (claude.md) status`)
-  .action((options) => statusCommand(options));
+  .action(() => statusCommand());
 
 // 🤖 faf verify - AI Verification System (The Trust Builder)
 program

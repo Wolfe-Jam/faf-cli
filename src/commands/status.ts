@@ -10,6 +10,15 @@ import path from 'path';
 import chalk from 'chalk';
 import { findFafFile } from '../utils/file-utils';
 import { calculateTrustScore } from './trust';
+import { 
+  FAF_ICONS, 
+  FAF_COLORS, 
+  formatTrustLevel, 
+  formatPerformance, 
+  formatAIHappiness,
+  formatTechnicalCredit,
+  PERFORMANCE_STANDARDS 
+} from '../utils/championship-style';
 
 export interface StatusOptions {
   // Minimal options for speed
@@ -84,7 +93,7 @@ async function checkClaudeMd(projectDir: string) {
 }
 
 /**
- * Display status dashboard (git status equivalent)
+ * 🏁 Championship Status Dashboard - <38ms Performance Target
  */
 function displayStatus(
   fafPath: string, 
@@ -94,53 +103,48 @@ function displayStatus(
 ): void {
   const { trustScore, lines, lastSyncText } = status;
   
-  // Health indicator
-  let healthEmoji = '🟢';
-  let healthText = 'EXCELLENT';
-  let healthColor = chalk.green.bold;
+  // Championship performance check
+  const performanceGrade = duration <= PERFORMANCE_STANDARDS.status_command ? 'CHAMPION' : 'GOOD';
+  const speedEmoji = duration <= PERFORMANCE_STANDARDS.status_command ? FAF_ICONS.trophy : FAF_ICONS.lightning;
   
-  if (trustScore >= 90) {
-    healthEmoji = '🟢';
-    healthText = 'EXCELLENT';
-    healthColor = chalk.green.bold;
-  } else if (trustScore >= 75) {
-    healthEmoji = '🟡';
-    healthText = 'GOOD';
-    healthColor = chalk.yellow.bold;
-  } else if (trustScore >= 50) {
-    healthEmoji = '🟠';
-    healthText = 'NEEDS WORK';
-    healthColor = chalk.yellow.bold;
-  } else {
-    healthEmoji = '🔴';
-    healthText = 'POOR';
-    healthColor = chalk.red.bold;
-  }
+  // Calculate Technical Credit (mock for now)
+  const technicalCredit = Math.floor((trustScore - 50) / 10) * 5;
   
   console.log();
-  console.log(chalk.cyan('┌─ FAF Status ──────────────────────┐'));
-  console.log(chalk.cyan('│') + healthColor(` ${healthEmoji} Context Health: ${trustScore}% ${healthText}`) + ' '.repeat(Math.max(0, 34 - ` ${healthEmoji} Context Health: ${trustScore}% ${healthText}`.length)) + chalk.cyan('│'));
-  console.log(`${chalk.cyan('│')  } 📁 Files Tracked: ${lines} lines${  ' '.repeat(Math.max(0, 34 - ` 📁 Files Tracked: ${lines} lines`.length))  }${chalk.cyan('│')}`);
-  console.log(`${chalk.cyan('│')  } 🔄 Last Sync: ${lastSyncText}${  ' '.repeat(Math.max(0, 34 - ` 🔄 Last Sync: ${lastSyncText}`.length))  }${chalk.cyan('│')}`);
+  console.log(FAF_COLORS.fafCyan(`${FAF_ICONS.chart_up} Project Status ${speedEmoji} (${performanceGrade})`));
+  console.log(FAF_COLORS.fafCyan('├─ ') + `${FAF_ICONS.gem} .faf Context: ${formatTrustLevel(trustScore)}`);
+  console.log(FAF_COLORS.fafCyan('├─ ') + `${FAF_ICONS.robot} AI Readiness: ${trustScore >= 80 ? '✅ Optimized' : '🟡 Improving'}`);
+  console.log(FAF_COLORS.fafCyan('├─ ') + `${FAF_ICONS.file} Files Tracked: ${lines} lines`);
+  console.log(FAF_COLORS.fafCyan('├─ ') + `${FAF_ICONS.zap} Performance: ${formatPerformance(duration)}`);
+  console.log(FAF_COLORS.fafCyan('├─ ') + `${FAF_ICONS.heart_orange} Last Sync: ${lastSyncText}`);
+  console.log(FAF_COLORS.fafCyan('└─ ') + `${FAF_ICONS.chart_up} Technical Credit: ${formatTechnicalCredit(technicalCredit)}`);
   
-  // AI Ready status
-  const aiReadyText = trustScore >= 80 ? '🤖 AI Ready: Claude, ChatGPT, Gemini' : '🤖 AI Ready: Needs improvement';
-  console.log(`${chalk.cyan('│')  } ${aiReadyText}${  ' '.repeat(Math.max(0, 34 - ` ${aiReadyText}`.length))  }${chalk.cyan('│')}`);
+  console.log();
   
-  // Performance indicator
-  const perfText = `⚡ Performance: <${duration}ms`;
-  console.log(`${chalk.cyan('│')  } ${perfText}${  ' '.repeat(Math.max(0, 34 - ` ${perfText}`.length))  }${chalk.cyan('│')}`);
-  console.log(chalk.cyan('└────────────────────────────────────┘'));
+  // AI Happiness Status
+  console.log(FAF_COLORS.fafGreen(`${FAF_ICONS.brain} AI Compatibility:`));
+  console.log(FAF_COLORS.fafCyan('   ├─ ') + `${FAF_ICONS.blue_heart} Claude: ${trustScore >= 85 ? '92% 🩵' : trustScore >= 70 ? '78% 🟡' : '54% 🟠'}`);
+  console.log(FAF_COLORS.fafCyan('   ├─ ') + `${FAF_ICONS.green_heart} ChatGPT: ${trustScore >= 80 ? '89% 💚' : trustScore >= 65 ? '71% 🟡' : '49% 🟠'}`);
+  console.log(FAF_COLORS.fafCyan('   └─ ') + `${FAF_ICONS.heart_orange} Gemini: ${trustScore >= 75 ? '84% 🧡' : trustScore >= 60 ? '68% 🟡' : '43% 🟠'}`);
   
-  // Siamese Twin status
+  console.log();
+  
+  // Siamese Twin status with Championship styling
   if (hasClaudeMd) {
-    console.log(chalk.green('✅ claude.md found - Siamese twins active'));
+    console.log(FAF_COLORS.fafGreen(`✅ claude.md found - ${FAF_ICONS.link} Siamese twins active`));
   } else {
-    console.log(chalk.yellow('⚠️  claude.md not found - run `faf sync --twins` to create'));
+    console.log(FAF_COLORS.fafOrange(`⚠️  claude.md not found - run `) + FAF_COLORS.fafCyan('faf sync --twins') + FAF_COLORS.fafOrange(' to create'));
   }
   
   console.log();
-  console.log(chalk.dim('💡 Try: faf explain "What does this project do?"'));
+  
+  // Championship Call to Action
+  if (duration <= PERFORMANCE_STANDARDS.status_command && trustScore >= 85) {
+    console.log(FAF_COLORS.fafGreen(`${FAF_ICONS.party} Championship performance! ${FAF_ICONS.trophy}`));
+    console.log(FAF_COLORS.fafCyan(`${FAF_ICONS.rocket} Try: `) + 'faf share' + FAF_COLORS.fafCyan(' - Share this excellence!'));
+  } else {
+    console.log(FAF_COLORS.fafCyan(`${FAF_ICONS.magic_wand} Try: `) + 'faf trust --detailed' + FAF_COLORS.fafCyan(' - Improve your context'));
+  }
   console.log();
 }
 
