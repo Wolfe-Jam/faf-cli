@@ -35,7 +35,7 @@ async function ensureCacheDir(): Promise<void> {
   const cacheDir = path.dirname(getTrustCachePath());
   try {
     await fs.mkdir(cacheDir, { recursive: true });
-  } catch (error) {
+  } catch {
     // Directory already exists, ignore
   }
 }
@@ -101,7 +101,7 @@ export async function getTrustCache(fafPath: string): Promise<CachedVerification
     const resolvedPath = path.resolve(fafPath);
     const cached = cache[resolvedPath];
     
-    if (!cached) return null;
+    if (!cached) {return null;}
     
     // Check if cache is still fresh (within 1 hour)
     const oneHour = 60 * 60 * 1000;

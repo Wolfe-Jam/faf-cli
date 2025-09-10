@@ -171,24 +171,126 @@ interface StackCardData {
 - **Innovation**: Track emerging technology combinations
 - **Knowledge Sharing**: Capture institutional stack wisdom
 
+## 🏎️ **Claude Code Handoff Specification**
+
+### **CLI-First Strategy: Data Contract Design**
+
+**Perfect Division of Labor**: Claude Code builds the detection engine, Gallery-Svelte renders the beautiful interface.
+
+#### **Core TypeScript Interfaces**
+
+```typescript
+interface StackSignature {
+  id: string;                    // "svelte5-runes-turso-v2.1"
+  name: string;                  // "Svelte 5 + Runes + Turso"
+  components: StackComponent[];
+  detectedAt: Date;
+  powerLevel: number;            // 1-100 calculated score
+  rarity: StackRarity;
+  emoji: string;                 // "⚡🗃️"
+  description: string;
+}
+
+interface StackComponent {
+  framework: string;             // "svelte"
+  version: string;              // "5.2.1"
+  role: "frontend" | "backend" | "database" | "deployment";
+  confidence: number;           // Detection confidence 0-100
+}
+
+enum StackRarity {
+  COMMON = "common",           // >50% of projects
+  UNCOMMON = "uncommon",       // 20-50%
+  RARE = "rare",              // 5-20%
+  EPIC = "epic",              // 1-5%
+  LEGENDARY = "legendary"      // <1%
+}
+
+interface GalleryStackCard {
+  signature: StackSignature;
+  cardArt: {
+    gradient: string[];        // CSS gradient colors
+    pattern: string;          // Visual pattern identifier  
+    holographic: boolean;     // Rare card effects
+  };
+  stats: {
+    discovered: Date;
+    timesEncountered: number;
+    projectsUsing: string[];
+  };
+}
+```
+
+#### **CLI Data Storage Strategy**
+
+**Location:** `~/.faf/stacktistics/`
+```
+~/.faf/stacktistics/
+├── discovered.json        # User's personal collection
+├── global-registry.json   # All known stacks database
+├── cache/                 # Performance cache
+└── exports/              # Gallery-Svelte ready files
+```
+
+#### **CLI Commands Interface**
+
+```bash
+faf stacks                    # List discovered stacks
+faf stacks --scan            # Scan current project 
+faf stacks --export-gallery  # Export for Gallery-Svelte
+faf stacks --rarity epic     # Filter by rarity
+faf stacks --share <id>      # Share stack signature
+faf stacks --ascii           # Terminal art rendering
+faf stacks collect           # Add current project to collection
+```
+
+#### **Real-time Sync Strategy**
+
+1. **CLI Detection** → Updates `~/.faf/stacktistics/discovered.json`
+2. **File Watcher** → Gallery-Svelte monitors CLI directory
+3. **Auto-refresh** → Gallery updates card collection live
+4. **Export Command** → `faf stacks --export-gallery` generates Gallery-ready JSON
+
+#### **Critical Implementation Questions for Claude Code**
+
+🔧 **Data Format & Schema**
+- **Output Format**: JSON optimized for Gallery-Svelte consumption
+- **Stack Signature Granularity**: `svelte5-runes-turso` vs `svelte5.2.1-runes-turso-2.1`
+- **Metadata Completeness**: Discovery date, power level, rarity, description, emoji
+
+📁 **Storage & Access Patterns**
+- **File Location**: `~/.faf/stacktistics/` for all stack data
+- **Collection Tracking**: Personal discoveries vs global registry
+- **Export Mechanism**: `--export-gallery` flag generates Gallery-Svelte ready files
+
+🎮 **Gamification Data Structure**
+- **Rarity Calculation**: AI-powered classification based on usage patterns
+- **Power Level Algorithm**: Calculated from DX score + performance + popularity
+- **Collection Timestamps**: Global discovery vs personal discovery dates
+
+⚡ **Gallery-Svelte Interface Contract**
+- **Sync Strategy**: Gallery-Svelte reads CLI export files directly
+- **Real-time Updates**: File system watchers for instant collection updates
+- **Data Transformation**: CLI exports ready-to-render Gallery format
+
 ## 🚀 Technical Implementation
 
-### Phase 1: Foundation
+### Phase 1: Foundation (Claude Code Focus)
 - Extend fab-formats with stack signature generation
-- Create stacktistics database schema
-- Build basic stack card data structure
-- Implement CLI commands for stack discovery
+- Create stacktistics database schema (`~/.faf/stacktistics/`)
+- Build CLI commands (`faf stacks` family)
+- Implement detection and collection logic
 
-### Phase 2: AI Intelligence  
+### Phase 2: AI Intelligence (Claude Code + AI Integration)
 - Integrate Claude for stack analysis and naming
 - Build rarity classification algorithms
 - Create power level calculation system
 - Add emoji and description generation
 
-### Phase 3: Community Features
-- Build stack card sharing/export system
-- Create web interface for stack browsing
-- Add social features (favorites, comments)
+### Phase 3: Community Features (Gallery-Svelte Integration)
+- Build Gallery-Svelte flip-card integration
+- Create visual collection and filtering interfaces
+- Add social features (sharing, showcasing)
 - Implement team/organization stack dashboards
 
 ## 💡 Success Metrics
