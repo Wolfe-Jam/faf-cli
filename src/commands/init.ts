@@ -24,6 +24,8 @@ import { createDefaultFafIgnore } from "../utils/fafignore-parser";
 
 interface InitOptions {
   force?: boolean;
+  new?: boolean;
+  choose?: boolean;
   template?: string;
   output?: string;
 }
@@ -38,12 +40,15 @@ export async function initFafFile(
     const outputPath = options.output ? options.output : `${projectRoot}/.faf`;
 
     // Check if .faf file already exists
-    if ((await fileExists(outputPath)) && !options.force) {
+    if ((await fileExists(outputPath)) && !options.force && !options.new && !options.choose) {
+      const username = require('os').userInfo().username;
       console.log();
-      console.log(FAF_COLORS.fafOrange(`${FAF_ICONS.shield} .faf file already exists: `) + FAF_COLORS.fafCyan(outputPath));
-      console.log(FAF_COLORS.fafOrange(`${FAF_ICONS.magic_wand} Use `) + FAF_COLORS.fafCyan('--force') + FAF_COLORS.fafOrange(' to overwrite'));
+      console.log(chalk.cyan.bold(`👋 Hi ${username}!`));
       console.log();
-      process.exit(1);
+      console.log(chalk.green(`🤖 We found a .faf file at: `) + chalk.cyan(outputPath));
+      console.log(FAF_COLORS.fafOrange(`💡 Do you want to use this one? Or run `) + chalk.cyan('faf init --new') + FAF_COLORS.fafOrange(' to create a fresh one?'));
+      console.log();
+      return; // Don't exit, just return gracefully
     }
 
     console.log();
@@ -95,7 +100,7 @@ export async function initFafFile(
     const embeddedScore = fafData.faf_score ? parseInt(fafData.faf_score.replace('%', '')) : scoreResult.totalScore;
 
     console.log();
-    console.log(FAF_COLORS.fafGreen(`${FAF_ICONS.chart_up} Initial score: ${embeddedScore}% (${scoreResult.filledSlots}/${scoreResult.totalSlots} slots)`));
+    console.log(FAF_COLORS.fafGreen(`${FAF_ICONS.chart_up} Initial score: ${embeddedScore}%`));
 
     // Championship Next Steps
     console.log();

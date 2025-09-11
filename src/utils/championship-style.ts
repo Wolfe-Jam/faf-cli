@@ -134,11 +134,30 @@ export const BRAND_MESSAGES = {
   ecosystem: "Making AI development better for everyone 🏁"
 };
 
-// 🏁 ASCII Art Header
-export const FAF_HEADER = `${FAF_COLORS.fafCyan('┌─────────────────────────────────────────┐')}
-${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafCyan('███████')}${FAF_COLORS.fafWhite('╗')} ${FAF_COLORS.fafCyan('█████')}${FAF_COLORS.fafWhite('╗')} ${FAF_COLORS.fafCyan('███████')}${FAF_COLORS.fafWhite('╗')}  🏎️⚡️🏁  v2.8.0 ${FAF_COLORS.fafCyan('│')}
+/**
+ * Generate simple help header (clean and focused)
+ */
+export function generateHelpHeader(): string {
+  return `${FAF_COLORS.fafCyan('┌─────────────────────────────────────────┐')}
+${FAF_COLORS.fafCyan('│')}                                         ${FAF_COLORS.fafCyan('│')}
+${FAF_COLORS.fafCyan('│')}             ${FAF_COLORS.fafOrange('=== H E L P ===')}             ${FAF_COLORS.fafCyan('│')}
+${FAF_COLORS.fafCyan('│')}                                         ${FAF_COLORS.fafCyan('│')}
+${FAF_COLORS.fafCyan('│')}  🤖 Make Your AI Happy! 🧡 Trust Driven ${FAF_COLORS.fafCyan('│')}
+${FAF_COLORS.fafCyan('│')}  ─────────────────────────────────────  ${FAF_COLORS.fafCyan('│')}
+${FAF_COLORS.fafCyan('│')}  🌐 Universal, AI-Context ⚡️ FAST AF 🩵 ${FAF_COLORS.fafCyan('│')}
+${FAF_COLORS.fafCyan('│')}                                         ${FAF_COLORS.fafCyan('│')}
+${FAF_COLORS.fafCyan('└─────────────────────────────────────────┘')}`;
+}
+
+/**
+ * Generate static championship header (no contextual subtitles)
+ */
+export function generateFAFHeader(): string {
+  return `${FAF_COLORS.fafCyan('┌─────────────────────────────────────────┐')}
+${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafWhite('███████')}${FAF_COLORS.fafWhite('╗')} ${FAF_COLORS.fafWhite('█████')}${FAF_COLORS.fafWhite('╗')} ${FAF_COLORS.fafWhite('███████')}${FAF_COLORS.fafWhite('╗')}  🏎️⚡️🏁  v2.8.0 ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafCyan('██')}${FAF_COLORS.fafWhite('╔════╝')}${FAF_COLORS.fafCyan('██')}${FAF_COLORS.fafWhite('╔══')}${FAF_COLORS.fafCyan('██')}${FAF_COLORS.fafWhite('╗')}${FAF_COLORS.fafCyan('██')}${FAF_COLORS.fafWhite('╔════╝')}                ${FAF_COLORS.fafCyan('│')}
-${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafGreen('█████')}${FAF_COLORS.fafWhite('╗  ')}${FAF_COLORS.fafGreen('███████')}${FAF_COLORS.fafWhite('║')}${FAF_COLORS.fafGreen('█████')}${FAF_COLORS.fafWhite('╗')}                  ${FAF_COLORS.fafCyan('│')}
+${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafCyan('█████')}${FAF_COLORS.fafWhite('╗  ')}${FAF_COLORS.fafCyan('███████')}${FAF_COLORS.fafWhite('║')}${FAF_COLORS.fafCyan('█████')}${FAF_COLORS.fafWhite('╗')}                  ${FAF_COLORS.fafCyan('│')}
+${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafOrange('█████')}${FAF_COLORS.fafWhite('╗  ')}${FAF_COLORS.fafOrange('███████')}${FAF_COLORS.fafWhite('║')}${FAF_COLORS.fafOrange('█████')}${FAF_COLORS.fafWhite('╗')}                  ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafOrange('██')}${FAF_COLORS.fafWhite('╔══╝  ')}${FAF_COLORS.fafOrange('██')}${FAF_COLORS.fafWhite('╔══')}${FAF_COLORS.fafOrange('██')}${FAF_COLORS.fafWhite('║')}${FAF_COLORS.fafOrange('██')}${FAF_COLORS.fafWhite('╔══╝')}                  ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafOrange('██')}${FAF_COLORS.fafWhite('║     ')}${FAF_COLORS.fafOrange('██')}${FAF_COLORS.fafWhite('║  ')}${FAF_COLORS.fafOrange('██')}${FAF_COLORS.fafWhite('║')}${FAF_COLORS.fafOrange('██')}${FAF_COLORS.fafWhite('║')}                     ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafWhite('╚═╝     ╚═╝  ╚═╝╚═╝')}                     ${FAF_COLORS.fafCyan('│')}
@@ -147,6 +166,10 @@ ${FAF_COLORS.fafCyan('│')}  🤖 Make Your AI Happy! 🧡 Trust Driven ${FAF_C
 ${FAF_COLORS.fafCyan('│')}  ─────────────────────────────────────  ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('│')}  🌐 Universal, AI-Context ⚡️ FAST AF 🩵 ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('└─────────────────────────────────────────┘')}`;
+}
+
+// 🏁 Default ASCII Art Header (for backwards compatibility)
+export const FAF_HEADER = generateFAFHeader();
 
 // 📊 Trust Level Formatter
 export function formatTrustLevel(trustScore: number): string {
