@@ -3,6 +3,7 @@
  * Commands, concepts, features, everything FAF can do!
  */
 
+import chalk from 'chalk';
 import { 
   FAF_ICONS, 
   FAF_COLORS
@@ -334,27 +335,27 @@ async function showFullIndex(options: IndexCommandOptions): Promise<void> {
     // Show letter header
     if (firstLetter !== currentLetter) {
       currentLetter = firstLetter;
-      console.log(FAF_COLORS.fafGreen(`=== ${firstLetter} ===`));
+      console.log();
+      console.log(chalk.bold(FAF_COLORS.fafCyan(`=== ${firstLetter} ===`)));
+      console.log();
     }
     
-    const typeEmoji = getTypeEmoji(entry.type);
-    // const categoryColor = getCategoryColor(entry.category); // Unused
-    
+    // No emojis, no cyan sidelines - just clean text
     const truncatedDesc = truncateText(entry.description, DESCRIPTION_WIDTH);
-    console.log(`${FAF_COLORS.fafCyan('├─ ')}${typeEmoji} ${FAF_COLORS.fafGreen(key)} - ${truncatedDesc}`);
+    console.log(`  ${chalk.bold(FAF_COLORS.fafGreen(key))} - ${truncatedDesc}`);
     
     if (options.examples && entry.examples) {
       entry.examples.forEach((example: string) => {
-        console.log(`${FAF_COLORS.fafCyan('│   ')}${FAF_COLORS.fafOrange('$')} ${example}`);
+        console.log(`    Example: ${chalk.dim(example)}`);
       });
     }
     
     if (entry.usage) {
-      console.log(`${FAF_COLORS.fafCyan('│   ')}Usage: ${FAF_COLORS.fafCyan(entry.usage)}`);
+      console.log(`    Usage: ${chalk.dim(entry.usage)}`);
     }
     
     if (entry.related && entry.related.length > 0) {
-      console.log(`${FAF_COLORS.fafCyan('│   ')}See also: ${entry.related.join(', ')}`);
+      console.log(chalk.dim(`    See also: ${entry.related.join(', ')}`));
     }
     
     console.log(); // Spacing
@@ -388,47 +389,37 @@ async function showSpecificEntry(query: string): Promise<void> {
       return;
     }
     
-    console.log(`${FAF_COLORS.fafCyan('├─ ')}Found ${matches.length} matches for "${query}":`);
+    console.log(`Found ${matches.length} matches for "${query}":`);
     console.log();
     
     matches.forEach(([key, entry]) => {
-      const typeEmoji = getTypeEmoji(entry.type);
       const truncatedDesc = truncateText(entry.description, DESCRIPTION_WIDTH);
-      console.log(`${FAF_COLORS.fafCyan('├─ ')}${typeEmoji} ${FAF_COLORS.fafGreen(key)} - ${truncatedDesc}`);
+      console.log(`  ${chalk.bold(FAF_COLORS.fafGreen(key))} - ${truncatedDesc}`);
     });
     
     return;
   }
 
-  // Show detailed entry
-  const typeEmoji = getTypeEmoji(entry.type);
+  // Show detailed entry - clean and readable
   console.log();
-  console.log(`┌─────────────────────────────────────────┐`);
-  console.log(`│ ${typeEmoji} ${FAF_COLORS.fafGreen(query)} - ${entry.type}                    │`);
-  console.log(`└─────────────────────────────────────────┘`);
-  console.log();
+  console.log(chalk.bold(FAF_COLORS.fafGreen(query)) + ` (${entry.type})`);
+  console.log('-'.repeat(40));
   
-  console.log(`${FAF_COLORS.fafCyan('📝 Description:')}`);
-  console.log(`   ${entry.description}`);
+  console.log(`Description: ${entry.description}`);
   
   if (entry.usage) {
-    console.log();
-    console.log(`${FAF_COLORS.fafCyan('💻 Usage:')}`);
-    console.log(`   ${FAF_COLORS.fafCyan(entry.usage)}`);
+    console.log(`Usage: ${chalk.dim(entry.usage)}`);
   }
   
   if (entry.examples && entry.examples.length > 0) {
-    console.log();
-    console.log(`${FAF_COLORS.fafCyan('📚 Examples:')}`);
+    console.log('Examples:');
     entry.examples.forEach((example: string) => {
-      console.log(`   ${FAF_COLORS.fafOrange('$')} ${example}`);
+      console.log(`  ${chalk.dim(example)}`);
     });
   }
   
   if (entry.related && entry.related.length > 0) {
-    console.log();
-    console.log(`${FAF_COLORS.fafCyan('🔗 Related:')}`);
-    console.log(`   ${entry.related.join(', ')}`);
+    console.log(chalk.dim(`See also: ${entry.related.join(', ')}`));
   }
   
   console.log();
@@ -438,14 +429,7 @@ async function showSpecificEntry(query: string): Promise<void> {
 /**
  * Get emoji for entry type
  */
-function getTypeEmoji(type: string): string {
-  const emojis: Record<string, string> = {
-    command: '⚡️',
-    concept: '💡', 
-    feature: '⭐',
-  };
-  return emojis[type] || '📄';
-}
+// Removed emoji function - clean text only for readability
 
 /**
  * Get color for category
