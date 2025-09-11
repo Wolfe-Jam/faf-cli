@@ -8,6 +8,18 @@ import {
   FAF_COLORS
 } from '../utils/championship-style';
 
+// Claude Code industry standard width
+const MAX_WIDTH = 80;
+const DESCRIPTION_WIDTH = 60; // Leave room for prefixes and formatting
+
+/**
+ * Truncate text to fit within width limit
+ */
+function truncateText(text: string, maxLength: number): string {
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength - 3) + '...';
+}
+
 export interface IndexCommandOptions {
   category?: string;    // Filter by category (commands, concepts, features)
   search?: string;      // Search within index
@@ -94,7 +106,7 @@ const FAF_INDEX: Record<string, IndexEntry> = {
   // === C ===
   'check': {
     type: 'command',
-    description: 'Comprehensive .faf validation and freshness check (merged validate + audit)',
+    description: 'Comprehensive .faf validation and freshness check',
     usage: 'faf check [--format] [--fresh] [--fix] [--detailed]',
     category: 'core',
     examples: ['faf check', 'faf check --fix', 'faf check --format']
@@ -212,7 +224,7 @@ const FAF_INDEX: Record<string, IndexEntry> = {
   },
   'bi-sync': {
     type: 'concept',
-    description: 'Real-time bidirectional sync between .faf and claude.md with sub-40ms performance, smart merge algorithms, and self-healing capabilities',
+    description: 'Real-time bidirectional .faf ↔ claude.md sync (<40ms)',
     related: ['sync', 'claude-md'],
     category: 'concepts'
   },
@@ -232,7 +244,7 @@ const FAF_INDEX: Record<string, IndexEntry> = {
   },
   'sync': {
     type: 'command',
-    description: 'Update .faf when dependencies change OR sync with claude.md (bi-directional sync)',
+    description: 'Update .faf when dependencies change OR sync with claude.md',
     usage: 'faf sync [file] [--bi-sync] [--auto]',
     category: 'core',
     examples: ['faf sync', 'faf sync --bi-sync', 'faf sync --auto']
@@ -328,7 +340,8 @@ async function showFullIndex(options: IndexCommandOptions): Promise<void> {
     const typeEmoji = getTypeEmoji(entry.type);
     // const categoryColor = getCategoryColor(entry.category); // Unused
     
-    console.log(`${FAF_COLORS.fafCyan('├─ ')}${typeEmoji} ${FAF_COLORS.fafGreen(key)} - ${entry.description}`);
+    const truncatedDesc = truncateText(entry.description, DESCRIPTION_WIDTH);
+    console.log(`${FAF_COLORS.fafCyan('├─ ')}${typeEmoji} ${FAF_COLORS.fafGreen(key)} - ${truncatedDesc}`);
     
     if (options.examples && entry.examples) {
       entry.examples.forEach((example: string) => {
@@ -380,7 +393,8 @@ async function showSpecificEntry(query: string): Promise<void> {
     
     matches.forEach(([key, entry]) => {
       const typeEmoji = getTypeEmoji(entry.type);
-      console.log(`${FAF_COLORS.fafCyan('├─ ')}${typeEmoji} ${FAF_COLORS.fafGreen(key)} - ${entry.description}`);
+      const truncatedDesc = truncateText(entry.description, DESCRIPTION_WIDTH);
+      console.log(`${FAF_COLORS.fafCyan('├─ ')}${typeEmoji} ${FAF_COLORS.fafGreen(key)} - ${truncatedDesc}`);
     });
     
     return;
