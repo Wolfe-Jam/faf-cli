@@ -33,7 +33,7 @@ export type CreditCategory =
   | 'ai_compatibility'        // AI happiness boost
   | 'performance'            // Speed improvements
   | 'completeness'           // More complete context
-  | 'sync_harmony'           // Siamese twin sync success
+  | 'sync_harmony'           // Bi-directional sync success
   | 'stack_discovery'        // New stack identified
   | 'trust_building';        // Trust score improvements
 
@@ -319,7 +319,7 @@ export async function autoAwardCredit(
     sync_success: {
       action: 'Synchronized files',
       category: 'sync_harmony',
-      impact: 'Siamese twin harmony maintained'
+      impact: 'Bi-sync harmony maintained'
     },
     validation_passed: {
       action: 'Validation successful',

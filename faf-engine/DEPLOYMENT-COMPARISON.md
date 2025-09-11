@@ -53,7 +53,7 @@ const optimizations = {
   },
   cloudflare: {
     runtime: 'workers',
-    compatibility: '2024-01-01'
+    compatibility: '2025-01-01'
   }
 };
 ```

@@ -135,7 +135,7 @@ class CLIEngineTest {
         }
       });
       
-      console.log(`✅ ${testName}: ${score.totalScore}% score, ${score.filledSlots}/${score.totalSlots} slots`);
+      console.log(`✅ ${testName}: ${score.totalScore}% score`);
       
     } catch (error) {
       this.results.push({

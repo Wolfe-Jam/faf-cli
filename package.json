@@ -31,7 +31,7 @@
     "docs:preview": "cd docs-site && vercel",
     "release": "ts-node scripts/prepare-release.ts",
     "release:patch": "npm run release -- --type patch",
-    "release:minor": "npm run release -- --type minor", 
+    "release:minor": "npm run release -- --type minor",
     "release:major": "npm run release -- --type major",
     "release:beta": "npm run release -- --type prerelease --preid beta",
     "release:dry": "npm run release -- --dry-run",
@@ -53,10 +53,12 @@
   "license": "MIT",
   "dependencies": {
     "@faf/engine": "file:./faf-engine",
+    "@types/inquirer": "^9.0.9",
     "chalk": "^4.1.2",
     "commander": "^9.5.0",
     "enquirer": "^2.4.1",
     "glob": "^8.1.0",
+    "inquirer": "^12.9.4",
     "openai": "^5.16.0",
     "yaml": "^2.4.1"
   },

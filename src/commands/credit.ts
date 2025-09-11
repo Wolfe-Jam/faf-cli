@@ -111,7 +111,7 @@ async function showCreditHistory(fafPath?: string): Promise<void> {
     console.log(`${FAF_COLORS.fafCyan('│  ')  }No credits earned yet. Start building with:`);
     console.log(`${FAF_COLORS.fafCyan('│  ')  }• ${  FAF_COLORS.fafOrange('faf init')  } - Create perfect AI context`);
     console.log(`${FAF_COLORS.fafCyan('│  ')  }• ${  FAF_COLORS.fafOrange('faf score')  } - Improve completeness`);
-    console.log(`${FAF_COLORS.fafCyan('│  ')  }• ${  FAF_COLORS.fafOrange('faf sync --twins')  } - Enable Siamese sync`);
+    console.log(`${FAF_COLORS.fafCyan('│  ')  }• ${  FAF_COLORS.fafOrange('faf bi-sync')  } - Enable bi-directional sync`);
     return;
   }
   

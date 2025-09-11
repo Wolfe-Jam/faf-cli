@@ -80,7 +80,7 @@ async function getQuickStatus(fafPath: string) {
 }
 
 /**
- * Check for claude.md file presence (Siamese Twin status)
+ * Check for claude.md file presence (Bi-sync status)
  */
 async function checkClaudeMd(projectDir: string) {
   try {
@@ -129,11 +129,11 @@ function displayStatus(
   
   console.log();
   
-  // Siamese Twin status with Championship styling
+  // Bi-sync status with Championship styling
   if (hasClaudeMd) {
-    console.log(FAF_COLORS.fafGreen(`☑️ claude.md found - ${FAF_ICONS.link} Siamese twins active`));
+    console.log(FAF_COLORS.fafGreen(`☑️ claude.md found - ${FAF_ICONS.link} Bi-sync active`));
   } else {
-    console.log(FAF_COLORS.fafOrange(`⚠️  claude.md not found - run `) + FAF_COLORS.fafCyan('faf sync --twins') + FAF_COLORS.fafOrange(' to create'));
+    console.log(FAF_COLORS.fafOrange(`⚠️  claude.md not found - run `) + FAF_COLORS.fafCyan('faf bi-sync') + FAF_COLORS.fafOrange(' to create'));
   }
   
   console.log();
@@ -173,9 +173,10 @@ export async function statusCommand(): Promise<void> {
     
     displayStatus(fafPath, status, hasClaudeMd, duration);
     
-    // Exit code based on health
+    // Return instead of exit so footer can show
     if (!status.isHealthy) {
-      process.exit(1);
+      // Let analytics wrapper handle footer display
+      return;
     }
     
   } catch (error) {
