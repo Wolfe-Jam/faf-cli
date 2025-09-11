@@ -127,12 +127,12 @@ export const BRAND_MESSAGES = {
 
 // 🏁 ASCII Art Header
 export const FAF_HEADER = `${FAF_COLORS.fafCyan('┌─────────────────────────────────────────┐')}
-${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafCyan('███████╗ █████╗ ███████╗')}  🏎️⚡️🏁  v2.8.0 ${FAF_COLORS.fafCyan('│')}
-${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafCyan('██╔════╝██╔══██╗██╔════╝')}                ${FAF_COLORS.fafCyan('│')}
-${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafGreen('█████╗  ███████║█████╗')}                  ${FAF_COLORS.fafCyan('│')}
-${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafOrange('██╔══╝  ██╔══██║██╔══╝')}                  ${FAF_COLORS.fafCyan('│')}
-${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafOrange('██║     ██║  ██║██║')}                     ${FAF_COLORS.fafCyan('│')}
-${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafCyan('╚═╝     ╚═╝  ╚═╝╚═╝')}                     ${FAF_COLORS.fafCyan('│')}
+${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafCyan('███████')}${FAF_COLORS.fafWhite('╗')} ${FAF_COLORS.fafCyan('█████')}${FAF_COLORS.fafWhite('╗')} ${FAF_COLORS.fafCyan('███████')}${FAF_COLORS.fafWhite('╗')}  🏎️⚡️🏁  v2.8.0 ${FAF_COLORS.fafCyan('│')}
+${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafCyan('██')}${FAF_COLORS.fafWhite('╔════╝')}${FAF_COLORS.fafCyan('██')}${FAF_COLORS.fafWhite('╔══')}${FAF_COLORS.fafCyan('██')}${FAF_COLORS.fafWhite('╗')}${FAF_COLORS.fafCyan('██')}${FAF_COLORS.fafWhite('╔════╝')}                ${FAF_COLORS.fafCyan('│')}
+${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafGreen('█████')}${FAF_COLORS.fafWhite('╗  ')}${FAF_COLORS.fafGreen('███████')}${FAF_COLORS.fafWhite('║')}${FAF_COLORS.fafGreen('█████')}${FAF_COLORS.fafWhite('╗')}                  ${FAF_COLORS.fafCyan('│')}
+${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafOrange('██')}${FAF_COLORS.fafWhite('╔══╝  ')}${FAF_COLORS.fafOrange('██')}${FAF_COLORS.fafWhite('╔══')}${FAF_COLORS.fafOrange('██')}${FAF_COLORS.fafWhite('║')}${FAF_COLORS.fafOrange('██')}${FAF_COLORS.fafWhite('╔══╝')}                  ${FAF_COLORS.fafCyan('│')}
+${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafOrange('██')}${FAF_COLORS.fafWhite('║     ')}${FAF_COLORS.fafOrange('██')}${FAF_COLORS.fafWhite('║  ')}${FAF_COLORS.fafOrange('██')}${FAF_COLORS.fafWhite('║')}${FAF_COLORS.fafOrange('██')}${FAF_COLORS.fafWhite('║')}                     ${FAF_COLORS.fafCyan('│')}
+${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafWhite('╚═╝     ╚═╝  ╚═╝╚═╝')}                     ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('│')}                                         ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('│')}  🤖 Make Your AI Happy! 🧡 Trust Driven ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('│')}  ─────────────────────────────────────  ${FAF_COLORS.fafCyan('│')}
