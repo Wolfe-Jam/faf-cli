@@ -1,5 +1,5 @@
 /**
- * 🎯 .faf Scoring Calculator
+ * 📊 .faf Scoring Calculator
  * Advanced scoring algorithm with fab-formats discovery engine integration
  */
 

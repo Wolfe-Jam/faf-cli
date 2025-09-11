@@ -200,7 +200,7 @@ export function generateFafContent(projectData: {
   if (!projectData.database || projectData.database === 'None') {missingSlots.push('Database');}
 
   const fafData = {
-    // 🎯 AI-FIRST SCORING SYSTEM - Live date instead of versions
+    // 🤖 AI-FIRST SCORING SYSTEM - Live date instead of versions
     ai_scoring_system: '2025-08-30',  // MY scoring logic live date (COUNT ONCE architecture)
     ai_score: `${projectData.fafScore}%`,  // MY evaluation
     ai_confidence: getConfidenceLevel(projectData.fafScore),  // MY trust level
@@ -232,7 +232,7 @@ export function generateFafContent(projectData: {
       missing_context: missingSlots.length > 0 ? missingSlots : ['None - fully specified!']
     },
     
-    // 🎯 Project Details (Progressive Disclosure)
+    // 📄 Project Details (Progressive Disclosure)
     project: {
       name: projectData.projectName || 'Untitled Project',
       goal: projectData.projectGoal ? escapeForYaml(projectData.projectGoal) : '⚡️ Transform developer psychology from hope-driven to trust-driven AI development - 30 seconds replaces 20 minutes of questions',

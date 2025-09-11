@@ -91,7 +91,7 @@ export async function lintFafFile(file?: string, options: LintOptions = {}) {
     const fixableIssues = issues.filter((i) => i.fixable);
 
     if (errors.length === 0 && warnings.length === 0 && info.length === 0) {
-      console.log(chalk.green("✅ No linting issues found"));
+      console.log(chalk.green("☑️ No linting issues found"));
       return;
     }
 
@@ -133,7 +133,7 @@ export async function lintFafFile(file?: string, options: LintOptions = {}) {
       const fixedContent = YAML.stringify(fafData, { lineWidth: 100 });
       await fs.writeFile(fafPath, fixedContent, "utf-8");
 
-      console.log(chalk.green("✅ Auto-fixes applied"));
+      console.log(chalk.green("☑️ Auto-fixes applied"));
     } else if (fixableIssues.length > 0) {
       console.log(
         chalk.yellow(

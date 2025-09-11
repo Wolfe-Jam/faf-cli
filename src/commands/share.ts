@@ -173,7 +173,7 @@ async function generateShareableVersion(sanitizedData: any, options: ShareComman
 async function displayShareResults(shareResult: ShareResult, options: ShareCommandOptions): Promise<void> {
   console.log();
   console.log(`┌─────────────────────────────────────────┐`);
-  console.log(`│ ${FAF_COLORS.fafCyan('🚀 Share Results')}                     │`);
+  console.log(`│ ${FAF_COLORS.fafCyan('📤 Share Results')}                     │`);
   console.log(`└─────────────────────────────────────────┘`);
   console.log();
   
@@ -219,7 +219,7 @@ async function displayShareResults(shareResult: ShareResult, options: ShareComma
   const outputPath = path.join(process.cwd(), shareResult.filename);
   await fs.writeFile(outputPath, shareResult.content, 'utf-8');
   console.log();
-  console.log(`${FAF_COLORS.fafGreen('✅ Saved to:')} ${outputPath}`);
+  console.log(`${FAF_COLORS.fafGreen('☑️ Saved to:')} ${outputPath}`);
 }
 
 /**

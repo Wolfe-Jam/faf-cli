@@ -8,7 +8,7 @@ import {
   FAF_COLORS,
   BRAND_MESSAGES 
 } from '../utils/championship-style';
-import { findFafFile, fileExists } from '../utils/file-utils';
+import { findFafFile } from '../utils/file-utils';
 import { validateSchema } from '../schema/faf-schema';
 import * as fs from 'fs/promises';
 import * as path from 'path';
@@ -65,7 +65,7 @@ export async function editCommand(options: EditCommandOptions = {}): Promise<voi
           const validation = validateSchema(fafData);
           
           if (validation.valid) {
-            console.log(`${FAF_COLORS.fafGreen('├─ ')}✅ Validation passed!`);
+            console.log(`${FAF_COLORS.fafGreen('├─ ')}☑️ Validation passed!`);
             
             // Clean up backup on successful edit
             await fs.unlink(backupPath);

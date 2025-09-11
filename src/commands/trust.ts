@@ -1,5 +1,5 @@
 /**
- * 🎯 Trust Dashboard Command - The Emotional Core
+ * 🧡 Trust Dashboard Command - The Emotional Core
  * Transforms developer psychology from hope-driven to trust-driven AI development
  * 
  * Mission: "I don't worry about ANY of that AI shit anymore"
@@ -148,12 +148,12 @@ export async function displayTrustDashboard(fafPath: string, trustScore: TrustSc
   const { overall, contextCompleteness, aiCompatibility, freshnessScore } = trustScore;
   
   // Choose emoji and color based on trust level
-  let trustEmoji = '🎯';
+  let trustEmoji = '🧡';
   let trustColor = chalk.green;
   let trustMessage = 'LOCKED & LOADED';
   
   if (overall >= 90) {
-    trustEmoji = '🎯';
+    trustEmoji = '🧡';
     trustColor = chalk.green.bold;
     trustMessage = 'LOCKED & LOADED';
   } else if (overall >= 75) {
@@ -183,14 +183,14 @@ export async function displayTrustDashboard(fafPath: string, trustScore: TrustSc
   
   if (cachedResults && cachedResults.allPassed) {
     // Show verified results
-    claudeStatus = `✅ Claude     - Perfect context (${cachedResults.verificationResults.claude}%)`;
-    chatgptStatus = `✅ ChatGPT    - Perfect context (${cachedResults.verificationResults.chatgpt}%)`;
-    geminiStatus = `✅ Gemini     - Perfect context (${cachedResults.verificationResults.gemini}%)`;
+    claudeStatus = `☑️ Claude     - Perfect context (${cachedResults.verificationResults.claude}%)`;
+    chatgptStatus = `☑️ ChatGPT    - Perfect context (${cachedResults.verificationResults.chatgpt}%)`;
+    geminiStatus = `☑️ Gemini     - Perfect context (${cachedResults.verificationResults.gemini}%)`;
   } else {
     // Show content-based assessment
-    claudeStatus = aiCompatibility >= 80 ? '✅ Claude     - Perfect context       ' : aiCompatibility >= 60 ? '🟡 Claude     - Good context          ' : '🔴 Claude     - Needs improvement     ';
-    chatgptStatus = aiCompatibility >= 80 ? '✅ ChatGPT    - Perfect context       ' : aiCompatibility >= 60 ? '🟡 ChatGPT    - Good context          ' : '🔴 ChatGPT    - Needs improvement     ';
-    geminiStatus = aiCompatibility >= 80 ? '✅ Gemini     - Perfect context       ' : aiCompatibility >= 60 ? '🟡 Gemini     - Good context          ' : '🔴 Gemini     - Needs improvement     ';
+    claudeStatus = aiCompatibility >= 80 ? '☑️ Claude     - Perfect context       ' : aiCompatibility >= 60 ? '🟡 Claude     - Good context          ' : '🔴 Claude     - Needs improvement     ';
+    chatgptStatus = aiCompatibility >= 80 ? '☑️ ChatGPT    - Perfect context       ' : aiCompatibility >= 60 ? '🟡 ChatGPT    - Good context          ' : '🔴 ChatGPT    - Needs improvement     ';
+    geminiStatus = aiCompatibility >= 80 ? '☑️ Gemini     - Perfect context       ' : aiCompatibility >= 60 ? '🟡 Gemini     - Good context          ' : '🔴 Gemini     - Needs improvement     ';
   }
   
   console.log(`${chalk.cyan('│')  } ${  claudeStatus  } ${  chalk.cyan('│')}`);
@@ -227,7 +227,7 @@ export async function displayTrustDashboard(fafPath: string, trustScore: TrustSc
     }
   } else if (cachedResults) {
     console.log();
-    console.log(chalk.green('🎯 Verified by AI models - context is championship grade!'));
+    console.log(chalk.green('☑️ Verified by AI models - context is championship grade!'));
   }
   
   console.log();
@@ -239,7 +239,7 @@ export async function displayTrustDashboard(fafPath: string, trustScore: TrustSc
 
 async function showConfidenceMode(fafPath: string): Promise<void> {
   const trustScore = await calculateTrustScore(fafPath);
-  console.log(chalk.cyan('🎯 AI Confidence Analysis'));
+  console.log(chalk.cyan('🤖 AI Confidence Analysis'));
   console.log(`├─ Claude Confidence: ${trustScore.aiCompatibility}%`);
   console.log(`├─ Context Completeness: ${trustScore.contextCompleteness}%`);
   console.log(`└─ Overall AI Trust: ${trustScore.overall}%`);
@@ -274,7 +274,7 @@ async function showPanicMode(fafPath: string): Promise<void> {
     console.log('├─ Garage backup found - restoring...');
     const backupContent = await fs.readFile(backupPath, 'utf-8');
     await fs.writeFile(fafPath, backupContent);
-    console.log('└─ ✅ Context restored from garage backup!');
+    console.log('└─ ☑️ Context restored from garage backup!');
   } else {
     console.log('├─ No garage backup found');
     console.log('├─ Running emergency diagnostics...');
@@ -290,7 +290,7 @@ async function showGuaranteeMode(fafPath: string): Promise<void> {
   const passed = trustScore.overall >= 85;
   
   if (passed) {
-    console.log('└─ ✅ QUALITY GUARANTEED - Context meets championship standards!');
+    console.log('└─ ☑️ QUALITY GUARANTEED - Context meets championship standards!');
   } else {
     console.log('├─ ⚠️ Quality below guarantee threshold (85%)');
     console.log('└─ Run: faf todo for improvement plan');
@@ -331,7 +331,7 @@ export async function trustCommand(options: TrustDashboardOptions = {}): Promise
       return;
     }
     
-    console.log(chalk.dim(`🎯 Calculating trust for: ${path.relative(process.cwd(), fafPath)}`));
+    console.log(chalk.dim(`🧡 Calculating trust for: ${path.relative(process.cwd(), fafPath)}`));
     
     const startTime = Date.now();
     const trustScore = await calculateTrustScore(fafPath);

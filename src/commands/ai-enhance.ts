@@ -35,7 +35,7 @@ export async function enhanceFafWithAI(
     }
 
     const model = options.model || 'claude'; // Claude-first default
-    console.log(chalk.cyan(`🚀 AI-enhancing with ${getModelDisplay(model)}: ${fafPath}`));
+    console.log(chalk.cyan(`⚡ AI-enhancing with ${getModelDisplay(model)}: ${fafPath}`));
 
     // Read current .faf file
     const content = await fs.readFile(fafPath, "utf-8");
@@ -45,7 +45,7 @@ export async function enhanceFafWithAI(
 
     // Determine enhancement focus
     const focus = options.focus || detectEnhancementFocus(fafData);
-    console.log(chalk.blue(`🎯 Enhancement focus: ${focus}`));
+    console.log(chalk.blue(`🔍 Enhancement focus: ${focus}`));
 
     if (options.dryRun) {
       const prompt = generateEnhancementPrompt(fafData, focus, model);
@@ -58,9 +58,9 @@ export async function enhanceFafWithAI(
     const enhanced = await executeBig3Enhancement(fafPath, fafData, focus, model, options);
 
     if (enhanced) {
-      console.log(chalk.green(`✅ .faf file enhanced with ${getModelDisplay(model)} intelligence`));
+      console.log(chalk.green(`☑️ .faf file enhanced with ${getModelDisplay(model)} intelligence`));
       console.log(chalk.cyan("📈 Run 'faf score' to see improvement"));
-      console.log(chalk.dim("🎯 Run 'faf verify' to test AI understanding"));
+      console.log(chalk.dim("🤖 Run 'faf verify' to test AI understanding"));
     }
 
   } catch (error) {
@@ -77,7 +77,7 @@ export async function enhanceFafWithAI(
  */
 function getModelDisplay(model: string): string {
   const displays = {
-    'claude': '🎯 Claude (Championship)',
+    'claude': '🤖 Claude (Championship)',
     'chatgpt': '🤖 ChatGPT', 
     'gemini': '💎 Gemini',
     'big3': '🚀 Big-3 Consensus',
@@ -190,7 +190,7 @@ async function executeBig3Enhancement(
       const enhancedYaml = YAML.stringify(enhanced, null, 2);
       await fs.writeFile(fafPath, enhancedYaml);
       
-      console.log(chalk.green(`✅ Enhanced .faf with ${getModelDisplay(model)} intelligence`));
+      console.log(chalk.green(`☑️ Enhanced .faf with ${getModelDisplay(model)} intelligence`));
       console.log(chalk.dim(`📁 Backup created`));
       
       // Show specific improvements
@@ -281,12 +281,12 @@ function applyEnhancements(fafData: any, enhancements: any, focus: string): any 
  * Display enhancement results
  */
 function displayEnhancementResults(results: any, focus: string): void {
-  console.log(chalk.cyan('\n🎯 Enhancement Summary:'));
+  console.log(chalk.cyan('\n📈 Enhancement Summary:'));
   console.log(chalk.dim(`Focus: ${focus}`));
   
   const improvements = Object.keys(results).length;
   if (improvements > 0) {
-    console.log(chalk.green(`✅ ${improvements} improvements applied`));
+    console.log(chalk.green(`☑️ ${improvements} improvements applied`));
     console.log(chalk.dim('📈 Run \'faf score\' to see impact'));
   }
 }

@@ -38,7 +38,7 @@ export async function validateFafFile(
     const validation = validateSchema(fafData, options.schema || "latest");
 
     if (validation.valid) {
-      console.log(chalk.green("✅ Valid .faf file"));
+      console.log(chalk.green("☑️ Valid .faf file"));
 
       // Award technical credit for successful validation
       await autoAwardCredit('validation_passed', fafPath);

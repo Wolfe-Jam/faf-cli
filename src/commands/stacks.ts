@@ -1,5 +1,5 @@
 /**
- * 🎯 STACKTISTICS - Stack Discovery & Collection
+ * 📊 STACKTISTICS - Stack Discovery & Collection
  * Simple extension of fab-formats intelligence
  */
 
@@ -127,12 +127,12 @@ export async function listStacks(): Promise<void> {
   const stacks = await engine.getDiscoveredStacks();
 
   if (stacks.length === 0) {
-    console.log(colors.info('🎯 No stacks discovered yet!'));
+    console.log(colors.info('📊 No stacks discovered yet!'));
     console.log(colors.dim('   Run: faf stacks --scan to discover your current project stack'));
     return;
   }
 
-  console.log(colors.highlight(`🎯 Discovered Stacks (${stacks.length})`));
+  console.log(colors.highlight(`📊 Discovered Stacks (${stacks.length})`));
   console.log('');
 
   stacks.forEach((stack, index) => {

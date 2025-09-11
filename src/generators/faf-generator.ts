@@ -76,7 +76,7 @@ export async function generateFafFromProject(
     }
   }
 
-  // 🎯 FAB-FORMATS DISCOVERY - Activate the 200+ format knowledge base
+  // 🔍 FAB-FORMATS DISCOVERY - Activate the 200+ format knowledge base
   const fabEngine = new FabFormatsEngine();
   let fabAnalysis: FabFormatsAnalysis;
   try {
@@ -171,7 +171,7 @@ function generateProjectData(
     projectType,
   );
   
-  // 🎯 ENHANCE WITH FAB-FORMATS INTELLIGENCE
+  // 🧠 ENHANCE WITH FAB-FORMATS INTELLIGENCE
   const topFramework = fabAnalysis.confirmedFormats.length > 0 
     ? Object.entries(fabAnalysis.frameworkConfidence)
         .reduce((max, current) => current[1] > max[1] ? current : max, ['', 0])
@@ -188,7 +188,7 @@ function generateProjectData(
   if (fabSlots.ui_library && !stack.ui_library) {stack.ui_library = fabSlots.ui_library;}
   if (fabSlots.state_management && !stack.state_management) {stack.state_management = fabSlots.state_management;}
 
-  // 🎯 ENHANCED SCORING - Multi-source + FAB-FORMATS intelligence (Universal: JS/TS + Python)
+  // 📈 ENHANCED SCORING - Multi-source + FAB-FORMATS intelligence (Universal: JS/TS + Python)
   // Base intelligence score from fab-formats discovery
   const fabIntelligenceBonus = Math.min(fabAnalysis.totalIntelligenceScore / 10, 5); // Max 5 bonus slots
   
@@ -232,7 +232,7 @@ function generateProjectData(
     !!(configData.qualityIndicators && configData.qualityIndicators.length > 0) || fabAnalysis.totalIntelligenceScore > 50, // Quality indicators + high fab score
     !!(configData.performanceOptimizations && configData.performanceOptimizations.length > 0) || fabSlots.cicd, // Performance focus + CI/CD detection
     
-    // 🎯 FAB-FORMATS BONUS SLOTS - Intelligent format discovery bonus
+    // 📊 FAB-FORMATS BONUS SLOTS - Intelligent format discovery bonus
     ...Array(Math.floor(fabIntelligenceBonus)).fill(true), // Add bonus slots based on format intelligence
   ];
   
@@ -240,7 +240,7 @@ function generateProjectData(
   const totalSlots = 21; // Base slots for scoring
   const slotBasedPercentage = Math.round((filledSlots / totalSlots) * 100);
   
-  // 🎯 FAB-FORMATS ENHANCEMENT - Apply intelligent scoring boost
+  // 📊 FAB-FORMATS ENHANCEMENT - Apply intelligent scoring boost
   let enhancedScore = slotBasedPercentage;
   if (fabAnalysis.totalIntelligenceScore > 0) {
     // Add percentage boost based on format discovery intelligence
@@ -278,7 +278,7 @@ function generateProjectData(
     timeline: readmeData.timeline,
     approach: readmeData.approach,
     
-    // 🎯 FORENSIC ANALYSIS DATA - Multi-source + FAB-FORMATS intelligence
+    // 📋 FORENSIC ANALYSIS DATA - Multi-source + FAB-FORMATS intelligence
     forensicData: {
       configAnalysis: configData,
       sourceAnalysis: sourceCodeData,
@@ -701,7 +701,7 @@ async function parsePyprojectToml(content: string): Promise<any> {
 }
 
 /**
- * 🎯 Extract config data from fab-formats analysis (replaces analyzeConfigFiles)
+ * 📊 Extract config data from fab-formats analysis (replaces analyzeConfigFiles)
  */
 function extractConfigDataFromFab(fabAnalysis: FabFormatsAnalysis): any {
   const configData: any = {
@@ -756,7 +756,7 @@ function extractConfigDataFromFab(fabAnalysis: FabFormatsAnalysis): any {
 }
 
 /**
- * 🎯 Extract source data from fab-formats analysis (replaces analyzeSourceCode)
+ * 📊 Extract source data from fab-formats analysis (replaces analyzeSourceCode)
  */
 function extractSourceDataFromFab(fabAnalysis: FabFormatsAnalysis): any {
   const sourceData: any = {

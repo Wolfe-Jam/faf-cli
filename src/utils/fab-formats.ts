@@ -1,5 +1,5 @@
 /**
- * 🎯 fab-formats System v1.0.0
+ * 📁 fab-formats System v1.0.0
  * Format-First Discovery Engine with Knowledge Base Intelligence
  * 
  * Revolutionary approach: Detect formats first, then intelligently map to frameworks
@@ -34,7 +34,7 @@ export interface FabFormatsAnalysis {
 }
 
 /**
- * 🎯 TWO-LAYERED DISCOVERY ENGINE
+ * 🔍 TWO-LAYERED DISCOVERY ENGINE
  * Layer 1: Direct format scanning
  * Layer 2: Content confirmation & usage validation
  */
@@ -274,7 +274,7 @@ export class FabFormatsEngine {
       });
     });
 
-    // 🎯 STACKTISTICS: Generate stack signature from detected frameworks
+    // 📊 STACKTISTICS: Generate stack signature from detected frameworks
     const stackSignature = this.generateStackSignature(confirmedFormats, frameworkConfidence);
 
     return {
@@ -288,7 +288,7 @@ export class FabFormatsEngine {
   }
 
   /**
-   * 🎯 STACKTISTICS: Generate stack signature from detected formats
+   * 📊 STACKTISTICS: Generate stack signature from detected formats
    * Simple, fast, and extends existing fab-formats intelligence
    */
   private generateStackSignature(
@@ -340,7 +340,7 @@ export class FabFormatsEngine {
     const confirmedCount = analysis.confirmedFormats.length;
     const totalScore = analysis.totalIntelligenceScore;
 
-    return `🎯 fab-formats Analysis: ${confirmedCount} confirmed formats, ${totalScore} intelligence points. ` +
+    return `📁 fab-formats Analysis: ${confirmedCount} confirmed formats, ${totalScore} intelligence points. ` +
            `Top framework: ${topFramework?.framework || 'Unknown'} (${topFramework?.confidence || 0}% confidence)`;
   }
 }

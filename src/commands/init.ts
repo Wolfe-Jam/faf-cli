@@ -57,7 +57,7 @@ export async function initFafFile(
       );
       await createDefaultFafIgnore(projectRoot);
       console.log(
-        chalk.green("   ✅ Created .fafignore (customize to exclude files)"),
+        chalk.green("   ☑️ Created .fafignore (customize to exclude files)"),
       );
     } else {
       console.log(chalk.gray("   Using existing .fafignore file"));
@@ -82,7 +82,7 @@ export async function initFafFile(
     await fs.writeFile(outputPath, fafContent, "utf-8");
 
     const elapsedTime = Date.now() - startTime;
-    console.log(chalk.green(`✅ Created ${outputPath}`));
+    console.log(chalk.green(`☑️ Created ${outputPath}`));
     console.log(FAF_COLORS.fafCyan(`   ${formatPerformance(elapsedTime)} - ${BRAND_MESSAGES.speed_result}`));
 
     // Award technical credit for successful initialization
