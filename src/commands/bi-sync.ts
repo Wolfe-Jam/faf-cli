@@ -166,7 +166,7 @@ export async function syncBiDirectional(): Promise<SyncResult> {
     const claudeMdExists = await fs.access(claudeMdPath).then(() => true).catch(() => false);
     
     console.log(FAF_COLORS.fafCyan(`${FAF_ICONS.link} Bi-Sync Engine`));
-    console.log(`${FAF_COLORS.fafCyan('├─ ')  }Analyzing twin files...`);
+    console.log(`${FAF_COLORS.fafCyan('├─ ')  }Analyzing sync files...`);
     
     if (!claudeMdExists) {
       // Create claude.md from .faf
@@ -185,7 +185,7 @@ export async function syncBiDirectional(): Promise<SyncResult> {
       
     } else {
       // Both files exist - need to sync
-      console.log(`${FAF_COLORS.fafCyan('├─ ')  }Both twins exist - checking sync status...`);
+      console.log(`${FAF_COLORS.fafCyan('├─ ')  }Both files exist - checking sync status...`);
       
       // For now, update claude.md from .faf (we can enhance this later)
       const fafContent = await fs.readFile(fafPath, 'utf-8');
@@ -197,7 +197,7 @@ export async function syncBiDirectional(): Promise<SyncResult> {
       result.direction = 'faf-to-claude';
       result.filesChanged.push('claude.md');
       
-      console.log(`${FAF_COLORS.fafGreen('└─ ')  }${FAF_ICONS.link} Twins synchronized! Perfect harmony achieved!`);
+      console.log(`${FAF_COLORS.fafGreen('└─ ')  }${FAF_ICONS.link} Files synchronized! Perfect harmony achieved!`);
     }
     
     result.duration = Date.now() - startTime;
@@ -208,7 +208,7 @@ export async function syncBiDirectional(): Promise<SyncResult> {
     // Championship success message
     console.log();
     console.log(FAF_COLORS.fafGreen(`${FAF_ICONS.trophy} Championship sync complete in ${result.duration}ms!`));
-    console.log(`${FAF_COLORS.fafCyan(`${FAF_ICONS.magic_wand} Try: `)  }faf status${  FAF_COLORS.fafCyan(' - See your active twins')}`);
+    console.log(`${FAF_COLORS.fafCyan(`${FAF_ICONS.magic_wand} Try: `)  }faf status${  FAF_COLORS.fafCyan(' - See your bi-sync status')}`);
     
     return result;
     

@@ -307,7 +307,7 @@ export async function trustCommand(options: TrustDashboardOptions = {}): Promise
     if (!fafPath) {
       console.log(chalk.red('❌ No .faf file found in current directory or parent directories'));
       console.log(chalk.dim('💡 Run `faf init` to generate your first .faf file'));
-      process.exit(1);
+      return; // Let analytics wrapper handle footer display
     }
 
     // Handle specific trust modes

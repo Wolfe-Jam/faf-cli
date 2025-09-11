@@ -61,11 +61,6 @@ export async function scoreFafFile(file?: string, options: ScoreOptions = {}) {
     const scoreText = `${scoreEmoji} Score: ${percentage}%`;
 
     console.log(scoreColor(chalk.bold(scoreText)));
-    console.log(
-      chalk.gray(
-        `   (${scoreResult.filledSlots}/${scoreResult.totalSlots} context slots filled)`,
-      ),
-    );
 
     // Always show key missing items for transparency
     const missingItems: string[] = [];

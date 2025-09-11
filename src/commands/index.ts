@@ -68,12 +68,20 @@ interface IndexEntry {
  */
 const FAF_INDEX: Record<string, IndexEntry> = {
   // === A ===
-  'ai-analyze': {
+  'analyze': {
     type: 'command',
     description: 'Claude-first AI analysis with Big-3 compatibility',
-    usage: 'faf ai-analyze [file] [--model claude|chatgpt|gemini]',
+    usage: 'faf analyze [file] [--model claude|chatgpt|gemini]',
     category: 'ai',
-    examples: ['faf ai-analyze', 'faf ai-analyze --model claude']
+    examples: ['faf analyze', 'faf analyze --model claude']
+  },
+  'auto-mode': {
+    type: 'feature',
+    description: 'Automatic gearbox - menu-driven interface for learning and exploration',
+    usage: 'faf --auto [command]',
+    category: 'navigation',
+    examples: ['faf --auto', 'faf --auto trust', 'faf --auto init'],
+    related: ['manual-mode', 'gearbox', 'inquirer']
   },
   'analytics': {
     type: 'command',
@@ -82,17 +90,17 @@ const FAF_INDEX: Record<string, IndexEntry> = {
     category: 'utilities',
     examples: ['faf analytics --summary', 'faf analytics --disable', 'faf analytics --enable']
   },
-  'ai-enhance': {
+  'enhance': {
     type: 'command', 
     description: 'Claude-first AI enhancement system',
-    usage: 'faf ai-enhance [file] [--model claude|chatgpt|gemini]',
+    usage: 'faf enhance [file] [--model claude|chatgpt|gemini]',
     category: 'ai',
-    examples: ['faf ai-enhance', 'faf ai-enhance --model all']
+    examples: ['faf enhance', 'faf enhance --model all']
   },
   'ai-compatibility': {
     type: 'concept',
     description: 'Support for Claude, ChatGPT, and Gemini (Big-3)',
-    related: ['verify', 'trust', 'ai-analyze'],
+    related: ['verify', 'trust', 'analyze'],
     category: 'concepts'
   },
 
@@ -105,6 +113,14 @@ const FAF_INDEX: Record<string, IndexEntry> = {
   },
 
   // === C ===
+  'chat': {
+    type: 'command',
+    description: 'Natural language .faf generation - conversation-driven context building',
+    usage: 'faf chat',
+    category: 'core',
+    examples: ['faf chat'],
+    related: ['init', 'status', 'score']
+  },
   'check': {
     type: 'command',
     description: 'Comprehensive .faf validation and freshness check',
@@ -149,6 +165,14 @@ const FAF_INDEX: Record<string, IndexEntry> = {
     category: 'utilities',
     examples: ['faf edit', 'faf edit --section project', 'faf edit --editor vim']
   },
+  'esc-key': {
+    type: 'concept',
+    description: 'Escape key behavior varies by terminal - use Ctrl+C for reliable exit',
+    usage: 'Press Esc (behavior varies) or Ctrl+C (always works)',
+    category: 'navigation',
+    examples: ['Ctrl+C: Force exit', 'Arrow keys: Navigate', 'Enter: Select'],
+    related: ['terminal', 'navigation', 'inquirer']
+  },
 
   // === F ===
   'fab-formats': {
@@ -165,6 +189,14 @@ const FAF_INDEX: Record<string, IndexEntry> = {
     usage: 'faf trust --garage',
     related: ['trust', 'panic'],
     category: 'trust'
+  },
+  'gearbox': {
+    type: 'concept',
+    description: 'F1-inspired Auto/Manual transmission system for FAF CLI',
+    usage: 'faf --auto (menus) or faf --manual (commands)',
+    category: 'navigation',
+    examples: ['faf --auto', 'faf --manual', 'faf (hybrid mode)'],
+    related: ['auto-mode', 'manual-mode', 'inquirer']
   },
   'guarantee': {
     type: 'feature', 
@@ -190,6 +222,16 @@ const FAF_INDEX: Record<string, IndexEntry> = {
     usage: 'faf lint [file] [--fix]',
     category: 'utilities',
     examples: ['faf lint', 'faf lint --fix']
+  },
+
+  // === M ===
+  'manual-mode': {
+    type: 'feature',
+    description: 'Manual gearbox - direct command-line interface for power users',
+    usage: 'faf --manual [command]',
+    category: 'navigation',
+    examples: ['faf --manual', 'faf --manual score', 'faf --manual trust'],
+    related: ['auto-mode', 'gearbox', 'inquirer']
   },
 
   // === P ===

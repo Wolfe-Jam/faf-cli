@@ -181,7 +181,7 @@ export function viteFafEngine(options: ViteFafEngineOptions = {}): Plugin {
           'stack.cicd': 'Cloudflare',
           'deployment_optimized': true,
           'cloudflare_config': {
-            compatibility_date: '2024-01-01'
+            compatibility_date: '2025-01-01'
           }
         }
       };
@@ -220,7 +220,7 @@ export function viteFafEngine(options: ViteFafEngineOptions = {}): Plugin {
         cloudflare: {
           'wrangler.toml': `
 name = "faf-engine-worker"
-compatibility_date = "2024-01-01"
+compatibility_date = "2025-01-01"
 
 [vars]
 FAF_ENGINE_VERSION = "1.0.0"
