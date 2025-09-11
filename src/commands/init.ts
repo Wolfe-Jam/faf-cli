@@ -107,7 +107,7 @@ export async function initFafFile(
     console.log(`${FAF_COLORS.fafCyan('   3. ')  }faf status${  FAF_COLORS.fafCyan(' - Monitor your championship performance')}`);
 
     if (embeddedScore < 70) {
-      console.log(FAF_COLORS.fafOrange(`   4. ${FAF_ICONS.target} Target 70%+ score for championship AI context`));
+      console.log(FAF_COLORS.fafOrange(`   4. ${FAF_ICONS.precision} Target 70%+ score for championship AI context`));
     } else if (embeddedScore >= 85) {
       console.log(FAF_COLORS.fafGreen(`${FAF_ICONS.party} Excellent start! Championship performance! ${FAF_ICONS.trophy}`));
     }
