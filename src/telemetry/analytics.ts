@@ -78,7 +78,7 @@ export class FafAnalytics {
    * Track command execution
    */
   async trackCommand(command: string, args: string[], duration: number, success: boolean): Promise<void> {
-    if (!TELEMETRY_ENABLED) return;
+    if (!TELEMETRY_ENABLED) {return;}
     
     const event: TelemetryEvent = {
       event: 'command_executed',
@@ -107,7 +107,7 @@ export class FafAnalytics {
    * Track errors with context
    */
   async trackError(error: Error, command?: string, args?: string[]): Promise<void> {
-    if (!TELEMETRY_ENABLED) return;
+    if (!TELEMETRY_ENABLED) {return;}
     
     const event: TelemetryEvent = {
       event: 'error_occurred',
@@ -135,7 +135,7 @@ export class FafAnalytics {
    * Track performance milestones
    */
   async trackPerformance(milestone: string, duration: number, metadata?: Record<string, any>): Promise<void> {
-    if (!TELEMETRY_ENABLED) return;
+    if (!TELEMETRY_ENABLED) {return;}
     
     const event: TelemetryEvent = {
       event: 'performance_milestone',
@@ -160,7 +160,7 @@ export class FafAnalytics {
    * Track feature usage
    */
   async trackFeatureUsage(feature: string, context?: Record<string, any>): Promise<void> {
-    if (!TELEMETRY_ENABLED) return;
+    if (!TELEMETRY_ENABLED) {return;}
     
     const event: TelemetryEvent = {
       event: 'feature_used',
@@ -251,13 +251,13 @@ export class FafAnalytics {
   }
   
   private async flushEvents(): Promise<void> {
-    if (this.events.length === 0) return;
+    if (this.events.length === 0) {return;}
     
     try {
       // In production, this would send to telemetry endpoint
       // For now, we'll just clear the events
       this.events = [];
-    } catch (error) {
+    } catch {
       // Silent fail - telemetry should never break the CLI
     }
   }
@@ -322,11 +322,11 @@ export class FafAnalytics {
       const cwd = process.cwd();
       const files = await fs.readdir(cwd);
       
-      if (files.includes('package.json')) return 'nodejs';
-      if (files.includes('requirements.txt') || files.includes('pyproject.toml')) return 'python';
-      if (files.includes('Cargo.toml')) return 'rust';
-      if (files.includes('go.mod')) return 'golang';
-      if (files.includes('pom.xml') || files.includes('build.gradle')) return 'java';
+      if (files.includes('package.json')) {return 'nodejs';}
+      if (files.includes('requirements.txt') || files.includes('pyproject.toml')) {return 'python';}
+      if (files.includes('Cargo.toml')) {return 'rust';}
+      if (files.includes('go.mod')) {return 'golang';}
+      if (files.includes('pom.xml') || files.includes('build.gradle')) {return 'java';}
       
       return null;
     } catch {
