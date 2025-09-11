@@ -6,6 +6,7 @@
 
 import { program } from 'commander';
 import chalk from 'chalk';
+import inquirer from 'inquirer';
 import { validateFafFile } from './commands/validate';
 import { initFafFile } from './commands/init';
 import { scoreFafFile } from './commands/score';
@@ -27,14 +28,57 @@ import { editCommand } from './commands/edit';
 import { searchCommand } from './commands/search';
 import { indexCommand } from './commands/index';
 import { shareCommand } from './commands/share';
+import { chatCommand } from './commands/chat';
 import { setColorOptions, type ColorScheme } from './utils/color-utils';
-import { FAF_HEADER } from './utils/championship-style';
+import { generateFAFHeader, generateHelpHeader, FAF_COLORS } from './utils/championship-style';
 import { analytics, trackCommand, trackError, withPerformanceTracking } from './telemetry/analytics';
+import { findFafFile } from './utils/file-utils';
+import { calculateFafScore } from './scoring/score-calculator';
+import { getTrustCache } from './utils/trust-cache';
+import * as YAML from 'yaml';
 
 const version = require('../package.json').version;
 
-// Championship Header 🏁
-console.log(FAF_HEADER);
+
+/**
+ * Show current score as footer
+ */
+async function showScoreFooter(context?: string) {
+  console.log('');
+  // Show context status line
+  if (context === 'device') {
+    console.log(chalk.dim('Using Device CLI'));
+  } else if (context === 'faf') {
+    console.log(chalk.dim('Using faf CLI'));
+  } else if (context === 'chat') {
+    console.log(chalk.dim('Using faf chat'));
+  }
+  
+  try {
+    const existingFafPath = await findFafFile();
+    if (existingFafPath) {
+      const fs = await import('fs').then(m => m.promises);
+      const fafContent = await fs.readFile(existingFafPath, 'utf-8');
+      const fafData = YAML.parse(fafContent);
+      const scoreResult = await calculateFafScore(fafData, existingFafPath);
+      const percentage = Math.round(scoreResult.totalScore);
+      
+      // Get AI readiness from trust cache
+      const trustCache = await getTrustCache(existingFafPath);
+      const aiReadiness = trustCache?.aiCompatibilityScore || 0;
+      
+      // Style the scores with championship colors
+      const scoreColor = percentage >= 85 ? FAF_COLORS.fafGreen : percentage >= 70 ? FAF_COLORS.fafCyan : FAF_COLORS.fafOrange;
+      const aiColor = aiReadiness >= 85 ? FAF_COLORS.fafGreen : aiReadiness >= 70 ? FAF_COLORS.fafCyan : FAF_COLORS.fafOrange;
+      
+      console.log(`Current Score: ${scoreColor(percentage + '%')} > AI-Readiness: ${aiColor(aiReadiness + '%')}`);
+    } else {
+      console.log(FAF_COLORS.fafOrange(`Current Score: 0% > AI-Readiness: 0%`));
+    }
+  } catch {
+    console.log(FAF_COLORS.fafOrange(`Current Score: 0% > AI-Readiness: 0%`));
+  }
+}
 
 /**
  * Analytics tracking wrapper for commands
@@ -51,6 +95,10 @@ function withAnalyticsTracking<T extends (...args: any[]) => Promise<any> | any>
       const result = await fn(...args);
       const duration = Date.now() - start;
       await trackCommand(commandName, commandArgs, duration, true);
+      
+      // Show score footer after every command
+      await showScoreFooter('device');
+      
       return result;
     } catch (error) {
       const duration = Date.now() - start;
@@ -61,60 +109,36 @@ function withAnalyticsTracking<T extends (...args: any[]) => Promise<any> | any>
   }) as T;
 }
 
+function showHeaderIfAppropriate(commandName?: string) {
+  const showHeaderCommands = ['help', 'init', 'clear', 'enhance', 'analyze', 'chat'];
+  if (!commandName || showHeaderCommands.includes(commandName)) {
+    console.log(generateFAFHeader());
+  }
+}
+
 program
   .name('faf')
   .description('STOP faffing About! Generate perfect AI context files for any project.')
   .version(version)
   .option('--no-color', 'Disable colored output for accessibility')
-  .option('--color-scheme <scheme>', 'Color scheme for colorblind accessibility: normal|deuteranopia|protanopia|tritanopia', 'normal');
+  .option('--color-scheme <scheme>', 'Color scheme for colorblind accessibility: normal|deuteranopia|protanopia|tritanopia', 'normal')
+  .option('--auto', 'Auto mode - menu-driven interface for learning and exploration')
+  .option('--manual', 'Manual mode - direct command-line interface for power users');
 
-// Add comprehensive help examples
-program.on('--help', () => {
-  console.log('');
-  console.log(chalk.yellow.bold('🚀 Quick Start:'));
-  console.log('');
-  console.log('  $ ' + chalk.cyan('faf init') + '                    # Generate .faf file for this project');
-  console.log('  $ ' + chalk.cyan('faf score --details') + '         # See completeness score breakdown');
-  console.log('  $ ' + chalk.cyan('faf validate') + '               # Check if .faf file is valid');
-  console.log('');
-  console.log(chalk.yellow.bold('💡 Common Workflows:'));
-  console.log('');
-  console.log(chalk.gray('  New project:'));
-  console.log('  $ ' + chalk.cyan('faf init --force') + '           # Create .faf file (overwrite existing)');
-  console.log('  $ ' + chalk.cyan('faf score') + '                  # Check initial score');
-  console.log('');
-  console.log(chalk.gray('  Improve quality:'));
-  console.log('  $ ' + chalk.cyan('faf score --details') + '         # See what\'s missing');
-  console.log('  $ ' + chalk.cyan('faf lint --fix') + '             # Auto-fix formatting');
-  console.log('  $ ' + chalk.cyan('faf audit') + '                  # Check freshness');
-  console.log('');
-  console.log(chalk.gray('  Team handoff:'));
-  console.log('  $ ' + chalk.cyan('faf sync --auto') + '            # Update with latest changes');
-  console.log('  $ ' + chalk.cyan('faf validate') + '               # Ensure it\'s ready');
-  console.log('');
-  console.log(chalk.yellow.bold('🚀 What is .faf?'));
-  console.log('');
-  console.log('  .faf files contain your project\'s "DNA" - everything an AI needs to understand');
-  console.log('  your codebase instantly. Think package.json, but for AI collaboration.');
-  console.log('');
-  console.log('  • ' + chalk.green('Replaces 20+ questions') + ' with one file');
-  console.log('  • ' + chalk.green('Works with any project type') + ' (React, Python, Node.js, etc.)');
-  console.log('  • ' + chalk.green('Scores your context quality') + ' (aim for 70%+)');
-  console.log('');
-  console.log(chalk.gray('  Learn more: https://github.com/wolfejam/faf-cli'));
-});
-
-// 📊 faf init - Create perfect AI context instantly
+// Add all the command definitions back
 program
   .command('init [directory]')
   .description('Create .faf file from your project (detects React, Python, Node.js, etc.)')
   .option('-f, --force', 'Overwrite existing .faf file')
+  .option('-n, --new', 'Create a fresh .faf file (friendlier than --force)')
+  .option('-c, --choose', 'Interactive choice when .faf exists')
   .option('-t, --template <type>', 'Use specific template (svelte, react, vue, node)', 'auto')
   .option('-o, --output <file>', 'Output file path')
   .addHelpText('after', `
 Examples:
   $ faf init                     # Detect project type automatically
-  $ faf init --force             # Overwrite existing .faf file
+  $ faf init --new               # Create a fresh .faf file
+  $ faf init --choose            # Interactive choice when .faf exists
   $ faf init my-app              # Create .faf for different directory
   $ faf init -t react            # Force React template`)
   .action(withAnalyticsTracking('init', (directory, options) => initFafFile(directory, options)));
@@ -157,7 +181,7 @@ Shows:
   • Files tracked and last sync time
   • AI readiness status
   • Performance metrics
-  • Siamese twin (claude.md) status`)
+  • Bi-sync (claude.md) status`)
   .action(withAnalyticsTracking('status', () => statusCommand()));
 
 // 💎 faf credit - Technical Credit Dashboard (Revolutionary Psychology)
@@ -226,7 +250,7 @@ Examples:
   
 The Everything Catalog:
   • ⚡️ Commands: All available commands with usage
-  • 💡 Concepts: Core FAF concepts (siamese-twins, technical-credit, etc.)
+  • 💡 Concepts: Core FAF concepts (bi-sync, technical-credit, etc.)
   • 🧡 Features: Specialized features (garage, panic, guarantee modes)
   • 📂 Categories: core, ai, trust, utilities, improvement, psychology
   
@@ -267,6 +291,26 @@ Perfect for:
   • Community help: Sanitized project sharing
   • Documentation: Shareable project examples`)
   .action((file, options) => shareCommand(file, options));
+
+// 🗣️ faf chat - Natural Language .faf Generation
+program
+  .command('chat')
+  .description('🗣️ Natural language .faf generation - conversation-driven context building')
+  .addHelpText('after', `
+Examples:
+  $ faf chat                         # Start conversational .faf creation
+  
+🗣️ Simple Natural Language Interface:
+  • Answer simple questions about your project
+  • Choose from numbered options (KISS method)
+  • Get perfect .faf file without technical flags
+  • Same championship output, accessible input
+  
+Perfect for:
+  • Non-technical team members
+  • Quick project setup
+  • Learning FAF concepts through conversation`)
+  .action(withAnalyticsTracking('chat', () => chatCommand()));
 
 // 🤖 faf verify - AI Verification System (The Trust Builder)
 program
@@ -346,6 +390,30 @@ Combines old validate + audit:
   • Auto-fix capabilities for common issues`)
   .action((options) => checkCommand(options));
 
+// ✅ faf validate - Check if .faf file is valid
+program
+  .command('validate [file]')
+  .description('Validate .faf file structure and content')
+  .option('-v, --verbose', 'Show detailed validation output')
+  .option('-s, --schema <path>', 'Custom schema file to validate against')
+  .addHelpText('after', `
+Examples:
+  $ faf validate                 # Validate current .faf file
+  $ faf validate --verbose       # Show detailed validation report`)
+  .action(withAnalyticsTracking('validate', validateFafFile));
+
+// 🔍 faf audit - Check freshness and quality
+program
+  .command('audit [file]')
+  .description('Check .faf file freshness and identify improvement areas')
+  .option('-w, --warn-days <days>', 'Days before warning about staleness', '7')
+  .option('-e, --error-days <days>', 'Days before marking as stale', '30')
+  .addHelpText('after', `
+Examples:
+  $ faf audit                    # Check freshness and quality
+  $ faf audit --warn-days 3      # Warn if older than 3 days`)
+  .action(withAnalyticsTracking('audit', auditFafFile));
+
 // 📈 faf score - See how complete your context is  
 program
   .command('score [file]')
@@ -397,6 +465,34 @@ Championship Bi-Sync Features:
       // Original sync functionality
       await syncFafFile(file, options);
     }
+  });
+
+// 🔗 faf bi-sync - Standalone bi-directional sync command
+program
+  .command('bi-sync')
+  .description('🔗 Bi-directional sync .faf ↔ claude.md')
+  .option('-a, --auto', 'Automatic sync without prompts')
+  .option('-w, --watch', 'Start real-time file watching')
+  .option('-f, --force', 'Force overwrite conflicts')
+  .addHelpText('after', `
+Examples:
+  $ faf bi-sync                  # Create claude.md and sync
+  $ faf bi-sync --auto           # Automatic conflict-free sync
+  $ faf bi-sync --watch          # Continuous real-time monitoring
+  
+Championship Bi-Sync Features:
+  • ⚡ Sub-40ms sync time (faster than most file operations)
+  • 🧠 Smart merge algorithms prevent conflicts and data corruption
+  • 🔄 Self-healing: Auto-recovers from file locks/system issues
+  • 💎 Credit propagation: Technical credit updates both files
+  • 🧡 Trust synchronization: AI compatibility scores stay aligned
+  • 🛡️ Conflict prevention: Detects simultaneous edits safely`)
+  .action(async (options) => {
+    await biSyncCommand({
+      auto: options.auto,
+      watch: options.watch,
+      force: options.force || false
+    });
   });
 
 // 🧹 faf clear - Reset caches and state (Claude Code consistency)
@@ -506,6 +602,21 @@ Privacy Controls:
     }
   }));
 
+// 🩵 faf faq - Show FAQ
+program
+  .command('faq')
+  .description('🩵 Frequently Asked Questions - Get help with common issues')
+  .option('-s, --search <term>', 'Search FAQ for specific topic')
+  .addHelpText('after', `
+Examples:
+  $ faf faq                      # Show full FAQ
+  $ faf faq --search spacebar    # Search for spacebar info
+  $ faf faq --search commands    # Search for command info`)
+  .action(withAnalyticsTracking('faq', async (options) => {
+    const faqCommand = await import('./commands/faq');
+    await faqCommand.faqCommand(options);
+  }));
+
 // 🔧 faf lint - Clean up formatting automatically
 program
   .command('lint [file]')
@@ -519,9 +630,9 @@ Examples:
   $ faf lint --schema-version 2.4.0  # Use specific schema`)
   .action(lintFafFile);
 
-// 🚀 faf ai-enhance - Claude-First, Big-3 Compatible Enhancement
+// 🚀 faf enhance - Claude-First, Big-3 Compatible Enhancement
 program
-  .command('ai-enhance [file]')
+  .command('enhance [file]')
   .description('🚀 Claude-First AI Enhancement - Big-3 Compatible, Bullet-proof Universal')
   .option('-m, --model <model>', 'AI model: claude|chatgpt|gemini|big3|universal', 'claude')
   .option('-f, --focus <area>', 'Focus: human-context|ai-instructions|completeness|claude-exclusive', 'completeness')
@@ -529,18 +640,18 @@ program
   .option('--dry-run', 'Show enhancement prompt without executing')
   .addHelpText('after', `
 🤖 Claude-First Enhancement:
-  $ faf ai-enhance                        # Claude intelligence (default)
-  $ faf ai-enhance --model big3           # Big-3 consensus enhancement
-  $ faf ai-enhance --focus claude-exclusive  # Claude's F1-inspired specialty
-  $ faf ai-enhance --consensus            # Multi-model consensus
-  $ faf ai-enhance --dry-run              # Preview enhancement
+  $ faf enhance                           # Claude intelligence (default)
+  $ faf enhance --model big3              # Big-3 consensus enhancement
+  $ faf enhance --focus claude-exclusive  # Claude's F1-inspired specialty
+  $ faf enhance --consensus               # Multi-model consensus
+  $ faf enhance --dry-run                 # Preview enhancement
 
 🚀 NO EXTERNAL DEPENDENCIES - Uses our own Big-3 verification engine!`)
   .action(enhanceFafWithAI);
 
-// 🔍 faf ai-analyze - Claude-First, Big-3 Compatible Analysis
+// 🔍 faf analyze - Claude-First, Big-3 Compatible Analysis
 program
-  .command('ai-analyze [file]')
+  .command('analyze [file]')
   .description('🔍 Claude-First AI Analysis - Big-3 Compatible Intelligence')
   .option('-m, --model <model>', 'AI model: claude|chatgpt|gemini|big3|universal', 'claude')
   .option('-f, --focus <area>', 'Focus: completeness|quality|ai-readiness|human-context|claude-exclusive')
@@ -549,11 +660,11 @@ program
   .option('-c, --comparative', 'Compare perspectives from multiple models')
   .addHelpText('after', `
 🤖 Claude-First Analysis:
-  $ faf ai-analyze                         # Claude intelligence (default)
-  $ faf ai-analyze --model big3            # Big-3 perspective analysis
-  $ faf ai-analyze --focus claude-exclusive  # Claude's championship analysis
-  $ faf ai-analyze --comparative           # Multi-model comparison
-  $ faf ai-analyze --verbose --suggestions # Detailed analysis + tips
+  $ faf analyze                            # Claude intelligence (default)
+  $ faf analyze --model big3               # Big-3 perspective analysis
+  $ faf analyze --focus claude-exclusive   # Claude's championship analysis
+  $ faf analyze --comparative              # Multi-model comparison
+  $ faf analyze --verbose --suggestions    # Detailed analysis + tips
 
 🚀 NO EXTERNAL DEPENDENCIES - Uses our own Big-3 verification engine!`)
   .action(analyzeFafWithAI);
@@ -564,44 +675,269 @@ program
   .action((cmd) => {
     console.log(chalk.red(`❌ Unknown command: ${cmd}`));
     console.log('');
-    console.log(chalk.yellow('💡 Did you mean:'));
+    console.log(FAF_COLORS.fafOrange('💡 Did you mean:'));
     console.log('  ' + chalk.cyan('faf init') + '     # Create .faf file');
     console.log('  ' + chalk.cyan('faf score') + '    # Check completeness');
     console.log('  ' + chalk.cyan('faf --help') + '   # See all commands');
     process.exit(1);
   });
 
-// Parse CLI arguments
-program.parse(process.argv);
-
-// Apply color accessibility settings after parsing
-const options = program.opts();
-if (options.noColor || process.env.NO_COLOR) {
-  setColorOptions(false);
-} else if (options.colorScheme) {
-  const scheme = options.colorScheme as ColorScheme;
-  const validSchemes: ColorScheme[] = ['normal', 'deuteranopia', 'protanopia', 'tritanopia'];
-  if (validSchemes.includes(scheme)) {
-    setColorOptions(true, scheme);
-  } else {
-    console.log(chalk.red(`❌ Invalid color scheme: ${scheme}`));
-    console.log(chalk.yellow(`💡 Valid schemes: ${validSchemes.join(', ')}`));
-    process.exit(1);
+/**
+ * Interactive welcome screen with persistent bottom command line
+ */
+async function showInteractiveWelcome() {
+  // Clear screen and set up persistent layout
+  console.clear();
+  
+  // ASCII Header
+  console.log(generateFAFHeader());
+  console.log('');
+  console.log(chalk.dim('Using faf menu'));
+  console.log('');
+  
+  // Hello User  
+  const username = require('os').userInfo().username;
+  console.log(chalk.cyan.bold(`  👋 Hello ${username}!`));
+  console.log('');
+  
+  // Ready message
+  console.log(chalk.white('  Ready to make your AI happy again?'));
+  console.log('');
+  
+  // Footer - show BEFORE menu
+  await showScoreFooter();
+  console.log('');
+  
+  try {
+    const answer = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'action',
+        message: 'Select an option',
+        choices: [
+          { name: '1. Create your first .faf file', value: 'init' },
+          { name: '2. Interactive context builder', value: 'chat' },
+          { name: '3. See all commands', value: 'help' },
+          { name: '4. FAQ - Get help & answers', value: 'faq' },
+          { name: '5. Browse everything A-Z', value: 'index' },
+          { name: '6. Switch to command line', value: 'commandline' },
+          new inquirer.Separator('')
+        ]
+      }
+    ]);
+    
+    
+    // If user selected command line mode, switch to persistent typing
+    if (answer.action === 'commandline') {
+      console.clear();
+      console.log(generateFAFHeader());
+      console.log('');
+      console.log(chalk.dim('Using faf CLI'));
+      console.log('');
+      console.log(chalk.cyan.bold('⌨️  Command Line Mode'));
+      console.log(chalk.gray('Type commands, "menu" for menu, or "exit" to quit'));
+      console.log('');
+      
+      // Persistent command line loop with spacebar detection
+      let inCommandMode = true;
+      while (inCommandMode) {
+        const cmdAnswer = await new Promise<{command: string}>((resolve) => {
+          let inputBuffer = '';
+          
+          // Show prompt
+          process.stdout.write('> ');
+          
+          // Set up raw keyboard input for spacebar detection
+          if (process.stdin.isTTY) {
+            process.stdin.setRawMode(true);
+            process.stdin.resume();
+            process.stdin.setEncoding('utf8');
+            
+            const keyHandler = (key: string) => {
+              // Spacebar pressed - toggle to menu
+              if (key === ' ' && inputBuffer === '') {
+                process.stdin.setRawMode(false);
+                process.stdin.removeListener('data', keyHandler);
+                console.log('\n' + chalk.dim('🎯 Switching to menu...'));
+                resolve({ command: 'menu' });
+                return;
+              }
+              
+              // Escape pressed - exit
+              if (key === '\u001b') {
+                process.stdin.setRawMode(false);
+                process.stdin.removeListener('data', keyHandler);
+                console.log('\n👋 Goodbye!');
+                process.exit(0);
+              }
+              
+              // Enter pressed - execute command
+              if (key === '\r' || key === '\n') {
+                process.stdin.setRawMode(false);
+                process.stdin.removeListener('data', keyHandler);
+                console.log('');
+                resolve({ command: inputBuffer });
+                return;
+              }
+              
+              // Backspace
+              if (key === '\u007f') {
+                if (inputBuffer.length > 0) {
+                  inputBuffer = inputBuffer.slice(0, -1);
+                  process.stdout.write('\b \b');
+                }
+                return;
+              }
+              
+              // Regular character
+              if (key >= ' ' && key <= '~') {
+                inputBuffer += key;
+                process.stdout.write(key);
+              }
+            };
+            
+            process.stdin.on('data', keyHandler);
+          } else {
+            // Fallback for non-TTY - use regular inquirer
+            inquirer.prompt([{
+              type: 'input',
+              name: 'command',
+              message: '>'
+            }]).then(resolve);
+          }
+        });
+        
+        const command = cmdAnswer.command.trim().toLowerCase();
+        
+        // Handle mode switching commands
+        if (command === 'exit' || command === 'quit') {
+          console.log('👋 Goodbye!');
+          process.exit(0);
+        }
+        
+        if (command === 'menu') {
+          inCommandMode = false;
+          console.log(chalk.dim('↩️  Returning to menu...'));
+          console.log('');
+          // Recursively call showInteractiveWelcome to return to menu
+          await showInteractiveWelcome();
+          return;
+        }
+        
+        // Execute typed command
+        switch (command) {
+          case 'init':
+            await initFafFile();
+            break;
+          case 'chat':
+            await chatCommand();
+            break;
+          case 'help':
+            program.help();
+            break;
+          case 'index':
+            await indexCommand();
+            break;
+          case 'status':
+            await statusCommand();
+            break;
+          case 'faq':
+            const faqCommand = await import('./commands/faq');
+            await faqCommand.faqCommand();
+            break;
+          case '':
+            // Empty command, just continue
+            break;
+          default:
+            console.log(chalk.red(`❌ Unknown command: ${command}`));
+            console.log(FAF_COLORS.fafOrange('💡 Try: init, chat, help, index, status, faf, exit'));
+            break;
+        }
+        
+        // Show footer after each command (unless it was help which shows its own footer)
+        if (command !== 'help' && command !== '') {
+          await showScoreFooter('faf');
+        }
+        console.log('');
+      }
+    } else {
+      // Execute selected menu item
+      const action = answer.action;
+      switch (action) {
+        case 'init':
+          await initFafFile();
+          break;
+        case 'chat':
+          await chatCommand();
+          break;
+        case 'help':
+          program.help();
+          break;
+        case 'faq':
+          const faqMenuCommand = await import('./commands/faq');
+          await faqMenuCommand.faqCommand();
+          break;
+        case 'index':
+          await indexCommand();
+          break;
+      }
+    }
+    
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('User force closed')) {
+      console.log(`\n${chalk.cyan('👋 See you later!')}\n`);
+    } else {
+      console.error(`\n${chalk.red('❌ Error:')} ${error}\n`);
+    }
   }
 }
 
-// Enhanced onboarding for first-time users
-if (!process.argv.slice(2).length) {
-  console.log(chalk.yellow.bold('👋 Welcome to .faf CLI!'));
-  console.log('');
-  console.log('Generate perfect AI context files in seconds:');
-  console.log('');
-  console.log('  ' + chalk.cyan('faf init') + '        # Create .faf file for this project');
-  console.log('  ' + chalk.cyan('faf score') + '       # See completeness score');
-  console.log('  ' + chalk.cyan('faf --help') + '      # See all commands');
-  console.log('');
-  console.log(chalk.gray('Learn more: Run "faf --help" for examples and workflows'));
+// Show header based on command used BEFORE parsing
+const commandUsed = process.argv[2];
+
+// Special case: No arguments at all - show interactive welcome
+if (!commandUsed) {
+  showInteractiveWelcome().then(() => process.exit(0)).catch(err => {
+    console.error(err);
+    process.exit(1);
+  });
+} else {
+  // Parse CLI arguments to check for gearbox flags
+  program.parse(process.argv);
+  const options = program.opts();
+
+  // Gearbox system: Auto/Manual mode detection
+  const isAutoMode = options.auto;
+  const isManualMode = options.manual;
+
+  // Auto mode - show interactive welcome
+  if (isAutoMode) {
+    showInteractiveWelcome().then(() => process.exit(0)).catch(err => {
+      console.error(err);
+      process.exit(1);
+    });
+  } else {
+    const isHelp = commandUsed === '--help' || commandUsed === '-h' || commandUsed === 'help';
+    showHeaderIfAppropriate(isHelp ? 'help' : commandUsed);
+
+    // Apply color accessibility settings after parsing
+    if (options.noColor || process.env.NO_COLOR) {
+      setColorOptions(false);
+    } else if (options.colorScheme) {
+      const scheme = options.colorScheme as ColorScheme;
+      const validSchemes: ColorScheme[] = ['normal', 'deuteranopia', 'protanopia', 'tritanopia'];
+      if (validSchemes.includes(scheme)) {
+        setColorOptions(true, scheme);
+      } else {
+        console.log(chalk.red(`❌ Invalid color scheme: ${scheme}`));
+        console.log(FAF_COLORS.fafOrange(`💡 Valid schemes: ${validSchemes.join(', ')}`));
+        process.exit(1);
+      }
+    }
+  }
 }
+
+// (Removed - handled earlier with minimal welcome screen)
 
 // Export for programmatic use
 export { program };
