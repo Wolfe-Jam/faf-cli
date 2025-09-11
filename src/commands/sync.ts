@@ -33,7 +33,7 @@ export async function syncFafFile(file?: string, options: SyncOptions = {}) {
     const changes = await detectProjectChanges(fafData);
 
     if (changes.length === 0) {
-      console.log(chalk.green("✅ .faf file is up to date"));
+      console.log(chalk.green("☑️ .faf file is up to date"));
       return;
     }
 
@@ -73,7 +73,7 @@ export async function syncFafFile(file?: string, options: SyncOptions = {}) {
     const updatedContent = YAML.stringify(fafData);
     await fs.writeFile(fafPath, updatedContent, "utf-8");
 
-    console.log(chalk.green("✅ .faf file synced successfully"));
+    console.log(chalk.green("☑️ .faf file synced successfully"));
     console.log(chalk.gray(`   Applied ${changes.length} changes`));
   } catch (error) {
     console.log(chalk.red("💥 Sync failed:"));

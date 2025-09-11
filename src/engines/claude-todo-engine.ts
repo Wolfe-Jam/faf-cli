@@ -1,5 +1,5 @@
 /**
- * 🎯 Claude-Inspired Todo Engine - Championship Gamification System
+ * 🤖 Claude-Inspired Todo Engine - Championship Gamification System
  * 
  * PORTABLE ARCHITECTURE:
  * - Pure TypeScript core (no CLI dependencies)
@@ -427,7 +427,7 @@ export const TodoEngineUtils = {
       case 'major':
         return `🎉 Major breakthrough! +${improvement.improvement} points (${improvement.after}%)`;
       case 'minor':
-        return `✅ Great progress! +${improvement.improvement} points (${improvement.after}%)`;
+        return `☑️ Great progress! +${improvement.improvement} points (${improvement.after}%)`;
     }
   }
 };

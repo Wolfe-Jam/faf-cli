@@ -113,7 +113,7 @@ function displayStatus(
   console.log();
   console.log(FAF_COLORS.fafCyan(`${FAF_ICONS.chart_up} Project Status ${speedEmoji} (${performanceGrade})`));
   console.log(`${FAF_COLORS.fafCyan('├─ ')  }${FAF_ICONS.gem} .faf Context: ${formatTrustLevel(trustScore)}`);
-  console.log(`${FAF_COLORS.fafCyan('├─ ')  }${FAF_ICONS.robot} AI Readiness: ${trustScore >= 80 ? '✅ Optimized' : '🟡 Improving'}`);
+  console.log(`${FAF_COLORS.fafCyan('├─ ')  }${FAF_ICONS.robot} AI Readiness: ${trustScore >= 80 ? '☑️ Optimized' : '🟡 Improving'}`);
   console.log(`${FAF_COLORS.fafCyan('├─ ')  }${FAF_ICONS.file} Files Tracked: ${lines} lines`);
   console.log(`${FAF_COLORS.fafCyan('├─ ')  }${FAF_ICONS.zap} Performance: ${formatPerformance(duration)}`);
   console.log(`${FAF_COLORS.fafCyan('├─ ')  }${FAF_ICONS.heart_orange} Last Sync: ${lastSyncText}`);
@@ -131,7 +131,7 @@ function displayStatus(
   
   // Siamese Twin status with Championship styling
   if (hasClaudeMd) {
-    console.log(FAF_COLORS.fafGreen(`✅ claude.md found - ${FAF_ICONS.link} Siamese twins active`));
+    console.log(FAF_COLORS.fafGreen(`☑️ claude.md found - ${FAF_ICONS.link} Siamese twins active`));
   } else {
     console.log(FAF_COLORS.fafOrange(`⚠️  claude.md not found - run `) + FAF_COLORS.fafCyan('faf sync --twins') + FAF_COLORS.fafOrange(' to create'));
   }

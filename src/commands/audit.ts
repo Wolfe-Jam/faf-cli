@@ -117,7 +117,7 @@ export async function auditFafFile(file?: string, options: AuditOptions = {}) {
     auditScore = Math.max(0, Math.min(100, auditScore));
 
     if (auditScore >= 90) {
-      console.log(chalk.green(`✅ Audit Score: ${auditScore}% - Excellent`));
+      console.log(chalk.green(`☑️ Audit Score: ${auditScore}% - Excellent`));
     } else if (auditScore >= 70) {
       console.log(chalk.yellow(`⚠️  Audit Score: ${auditScore}% - Good`));
     } else {

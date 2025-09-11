@@ -25,7 +25,7 @@ export async function indexCommand(query?: string, options: IndexCommandOptions 
     console.log(`${FAF_COLORS.fafCyan('├─ ')}The everything catalog - commands, concepts, features A-Z`);
     
     if (query) {
-      await showSpecificEntry(query, options);
+      await showSpecificEntry(query);
     } else {
       await showFullIndex(options);
     }
@@ -61,6 +61,13 @@ const FAF_INDEX: Record<string, IndexEntry> = {
     usage: 'faf ai-analyze [file] [--model claude|chatgpt|gemini]',
     category: 'ai',
     examples: ['faf ai-analyze', 'faf ai-analyze --model claude']
+  },
+  'analytics': {
+    type: 'command',
+    description: 'View usage analytics and manage telemetry settings',
+    usage: 'faf analytics [--summary] [--disable] [--enable] [--reset]',
+    category: 'utilities',
+    examples: ['faf analytics --summary', 'faf analytics --disable', 'faf analytics --enable']
   },
   'ai-enhance': {
     type: 'command', 
@@ -101,8 +108,8 @@ const FAF_INDEX: Record<string, IndexEntry> = {
   },
   'claude-md': {
     type: 'concept',
-    description: 'Siamese twin to .faf file for Claude Code integration',
-    related: ['siamese-twins', 'sync'],
+    description: 'Bi-directional sync partner to .faf file for Claude Code integration',
+    related: ['bi-sync', 'sync'],
     category: 'concepts'
   },
   'credit': {
@@ -203,9 +210,9 @@ const FAF_INDEX: Record<string, IndexEntry> = {
     category: 'utilities',
     examples: ['faf share', 'faf share --anonymous', 'faf share --format json --expires 24h']
   },
-  'siamese-twins': {
+  'bi-sync': {
     type: 'concept',
-    description: 'Bidirectional sync between .faf and claude.md files',
+    description: 'Real-time bidirectional sync between .faf and claude.md with sub-40ms performance, smart merge algorithms, and self-healing capabilities',
     related: ['sync', 'claude-md'],
     category: 'concepts'
   },
@@ -225,10 +232,10 @@ const FAF_INDEX: Record<string, IndexEntry> = {
   },
   'sync': {
     type: 'command',
-    description: 'Update .faf when dependencies change OR sync with claude.md (Siamese Twins)',
-    usage: 'faf sync [file] [--twins] [--auto]',
+    description: 'Update .faf when dependencies change OR sync with claude.md (bi-directional sync)',
+    usage: 'faf sync [file] [--bi-sync] [--auto]',
     category: 'core',
-    examples: ['faf sync', 'faf sync --twins', 'faf sync --auto']
+    examples: ['faf sync', 'faf sync --bi-sync', 'faf sync --auto']
   },
 
   // === T ===
@@ -352,7 +359,7 @@ async function showFullIndex(options: IndexCommandOptions): Promise<void> {
 /**
  * Show specific index entry
  */
-async function showSpecificEntry(query: string, _options: IndexCommandOptions): Promise<void> {
+async function showSpecificEntry(query: string): Promise<void> {
   const entry = FAF_INDEX[query.toLowerCase() as keyof typeof FAF_INDEX];
   
   if (!entry) {
@@ -398,7 +405,7 @@ async function showSpecificEntry(query: string, _options: IndexCommandOptions): 
   
   if (entry.examples && entry.examples.length > 0) {
     console.log();
-    console.log(`${FAF_COLORS.fafCyan('🎯 Examples:')}`);
+    console.log(`${FAF_COLORS.fafCyan('📚 Examples:')}`);
     entry.examples.forEach((example: string) => {
       console.log(`   ${FAF_COLORS.fafOrange('$')} ${example}`);
     });
@@ -421,7 +428,7 @@ function getTypeEmoji(type: string): string {
   const emojis: Record<string, string> = {
     command: '⚡️',
     concept: '💡', 
-    feature: '🎯',
+    feature: '⭐',
   };
   return emojis[type] || '📄';
 }

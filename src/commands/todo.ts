@@ -110,7 +110,7 @@ function displayTodoList(todoList: TodoList): void {
   
   console.log();
   console.log(`┌─────────────────────────────────────────┐`);
-  console.log(`│ ${FAF_COLORS.fafCyan('🎯 Claude-Inspired Improvement Plan')}     │`);
+  console.log(`│ ${FAF_COLORS.fafCyan('🤖 Claude-Inspired Improvement Plan')}     │`);
   console.log(`│ ${FAF_COLORS.fafOrange(`Current: ${todoList.currentScore}%`)} → ${FAF_COLORS.fafGreen(`Target: ${todoList.targetScore}%`)}        │`);
   console.log(`└─────────────────────────────────────────┘`);
   console.log();
@@ -119,10 +119,10 @@ function displayTodoList(todoList: TodoList): void {
   
   todoList.items.forEach((item, index) => {
     const connector = index === todoList.items.length - 1 ? '└─' : '├─';
-    const checkbox = item.completed ? '✅' : '[ ]';
+    const checkbox = item.completed ? '☑️' : '[ ]';
     const impactColor = item.impact >= 15 ? FAF_COLORS.fafGreen : 
                        item.impact >= 10 ? FAF_COLORS.fafOrange : FAF_COLORS.fafCyan;
-    const highImpact = item.impact >= 15 ? ' 🎯 HIGH IMPACT' : '';
+    const highImpact = item.impact >= 15 ? ' 💯 HIGH IMPACT' : '';
     
     console.log(
       `${FAF_COLORS.fafCyan(`${connector} `)}${checkbox} ${item.title} ${impactColor(`(+${item.impact} points)`)}${highImpact}`
@@ -214,7 +214,7 @@ async function completeTask(taskIdentifier: string, fafPath: string): Promise<vo
   if (improvement.celebrationLevel === 'championship') {
     console.log();
     console.log(FAF_COLORS.fafGreen('🎊 CHAMPIONSHIP ACHIEVED! 🏁'));
-    console.log(FAF_COLORS.fafGreen('🚀 Your AI context is now maximally optimized!'));
+    console.log(FAF_COLORS.fafGreen('🏆 Your AI context is now maximally optimized!'));
     console.log(FAF_COLORS.fafCyan('💎 Technical Credit: +25 points (Perfect Score Bonus)'));
   }
 }

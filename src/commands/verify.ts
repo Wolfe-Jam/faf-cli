@@ -2,7 +2,7 @@
  * 🤖 AI Verification System - The Trust Builder
  * Tests .faf context with Claude, ChatGPT, and Gemini to prove AI understanding
  * 
- * Mission: Transform "🔴 Needs improvement" → "✅ Perfect context"
+ * Mission: Transform "🔴 Needs improvement" → "☑️ Perfect context"
  */
 
 import { promises as fs } from 'fs';
@@ -130,7 +130,7 @@ export function displayVerificationResults(results: VerificationResult[], detail
   console.log();
   
   for (const result of results) {
-    const statusEmoji = result.understood ? '✅' : result.confidence > 50 ? '🟡' : '🔴';
+    const statusEmoji = result.understood ? '☑️' : result.confidence > 50 ? '🟡' : '🔴';
     const statusText = result.understood ? 'Perfect context' : result.confidence > 50 ? 'Good context' : 'Needs improvement';
     const modelName = result.model.charAt(0).toUpperCase() + result.model.slice(1);
     
@@ -199,7 +199,7 @@ export async function verifyCommand(options: AIVerificationOptions = {}): Promis
       process.exit(1);
     }
     
-    console.log(chalk.dim(`🎯 Verifying context: ${path.relative(process.cwd(), fafPath)}`));
+    console.log(chalk.dim(`🔍 Verifying context: ${path.relative(process.cwd(), fafPath)}`));
     
     const startTime = Date.now();
     const results = await verifyWithAI(fafPath, options);

@@ -80,7 +80,7 @@ export async function analyzeFafWithAI(
  */
 function getModelDisplay(model: string): string {
   const displays = {
-    'claude': '🎯 Claude (Championship)',
+    'claude': '🤖 Claude (Championship)',
     'chatgpt': '🤖 ChatGPT', 
     'gemini': '💎 Gemini',
     'big3': '🚀 Big-3 Analysis',
@@ -104,7 +104,7 @@ function displayCurrentAnalysis(scoreResult: any, trustCache: any, verbose?: boo
   if (verbose) {
     console.log(chalk.cyan("\n📋 Section Breakdown:"));
     Object.entries(scoreResult.sectionScores).forEach(([section, score]: [string, any]) => {
-      const icon = score.percentage > 80 ? "✅" : score.percentage > 50 ? "🟡" : "❌";
+      const icon = score.percentage > 80 ? "☑️" : score.percentage > 50 ? "🟡" : "❌";
       console.log(chalk.cyan(`  ${icon} ${section}:`), `${Math.round(score.percentage)}% (${score.filled}/${score.total})`);
     });
   }
@@ -182,9 +182,9 @@ function displayAnalysisResults(insights: any): void {
   
   models.forEach(model => {
     const analysis = insights[model];
-    console.log(chalk.cyan(`\n🎯 ${getModelDisplay(model)} Analysis:`));
+    console.log(chalk.cyan(`\n🔍 ${getModelDisplay(model)} Analysis:`));
     
-    console.log(chalk.green('\n✅ Strengths:'));
+    console.log(chalk.green('\n☑️ Strengths:'));
     analysis.strengths.forEach((strength: string, i: number) => {
       console.log(chalk.dim(`  ${i + 1}. ${strength}`));
     });
@@ -194,7 +194,7 @@ function displayAnalysisResults(insights: any): void {
       console.log(chalk.dim(`  ${i + 1}. ${weakness}`));
     });
     
-    console.log(chalk.blue('\n🚀 Recommendations:'));
+    console.log(chalk.blue('\n📋 Recommendations:'));
     analysis.recommendations.forEach((rec: string, i: number) => {
       console.log(chalk.dim(`  ${i + 1}. ${rec}`));
     });
@@ -237,7 +237,7 @@ function displayComparativeInsights(insights: any): void {
                           insights.gemini?.recommendations[0];
   
   if (topRecommendation) {
-    console.log(chalk.blue('\n🎯 Priority Recommendation:'));
+    console.log(chalk.blue('\n📈 Priority Recommendation:'));
     console.log(chalk.dim(`  ${topRecommendation}`));
   }
 }

@@ -1,5 +1,5 @@
 /**
- * 🎯 faf score - Scoring Command
+ * 📈 faf score - Scoring Command
  * Calculates .faf completeness score with detailed breakdown
  */
 
@@ -45,7 +45,7 @@ export async function scoreFafFile(file?: string, options: ScoreOptions = {}) {
       process.exit(1);
     }
 
-    console.log(chalk.blue(`🎯 Scoring: ${fafPath}`));
+    console.log(chalk.blue(`📈 Scoring: ${fafPath}`));
 
     // Read and parse .faf file
     const content = await fs.readFile(fafPath, "utf-8");
