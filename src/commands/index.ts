@@ -317,12 +317,16 @@ async function showFullIndex(options: IndexCommandOptions): Promise<void> {
 
   console.log();
   console.log(`┌─────────────────────────────────────────┐`);
-  console.log(`│ ${FAF_COLORS.fafCyan('📚 FAF Universal Index - A to Z')}       │`);
+  console.log(`│ ${FAF_COLORS.fafCyan('📚 FAF Universal Index - A to Z')}        │`);
   if (options.category) {
-    console.log(`│ ${FAF_COLORS.fafOrange(`Category: ${options.category}`)}                    │`);
+    const categoryText = `Category: ${options.category}`;
+    const padding = ' '.repeat(Math.max(0, 41 - categoryText.length));
+    console.log(`│ ${FAF_COLORS.fafOrange(categoryText)}${padding}│`);
   }
   if (options.search) {
-    console.log(`│ ${FAF_COLORS.fafOrange(`Search: "${options.search}"`)}                │`);
+    const searchText = `Search: "${options.search}"`;
+    const padding = ' '.repeat(Math.max(0, 41 - searchText.length));
+    console.log(`│ ${FAF_COLORS.fafOrange(searchText)}${padding}│`);
   }
   console.log(`└─────────────────────────────────────────┘`);
   console.log();
