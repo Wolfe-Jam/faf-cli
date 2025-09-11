@@ -368,6 +368,9 @@ async function showFullIndex(options: IndexCommandOptions): Promise<void> {
     const count = entries.filter(([, entry]) => entry.category === category).length;
     console.log(`${FAF_COLORS.fafCyan('   ')}${getCategoryColor(category)(category)} (${count})`);
   });
+  
+  // Clear line break at the end for better readability
+  console.log();
 }
 
 /**
