@@ -1,0 +1,152 @@
+{
+  "name": "faf",
+  "displayName": "FAF - AI Context Manager",
+  "description": "🧡 Generate perfect AI context files. bi-sync = persistent context-mirroring through thick and thin",
+  "version": "1.0.0",
+  "publisher": "wolfejam",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other",
+    "Snippets",
+    "Formatters"
+  ],
+  "keywords": [
+    "ai",
+    "context",
+    "claude",
+    "chatgpt", 
+    "gemini",
+    "faf",
+    "sync"
+  ],
+  "activationEvents": [
+    "onCommand:faf.init",
+    "workspaceContains:.faf"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "faf.init",
+        "title": "FAF: Init Project",
+        "category": "FAF"
+      },
+      {
+        "command": "faf.score", 
+        "title": "FAF: Check Score",
+        "category": "FAF"
+      },
+      {
+        "command": "faf.trust",
+        "title": "FAF: Build Trust",
+        "category": "FAF"  
+      },
+      {
+        "command": "faf.bisync",
+        "title": "FAF: Sync Context",
+        "category": "FAF"
+      },
+      {
+        "command": "faf.status",
+        "title": "FAF: Status",
+        "category": "FAF"
+      },
+      {
+        "command": "faf.share",
+        "title": "FAF: Share File", 
+        "category": "FAF"
+      },
+      {
+        "command": "faf.faq",
+        "title": "FAF: FAQ",
+        "category": "FAF"
+      },
+      {
+        "command": "faf.index",
+        "title": "FAF: A-Z Reference",
+        "category": "FAF"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "faf.init",
+          "when": "!faf.hasFile"
+        },
+        {
+          "command": "faf.score",
+          "when": "faf.hasFile"
+        },
+        {
+          "command": "faf.trust", 
+          "when": "faf.hasFile"
+        },
+        {
+          "command": "faf.bisync",
+          "when": "faf.hasFile"  
+        },
+        {
+          "command": "faf.status",
+          "when": "faf.hasFile"
+        },
+        {
+          "command": "faf.share",
+          "when": "faf.hasFile"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "faf.init",
+          "when": "!faf.hasFile"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "FAF",
+      "properties": {
+        "faf.autoSync": {
+          "type": "boolean", 
+          "default": true,
+          "description": "Enable automatic bi-sync context-mirroring"
+        },
+        "faf.showStatusBar": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show FAF status in status bar"
+        },
+        "faf.trustThreshold": {
+          "type": "number",
+          "default": 70,
+          "description": "Minimum trust score threshold (0-100)"
+        }
+      }
+    },
+    "languages": [
+      {
+        "id": "faf",
+        "aliases": ["FAF", "faf"],
+        "extensions": [".faf"],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "faf",
+        "scopeName": "source.faf",
+        "path": "./syntaxes/faf.tmGrammar.json"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.74.0",
+    "@types/node": "16.x",
+    "typescript": "^4.9.4"
+  }
+}

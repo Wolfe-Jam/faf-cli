@@ -323,6 +323,14 @@ const FAF_INDEX: Record<string, IndexEntry> = {
     category: 'ai',
     examples: ['faf verify', 'faf verify --detailed', 'faf verify --models claude,chatgpt']
   },
+  'vscode-extension': {
+    type: 'feature',
+    description: 'Native VS Code integration with Command Palette (Ctrl+Shift+P) and status bar',
+    usage: 'Install "FAF - AI Context Manager" from VS Code marketplace',
+    category: 'integrations',
+    examples: ['Ctrl+Shift+P → "FAF: Init Project"', 'Status bar: "🧡 FAF 85% | 🩵 AI 92%"'],
+    related: ['faq', 'command-palette', 'status-bar']
+  },
 
   // === W ===
   'wolfejam-testing-center': {
@@ -493,6 +501,7 @@ function getCategoryColor(category: string): (text: string) => string {
     psychology: FAF_COLORS.fafOrange,
     concepts: FAF_COLORS.fafCyan,
     discovery: FAF_COLORS.fafGreen,
+    integrations: FAF_COLORS.fafOrange,
   };
   return colors[category] || FAF_COLORS.fafCyan;
 }
