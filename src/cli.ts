@@ -69,14 +69,13 @@ async function showScoreFooter(context?: string) {
       
       // Style the scores with championship colors
       const scoreColor = percentage >= 85 ? FAF_COLORS.fafGreen : percentage >= 70 ? FAF_COLORS.fafCyan : FAF_COLORS.fafOrange;
-      const aiColor = aiReadiness >= 85 ? FAF_COLORS.fafGreen : aiReadiness >= 70 ? FAF_COLORS.fafCyan : FAF_COLORS.fafOrange;
       
-      console.log(`Current Score: ${scoreColor(percentage + '%')} > AI-Readiness: ${aiColor(aiReadiness + '%')}`);
+      console.log(`Current Score: ${scoreColor(percentage + '%')} > AI-Predictive: ${FAF_COLORS.fafCyan(aiReadiness + '%')}`);
     } else {
-      console.log(FAF_COLORS.fafOrange(`Current Score: 0% > AI-Readiness: 0%`));
+      console.log(`Current Score: 0% > AI-Predictive: ${FAF_COLORS.fafCyan('0%')}`);
     }
   } catch {
-    console.log(FAF_COLORS.fafOrange(`Current Score: 0% > AI-Readiness: 0%`));
+    console.log(`Current Score: 0% > AI-Predictive: ${FAF_COLORS.fafCyan('0%')}`);
   }
 }
 
@@ -123,7 +122,25 @@ program
   .option('--no-color', 'Disable colored output for accessibility')
   .option('--color-scheme <scheme>', 'Color scheme for colorblind accessibility: normal|deuteranopia|protanopia|tritanopia', 'normal')
   .option('--auto', 'Auto mode - menu-driven interface for learning and exploration')
-  .option('--manual', 'Manual mode - direct command-line interface for power users');
+  .option('--manual', 'Manual mode - direct command-line interface for power users')
+  .addHelpText('after', `
+${FAF_COLORS.fafOrange('💡 In Terminal:')} Use ${chalk.cyan('faf')} prefix - like ${chalk.cyan('faf init')}, ${chalk.cyan('faf faq')}
+
+${FAF_COLORS.fafCyan('🚀 Quick Start - Get Perfect AI Context:')}
+
+  ${FAF_COLORS.fafOrange('1.')} ${chalk.cyan('faf init')}     ${chalk.gray('# Get your .faf file')}
+  ${FAF_COLORS.fafOrange('2.')} ${chalk.cyan('faf score')}    ${chalk.gray('# Get a high score (70%+)')}
+  ${FAF_COLORS.fafOrange('3.')} ${chalk.cyan('faf trust')}    ${chalk.gray('# Build AI trust & confidence')}
+  ${FAF_COLORS.fafOrange('4.')} ${chalk.cyan('faf bi-sync')}  ${chalk.gray('# Set & forget - persistent context-mirroring')}
+
+${FAF_COLORS.fafCyan('🎯 The Promise:')}
+  AI needs context. .faf brings it.
+  bi-sync = persistent context-mirroring through thick and thin
+  Get high score, build trust, share freely!
+  
+${FAF_COLORS.fafOrange('📚 Need more?')} ${chalk.cyan('faf index')} ${chalk.gray('# Complete A-Z reference guide')}
+${FAF_COLORS.fafOrange('🎯 VS Coders?')} ${chalk.cyan('faf faq')} ${chalk.gray('# VS Code extension & Command Palette info!')}
+`);
 
 // Add all the command definitions back
 program
@@ -735,7 +752,7 @@ async function showInteractiveWelcome() {
       console.log(chalk.dim('Using faf CLI'));
       console.log('');
       console.log(chalk.cyan.bold('⌨️  Command Line Mode'));
-      console.log(chalk.gray('Type commands, "menu" for menu, or "exit" to quit'));
+      console.log(chalk.gray('Type commands, "menu" for menu, or "index" for the .faf A-Z'));
       console.log('');
       
       // Persistent command line loop with spacebar detection
@@ -849,8 +866,16 @@ async function showInteractiveWelcome() {
             // Empty command, just continue
             break;
           default:
-            console.log(chalk.red(`❌ Unknown command: ${command}`));
-            console.log(FAF_COLORS.fafOrange('💡 Try: init, chat, help, index, status, faf, exit'));
+            // Check if user tried a slash command
+            if (command.startsWith('/')) {
+              const commandWithoutSlash = command.slice(1);
+              console.log(chalk.red(`❌ Unknown command: ${command}`));
+              console.log(FAF_COLORS.fafCyan('🎉 Good news! You don\'t need a slash in FAF CLI mode'));
+              console.log(FAF_COLORS.fafOrange(`💡 Try: ${commandWithoutSlash} (without the /)`));
+            } else {
+              console.log(chalk.red(`❌ Unknown command: ${command}`));
+              console.log(FAF_COLORS.fafOrange('💡 Try: init, chat, help, index, status, score, exit'));
+            }
             break;
         }
         

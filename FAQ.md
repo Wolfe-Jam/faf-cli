@@ -48,7 +48,7 @@
 **A:** Fixed! Now when you switch to command line mode, the screen clears and shows:
 ```
 ⌨️  Command Line Mode
-Type commands, "menu" for menu, or "exit" to quit
+Type commands, "menu" for menu, or "index" for the .faf A-Z
 
 > 
 ```
@@ -176,6 +176,42 @@ faf → spacebar → menu → 6 → Enter → CLI → spacebar → menu
 
 ## 🖥️ **Platform Support**
 
+### Q: Do you support VS Code?
+**A:** YES! 🚀 FAF has full VS Code integration via our official extension:
+
+**🎯 Command Palette Integration:**
+- Press `Ctrl+Shift+P` (Windows/Linux) or `Cmd+Shift+P` (Mac)
+- Type "FAF:" to see all commands
+- **FAF: Init Project**, **FAF: Check Score**, **FAF: Build Trust**, etc.
+
+**⚡ Real-time Status Bar:**
+- Shows live context scores: `🧡 FAF 85% | 🩵 AI 92%`
+- Click for instant status check
+- Auto-updates when .faf files change
+
+**🎨 Developer Experience:**
+- Syntax highlighting for .faf files
+- Auto-detection of .faf files in workspace
+- Smart command suggestions (only show relevant commands)
+- Terminal integration - commands run in VS Code terminal
+
+**Installation:**
+```bash
+# Install FAF CLI first
+npm install -g @faf/cli
+
+# Then install VS Code extension from marketplace
+# Search: "FAF - AI Context Manager" by wolfejam
+```
+
+**Why VS Code Extension?**
+- Native Command Palette workflow (`Ctrl+Shift+P`)
+- No context switching between editor and terminal
+- Visual feedback via status bar
+- Seamless integration with existing VS Code workflows
+
+Both CLI and VS Code extension work together perfectly! 🤖🧡
+
 ### Q: What devices will faf CLI work on?
 **A:** FAF CLI is built with Node.js/TypeScript and works on all major platforms:
 
@@ -208,6 +244,46 @@ faf --version
 ```
 
 Works anywhere you can run npm! 🚀
+
+---
+
+## 📝 **Commands & Syntax**
+
+### Q: When do I use `faf command`, `/command`, or just `command`?
+**A:** It depends on your context:
+
+**🖥️ Device Terminal** (Mac/Linux/Windows):
+- Use: `faf command`
+- Examples: `faf init`, `faf status`, `faf score`
+
+**⌨️ FAF CLI Mode** (after `faf` → option 6):
+- Use: `command` (no prefix needed!)
+- Examples: `init`, `status`, `score`, `exit`
+- 🎉 **Good news**: No slashes needed in FAF CLI mode
+
+**🎯 FAF Menu Mode** (after typing `faf`):
+- Use: Arrow keys or number shortcuts (1-6)
+- Examples: Press `1` for init, `2` for chat
+
+**📝 Documentation/Claude Code**:
+- Use: `/command` (slash commands)
+
+### Q: Is there a slash / command?
+**A:** Crystal clear rule:
+
+**FAF CLI = No Slashes** ✅
+
+🖥️ **Terminal** → `faf command`  
+⌨️ **FAF CLI Mode** → `command` (NO slashes!)
+
+FAF CLI is slash-free by design:
+- Simple and clean
+- No confusion with file paths
+- Direct command entry
+- More natural typing
+
+### Q: I tried `/score` in FAF CLI mode and got an error?
+**A:** Perfect! You discovered the user-friendly design - FAF CLI mode doesn't need slashes. Just type `score` instead of `/score`. The CLI will give you a helpful message when this happens.
 
 ---
 
