@@ -1,6 +1,6 @@
 {
   "name": "@faf/cli",
-  "version": "2.7.0",
+  "version": "2.8.0",
   "description": "Command-line interface for .faf (Foundational AI-Context Format)",
   "main": "dist/index.js",
   "bin": {
@@ -37,7 +37,10 @@
     "release:dry": "npm run release -- --dry-run",
     "performance": "ts-node scripts/performance-validation.ts",
     "performance:ci": "npm run performance -- --tests status,help,index",
-    "performance:full": "npm run performance -- --verbose"
+    "performance:full": "npm run performance -- --verbose",
+    "version:update": "node scripts/update-version.js",
+    "version:check": "node scripts/check-version.js",
+    "precommit": "npm run version:check"
   },
   "keywords": [
     "faf",

@@ -1,0 +1,14 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# 🔍 Check version consistency before every commit
+echo "🏎️ Running FAF version consistency check..."
+npm run version:check
+
+# If version check fails, the commit will be aborted
+if [ $? -ne 0 ]; then
+  echo "❌ Version check failed! Fix with: npm run version:update X.Y.Z"
+  exit 1
+fi
+
+echo "✅ Version check passed!"
