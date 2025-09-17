@@ -10,6 +10,8 @@ import inquirer from 'inquirer';
 import { validateFafFile } from './commands/validate';
 import { initFafFile } from './commands/init';
 import { scoreFafFile } from './commands/score';
+import { showFafScoreCard } from './commands/show';
+import { autoCommand } from './commands/auto';
 import { syncFafFile } from './commands/sync';
 import { auditFafFile } from './commands/audit';
 import { lintFafFile } from './commands/lint';
@@ -29,6 +31,7 @@ import { searchCommand } from './commands/search';
 import { indexCommand } from './commands/index';
 import { shareCommand } from './commands/share';
 import { chatCommand } from './commands/chat';
+import { convertCommand, toMarkdown, toText } from './commands/convert';
 import { setColorOptions, type ColorScheme } from './utils/color-utils';
 import { generateFAFHeader, generateHelpHeader, FAF_COLORS } from './utils/championship-style';
 import { analytics, trackCommand, trackError, withPerformanceTracking } from './telemetry/analytics';
@@ -128,6 +131,9 @@ ${FAF_COLORS.fafOrange('💡 In Terminal:')} Use ${chalk.cyan('faf')} prefix - l
 
 ${FAF_COLORS.fafCyan('🚀 Quick Start - Get Perfect AI Context:')}
 
+  ${chalk.bold.green('FASTEST:')} ${chalk.cyan('faf auto')}     ${chalk.gray('# ONE COMMAND - Zero to Championship!')}
+
+  ${chalk.gray('Or step by step:')}
   ${FAF_COLORS.fafOrange('1.')} ${chalk.cyan('faf init')}     ${chalk.gray('# Get your .faf file')}
   ${FAF_COLORS.fafOrange('2.')} ${chalk.cyan('faf score')}    ${chalk.gray('# Get a high score (70%+)')}
   ${FAF_COLORS.fafOrange('3.')} ${chalk.cyan('faf trust')}    ${chalk.gray('# Build AI trust & confidence')}
@@ -141,6 +147,30 @@ ${FAF_COLORS.fafCyan('🎯 The Promise:')}
 ${FAF_COLORS.fafOrange('📚 Need more?')} ${chalk.cyan('faf index')} ${chalk.gray('# Complete A-Z reference guide')}
 ${FAF_COLORS.fafOrange('🎯 VS Coders?')} ${chalk.cyan('faf faq')} ${chalk.gray('# VS Code extension & Command Palette info!')}
 `);
+
+// 🏎️ faf auto - The One Command Championship (PRIORITY #1)
+program
+  .command('auto [directory]')
+  .description('🏎️ ONE COMMAND TO RULE THEM ALL - Zero to Championship instantly!')
+  .option('-f, --force', 'Force overwrite existing files')
+  .option('-a, --ai', 'Include AI enhancement (requires API key)')
+  .option('--no-show', 'Skip showing scorecard at end')
+  .addHelpText('after', `
+Examples:
+  $ faf auto                     # Transform current directory to Championship
+  $ faf auto ./my-project        # Transform specific project
+  $ faf auto --ai                # Include AI enhancements
+  $ faf auto --force             # Overwrite everything, fresh start
+
+🏎️ What FAF AUTO Does (in 30 seconds):
+  1. Creates perfect .faf file
+  2. Syncs all dependencies
+  3. Generates CLAUDE.md
+  4. Sets up bi-directional sync
+  5. Shows your Championship scorecard
+
+From 0% to 99% in one command. No faffing about!`)
+  .action(withAnalyticsTracking('auto', autoCommand));
 
 // Add all the command definitions back
 program
@@ -309,6 +339,37 @@ Perfect for:
   • Documentation: Shareable project examples`)
   .action((file, options) => shareCommand(file, options));
 
+// 🏆 GOLDEN RULE: faf convert - YAML to MD/TXT
+program
+  .command('convert [file]')
+  .alias('to-md')
+  .description('🔄 Convert .faf YAML to Markdown or Text (Golden Rule: We SPEAK YAML)')
+  .option('-f, --format <type>', 'Output format (md|txt)', 'md')
+  .option('-o, --output <file>', 'Output file path')
+  .option('-s, --save', 'Save to file (.faf.md or .faf.txt)')
+  .addHelpText('after', `
+Examples:
+  $ faf convert              # Convert .faf to Markdown (console output)
+  $ faf convert --save       # Save as .faf.md
+  $ faf to-md                # Quick alias for Markdown
+  $ faf convert -f txt       # Convert to plain text
+  $ faf convert -f txt -s    # Save as .faf.txt
+
+🏆 GOLDEN RULE: .faf = YAML ONLY
+  • One source of truth: Pure YAML
+  • Convert when needed: MD for docs, TXT for sharing
+  • No parse errors ever again!`)
+  .action(withAnalyticsTracking('convert', async (file, options) => {
+    await convertCommand(file, options);
+  }));
+
+program
+  .command('to-txt [file]')
+  .description('📝 Quick convert .faf YAML to plain text')
+  .action(withAnalyticsTracking('to-txt', async (file) => {
+    await toText(file);
+  }));
+
 // 🗣️ faf chat - Natural Language .faf Generation
 program
   .command('chat')
@@ -431,7 +492,7 @@ Examples:
   $ faf audit --warn-days 3      # Warn if older than 3 days`)
   .action(withAnalyticsTracking('audit', auditFafFile));
 
-// 📈 faf score - See how complete your context is  
+// 📈 faf score - See how complete your context is
 program
   .command('score [file]')
   .description('Rate your .faf completeness (0-100%). Aim for 70%+ for good AI context.')
@@ -443,6 +504,22 @@ Examples:
   $ faf score --details          # See what's missing for higher score
   $ faf score --minimum 80       # Fail if score below 80%`)
   .action(withAnalyticsTracking('score', scoreFafFile));
+
+// 🏎️ faf show - Championship Score Card Display
+program
+  .command('show [directory]')
+  .description('🏎️ Display FAF Championship Score Card with clean markdown output')
+  .option('-r, --raw', 'Output raw markdown (for piping)')
+  .addHelpText('after', `
+Examples:
+  $ faf show                     # Show score card for current directory
+  $ faf show ./my-project        # Show score card for specific directory
+  $ faf show --raw               # Output raw markdown for piping
+  $ faf show --raw | pbcopy      # Copy score card to clipboard
+
+🍫🍊 CHOCOLATE ORANGE - NO WRAPPERS!
+Clean markdown output that displays naturally.`)
+  .action(withAnalyticsTracking('show', showFafScoreCard));
 
 // 🔄 faf sync - Keep .faf up-to-date automatically + Bi-directional sync
 program

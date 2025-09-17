@@ -5,6 +5,10 @@ node_modules/
 dist/
 build/
 *.tsbuildinfo
+src/**/*.js
+src/**/*.js.map
+src/**/*.d.ts
+src/**/*.d.ts.map
 
 # Package files
 *.tgz
@@ -56,3 +60,7 @@ pids/
 # Temporary folders
 tmp/
 temp/
+
+# Generated conversion files
+.faf.md
+.faf.txt
