@@ -247,7 +247,7 @@ describe('🔍 Performance Regression Tests', () => {
 
 /**
  * 🏆 WOLFEJAM TESTING CENTER AUDIT CHECKLIST
- * *Inspired by McLaren F1 Engineering Excellence*
+ * *McLaren-Inspired Engineering Excellence 🍊*
  * 
  * This test suite ensures:
  * ☑️ Directories ending in "faf" are never mistaken for files

@@ -414,7 +414,7 @@ export default function Home() {
 
 /**
  * 🏆 WOLFEJAM TESTING CENTER STANDARDS CHECKLIST
- * *Inspired by McLaren F1 Engineering Excellence*
+ * *McLaren-Inspired Engineering Excellence 🍊*
  * 
  * ☑️ Critical functionality tested (project detection)
  * ☑️ Performance benchmarks enforced (<2s for large projects)
