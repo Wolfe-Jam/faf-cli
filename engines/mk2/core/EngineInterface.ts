@@ -23,10 +23,13 @@ export interface ScoringEngine {
 export interface EngineSpecs {
   slots?: number;
   fields?: number;
-  mode: 'RELIABLE' | 'CURATED' | 'CHAOTIC' | 'EVOLVING';
+  mode: 'RELIABLE' | 'CURATED' | 'CHAOTIC' | 'EVOLVING' | 'RELIABLE + TURBOCHARGED';
   performance: string;
   reliability: string;
+  catalyst?: string; // 😽 TURBO-CAT optional catalyst
 }
 
 export const ENGINE_BRAND = '🏎️⚡️II';
 export const CLI_VERSION = 'FAF-CLI v2.0.0 with 🏎️⚡️II';
+export const TURBO_CAT = '😽 TURBO-CAT™';
+export const FULL_VERSION = 'FAF-CLI v2.0.0 with 🏎️⚡️II + 😽 TURBO-CAT™';

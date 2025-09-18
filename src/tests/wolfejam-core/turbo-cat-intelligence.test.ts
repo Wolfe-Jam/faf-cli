@@ -1,5 +1,5 @@
 /**
- * 🚨 FAB-Formats Intelligence Engine Tests - BRAKE SYSTEM CRITICAL
+ * 😽 TURBO-CAT Intelligence Engine Tests - CATALYTIC CONVERTER CRITICAL
  * 
  * This is a Tier 1 critical system test. When this system fails, users get:
  * - Wrong project analysis
@@ -13,16 +13,16 @@ import { describe, it, expect, beforeEach } from '@jest/globals';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as os from 'os';
-import { FabFormatsEngine } from '../../utils/fab-formats';
+import { TurboCat } from '../../utils/turbo-cat';
 
-describe('🚨 FAB-Formats Intelligence Engine - BRAKE SYSTEM TESTS', () => {
+describe('😽 TURBO-CAT Intelligence Engine - CATALYTIC TESTS', () => {
   let testDir: string;
-  let fabFormats: FabFormatsEngine;
+  let turboCat: TurboCat;
   
   beforeEach(async () => {
-    testDir = path.join(os.tmpdir(), 'fab-formats-test-' + Date.now());
+    testDir = path.join(os.tmpdir(), 'turbo-cat-test-' + Date.now());
     await fs.mkdir(testDir, { recursive: true });
-    fabFormats = new FabFormatsEngine();
+    turboCat = new TurboCat();
   });
 
   afterEach(async () => {

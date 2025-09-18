@@ -1,12 +1,12 @@
 /**
  * 📊 STACKTISTICS - Stack Discovery & Collection
- * Simple extension of fab-formats intelligence
+ * Powered by TURBO-CAT intelligence catalyst
  */
 
 import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';
-import { FabFormatsEngine } from '../utils/fab-formats';
+import { TurboCat } from '../utils/turbo-cat';
 import { colors } from '../utils/color-utils';
 
 export interface StackSignature {
@@ -43,8 +43,8 @@ export class StacktisticsEngine {
    * Scan current project and discover stack
    */
   async scanProject(projectPath: string = process.cwd()): Promise<StackSignature | null> {
-    const fabEngine = new FabFormatsEngine();
-    const analysis = await fabEngine.discoverFormats(projectPath);
+    const turboCat = new TurboCat();
+    const analysis = await turboCat.discoverFormats(projectPath);
 
     if (!analysis.stackSignature || analysis.stackSignature === 'unknown-stack') {
       return null;

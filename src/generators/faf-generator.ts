@@ -15,7 +15,7 @@ import {
   TypeScriptContext,
 } from "../utils/file-utils";
 import { generateFafContent } from "../utils/yaml-generator";
-import { FabFormatsEngine, FabFormatsAnalysis } from "../utils/fab-formats";
+import { TurboCat, TurboCatAnalysis } from "../utils/turbo-cat";
 
 export interface GenerateOptions {
   projectType?: string;
@@ -76,11 +76,11 @@ export async function generateFafFromProject(
     }
   }
 
-  // 🔍 FAB-FORMATS DISCOVERY - Activate the 200+ format knowledge base
-  const fabEngine = new FabFormatsEngine();
-  let fabAnalysis: FabFormatsAnalysis;
+  // 😽 TURBO-CAT DISCOVERY - Activate the 134-format intelligence catalyst
+  const turboCat = new TurboCat();
+  let fabAnalysis: TurboCatAnalysis;
   try {
-    fabAnalysis = await fabEngine.discoverFormats(projectRoot);
+    fabAnalysis = await turboCat.discoverFormats(projectRoot);
   } catch {
     // Fallback to empty analysis if discovery fails
     fabAnalysis = {
@@ -132,7 +132,7 @@ function generateProjectData(
   readmeData: any,
   configData: any,
   sourceCodeData: any,
-  fabAnalysis: FabFormatsAnalysis,
+  fabAnalysis: TurboCatAnalysis,
   projectType: string,
 ): any {
   // Determine project name and version from appropriate source
@@ -703,7 +703,7 @@ async function parsePyprojectToml(content: string): Promise<any> {
 /**
  * 📊 Extract config data from fab-formats analysis (replaces analyzeConfigFiles)
  */
-function extractConfigDataFromFab(fabAnalysis: FabFormatsAnalysis): any {
+function extractConfigDataFromFab(fabAnalysis: TurboCatAnalysis): any {
   const configData: any = {
     buildTool: null,
     deployment: null,
@@ -758,7 +758,7 @@ function extractConfigDataFromFab(fabAnalysis: FabFormatsAnalysis): any {
 /**
  * 📊 Extract source data from fab-formats analysis (replaces analyzeSourceCode)
  */
-function extractSourceDataFromFab(fabAnalysis: FabFormatsAnalysis): any {
+function extractSourceDataFromFab(fabAnalysis: TurboCatAnalysis): any {
   const sourceData: any = {
     frameworkFeatures: [],
     integrations: [],
