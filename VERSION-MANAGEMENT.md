@@ -124,10 +124,14 @@ npm run version:check
 
 ## 🏁 Version History
 
-- **v2.8.0** - Multi-platform ecosystem integration, VS Code extension
-- **v2.7.0** - Championship style updates, trust cache system
-- **v2.6.0** - Enhanced AI verification, bi-sync improvements
-- **v2.5.0** - Nested snake_case format, fab-formats discovery
+### NEW MK2 ERA (Current)
+- **v2.0.0** - MK2 Engine with TURBO-CAT™ integration, 154 Format Pyramid
+
+### LEGACY VERSIONS (Pre-MK2)
+- **v1.8.0** - Last version before MK2 engine
+- **v1.7.0** - Championship style updates, trust cache system
+- **v1.6.0** - Enhanced AI verification, bi-sync improvements
+- **v1.5.0** - Nested snake_case format, fab-formats discovery
 
 ## 💡 Schema Versions vs CLI Versions
 

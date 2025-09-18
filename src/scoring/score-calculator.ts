@@ -1,9 +1,9 @@
 /**
  * 📊 .faf Scoring Calculator
- * Advanced scoring algorithm with fab-formats discovery engine integration
+ * Advanced scoring algorithm with TURBO-CAT intelligence catalyst
  */
 
-import { FabFormatsEngine } from '../utils/fab-formats';
+import { TurboCat } from '../utils/turbo-cat';
 import path from 'path';
 
 export interface SectionScore {
@@ -85,10 +85,10 @@ export async function calculateFafScore(fafData: any, projectPath?: string): Pro
   
   if (projectPath) {
     try {
-      // Run fab-formats discovery engine - our 200+ format knowledge base!
+      // Run TURBO-CAT discovery engine - Format Freaks! ANY format catalyzed!
       const projectDir = path.dirname(projectPath);
-      const fabEngine = new FabFormatsEngine();
-      const analysis = await fabEngine.discoverFormats(projectDir);
+      const turboCat = new TurboCat();
+      const analysis = await turboCat.discoverFormats(projectDir);
       
       // Use discovered slots to enhance scoring
       if (analysis.slotFillRecommendations) {

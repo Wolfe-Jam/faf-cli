@@ -1,17 +1,17 @@
 /**
- * 📁 fab-formats System v1.0.0
- * Format-First Discovery Engine with Knowledge Base Intelligence
- * 
- * Revolutionary approach: Detect formats first, then intelligently map to frameworks
- * Based on the proven two-layered search technique from file-utils.ts
+ * 😽 TURBO-CAT™ (Turbo Catalytic Analysis Technology) v1.0.0
+ * 134-Format Intelligence Catalyst with F1-Inspired Performance
+ *
+ * Like a catalytic converter for code - transforms raw file discoveries into pure intelligence!
+ * "From dirty exhaust to clean boost" - 134 formats, 2-layer scan, <50ms delivery
  */
 
 import { promises as fs } from "fs";
 import path from "path";
 import { glob } from "glob";
 
-// 🚀 Import THE MOTHER SHIP - 200+ Format Knowledge Base v1.0.0
-import { KNOWLEDGE_BASE } from './fab-formats-knowledge-base';
+// 😽 Import TURBO-CAT Knowledge Chamber - 134 Format Catalyst
+import { KNOWLEDGE_BASE } from './turbo-cat-knowledge';
 
 export interface FormatDiscoveryResult {
   fileName: string;
@@ -22,9 +22,12 @@ export interface FormatDiscoveryResult {
   intelligence: 'low' | 'medium' | 'high' | 'very-high' | 'ultra-high';
   confirmed: boolean;
   filePath: string;
+  fileSize?: number;       // Size in bytes
+  lastModified?: Date;     // When file was last modified
+  discovered?: Date;       // When TURBO-CAT found it
 }
 
-export interface FabFormatsAnalysis {
+export interface TurboCatAnalysis {
   discoveredFormats: FormatDiscoveryResult[];
   totalIntelligenceScore: number;
   confirmedFormats: FormatDiscoveryResult[];
@@ -38,13 +41,15 @@ export interface FabFormatsAnalysis {
  * Layer 1: Direct format scanning
  * Layer 2: Content confirmation & usage validation
  */
-export class FabFormatsEngine {
+export class TurboCat {
   private knowledgeBase = KNOWLEDGE_BASE;
 
   /**
-   * Discover formats using two-layered search technique
+   * 😽 TURBO-CAT DUAL-STAGE CATALYST
+   * Stage 1: Raw format intake (like air intake)
+   * Stage 2: Catalytic conversion to intelligence (like exhaust treatment)
    */
-  async discoverFormats(projectDir: string = process.cwd()): Promise<FabFormatsAnalysis> {
+  async discoverFormats(projectDir: string = process.cwd()): Promise<TurboCatAnalysis> {
     const discoveredFormats: FormatDiscoveryResult[] = [];
     
     // LAYER 1: Format Discovery (based on proven two-layered file search)
@@ -101,6 +106,19 @@ export class FabFormatsEngine {
         for (const file of files) {
           const formatInfo = this.knowledgeBase[file];
           if (formatInfo) {
+            const fullPath = path.join(currentDir, file);
+            let fileStats: any = {};
+            try {
+              const stats = await fs.stat(fullPath);
+              fileStats = {
+                fileSize: stats.size,
+                lastModified: stats.mtime,
+                discovered: new Date()
+              };
+            } catch {
+              // Continue without stats
+            }
+
             results.push({
               fileName: file,
               formatType: file,
@@ -109,7 +127,8 @@ export class FabFormatsEngine {
               priority: formatInfo.priority,
               intelligence: formatInfo.intelligence as 'low' | 'medium' | 'high' | 'very-high' | 'ultra-high',
               confirmed: false, // Will be confirmed in Layer 2
-              filePath: path.join(currentDir, file)
+              filePath: fullPath,
+              ...fileStats
             });
           }
         }
@@ -252,7 +271,7 @@ export class FabFormatsEngine {
   /**
    * Analyze discovered formats and generate intelligence
    */
-  private analyzeFormats(formats: FormatDiscoveryResult[]): FabFormatsAnalysis {
+  private analyzeFormats(formats: FormatDiscoveryResult[]): TurboCatAnalysis {
     const confirmedFormats = formats.filter(f => f.confirmed);
     const totalIntelligenceScore = confirmedFormats.reduce((sum, f) => sum + f.priority, 0);
     
@@ -321,7 +340,7 @@ export class FabFormatsEngine {
   /**
    * Get top framework recommendation
    */
-  getTopFramework(analysis: FabFormatsAnalysis): { framework: string; confidence: number } | null {
+  getTopFramework(analysis: TurboCatAnalysis): { framework: string; confidence: number } | null {
     const frameworks = Object.entries(analysis.frameworkConfidence);
     if (frameworks.length === 0) {return null;}
 
@@ -335,12 +354,12 @@ export class FabFormatsEngine {
   /**
    * Generate human-readable summary
    */
-  generateSummary(analysis: FabFormatsAnalysis): string {
+  generateSummary(analysis: TurboCatAnalysis): string {
     const topFramework = this.getTopFramework(analysis);
     const confirmedCount = analysis.confirmedFormats.length;
     const totalScore = analysis.totalIntelligenceScore;
 
-    return `📁 fab-formats Analysis: ${confirmedCount} confirmed formats, ${totalScore} intelligence points. ` +
+    return `😽 TURBO-CAT Analysis: ${confirmedCount} confirmed formats, ${totalScore} intelligence boost. ` +
            `Top framework: ${topFramework?.framework || 'Unknown'} (${topFramework?.confidence || 0}% confidence)`;
   }
 }

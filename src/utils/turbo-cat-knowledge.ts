@@ -1,10 +1,18 @@
 /**
- * 🏎️ fab-formats Knowledge Base v1.0.0
- * 
- * THE MOTHER SHIP - Complete mapping of file formats to frameworks and Context-On-Demand slots
- * 
- * This is a pure data structure - no complex logic needed!
- * Just add new formats here and the engine will use them.
+ * 🔺 TURBO-CAT™ FORMAT PYRAMID v1.0.0
+ *
+ * THE SACRED 154 - Each format is a pyramid stone!
+ *
+ * Like precious metals in a catalytic converter - each format triggers
+ * a specific intelligence reaction. We CAN catalyze ANY format, but only
+ * the WORTHY earn a pyramid stone!
+ *
+ * Pyramid Status: 134/154 stones placed (20 positions available)
+ *
+ * THE DOCTRINE: To add a new format, PROVE it's better than existing ones!
+ * Sum(1..17) = 153 + TURBO-CAT = 154 Perfect Formats
+ *
+ * 😽 We are the FORMAT FREAKS - Quality over Quantity!
  */
 
 export interface FormatKnowledge {
