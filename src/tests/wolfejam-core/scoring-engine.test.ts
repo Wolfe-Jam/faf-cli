@@ -473,7 +473,7 @@ describe('⚡️ Scoring Engine - BRAKE SYSTEM TESTS', () => {
 
 /**
  * 🏆 WOLFEJAM TESTING CENTER SCORING ENGINE CHECKLIST
- * *Inspired by McLaren F1 Engineering Excellence*
+ * *McLaren-Inspired Engineering Excellence 🍊*
  * 
  * ☑️ Trust score calculation accuracy (prevents wrong decisions)
  * ☑️ Embedded AI scoring system validation (prevents manipulation)
