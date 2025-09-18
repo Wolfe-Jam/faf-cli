@@ -11,7 +11,7 @@ Command-line interface for .faf (Foundational AI-Context Format) - Create struct
 ## Key Features
 
 - **Balanced Context**: Combines human project context (goals, team, requirements) with technical implementation details
-- **Performance Focused**: Fast initialization and scoring (<200ms for most projects)
+- **Performance Focused**: Championship speed status (<30ms) and fast generation (<200ms)
 - **Zero Configuration**: Intelligent project detection with sensible defaults
 - **Quality Scoring**: Objective measurement of context completeness (0-100%)
 

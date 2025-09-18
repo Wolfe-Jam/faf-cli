@@ -1,223 +1,101 @@
-# 🚀 FAF Multi-Platform Integration - Development Prompt
+# 🌍 FAF Universal MCP Server - Implementation Prompt
 
-**Project:** Universal AI Context Integration Across Developer Ecosystems  
-**Goal:** Implement FAF support for Claude Code, GitHub Codespaces, Cursor, Vim/Neovim, and JetBrains IDEs  
-**Priority Order:** Claude Code → Codespaces → Cursor → Vim → JetBrains  
+**BREAKTHROUGH:** MCP is the universal AI development standard across ALL major platforms!
+
+**Project:** Single Universal FAF MCP Server Development  
+**Goal:** Build ONE MCP server that works across 6+ AI development platforms simultaneously  
+**Timeline:** 1 week (not months) - Universal protocol implementation  
 
 ---
 
-## 📋 Development Planning Prompt
+## 🚨 STRATEGIC PIVOT: Universal MCP Implementation
 
-### Context
-We have successfully built a VS Code extension with full Command Palette integration. Now we need to systematically implement FAF integration across 5 additional developer platforms, each with unique technical requirements and user expectations.
+### Revolutionary Discovery
+MCP (Model Context Protocol) isn't Claude-specific—it's the **universal standard** with **16,000+ existing MCP servers** across all major AI development platforms.
+
+### Paradigm Shift
+- ❌ **OLD:** 5 platform-specific adapters (20+ weeks)
+- ✅ **NEW:** 1 universal MCP server (1 week)
+- 🎯 **RESULT:** 6+ platforms supported simultaneously
 
 ### Current State
-- ✅ **FAF CLI:** Full-featured command-line tool with 25+ commands
-- ✅ **VS Code Extension:** Complete with Command Palette, status bar, file watching
-- ✅ **Core Infrastructure:** .faf format, trust cache, analytics, scoring system
-- ✅ **Research Complete:** Platform-specific pain points and integration strategies identified
+- ✅ **faf-engine-mk1:** Proven CLI engine with <30ms performance (beating 38ms targets)
+- ✅ **MCP Discovery:** Universal protocol support across Claude Code, Gemini CLI, Cursor, Windsurf, VS Code, JetBrains
+- ✅ **Ecosystem Validation:** 16,000+ MCP servers prove mature ecosystem
+- ✅ **Architecture Clarity:** Single server → all platforms via MCP protocol
 
 ---
 
-## 🎯 Implementation Requirements by Platform
+## 🎯 Universal MCP Server Implementation
 
-### 1. Claude Code Integration (Priority 1)
-**Goal:** Eliminate context restoration tax through native FAF integration
+### Core Architecture: Single Universal MCP Server
 
-#### Technical Requirements:
-- **MCP Server Development:** Create FAF Model Context Protocol server
-- **Context Loading:** Automatic .faf file detection and parsing
-- **Session Persistence:** Maintain FAF context across Claude Code sessions
-- **Command Integration:** `claude --context .faf` command support
+**Goal:** Build ONE `@faf/mcp-server` that works across ALL AI development platforms
 
-#### Deliverables Needed:
+#### Universal MCP Server Architecture:
+- **MCP Protocol Implementation:** Full Model Context Protocol compliance
+- **Universal Resources:** Standard MCP resources exposing faf-engine-mk1 data
+- **Universal Tools:** Standard MCP tools calling faf-engine-mk1 commands  
+- **Engine Bridge:** Direct integration with proven <30ms faf-engine-mk1
+- **Platform Agnostic:** Works identically across all MCP-supporting platforms
+
+#### Single Universal Deliverable:
 ```
-📁 claude-code-integration/
-├── mcp-server/
-│   ├── faf-mcp-server.ts        # MCP protocol implementation
-│   ├── context-loader.ts        # .faf file parsing and validation
-│   └── session-manager.ts       # Context persistence logic
-├── cli-integration/
-│   ├── claude-faf-plugin.ts     # CLI command extensions
-│   └── auto-detect.ts           # Automatic .faf discovery
-└── README.md                    # Installation and usage guide
+📁 @faf/mcp-server/
+├── src/
+│   ├── server.ts                # MCP protocol implementation
+│   ├── resources/              # MCP resource endpoints
+│   │   ├── project-context.ts  # faf://context resource
+│   │   ├── trust-score.ts      # faf://trust resource  
+│   │   ├── project-status.ts   # faf://status resource
+│   │   └── file-list.ts        # faf://files resource
+│   ├── tools/                  # MCP tool implementations
+│   │   ├── faf-init.ts         # faf_init tool
+│   │   ├── faf-score.ts        # faf_score tool
+│   │   ├── faf-trust.ts        # faf_trust tool
+│   │   ├── faf-sync.ts         # faf_sync tool
+│   │   └── faf-status.ts       # faf_status tool
+│   └── engine-bridge/          # faf-engine-mk1 integration
+│       ├── cli-client.ts       # CLI command execution
+│       └── performance.ts      # Maintain <30ms characteristics
+├── package.json                # NPX-ready universal package
+├── README.md                   # Universal setup guide
+└── platform-configs/          # Example configs for each platform
+    ├── claude-code.json        # Claude Code MCP config
+    ├── cursor.json             # Cursor MCP config  
+    ├── windsurf.json           # Windsurf MCP config
+    └── vscode-copilot.json     # VS Code Copilot config
 ```
 
-#### Key Features:
-- Auto-load .faf context when Claude Code starts in a directory with .faf file
-- Context refresh when .faf file changes
-- Seamless integration with Claude Code's existing context system
-- Fallback to manual loading if auto-detection fails
+#### Universal Platform Coverage (Single Implementation):
+| Platform | Setup Complexity | Config Method | Works Immediately |
+|----------|-----------------|---------------|-------------------|
+| **Claude Code** | Minimal | MCP config file | ✅ Native |
+| **Gemini CLI** | Zero | Auto-discovery | ✅ Built-in /mcp |
+| **Cursor** | Minimal | One-click config | ✅ MCP settings |
+| **Windsurf** | Minimal | One-click config | ✅ MCP settings |
+| **VS Code** | Minimal | Copilot integration | ✅ GitHub Copilot |
+| **JetBrains** | Minimal | AI Assistant MCP | ✅ Native support |
+
+**Result:** 6+ platforms supported with ZERO platform-specific code!
 
 ---
 
-### 2. GitHub Codespaces Integration (Priority 2)  
-**Goal:** Zero-ramp-up AI context in ephemeral cloud environments
+## 🛠 Cross-Platform Adapter Requirements
 
-#### Technical Requirements:
-- **Devcontainer Templates:** Pre-configured .faf setups for common stacks
-- **GitHub Actions:** Automated .faf updates on code changes
-- **Extension Integration:** Codespaces-compatible VS Code extension
-- **Marketplace Presence:** GitHub Marketplace listing
+### Shared Engine Integration:
+1. **Engine API Client:** Standardized faf-engine-mk1 communication layer
+2. **Adapter Interface:** Consistent pattern for platform→engine translation  
+3. **Performance Passthrough:** Maintain engine's <30ms response characteristics (championship speed)
+4. **State Synchronization:** Leverage engine's existing file watching and caching
+5. **Error Translation:** Convert engine errors to platform-appropriate messages
 
-#### Deliverables Needed:
-```
-📁 github-codespaces-integration/
-├── devcontainer-templates/
-│   ├── react-typescript/        # React + TypeScript .faf template
-│   ├── python-fastapi/          # Python FastAPI .faf template  
-│   ├── node-express/            # Node.js Express .faf template
-│   └── generic/                 # Language-agnostic template
-├── github-actions/
-│   ├── auto-faf-update.yml      # Workflow for automatic .faf updates
-│   └── faf-validation.yml       # .faf file validation on PR
-├── marketplace/
-│   ├── codespaces-extension/    # Codespaces-specific extension
-│   └── marketplace-listing.md   # GitHub Marketplace description
-└── documentation/
-    ├── setup-guide.md           # Quick setup for Codespaces
-    └── best-practices.md        # Team collaboration patterns
-```
-
-#### Key Features:
-- One-click .faf setup in new Codespaces
-- Automatic environment detection and .faf generation
-- Team-shared .faf templates via organization settings
-- Integration with existing Codespaces prebuilds
-
----
-
-### 3. Cursor Editor Integration (Priority 3)
-**Goal:** Replace manual status.md workflows with automated FAF project memory
-
-#### Technical Requirements:
-- **Cursor Plugin Development:** Native Cursor extension
-- **Context Window Management:** Smart .faf priority in AI conversations
-- **Auto-Update System:** Real-time .faf updates based on code changes
-- **Status.md Migration:** Tool to convert existing status.md to .faf
-
-#### Deliverables Needed:
-```
-📁 cursor-integration/
-├── cursor-plugin/
-│   ├── extension.ts             # Main plugin entry point
-│   ├── faf-provider.ts          # FAF context provider for Cursor AI
-│   ├── auto-updater.ts          # Real-time .faf updates
-│   └── migration-tool.ts        # status.md → .faf converter
-├── context-management/
-│   ├── smart-prioritizer.ts     # Context window optimization
-│   ├── session-memory.ts        # Persistent context across sessions
-│   └── conflict-resolver.ts     # Handle context limit scenarios
-└── templates/
-    ├── cursor-specific.faf      # Cursor-optimized .faf template
-    └── migration-guide.md       # How to migrate from status.md
-```
-
-#### Key Features:
-- Automatic .faf loading when Cursor opens project
-- Smart context prioritization (recent changes + .faf core info)
-- One-click migration from status.md to .faf format
-- Real-time context updates as you code
-
----
-
-### 4. Vim/Neovim Integration (Priority 4)
-**Goal:** Terminal-native AI context without breaking workflow
-
-#### Technical Requirements:
-- **Neovim Plugin:** Lua-based plugin for modern Neovim
-- **Vim Commands:** `:Faf` command suite (`:FafInit`, `:FafScore`, etc.)
-- **LSP Integration:** Real-time .faf validation and completion
-- **Popular Distributions:** Integration with LazyVim, AstroVim, NvChad
-
-#### Deliverables Needed:
-```
-📁 vim-neovim-integration/
-├── neovim-plugin/
-│   ├── lua/faf/
-│   │   ├── init.lua             # Plugin initialization
-│   │   ├── commands.lua         # :Faf command implementations
-│   │   ├── lsp.lua              # LSP integration for .faf files
-│   │   └── ui.lua               # Terminal-friendly UI components
-│   └── plugin/faf.vim           # Vim compatibility layer
-├── distributions/
-│   ├── lazyvim-config.lua       # LazyVim integration
-│   ├── astrovim-config.lua      # AstroVim integration
-│   └── nvchad-config.lua        # NvChad integration
-├── lsp-server/
-│   ├── faf-lsp.ts               # FAF Language Server Protocol
-│   └── diagnostics.ts          # Real-time .faf validation
-└── documentation/
-    ├── vim-users-guide.md       # Installation and usage
-    └── plugin-architecture.md   # Technical documentation
-```
-
-#### Key Features:
-- Full terminal-based workflow (no GUI dependencies)
-- Integration with existing Neovim plugin managers
-- LSP support for .faf file editing and validation
-- Consistent with Neovim philosophy and keybinding patterns
-
----
-
-### 5. JetBrains Integration (Priority 5)
-**Goal:** Enterprise-scale AI context standardization across teams
-
-#### Technical Requirements:
-- **Multi-IDE Plugin:** Support IntelliJ, PyCharm, WebStorm, etc.
-- **Enterprise Features:** Team templates, centralized management
-- **IDE Services Integration:** Plugin distribution through JetBrains toolbox
-- **Enterprise Dashboard:** Web-based management for IT teams
-
-#### Deliverables Needed:
-```
-📁 jetbrains-integration/
-├── intellij-plugin/
-│   ├── src/main/kotlin/
-│   │   ├── FafPlugin.kt         # Main plugin class
-│   │   ├── actions/             # IDE actions (menu items, shortcuts)
-│   │   ├── services/            # Background services
-│   │   └── ui/                  # Plugin UI components
-│   └── resources/
-│       ├── META-INF/plugin.xml  # Plugin configuration
-│       └── icons/               # Plugin icons
-├── enterprise-features/
-│   ├── team-templates/          # Shared .faf templates
-│   ├── central-management/      # IT admin dashboard
-│   └── compliance-tools/        # Audit and reporting
-├── multi-ide-support/
-│   ├── pycharm-specifics/       # Python-specific features
-│   ├── webstorm-specifics/      # JavaScript-specific features
-│   └── shared-core/             # Common functionality
-└── enterprise-deployment/
-    ├── installation-guide.md    # Enterprise installation
-    ├── admin-manual.md          # IT administrator guide
-    └── migration-tools/         # Migrate existing projects
-```
-
-#### Key Features:
-- Consistent experience across all JetBrains IDEs
-- Enterprise-grade security and compliance features
-- Integration with existing JetBrains IDE Services
-- Centralized template and policy management
-
----
-
-## 🛠 Cross-Platform Technical Requirements
-
-### Shared Infrastructure Needed:
-1. **FAF API Server:** RESTful API for all integrations to communicate with
-2. **Universal Schema Validation:** Consistent .faf format validation
-3. **Analytics Integration:** Usage tracking across all platforms
-4. **Template System:** Platform-specific .faf templates with shared core
-5. **Documentation Hub:** Centralized docs for all integrations
-
-### Development Standards:
-- **TypeScript/JavaScript:** Primary language for consistency with existing CLI
-- **Platform-Native:** Each integration should feel native to its ecosystem
-- **Backwards Compatible:** All integrations work with existing .faf files
-- **Error Handling:** Graceful degradation when .faf files are invalid
-- **Testing:** Comprehensive test suites for each platform integration
+### Adapter Development Standards:
+- **Lightweight Design:** Adapters should be thin protocol translation layers
+- **Engine-First:** Leverage existing engine capabilities, don't duplicate logic
+- **Platform-Native:** Each adapter feels native while calling proven engine APIs
+- **Consistent Interface:** Standardized adapter→engine communication patterns
+- **Performance Preservation:** Adapters should not degrade engine performance
 
 ---
 
@@ -237,53 +115,69 @@ We have successfully built a VS Code extension with full Command Palette integra
 
 ---
 
-## 🚀 Development Phases & Timeline
+## 🚀 Universal MCP Server Development Timeline
 
-### Phase 1: Foundation (Months 1-2)
-- [ ] Claude Code MCP server development
-- [ ] GitHub Codespaces devcontainer templates
-- [ ] Shared FAF API server architecture
-- [ ] Universal schema validation system
+### Week 1: Core MCP Server Development
+**Days 1-2: MCP Protocol Foundation**
+- [ ] Set up MCP server framework with TypeScript
+- [ ] Implement core MCP protocol handlers (resources, tools, notifications)
+- [ ] Create basic server structure with proper MCP message routing
 
-### Phase 2: AI-Native Platforms (Months 3-4)
-- [ ] Cursor plugin development and testing
-- [ ] Enhanced Claude Code integration features
-- [ ] GitHub Codespaces marketplace presence
-- [ ] Cross-platform template system
+**Days 3-4: Engine Integration**
+- [ ] Build faf-engine-mk1 CLI bridge (maintaining <30ms performance)
+- [ ] Implement MCP resource endpoints (faf://context, faf://trust, faf://status)
+- [ ] Create MCP tool handlers (faf_init, faf_score, faf_trust, faf_sync)
 
-### Phase 3: Power Users (Months 5-6)
-- [ ] Neovim plugin with full feature set
-- [ ] Vim compatibility layer
-- [ ] LSP server for .faf file support
-- [ ] Integration with popular Neovim distributions
+**Days 5-7: Universal Package**
+- [ ] NPM package setup for `npx @faf/mcp-server` distribution
+- [ ] Platform configuration examples (Claude Code, Cursor, VS Code, etc.)
+- [ ] Universal testing suite validating MCP compliance
+- [ ] Documentation for all platform integrations
 
-### Phase 4: Enterprise Scale (Months 7-8)
-- [ ] JetBrains multi-IDE plugin suite
-- [ ] Enterprise management dashboard
-- [ ] Team collaboration features
-- [ ] Compliance and audit tools
+### Week 2: Platform Rollout & Validation
+**Days 8-10: Platform Integration Testing**
+- [ ] Claude Code native MCP integration testing
+- [ ] Gemini CLI auto-discovery validation (/mcp commands)
+- [ ] Cursor & Windsurf one-click configuration testing
 
-### Phase 5: Ecosystem Maturity (Months 9-10)
-- [ ] Advanced analytics across all platforms
-- [ ] AI-powered .faf optimization suggestions
-- [ ] Cross-platform context synchronization
-- [ ] Community plugin ecosystem support
+**Days 11-12: Advanced Platform Support**
+- [ ] VS Code GitHub Copilot MCP integration
+- [ ] JetBrains AI Assistant MCP configuration
+- [ ] Cross-platform consistency validation
+
+**Days 13-14: Ecosystem Preparation**
+- [ ] MCP marketplace submission preparation
+- [ ] Universal documentation and setup guides
+- [ ] Performance monitoring and optimization
+
+### Week 3: Universal Deployment
+**Days 15-17: Marketplace Distribution**
+- [ ] Submit to MCP server directories and marketplaces
+- [ ] Publish `@faf/mcp-server` to NPM registry
+- [ ] Platform-specific integration guides and examples
+
+**Days 18-21: Community Launch**
+- [ ] Developer documentation and onboarding materials
+- [ ] Platform community announcements and demos
+- [ ] Feedback collection and rapid iteration system
+
+**Total Timeline: 3 weeks (vs 24+ weeks for platform-specific adapters)**
 
 ---
 
 ## 💭 Planning Questions to Address
 
-### Technical Architecture:
-1. Should we build a centralized FAF API server or keep each integration self-contained?
-2. How do we handle .faf format evolution across different platform integrations?
-3. What's the best approach for real-time synchronization across platforms?
-4. How do we ensure consistent UX while respecting platform conventions?
+### Adapter Architecture:
+1. Should adapters call faf-engine-mk1 via CLI, API, or direct library integration?
+2. How do we standardize adapter interfaces while preserving platform idioms?
+3. What's the optimal adapter caching strategy to complement engine performance?
+4. How do we ensure consistent UX through adapter translation layers?
 
 ### Development Process:
-1. Which platform should we prototype first to validate our architecture?
-2. How do we balance platform-specific features vs. universal functionality?
-3. What testing strategy ensures reliability across all platforms?
-4. How do we manage documentation for 5+ different developer audiences?
+1. Which adapter pattern should we establish first to guide other implementations?
+2. How do we balance adapter-specific features vs. engine API limitations?
+3. What testing strategy validates adapter→engine communication reliability?
+4. How do we manage adapter documentation while leveraging engine docs?
 
 ### Go-to-Market:
 1. What's the launch sequence that maximizes adoption and word-of-mouth?
@@ -295,28 +189,28 @@ We have successfully built a VS Code extension with full Command Palette integra
 
 ## 🎯 Immediate Next Steps
 
-1. **Choose Starting Platform:** Validate which integration to build first based on:
-   - Technical complexity vs. impact
-   - Available developer resources
-   - Market readiness and competitive landscape
+1. **Choose Starting Adapter:** Validate which adapter to build first based on:
+   - Protocol complexity vs. engine API compatibility  
+   - Adapter implementation effort vs. user impact
+   - Platform readiness for external integrations
 
-2. **Architecture Decisions:** Resolve core technical architecture questions:
-   - Centralized vs. distributed approach
-   - API design and versioning strategy
-   - Cross-platform synchronization method
+2. **Adapter Pattern Decisions:** Establish core adapter architecture:
+   - CLI vs. API vs. library integration with faf-engine-mk1
+   - Error handling and performance preservation patterns
+   - Standardized adapter interface design
 
-3. **Prototype Development:** Build minimal viable integration for chosen platform:
-   - Core functionality only
-   - Basic error handling
-   - Simple installation process
+3. **Prototype Development:** Build minimal viable adapter for chosen platform:
+   - Core engine API integration only
+   - Platform-native installation process
+   - Basic error translation layer
 
-4. **Community Engagement:** Begin engaging target communities:
-   - Share strategy document for feedback
-   - Identify potential early adopters
-   - Validate pain points and proposed solutions
+4. **Community Engagement:** Begin platform-specific outreach:
+   - Share adapter approach for technical feedback
+   - Identify platform-specific integration requirements
+   - Validate engine API coverage for platform needs
 
 ---
 
-*This prompt provides the comprehensive blueprint needed to plan and execute FAF's expansion across all major developer platforms. The detailed technical requirements, deliverables, and success criteria ensure systematic, high-quality implementation that respects each platform's unique ecosystem while advancing FAF's mission of universal AI context standardization.*
+*This prompt provides the comprehensive blueprint for building lightweight protocol adapters that connect developer platforms to the proven faf-engine-mk1. The focus on adapter architecture, accelerated timelines, and engine API integration ensures rapid, high-quality implementation that leverages existing engine capabilities while respecting each platform's unique ecosystem.*
 
-**🚀 Ready to transform how developers manage AI context across every platform! 🤖🧡**
+**⚡ Ready to build universal AI context adapters powered by faf-engine-mk1! 🤖🧡**
