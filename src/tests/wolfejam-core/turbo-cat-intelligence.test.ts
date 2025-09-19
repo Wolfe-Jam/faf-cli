@@ -51,7 +51,7 @@ describe('😽 TURBO-CAT Intelligence Engine - CATALYTIC TESTS', () => {
         }
       `);
 
-      const analysis = await fabFormats.discoverFormats(testDir);
+      const analysis = await turboCat.discoverFormats(testDir);
       
       expect(analysis.confirmedFormats.length).toBeGreaterThan(0);
       const reactFiles = analysis.confirmedFormats.filter((r: any) => r.frameworks.includes('React'));
@@ -59,7 +59,7 @@ describe('😽 TURBO-CAT Intelligence Engine - CATALYTIC TESTS', () => {
       
       // Performance requirement: Analysis must complete in <2 seconds
       const startTime = Date.now();
-      await fabFormats.discoverFormats(testDir);
+      await turboCat.discoverFormats(testDir);
       const duration = Date.now() - startTime;
       expect(duration).toBeLessThan(2000);
     });
@@ -79,7 +79,7 @@ def read_root():
     return {"Hello": "World"}
       `);
 
-      const analysis = await fabFormats.discoverFormats(testDir);
+      const analysis = await turboCat.discoverFormats(testDir);
       
       const pythonFiles = analysis.confirmedFormats.filter((r: any) => 
         r.frameworks.includes('FastAPI') || 
@@ -118,7 +118,7 @@ const app = express();
 app.listen(3001);
       `);
 
-      const analysis = await fabFormats.discoverFormats(testDir);
+      const analysis = await turboCat.discoverFormats(testDir);
       
       // Engine intelligently skips .ts files when package.json already indicates TypeScript
       // This is correct behavior - test for intelligent slot filling instead
@@ -151,7 +151,7 @@ app.listen(3001);
         await fs.writeFile(path.join(testDir, filename), content);
       }
 
-      const analysis = await fabFormats.discoverFormats(testDir);
+      const analysis = await turboCat.discoverFormats(testDir);
       
       // Should recognize at least 50% of the files (performance-optimized engine)
       expect(analysis.confirmedFormats.length).toBeGreaterThanOrEqual(Object.keys(criticalFiles).length * 0.5);
@@ -165,7 +165,7 @@ app.listen(3001);
     });
 
     it('should handle empty directories gracefully', async () => {
-      const analysis = await fabFormats.discoverFormats(testDir);
+      const analysis = await turboCat.discoverFormats(testDir);
       expect(analysis.confirmedFormats).toEqual([]);
     });
 
@@ -173,7 +173,7 @@ app.listen(3001);
       const nonExistentDir = path.join(testDir, 'does-not-exist');
       
       await expect(async () => {
-        await fabFormats.discoverFormats(nonExistentDir);
+        await turboCat.discoverFormats(nonExistentDir);
       }).not.toThrow();
     });
   });
@@ -192,7 +192,7 @@ app.listen(3001);
       }
 
       const startTime = Date.now();
-      const analysis = await fabFormats.discoverFormats(testDir);
+      const analysis = await turboCat.discoverFormats(testDir);
       const duration = Date.now() - startTime;
       
       // Velocity test: Should be fast because high-value components found first
@@ -229,7 +229,7 @@ app.listen(3001);
       }
 
       const startTime = Date.now();
-      const analysis = await fabFormats.discoverFormats(testDir);
+      const analysis = await turboCat.discoverFormats(testDir);
       const duration = Date.now() - startTime;
       
       // Velocity achievement: Fast analysis despite large project
@@ -265,7 +265,7 @@ app.listen(3001);
       await fs.writeFile(path.join(testDir, 'main.py'), 'from fastapi import FastAPI\napp = FastAPI()');
       
       const startTime = Date.now();
-      const analysis = await fabFormats.discoverFormats(testDir);
+      const analysis = await turboCat.discoverFormats(testDir);
       const duration = Date.now() - startTime;
       
       // Should ignore the haystack and find the tech stack components
@@ -308,7 +308,7 @@ export default function Home() {
 }
       `);
 
-      const analysis = await fabFormats.discoverFormats(testDir);
+      const analysis = await turboCat.discoverFormats(testDir);
       
       // Should detect both React and Next.js indicators
       const allFrameworks = analysis.confirmedFormats.flatMap((r: any) => r.frameworks);
@@ -340,7 +340,7 @@ export default function Home() {
       await fs.writeFile(path.join(testDir, 'backend', 'server.ts'), 'import express from "express"; const app = express();');
       await fs.writeFile(path.join(testDir, 'server.ts'), 'import express from "express"; const app = express();');
 
-      const analysis = await fabFormats.discoverFormats(testDir);
+      const analysis = await turboCat.discoverFormats(testDir);
       
       // Should detect multiple technologies through intelligent analysis
       // Engine may skip redundant files once slots are filled - this is correct behavior
@@ -358,7 +358,7 @@ export default function Home() {
     it('should handle malformed JSON files gracefully', async () => {
       await fs.writeFile(path.join(testDir, 'broken.json'), '{ "name": "test", broken json }');
       
-      const analysis = await fabFormats.discoverFormats(testDir);
+      const analysis = await turboCat.discoverFormats(testDir);
       
       // Should not crash, may or may not include the broken file
       expect(analysis.discoveredFormats).toBeDefined();
@@ -371,7 +371,7 @@ export default function Home() {
       await fs.writeFile(path.join(testDir, 'binary.dat'), binaryData);
       
       await expect(async () => {
-        await fabFormats.discoverFormats(testDir);
+        await turboCat.discoverFormats(testDir);
       }).not.toThrow();
     });
 
@@ -381,7 +381,7 @@ export default function Home() {
       await fs.mkdir(deepPath, { recursive: true });
       await fs.writeFile(path.join(deepPath, 'deep-file.ts'), 'export const deep = true;');
       
-      const analysis = await fabFormats.discoverFormats(testDir);
+      const analysis = await turboCat.discoverFormats(testDir);
       
       expect(Array.isArray(analysis.discoveredFormats)).toBe(true);
       // Should handle deep nesting without issues
@@ -390,7 +390,7 @@ export default function Home() {
     it('should handle permission errors gracefully', async () => {
       // This test might not work on all systems, but should not crash
       await expect(async () => {
-        await fabFormats.discoverFormats('/root/some-restricted-path');
+        await turboCat.discoverFormats('/root/some-restricted-path');
       }).not.toThrow();
     });
   });
@@ -402,8 +402,8 @@ export default function Home() {
       await fs.writeFile(path.join(testDir, 'index.ts'), 'export const test = true;');
       await fs.writeFile(path.join(testDir, 'README.md'), '# Test Project');
 
-      const analysis1 = await fabFormats.discoverFormats(testDir);
-      const analysis2 = await fabFormats.discoverFormats(testDir);
+      const analysis1 = await turboCat.discoverFormats(testDir);
+      const analysis2 = await turboCat.discoverFormats(testDir);
       
       // Results should be identical
       expect(analysis1.confirmedFormats.length).toBe(analysis2.confirmedFormats.length);

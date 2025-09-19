@@ -12,6 +12,8 @@ import { initFafFile } from './commands/init';
 import { scoreFafFile } from './commands/score';
 import { showFafScoreCard } from './commands/show';
 import { autoCommand } from './commands/auto';
+import { formatsCommand } from './commands/formats';
+import { versionCommand } from './commands/version';
 import { syncFafFile } from './commands/sync';
 import { auditFafFile } from './commands/audit';
 import { lintFafFile } from './commands/lint';
@@ -73,7 +75,12 @@ async function showScoreFooter(context?: string) {
       // Style the scores with championship colors
       const scoreColor = percentage >= 85 ? FAF_COLORS.fafGreen : percentage >= 70 ? FAF_COLORS.fafCyan : FAF_COLORS.fafOrange;
       
-      console.log(`Current Score: ${scoreColor(percentage + '%')} > AI-Predictive: ${FAF_COLORS.fafCyan(aiReadiness + '%')}`);
+      // RULE: Only show AI-Predictive if it's greater than FAF Score
+      if (aiReadiness > percentage) {
+        console.log(`Current Score: ${scoreColor(percentage + '%')} > AI-Predictive: ${FAF_COLORS.fafCyan(aiReadiness + '%')}`);
+      } else {
+        console.log(`Current Score: ${scoreColor(percentage + '%')}`);
+      }
     } else {
       console.log(`Current Score: 0% > AI-Predictive: ${FAF_COLORS.fafCyan('0%')}`);
     }
@@ -112,7 +119,7 @@ function withAnalyticsTracking<T extends (...args: any[]) => Promise<any> | any>
 }
 
 function showHeaderIfAppropriate(commandName?: string) {
-  const showHeaderCommands = ['help', 'init', 'clear', 'enhance', 'analyze', 'chat'];
+  const showHeaderCommands = ['help', 'init', 'clear', 'enhance', 'analyze', 'chat', 'formats', 'score', 'version'];
   if (!commandName || showHeaderCommands.includes(commandName)) {
     console.log(generateFAFHeader());
   }
@@ -189,6 +196,25 @@ Examples:
   $ faf init my-app              # Create .faf for different directory
   $ faf init -t react            # Force React template`)
   .action(withAnalyticsTracking('init', (directory, options) => initFafFile(directory, options)));
+
+// 😽 faf formats - TURBO-CAT Format Discovery
+program
+  .command('formats [directory]')
+  .description('😽 TURBO-CAT™ discovers all formats in your project (154 validated types!)')
+  .option('-e, --export', 'Export as JSON')
+  .option('-c, --category', 'Show by category')
+  .addHelpText('after', `
+Examples:
+  $ faf formats                  # List all discovered formats
+  $ faf formats --category       # Show by category
+  $ faf formats --export         # Export as JSON`)
+  .action(withAnalyticsTracking('formats', (directory, options) => formatsCommand(directory, options)));
+
+// 🏆 faf version - Show version with MK2 status
+program
+  .command('version')
+  .description('🏆 Show FAF version with MK2 Engine and TURBO-CAT status')
+  .action(withAnalyticsTracking('version', () => versionCommand()));
 
 // 🧡 faf trust - Consolidated Trust Dashboard (The Emotional Core)
 program

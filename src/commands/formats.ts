@@ -1,154 +1,113 @@
 /**
- * 😽 TURBO-CAT™ Format Discovery Command
- * List all discovered formats with intelligence scores
+ * 🏆 faf formats - TURBO-CAT Format Discovery Command
+ * Lists all discovered formats in the project
  */
 
-import { TurboCat } from '../utils/turbo-cat';
-import chalk from 'chalk';
+import chalk from "chalk";
+import { FAF_COLORS, FAF_ICONS, generateFAFHeader } from "../utils/championship-style";
+import { TurboCat } from "../utils/turbo-cat";
 
-export async function formatsCommand(options: any = {}) {
-  const startTime = Date.now();
-
-  console.log(chalk.cyan('😽 TURBO-CAT™ Format Discovery'));
-  console.log(chalk.dim('================================\n'));
-
-  const turboCat = new TurboCat();
-  const analysis = await turboCat.discoverFormats(process.cwd());
-
-  // Group formats by intelligence level
-  const ultraHigh = analysis.discoveredFormats.filter(f => f.intelligence === 'ultra-high');
-  const high = analysis.discoveredFormats.filter(f => f.intelligence === 'high');
-  const medium = analysis.discoveredFormats.filter(f => f.intelligence === 'medium');
-  const low = analysis.discoveredFormats.filter(f => f.intelligence === 'low');
-
-  // Display discovered formats
-  if (analysis.confirmedFormats.length === 0) {
-    console.log(chalk.yellow('⚠️  No formats discovered in current directory'));
-    return;
-  }
-
-  console.log(chalk.green(`✅ Discovered ${analysis.discoveredFormats.length} formats\n`));
-
-  // Helper to format file size
-  const formatSize = (bytes?: number) => {
-    if (!bytes) return '';
-    if (bytes < 1024) return `${bytes}B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)}KB`;
-    return `${(bytes / 1024 / 1024).toFixed(1)}MB`;
-  };
-
-  // Helper to format date
-  const formatDate = (date?: Date) => {
-    if (!date) return '';
-    return new Date(date).toLocaleDateString();
-  };
-
-  // Show formats by intelligence level
-  if (ultraHigh.length > 0) {
-    console.log(chalk.magenta('🏆 ULTRA-HIGH Intelligence (35 points):'));
-    ultraHigh.forEach(f => {
-      const status = f.confirmed ? '✅' : '❓';
-      const size = formatSize(f.fileSize);
-      const date = formatDate(f.lastModified);
-      console.log(`  ${status} ${f.fileName} → ${f.frameworks.join(', ')}`);
-      if (size || date) {
-        console.log(chalk.dim(`     ${size ? `[${size}]` : ''} ${date ? `modified: ${date}` : ''}`));
-      }
-    });
-    console.log();
-  }
-
-  if (high.length > 0) {
-    console.log(chalk.cyan('⚡ HIGH Intelligence (30 points):'));
-    high.forEach(f => {
-      const status = f.confirmed ? '✅' : '❓';
-      const size = formatSize(f.fileSize);
-      const date = formatDate(f.lastModified);
-      console.log(`  ${status} ${f.fileName} → ${f.frameworks.join(', ')}`);
-      if (size || date) {
-        console.log(chalk.dim(`     ${size ? `[${size}]` : ''} ${date ? `modified: ${date}` : ''}`));
-      }
-    });
-    console.log();
-  }
-
-  if (medium.length > 0) {
-    console.log(chalk.blue('📊 MEDIUM Intelligence (20-25 points):'));
-    medium.forEach(f => {
-      const status = f.confirmed ? '✅' : '❓';
-      console.log(`  ${status} ${f.fileName} → ${f.frameworks.join(', ')}`);
-    });
-    console.log();
-  }
-
-  if (low.length > 0) {
-    console.log(chalk.dim('📁 LOW Intelligence (15 points):'));
-    low.forEach(f => {
-      const status = f.confirmed ? '✅' : '❓';
-      console.log(chalk.dim(`  ${status} ${f.fileName}`));
-    });
-    console.log();
-  }
-
-  // Show framework confidence
-  console.log(chalk.cyan('\n🎯 Framework Confidence:'));
-  const sortedFrameworks = Object.entries(analysis.frameworkConfidence)
-    .sort(([,a], [,b]) => b - a)
-    .slice(0, 5);
-
-  sortedFrameworks.forEach(([framework, confidence]) => {
-    const bar = '█'.repeat(Math.min(20, Math.floor(confidence / 5)));
-    console.log(`  ${framework}: ${chalk.green(bar)} ${confidence}%`);
-  });
-
-  // Calculate total file size
-  const totalSize = analysis.confirmedFormats.reduce((sum, f) => sum + (f.fileSize || 0), 0);
-  const oldestFile = analysis.confirmedFormats.reduce((oldest, f) => {
-    if (!f.lastModified) return oldest;
-    const date = new Date(f.lastModified);
-    return !oldest || date < oldest ? date : oldest;
-  }, null as Date | null);
-
-  // Show statistics
-  const duration = Date.now() - startTime;
-  const emoji = duration < 50 ? '🏎️' : duration < 200 ? '⚡' : '🐢';
-
-  console.log(chalk.dim('\n────────────────────────'));
-  console.log(`⚡ Total Intelligence: ${chalk.green(analysis.totalIntelligenceScore + ' points')}`);
-  console.log(`🏎️ Stack Signature: ${chalk.cyan(analysis.stackSignature || 'unknown')}`);
-  console.log(`📁 Total Size: ${chalk.blue(formatSize(totalSize))}`);
-  if (oldestFile) {
-    console.log(`📅 Oldest File: ${chalk.dim(formatDate(oldestFile))}`);
-  }
-  console.log(`⏱️  Analysis Time: ${duration}ms ${emoji}`);
-
-  // Export option hint
-  if (options.export) {
-    const exportData = {
-      timestamp: new Date().toISOString(),
-      project: process.cwd(),
-      formats: analysis.discoveredFormats.map(f => ({
-        file: f.fileName,
-        type: f.formatType,
-        frameworks: f.frameworks,
-        intelligence: f.intelligence,
-        confirmed: f.confirmed
-      })),
-      stackSignature: analysis.stackSignature,
-      totalIntelligence: analysis.totalIntelligenceScore
-    };
-
-    console.log('\n' + chalk.dim('JSON Export:'));
-    console.log(JSON.stringify(exportData, null, 2));
-  } else {
-    console.log('\n' + chalk.dim('💡 Tip: Use --export to get JSON output'));
-  }
-
-  console.log('\n😽 TURBO-CAT™ - We are the Format Freaks!');
+interface FormatOptions {
+  export?: boolean;
+  json?: boolean;
+  category?: boolean;
 }
 
-// Standalone runner
-if (require.main === module) {
-  formatsCommand(process.argv.includes('--export') ? { export: true } : {})
-    .catch(console.error);
+export async function formatsCommand(projectPath?: string, options: FormatOptions = {}) {
+  // Show the FAF banner
+  console.log(generateFAFHeader());
+
+  console.log();
+  console.log(FAF_COLORS.fafCyan(`😽 TURBO-CAT™ Format Discovery v2.0.0`));
+  console.log(FAF_COLORS.fafCyan(`════════════════════════════════════`));
+  console.log();
+
+  const turboCat = new TurboCat();
+  const projectRoot = projectPath || process.cwd();
+
+  console.log(chalk.gray(`${FAF_ICONS.lightning} Scanning project at ${projectRoot}...`));
+
+  const startTime = Date.now();
+  const analysis = await turboCat.discoverFormats(projectRoot);
+  const elapsedTime = Date.now() - startTime;
+
+  console.log();
+  console.log(FAF_COLORS.fafGreen(`✅ Found ${analysis.discoveredFormats.length} formats in ${elapsedTime}ms!`));
+  console.log();
+
+  if (options.json || options.export) {
+    // Export as JSON
+    console.log(JSON.stringify(analysis, null, 2));
+  } else if (options.category) {
+    // Show by category (pyramid levels)
+    console.log(FAF_COLORS.fafCyan(`📊 By Category:`));
+    console.log();
+
+    const categories: { [key: string]: string[] } = {
+      'Config': [],
+      'Code': [],
+      'Documentation': [],
+      'Testing': [],
+      'CI/CD': [],
+      'Container': [],
+      'Database': [],
+      'Other': []
+    };
+
+    // Categorize formats
+    analysis.discoveredFormats.forEach(format => {
+      const formatName = format.fileName;
+      if (formatName.includes('json') || formatName.includes('yaml') || formatName.includes('toml')) {
+        categories['Config'].push(formatName);
+      } else if (formatName.includes('.ts') || formatName.includes('.js') || formatName.includes('.py')) {
+        categories['Code'].push(formatName);
+      } else if (formatName.includes('.md') || formatName.includes('README')) {
+        categories['Documentation'].push(formatName);
+      } else if (formatName.includes('test') || formatName.includes('spec')) {
+        categories['Testing'].push(formatName);
+      } else if (formatName.includes('workflow') || formatName.includes('jenkins')) {
+        categories['CI/CD'].push(formatName);
+      } else if (formatName.includes('docker') || formatName.includes('compose')) {
+        categories['Container'].push(formatName);
+      } else if (formatName.includes('.sql') || formatName.includes('migration')) {
+        categories['Database'].push(formatName);
+      } else {
+        categories['Other'].push(formatName);
+      }
+    });
+
+    // Display categories
+    Object.entries(categories).forEach(([category, formats]) => {
+      if (formats.length > 0) {
+        console.log(FAF_COLORS.fafOrange(`  ${category}:`));
+        formats.forEach(format => {
+          console.log(chalk.gray(`    - ${format}`));
+        });
+        console.log();
+      }
+    });
+  } else {
+    // Default: alphabetical list
+    console.log(FAF_COLORS.fafCyan(`📋 Discovered Formats (A-Z):`));
+    console.log();
+
+    const sorted = [...analysis.discoveredFormats].sort((a, b) => a.fileName.localeCompare(b.fileName));
+    sorted.forEach(format => {
+      const isConfirmed = format.confirmed;
+      const icon = isConfirmed ? '✅' : '📄';
+      const color = isConfirmed ? chalk.green : chalk.gray;
+      console.log(color(`  ${icon} ${format.fileName}`));
+    });
+  }
+
+  console.log();
+  console.log(FAF_COLORS.fafCyan(`💡 Stack Signature: ${analysis.stackSignature}`));
+  console.log(FAF_COLORS.fafOrange(`🏆 Intelligence Score: ${analysis.totalIntelligenceScore}`));
+  console.log();
+
+  // TURBO-CAT signature
+  console.log(chalk.gray('─'.repeat(40)));
+  console.log(FAF_COLORS.fafCyan(`😽 TURBO-CAT™: "I detected ${analysis.discoveredFormats.length} formats and made your stack PURRR!"`));
+  console.log(chalk.gray('─'.repeat(40)));
+  console.log();
 }

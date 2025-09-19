@@ -35,6 +35,11 @@ export async function initFafFile(
   options: InitOptions = {},
 ) {
   const startTime = Date.now();
+
+  // Show the FAF banner
+  const { generateFAFHeader } = require('../utils/championship-style');
+  console.log(generateFAFHeader());
+
   try {
     const projectRoot = projectPath || process.cwd();
     const outputPath = options.output ? options.output : `${projectRoot}/.faf`;

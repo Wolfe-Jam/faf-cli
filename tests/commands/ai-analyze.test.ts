@@ -36,7 +36,7 @@ describe('AI Analyze Command', () => {
   it('should check for OpenAI Codex CLI availability', async () => {
     // Since OpenAI Codex CLI won't be available in test environment,
     // this should exit with error about missing dependency
-    await analyzeFafWithAI(undefined, { model: 'gpt-4', focus: 'quality' });
+    await analyzeFafWithAI(undefined, { model: 'chatgpt', focus: 'quality' });
 
     expect(mockLog).toHaveBeenCalledWith(expect.stringContaining('❌ OpenAI Codex CLI not found'));
     expect(mockLog).toHaveBeenCalledWith(expect.stringContaining('💡 Install with: npm install -g @openai/codex'));
