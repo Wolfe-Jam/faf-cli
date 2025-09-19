@@ -156,16 +156,23 @@ export async function awardCredit(
       credit.trending = 'stable';
     }
     
-    // Save updated credit
+    // Save updated credit (will silently fail if no permissions)
     await saveTechnicalCredit(credit, fafPath);
-    
-    // Show achievement message
-    console.log(FAF_COLORS.fafGreen(`${FAF_ICONS.gem} ${BRAND_MESSAGES.achievement} +${points} points`));
-    console.log(FAF_COLORS.fafCyan(`└─ ${impact}`));
-    
+
+    // Check if we can actually write to cache before showing message
+    const cacheDir = path.join(require('os').homedir(), '.faf-cli-cache');
+    try {
+      await fs.access(cacheDir, fs.constants.W_OK);
+      // Only show achievement message if we have write access
+      console.log(FAF_COLORS.fafGreen(`${FAF_ICONS.gem} ${BRAND_MESSAGES.achievement} +${points} points`));
+      console.log(FAF_COLORS.fafCyan(`└─ ${impact}`));
+    } catch {
+      // No write access - skip the message
+    }
+
     return points;
   } catch (error) {
-    console.error('Failed to award technical credit:', error);
+    // Silently fail - technical credit is optional
     return 0;
   }
 }
@@ -193,7 +200,8 @@ async function saveTechnicalCredit(credit: TechnicalCredit, fafPath?: string): P
     // Save updated cache
     await fs.writeFile(cachePath, JSON.stringify(allCredits, null, 2));
   } catch (error) {
-    console.error('Failed to save technical credit:', error);
+    // Silently fail - technical credit is optional and shouldn't scare newbies
+    // The error is usually just permission issues in sandboxed environments
   }
 }
 

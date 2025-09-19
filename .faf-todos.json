@@ -1,0 +1,94 @@
+{
+  "id": "7fo5o98uwrmmfq77wl7",
+  "projectId": "faf-cli",
+  "currentScore": 0,
+  "targetScore": 75,
+  "items": [
+    {
+      "id": "bxkc335j75bmfq77wl7",
+      "title": "Improve package.json description",
+      "description": "Write clear, compelling project description",
+      "impact": 8,
+      "difficulty": "easy",
+      "category": "structure",
+      "completed": false,
+      "estimatedMinutes": 5,
+      "aiPersonality": "universal",
+      "efficiency": 1.6
+    },
+    {
+      "id": "kuvtjcuqqkmfq77wl7",
+      "title": "Document complete tech stack",
+      "description": "List all frameworks, libraries, and tools used",
+      "impact": 10,
+      "difficulty": "easy",
+      "category": "structure",
+      "completed": false,
+      "estimatedMinutes": 8,
+      "aiPersonality": "chatgpt",
+      "efficiency": 1.25
+    },
+    {
+      "id": "7hv89jf0wx7mfq77wl7",
+      "title": "Define clear project goals",
+      "description": "Add specific, measurable project objectives to .faf",
+      "impact": 12,
+      "difficulty": "easy",
+      "category": "context",
+      "completed": false,
+      "estimatedMinutes": 10,
+      "aiPersonality": "universal",
+      "efficiency": 1.2
+    },
+    {
+      "id": "7n2gld2ubdmfq77wl7",
+      "title": "Create CONTRIBUTING.md",
+      "description": "Guide contributors on how to participate",
+      "impact": 11,
+      "difficulty": "medium",
+      "category": "documentation",
+      "completed": false,
+      "estimatedMinutes": 15,
+      "aiPersonality": "claude",
+      "efficiency": 0.7333333333333333
+    },
+    {
+      "id": "2drxsorlxermfq77wl7",
+      "title": "Add deployment instructions",
+      "description": "Step-by-step guide for deploying the project",
+      "impact": 13,
+      "difficulty": "medium",
+      "category": "documentation",
+      "completed": false,
+      "estimatedMinutes": 20,
+      "aiPersonality": "chatgpt",
+      "efficiency": 0.65
+    },
+    {
+      "id": "jfm66lgyhidmfq77wl7",
+      "title": "Add usage examples",
+      "description": "Create practical examples showing how to use the project",
+      "impact": 14,
+      "difficulty": "medium",
+      "category": "examples",
+      "completed": false,
+      "estimatedMinutes": 30,
+      "aiPersonality": "chatgpt",
+      "efficiency": 0.4666666666666667
+    },
+    {
+      "id": "oskkj34vb1mfq77wl7",
+      "title": "Add API documentation",
+      "description": "Document all public APIs and endpoints",
+      "impact": 18,
+      "difficulty": "hard",
+      "category": "documentation",
+      "completed": false,
+      "estimatedMinutes": 45,
+      "aiPersonality": "claude",
+      "efficiency": 0.4
+    }
+  ],
+  "createdAt": "2025-09-19T02:06:31.867Z",
+  "updatedAt": "2025-09-19T02:06:31.867Z"
+}

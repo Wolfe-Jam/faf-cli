@@ -4,6 +4,37 @@
 
 ---
 
+## 🏆 BIG-3 AI PLATFORM TEST v2.0.0
+
+### Testing FAF Context with Claude, Codex & Gemini
+**Purpose:** Validate that FAF-generated context enables instant AI understanding across platforms
+
+### The 5 Championship Questions:
+1. **Project Understanding** - Can AI identify the project type and stack?
+2. **TURBO-CAT Knowledge** - Does AI understand our 154 validated formats?
+3. **Feature Discovery** - Can AI list available CLI commands?
+4. **Architecture Understanding** - Does AI grasp the MK2 engine design?
+5. **Purpose & Value** - Can AI explain FAF's trust-driven development?
+
+### Test Procedure:
+```bash
+# Generate fresh context
+npx ts-node src/cli.ts init --force
+
+# Copy .faf content to each AI platform
+# Ask the 5 questions
+# Score each response (20 points per question)
+```
+
+### Championship Scoring:
+- 🏆 **CHAMPION:** 80+ points (AI fully understands FAF context)
+- 📈 **GOOD:** 60-79 points (AI mostly gets it)
+- 🔧 **NEEDS WORK:** <60 points (Context needs improvement)
+
+**Status:** Ready for testing with fresh FAF context generated
+
+---
+
 ## 🎯 Mission Statement
 
 *"When cars can accelerate to 100mph in 2 seconds with ground speeds more than double that, when you press the brakes, they better fucking work!"*

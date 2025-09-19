@@ -1,0 +1,118 @@
+# WJTC Test Report Format v1.0.0
+# Wolfejam Testing Center - Standardized Report Structure
+
+report_metadata:
+  report_id: null  # Auto-generated UUID
+  report_version: "1.0.0"
+  test_date: null  # ISO 8601 timestamp
+  tester: null  # Who/what ran the test
+  platform: null  # claude-cli|codex|gemini|vscode|terminal
+  test_type: null  # full|partial|specific|regression|smoke
+  duration_ms: null  # Total test execution time
+
+test_environment:
+  os: null  # darwin|linux|win32
+  os_version: null
+  node_version: null
+  faf_version: null
+  terminal: null  # Terminal.app|iTerm2|cmd|powershell|wsl
+  ci_environment: false  # true if running in CI/CD
+
+test_scope:
+  total_commands: null
+  commands_tested: null
+  success_count: null
+  failure_count: null
+  skipped_count: null
+  coverage_percentage: null
+
+# Display quality for terminal-based platforms
+display_quality:
+  ascii_art: null  # perfect|corrupted|none
+  colors: null  # full|partial|none
+  emojis: null  # all|most|some|none
+  interactive: null  # works|limited|none
+  turbo_cat: null  # purrs|visible|hidden|broken
+  overall_score: null  # 0-10
+
+# Individual test results
+test_results:
+  # Each command gets an entry
+  # command_name:
+  #   status: pass|fail|skip|timeout
+  #   duration_ms: 0
+  #   error_message: null
+  #   notes: null
+  #   display_quality: perfect|good|poor|broken
+
+# Specific test categories
+category_results:
+  foundation_commands:
+    status: null  # pass|fail|partial
+    commands: []
+    notes: null
+
+  trust_status_commands:
+    status: null
+    commands: []
+    notes: null
+
+  productivity_commands:
+    status: null
+    commands: []
+    notes: null
+
+  ai_features:
+    status: null
+    commands: []
+    notes: null
+
+  validation_quality:
+    status: null
+    commands: []
+    notes: null
+
+  utility_commands:
+    status: null
+    commands: []
+    notes: null
+
+# Issues found during testing
+issues:
+  # - issue_id: auto-generated
+  #   severity: critical|high|medium|low
+  #   command: affected command
+  #   description: what went wrong
+  #   fix_applied: true|false
+  #   fix_description: what was done
+
+# Championship scoring (if applicable)
+championship_score:
+  project_understanding: null  # 0-20 points
+  turbo_cat_knowledge: null  # 0-20 points
+  feature_discovery: null  # 0-20 points
+  architecture_understanding: null  # 0-20 points
+  purpose_value: null  # 0-20 points
+  total_score: null  # 0-100
+  championship_status: null  # champion|good|needs_work
+
+# Summary and recommendations
+summary:
+  verdict: null  # Text summary of results
+  key_findings: []  # List of important discoveries
+  recommendations: []  # What to fix or improve
+  platform_rating: null  # Overall platform score
+
+# Certification
+certification:
+  certified: false  # true if passes WJTC standards
+  certification_level: null  # platinum|gold|silver|bronze|none
+  certified_by: null  # Who certified this
+  certification_date: null
+  expiry_date: null  # When re-test needed
+
+# Raw data attachment (optional)
+raw_output:
+  included: false
+  format: null  # json|text|base64
+  data: null  # Actual command outputs if needed
