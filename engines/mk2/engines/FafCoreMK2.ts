@@ -57,7 +57,7 @@ export class FafCoreMK2 implements ScoringEngine {
   getSpecs(): EngineSpecs {
     return {
       slots: 21,
-      mode: 'RELIABLE + TURBOCHARGED',
+      mode: 'RELIABLE',
       performance: '2ms average (with TURBO-CAT)',
       reliability: '99.9% uptime',
       catalyst: '😽 TURBO-CAT™ 154 Format Intelligence'
