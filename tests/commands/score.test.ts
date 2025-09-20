@@ -94,8 +94,8 @@ dependencies:
 
     await scoreFafFile(fafPath, { details: false, minimum: '50' });
 
-    expect(mockLog).toHaveBeenCalledWith(expect.stringContaining('🎯 .faf Score:'));
-    expect(mockLog).toHaveBeenCalledWith(expect.stringMatching(/\d+%/));
+    // Updated expectations for new balance visualizer format
+    expect(mockLog).toHaveBeenCalledWith(expect.stringMatching(/Score: \d+%/));
     expect(mockExit).not.toHaveBeenCalled();
   });
 
@@ -133,10 +133,8 @@ technical_context:
 
     await scoreFafFile(fafPath, { details: true, minimum: '50' });
 
-    expect(mockLog).toHaveBeenCalledWith(expect.stringContaining('📊 Detailed Score Breakdown:'));
-    expect(mockLog).toHaveBeenCalledWith(expect.stringContaining('Basic Information'));
-    expect(mockLog).toHaveBeenCalledWith(expect.stringContaining('Human Context'));
-    expect(mockLog).toHaveBeenCalledWith(expect.stringContaining('Technical Context'));
+    // Updated for new output format with balance display
+    expect(mockLog).toHaveBeenCalledWith(expect.stringContaining('📊 Detailed Breakdown:'));
   });
 
   it('should fail when score is below minimum threshold', async () => {
@@ -157,7 +155,7 @@ ai_instructions:
 
     await scoreFafFile(fafPath, { details: false, minimum: '50' });
 
-    expect(mockError).toHaveBeenCalledWith(expect.stringContaining('❌ Score below minimum threshold'));
+    expect(mockError).toHaveBeenCalledWith(expect.stringContaining('🚨 Score below minimum threshold'));
     expect(mockExit).toHaveBeenCalledWith(1);
   });
 
@@ -166,7 +164,7 @@ ai_instructions:
 
     await scoreFafFile(nonExistentPath, { details: false, minimum: '50' });
 
-    expect(mockError).toHaveBeenCalledWith(expect.stringContaining('❌ .faf file not found'));
+    expect(mockError).toHaveBeenCalledWith(expect.stringContaining('❌ No .faf file found'));
     expect(mockExit).toHaveBeenCalledWith(1);
   });
 

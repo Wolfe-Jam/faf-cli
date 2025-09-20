@@ -9,6 +9,7 @@ import * as YAML from "yaml";
 import { calculateFafScore } from "../scoring/score-calculator";
 import { findFafFile } from "../utils/file-utils";
 import { getScoreColor, getScoreEmoji } from "../utils/color-utils";
+import { BalanceVisualizer } from "../utils/balance-visualizer";
 
 interface ScoreOptions {
   details?: boolean;
@@ -40,7 +41,7 @@ export async function scoreFafFile(file?: string, options: ScoreOptions = {}) {
     }
 
     if (!fafPath) {
-      console.log(chalk.red("❌ No .faf file found"));
+      console.error(chalk.red("❌ No .faf file found"));
       console.log(chalk.yellow('💡 Run "faf init" to create one'));
       process.exit(1);
     }
@@ -61,6 +62,18 @@ export async function scoreFafFile(file?: string, options: ScoreOptions = {}) {
     const scoreText = `${scoreEmoji} Score: ${percentage}%`;
 
     console.log(scoreColor(chalk.bold(scoreText)));
+
+    // Show AI|HUMAN Balance visualization
+    console.log('\n' + '─'.repeat(50));
+    const balance = BalanceVisualizer.calculateBalance(fafData);
+    console.log(BalanceVisualizer.generateBalanceBar(balance));
+    console.log('─'.repeat(50));
+
+    // Show achievement message if applicable
+    const achievement = BalanceVisualizer.getAchievementMessage(balance);
+    if (achievement) {
+      console.log('\n' + achievement);
+    }
 
     // Always show key missing items for transparency
     const missingItems: string[] = [];
@@ -112,13 +125,15 @@ export async function scoreFafFile(file?: string, options: ScoreOptions = {}) {
       }
     }
 
-    // Check minimum threshold
-    const minimumScore = parseInt(options.minimum || "50");
-    if (percentage < minimumScore) {
-      console.log(
-        chalk.red(`\n🚨 Score below minimum threshold (${minimumScore}%)`),
-      );
-      process.exit(1);
+    // Check minimum threshold (only if explicitly provided)
+    if (options.minimum) {
+      const minimumScore = parseInt(options.minimum);
+      if (percentage < minimumScore) {
+        console.error(
+          chalk.red(`\n🚨 Score below minimum threshold (${minimumScore}%)`),
+        );
+        process.exit(1);
+      }
     }
 
     // Success message
@@ -138,8 +153,8 @@ export async function scoreFafFile(file?: string, options: ScoreOptions = {}) {
       );
     }
   } catch (error) {
-    console.log(chalk.red("💥 Scoring failed:"));
-    console.log(
+    console.error(chalk.red("💥 Scoring failed:"));
+    console.error(
       chalk.red(error instanceof Error ? error.message : String(error)),
     );
     process.exit(1);

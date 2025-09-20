@@ -5,7 +5,7 @@
  * Color Trinity: 🩵 AI Precision + 💚 Solution Bridge + 🧡 Human Energy
  */
 
-import chalk from 'chalk';
+const chalk = require('chalk');
 
 // 🎨 Championship Color Trinity (v2.0.0 White Stripe Edition)
 export const FAF_COLORS = {
@@ -13,15 +13,15 @@ export const FAF_COLORS = {
   cyan: '#00CCFF',      // 🩵 Championship AI Precision
   white: '#FFFFFF',     // ⚪ Championship Victory (replaced green)
   orange: '#FF4500',    // 🧡 Championship Orange
-  
+
   // Chalk color functions for CLI
-  fafCyan: chalk.hex('#00CCFF'),
+  fafCyan: chalk.cyan,
   fafWhite: chalk.white,             // ⚪ White stripe (championship flag)
   fafGreen: chalk.white,              // Legacy mapping to white
-  fafOrange: chalk.hex('#FF4500'),
-  
+  fafOrange: chalk.yellow,
+
   // Gradient simulation for CLI (fallback to single colors)
-  gradient: (text: string) => chalk.hex('#00CCFF')(text), // Primary cyan
+  gradient: (text: string) => chalk.cyan(text), // Primary cyan
 };
 
 /**
@@ -62,6 +62,7 @@ export const FAF_ICONS = {
   zap: '⚡',              // Speed/Energy
   sparkles: '✨',         // Discovery/New
   party: '🎉',            // Celebration/Success
+  balance: '⚖️',          // AI|HUMAN Balance
   
   // Technical
   gear: '⚙️',             // Configuration

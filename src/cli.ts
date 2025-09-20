@@ -11,6 +11,7 @@ import { validateFafFile } from './commands/validate';
 import { initFafFile } from './commands/init';
 import { scoreFafFile } from './commands/score';
 import { showFafScoreCard } from './commands/show';
+import { editFafFile } from './commands/edit-helper';
 import { autoCommand } from './commands/auto';
 import { formatsCommand } from './commands/formats';
 import { versionCommand } from './commands/version';
@@ -523,13 +524,26 @@ program
   .command('score [file]')
   .description('Rate your .faf completeness (0-100%). Aim for 70%+ for good AI context.')
   .option('-d, --details', 'Show detailed scoring breakdown')
-  .option('-m, --minimum <score>', 'Minimum required score', '50')
+  .option('-m, --minimum <score>', 'Minimum required score (fails if below)')
   .addHelpText('after', `
 Examples:
   $ faf score                    # Quick score check
   $ faf score --details          # See what's missing for higher score
   $ faf score --minimum 80       # Fail if score below 80%`)
   .action(withAnalyticsTracking('score', scoreFafFile));
+
+// 📝 faf edit - Edit helper
+program
+  .command('edit [file]')
+  .description('Get guidance on editing your .faf file to improve score')
+  .option('-o, --open', 'Open in default editor')
+  .addHelpText('after', `
+Examples:
+  $ faf edit                     # Show what to edit
+  $ faf edit --open              # Open in $EDITOR
+
+Helps you understand which fields to fill for a higher score.`)
+  .action(withAnalyticsTracking('edit', editFafFile));
 
 // 🏎️ faf show - Championship Score Card Display
 program

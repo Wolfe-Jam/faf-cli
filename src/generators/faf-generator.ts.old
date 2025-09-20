@@ -15,7 +15,10 @@ import {
   TypeScriptContext,
 } from "../utils/file-utils";
 import { generateFafContent } from "../utils/yaml-generator";
-import { TurboCat, TurboCatAnalysis } from "../utils/turbo-cat";
+import { FabFormatsProcessor, FabFormatsAnalysis } from "../engines/fab-formats-processor";
+
+// Legacy type alias for compatibility
+type TurboCatAnalysis = FabFormatsAnalysis;
 
 export interface GenerateOptions {
   projectType?: string;
@@ -76,19 +79,23 @@ export async function generateFafFromProject(
     }
   }
 
-  // 😽 TURBO-CAT DISCOVERY - Activate the 134-format intelligence catalyst
-  const turboCat = new TurboCat();
-  let fabAnalysis: TurboCatAnalysis;
+  // 🏎️ CHAMPIONSHIP ENGINE - FAB-FORMATS Power Unit with 150+ handlers!
+  const fabProcessor = new FabFormatsProcessor();
+  let fabAnalysis: FabFormatsAnalysis;
   try {
-    fabAnalysis = await turboCat.discoverFormats(projectRoot);
+    fabAnalysis = await fabProcessor.processFiles(projectRoot);
   } catch {
     // Fallback to empty analysis if discovery fails
     fabAnalysis = {
-      discoveredFormats: [],
-      totalIntelligenceScore: 0,
-      confirmedFormats: [],
-      frameworkConfidence: {},
-      slotFillRecommendations: {}
+      results: [],
+      totalBonus: 0,
+      context: {},
+      qualityMetrics: {
+        highestGrade: 'MINIMAL',
+        averageScore: 0,
+        filesCovered: 0,
+        intelligenceDepth: 0
+      }
     };
   }
 

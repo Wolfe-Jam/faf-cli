@@ -19,7 +19,7 @@ export interface FormatDiscoveryResult {
   frameworks: string[];
   slotMappings: Record<string, string>;
   priority: number;
-  intelligence: 'low' | 'medium' | 'high' | 'very-high' | 'ultra-high';
+  intelligence: 'low' | 'medium' | 'high' | 'very-high' | 'ultra-high' | any; // Can be object with extracted data
   confirmed: boolean;
   filePath: string;
   fileSize?: number;       // Size in bytes
@@ -201,7 +201,92 @@ export class TurboCat {
   }
 
   /**
-   * LAYER 2: F1-OPTIMIZED Content confirmation (fast validation with early exit)
+   * Extract deep intelligence from package.json - THE KILLER FEATURE!
+   * This is what makes FAB-FORMATS so powerful!
+   */
+  private async extractPackageJsonIntelligence(content: string): Promise<any> {
+    try {
+      const pkg = JSON.parse(content);
+      const allDeps = { ...pkg.dependencies, ...pkg.devDependencies, ...pkg.peerDependencies };
+
+      // Calculate quality score like FAB-FORMATS does!
+      let score = 0;
+      const detectedFrameworks: string[] = [];
+
+      // TIER 1: Essential metadata (30 points)
+      if (pkg.name) score += 10;
+      if (pkg.description) score += 10;
+      if (pkg.version) score += 5;
+      if (pkg.author || pkg.license) score += 5;
+
+      // TIER 2: Scripts showing development maturity (30 points)
+      const scripts = pkg.scripts || {};
+      if (scripts.dev || scripts.start) score += 10;
+      if (scripts.build) score += 10;
+      if (scripts.test || scripts.check) score += 10;
+
+      // TIER 3: Dependencies showing tech stack (40 points)
+      const depCount = Object.keys(allDeps).length;
+      if (depCount >= 15) score += 20;
+      else if (depCount >= 8) score += 15;
+      else if (depCount >= 3) score += 10;
+      else if (depCount >= 1) score += 5;
+
+      // TIER 4: Modern toolchain detection (50 points)
+      if (allDeps['typescript'] || allDeps['@types/node']) score += 10;
+      if (allDeps['vite'] || allDeps['webpack'] || allDeps['rollup']) score += 10;
+      if (allDeps['vitest'] || allDeps['jest'] || allDeps['playwright']) score += 10;
+      if (allDeps['eslint'] || allDeps['prettier']) score += 10;
+      if (allDeps['tailwindcss'] || allDeps['@emotion/styled']) score += 10;
+
+      // TIER 5: Framework detection (MASSIVE BONUS: 50 points)
+      if (allDeps['svelte'] || allDeps['@sveltejs/kit']) {
+        score += 25;
+        detectedFrameworks.push('Svelte');
+      }
+      if (allDeps['react'] || allDeps['next']) {
+        score += 20;
+        detectedFrameworks.push('React');
+      }
+      if (allDeps['vue'] || allDeps['nuxt']) {
+        score += 20;
+        detectedFrameworks.push('Vue');
+      }
+      if (allDeps['@angular/core']) {
+        score += 15;
+        detectedFrameworks.push('Angular');
+      }
+      if (allDeps['astro']) {
+        score += 20;
+        detectedFrameworks.push('Astro');
+      }
+
+      // Return the intelligence object that score-calculator expects!
+      return {
+        name: pkg.name,
+        description: pkg.description,
+        version: pkg.version,
+        scripts: pkg.scripts,
+        dependencies: allDeps,
+        author: pkg.author,
+        license: pkg.license,
+        repository: pkg.repository,
+        frameworks: detectedFrameworks,
+        score: Math.min(score, 150), // Cap at 150
+        depCount,
+        hasTests: !!(scripts.test || scripts.check),
+        hasBuild: !!scripts.build,
+        hasTypeScript: !!(allDeps['typescript'] || allDeps['@types/node']),
+        hasLinting: !!(allDeps['eslint'] || allDeps['prettier']),
+        hasStyling: !!(allDeps['tailwindcss'] || allDeps['@emotion/styled'] || allDeps['styled-components'])
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * LAYER 2: F1-OPTIMIZED Content confirmation WITH INTELLIGENCE EXTRACTION!
    */
   private async layerTwoContentConfirmation(format: FormatDiscoveryResult): Promise<boolean> {
     try {
@@ -218,10 +303,19 @@ export class TurboCat {
       await fd.close();
       const content = buffer.slice(0, bytesRead).toString('utf-8');
       
+      // For package.json, we ALWAYS read and extract intelligence
+      if (format.formatType === 'package.json') {
+        const fullContent = await fs.readFile(format.filePath, 'utf-8');
+        const intelligence = await this.extractPackageJsonIntelligence(fullContent);
+        if (intelligence) {
+          format.intelligence = intelligence; // Store extracted data
+          return true;
+        }
+        return false;
+      }
+
       // 🏎️ F1-OPTIMIZATION: Fast validation with early exit
       switch (format.formatType) {
-        case 'package.json':
-          return content.includes('"name"') && (content.includes('dependencies') || content.includes('scripts'));
         case 'requirements.txt':
           return content.split('\n').some(line => line.trim() && !line.startsWith('#'));
         case 'svelte.config.js':

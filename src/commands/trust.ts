@@ -12,6 +12,7 @@ import { findFafFile } from '../utils/file-utils';
 import { calculateFafScore } from '../scoring/score-calculator';
 import { getTrustCache } from '../utils/trust-cache';
 import YAML from 'yaml';
+import { dropCoach } from '../engines/drop-coach';
 
 export interface TrustScore {
   overall: number;           // 0-100% overall trust
