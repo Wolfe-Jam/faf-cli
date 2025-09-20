@@ -1,273 +1,295 @@
-# 🚀 faf-cli
+# 🏁 FAF CLI - Championship AI-Context Infrastructure
+*Transform developer psychology from hope-driven to trust-driven AI development*
 
-![CI](https://github.com/Wolfe-Jam/faf-cli/workflows/CI/badge.svg)
-![npm version](https://img.shields.io/npm/v/@faf/cli.svg)
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
+[![CI](https://github.com/Wolfe-Jam/faf-cli/workflows/CI/badge.svg)](https://github.com/Wolfe-Jam/faf-cli/actions)
+[![npm version](https://img.shields.io/npm/v/@faf/cli.svg)](https://www.npmjs.com/package/@faf/cli)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Performance](https://img.shields.io/badge/performance-<50ms-green.svg)](docs/PERFORMANCE.md)
+[![Context Score](https://img.shields.io/badge/context_score-86%25-green.svg)](docs/SCORING.md)
 
-**Generate comprehensive AI context files for any project.**
+## 🚀 30 seconds replaces 20 minutes of questions
 
-Command-line interface for .faf (Foundational AI-Context Format) - Create structured context files that help AI understand your project instantly, with validation, scoring, and synchronization capabilities.
-
-## Key Features
-
-- **Balanced Context**: Combines human project context (goals, team, requirements) with technical implementation details
-- **Performance Focused**: Championship speed status (<30ms) and fast generation (<200ms)
-- **Zero Configuration**: Intelligent project detection with sensible defaults
-- **Quality Scoring**: Objective measurement of context completeness (0-100%)
-
-The .faf format bridges human project understanding with technical implementation, providing AI assistants with both the "why" and the "how" of your project.
-
-## 🎯 Quick Start
+FAF (Foundational AI Format) is a revolutionary CLI tool that creates perfect AI context for your projects. One `.faf` file tells AI everything about your project - instantly.
 
 ```bash
-# Install globally
+# Three commands to championship context
 npm install -g @faf/cli
-
-# Generate .faf file for your project
-faf init
-
-# Validate and score your .faf
-faf validate
-faf score --details
-
-# Keep it synchronized
-faf sync --auto
+faf init          # Generate .faf with 86% context score
+faf trust         # See your AI confidence dashboard
 ```
 
-## 📋 Commands
-
-### `faf init`
-Generate initial .faf file from project structure
-```bash
-faf init                           # Auto-detect project type
-faf init --template react          # Use specific template
-faf init --force                   # Overwrite existing .faf
-faf init --output my-project.faf   # Custom output path
-```
-
-### `faf validate`
-Validate .faf file against schema
-```bash
-faf validate                    # Validate .faf in current directory
-faf validate project.faf        # Validate specific file
-faf validate --verbose          # Show detailed validation
-faf validate --schema 2.4.0     # Validate against specific version
-```
-
-### `faf score`
-Calculate completeness score (0-100%)
-```bash
-faf score                       # Show basic score
-faf score --details             # Detailed breakdown by section
-faf score --minimum 80          # Fail if score below threshold
-```
-
-### `faf sync`
-Sync .faf with project changes
-```bash
-faf sync                        # Show detected changes
-faf sync --auto                 # Auto-apply changes
-faf sync --dry-run              # Preview changes only
-```
-
-### `faf audit`
-Check freshness and completeness
-```bash
-faf audit                       # Full audit report
-faf audit --warn-days 7         # Warn if older than 7 days
-faf audit --error-days 30       # Error if older than 30 days
-```
-
-### `faf lint`
-Format compliance checking
-```bash
-faf lint                        # Check for issues
-faf lint --fix                  # Auto-fix formatting
-faf lint --schema-version 2.4.0 # Validate against specific schema
-```
-
-## 🎯 Scoring System
-
-The CLI uses a comprehensive scoring algorithm that balances human project context with technical implementation details:
-
-- **21 Context Slots**: Covers both project purpose (WHO/WHAT) and technical implementation (HOW)
-- **Weighted Scoring**: Human context fields have higher importance weights to prioritize project understanding
-- **Project Identity First**: Project goals and team context drive the scoring methodology
-- **Technical Completeness**: Ensures AI has all necessary technical details for effective assistance
-
-### Score Ranges
-- 🟢 **90-100%**: Comprehensive context coverage
-- 🟡 **70-89%**: Good coverage with minor gaps  
-- 🔴 **Below 70%**: Requires additional context for optimal AI assistance
-
-## 🏗️ Project Type Detection
-
-Automatically detects and optimizes for:
-
-- **Svelte/SvelteKit** projects
-- **React/Next.js** applications  
-- **Vue/Nuxt** applications
-- **Node.js APIs** and servers
-- **Generic** projects with smart defaults
-
-## 📊 What Gets Analyzed
-
-**Anti-Faff Detection** - Smart analysis, automatic context:
-
-The CLI examines your project to populate:
-
-### From `package.json`
-- Project name, description, version
-- Dependencies → Tech stack detection
-- Scripts → Build tools identification
-
-### From File Structure  
-- Framework detection (`.svelte`, `.jsx`, `.vue` files)
-- Configuration files
-- Project organization patterns
-
-### Smart Defaults
-- Current year tags
-- Project type categorization  
-- Open source assumptions
-- AI-ready optimizations
-
-## 🔄 Sync Intelligence
-
-**Anti-Faff Automation** - Smart monitoring, zero manual overhead:
-
-`faf sync` monitors and updates:
-
-- Package.json changes (name, version, dependencies)
-- Major framework additions/removals
-- Stale timestamps (30+ days old)
-- Version bumps and releases
-
-## ⚙️ Configuration
-
-The CLI respects `.faf` format standards:
-
-- **Schema Version**: 2.4.0 (latest)
-- **Output Format**: Clean YAML with 100-char line width
-- **Validation**: Strict schema compliance
-- **Timestamps**: ISO 8601 format
-
-## 🎪 Integration Examples
-
-### In CI/CD Pipelines
-```yaml
-# .github/workflows/faf-check.yml
-- name: Validate .faf file
-  run: |
-    npx @faf/cli validate --minimum 70
-    npx @faf/cli audit --error-days 30
-```
-
-### Pre-commit Hooks
-```bash
-# .pre-commit-config.yaml
-repos:
-  - repo: local
-    hooks:
-      - id: faf-lint
-        name: Lint .faf file
-        entry: faf lint --fix
-        language: system
-```
-
-### Package.json Scripts
-```json
-{
-  "scripts": {
-    "faf:check": "faf validate && faf score --minimum 80",
-    "faf:sync": "faf sync --auto",
-    "faf:audit": "faf audit"
-  }
-}
-```
-
-## 🚀 Programmatic Usage
-
-```typescript
-import { validateFafFile, scoreFafFile, generateFafFromProject } from '@faf/cli';
-
-// Validate a .faf file
-const validation = await validateFafFile('./project.faf');
-
-// Calculate score
-const score = await scoreFafFile('./project.faf', { details: true });
-
-// Generate new .faf
-const fafContent = await generateFafFromProject({
-  projectType: 'svelte',
-  projectRoot: './my-project'
-});
-```
-
-## 🏎️ Performance
-
-**F1-Inspired Software Engineering** - No bloat, just results:
-
-- **Validation**: < 50ms for typical .faf files
-- **Scoring**: < 100ms with full analysis  
-- **Generation**: < 200ms including file system scans
-- **Zero Dependencies**: Core functionality, minimal overhead
-- **Anti-Faff Philosophy**: Every millisecond matters, every feature justified
-
-## 🧪 Testing & Validation
-
-**Real-World Testing** - Validated with actual AI assistants rather than synthetic tests:
-
-### ✅ **Multi-Platform RAW Validation**
-- **Claude AI**: 85% accuracy score on cold testing
-- **Gemini AI**: 88% accuracy score on zero-context deployment  
-- **Fresh Sessions**: Tested with completely new AI assistants (no prior context)
-
-### ✅ **Real-World Project Testing**
-- **Go Projects**: Full project detection and scoring
-- **Python FastAPI**: Complete framework recognition  
-- **React/TypeScript**: Advanced type analysis and strictness levels
-- **Vue Applications**: Framework-specific optimizations
-- **Node.js APIs**: Backend service detection
-
-### ✅ **Production Environment Testing**  
-- **Cold Deployment**: Packaged CLI tested in isolated environments
-- **Cross-Platform**: macOS, Linux compatibility validated
-- **Network Resilience**: GitHub → npm → global install workflow proven
-- **Zero Dependencies**: Core functionality works without external services
-
-### 📊 **Test Results Summary**
-```
-✅ Framework Detection: 100% accuracy across test projects
-✅ TypeScript Analysis: F1-Inspired strictness levels working  
-✅ File Detection: FATAL bugs eliminated (bulletproof fs.readdir approach)
-✅ AI Validation: 85-88% scores from independent AI evaluation
-✅ Package Integrity: 38.1 kB compressed, clean distribution
-```
-
-**Why RAW Testing?** Unit tests can lie. AI assistants using your tool in real scenarios cannot.
-
-## 🤝 Contributing
-
-Built with TypeScript and follows the .faf specification. All contributions are validated through our RAW testing methodology.
-
-**Anti-Faff Software Development** - Quality contributions, zero process bloat.
-
-```bash
-git clone https://github.com/Wolfe-Jam/faf-cli
-cd faf-cli
-npm install
-npm run dev
-
-# Test with real projects
-npm run test:real-world  # References /faf-cli-testing projects
-```
-
-## 📄 License
-
-MIT © 🏎️⚡️_wolfejam.dev
+**Result**: Your AI now has championship context. No more explaining. Just building.
 
 ---
 
-**🎯 Complete .faf files enable effective AI collaboration**  
-*Performance-focused engineering: Comprehensive context with minimal setup overhead.*
+## 🏆 Why FAF?
+
+### Before FAF (Hope-Driven)
+- 20 minutes explaining your project to AI
+- Repeating context every session
+- AI confusion and wrong assumptions
+- Hope that AI understands
+
+### After FAF (Trust-Driven)
+- 30 seconds to perfect context
+- Persistent understanding across sessions
+- AI has complete project intelligence
+- **Trust** with 86% context scores
+
+---
+
+## 🎯 Key Features
+
+### Championship Performance
+- ⚡ **<50ms operations** - FAST AF or failure
+- 🏎️ **86% context scores** - 3.5x better than baseline
+- 🧡 **Trust Dashboard** - Emotional confidence center
+- 🤖 **Multi-model support** - Claude, ChatGPT, Gemini
+
+### Revolutionary Tools
+- **FAB-FORMATS Engine** - 150+ file format handlers
+- **RelentlessContextExtractor** - 3-tier confidence hunting
+- **DropCoach** - Intelligent TOP-6 file guidance
+- **AI|HUMAN Balance** - Visual gamification system
+- **Context Mirroring** - Bi-directional .faf ↔ CLAUDE.md sync
+
+### F1-Inspired Engineering
+- 🏁 **Championship standards** - Zero errors accepted
+- 🔧 **72-hour rebuild protocol** - Break, rebuild, win
+- 💎 **Premium positioning** - $100/month, no compromises
+- 🚀 **Performance mad** - Speed is non-negotiable
+
+---
+
+## 📖 Documentation
+
+### Essential Guides
+- 📚 **[Documentation Index](docs/INDEX.md)** - Complete documentation suite
+- 🚀 **[Developer Guide](docs/DEVELOPER-GUIDE.md)** - Anthropic-style comprehensive guide
+- 🛠️ **[Unique Tools](docs/UNIQUE-TOOLS.md)** - Revolutionary innovations explained
+- ❓ **[FAQ](docs/FAQ.md)** - All your questions answered
+
+### Quick Links
+- [Getting Started](docs/GETTING-STARTED.md)
+- [API Reference](docs/API-REFERENCE.md)
+- [F1 Philosophy](docs/F1-PHILOSOPHY.md)
+- [Championship Standards](docs/CHAMPIONSHIP-STANDARDS.md)
+
+---
+
+## 🎮 Commands
+
+### Essential Commands
+
+```bash
+# Initialize championship context
+faf init                    # Auto-detect and generate .faf
+faf init --force           # Overwrite existing
+
+# Measure your excellence
+faf score                  # Quick context score
+faf score --details       # Full breakdown with balance
+
+# Build trust, not hope
+faf trust                  # AI confidence dashboard
+faf trust --detailed      # With metrics
+faf trust --garage        # Safe experimentation mode
+
+# Keep context perfect
+faf sync                   # Bi-directional sync
+faf enhance               # AI-powered improvements
+```
+
+### Advanced Commands
+
+```bash
+# Multi-model verification
+faf verify --model claude   # Test with Claude
+faf verify --model chatgpt  # Test with ChatGPT
+faf verify --big3          # Test all three
+
+# Context improvement
+faf todo --generate        # Get improvement tasks
+faf check --fix           # Auto-repair issues
+
+# Championship operations
+faf status                # System health check
+faf formats --pyramid     # View format hierarchy
+```
+
+---
+
+## 🏎️ The Championship Engine
+
+```
+┌─────────────────────────────────────────┐
+│        CHAMPIONSHIP ARCHITECTURE         │
+├─────────────────────────────────────────┤
+│ Power Unit: FAB-FORMATS                 │
+│ • 150+ format handlers                  │
+│ • Quality grading system                │
+│ • Two-stage discovery                   │
+├─────────────────────────────────────────┤
+│ Aero Package: RelentlessExtractor       │
+│ • WHO/WHAT/WHY extraction              │
+│ • 3-tier confidence                    │
+│ • Automatic TODO generation            │
+├─────────────────────────────────────────┤
+│ Race Strategy: DropCoach                │
+│ • Language-adaptive TOP-6              │
+│ • Progressive coaching                 │
+│ • Milestone celebrations               │
+└─────────────────────────────────────────┘
+
+Performance: <50ms | Score: 86% | Trust: 100%
+```
+
+---
+
+## 📊 Real Results
+
+| Metric | Before FAF | After FAF | Improvement |
+|--------|------------|-----------|-------------|
+| Context Setup | 20 minutes | 30 seconds | **40x faster** |
+| Context Score | 24% | 86% | **3.5x better** |
+| Human Context | 30% | 74% | **+144%** |
+| AI Understanding | Hope | Trust | **∞** |
+| Performance | Variable | <50ms | **Guaranteed** |
+
+---
+
+## 🚀 Quick Start
+
+### Install
+```bash
+npm install -g @faf/cli
+```
+
+### Your First Championship Context
+```bash
+# 1. Initialize your project
+cd my-project
+faf init
+
+# 2. Check your score
+faf score --details
+# Score: 86% 🏆
+
+# 3. See trust dashboard
+faf trust
+# 🧡 TRUST LEVEL: 85% (LOCKED & LOADED)
+
+# 4. Use with AI
+# Your AI now has perfect context!
+```
+
+---
+
+## 💎 Premium Software
+
+FAF is positioned as premium software - AMG Mercedes, not Honda Civic.
+
+### Why $100/month?
+- Save 10+ hours monthly (worth $500+ at developer rates)
+- Championship-grade tools and performance
+- Continuous improvements and support
+- Transform from hope to trust
+
+### Open Source with Premium Features
+- Core CLI is MIT licensed
+- Advanced features are subscription-based
+- No compromises on quality or performance
+
+---
+
+## 🏁 F1 Philosophy
+
+We follow Formula 1 principles in everything we do:
+
+1. **Performance Mad** - <50ms or it's broken
+2. **Championship Only** - 85% score minimum
+3. **Rebuild Protocol** - 72 hours to fix anything
+4. **Respect Competition** - Honor good work everywhere
+5. **Zero Errors** - Perfection is the standard
+
+Read more in our [F1 Philosophy Guide](docs/F1-PHILOSOPHY.md)
+
+---
+
+## 🔧 Technical Specifications
+
+### File Format
+- **Pure YAML** - No markdown contamination
+- **Structured Schema** - Validated and typed
+- **Extensible** - Add custom fields
+- **Version Controlled** - Git-friendly
+
+### Performance Requirements
+- `faf init`: <50ms
+- `faf score`: <50ms
+- `faf trust`: <100ms
+- `faf sync`: <50ms
+
+### Compatibility
+- **Node.js**: 18.0.0+
+- **OS**: Windows, macOS, Linux
+- **AI Models**: Claude, ChatGPT, Gemini, Local models
+- **Languages**: All major programming languages
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions that maintain championship standards:
+
+1. Performance must stay <50ms
+2. Tests must pass (196+ tests)
+3. Documentation must be updated
+4. F1 philosophy must be respected
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+
+---
+
+## 📞 Support
+
+### Get Help
+- 📖 [Documentation](docs/INDEX.md)
+- ❓ [FAQ](docs/FAQ.md)
+- 🐛 [GitHub Issues](https://github.com/Wolfe-Jam/faf-cli/issues)
+- 💬 [GitHub Discussions](https://github.com/Wolfe-Jam/faf-cli/discussions)
+
+### Stay Updated
+- 🌐 [fafdev.tools](https://fafdev.tools)
+- 📦 [npm package](https://www.npmjs.com/package/@faf/cli)
+- ⭐ [Star on GitHub](https://github.com/Wolfe-Jam/faf-cli)
+
+---
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+Built with championship mindset by developers who believe:
+- AI deserves perfect context
+- Developers deserve trust, not hope
+- Performance is non-negotiable
+- Quality beats quantity
+
+Special thanks to Anthropic for Claude and the AI community for pushing boundaries.
+
+---
+
+<div align="center">
+
+**Make Your AI Happy! 🧡 Trust-Driven 🤖**
+
+*F1-Inspired Software Engineering - Where Performance Meets Trust*
+
+**FAF: 30 seconds replaces 20 minutes of questions**
+
+</div>

@@ -63,4 +63,18 @@ temp/
 
 # Generated conversion files
 .faf.md
-.faf.txt
+.faf.txt# Backup files
+*.backup-*
+.faf.backup-*
+
+# Test files
+test-*.faf
+
+# Internal documents
+WJTC-*.md
+*-INTERNAL.md
+
+# Temporary files
+*.tmp
+*.log
+.DS_Store

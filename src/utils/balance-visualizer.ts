@@ -4,7 +4,7 @@
  * The 50/50 eternal truth: AI detects tech (50%), humans provide meaning (50%)
  */
 
-const chalk = require('chalk');
+import { colors, bars, formatScore } from '../fix-once/colors';
 
 export interface BalanceData {
   aiPercentage: number;
@@ -120,9 +120,9 @@ export class BalanceVisualizer {
     // Header matching fafdev.tools style
     lines.push('');
     if (isBalanced) {
-      lines.push(chalk.green.bold('   PRD Balance'));
+      lines.push(colors.success(colors.bold('   PRD Balance')));
     } else {
-      lines.push(chalk.white.bold('   AI|HUMAN CONTEXT BALANCE'));
+      lines.push(colors.bright(colors.bold('   AI|HUMAN CONTEXT BALANCE')));
     }
     lines.push('');
 
@@ -135,16 +135,16 @@ export class BalanceVisualizer {
     // GREEN celebration when perfectly balanced!
     if (isBalanced) {
       // Entire bar turns GREEN for perfect balance
-      barLine += chalk.green('█'.repeat(this.BAR_WIDTH));
+      barLine += bars.green(this.BAR_WIDTH);
     } else {
       // Normal cyan/orange split when not balanced
       if (aiBarWidth > 0 && humanBarWidth > 0) {
-        barLine += chalk.cyan('█'.repeat(aiBarWidth));
-        barLine += chalk.yellow('█'.repeat(humanBarWidth));
+        barLine += bars.cyan(aiBarWidth);
+        barLine += bars.orange(humanBarWidth);
       } else if (aiBarWidth > 0) {
-        barLine += chalk.cyan('█'.repeat(this.BAR_WIDTH));
+        barLine += bars.cyan(this.BAR_WIDTH);
       } else {
-        barLine += chalk.yellow('█'.repeat(this.BAR_WIDTH));
+        barLine += bars.orange(this.BAR_WIDTH);
       }
     }
 
@@ -153,28 +153,28 @@ export class BalanceVisualizer {
     // Guidance text
     lines.push('');
     if (isBalanced) {
-      lines.push(chalk.gray('   ⚖️ PERFECT BALANCE!'));
+      lines.push(colors.muted('   ⚖️ PERFECT BALANCE!'));
     } else {
-      lines.push(chalk.gray('   DROP FILES OR ADD CONTEXT TO SEE AI/HUMAN BALANCE'));
+      lines.push(colors.muted('   DROP FILES OR ADD CONTEXT TO SEE AI/HUMAN BALANCE'));
     }
 
     // Status message
     lines.push('');
     if (isBalanced) {
-      lines.push(chalk.green('   ✅ Your context is perfectly balanced!'));
-      lines.push(chalk.green('   🏆 AI understands your tech, you provide the meaning'));
+      lines.push(colors.success('   ✅ Your context is perfectly balanced!'));
+      lines.push(colors.success('   🏆 AI understands your tech, you provide the meaning'));
     } else if (aiPercentage > humanPercentage + 20) {
-      lines.push(chalk.yellow('   📝 Add more human context (who, what, why, etc.)'));
-      lines.push(chalk.gray('   💡 AI detected your tech, now tell your story'));
+      lines.push(colors.warning('   📝 Add more human context (who, what, why, etc.)'));
+      lines.push(colors.muted('   💡 AI detected your tech, now tell your story'));
     } else if (humanPercentage > aiPercentage + 20) {
-      lines.push(chalk.yellow('   🔧 Add more technical details (stack, dependencies)'));
-      lines.push(chalk.gray('   💡 Great story, now specify the implementation'));
+      lines.push(colors.warning('   🔧 Add more technical details (stack, dependencies)'));
+      lines.push(colors.muted('   💡 Great story, now specify the implementation'));
     } else if (aiPercentage < 30 && humanPercentage < 30) {
-      lines.push(chalk.red('   ⚠️  Both AI and HUMAN context are low'));
-      lines.push(chalk.gray('   💡 Start by filling in basic project info'));
+      lines.push(colors.error('   ⚠️  Both AI and HUMAN context are low'));
+      lines.push(colors.muted('   💡 Start by filling in basic project info'));
     } else {
-      lines.push(chalk.cyan('   🎯 Getting closer to balance!'));
-      lines.push(chalk.gray(`   📊 AI: ${aiPercentage}% | HUMAN: ${humanPercentage}%`));
+      lines.push(colors.primary('   🎯 Getting closer to balance!'));
+      lines.push(colors.muted(`   📊 AI: ${aiPercentage}% | HUMAN: ${humanPercentage}%`));
     }
 
     return lines.join('\n');
@@ -187,11 +187,11 @@ export class BalanceVisualizer {
     const { aiPercentage, humanPercentage, isBalanced } = balance;
 
     if (isBalanced) {
-      return chalk.green('⚖️ BALANCED');
+      return colors.success('⚖️ BALANCED');
     }
 
-    const aiColor = chalk.cyan;
-    const humanColor = chalk.yellow;
+    const aiColor = colors.primary;
+    const humanColor = colors.secondary;
 
     return `${aiColor(`AI:${aiPercentage}%`)} | ${humanColor(`HUMAN:${humanPercentage}%`)}`;
   }
@@ -203,11 +203,11 @@ export class BalanceVisualizer {
     const { isBalanced, aiPercentage, humanPercentage } = balance;
 
     if (isBalanced && aiPercentage >= 80 && humanPercentage >= 80) {
-      return chalk.green.bold('🏆 CHAMPION BALANCE - Both AI and HUMAN above 80%!');
+      return colors.success(colors.bold('🏆 CHAMPION BALANCE - Both AI and HUMAN above 80%!'));
     } else if (isBalanced) {
-      return chalk.green('✨ Balance achieved! Keep adding context to reach Champion status');
+      return colors.success('✨ Balance achieved! Keep adding context to reach Champion status');
     } else if (Math.abs(aiPercentage - humanPercentage) <= 5) {
-      return chalk.yellow('🔥 So close to perfect balance! Just a few more fields...');
+      return colors.warning('🔥 So close to perfect balance! Just a few more fields...');
     }
 
     return null;
