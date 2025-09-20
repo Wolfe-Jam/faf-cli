@@ -44,8 +44,9 @@ describe('AI Analyze Command', () => {
   });
 
   it('should handle different focus areas', async () => {
-    const focusAreas = ['completeness', 'quality', 'ai-readiness', 'human-context'];
-    
+    const focusAreas: Array<'completeness' | 'quality' | 'ai-readiness' | 'human-context' | 'claude-exclusive'> =
+      ['completeness', 'quality', 'ai-readiness', 'human-context'];
+
     for (const focus of focusAreas) {
       mockExit.mockClear();
       await analyzeFafWithAI(undefined, { focus });
@@ -77,7 +78,7 @@ scores:
     const fafPath = path.join(testDir, 'analyze-test.faf');
     await fs.writeFile(fafPath, fafContent, 'utf-8');
 
-    await analyzeFafWithAI(fafPath, { model: 'gpt-4' });
+    await analyzeFafWithAI(fafPath, { model: 'chatgpt' });
 
     // Should still fail at Codex check, but demonstrates the flow
     expect(mockExit).toHaveBeenCalledWith(1);

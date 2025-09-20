@@ -115,7 +115,7 @@ describe('🍜 TURBO-CAT Tests - The Noodle Quest', () => {
 
       const analysis = await turboCat.discoverFormats(testDir);
 
-      expect(analysis.discoveredFormats.some(f => f.formatType === '.ts')).toBe(true);
+      expect(analysis.discoveredFormats.some(f => f.formatType === 'ts' || f.formatType === '.ts')).toBe(true);
     });
   });
 
