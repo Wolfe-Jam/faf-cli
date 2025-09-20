@@ -7,11 +7,11 @@ import chalk from "chalk";
 import { promises as fs } from "fs";
 import path from "path";
 import * as YAML from "yaml";
-import { 
-  FAF_ICONS, 
-  FAF_COLORS, 
+import {
+  FAF_ICONS,
+  FAF_COLORS,
   BRAND_MESSAGES,
-  formatPerformance 
+  formatPerformance
 } from "../utils/championship-style";
 import { autoAwardCredit } from "../utils/technical-credit";
 import {
@@ -22,6 +22,8 @@ import { generateFafFromProject } from "../generators/faf-generator-championship
 import { calculateFafScore } from "../scoring/score-calculator";
 import { createDefaultFafIgnore } from "../utils/fafignore-parser";
 import { BalanceVisualizer } from "../utils/balance-visualizer";
+import { FafDNAManager, displayScoreWithBirthWeight } from "../engines/faf-dna";
+import { fabFormatsProcessor } from "../engines/fab-formats-processor";
 
 interface InitOptions {
   force?: boolean;
@@ -99,33 +101,100 @@ export async function initFafFile(
     // Award technical credit for successful initialization
     await autoAwardCredit('init_success', outputPath);
 
-    // Show actual score matching what's embedded in the file
-    const fafData = YAML.parse(fafContent);
-    const scoreResult = await calculateFafScore(fafData, outputPath);
-    // Use the embedded score from the file header to match what user sees
-    const embeddedScore = fafData.faf_score ? parseInt(fafData.faf_score.replace('%', '')) : scoreResult.totalScore;
+    // REVOLUTIONARY: Score CLAUDE.md ONLY for birth weight!
+    // This is the TRUE starting point - what AI sees initially
+    console.log();
+    console.log(FAF_COLORS.fafCyan(`${FAF_ICONS.magic_wand} Analyzing CLAUDE.md for birth weight...`));
+
+    const claudeMdPath = path.join(projectRoot, 'CLAUDE.md');
+    let birthWeight = 0;
+    let fromClaudeMD = false;
+
+    if (await fileExists(claudeMdPath)) {
+      // Score ONLY CLAUDE.md for birth weight
+      const claudeMdContent = await fs.readFile(claudeMdPath, 'utf-8');
+      const claudeMdAnalysis = await fabFormatsProcessor.processFiles(projectRoot);
+
+      // Calculate birth weight from CLAUDE.md context quality
+      // Low scores are GOOD - they show the journey!
+      if (claudeMdContent.length < 100) {
+        birthWeight = 5;  // Almost empty CLAUDE.md
+      } else if (claudeMdContent.includes('FAF')) {
+        birthWeight = 22; // Has some FAF context
+      } else {
+        birthWeight = 12; // Generic CLAUDE.md
+      }
+      fromClaudeMD = true;
+
+      console.log(FAF_COLORS.fafOrange(`   Birth weight from CLAUDE.md: ${birthWeight}%`));
+      console.log(FAF_COLORS.fafWhite(`   (Low scores are normal - they show your growth journey!)`));
+    } else {
+      // No CLAUDE.md - use minimal birth weight
+      birthWeight = 0;
+      console.log(FAF_COLORS.fafOrange(`   No CLAUDE.md found - birth weight: ${birthWeight}%`));
+    }
+
+    // Initialize FAF DNA with birth certificate
+    const dnaManager = new FafDNAManager(projectRoot);
+    const dna = await dnaManager.birth(birthWeight, fromClaudeMD);
 
     console.log();
-    console.log(FAF_COLORS.fafGreen(`${FAF_ICONS.chart_up} Initial score: ${embeddedScore}%`));
+    console.log(FAF_COLORS.fafGreen(`${FAF_ICONS.dna} FAF DNA created with birth certificate!`));
+    console.log(FAF_COLORS.fafWhite(`   Certificate: ${dna.birthCertificate.certificate}`));
+
+    // Now calculate ACTUAL score from full .faf
+    const fafData = YAML.parse(fafContent);
+    const scoreResult = await calculateFafScore(fafData, outputPath);
+    const currentScore = fafData.faf_score ? parseInt(fafData.faf_score.replace('%', '')) : scoreResult.totalScore;
+
+    // Record first growth if different from birth weight
+    if (currentScore !== birthWeight) {
+      await dnaManager.recordGrowth(currentScore, ['Initial .faf generation from project']);
+    }
+
+    // Display with birth weight
+    console.log();
+    displayScoreWithBirthWeight(
+      currentScore,
+      birthWeight,
+      dna.birthCertificate.born,
+      { showGrowth: true }
+    );
 
     // Show AI|HUMAN Balance
     const balance = BalanceVisualizer.calculateBalance(fafData);
     console.log(FAF_COLORS.fafWhite(`${FAF_ICONS.balance} Balance: `) + BalanceVisualizer.generateCompactBalance(balance));
 
-    // Championship Next Steps
+    // Championship Next Steps with DNA lifecycle
     console.log();
     console.log(FAF_COLORS.fafOrange(`${FAF_ICONS.magic_wand} Championship Recommendations:`));
     console.log(
-      `${FAF_COLORS.fafCyan('   1. ')  }faf score --details${  FAF_COLORS.fafCyan(' - Discover improvement opportunities')}`
+      `${FAF_COLORS.fafCyan('   1. ')  }faf auth${  FAF_COLORS.fafCyan(' - Authenticate your FAF DNA')}`
     );
-    console.log(`${FAF_COLORS.fafCyan('   2. ')  }faf trust --detailed${  FAF_COLORS.fafCyan(' - Boost AI happiness')}`);
-    console.log(`${FAF_COLORS.fafCyan('   3. ')  }faf status${  FAF_COLORS.fafCyan(' - Monitor your championship performance')}`);
+    console.log(
+      `${FAF_COLORS.fafCyan('   2. ')  }faf auto${  FAF_COLORS.fafCyan(' - Grow your context automatically')}`
+    );
+    console.log(
+      `${FAF_COLORS.fafCyan('   3. ')  }faf score --details${  FAF_COLORS.fafCyan(' - Track improvement opportunities')}`
+    );
+    console.log(`${FAF_COLORS.fafCyan('   4. ')  }faf trust --detailed${  FAF_COLORS.fafCyan(' - Boost AI happiness')}`);
+    console.log(`${FAF_COLORS.fafCyan('   5. ')  }faf log${  FAF_COLORS.fafCyan(' - View your context evolution')}`);
 
-    if (embeddedScore < 70) {
-      console.log(FAF_COLORS.fafOrange(`   4. ${FAF_ICONS.precision} Target 70%+ score for championship AI context`));
-    } else if (embeddedScore >= 85) {
-      console.log(FAF_COLORS.fafGreen(`${FAF_ICONS.party} Excellent start! Championship performance! ${FAF_ICONS.trophy}`));
+    // Growth-focused messaging
+    const growth = currentScore - birthWeight;
+    if (growth > 0) {
+      console.log();
+      console.log(FAF_COLORS.fafGreen(`${FAF_ICONS.rocket} Already improved +${growth}% from birth weight!`));
     }
+
+    if (currentScore < 70) {
+      console.log(FAF_COLORS.fafOrange(`   ${FAF_ICONS.precision} Target 70%+ for championship AI context`));
+    } else if (currentScore >= 85) {
+      console.log(FAF_COLORS.fafGreen(`${FAF_ICONS.party} Championship performance achieved! ${FAF_ICONS.trophy}`));
+    }
+
+    console.log();
+    console.log(FAF_COLORS.fafWhite(`Your FAF journey has begun: ${birthWeight}% → ${currentScore}%`));
   } catch (error) {
     console.log(chalk.red("💥 Initialization failed:"));
     console.log(

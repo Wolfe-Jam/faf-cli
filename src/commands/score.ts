@@ -10,6 +10,8 @@ import { calculateFafScore } from "../scoring/score-calculator";
 import { findFafFile } from "../utils/file-utils";
 import { getScoreColor, getScoreEmoji } from "../utils/color-utils";
 import { BalanceVisualizer } from "../utils/balance-visualizer";
+import { FafDNAManager, displayScoreWithBirthWeight } from "../engines/faf-dna";
+import * as path from "path";
 
 interface ScoreOptions {
   details?: boolean;
@@ -56,12 +58,27 @@ export async function scoreFafFile(file?: string, options: ScoreOptions = {}) {
     const scoreResult = await calculateFafScore(fafData, fafPath);
     const percentage = Math.round(scoreResult.totalScore);
 
-    // Accessibility-friendly score display
-    const scoreColor = getScoreColor(percentage);
-    const scoreEmoji = getScoreEmoji(percentage);
-    const scoreText = `${scoreEmoji} Score: ${percentage}%`;
+    // Load DNA to get birth weight - THE VALUE STORY!
+    const projectPath = path.dirname(fafPath);
+    const dnaManager = new FafDNAManager(projectPath);
+    const dna = await dnaManager.load();
 
-    console.log(scoreColor(chalk.bold(scoreText)));
+    if (dna) {
+      // ALWAYS show birth weight - this is the value visualization!
+      displayScoreWithBirthWeight(
+        percentage,
+        dna.birthCertificate.birthWeight,
+        dna.birthCertificate.born,
+        { showGrowth: true, showJourney: true }
+      );
+    } else {
+      // Fallback to old display if no DNA yet
+      const scoreColor = getScoreColor(percentage);
+      const scoreEmoji = getScoreEmoji(percentage);
+      const scoreText = `${scoreEmoji} Score: ${percentage}%`;
+      console.log(scoreColor(chalk.bold(scoreText)));
+      console.log(chalk.gray('   Run "faf init" to create DNA tracking'));
+    }
 
     // Show AI|HUMAN Balance visualization
     console.log('\n' + '─'.repeat(50));

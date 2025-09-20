@@ -5,7 +5,7 @@
  * Color Trinity: 🩵 AI Precision + 💚 Solution Bridge + 🧡 Human Energy
  */
 
-const chalk = require('chalk');
+import { colors } from '../fix-once/colors';
 
 // 🎨 Championship Color Trinity (v2.0.0 White Stripe Edition)
 export const FAF_COLORS = {
@@ -14,14 +14,14 @@ export const FAF_COLORS = {
   white: '#FFFFFF',     // ⚪ Championship Victory (replaced green)
   orange: '#FF4500',    // 🧡 Championship Orange
 
-  // Chalk color functions for CLI
-  fafCyan: chalk.cyan,
-  fafWhite: chalk.white,             // ⚪ White stripe (championship flag)
-  fafGreen: chalk.white,              // Legacy mapping to white
-  fafOrange: chalk.yellow,
+  // Color functions for CLI (using fix-once system)
+  fafCyan: colors.fafCyan,
+  fafWhite: colors.fafWhite,
+  fafGreen: colors.fafGreen,
+  fafOrange: colors.fafOrange,
 
   // Gradient simulation for CLI (fallback to single colors)
-  gradient: (text: string) => chalk.cyan(text), // Primary cyan
+  gradient: (text: string) => colors.championship(text), // Championship cyan
 };
 
 /**
@@ -76,6 +76,7 @@ export const FAF_ICONS = {
   clipboard: '📝',        // Todo/Tasks
   broom: '🧹',           // Clear/Clean
   pencil: '✏️',          // Edit
+  dna: '🧬',             // DNA/Lifecycle
 };
 
 // 📊 Status Color Coding
