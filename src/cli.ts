@@ -198,6 +198,68 @@ Examples:
   $ faf init -t react            # Force React template`)
   .action(withAnalyticsTracking('init', (directory, options) => initFafFile(directory, options)));
 
+// 🔐 faf auth - Authenticate your FAF DNA
+program
+  .command('auth')
+  .description('🔐 Authenticate your FAF project with a birth certificate')
+  .option('--verify <certificate>', 'Verify an existing certificate')
+  .option('--show', 'Show current authentication status')
+  .addHelpText('after', `
+Examples:
+  $ faf auth                     # Authenticate your project
+  $ faf auth --show              # Show authentication status
+  $ faf auth --verify FAF-2025-PROJECT-XXXX  # Verify certificate
+
+🔐 Birth Certificate:
+  • Proves origin of your context
+  • Tracks evolution from birth weight
+  • Enables Context-Mirroring guarantee`)
+  .action(withAnalyticsTracking('auth', () => {
+    const authCommand = require('./commands/faf-auth');
+    return authCommand.default?.();
+  }));
+
+// 📜 faf log - View context evolution history
+program
+  .command('log')
+  .description('📜 View complete evolution history of your FAF context')
+  .option('--milestones', 'Show milestones only')
+  .option('--analytics', 'Show growth analytics')
+  .option('--json', 'Output as JSON')
+  .addHelpText('after', `
+Examples:
+  $ faf log                      # Full evolution history
+  $ faf log --milestones         # Key milestones only
+  $ faf log --analytics          # Growth analytics
+  $ faf log --json               # Export as JSON
+
+📜 Shows Your Journey:
+  • Birth weight (from CLAUDE.md)
+  • Every version and growth
+  • Milestones achieved
+  • Current position vs peak`)
+  .action(withAnalyticsTracking('log', () => {
+    const logCommand = require('./commands/faf-log');
+    return logCommand.default?.();
+  }));
+
+// 💾 faf update - Save your current version
+program
+  .command('update')
+  .description('💾 Save your current FAF version (checkpoint your progress)')
+  .addHelpText('after', `
+Examples:
+  $ faf update                   # Save current version
+
+💾 Simple checkpoint:
+  • Marks current state as good
+  • Creates reference point
+  • Track future changes from here`)
+  .action(withAnalyticsTracking('update', () => {
+    const updateCommand = require('./commands/faf-update');
+    return updateCommand.default?.();
+  }));
+
 // 😽 faf formats - TURBO-CAT Format Discovery
 program
   .command('formats [directory]')
