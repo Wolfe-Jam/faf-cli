@@ -64,31 +64,43 @@ program
       
       console.log();
       
-      // Milestones
+      // Milestones with ☑️ and ░░ visual journey
+      console.log(colors.info('🧬 YOUR JOURNEY'));
+      console.log();
+
       const milestones = dna.growth.milestones;
-      const achievements = [];
-      
-      if (milestones.find(m => m.type === 'first_save')) {
-        achievements.push('💾 First Save');
-      }
-      if (milestones.find(m => m.type === 'doubled')) {
-        achievements.push('2️⃣ Doubled');
-      }
-      if (milestones.find(m => m.type === 'championship')) {
-        achievements.push('🏆 Championship');
-      }
-      if (milestones.find(m => m.type === 'elite')) {
-        achievements.push('⭐ Elite');
-      }
-      if (milestones.find(m => m.type === 'perfect')) {
-        achievements.push('💎 Perfect');
-      }
-      
-      if (achievements.length > 0) {
-        console.log(colors.info('🏅 ACHIEVEMENTS'));
-        console.log(colors.secondary(`   ${achievements.join(' · ')}`));
-        console.log();
-      }
+      const allPossibleMilestones = [
+        { type: 'birth', label: 'Born', threshold: 0 },
+        { type: 'first_save', label: 'First Save', threshold: 0 },
+        { type: 'doubled', label: 'Doubled', threshold: birthWeight * 2 },
+        { type: 'championship', label: 'Championship', threshold: 70 },
+        { type: 'elite', label: 'Elite', threshold: 85 },
+        { type: 'peak', label: 'Peak', threshold: 95 },
+        { type: 'perfect', label: 'Perfect', threshold: 100 }
+      ];
+
+      let achievedCount = 0;
+      allPossibleMilestones.forEach(possible => {
+        const achieved = milestones.find(m => m.type === possible.type);
+        if (achieved) {
+          const isCurrent = achieved.type === 'current' ||
+                           (achieved.type === 'elite' && current >= 85 && current < 95) ||
+                           (achieved.type === 'peak' && current >= 95 && current < 100);
+          if (isCurrent) {
+            console.log(colors.success(`   ⭐ ${possible.label} (${achieved.score}%) ← You are here!`));
+          } else {
+            console.log(colors.secondary(`   ☑️ ${possible.label} (${achieved.score}%)`));
+          }
+          achievedCount++;
+        } else if (possible.threshold > 0 && current < possible.threshold) {
+          // Show as available future milestone
+          console.log(colors.dim(`   ░░ ${possible.label} (${possible.threshold}%) - Available!`));
+        }
+      });
+
+      console.log();
+      console.log(colors.info(`   You've unlocked ${achievedCount} of ${allPossibleMilestones.length} milestones!`));
+      console.log();
       
       // Peak vs Current
       const peak = milestones.find(m => m.type === 'peak');
