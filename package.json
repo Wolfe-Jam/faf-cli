@@ -1,7 +1,7 @@
 {
   "name": "@faf/cli",
-  "version": "2.0.0",
-  "description": "Command-line interface for .faf (Foundational AI-Context Format)",
+  "version": "2.0.0-beta.1",
+  "description": "🏎️ Stop FAFfing About! Perfect AI context in 30 seconds. Championship-grade AI context infrastructure with DNA lifecycle tracking.",
   "main": "dist/index.js",
   "bin": {
     "faf": "dist/cli.js"
@@ -47,10 +47,17 @@
     "anti-faff",
     "ai-context",
     "cli",
+    "dna-lifecycle",
+    "disaster-recovery",
+    "championship",
+    "fast-af",
     "validation",
     "project-context",
     "stop-faffing",
-    "developer-productivity"
+    "developer-productivity",
+    "claude",
+    "chatgpt",
+    "gemini"
   ],
   "author": "🏎️⚡️_wolfejam.dev",
   "license": "MIT",
