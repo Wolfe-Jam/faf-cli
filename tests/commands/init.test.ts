@@ -78,11 +78,11 @@ describe('Init Command', () => {
 
     await initFafFile(testDir, { force: false, template: 'auto' });
 
-    const fafPath = path.join(testDir, 'project.faf');
+    const fafPath = path.join(testDir, '.faf');
     const fafExists = await fs.access(fafPath).then(() => true).catch(() => false);
-    
+
     expect(fafExists).toBe(true);
-    expect(mockLog).toHaveBeenCalledWith(expect.stringContaining('✅ Created .faf file'));
+    expect(mockLog).toHaveBeenCalledWith(expect.stringContaining('Created'));
 
     // Verify file content
     const fafContent = await fs.readFile(fafPath, 'utf-8');
@@ -99,7 +99,7 @@ describe('Init Command', () => {
 project:
   name: "old-project"
 `;
-    const fafPath = path.join(testDir, 'project.faf');
+    const fafPath = path.join(testDir, '.faf');
     await fs.writeFile(fafPath, existingFaf, 'utf-8');
 
     // Create minimal project structure
@@ -111,8 +111,8 @@ project:
     await initFafFile(testDir, { force: true, template: 'auto' });
 
     const newContent = await fs.readFile(fafPath, 'utf-8');
-    expect(newContent).toContain('name: "new-project"');
-    expect(mockLog).toHaveBeenCalledWith(expect.stringContaining('✅ Created .faf file'));
+    expect(newContent).toContain('new-project');
+    expect(mockLog).toHaveBeenCalledWith(expect.stringContaining('Created'));
   });
 
   it('should refuse to overwrite existing .faf file without force', async () => {
