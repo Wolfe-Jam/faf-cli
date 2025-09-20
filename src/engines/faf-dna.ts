@@ -419,7 +419,11 @@ export class FafDNAManager {
   private generateCertificate(): string {
     const year = new Date().getFullYear();
     const random = Math.random().toString(36).substring(2, 6).toUpperCase();
-    const projectName = path.basename(this.projectPath).toUpperCase().substring(0, 8);
+    const projectName = path.basename(this.projectPath)
+      .replace(/[^A-Z0-9]/gi, '')  // Remove special characters
+      .toUpperCase()
+      .substring(0, 8)
+      .padEnd(4, 'X');  // Ensure minimum length
     return `FAF-${year}-${projectName}-${random}`;
   }
 
