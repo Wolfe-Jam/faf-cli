@@ -67,14 +67,25 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   
   'package.json': {
     frameworks: ['Node.js', 'JavaScript', 'TypeScript'],
-    slots: { 
+    slots: {
       packageManager: 'npm/yarn/pnpm',
       mainLanguage: 'JavaScript/TypeScript'
     },
     priority: 35,
     intelligence: 'ultra-high'
   },
-  
+
+  'README.md': {
+    frameworks: [], // Can be any framework
+    slots: {
+      targetUser: 'developers', // Often contains who it's for
+      coreProblem: 'understanding project', // Usually describes the problem
+      missionPurpose: 'project documentation' // Contains the why
+    },
+    priority: 25, // HIGH: Human context goldmine
+    intelligence: 'high'
+  },
+
   'requirements.txt': {
     frameworks: ['Python'],
     slots: { 

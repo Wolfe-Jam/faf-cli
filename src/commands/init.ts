@@ -18,9 +18,10 @@ import {
   detectProjectType,
   fileExists,
 } from "../utils/file-utils";
-import { generateFafFromProject } from "../generators/faf-generator";
+import { generateFafFromProject } from "../generators/faf-generator-championship";
 import { calculateFafScore } from "../scoring/score-calculator";
 import { createDefaultFafIgnore } from "../utils/fafignore-parser";
+import { BalanceVisualizer } from "../utils/balance-visualizer";
 
 interface InitOptions {
   force?: boolean;
@@ -106,6 +107,10 @@ export async function initFafFile(
 
     console.log();
     console.log(FAF_COLORS.fafGreen(`${FAF_ICONS.chart_up} Initial score: ${embeddedScore}%`));
+
+    // Show AI|HUMAN Balance
+    const balance = BalanceVisualizer.calculateBalance(fafData);
+    console.log(FAF_COLORS.fafWhite(`${FAF_ICONS.balance} Balance: `) + BalanceVisualizer.generateCompactBalance(balance));
 
     // Championship Next Steps
     console.log();

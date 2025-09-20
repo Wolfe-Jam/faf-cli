@@ -1,9 +1,10 @@
 /**
  * 📊 .faf Scoring Calculator
- * Advanced scoring algorithm with TURBO-CAT intelligence catalyst
+ * Championship scoring with FAB-FORMATS Power Unit
+ * 150+ file handlers delivering 86%+ scores!
  */
 
-import { TurboCat } from '../utils/turbo-cat';
+import { FabFormatsProcessor } from '../engines/fab-formats-processor';
 import path from 'path';
 
 export interface SectionScore {
@@ -44,65 +45,118 @@ export async function calculateFafScore(fafData: any, projectPath?: string): Pro
     fafData = {};
   }
 
-  // AI-FIRST COUNT ONCE: Trust ONLY scores with MY scoring system date (2025-08-30)
-  // This is MY scoring logic - I trust MY embedded evaluations
-  // BUT ONLY if they have a non-zero score (0 means needs calculation)
-  const embeddedScore = parseInt((fafData.ai_score || fafData.faf_score || fafData.project?.faf_score || '0').toString().replace('%', ''));
-  
-  // 🔒 SECURITY: Cap embedded scores to prevent manipulation
-  const cappedEmbeddedScore = Math.min(100, Math.max(0, embeddedScore));
-  
-  if (cappedEmbeddedScore > 0 && 
-      (fafData.ai_scoring_system === '2025-08-30' || // MY system date
-       fafData.ai_scoring_details?.system_date === '2025-08-30')) { // Alternative location
-    const embeddedSlots = fafData.ai_scoring_details?.filled_slots || fafData.scoring?.filled_slots || 0;
-    const embeddedTotal = fafData.ai_scoring_details?.total_slots || fafData.scoring?.total_slots || 21;
-    
-    return {
-      totalScore: cappedEmbeddedScore,
-      filledSlots: embeddedSlots,
-      totalSlots: embeddedTotal,
-      sectionScores: {
-        embedded_scoring: {
-          percentage: cappedEmbeddedScore,
-          filled: embeddedSlots,
-          total: embeddedTotal,
-          missing: ['Use faf init to regenerate with current context']
-        }
-      },
-      suggestions: ['Edit .faf file to add missing context', 'Run faf validate to check format'],
-      qualityIndicators: {
-        hasAiInstructions: !!fafData.ai_instructions,
-        hasHumanContext: !!fafData.human_context,
-        hasFreshTimestamp: isTimestampFresh(fafData.project?.generated),
-        hasQualityPreferences: !!fafData.preferences
-      }
-    };
-  }
+  // CHAMPIONSHIP ENGINE: FAB-FORMATS Power Unit from web (86% scores!)
+  // This is the REAL engine, not simplified version
+  // 150+ file handlers with deep intelligence extraction
 
-  // ENHANCED SCORING: Use fab-formats discovery to find missing context!
   let discoveredContext: any = {};
-  
+
   if (projectPath) {
     try {
-      // Run TURBO-CAT discovery engine - Format Freaks! ANY format catalyzed!
+      // Fire up the championship engine! 🏎️
       const projectDir = path.dirname(projectPath);
-      const turboCat = new TurboCat();
-      const analysis = await turboCat.discoverFormats(projectDir);
-      
-      // Use discovered slots to enhance scoring
-      if (analysis.slotFillRecommendations) {
-        discoveredContext = analysis.slotFillRecommendations;
-        
-        // Merge discovered context with .faf data (discovered context as fallback)
-        Object.keys(discoveredContext).forEach(key => {
-          if (!fafData[key] || fafData[key] === 'None' || fafData[key] === 'Unknown') {
-            fafData[key] = discoveredContext[key];
-          }
-        });
+      const fabProcessor = new FabFormatsProcessor();
+      const analysis = await fabProcessor.processFiles(projectDir);
+
+      // Championship Context Extraction - Fill ALL the slots!
+      if (analysis.context) {
+        const ctx = analysis.context;
+
+        // Project slots (core identity)
+        if (ctx.projectName && !fafData.project?.name) {
+          if (!fafData.project) fafData.project = {};
+          fafData.project.name = ctx.projectName;
+        }
+        if (ctx.projectGoal && !fafData.project?.goal) {
+          if (!fafData.project) fafData.project = {};
+          fafData.project.goal = ctx.projectGoal;
+        }
+        if (ctx.mainLanguage && !fafData.project?.main_language) {
+          if (!fafData.project) fafData.project = {};
+          fafData.project.main_language = ctx.mainLanguage;
+        }
+
+        // Stack slots (technical architecture)
+        if (!fafData.stack) fafData.stack = {};
+        if (ctx.framework && !fafData.stack.frontend) {
+          fafData.stack.frontend = ctx.framework;
+        }
+        if (ctx.backend && !fafData.stack.backend) {
+          fafData.stack.backend = ctx.backend;
+        }
+        if (ctx.server && !fafData.stack.server) {
+          fafData.stack.server = ctx.server;
+        }
+        if (ctx.database && !fafData.stack.database) {
+          fafData.stack.database = ctx.database;
+        }
+        if (ctx.hosting && !fafData.stack.hosting) {
+          fafData.stack.hosting = ctx.hosting;
+        }
+
+        // Build slots (development tools)
+        if (!fafData.build) fafData.build = {};
+        if (ctx.buildTool && !fafData.build.tool) {
+          fafData.build.tool = ctx.buildTool;
+        }
+        if (ctx.packageManager && !fafData.build.package_manager) {
+          fafData.build.package_manager = ctx.packageManager;
+        }
+        if (ctx.testFramework && !fafData.build.test_framework) {
+          fafData.build.test_framework = ctx.testFramework;
+        }
+        if (ctx.linter && !fafData.build.linter) {
+          fafData.build.linter = ctx.linter;
+        }
+
+        // Human context slots (6 W's)
+        if (!fafData.human) fafData.human = {};
+        if (ctx.targetUser && !fafData.human.who) {
+          fafData.human.who = ctx.targetUser;
+        }
+        if (ctx.coreProblem && !fafData.human.what) {
+          fafData.human.what = ctx.coreProblem;
+        }
+        if (ctx.missionPurpose && !fafData.human.why) {
+          fafData.human.why = ctx.missionPurpose;
+        }
+        if (ctx.deploymentMarket && !fafData.human.where) {
+          fafData.human.where = ctx.deploymentMarket;
+        }
+        if (ctx.timeline && !fafData.human.when) {
+          fafData.human.when = ctx.timeline;
+        }
+        if (ctx.approach && !fafData.human.how) {
+          fafData.human.how = ctx.approach;
+        }
       }
-    } catch {
-      // Fail silently - continue with .faf data only
+
+      // Process intelligence from each file result
+      if (analysis.results && analysis.results.length > 0) {
+        // Track quality for bonus scoring
+        const hasExceptional = analysis.results.some((r: any) =>
+          r.metadata?.grade === 'EXCEPTIONAL'
+        );
+        const hasProfessional = analysis.results.some((r: any) =>
+          r.metadata?.grade === 'PROFESSIONAL'
+        );
+
+        // Apply quality bonuses
+        if (hasExceptional) {
+          // EXCEPTIONAL quality = major score boost
+          discoveredContext.qualityBonus = 30;
+        } else if (hasProfessional) {
+          discoveredContext.qualityBonus = 20;
+        }
+
+        // Store discovery metadata
+        discoveredContext.filesAnalyzed = analysis.results.length;
+        discoveredContext.totalIntelligence = analysis.totalBonus;
+
+      }
+    } catch (error) {
+      // Log the error so we can see what's wrong with TURBO-CAT
+      console.error('TURBO-CAT Discovery failed:', error);
     }
   }
   

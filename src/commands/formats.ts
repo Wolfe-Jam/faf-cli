@@ -5,7 +5,7 @@
 
 import chalk from "chalk";
 import { FAF_COLORS, FAF_ICONS, generateFAFHeader } from "../utils/championship-style";
-import { TurboCat } from "../utils/turbo-cat";
+import { FabFormatsEngine } from "../utils/fab-formats-engine";
 
 interface FormatOptions {
   export?: boolean;
@@ -22,13 +22,13 @@ export async function formatsCommand(projectPath?: string, options: FormatOption
   console.log(FAF_COLORS.fafCyan(`════════════════════════════════════`));
   console.log();
 
-  const turboCat = new TurboCat();
+  const fabFormats = new FabFormatsEngine();
   const projectRoot = projectPath || process.cwd();
 
   console.log(chalk.gray(`${FAF_ICONS.lightning} Scanning project at ${projectRoot}...`));
 
   const startTime = Date.now();
-  const analysis = await turboCat.discoverFormats(projectRoot);
+  const analysis = await fabFormats.discoverFormats(projectRoot);
   const elapsedTime = Date.now() - startTime;
 
   console.log();
@@ -93,9 +93,9 @@ export async function formatsCommand(projectPath?: string, options: FormatOption
 
     const sorted = [...analysis.discoveredFormats].sort((a, b) => a.fileName.localeCompare(b.fileName));
     sorted.forEach(format => {
-      const isConfirmed = format.confirmed;
-      const icon = isConfirmed ? '✅' : '📄';
-      const color = isConfirmed ? chalk.green : chalk.gray;
+      // FAB-FORMATS always confirms (it reads the file)
+      const icon = '✅';
+      const color = chalk.green;
       console.log(color(`  ${icon} ${format.fileName}`));
     });
   }
