@@ -278,6 +278,41 @@ Examples:
     return updateCommand.default?.();
   }));
 
+// 🚨 faf recover - Disaster Recovery
+program
+  .command('recover')
+  .description('🚨 Disaster recovery for corrupted or missing FAF files')
+  .option('--auto', 'Attempt automatic recovery')
+  .option('--backup', 'List available backups')
+  .option('--check', 'Check health without recovery')
+  .option('--force', 'Force recovery even if risky')
+  .addHelpText('after', `
+Examples:
+  $ faf recover                  # Interactive recovery
+  $ faf recover --auto           # Try automatic fix
+  $ faf recover --backup         # List backups
+  $ faf recover --check          # Health check only
+
+🚨 Emergency Commands:
+  • faf recover --auto: Try automatic recovery
+  • git checkout HEAD -- .faf: Restore from git
+  • faf init --force: Start fresh (loses history)`)
+  .action(withAnalyticsTracking('recover', (options) => {
+    const { spawn } = require('child_process');
+    const recoverPath = require('path').join(__dirname, 'commands', 'faf-recover.ts');
+    const args = ['ts-node', recoverPath];
+
+    if (options.auto) args.push('--auto');
+    if (options.backup) args.push('--backup');
+    if (options.check) args.push('--check');
+    if (options.force) args.push('--force');
+
+    const child = spawn('npx', args, { stdio: 'inherit' });
+    child.on('exit', (code: number | null) => {
+      process.exit(code || 0);
+    });
+  }));
+
 // 😽 faf formats - TURBO-CAT Format Discovery
 program
   .command('formats [directory]')
