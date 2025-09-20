@@ -198,6 +198,24 @@ Examples:
   $ faf init -t react            # Force React template`)
   .action(withAnalyticsTracking('init', (directory, options) => initFafFile(directory, options)));
 
+// 🧬 faf dna - Show your journey at a glance
+program
+  .command('dna')
+  .description('🧬 Show your FAF DNA journey (22% → 85% → 99% ← 92%)')
+  .addHelpText('after', `
+Examples:
+  $ faf dna                      # See your journey at a glance
+
+🧬 Shows instantly:
+  • Your complete journey line
+  • Quick stats and growth
+  • Achievements unlocked
+  • Links to detailed info`)
+  .action(withAnalyticsTracking('dna', () => {
+    const dnaCommand = require('./commands/faf-dna');
+    return dnaCommand.default?.();
+  }));
+
 // 🔐 faf auth - Authenticate your FAF DNA
 program
   .command('auth')
