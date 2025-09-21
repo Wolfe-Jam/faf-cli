@@ -59,10 +59,10 @@ describe('⚡️ Scoring Engine - BRAKE SYSTEM TESTS', () => {
       expect(result.qualityIndicators.hasFreshTimestamp).toBe(true);
     });
 
-    it('should detect embedded AI scoring system with precision', async () => {
+    it('should IGNORE embedded scores and calculate fresh (COUNT ONCE fix)', async () => {
       const embeddedScoringFaf = {
-        ai_score: 95,
-        ai_scoring_system: "2025-08-30", // Trusted system date
+        ai_score: 95, // This should be IGNORED
+        ai_scoring_system: "2025-08-30",
         ai_scoring_details: {
           filled_slots: 19,
           total_slots: 21,
@@ -72,13 +72,14 @@ describe('⚡️ Scoring Engine - BRAKE SYSTEM TESTS', () => {
       };
 
       const result = await calculateFafScore(embeddedScoringFaf);
-      
-      // Should trust embedded scoring
-      expect(result.totalScore).toBe(95);
-      expect(result.filledSlots).toBe(19);
-      expect(result.totalSlots).toBe(21);
-      expect(result.sectionScores.embedded_scoring).toBeDefined();
-      expect(result.sectionScores.embedded_scoring.percentage).toBe(95);
+
+      // Should IGNORE embedded scoring and calculate fresh
+      // Only has project name = 1 slot filled
+      expect(result.totalScore).toBe(5); // Fresh calculation, not 95
+      expect(result.filledSlots).toBe(1); // Only project name
+      expect(result.totalSlots).toBe(21); // Standard total
+      // No embedded_scoring section since we don't trust it
+      expect(result.sectionScores.embedded_scoring).toBeUndefined();
     });
 
     it('should reject untrusted embedded scores and recalculate', async () => {

@@ -4,7 +4,7 @@
  */
 
 import inquirer from 'inquirer';
-import { generateFafFromProject } from '../generators/faf-generator';
+import { generateFafFromProject } from '../generators/faf-generator-championship';
 import { FAF_COLORS, FAF_ICONS } from '../utils/championship-style';
 import { findFafFile } from '../utils/file-utils';
 import { calculateFafScore } from '../scoring/score-calculator';

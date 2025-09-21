@@ -7,9 +7,9 @@
 [![Performance](https://img.shields.io/badge/performance-<50ms-green.svg)](docs/PERFORMANCE.md)
 [![Context Score](https://img.shields.io/badge/context_score-86%25-green.svg)](docs/SCORING.md)
 
-## 🚀 30 seconds replaces 20 minutes of questions
+## 🚀 30 seconds to Podium-Level AI Context - Then Forget It Exists
 
-FAF (Foundational AI Format) is a revolutionary CLI tool that creates perfect AI context for your projects. One `.faf` file tells AI everything about your project - instantly.
+FAF (Foundational AI Format) is a revolutionary CLI tool that creates perfect AI context for your projects. One `.faf` file tells AI everything about your project - instantly. Set it once, then just work. Your AI stays happy forever.
 
 ```bash
 # Three commands to championship context
@@ -44,7 +44,8 @@ faf trust         # See your AI confidence dashboard
 - ⚡ **<50ms operations** - FAST AF or failure
 - 🏎️ **86% context scores** - 3.5x better than baseline
 - 🧡 **Trust Dashboard** - Emotional confidence center
-- 🤖 **Multi-model support** - Claude, ChatGPT, Gemini
+- 🤖 **Multi-model support** - Claude, ChatGPT, Gemini, Codex
+- 🖥️ **7+ IDE integrations** - VS Code, Cursor, Claude Code, Codex CLI, Gemini CLI, Windsurf, JetBrains
 
 ### Revolutionary Tools
 - **FAB-FORMATS Engine** - 150+ file format handlers
@@ -190,10 +191,10 @@ faf trust
 FAF is positioned as premium software - AMG Mercedes, not Honda Civic.
 
 ### Why $100/month?
-- Save 10+ hours monthly (worth $500+ at developer rates)
-- Championship-grade tools and performance
-- Continuous improvements and support
-- Transform from hope to trust
+- Establish Podium-Level AI Context ONCE, then forget it exists
+- Your AI stays happy while you just work
+- No more explaining your project. Ever.
+- You do the math on what never thinking about context again is worth
 
 ### Open Source with Premium Features
 - Core CLI is MIT licensed
@@ -233,7 +234,8 @@ Read more in our [F1 Philosophy Guide](docs/F1-PHILOSOPHY.md)
 ### Compatibility
 - **Node.js**: 18.0.0+
 - **OS**: Windows, macOS, Linux
-- **AI Models**: Claude, ChatGPT, Gemini, Local models
+- **AI Models**: Claude, ChatGPT, Gemini, Codex, Local models
+- **IDEs**: VS Code, Cursor, Claude Code, Codex CLI (auto-detect), Gemini CLI (auto-detect), Windsurf, JetBrains
 - **Languages**: All major programming languages
 
 ---

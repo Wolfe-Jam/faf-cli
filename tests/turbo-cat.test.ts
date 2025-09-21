@@ -115,6 +115,13 @@ describe('🍜 TURBO-CAT Tests - The Noodle Quest', () => {
 
       const analysis = await turboCat.discoverFormats(testDir);
 
+      // Debug: Log what was actually discovered
+      if (analysis.discoveredFormats.length === 0) {
+        console.log('No formats discovered at all!');
+      } else {
+        console.log('Discovered formats:', analysis.discoveredFormats.map(f => f.formatType));
+      }
+
       expect(analysis.discoveredFormats.some(f => f.formatType === 'ts' || f.formatType === '.ts')).toBe(true);
     });
   });
