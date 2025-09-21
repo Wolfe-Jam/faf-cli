@@ -2,7 +2,7 @@
  * Tests for .faf file generation
  */
 
-import { generateFafFromProject } from '../src/generators/faf-generator';
+import { generateFafFromProject } from '../src/generators/faf-generator-championship';
 import * as YAML from 'yaml';
 
 describe('FAF Generator', () => {

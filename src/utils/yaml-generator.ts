@@ -210,7 +210,7 @@ export function generateFafContent(projectData: {
     
     // 🧠 AI READ THIS FIRST - 5-LINE TL;DR
     ai_tldr: {
-      project: `${projectData.projectName} - ${escapeForYaml(projectData.projectGoal) || 'Universal AI-Context Infrastructure - Make Your AI Happy! 🤖'}`,
+      project: `${projectData.projectName} - ${escapeForYaml(projectData.projectGoal) || 'Universal AI-context Infrastructure - Make Your AI Happy! 🤖'}`,
       stack: generateStackString(projectData),
       quality_bar: 'ZERO_ERRORS_F1_STANDARDS',
       current_focus: 'Production deployment preparation',
@@ -219,7 +219,7 @@ export function generateFafContent(projectData: {
     
     // ⚡ INSTANT CONTEXT - Everything critical in one place
     instant_context: {
-      what_building: projectData.projectGoal ? escapeForYaml(projectData.projectGoal) : '🚀 Universal AI-Context CLI - Trust-Driven Infrastructure that eliminates developer anxiety',
+      what_building: projectData.projectGoal ? escapeForYaml(projectData.projectGoal) : '🚀 Universal AI-context CLI - Trust-Driven Infrastructure that eliminates developer anxiety',
       tech_stack: generateStackString(projectData),
       main_language: projectData.mainLanguage || 'TypeScript',
       deployment: projectData.hosting || 'Cloud platform',
@@ -345,7 +345,7 @@ export function generateFafContent(projectData: {
   
   // Championship fix: Replace !CI placeholders with revolutionary content
   const championshipContent = yamlContent
-    .replace(/what_building: !CI/g, 'what_building: "🚀 Universal AI-Context CLI - Trust-Driven Infrastructure that eliminates developer anxiety"')
+    .replace(/what_building: !CI/g, 'what_building: "🚀 Universal AI-context CLI - Trust-Driven Infrastructure that eliminates developer anxiety"')
     .replace(/goal: !CI/g, 'goal: "⚡️ Transform developer psychology from hope-driven to trust-driven AI development - 30 seconds replaces 20 minutes of questions"');
   
   return championshipContent;

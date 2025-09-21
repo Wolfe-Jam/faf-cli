@@ -1,6 +1,6 @@
 /**
  * 🚀 faf ai-enhance - Claude-First, Big-3 Compatible Enhancement
- * Universal AI-Context enhancement with Claude intelligence and Big-3 compatibility
+ * Universal AI-context enhancement with Claude intelligence and Big-3 compatibility
  * 
  * Architecture: Claude-first → Big-3 Compatible → Bullet-proof Universal
  */
@@ -131,7 +131,7 @@ function generateEnhancementPrompt(fafData: any, focus: string, model: string): 
 
   return `${modelInstructions[model as keyof typeof modelInstructions] || modelInstructions.claude}
 
-Analyze and enhance this .faf (Universal AI-Context Format) file.
+Analyze and enhance this .faf (Universal AI-context Format) file.
 
 Current .faf content:
 \`\`\`yaml

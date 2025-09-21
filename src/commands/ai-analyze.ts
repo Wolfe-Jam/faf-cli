@@ -1,6 +1,6 @@
 /**
  * 🔍 faf ai-analyze - Claude-First, Big-3 Compatible Analysis
- * Universal AI-Context analysis with Claude intelligence and Big-3 perspectives
+ * Universal AI-context analysis with Claude intelligence and Big-3 perspectives
  * 
  * Architecture: Claude-first → Big-3 Compatible → Bullet-proof Universal
  */

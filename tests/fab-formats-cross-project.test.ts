@@ -3,8 +3,8 @@
  * Tests the fab-formats refactoring across different project types
  */
 
-import { FabFormatsEngine } from '../src/utils/fab-formats';
-import { generateFafFromProject } from '../src/generators/faf-generator';
+import { FabFormatsEngine } from '../src/utils/fab-formats-engine';
+import { generateFafFromProject } from '../src/generators/faf-generator-championship';
 import * as YAML from 'yaml';
 import { promises as fs } from 'fs';
 import path from 'path';

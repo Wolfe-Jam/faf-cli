@@ -77,6 +77,7 @@ export const FAF_ICONS = {
   broom: '🧹',           // Clear/Clean
   pencil: '✏️',          // Edit
   dna: '🧬',             // DNA/Lifecycle
+  turbo_cat: '😽',        // TURBO-CAT mascot
 };
 
 // 📊 Status Color Coding
@@ -115,8 +116,8 @@ export const PERFORMANCE_STANDARDS = {
 // 🎮 Brand Messaging
 export const BRAND_MESSAGES = {
   // CLI Headers
-  primary: "Make Your AI Happy! 🤖🧡 Trust Driven",
-  technical: "Universal, AI-Context ⚡️ FAST AF",
+  primary: "AI needed a format, it got one— .faf",
+  technical: "Foundational AI-context Format",
   performance: "F1-Inspired Software Engineering",
   
   // Success Messages
@@ -144,9 +145,9 @@ export function generateHelpHeader(): string {
 ${FAF_COLORS.fafCyan('│')}                                         ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('│')}             ${FAF_COLORS.fafOrange('=== H E L P ===')}             ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('│')}                                         ${FAF_COLORS.fafCyan('│')}
-${FAF_COLORS.fafCyan('│')}  🤖 Make Your AI Happy! 🧡 Trust Driven ${FAF_COLORS.fafCyan('│')}
+${FAF_COLORS.fafCyan('│')}   AI needed a format, it got one— .faf  ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('│')}  ─────────────────────────────────────  ${FAF_COLORS.fafCyan('│')}
-${FAF_COLORS.fafCyan('│')}  🌐 Universal, AI-Context ⚡️ FAST AF 🩵 ${FAF_COLORS.fafCyan('│')}
+${FAF_COLORS.fafCyan('│')}    🌐 Foundational AI-context Format    ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('│')}                                         ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('└─────────────────────────────────────────┘')}`;
 }
@@ -163,9 +164,9 @@ ${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafOrange('██')}${FAF_COLORS.fafWh
 ${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafOrange('██')}${FAF_COLORS.fafWhite('║     ')}${FAF_COLORS.fafOrange('██')}${FAF_COLORS.fafWhite('║  ')}${FAF_COLORS.fafOrange('██')}${FAF_COLORS.fafWhite('║')}${FAF_COLORS.fafOrange('██')}${FAF_COLORS.fafWhite('║')}                     ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafWhite('╚═╝     ╚═╝  ╚═╝╚═╝')}                     ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('│')}                                         ${FAF_COLORS.fafCyan('│')}
-${FAF_COLORS.fafCyan('│')}  🤖 Make Your AI Happy! 🧡 Trust Driven ${FAF_COLORS.fafCyan('│')}
+${FAF_COLORS.fafCyan('│')}   AI needed a format, it got one— .faf  ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('│')}  ─────────────────────────────────────  ${FAF_COLORS.fafCyan('│')}
-${FAF_COLORS.fafCyan('│')}  🌐 Universal, AI-Context ⚡️ FAST AF 🩵 ${FAF_COLORS.fafCyan('│')}
+${FAF_COLORS.fafCyan('│')}    🌐 Foundational AI-context Format    ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('└─────────────────────────────────────────┘')}`;
 }
 

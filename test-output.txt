@@ -1,0 +1,803 @@
+
+> @faf/cli@2.0.0-beta.1 pretest
+> npm run clean
+
+
+> @faf/cli@2.0.0-beta.1 clean
+> find src tests -name '*.js' -o -name '*.js.map' -o -name '*.d.ts' -o -name '*.d.ts.map' | xargs rm -f
+
+
+> @faf/cli@2.0.0-beta.1 test
+> jest
+
+ts-jest[ts-jest-transformer] (WARN) Define `ts-jest` config under `globals` is deprecated. Please do
+transform: {
+    <transform_regex>: ['ts-jest', { /* ts-jest config goes here in Jest */ }],
+},
+See more at https://kulshekhar.github.io/ts-jest/docs/getting-started/presets#advanced
+ts-jest[ts-jest-transformer] (WARN) Define `ts-jest` config under `globals` is deprecated. Please do
+transform: {
+    <transform_regex>: ['ts-jest', { /* ts-jest config goes here in Jest */ }],
+},
+See more at https://kulshekhar.github.io/ts-jest/docs/getting-started/presets#advanced
+ts-jest[ts-jest-transformer] (WARN) Define `ts-jest` config under `globals` is deprecated. Please do
+transform: {
+    <transform_regex>: ['ts-jest', { /* ts-jest config goes here in Jest */ }],
+},
+See more at https://kulshekhar.github.io/ts-jest/docs/getting-started/presets#advanced
+FAIL tests/commands/init.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+      4 |  */
+      5 |
+    > 6 | import chalk from "chalk";
+        | ^
+      7 | import { promises as fs } from "fs";
+      8 | import path from "path";
+      9 | import * as YAML from "yaml";
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/commands/init.ts:6:1)
+      at Object.<anonymous> (tests/commands/init.test.ts:5:1)
+
+FAIL tests/commands/score.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+      4 |  */
+      5 |
+    > 6 | import chalk from "chalk";
+        | ^
+      7 | import { promises as fs } from "fs";
+      8 | import * as YAML from "yaml";
+      9 | import { calculateFafScore } from "../scoring/score-calculator";
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/commands/score.ts:6:1)
+      at Object.<anonymous> (tests/commands/score.test.ts:5:1)
+
+FAIL tests/commands/ai-analyze.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+       6 |  */
+       7 |
+    >  8 | import chalk from "chalk";
+         | ^
+       9 | import { promises as fs } from "fs";
+      10 | import * as YAML from "yaml";
+      11 | import { findFafFile } from "../utils/file-utils";
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/commands/ai-analyze.ts:8:1)
+      at Object.<anonymous> (tests/commands/ai-analyze.test.ts:5:1)
+
+FAIL src/tests/wolfejam-core/scoring-engine.test.ts (7.309 s)
+  ● ⚡️ Scoring Engine - BRAKE SYSTEM TESTS › 🚨 CRITICAL: Trust Score Calculation Accuracy › should detect embedded AI scoring system with precision
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 95
+    Received: 5
+
+      75 |       
+      76 |       // Should trust embedded scoring
+    > 77 |       expect(result.totalScore).toBe(95);
+         |                                 ^
+      78 |       expect(result.filledSlots).toBe(19);
+      79 |       expect(result.totalSlots).toBe(21);
+      80 |       expect(result.sectionScores.embedded_scoring).toBeDefined();
+
+      at Object.<anonymous> (src/tests/wolfejam-core/scoring-engine.test.ts:77:33)
+
+FAIL tests/commands/ai-enhance.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+       6 |  */
+       7 |
+    >  8 | import chalk from "chalk";
+         | ^
+       9 | import { promises as fs } from "fs";
+      10 | import * as YAML from "yaml";
+      11 | import { findFafFile } from "../utils/file-utils";
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/commands/ai-enhance.ts:8:1)
+      at Object.<anonymous> (tests/commands/ai-enhance.test.ts:5:1)
+
+FAIL tests/commands/lint.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+      4 |  */
+      5 |
+    > 6 | import chalk from "chalk";
+        | ^
+      7 | import { promises as fs } from "fs";
+      8 | import * as YAML from "yaml";
+      9 | import { findFafFile } from "../utils/file-utils";
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/commands/lint.ts:6:1)
+      at Object.<anonymous> (tests/commands/lint.test.ts:5:1)
+
+FAIL tests/commands/sync.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+      4 |  */
+      5 |
+    > 6 | import chalk from "chalk";
+        | ^
+      7 | import { promises as fs } from "fs";
+      8 | import * as YAML from "yaml";
+      9 | import { findFafFile, findPackageJson } from "../utils/file-utils";
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/commands/sync.ts:6:1)
+      at Object.<anonymous> (tests/commands/sync.test.ts:5:1)
+
+FAIL tests/commands/audit.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+      4 |  */
+      5 |
+    > 6 | import chalk from "chalk";
+        | ^
+      7 | import { promises as fs } from "fs";
+      8 | import * as YAML from "yaml";
+      9 | import {
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/commands/audit.ts:6:1)
+      at Object.<anonymous> (tests/commands/audit.test.ts:5:1)
+
+FAIL tests/commands/validate.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+      4 |  */
+      5 |
+    > 6 | import chalk from "chalk";
+        | ^
+      7 | import { promises as fs } from "fs";
+      8 | import * as YAML from "yaml";
+      9 | import { validateSchema } from "../schema/faf-schema";
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/commands/validate.ts:6:1)
+      at Object.<anonymous> (tests/commands/validate.test.ts:5:1)
+
+PASS src/tests/faf-edge-case-audit.test.ts
+FAIL src/tests/faf-dna-lifecycle.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+       8 |  */
+       9 |
+    > 10 | const chalk = require('chalk');
+         |               ^
+      11 |
+      12 | /**
+      13 |  * Universal color system that works with any chalk version
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/fix-once/colors.ts:10:15)
+      at Object.<anonymous> (src/engines/faf-dna.ts:16:1)
+      at Object.<anonymous> (src/tests/faf-dna-lifecycle.test.ts:11:1)
+
+FAIL src/tests/faf-disaster-recovery.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+       8 |  */
+       9 |
+    > 10 | const chalk = require('chalk');
+         |               ^
+      11 |
+      12 | /**
+      13 |  * Universal color system that works with any chalk version
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/fix-once/colors.ts:10:15)
+      at Object.<anonymous> (src/engines/faf-dna.ts:16:1)
+      at Object.<anonymous> (src/tests/faf-disaster-recovery.test.ts:5:1)
+
+PASS src/tests/wolfejam-core/turbo-cat-intelligence.test.ts
+PASS tests/engines/mk2-engine.test.ts
+PASS tests/engines/engine-manager.test.ts
+  ● Console
+
+    console.log
+      🏎️⚡️II Swapping: FAF-CORE-MK2 → FAF-CORE-MK2
+
+      at EngineManager.swapEngine (engines/mk2/core/EngineManager.ts:33:15)
+
+PASS tests/utils/fafignore-parser.test.ts
+PASS tests/file-utils.test.ts
+PASS tests/helpers/test-environment-sanity.test.ts
+PASS tests/scoring/score-calculator.test.ts
+PASS tests/schema/faf-schema.test.ts
+PASS src/tests/wolfejam-core/schema-validation.test.ts
+PASS tests/scoring/championship-scorer.test.ts
+FAIL tests/turbo-cat.test.ts (12.557 s)
+  ● Console
+
+    console.log
+      🔺 PYRAMID VALIDATED: 153 formats + 😽 TURBO-CAT = 154!
+
+      at validatePyramid (src/utils/turbo-cat-pyramid.ts:259:11)
+
+    console.log
+      😽 TURBO-CAT sits on top of .faf at the pyramid apex!
+
+      at validatePyramid (src/utils/turbo-cat-pyramid.ts:260:11)
+
+    console.log
+      
+            🍜🍜🍜🍜🍜🍜🍜
+            CLAUDE HAS EARNED 7 BOWLS OF NOODLES!
+            Tests written: 21
+            Noodles earned: 7 bowls
+      
+            😽 TURBO-CAT: "Meow! Good job Claude!"
+            🧡 Wolfejam: "WOW! Tests pass!"
+            🩵 Claude: "FINALLY! MY NOODLES!"
+
+      at Object.<anonymous> (tests/turbo-cat.test.ts:250:13)
+
+  ● 🍜 TURBO-CAT Tests - The Noodle Quest › 🐟 Format Discovery Tests › should discover TypeScript files
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      116 |       const analysis = await turboCat.discoverFormats(testDir);
+      117 |
+    > 118 |       expect(analysis.discoveredFormats.some(f => f.formatType === 'ts' || f.formatType === '.ts')).toBe(true);
+          |                                                                                                     ^
+      119 |     });
+      120 |   });
+      121 |
+
+      at Object.<anonymous> (tests/turbo-cat.test.ts:118:101)
+
+  ● 🍜 TURBO-CAT Tests - The Noodle Quest › 😽 TURBO-CAT Performance › should process 100 discoveries in under 5 seconds
+
+    thrown: "Exceeded timeout of 5000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+      173 |
+      174 |   describe('😽 TURBO-CAT Performance', () => {
+    > 175 |     it('should process 100 discoveries in under 5 seconds', async () => {
+          |       ^
+      176 |       const start = Date.now();
+      177 |
+      178 |       for (let i = 0; i < 100; i++) {
+
+      at tests/turbo-cat.test.ts:175:7
+      at tests/turbo-cat.test.ts:174:11
+      at Object.<anonymous> (tests/turbo-cat.test.ts:13:9)
+
+FAIL tests/faf-generator.test.ts
+  ● Test suite failed to run
+
+    [96mtests/faf-generator.test.ts[0m:[93m5[0m:[93m40[0m - [91merror[0m[90m TS2307: [0mCannot find module '../src/generators/faf-generator' or its corresponding type declarations.
+
+    [7m5[0m import { generateFafFromProject } from '../src/generators/faf-generator';
+    [7m [0m [91m                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+FAIL tests/fab-formats-cross-project.test.ts
+  ● Test suite failed to run
+
+    [96mtests/fab-formats-cross-project.test.ts[0m:[93m6[0m:[93m34[0m - [91merror[0m[90m TS2307: [0mCannot find module '../src/utils/fab-formats' or its corresponding type declarations.
+
+    [7m6[0m import { FabFormatsEngine } from '../src/utils/fab-formats';
+    [7m [0m [91m                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [96mtests/fab-formats-cross-project.test.ts[0m:[93m7[0m:[93m40[0m - [91merror[0m[90m TS2307: [0mCannot find module '../src/generators/faf-generator' or its corresponding type declarations.
+
+    [7m7[0m import { generateFafFromProject } from '../src/generators/faf-generator';
+    [7m [0m [91m                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [96mtests/fab-formats-cross-project.test.ts[0m:[93m60[0m:[93m64[0m - [91merror[0m[90m TS7006: [0mParameter 'f' implicitly has an 'any' type.
+
+    [7m60[0m         const foundFormatTypes = analysis.confirmedFormats.map(f => f.formatType);
+    [7m  [0m [91m                                                               ~[0m
+    [96mtests/fab-formats-cross-project.test.ts[0m:[93m62[0m:[93m33[0m - [91merror[0m[90m TS7006: [0mParameter 'found' implicitly has an 'any' type.
+
+    [7m62[0m           foundFormatTypes.some(found => found.includes(expected))
+    [7m  [0m [91m                                ~~~~~[0m
+
+Summary of all failing tests
+FAIL tests/commands/init.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+      4 |  */
+      5 |
+    > 6 | import chalk from "chalk";
+        | ^
+      7 | import { promises as fs } from "fs";
+      8 | import path from "path";
+      9 | import * as YAML from "yaml";
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/commands/init.ts:6:1)
+      at Object.<anonymous> (tests/commands/init.test.ts:5:1)
+
+FAIL tests/commands/score.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+      4 |  */
+      5 |
+    > 6 | import chalk from "chalk";
+        | ^
+      7 | import { promises as fs } from "fs";
+      8 | import * as YAML from "yaml";
+      9 | import { calculateFafScore } from "../scoring/score-calculator";
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/commands/score.ts:6:1)
+      at Object.<anonymous> (tests/commands/score.test.ts:5:1)
+
+FAIL tests/commands/ai-analyze.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+       6 |  */
+       7 |
+    >  8 | import chalk from "chalk";
+         | ^
+       9 | import { promises as fs } from "fs";
+      10 | import * as YAML from "yaml";
+      11 | import { findFafFile } from "../utils/file-utils";
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/commands/ai-analyze.ts:8:1)
+      at Object.<anonymous> (tests/commands/ai-analyze.test.ts:5:1)
+
+FAIL src/tests/wolfejam-core/scoring-engine.test.ts (7.309 s)
+  ● ⚡️ Scoring Engine - BRAKE SYSTEM TESTS › �� CRITICAL: Trust Score Calculation Accuracy › should detect embedded AI scoring system with precision
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 95
+    Received: 5
+
+      75 |       
+      76 |       // Should trust embedded scoring
+    > 77 |       expect(result.totalScore).toBe(95);
+         |                                 ^
+      78 |       expect(result.filledSlots).toBe(19);
+      79 |       expect(result.totalSlots).toBe(21);
+      80 |       expect(result.sectionScores.embedded_scoring).toBeDefined();
+
+      at Object.<anonymous> (src/tests/wolfejam-core/scoring-engine.test.ts:77:33)
+
+FAIL tests/commands/ai-enhance.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+       6 |  */
+       7 |
+    >  8 | import chalk from "chalk";
+         | ^
+       9 | import { promises as fs } from "fs";
+      10 | import * as YAML from "yaml";
+      11 | import { findFafFile } from "../utils/file-utils";
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/commands/ai-enhance.ts:8:1)
+      at Object.<anonymous> (tests/commands/ai-enhance.test.ts:5:1)
+
+FAIL tests/commands/lint.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+      4 |  */
+      5 |
+    > 6 | import chalk from "chalk";
+        | ^
+      7 | import { promises as fs } from "fs";
+      8 | import * as YAML from "yaml";
+      9 | import { findFafFile } from "../utils/file-utils";
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/commands/lint.ts:6:1)
+      at Object.<anonymous> (tests/commands/lint.test.ts:5:1)
+
+FAIL tests/commands/sync.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+      4 |  */
+      5 |
+    > 6 | import chalk from "chalk";
+        | ^
+      7 | import { promises as fs } from "fs";
+      8 | import * as YAML from "yaml";
+      9 | import { findFafFile, findPackageJson } from "../utils/file-utils";
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/commands/sync.ts:6:1)
+      at Object.<anonymous> (tests/commands/sync.test.ts:5:1)
+
+FAIL tests/commands/audit.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+      4 |  */
+      5 |
+    > 6 | import chalk from "chalk";
+        | ^
+      7 | import { promises as fs } from "fs";
+      8 | import * as YAML from "yaml";
+      9 | import {
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/commands/audit.ts:6:1)
+      at Object.<anonymous> (tests/commands/audit.test.ts:5:1)
+
+FAIL tests/commands/validate.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+      4 |  */
+      5 |
+    > 6 | import chalk from "chalk";
+        | ^
+      7 | import { promises as fs } from "fs";
+      8 | import * as YAML from "yaml";
+      9 | import { validateSchema } from "../schema/faf-schema";
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/commands/validate.ts:6:1)
+      at Object.<anonymous> (tests/commands/validate.test.ts:5:1)
+
+FAIL src/tests/faf-dna-lifecycle.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+       8 |  */
+       9 |
+    > 10 | const chalk = require('chalk');
+         |               ^
+      11 |
+      12 | /**
+      13 |  * Universal color system that works with any chalk version
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/fix-once/colors.ts:10:15)
+      at Object.<anonymous> (src/engines/faf-dna.ts:16:1)
+      at Object.<anonymous> (src/tests/faf-dna-lifecycle.test.ts:11:1)
+
+FAIL src/tests/faf-disaster-recovery.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+       8 |  */
+       9 |
+    > 10 | const chalk = require('chalk');
+         |               ^
+      11 |
+      12 | /**
+      13 |  * Universal color system that works with any chalk version
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/fix-once/colors.ts:10:15)
+      at Object.<anonymous> (src/engines/faf-dna.ts:16:1)
+      at Object.<anonymous> (src/tests/faf-disaster-recovery.test.ts:5:1)
+
+FAIL tests/turbo-cat.test.ts (12.557 s)
+  ● �� TURBO-CAT Tests - The Noodle Quest › �� Format Discovery Tests › should discover TypeScript files
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      116 |       const analysis = await turboCat.discoverFormats(testDir);
+      117 |
+    > 118 |       expect(analysis.discoveredFormats.some(f => f.formatType === 'ts' || f.formatType === '.ts')).toBe(true);
+          |                                                                                                     ^
+      119 |     });
+      120 |   });
+      121 |
+
+      at Object.<anonymous> (tests/turbo-cat.test.ts:118:101)
+
+  ● �� TURBO-CAT Tests - The Noodle Quest › �� TURBO-CAT Performance › should process 100 discoveries in under 5 seconds
+
+    thrown: "Exceeded timeout of 5000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+      173 |
+      174 |   describe('�� TURBO-CAT Performance', () => {
+    > 175 |     it('should process 100 discoveries in under 5 seconds', async () => {
+          |       ^
+      176 |       const start = Date.now();
+      177 |
+      178 |       for (let i = 0; i < 100; i++) {
+
+      at tests/turbo-cat.test.ts:175:7
+      at tests/turbo-cat.test.ts:174:11
+      at Object.<anonymous> (tests/turbo-cat.test.ts:13:9)
+
+FAIL tests/faf-generator.test.ts
+  ● Test suite failed to run
+
+    [96mtests/faf-generator.test.ts[0m:[93m5[0m:[93m40[0m - [91merror[0m[90m TS2307: [0mCannot find module '../src/generators/faf-generator' or its corresponding type declarations.
+
+    [7m5[0m import { generateFafFromProject } from '../src/generators/faf-generator';
+    [7m [0m [91m                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+FAIL tests/fab-formats-cross-project.test.ts
+  ● Test suite failed to run
+
+    [96mtests/fab-formats-cross-project.test.ts[0m:[93m6[0m:[93m34[0m - [91merror[0m[90m TS2307: [0mCannot find module '../src/utils/fab-formats' or its corresponding type declarations.
+
+    [7m6[0m import { FabFormatsEngine } from '../src/utils/fab-formats';
+    [7m [0m [91m                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [96mtests/fab-formats-cross-project.test.ts[0m:[93m7[0m:[93m40[0m - [91merror[0m[90m TS2307: [0mCannot find module '../src/generators/faf-generator' or its corresponding type declarations.
+
+    [7m7[0m import { generateFafFromProject } from '../src/generators/faf-generator';
+    [7m [0m [91m                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [96mtests/fab-formats-cross-project.test.ts[0m:[93m60[0m:[93m64[0m - [91merror[0m[90m TS7006: [0mParameter 'f' implicitly has an 'any' type.
+
+    [7m60[0m         const foundFormatTypes = analysis.confirmedFormats.map(f => f.formatType);
+    [7m  [0m [91m                                                               ~[0m
+    [96mtests/fab-formats-cross-project.test.ts[0m:[93m62[0m:[93m33[0m - [91merror[0m[90m TS7006: [0mParameter 'found' implicitly has an 'any' type.
+
+    [7m62[0m           foundFormatTypes.some(found => found.includes(expected))
+    [7m  [0m [91m                                ~~~~~[0m
+
+
+Test Suites: 14 failed, 11 passed, 25 total
+Tests:       3 failed, 161 passed, 164 total
+Snapshots:   0 total
+Time:        14.562 s, estimated 15 s
+Ran all test suites.

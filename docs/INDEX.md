@@ -81,7 +81,7 @@ WJTC (Wolfejam Testing Center) protocols and forms.
 ## 📊 Comparisons & Analysis
 
 ### [FAF vs Claude MAX](./FAF-VS-CLAUDE-MAX.md)
-How FAF's 100% AI-Context compares to Claude's $200/month offering.
+How FAF's 100% AI-context compares to Claude's $200/month offering.
 
 ### [Competitor Analysis](./COMPETITORS.md)
 Respectful analysis of alternative solutions.
