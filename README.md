@@ -43,6 +43,24 @@ faf trust         # See your AI confidence dashboard
 
 ---
 
+## 🎨 Perfect for No-Code/Low-Code Builders
+
+**The Problem:** You build things but don't know what to tell AI about your project.
+
+**The Solution:** FAF auto-detects EVERYTHING and explains it perfectly to AI.
+
+### Supported Platforms:
+- **Replit** - Browser coding made AI-ready
+- **Lovable** - AI-first development perfected
+- **Wix/Base44** - Website builders with AI context
+- **Glitch** - Remix with understanding
+- **CodeSandbox** - Instant AI awareness
+- **Warp** - Terminal with context
+
+**One click. Zero configuration. Your AI finally gets it.**
+
+---
+
 ## 🎯 Key Features
 
 ### Championship Performance
@@ -196,7 +214,14 @@ faf trust
 
 .faf is positioned as premium software - AMG Mercedes, not Honda Civic.
 
-### Why $100/month?
+### 🔥 LIMITED TIME: Vibe-Code Plan - $9
+**For No-Code/Low-Code Builders** (Replit, Lovable, Wix, Glitch users)
+- Same features as $100 Pro Plan
+- Lock in $9/month FOREVER
+- When this offer ends, it's GONE
+- Because builders come in all forms
+
+### Professional Developer Plan - $100/month
 - Establish Podium-Level AI Context ONCE, then forget it exists
 - Your AI stays happy while you just work
 - No more explaining your project. Ever.
