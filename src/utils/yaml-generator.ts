@@ -200,6 +200,8 @@ export function generateFafContent(projectData: {
   if (!projectData.database || projectData.database === 'None') {missingSlots.push('Database');}
 
   const fafData = {
+    // FAF schema version (not CLI version)
+    faf_version: '2.4.0',
     // 🤖 AI-FIRST SCORING SYSTEM - Live date instead of versions
     ai_scoring_system: '2025-08-30',  // MY scoring logic live date (COUNT ONCE architecture)
     ai_score: `${projectData.fafScore}%`,  // MY evaluation

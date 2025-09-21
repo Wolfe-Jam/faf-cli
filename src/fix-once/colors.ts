@@ -7,7 +7,7 @@
  * Fix once = Works indefinitely
  */
 
-const chalk = require('chalk');
+import chalk from 'chalk';
 
 /**
  * Universal color system that works with any chalk version

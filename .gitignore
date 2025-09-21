@@ -5,10 +5,19 @@ node_modules/
 dist/
 build/
 *.tsbuildinfo
+
+# CRITICAL: No compiled JS in src or tests directories
 src/**/*.js
 src/**/*.js.map
 src/**/*.d.ts
 src/**/*.d.ts.map
+tests/**/*.js
+tests/**/*.js.map
+tests/**/*.d.ts
+tests/**/*.d.ts.map
+# Exception for mock files
+!src/**/__mocks__/**
+!tests/**/__mocks__/**
 
 # Package files
 *.tgz

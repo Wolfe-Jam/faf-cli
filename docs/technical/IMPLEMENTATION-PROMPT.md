@@ -72,12 +72,13 @@ MCP (Model Context Protocol) isn't Claude-specific—it's the **universal standa
 |----------|-----------------|---------------|-------------------|
 | **Claude Code** | Minimal | MCP config file | ✅ Native |
 | **Gemini CLI** | Zero | Auto-discovery | ✅ Built-in /mcp |
+| **Codex CLI** | Zero | Auto-discovery | ✅ Auto-detect |
 | **Cursor** | Minimal | One-click config | ✅ MCP settings |
 | **Windsurf** | Minimal | One-click config | ✅ MCP settings |
 | **VS Code** | Minimal | Copilot integration | ✅ GitHub Copilot |
 | **JetBrains** | Minimal | AI Assistant MCP | ✅ Native support |
 
-**Result:** 6+ platforms supported with ZERO platform-specific code!
+**Result:** 7+ platforms supported with ZERO platform-specific code!
 
 ---
 

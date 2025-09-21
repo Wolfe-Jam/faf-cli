@@ -1126,9 +1126,18 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
     intelligence: 'low'
   },
   
+  '*.ts': {
+    frameworks: ['TypeScript'],
+    slots: {
+      mainLanguage: 'TypeScript'
+    },
+    priority: 15,
+    intelligence: 'low'
+  },
+
   '*.tsx': {
     frameworks: ['React', 'TypeScript'],
-    slots: { 
+    slots: {
       framework: 'React',
       mainLanguage: 'TypeScript'
     },

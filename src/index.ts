@@ -18,7 +18,7 @@ export { lintFafFile } from './commands/lint';
 export { findFafFile, detectProjectType } from './utils/file-utils';
 export { validateSchema } from './schema/faf-schema';
 export { calculateFafScore } from './scoring/score-calculator';
-export { generateFafFromProject } from './generators/faf-generator';
+export { generateFafFromProject } from './generators/faf-generator-championship';
 
 // Export types
 export type { FafSchema, ValidationResult } from './schema/faf-schema';
