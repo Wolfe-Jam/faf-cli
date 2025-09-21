@@ -12,6 +12,8 @@ import { getScoreColor, getScoreEmoji } from "../utils/color-utils";
 import { BalanceVisualizer } from "../utils/balance-visualizer";
 import { FafDNAManager, displayScoreWithBirthWeight } from "../engines/faf-dna";
 import * as path from "path";
+import { PlatformDetector } from "../utils/platform-detector";
+import { VibeSync } from "../utils/vibe-sync";
 
 interface ScoreOptions {
   details?: boolean;
@@ -108,6 +110,16 @@ export async function scoreFafFile(file?: string, options: ScoreOptions = {}) {
       console.log(
         chalk.cyan('\n   💡 Run "faf score --details" for complete breakdown'),
       );
+    }
+
+    // VIBE Progression Path (for low-scoring prototypes)
+    const detector = new PlatformDetector();
+    const platform = await detector.detectPlatform();
+
+    if (platform.tier === 'vibe' && percentage < 70) {
+      console.log();
+      console.log(chalk.bold.cyan('⚡️ FAF VIBE PROGRESSION PATH:'));
+      console.log(VibeSync.getProgressionMessage(percentage));
     }
 
     // Detailed breakdown

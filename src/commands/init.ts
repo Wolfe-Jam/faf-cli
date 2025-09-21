@@ -24,6 +24,7 @@ import { createDefaultFafIgnore } from "../utils/fafignore-parser";
 import { BalanceVisualizer } from "../utils/balance-visualizer";
 import { FafDNAManager, displayScoreWithBirthWeight } from "../engines/faf-dna";
 import { fabFormatsProcessor } from "../engines/fab-formats-processor";
+import { PlatformDetector } from "../utils/platform-detector";
 
 interface InitOptions {
   force?: boolean;
@@ -164,6 +165,18 @@ export async function initFafFile(
     // Show AI|HUMAN Balance
     const balance = BalanceVisualizer.calculateBalance(fafData);
     console.log(FAF_COLORS.fafWhite(`${FAF_ICONS.balance} Balance: `) + BalanceVisualizer.generateCompactBalance(balance));
+
+    // Detect platform and show VIBE message if applicable
+    const platformDetector = new PlatformDetector();
+    const platformInfo = await platformDetector.detectPlatform(projectRoot);
+
+    if (platformInfo.detected && platformInfo.tier === 'vibe') {
+      console.log();
+      console.log(FAF_COLORS.fafOrange('⚡️ FAF VIBE DETECTED! 😽'));
+      console.log(FAF_COLORS.fafCyan(`   Platform: ${platformInfo.platform}`));
+      console.log(FAF_COLORS.fafGreen(`   Special pricing: $9/month FOREVER!`));
+      console.log(FAF_COLORS.fafWhite(`   ${FAF_ICONS.turbo_cat} TURBO-CAT is ready to make your AI happy!`));
+    }
 
     // Championship Next Steps with DNA lifecycle
     console.log();

@@ -1,7 +1,7 @@
 {
   "name": "@faf/cli",
   "version": "2.0.0",
-  "description": "🏎️ Stop FAFfing About! Perfect AI context in 30 seconds. Championship-grade AI context infrastructure with DNA lifecycle tracking.",
+  "description": "AI needed a format, it got one— .faf | Universal, shareable AI-context for any AI, human or team, regardless of size, location, languages, stack, setup or documentation",
   "main": "dist/index.js",
   "bin": {
     "faf": "dist/cli.js"

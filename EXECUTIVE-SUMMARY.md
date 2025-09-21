@@ -1,5 +1,5 @@
 # Executive Summary: FAF CLI
-**Championship AI-Context Infrastructure**
+**Championship AI-context Infrastructure**
 
 ---
 

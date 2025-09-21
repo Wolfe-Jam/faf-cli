@@ -9,7 +9,7 @@
 
 We built something differently. A CLI tool with a personality—**TURBO-CAT™**—that makes developer tools fun again. ASCII art banners. Celebration moments. Emojis that actually mean something.
 
-We called it **FAF** (Foundational AI-Context Format).
+We called it **FAF** (Foundational AI-context Format).
 
 But underneath, it's something more:
 - **A file format**: `.faf` files that give AI perfect context about any project
@@ -53,7 +53,7 @@ npx ts-node src/cli.ts version
 │                                         │
 │  🤖 Make Your AI Happy! 🧡 Trust Driven │
 │  ─────────────────────────────────────  │
-│  🌐 Universal, AI-Context ⚡️ FAST AF 🩵 │
+│  🌐 Universal, AI-context ⚡️ FAST AF 🩵 │
 └─────────────────────────────────────────┘
 
 😽 TURBO-CAT™: "I detected 154 formats and made your stack PURRR!"

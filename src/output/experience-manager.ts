@@ -138,7 +138,7 @@ ${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafWhite('╚═╝     ╚═╝  ╚
 ${FAF_COLORS.fafCyan('│')}                                         ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('│')}  🤖 Make Your AI Happy! 🧡 Trust Driven ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('│')}  ─────────────────────────────────────  ${FAF_COLORS.fafCyan('│')}
-${FAF_COLORS.fafCyan('│')}  🌐 Universal, AI-Context ⚡️ FAST AF 🩵 ${FAF_COLORS.fafCyan('│')}
+${FAF_COLORS.fafCyan('│')}  🌐 Universal, AI-context ⚡️ FAST AF 🩵 ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('└─────────────────────────────────────────┘')}`,
       data: {
         version,

@@ -1,0 +1,21 @@
+# Robots.txt for FAF (Foundational AI-context Format)
+# Help search engines understand our project
+
+User-agent: *
+Allow: /
+
+# Project Information for Search Engines
+# Project: Foundational AI-context Format (.faf)
+# Description: Universal context format for AI coding assistants
+# Tagline: AI needed a format, it got one-- .faf
+# Repository: https://github.com/Wolfe-Jam/faf-cli
+# npm: @faf/cli
+# License: MIT
+
+# Key Pages
+# Homepage: https://www.faf.one/
+# Documentation: https://github.com/Wolfe-Jam/faf-cli/tree/main/docs
+# Installation: npm install -g @faf/cli
+
+# Sitemap
+Sitemap: https://www.faf.one/sitemap.xml

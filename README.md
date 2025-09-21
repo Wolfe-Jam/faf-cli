@@ -1,5 +1,7 @@
-# 🏁 FAF CLI - Championship AI-Context Infrastructure
-*Transform developer psychology from hope-driven to trust-driven AI development*
+# 🏁 .faf CLI - Foundational AI-context Format
+*AI needed a format, it got one— .faf*
+
+**Official Definition:** Universal, shareable AI-context for any AI, human or team, regardless of size, location, languages, stack, setup or documentation.
 
 [![CI](https://github.com/Wolfe-Jam/faf-cli/workflows/CI/badge.svg)](https://github.com/Wolfe-Jam/faf-cli/actions)
 [![npm version](https://img.shields.io/npm/v/@faf/cli.svg)](https://www.npmjs.com/package/@faf/cli)
@@ -7,9 +9,12 @@
 [![Performance](https://img.shields.io/badge/performance-<50ms-green.svg)](docs/PERFORMANCE.md)
 [![Context Score](https://img.shields.io/badge/context_score-86%25-green.svg)](docs/SCORING.md)
 
-## 🚀 30 seconds to Podium-Level AI Context - Then Forget It Exists
+## 🚀 The Universal Context Protocol for AI Development
 
-FAF (Foundational AI Format) is a revolutionary CLI tool that creates perfect AI context for your projects. One `.faf` file tells AI everything about your project - instantly. Set it once, then just work. Your AI stays happy forever.
+.faf (Foundational AI-context Format) is the missing layer in AI development. While everyone built tools, we built the foundation they all need. One `.faf` file works with EVERY AI tool - Anthropic Claude, OpenAI ChatGPT, Google Gemini, GitHub Copilot, Cursor, and beyond.
+
+**The difference:** Instant • 100% accurate • Verified • Auto-updates
+**vs. manual:** Time varies • Accuracy unknown • Unverified • Human updates
 
 ```bash
 # Three commands to championship context
@@ -18,23 +23,23 @@ faf init          # Generate .faf with 86% context score
 faf trust         # See your AI confidence dashboard
 ```
 
-**Result**: Your AI now has championship context. No more explaining. Just building.
+**Result**: Fast, reliable, complete AI context with trust - not hope.
 
 ---
 
-## 🏆 Why FAF?
+## 🏆 Why .faf?
 
-### Before FAF (Hope-Driven)
-- 20 minutes explaining your project to AI
-- Repeating context every session
-- AI confusion and wrong assumptions
-- Hope that AI understands
+### Without .faf
+- **Time:** Varies (unpredictable)
+- **Accuracy:** Varies/unknown
+- **Verification:** None
+- **Updates:** Manual human effort
 
-### After FAF (Trust-Driven)
-- 30 seconds to perfect context
-- Persistent understanding across sessions
-- AI has complete project intelligence
-- **Trust** with 86% context scores
+### With .faf
+- **Time:** Instant (<30ms)
+- **Accuracy:** 100% complete
+- **Verification:** Objectively scored
+- **Updates:** Automatic (bi-sync)
 
 ---
 
@@ -44,15 +49,16 @@ faf trust         # See your AI confidence dashboard
 - ⚡ **<50ms operations** - FAST AF or failure
 - 🏎️ **86% context scores** - 3.5x better than baseline
 - 🧡 **Trust Dashboard** - Emotional confidence center
-- 🤖 **Multi-model support** - Claude, ChatGPT, Gemini, Codex
+- 🤖 **Multi-model support** - Anthropic Claude, OpenAI ChatGPT, Google Gemini, Codex
 - 🖥️ **7+ IDE integrations** - VS Code, Cursor, Claude Code, Codex CLI, Gemini CLI, Windsurf, JetBrains
 
 ### Revolutionary Tools
+- **Context-on-demand** - Instant AI understanding in <30ms
+- **Context-mirroring (bi-sync)** - Bi-directional .faf ↔ CLAUDE.md/GEMINI.md synchronization
 - **FAB-FORMATS Engine** - 150+ file format handlers
 - **RelentlessContextExtractor** - 3-tier confidence hunting
 - **DropCoach** - Intelligent TOP-6 file guidance
 - **AI|HUMAN Balance** - Visual gamification system
-- **Context Mirroring** - Bi-directional .faf ↔ CLAUDE.md sync
 
 ### F1-Inspired Engineering
 - 🏁 **Championship standards** - Zero errors accepted
@@ -188,7 +194,7 @@ faf trust
 
 ## 💎 Premium Software
 
-FAF is positioned as premium software - AMG Mercedes, not Honda Civic.
+.faf is positioned as premium software - AMG Mercedes, not Honda Civic.
 
 ### Why $100/month?
 - Establish Podium-Level AI Context ONCE, then forget it exists
@@ -226,15 +232,16 @@ Read more in our [F1 Philosophy Guide](docs/F1-PHILOSOPHY.md)
 - **Version Controlled** - Git-friendly
 
 ### Performance Requirements
+- **Context-on-demand**: <30ms for instant AI understanding
 - `faf init`: <50ms
 - `faf score`: <50ms
 - `faf trust`: <100ms
-- `faf sync`: <50ms
+- `faf sync`: <50ms (context-mirroring bi-sync)
 
 ### Compatibility
 - **Node.js**: 18.0.0+
 - **OS**: Windows, macOS, Linux
-- **AI Models**: Claude, ChatGPT, Gemini, Codex, Local models
+- **AI Models**: Anthropic Claude, OpenAI ChatGPT, Google Gemini, Codex, Local models
 - **IDEs**: VS Code, Cursor, Claude Code, Codex CLI (auto-detect), Gemini CLI (auto-detect), Windsurf, JetBrains
 - **Languages**: All major programming languages
 

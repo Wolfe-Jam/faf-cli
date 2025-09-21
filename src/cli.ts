@@ -357,6 +357,27 @@ Trust Modes:
   • Guarantee: Championship quality assurance (85%+ standard)`)
   .action(withAnalyticsTracking('trust', (options) => trustCommand(options)));
 
+// ⚡️ faf vibe - No-Code/Low-Code Builder Edition
+program
+  .command('vibe')
+  .description('⚡️ FAF VIBE - Check $9 tier eligibility for no-code builders')
+  .option('-p, --preview', 'Preview TURBO-CAT discovery')
+  .addHelpText('after', `
+Examples:
+  $ faf vibe                         # Check platform & pricing
+  $ faf vibe --preview               # Include TURBO-CAT preview
+
+⚡️ FAF VIBE Features:
+  • Auto-detects no-code platforms (Replit, Lovable, Wix, etc.)
+  • $9/month FOREVER (limited time offer)
+  • Same features as $100 Pro Plan
+  • TURBO-CAT format discovery
+  • Lightning not rainbows!`)
+  .action(withAnalyticsTracking('vibe', (options) => {
+    const { vibeCommand } = require('./commands/vibe');
+    return vibeCommand(options);
+  }));
+
 // 🚀 faf status - Quick context health check (git status equivalent)
 program
   .command('status')

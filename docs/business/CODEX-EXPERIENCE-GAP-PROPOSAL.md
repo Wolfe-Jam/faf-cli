@@ -5,7 +5,7 @@
 
 ### Executive Summary
 
-During the development and testing of FAF CLI (Foundational AI-Context Format), we discovered a fundamental challenge in how AI coding assistants handle terminal output. While FAF generates rich terminal experiences with ASCII art, color gradients, and personality-driven messaging, these crucial elements of developer experience are lost when commands are executed through certain AI platforms.
+During the development and testing of FAF CLI (Foundational AI-context Format), we discovered a fundamental challenge in how AI coding assistants handle terminal output. While FAF generates rich terminal experiences with ASCII art, color gradients, and personality-driven messaging, these crucial elements of developer experience are lost when commands are executed through certain AI platforms.
 
 This document proposes a solution that could benefit the entire developer tools ecosystem.
 
@@ -202,7 +202,7 @@ Together, we can ensure that as AI transforms development, we don't lose the joy
 
 ### Contact & Collaboration
 
-**Project**: FAF CLI (Foundational AI-Context Format)
+**Project**: FAF CLI (Foundational AI-context Format)
 **Version**: 2.0.0 with MK2 Engine + TURBO-CAT™
 **GitHub**: [FAF Repository]
 **Innovation**: Terminal Experience Preservation Protocol

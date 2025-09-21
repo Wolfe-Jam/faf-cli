@@ -93,7 +93,7 @@ faf bi-sync
 ```
 
 **THE PROMISE**:
-> "We maintain the AI-Context of any authenticated .faf project. After any disaster, when systems are restored, faf bi-sync will restore your project's AI context instantly from CLAUDE.md."
+> "We maintain the AI-context of any authenticated .faf project. After any disaster, when systems are restored, faf bi-sync will restore your project's AI context instantly from CLAUDE.md."
 
 ---
 
