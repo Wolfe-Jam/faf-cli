@@ -17,5 +17,7 @@ Allow: /
 # Documentation: https://github.com/Wolfe-Jam/faf-cli/tree/main/docs
 # Installation: npm install -g @faf/cli
 
-# Sitemap
-Sitemap: https://www.faf.one/sitemap.xml
+# Sitemaps for all FAF domains
+Sitemap: https://faf.one/sitemap.xml
+Sitemap: https://fafcli.dev/sitemap.xml
+Sitemap: https://fafdev.tools/sitemap.xml

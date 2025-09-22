@@ -128,7 +128,7 @@ function showHeaderIfAppropriate(commandName?: string) {
 
 program
   .name('faf')
-  .description('STOP faffing About! Generate perfect AI context files for any project.')
+  .description('.faf = THE JPEG for AI | Foundational AI-context Format | SPEEDY AI you can TRUST! 🧡⚡️')
   .version(version)
   .option('--no-color', 'Disable colored output for accessibility')
   .option('--color-scheme <scheme>', 'Color scheme for colorblind accessibility: normal|deuteranopia|protanopia|tritanopia', 'normal')
@@ -147,8 +147,9 @@ ${FAF_COLORS.fafCyan('🚀 Quick Start - Get Perfect AI Context:')}
   ${FAF_COLORS.fafOrange('3.')} ${chalk.cyan('faf trust')}    ${chalk.gray('# Build AI trust & confidence')}
   ${FAF_COLORS.fafOrange('4.')} ${chalk.cyan('faf bi-sync')}  ${chalk.gray('# Set & forget - persistent context-mirroring')}
 
-${FAF_COLORS.fafCyan('🎯 The Promise:')}
-  AI needs context. .faf brings it.
+${FAF_COLORS.fafCyan('🎯 What is .faf?')}
+  .faf = Foundational AI-context Format (THE JPEG for AI!)
+  Just like JPEG makes images universal, .faf makes projects AI-readable.
   bi-sync = persistent context-mirroring through thick and thin
   Get high score, build trust, share freely!
   

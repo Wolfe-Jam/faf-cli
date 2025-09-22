@@ -97,7 +97,12 @@ export async function initFafFile(
 
     const elapsedTime = Date.now() - startTime;
     console.log(chalk.green(`☑️ Created ${outputPath}`));
-    console.log(FAF_COLORS.fafCyan(`   ${formatPerformance(elapsedTime)} - ${BRAND_MESSAGES.speed_result}`));
+    console.log();
+    console.log(FAF_COLORS.fafOrange('🤖 .faf = Foundational AI-context Format = THE JPEG for AI! 🧡⚡️'));
+    console.log(FAF_COLORS.fafOrange('🧡 Trust: Context verified'));
+    console.log(FAF_COLORS.fafCyan(`⚡️ Speed: Generated in ${elapsedTime}ms`));
+    console.log(FAF_COLORS.fafGreen('SPEEDY AI you can TRUST!'));
+    console.log();
 
     // Award technical credit for successful initialization
     await autoAwardCredit('init_success', outputPath);
