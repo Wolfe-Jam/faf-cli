@@ -1,5 +1,9 @@
+<p align="center">
+  <img src="https://faf.one/orange-smiley.svg" width="120" alt=".faf logo">
+</p>
+
 # 🏁 .faf CLI - Foundational AI-context Format
-*AI needed a format, it got one— .faf*
+*🏎️🏁 STOP faffing About! - AI-context ⚡️ FAST AF*
 
 **Official Definition:** Universal, shareable AI-context for any AI, human or team, regardless of size, location, languages, stack, setup or documentation.
 
