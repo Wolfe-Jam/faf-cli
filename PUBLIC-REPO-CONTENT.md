@@ -8,7 +8,7 @@
 ```markdown
 # .faf - Foundational AI-context Format
 
-*AI needed a format, it got one— .faf*
+*The JPEG for AI*
 
 **Official Definition:** Universal, shareable AI-context for any AI, human or team, regardless of size, location, languages, stack, setup or documentation.
 

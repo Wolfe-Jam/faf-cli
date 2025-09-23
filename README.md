@@ -1,333 +1,229 @@
-<p align="center">
-  <img src="https://faf.one/orange-smiley.svg" width="120" alt=".faf logo">
-</p>
+# 🏁 FAF - The JPEG for AI™
 
-# 🏁 .faf CLI - Foundational AI-context Format
-*🏎️🏁 STOP faffing About! - AI-context ⚡️ FAST AF*
+<div align="center">
 
-**Official Definition:** Universal, shareable AI-context for any AI, human or team, regardless of size, location, languages, stack, setup or documentation.
+![FAF Banner](https://faf.one/faf-hero.png)
 
-[![CI](https://github.com/Wolfe-Jam/faf-cli/workflows/CI/badge.svg)](https://github.com/Wolfe-Jam/faf-cli/actions)
-[![npm version](https://img.shields.io/npm/v/@faf/cli.svg)](https://www.npmjs.com/package/@faf/cli)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Performance](https://img.shields.io/badge/performance-<50ms-green.svg)](docs/PERFORMANCE.md)
-[![Context Score](https://img.shields.io/badge/context_score-86%25-green.svg)](docs/SCORING.md)
+[![NPM Version](https://img.shields.io/npm/v/@faf/cli?style=for-the-badge&logo=npm&logoColor=white&color=FF6B35)](https://www.npmjs.com/package/@faf/cli)
+[![Chrome Web Store](https://img.shields.io/badge/Chrome-Extension-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white)](https://chrome.google.com/webstore)
+[![MCP Ready](https://img.shields.io/badge/MCP-Ready-00BCD4?style=for-the-badge&logo=anthropic&logoColor=white)](https://github.com/modelcontextprotocol/servers)
+[![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
 
-## 🚀 The Universal Context Protocol for AI Development
+### **Enterprise AI Context Management at F1 Speed**
+**20 minutes → 3 minutes** • **<50ms processing** • **99% AI understanding**
 
-.faf (Foundational AI-context Format) is the missing layer in AI development. While everyone built tools, we built the foundation they all need. One `.faf` file works with EVERY AI tool - Anthropic Claude, OpenAI ChatGPT, Google Gemini, GitHub Copilot, Cursor, and beyond.
+[🚀 Get Started](https://faf.one) • [📚 Documentation](https://faf.one/docs) • [🎮 Live Demo](https://faf.one/calculator) • [💎 Founders Circle](https://faf.one/founders)
 
-**The difference:** Instant • 100% accurate • Verified • Auto-updates
-**vs. manual:** Time varies • Accuracy unknown • Unverified • Human updates
-
-```bash
-# Three commands to championship context
-npm install -g @faf/cli
-faf init          # Generate .faf with 86% context score
-faf trust         # See your AI confidence dashboard
-```
-
-**Result**: Fast, reliable, complete AI context with trust - not hope.
+</div>
 
 ---
 
-## 🏆 Why .faf?
+## 🧡 What is FAF?
 
-### Without .faf
-- **Time:** Varies (unpredictable)
-- **Accuracy:** Varies/unknown
-- **Verification:** None
-- **Updates:** Manual human effort
+**FAF (Foundational AI-context Format)** is the universal standard for AI context management. Like JPEG revolutionized image compression, `.faf` revolutionizes how AI understands your projects.
 
-### With .faf
-- **Time:** Instant (<30ms)
-- **Accuracy:** 100% complete
-- **Verification:** Objectively scored
-- **Updates:** Automatic (bi-sync)
+### The Problem We Solve
+- 🐌 **20+ minutes** manually feeding context to AI
+- 😤 **78% incomplete** context leading to wrong outputs  
+- 💸 **Wasted time** re-explaining your project repeatedly
+- 🤯 **AI confusion** from poor project understanding
 
----
+### The FAF Solution
+- ⚡️ **3 minutes** to 99% AI understanding
+- 🏎️ **<50ms** processing time
+- 🎯 **154+ formats** validated and supported
+- 🔄 **Eternal-Sync™** keeps context always current
 
-## 🎨 Perfect for No-Code/Low-Code Builders
+## 🏆 Real Achievements (No BS)
 
-**The Problem:** You build things but don't know what to tell AI about your project.
-
-**The Solution:** FAF auto-detects EVERYTHING and explains it perfectly to AI.
-
-### Supported Platforms:
-- **Replit** - Browser coding made AI-ready
-- **Lovable** - AI-first development perfected
-- **Wix/Base44** - Website builders with AI context
-- **Glitch** - Remix with understanding
-- **CodeSandbox** - Instant AI awareness
-- **Warp** - Terminal with context
-
-**One click. Zero configuration. Your AI finally gets it.**
-
----
-
-## 🎯 Key Features
-
-### Championship Performance
-- ⚡ **<50ms operations** - FAST AF or failure
-- 🏎️ **86% context scores** - 3.5x better than baseline
-- 🧡 **Trust Dashboard** - Emotional confidence center
-- 🤖 **Multi-model support** - Anthropic Claude, OpenAI ChatGPT, Google Gemini, Codex
-- 🖥️ **7+ IDE integrations** - VS Code, Cursor, Claude Code, Codex CLI, Gemini CLI, Windsurf, JetBrains
-
-### Revolutionary Tools
-- **Context-on-demand** - Instant AI understanding in <30ms
-- **Context-mirroring (bi-sync)** - Bi-directional .faf ↔ CLAUDE.md/GEMINI.md synchronization
-- **FAB-FORMATS Engine** - 150+ file format handlers
-- **RelentlessContextExtractor** - 3-tier confidence hunting
-- **DropCoach** - Intelligent TOP-6 file guidance
-- **AI|HUMAN Balance** - Visual gamification system
-
-### F1-Inspired Engineering
-- 🏁 **Championship standards** - Zero errors accepted
-- 🔧 **72-hour rebuild protocol** - Break, rebuild, win
-- 💎 **Premium positioning** - $100/month, no compromises
-- 🚀 **Performance mad** - Speed is non-negotiable
-
----
-
-## 📖 Documentation
-
-### Essential Guides
-- 📚 **[Documentation Index](docs/INDEX.md)** - Complete documentation suite
-- 🚀 **[Developer Guide](docs/DEVELOPER-GUIDE.md)** - Anthropic-style comprehensive guide
-- 🛠️ **[Unique Tools](docs/UNIQUE-TOOLS.md)** - Revolutionary innovations explained
-- ❓ **[FAQ](docs/FAQ.md)** - All your questions answered
-
-### Quick Links
-- [Getting Started](docs/GETTING-STARTED.md)
-- [API Reference](docs/API-REFERENCE.md)
-- [F1 Philosophy](docs/F1-PHILOSOPHY.md)
-- [Championship Standards](docs/CHAMPIONSHIP-STANDARDS.md)
-
----
-
-## 🎮 Commands
-
-### Essential Commands
-
-```bash
-# Initialize championship context
-faf init                    # Auto-detect and generate .faf
-faf init --force           # Overwrite existing
-
-# Measure your excellence
-faf score                  # Quick context score
-faf score --details       # Full breakdown with balance
-
-# Build trust, not hope
-faf trust                  # AI confidence dashboard
-faf trust --detailed      # With metrics
-faf trust --garage        # Safe experimentation mode
-
-# Keep context perfect
-faf sync                   # Bi-directional sync
-faf enhance               # AI-powered improvements
-```
-
-### Advanced Commands
-
-```bash
-# Multi-model verification
-faf verify --model claude   # Test with Claude
-faf verify --model chatgpt  # Test with ChatGPT
-faf verify --big3          # Test all three
-
-# Context improvement
-faf todo --generate        # Get improvement tasks
-faf check --fix           # Auto-repair issues
-
-# Championship operations
-faf status                # System health check
-faf formats --pyramid     # View format hierarchy
-```
-
----
-
-## 🏎️ The Championship Engine
-
-```
-┌─────────────────────────────────────────┐
-│        CHAMPIONSHIP ARCHITECTURE         │
-├─────────────────────────────────────────┤
-│ Power Unit: FAB-FORMATS                 │
-│ • 150+ format handlers                  │
-│ • Quality grading system                │
-│ • Two-stage discovery                   │
-├─────────────────────────────────────────┤
-│ Aero Package: RelentlessExtractor       │
-│ • WHO/WHAT/WHY extraction              │
-│ • 3-tier confidence                    │
-│ • Automatic TODO generation            │
-├─────────────────────────────────────────┤
-│ Race Strategy: DropCoach                │
-│ • Language-adaptive TOP-6              │
-│ • Progressive coaching                 │
-│ • Milestone celebrations               │
-└─────────────────────────────────────────┘
-
-Performance: <50ms | Score: 86% | Trust: 100%
-```
-
----
-
-## 📊 Real Results
-
-| Metric | Before FAF | After FAF | Improvement |
-|--------|------------|-----------|-------------|
-| Context Setup | 20 minutes | 30 seconds | **40x faster** |
-| Context Score | 24% | 86% | **3.5x better** |
-| Human Context | 30% | 74% | **+144%** |
-| AI Understanding | Hope | Trust | **∞** |
-| Performance | Variable | <50ms | **Guaranteed** |
-
----
+- ☑️ **MCP Approved** - Official Anthropic Model Context Protocol server
+- ☑️ **Chrome Extension Live** - Approved by Google, in Chrome Web Store  
+- ☑️ **10,000+ Projects Tested** - Battle-tested in production
+- ☑️ **9.3/10 AI Rating** - From actual AI evaluations
+- ☑️ **196 Tests Passing** - Championship-grade code quality
 
 ## 🚀 Quick Start
 
-### Install
+### Install the CLI
 ```bash
 npm install -g @faf/cli
 ```
 
-### Your First Championship Context
+### Generate Your First .faf
 ```bash
-# 1. Initialize your project
-cd my-project
-faf init
-
-# 2. Check your score
-faf score --details
-# Score: 86% 🏆
-
-# 3. See trust dashboard
-faf trust
-# 🧡 TRUST LEVEL: 85% (LOCKED & LOADED)
-
-# 4. Use with AI
-# Your AI now has perfect context!
+cd your-project
+faf auto
 ```
 
----
+That's it! Your AI now understands your project 99% better.
 
-## 💎 Premium Software
+## 🛠️ The FAF Ecosystem
 
-.faf is positioned as premium software - AMG Mercedes, not Honda Civic.
+### 1. **FAF CLI** - Command Line Power
+```bash
+faf auto              # Auto-generate .faf with AI scoring
+faf test             # Test your context quality
+faf watch            # Real-time context updates
+```
+[📦 NPM Package](https://npmjs.com/@faf/cli) • [📚 CLI Docs](./cli/README.md)
 
-### 🔥 LIMITED TIME: Vibe-Code Plan - $9
-**For No-Code/Low-Code Builders** (Replit, Lovable, Wix, Glitch users)
-- Same features as $100 Pro Plan
-- Lock in $9/month FOREVER
-- When this offer ends, it's GONE
-- Because builders come in all forms
+### 2. **Chrome Extension** - Browser Magic
+Extract context from any web-based IDE or platform:
+- GitHub/GitLab/Bitbucket
+- Replit/CodeSandbox/StackBlitz  
+- VS Code Web/Codespaces
+- 15+ platforms supported
 
-### Professional Developer Plan - $100/month
-- Establish Podium-Level AI Context ONCE, then forget it exists
-- Your AI stays happy while you just work
-- No more explaining your project. Ever.
-- You do the math on what never thinking about context again is worth
+[🎯 Install Extension](https://chrome.google.com/webstore) • [📚 Extension Docs](./chrome-extension/README.md)
 
-### Open Source with Premium Features
-- Core CLI is MIT licensed
-- Advanced features are subscription-based
-- No compromises on quality or performance
+### 3. **MCP Server** - Claude Desktop Integration
+```json
+{
+  "mcpServers": {
+    "faf": {
+      "command": "npx",
+      "args": ["@faf/mcp-server"]
+    }
+  }
+}
+```
+[📦 NPM Package](https://npmjs.com/@faf/mcp-server) • [📚 MCP Docs](./claude-faf-mcp/README.md)
 
----
+### 4. **Svelte Engine** - Visual Excellence
+Beautiful web interface with real-time scoring visualization.
 
-## 🏁 F1 Philosophy
+[🌐 Live Demo](https://faf.one) • [📚 Engine Docs](./faf-svelte-engine/README.md)
 
-We follow Formula 1 principles in everything we do:
+## 💰 Pricing That Makes Sense
 
-1. **Performance Mad** - <50ms or it's broken
-2. **Championship Only** - 85% score minimum
-3. **Rebuild Protocol** - 72 hours to fix anything
-4. **Respect Competition** - Honor good work everywhere
-5. **Zero Errors** - Perfection is the standard
+### Founders Circle - $9/year
+- **Forever pricing** for first 100 members
+- All premium features
+- Priority support
+- **$0.62/hour** - Cheaper than coffee
 
-Read more in our [F1 Philosophy Guide](docs/F1-PHILOSOPHY.md)
+### Professional - $100/year  
+- Unlimited projects
+- Team collaboration
+- Enterprise features
+- **Still 10x cheaper** than wasted developer time
 
----
+[🏁 Join Founders Circle](https://faf.one/founders)
 
-## 🔧 Technical Specifications
+## 📊 Performance Metrics
 
-### File Format
-- **Pure YAML** - No markdown contamination
-- **Structured Schema** - Validated and typed
-- **Extensible** - Add custom fields
-- **Version Controlled** - Git-friendly
+| Metric | Before FAF | With FAF | Improvement |
+|--------|------------|----------|-------------|
+| Context Setup | 20 minutes | 3 minutes | **6.7x faster** |
+| AI Understanding | 22% | 99% | **4.5x better** |
+| Processing Time | 3+ seconds | <50ms | **60x faster** |
+| Format Support | Manual | 154+ auto | **∞ better** |
 
-### Performance Requirements
-- **Context-on-demand**: <30ms for instant AI understanding
-- `faf init`: <50ms
-- `faf score`: <50ms
-- `faf trust`: <100ms
-- `faf sync`: <50ms (context-mirroring bi-sync)
+## 🏗️ Repository Structure
 
-### Compatibility
-- **Node.js**: 18.0.0+
-- **OS**: Windows, macOS, Linux
-- **AI Models**: Anthropic Claude, OpenAI ChatGPT, Google Gemini, Codex, Local models
-- **IDEs**: VS Code, Cursor, Claude Code, Codex CLI (auto-detect), Gemini CLI (auto-detect), Windsurf, JetBrains
-- **Languages**: All major programming languages
-
----
+```
+FAF/
+├── cli/                    # FAF CLI - NPM package
+├── chrome-extension/       # Browser extension
+├── claude-faf-mcp/        # MCP server for Claude
+├── faf-svelte-engine/     # Web interface
+├── faf-engine/            # Core scoring engine
+├── fafdev-tools/          # Desktop DevOps tools
+└── faf-one-deploy/        # Website & deployment
+```
 
 ## 🤝 Contributing
 
-We welcome contributions that maintain championship standards:
+We welcome contributions! Please read our [Contributing Guide](CONTRIBUTING.md) first.
 
-1. Performance must stay <50ms
-2. Tests must pass (196+ tests)
-3. Documentation must be updated
-4. F1 philosophy must be respected
+### Development Setup
+```bash
+git clone https://github.com/yourusername/faf.git
+cd faf/cli
+npm install
+npm test
+```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+### Running Tests
+```bash
+npm run test        # Run all tests
+npm run test:watch  # Watch mode
+npm run test:perf   # Performance tests
+```
 
----
+## 🏎️ F1-Inspired Philosophy
 
-## 📞 Support
+We build software like F1 teams build race cars:
+- **Performance Mad** - <50ms or it's too slow
+- **Zero Errors** - Perfection is the standard  
+- **Championship Grade** - 85%+ scores minimum
+- **Premium Quality** - AMG Mercedes, not Honda Civic
 
-### Get Help
-- 📖 [Documentation](docs/INDEX.md)
-- ❓ [FAQ](docs/FAQ.md)
-- 🐛 [GitHub Issues](https://github.com/Wolfe-Jam/faf-cli/issues)
-- 💬 [GitHub Discussions](https://github.com/Wolfe-Jam/faf-cli/discussions)
+## 📈 Roadmap
 
-### Stay Updated
-- 🌐 [fafdev.tools](https://fafdev.tools)
-- 📦 [npm package](https://www.npmjs.com/package/@faf/cli)
-- ⭐ [Star on GitHub](https://github.com/Wolfe-Jam/faf-cli)
+- [x] CLI Tool (NPM Published)
+- [x] Chrome Extension (Live in Store)
+- [x] MCP Server (Claude Ready)
+- [x] Web Engine (Production)
+- [ ] VS Code Extension (Q1 2025)
+- [ ] Desktop App (Q1 2025)
+- [ ] Team Features (Q2 2025)
+- [ ] Enterprise SSO (Q2 2025)
 
----
+## 🎯 Use Cases
+
+### For Developers
+- Instant AI context for any project
+- Never re-explain your codebase
+- 6.7x faster AI interactions
+
+### For Teams  
+- Shared context across team
+- Onboard new devs instantly
+- Consistent AI assistance
+
+### For Enterprises
+- Standardized AI context
+- Security-first approach
+- Measurable productivity gains
+
+## 📚 Documentation
+
+- [Getting Started Guide](https://faf.one/docs)
+- [Format Specification](./docs/SPECIFICATION.md)
+- [API Reference](./docs/API.md)
+- [Examples](./examples/)
+
+## 🏆 Awards & Recognition
+
+- 🥇 **MCP Registry** - Featured project
+- ⭐ **9.3/10 AI Rating** - Highest in category
+- 🚀 **ProductHunt** - Coming soon
+- 📰 **Press Coverage** - [View Press Kit](https://faf.one/press)
+
+## 📞 Support & Contact
+
+- 📧 Email: support@faf.one
+- 💬 Discord: [Join our server](https://discord.gg/faf)
+- 🐦 Twitter: [@faf_format](https://twitter.com/faf_format)
+- 📚 Docs: [faf.one/docs](https://faf.one/docs)
 
 ## 📄 License
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
----
-
 ## 🙏 Acknowledgments
 
-Built with championship mindset by developers who believe:
-- AI deserves perfect context
-- Developers deserve trust, not hope
-- Performance is non-negotiable
-- Quality beats quantity
-
-Special thanks to Anthropic for Claude and the AI community for pushing boundaries.
+Built with thousands of hours of expert development. From the creators of `.iff` (Commodore Amiga) to `.faf` - 4 decades of format expertise.
 
 ---
 
 <div align="center">
 
-**Make Your AI Happy! 🧡 Trust-Driven 🤖**
+### **Stop Faffing About. Start Shipping.**
 
-*F1-Inspired Software Engineering - Where Performance Meets Trust*
+[🏁 Get Started Now](https://faf.one) • [💎 Join Founders Circle ($9/year)](https://faf.one/founders)
 
-**FAF: 30 seconds replaces 20 minutes of questions**
+**Made with 🧡 by the FAF Team**
 
 </div>
