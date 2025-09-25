@@ -28,6 +28,11 @@ export async function generateFafFromProject(
 ): Promise<string> {
   const { projectType, projectRoot } = options;
 
+  // Validate projectRoot
+  if (!projectRoot || typeof projectRoot !== 'string') {
+    throw new Error(`Invalid projectRoot: ${projectRoot}. Expected a valid directory path.`);
+  }
+
   // Read README.md if available (HUMAN CONTEXT SOURCE)
   let readmeData: any = {};
   const readmePath = path.join(projectRoot, "README.md");

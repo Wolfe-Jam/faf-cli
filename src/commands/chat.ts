@@ -4,6 +4,7 @@
  */
 
 import inquirer from 'inquirer';
+import chalk from 'chalk';
 import { generateFafFromProject } from '../generators/faf-generator-championship';
 import { FAF_COLORS, FAF_ICONS } from '../utils/championship-style';
 import { findFafFile } from '../utils/file-utils';
@@ -153,10 +154,17 @@ export async function chatCommand(): Promise<void> {
     };
 
     // Generate the .faf content
+    const currentDir = process.cwd();
+    if (!currentDir || typeof currentDir !== 'string') {
+      console.error(chalk.red('✗ Error: Unable to determine current directory'));
+      console.error('Please ensure you are running this command from a valid directory');
+      return;
+    }
+
     const fafContent = await generateFafFromProject({
       projectType: mapProjectType(answers.projectType),
       outputPath: `${answers.projectName.toLowerCase().replace(/\s+/g, '-')}.faf`,
-      projectRoot: process.cwd()
+      projectRoot: currentDir
     });
 
     // Write the .faf file

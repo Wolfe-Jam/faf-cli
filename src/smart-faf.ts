@@ -155,7 +155,12 @@ class SmartFaf {
       }
 
       // Fallback: run score command and parse output
-      const output = execSync('faf score --silent', { encoding: 'utf-8' });
+      const cliPath = path.join(__dirname, 'cli.js');
+      const output = execSync(`node "${cliPath}" score`, {
+        encoding: 'utf-8',
+        cwd: process.cwd(),
+        stdio: ['pipe', 'pipe', 'pipe']
+      });
       const outputMatch = output.match(/Score:\s*(\d+)/);
       if (outputMatch) {
         return parseInt(outputMatch[1]);
