@@ -1,0 +1,6 @@
+version: 2.0.0
+project:
+  name: basic-test
+  description: A basic test project
+instant_context:
+  what_building: Testing the extraction

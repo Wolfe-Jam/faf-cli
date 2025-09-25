@@ -2,6 +2,8 @@
 
 <div align="center">
 
+![Orange Smiley Logo](https://faf.one/orange-smiley.svg)
+
 ![FAF Banner](https://faf.one/faf-hero.png)
 
 [![NPM Version](https://img.shields.io/npm/v/faf-cli?style=for-the-badge&logo=npm&logoColor=white&color=FF6B35)](https://www.npmjs.com/package/faf-cli)
@@ -18,9 +20,9 @@
 
 ---
 
-## 🧡 What is FAF?
+## 🧡 What is .faf?
 
-**FAF (Foundational AI-context Format)** is the universal standard for AI context management. Like JPEG revolutionized image compression, `.faf` revolutionizes how AI understands your projects.
+**.faf (Foundational AI-context Format)** is the universal standard for AI context management. Like JPEG revolutionized image compression, `.faf` revolutionizes how AI understands your projects.
 
 ### The Problem We Solve
 - 🐌 **20+ minutes** manually feeding context to AI
@@ -28,7 +30,7 @@
 - 💸 **Wasted time** re-explaining your project repeatedly
 - 🤯 **AI confusion** from poor project understanding
 
-### The FAF Solution
+### The .faf Solution
 - ⚡️ **3 minutes** to 99% AI understanding
 - 🏎️ **<50ms** processing time
 - 🎯 **154+ formats** validated and supported
@@ -39,8 +41,8 @@
 - 📝 **MCP PR Submitted** - #2759 (pending review)
 - ✅ **TypeScript Strict Mode** - Zero violations
 - ✅ **20 Edge Case Tests** - All passing
-- ✅ **Used by Real Developers** - Kathleen, Paul, and growing
-- ✅ **Published on npm** - faf-cli v2.1.4
+- ✅ **201+ Downloads** - Real developers using it now
+- ✅ **Published on npm** - faf-cli v2.1.5
 
 ## 🚀 Quick Start
 
