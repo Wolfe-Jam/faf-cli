@@ -1174,9 +1174,13 @@ async function showInteractiveWelcome() {
 // Show header based on command used BEFORE parsing
 const commandUsed = process.argv[2];
 
-// Special case: No arguments at all - show interactive welcome
+// Special case: No arguments at all - use smart FAF logic
 if (!commandUsed) {
-  showInteractiveWelcome().then(() => process.exit(0)).catch(err => {
+  import('./smart-faf').then(module => {
+    const SmartFaf = module.default;
+    const smartFaf = new SmartFaf();
+    return smartFaf.execute();
+  }).then(() => process.exit(0)).catch(err => {
     console.error(err);
     process.exit(1);
   });
