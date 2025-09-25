@@ -310,13 +310,9 @@ export async function detectProjectType(
     glob("**/*.{svelte,jsx,tsx,vue,ts,js,py}", {
       cwd: projectDir,
       ignore: ignorePatterns.filter((p) => !p.startsWith("*.")), // glob doesn't like *.ext patterns
-    }, (err, matches) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(matches);
-      }
-    });
+    })
+      .then(matches => resolve(matches))
+      .catch(err => reject(err));
   });
 
   // Python pattern detection (Option B)
