@@ -9,7 +9,7 @@
 [![MCP Ready](https://img.shields.io/badge/MCP-Ready-00BCD4?style=for-the-badge&logo=anthropic&logoColor=white)](https://github.com/modelcontextprotocol/servers)
 [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
 
-### **Enterprise AI Context Management at F1 Speed**
+### **Enterprise AI Context Management - F1-Inspired Performance**
 **20 minutes → 3 minutes** • **<50ms processing** • **99% AI understanding**
 
 [🚀 Get Started](https://faf.one) • [📚 Documentation](https://faf.one/docs) • [🎮 Live Demo](https://faf.one/calculator) • [💎 Founders Circle](https://faf.one/founders)
@@ -34,19 +34,19 @@
 - 🎯 **154+ formats** validated and supported
 - 🔄 **Eternal-Sync™** keeps context always current
 
-## 🏆 Real Achievements (No BS)
+## 🏆 Real Achievements (Actually True)
 
-- ☑️ **MCP Approved** - Official Anthropic Model Context Protocol server
-- ☑️ **Chrome Extension Live** - Approved by Google, in Chrome Web Store  
-- ☑️ **10,000+ Projects Tested** - Battle-tested in production
-- ☑️ **9.3/10 AI Rating** - From actual AI evaluations
-- ☑️ **196 Tests Passing** - Championship-grade code quality
+- 📝 **MCP PR Submitted** - #2759 (pending review)
+- ✅ **TypeScript Strict Mode** - Zero violations
+- ✅ **20 Edge Case Tests** - All passing
+- ✅ **Used by Real Developers** - Kathleen, Paul, and growing
+- ✅ **Published on npm** - faf-cli v2.1.4
 
 ## 🚀 Quick Start
 
 ### Install the CLI
 ```bash
-npm install -g @faf/cli
+npm install -g faf-cli
 ```
 
 ### Generate Your First .faf
@@ -61,9 +61,9 @@ That's it! Your AI now understands your project 99% better.
 
 ### 1. **FAF CLI** - Command Line Power
 ```bash
-faf auto              # Auto-generate .faf with AI scoring
-faf test             # Test your context quality
-faf watch            # Real-time context updates
+faf auto              # Smart .faf generation with instant scoring
+faf score --details   # See your AI-readiness percentage
+faf trust            # View trust dashboard & achievements
 ```
 [📦 NPM Package](https://npmjs.com/@faf/cli) • [📚 CLI Docs](./cli/README.md)
 
@@ -94,21 +94,19 @@ Beautiful web interface with real-time scoring visualization.
 
 [🌐 Live Demo](https://faf.one) • [📚 Engine Docs](./faf-svelte-engine/README.md)
 
-## 💰 Pricing That Makes Sense
+## 💰 Pricing
 
-### Founders Circle - $9/year
+### Founder - $9/month
 - **Forever pricing** for first 100 members
 - All premium features
 - Priority support
-- **$0.62/hour** - Cheaper than coffee
 
-### Professional - $100/year  
+### Legend - $100/year
 - Unlimited projects
 - Team collaboration
 - Enterprise features
-- **Still 10x cheaper** than wasted developer time
 
-[🏁 Join Founders Circle](https://faf.one/founders)
+[🏁 Join as Founder](https://faf.one/founders)
 
 ## 📊 Performance Metrics
 
@@ -196,16 +194,16 @@ We build software like F1 teams build race cars:
 
 ## 🏆 Awards & Recognition
 
-- 🥇 **MCP Registry** - Featured project
+- 🥇 **MCP PR Submitted** - #2759 (pending review)
 - ⭐ **9.3/10 AI Rating** - Highest in category
 - 🚀 **ProductHunt** - Coming soon
 - 📰 **Press Coverage** - [View Press Kit](https://faf.one/press)
 
 ## 📞 Support & Contact
 
+- 📦 NPM Package: [npmjs.com/package/faf-cli](https://npmjs.com/package/faf-cli)
+- 🐛 Issues: [GitHub Issues](https://github.com/yourusername/faf/issues)
 - 📧 Email: support@faf.one
-- 💬 Discord: [Join our server](https://discord.gg/faf)
-- 🐦 Twitter: [@faf_format](https://twitter.com/faf_format)
 - 📚 Docs: [faf.one/docs](https://faf.one/docs)
 
 ## 📄 License
@@ -222,8 +220,8 @@ Built with thousands of hours of expert development. From the creators of `.iff`
 
 ### **Stop Faffing About. Start Shipping.**
 
-[🏁 Get Started Now](https://faf.one) • [💎 Join Founders Circle ($9/year)](https://faf.one/founders)
+[🏁 Get Started Now](https://faf.one) • [💎 Founder $9/month](https://faf.one/founders)
 
-**Made with 🧡 by the FAF Team**
+**Made with 🧡 by the .faf Team**
 
 </div>
