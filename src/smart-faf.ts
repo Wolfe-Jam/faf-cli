@@ -31,6 +31,16 @@ class SmartFaf {
    * Main entry point - smart contextual command
    */
   async execute(): Promise<void> {
+    // CRITICAL: Check if we're in home or root directory
+    const currentDir = process.cwd();
+    const homeDir = require('os').homedir();
+
+    if (currentDir === homeDir || currentDir === '/') {
+      console.log('\n⚠️  For speed and safety, we do not work on ROOT directories.');
+      console.log('Please provide or cd my-project\n');
+      return;
+    }
+
     const state = this.getState();
 
     console.log('🏎️ FAF Smart Mode Engaged...\n');

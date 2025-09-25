@@ -21,6 +21,14 @@ interface AutoOptions {
 
 export async function autoCommand(directory?: string, options: AutoOptions = {}) {
   const targetDir = directory || process.cwd();
+  const homeDir = require('os').homedir();
+
+  // CRITICAL: Prevent running in home or root directory
+  if (!directory && (targetDir === homeDir || targetDir === '/')) {
+    console.log(chalk.red('\n⚠️  For speed and safety, we do not work on ROOT directories.'));
+    console.log(chalk.yellow('Please provide or cd my-project\n'));
+    return;
+  }
 
   console.log(chalk.bold.blue("\n🏎️ FAF AUTO - CHAMPIONSHIP MODE ENGAGED!"));
   console.log(chalk.gray("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"));
