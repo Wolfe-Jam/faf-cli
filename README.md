@@ -18,6 +18,13 @@
 
 ---
 
+> **🧡⚡️ CLAUDE DESKTOP USERS:** Also install [`claude-faf-mcp`](https://www.npmjs.com/package/claude-faf-mcp) for direct MCP integration!
+> ```bash
+> npm install -g claude-faf-mcp  # 800+ weekly downloads!
+> ```
+
+---
+
 ## 🧡 What is .faf?
 
 **[Have you been dot.faffed yet? 🧡⚡️](https://faf.one)**
@@ -47,11 +54,16 @@
 
 ## 🚀 Quick Start
 
-### ⚡️💥 GET BOTH! Double Down!
+### ⚡️💥 DOUBLE DOWN! Get Both!
 ```bash
-npm install -g faf-cli         # 🩵⚡️ AI-powered CLI
-npm install -g claude-faf-mcp  # 🧡⚡️ Claude Desktop integration
+npm install -g faf-cli         # 🩵⚡️ AI-powered CLI (this package)
+npm install -g claude-faf-mcp  # 🧡⚡️ Claude Desktop integration (800+ weekly downloads!)
 ```
+
+**Why both?**
+- **CLI**: Command-line power for any terminal
+- **MCP**: Direct integration in Claude Desktop
+- **Together**: Complete .faf ecosystem!
 
 ### Generate Your First .faf
 ```bash
