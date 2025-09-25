@@ -46,6 +46,15 @@ export async function initFafFile(
 
   try {
     const projectRoot = projectPath || process.cwd();
+    const homeDir = require('os').homedir();
+
+    // CRITICAL: Prevent running in home or root directory
+    if (!projectPath && (projectRoot === homeDir || projectRoot === '/')) {
+      console.log();
+      console.log(FAF_COLORS.fafOrange('⚠️  For speed and safety, we do not work on ROOT directories.'));
+      console.log(chalk.yellow('Please provide or cd my-project\n'));
+      return;
+    }
     const outputPath = options.output ? options.output : `${projectRoot}/.faf`;
 
     // Check if .faf file already exists
