@@ -152,11 +152,27 @@ npm run test:watch  # Watch mode
 npm run test:perf   # Performance tests
 ```
 
+## 📦 Dependencies (Lean & Mean)
+
+**Core Dependencies:**
+- `yaml` (v2.4.1) - The .faf format language (YAML & 🍜 noodles)
+- `chalk` (v4.1.2) - Terminal colors
+- `commander` (v9.5.0) - CLI framework
+- `inquirer` (v12.9.4) - Interactive prompts
+- `glob` (v11.0.3) - File pattern matching
+
+**To Be Removed:**
+- ❌ `openai` - Not used (removing in v2.2.0)
+- ❌ `enquirer` - Duplicate of inquirer (removing in v2.2.0)
+- ❌ `@types/inquirer` - Should be in devDependencies
+
+Total: 9 dependencies → targeting 6 in v2.2.0
+
 ## 🏎️ F1-Inspired Philosophy
 
 We build software like F1 teams build race cars:
 - **Performance Mad** - <50ms or it's too slow
-- **Zero Errors** - Perfection is the standard  
+- **Zero Errors** - Perfection is the standard
 - **Championship Grade** - 85%+ scores minimum
 - **Premium Quality** - AMG Mercedes, not Honda Civic
 

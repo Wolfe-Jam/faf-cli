@@ -162,13 +162,9 @@ export class TurboCat {
           ignore: ['node_modules/**', '.git/**', 'dist/**', 'build/**', 'venv/**', '__pycache__/**'],
           absolute: true,
           nodir: true  // Only files, skip directories
-        }, (err, matches) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(matches.slice(0, 10)); // Limit total files for speed
-          }
-        });
+        })
+          .then(matches => resolve(matches.slice(0, 10))) // Limit total files for speed
+          .catch(err => reject(err));
       });
 
       // 🏎️ F1-OPTIMIZATION: Process files in parallel batches
