@@ -6,6 +6,7 @@
 import chalk from "chalk";
 import { promises as fs } from "fs";
 import * as path from "path";
+import inquirer from "inquirer";
 import { findFafFile } from "../utils/file-utils";
 import { initFafFile } from "./init";
 import { syncFafFile } from "./sync";
@@ -96,6 +97,7 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
 
     // Quick tips
     console.log(chalk.blue("Next steps:"));
+    console.log(chalk.gray("  • Email hard copy: ") + chalk.white("faf email") + chalk.gray(" (you'll want this!)"));
     console.log(chalk.gray("  • Check your score: ") + chalk.white("faf show"));
     console.log(chalk.gray("  • See details: ") + chalk.white("faf score --details"));
     console.log(chalk.gray("  • Keep synced: ") + chalk.white("faf bi-sync --watch"));
