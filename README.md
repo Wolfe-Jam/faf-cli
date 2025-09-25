@@ -1,4 +1,4 @@
-# 🏁 .faf - The JPEG for AI™
+# 🩵⚡️ .faf CLI - The JPEG for AI™
 
 <div align="center">
 
@@ -19,6 +19,8 @@
 ---
 
 ## 🧡 What is .faf?
+
+**[Have you been dot.faffed yet? 🧡⚡️](https://faf.one)**
 
 **.faf (Foundational AI-context Format)** is the universal standard for AI context management. Like JPEG revolutionized image compression, `.faf` revolutionizes how AI understands your projects.
 
@@ -45,9 +47,10 @@
 
 ## 🚀 Quick Start
 
-### Install the CLI
+### ⚡️💥 GET BOTH! Double Down!
 ```bash
-npm install -g faf-cli
+npm install -g faf-cli         # 🩵⚡️ AI-powered CLI
+npm install -g claude-faf-mcp  # 🧡⚡️ Claude Desktop integration
 ```
 
 ### Generate Your First .faf
