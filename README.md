@@ -18,9 +18,9 @@
 
 ---
 
-> **🧡⚡️ CLAUDE DESKTOP USERS:** Also install [`claude-faf-mcp`](https://www.npmjs.com/package/claude-faf-mcp) for direct MCP integration!
+> **🧡⚡️ CLAUDE DESKTOP USERS:** Get our MCP with 800+ weekly downloads!
 > ```bash
-> npm install -g claude-faf-mcp  # 800+ weekly downloads!
+> npm install -g claude-faf-mcp  # Our most popular package!
 > ```
 
 ---
@@ -48,7 +48,7 @@
 - 📝 **MCP PR Submitted** - #2759 (pending review)
 - ✅ **TypeScript Strict Mode** - Zero violations
 - ✅ **20 Edge Case Tests** - All passing
-- ✅ **201+ Downloads** - Real developers using it now
+- ✅ **201+ Weekly Downloads** - Growing fast!
 - ✅ **Published on npm** - faf-cli v2.1.5
 - 🧪 **Obsessed with Testing** - ZERO ERRORS for True Performance
 
