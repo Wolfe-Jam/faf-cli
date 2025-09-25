@@ -2,9 +2,7 @@
 
 <div align="center">
 
-![Orange Smiley Logo](https://faf.one/orange-smiley.svg)
-
-![FAF Banner](https://faf.one/faf-hero.png)
+<img src="https://faf.one/orange-smiley.svg" alt="Orange Smiley Logo" width="200" />
 
 [![NPM Version](https://img.shields.io/npm/v/faf-cli?style=for-the-badge&logo=npm&logoColor=white&color=FF6B35)](https://www.npmjs.com/package/faf-cli)
 [![Chrome Web Store](https://img.shields.io/badge/Chrome-Extension-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white)](https://chrome.google.com/webstore)
