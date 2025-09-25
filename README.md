@@ -1,10 +1,10 @@
-# 🏁 FAF - The JPEG for AI™
+# 🏁 .faf - The JPEG for AI™
 
 <div align="center">
 
 ![FAF Banner](https://faf.one/faf-hero.png)
 
-[![NPM Version](https://img.shields.io/npm/v/@faf/cli?style=for-the-badge&logo=npm&logoColor=white&color=FF6B35)](https://www.npmjs.com/package/@faf/cli)
+[![NPM Version](https://img.shields.io/npm/v/faf-cli?style=for-the-badge&logo=npm&logoColor=white&color=FF6B35)](https://www.npmjs.com/package/faf-cli)
 [![Chrome Web Store](https://img.shields.io/badge/Chrome-Extension-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white)](https://chrome.google.com/webstore)
 [![MCP Ready](https://img.shields.io/badge/MCP-Ready-00BCD4?style=for-the-badge&logo=anthropic&logoColor=white)](https://github.com/modelcontextprotocol/servers)
 [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
