@@ -1,0 +1,15 @@
+version: 2.0.0
+project:
+  name: complete-test
+  description: A complete test project
+  technologies:
+    - TypeScript
+    - Node.js
+instant_context:
+  what_building: Complete test suite
+  main_language: TypeScript
+key_files:
+  - path: index.ts
+    purpose: Main entry point
+  - path: test.ts
+    purpose: Test suite
