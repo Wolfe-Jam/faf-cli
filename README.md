@@ -29,7 +29,7 @@
 - 🤯 **AI confusion** from poor project understanding
 
 ### The .faf Solution
-- ⚡️ **3 minutes** to 99% AI understanding
+- ⚡️ **3 minutes** to 99% AI understanding (3 seconds AI, 2:57 human clicking 😉)
 - 🏎️ **<50ms** processing time
 - 🎯 **154+ formats** validated and supported
 - 🔄 **Eternal-Sync™** keeps context always current
@@ -152,19 +152,19 @@ npm run test:perf   # Performance tests
 
 ## 📦 Dependencies (Lean & Mean)
 
-**Core Dependencies:**
-- `yaml` (v2.4.1) - The .faf format language (YAML & 🍜 noodles)
-- `chalk` (v4.1.2) - Terminal colors
-- `commander` (v9.5.0) - CLI framework
-- `inquirer` (v12.9.4) - Interactive prompts
-- `glob` (v11.0.3) - File pattern matching
+**Production Dependencies (6 only!):**
+1. `@faf/engine` (local) - Our core engine
+2. `chalk` (^4.1.2) - Terminal colors
+3. `commander` (^9.5.0) - CLI framework
+4. `glob` (^11.0.3) - File patterns
+5. `inquirer` (^12.9.4) - Interactive prompts
+6. `yaml` (^2.4.1) - The .faf language (YAML & 🍜 noodles)
 
-**To Be Removed:**
-- ❌ `openai` - Not used (removing in v2.2.0)
-- ❌ `enquirer` - Duplicate of inquirer (removing in v2.2.0)
-- ❌ `@types/inquirer` - Should be in devDependencies
-
-Total: 9 dependencies → targeting 6 in v2.2.0
+**✅ Cleanup Complete:**
+- Removed `openai` - Not used
+- Removed `enquirer` - Duplicate
+- Moved `@types/inquirer` to devDependencies
+- **33% reduction achieved!** (9 → 6 dependencies)
 
 ## 🏎️ F1-Inspired Philosophy
 
