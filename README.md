@@ -5,14 +5,14 @@
 <img src="https://faf.one/orange-smiley.svg" alt="Orange Smiley Logo" width="200" />
 
 [![NPM Version](https://img.shields.io/npm/v/faf-cli?style=for-the-badge&logo=npm&logoColor=white&color=FF6B35)](https://www.npmjs.com/package/faf-cli)
-[![Chrome Web Store](https://img.shields.io/badge/Chrome-Extension-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white)](https://chrome.google.com/webstore)
+[![Weekly Downloads](https://img.shields.io/npm/dw/faf-cli?style=for-the-badge&logo=npm&logoColor=white&color=FF6B35)](https://www.npmjs.com/package/faf-cli)
 [![MCP Ready](https://img.shields.io/badge/MCP-Ready-00BCD4?style=for-the-badge&logo=anthropic&logoColor=white)](https://github.com/modelcontextprotocol/servers)
 [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
 
-### **Enterprise AI Context Management - F1-Inspired Performance**
+### **🆓 FREE & Open Source AI Context Management**
 **20 minutes → 3 minutes** • **<50ms processing** • **99% AI understanding**
 
-[🚀 Get Started](https://faf.one) • [📚 Documentation](https://faf.one/docs) • [🎮 Live Demo](https://faf.one/calculator) • [💎 Founders Circle](https://faf.one/founders)
+[🚀 Get Started](https://faf.one) • [📚 Documentation](https://faf.one/docs) • [🎮 Live Demo](https://faf.one/calculator)
 
 </div>
 
@@ -34,19 +34,20 @@
 - 🎯 **154+ formats** validated and supported
 - 🔄 **Eternal-Sync™** keeps context always current
 
-## 🏆 Real Achievements (Actually True)
+## 🏆 Real Achievements
 
-- 📝 **MCP PR Submitted** - #2759 (pending review)
+- 🆓 **100% FREE** - Open source CLI tool
+- 📦 **800+ Weekly Downloads** - Growing community
+- 📝 **MCP Integration** - Works with Claude Desktop
 - ✅ **TypeScript Strict Mode** - Zero violations
-- ✅ **20 Edge Case Tests** - All passing
-- ✅ **201+ Downloads** - Real developers using it now
-- ✅ **Published on npm** - faf-cli v2.1.5
-- 🧪 **Obsessed with Testing** - ZERO ERRORS for True Performance
+- ✅ **Battle Tested** - 20 extreme stress tests passed
+- 🏎️ **Championship Grade** - <50ms performance
 
 ## 🚀 Quick Start
 
-### Install the CLI
+### Install the FREE CLI
 ```bash
+# 100% FREE - No credit card required
 npm install -g faf-cli
 ```
 
@@ -94,20 +95,6 @@ Extract context from any web-based IDE or platform:
 Beautiful web interface with real-time scoring visualization.
 
 [🌐 Live Demo](https://faf.one) • [📚 Engine Docs](./faf-svelte-engine/README.md)
-
-## 💰 Pricing
-
-### Founder - $9/month
-- **Forever pricing** for first 100 members
-- All premium features
-- Priority support
-
-### Legend - $100/year
-- Unlimited projects
-- Team collaboration
-- Enterprise features
-
-[🏁 Join as Founder](https://faf.one/founders)
 
 ## 📊 Performance Metrics
 

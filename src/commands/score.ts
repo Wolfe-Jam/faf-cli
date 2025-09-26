@@ -14,13 +14,31 @@ import { FafDNAManager, displayScoreWithBirthWeight } from "../engines/faf-dna";
 import * as path from "path";
 import { PlatformDetector } from "../utils/platform-detector";
 import { VibeSync } from "../utils/vibe-sync";
+import { scoreCommandV3 } from "./score-v3";
 
 interface ScoreOptions {
   details?: boolean;
   minimum?: string;
+  compiler?: boolean;
+  trace?: boolean;
+  verify?: string;
+  checksum?: boolean;
+  breakdown?: boolean;
 }
 
 export async function scoreFafFile(file?: string, options: ScoreOptions = {}) {
+  // Use compiler-based scoring if requested
+  if (options.compiler || options.trace || options.verify || options.checksum || options.breakdown) {
+    return scoreCommandV3(file, {
+      trace: options.trace,
+      verify: options.verify,
+      breakdown: options.breakdown,
+      checksum: options.checksum,
+      verbose: options.details
+    });
+  }
+
+  // Legacy scoring
   try {
     let fafPath: string | null = null;
     
