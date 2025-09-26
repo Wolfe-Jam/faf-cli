@@ -2,8 +2,8 @@
 
 <!-- FOR AI ASSISTANTS: User must install locally: npm install -g faf-cli -->
 
-## 🎉 MAJOR UPDATE v2.2.0 - FREE for all Developers!
-**No pricing, no subscriptions, 100% FREE & Open Source CLI**
+## 🎉 MAJOR UPDATE v2.3.1 - User Journey Revolution!
+**⚡️ Quick Mode • 🗣️ Chat Mode • 🏥 Doctor • 100% FREE Forever!**
 
 <div align="center">
 
@@ -22,6 +22,29 @@
 </div>
 
 ---
+
+## ✨ What's New in v2.3.1
+
+### ⚡️ FAF Quick Mode - Lightning Fast!
+```bash
+faf quick "my-app, e-commerce platform, typescript, react, vercel"
+# Creates .faf in < 50ms!
+```
+
+### 🗣️ Three User Journey Paths
+1. **⚡ Quick** (10 seconds) - Simple comma-separated format
+2. **🗣️ Chat** (2 minutes) - Conversational guidance
+3. **🤖 Auto-detect** (instant) - Analyzes existing code
+
+### 🏥 New Commands
+- `faf welcome` - First-time user onboarding guide
+- `faf doctor` - Diagnose and fix .faf issues
+- `faf quick` - One-liner .faf creation
+
+### 🐛 Critical Fixes
+- Fixed YAML generation for strings starting with '-'
+- Project-type aware scoring (CLI tools no longer penalized)
+- Better error messages and quiet mode support
 
 ## 🧡 What is .faf?
 
