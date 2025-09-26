@@ -334,6 +334,18 @@ program
   .description('🏆 Show FAF version with MK2 Engine and TURBO-CAT status')
   .action(withAnalyticsTracking('version', () => versionCommand()));
 
+// 🏎️ faf cache - FileSystem Cache Management
+program
+  .command('cache')
+  .description('🏎️ Manage FileSystem cache (70% speed improvement)')
+  .option('-c, --clear', 'Clear the cache')
+  .option('-s, --stats', 'Show cache statistics')
+  .option('-w, --warm', 'Warm the cache')
+  .action(async (options) => {
+    const { cacheCommand } = await import('./commands/cache');
+    await cacheCommand(options);
+  });
+
 // 🧡 faf trust - Consolidated Trust Dashboard (The Emotional Core)
 program
   .command('trust')

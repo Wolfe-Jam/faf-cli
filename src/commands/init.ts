@@ -116,6 +116,16 @@ export async function initFafFile(
     // Award technical credit for successful initialization
     await autoAwardCredit('init_success', outputPath);
 
+    // Warm cache for next commands (Telepathy feature!)
+    if (process.env.FAF_CACHE === 'true') {
+      const { cachedOps } = require('../utils/filesystem-cache');
+      await cachedOps.warmCache('init');
+
+      if (process.env.FAF_VERBOSE === 'true') {
+        console.log(FAF_COLORS.fafCyan('🏎️ Cache warmed for instant next commands'));
+      }
+    }
+
     // REVOLUTIONARY: Score CLAUDE.md ONLY for birth weight!
     // This is the TRUE starting point - what AI sees initially
     console.log();

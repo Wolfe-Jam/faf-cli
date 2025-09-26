@@ -7,6 +7,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import { glob } from "glob";
 import { parseFafIgnore } from "./fafignore-parser";
+import { cachedOps } from "./filesystem-cache";
 
 /**
  * Find .faf file in current directory or parent directories
@@ -14,6 +15,10 @@ import { parseFafIgnore } from "./fafignore-parser";
 export async function findFafFile(
   startDir: string = process.cwd(),
 ): Promise<string | null> {
+  // Use cached version if cache is enabled
+  if (process.env.FAF_CACHE === 'true') {
+    return cachedOps.findFafFile(startDir);
+  }
   let currentDir = path.resolve(startDir);
 
   // Check up to 10 parent directories to avoid infinite loops
