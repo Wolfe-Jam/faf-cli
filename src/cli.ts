@@ -361,17 +361,16 @@ Trust Modes:
 // ⚡️ faf vibe - No-Code/Low-Code Builder Edition
 program
   .command('vibe')
-  .description('⚡️ FAF VIBE - Check $9 tier eligibility for no-code builders')
+  .description('⚡️ FAF VIBE - Detect your development platform')
   .option('-p, --preview', 'Preview TURBO-CAT discovery')
   .addHelpText('after', `
 Examples:
-  $ faf vibe                         # Check platform & pricing
+  $ faf vibe                         # Check platform type
   $ faf vibe --preview               # Include TURBO-CAT preview
 
 ⚡️ FAF VIBE Features:
   • Auto-detects no-code platforms (Replit, Lovable, Wix, etc.)
-  • $9/month FOREVER (limited time offer)
-  • Same features as $100 Pro Plan
+  • FREE CLI tool for all platforms
   • TURBO-CAT format discovery
   • Lightning not rainbows!`)
   .action(withAnalyticsTracking('vibe', (options) => {

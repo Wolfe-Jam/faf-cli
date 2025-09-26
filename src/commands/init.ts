@@ -188,7 +188,7 @@ export async function initFafFile(
       console.log();
       console.log(FAF_COLORS.fafOrange('⚡️ FAF VIBE DETECTED! 😽'));
       console.log(FAF_COLORS.fafCyan(`   Platform: ${platformInfo.platform}`));
-      console.log(FAF_COLORS.fafGreen(`   Special pricing: $9/month FOREVER!`));
+      console.log(FAF_COLORS.fafGreen(`   FREE CLI for all platforms!`));
       console.log(FAF_COLORS.fafWhite(`   ${FAF_ICONS.turbo_cat} TURBO-CAT is ready to make your AI happy!`));
     }
 
