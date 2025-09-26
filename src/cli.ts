@@ -38,6 +38,7 @@ import { convertCommand, toMarkdown, toText } from './commands/convert';
 import { setColorOptions, type ColorScheme } from './utils/color-utils';
 import { generateFAFHeader, generateHelpHeader, FAF_COLORS } from './utils/championship-style';
 import { analytics, trackCommand, trackError, withPerformanceTracking } from './telemetry/analytics';
+import { checkForUpdates, forceUpdateCheck } from './utils/update-checker';
 import { findFafFile } from './utils/file-utils';
 import { calculateFafScore } from './scoring/score-calculator';
 import { getTrustCache } from './utils/trust-cache';
@@ -1265,6 +1266,11 @@ if (!commandUsed) {
   } else {
     const isHelp = commandUsed === '--help' || commandUsed === '-h' || commandUsed === 'help';
     showHeaderIfAppropriate(isHelp ? 'help' : commandUsed);
+
+    // Check for updates (non-blocking, respects quiet mode)
+    checkForUpdates({ quiet: options.quiet }).catch(() => {
+      // Silent fail - update check is not critical
+    });
 
     // Apply color accessibility settings after parsing
     if (options.noColor || process.env.NO_COLOR) {
