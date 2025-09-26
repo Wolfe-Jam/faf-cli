@@ -1,5 +1,8 @@
 # 🏁 .faf - The JPEG for AI™
 
+## 🎉 MAJOR UPDATE v2.2.0 - FREE for all Developers!
+**No pricing, no subscriptions, 100% FREE & Open Source CLI**
+
 <div align="center">
 
 <img src="https://faf.one/orange-smiley.svg" alt="Orange Smiley Logo" width="200" />
