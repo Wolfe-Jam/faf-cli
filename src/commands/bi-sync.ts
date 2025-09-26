@@ -165,14 +165,18 @@ export async function syncBiDirectional(): Promise<SyncResult> {
     // const fafExists = true; // We found it above (unused)
     const claudeMdExists = await fs.access(claudeMdPath).then(() => true).catch(() => false);
     
-    console.log(FAF_COLORS.fafCyan(`${FAF_ICONS.link} Bi-Sync Engine`));
+    // Show score FIRST - top line
+    const fafContent = await fs.readFile(fafPath, 'utf-8');
+    const fafData = YAML.parse(fafContent);
+    const currentScore = fafData.faf_score || '0%';
+
+    console.log(FAF_COLORS.fafOrange(`🏆 FAF Score: ${currentScore} | Bi-Sync Engine ${FAF_ICONS.link}`));
     console.log(`${FAF_COLORS.fafCyan('├─ ')  }Analyzing sync files...`);
     
     if (!claudeMdExists) {
       // Create claude.md from .faf
       console.log(`${FAF_COLORS.fafCyan('├─ ')  }Creating claude.md from .faf...`);
-      
-      const fafContent = await fs.readFile(fafPath, 'utf-8');
+
       const claudeMdContent = fafToClaudeMd(fafContent);
       
       await fs.writeFile(claudeMdPath, claudeMdContent, 'utf-8');
@@ -209,7 +213,7 @@ export async function syncBiDirectional(): Promise<SyncResult> {
     console.log();
     console.log(FAF_COLORS.fafGreen(`${FAF_ICONS.trophy} Championship sync complete in ${result.duration}ms!`));
     console.log(`${FAF_COLORS.fafCyan(`${FAF_ICONS.magic_wand} Try: `)  }faf status${  FAF_COLORS.fafCyan(' - See your bi-sync status')}`);
-    
+
     return result;
     
   } catch (error) {

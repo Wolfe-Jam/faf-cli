@@ -40,9 +40,12 @@ export async function initFafFile(
 ) {
   const startTime = Date.now();
 
-  // Show the FAF banner
-  const { generateFAFHeader } = require('../utils/championship-style');
-  console.log(generateFAFHeader());
+  // Show the FAF banner (unless quiet mode)
+  const isQuiet = process.argv.includes('--quiet');
+  if (!isQuiet) {
+    const { generateFAFHeader } = require('../utils/championship-style');
+    console.log(generateFAFHeader());
+  }
 
   try {
     const projectRoot = projectPath || process.cwd();

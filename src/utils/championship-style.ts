@@ -156,8 +156,9 @@ ${FAF_COLORS.fafCyan('└──────────────────�
  * Generate static championship header (no contextual subtitles)
  */
 export function generateFAFHeader(): string {
+  const version = require('../../package.json').version;
   return `${FAF_COLORS.fafCyan('┌─────────────────────────────────────────┐')}
-${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafWhite('███████')}${FAF_COLORS.fafWhite('╗')} ${FAF_COLORS.fafWhite('█████')}${FAF_COLORS.fafWhite('╗')} ${FAF_COLORS.fafWhite('███████')}${FAF_COLORS.fafWhite('╗')}  🏎️⚡️🏁  v2.1.3 ${FAF_COLORS.fafCyan('│')}
+${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafWhite('███████')}${FAF_COLORS.fafWhite('╗')} ${FAF_COLORS.fafWhite('█████')}${FAF_COLORS.fafWhite('╗')} ${FAF_COLORS.fafWhite('███████')}${FAF_COLORS.fafWhite('╗')}  🏎️⚡️🏁  v${version} ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafCyan('██')}${FAF_COLORS.fafWhite('╔════╝')}${FAF_COLORS.fafCyan('██')}${FAF_COLORS.fafWhite('╔══')}${FAF_COLORS.fafCyan('██')}${FAF_COLORS.fafWhite('╗')}${FAF_COLORS.fafCyan('██')}${FAF_COLORS.fafWhite('╔════╝')}                ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafCyan('█████')}${FAF_COLORS.fafWhite('╗  ')}${FAF_COLORS.fafCyan('███████')}${FAF_COLORS.fafWhite('║')}${FAF_COLORS.fafCyan('█████')}${FAF_COLORS.fafWhite('╗')}                  ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafOrange('██')}${FAF_COLORS.fafWhite('╔══╝  ')}${FAF_COLORS.fafOrange('██')}${FAF_COLORS.fafWhite('╔══')}${FAF_COLORS.fafOrange('██')}${FAF_COLORS.fafWhite('║')}${FAF_COLORS.fafOrange('██')}${FAF_COLORS.fafWhite('╔══╝')}                  ${FAF_COLORS.fafCyan('│')}

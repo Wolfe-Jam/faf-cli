@@ -7,6 +7,7 @@
 
 import chalk from "chalk";
 import { promises as fs } from "fs";
+import * as path from "path";
 import * as YAML from "yaml";
 import { findFafFile } from "../utils/file-utils";
 // Removed unused imports
@@ -41,7 +42,15 @@ export async function enhanceFafWithAI(
     const content = await fs.readFile(fafPath, "utf-8");
     const fafData = YAML.parse(content);
 
-    console.log(chalk.cyan("📊 Current .faf score:"), chalk.bold(fafData.ai_score || fafData.scores?.faf_score || "N/A"));
+    // Calculate real score, don't trust embedded score
+    const { FafCompiler } = require('../compiler/faf-compiler');
+    const compiler = new FafCompiler(path.dirname(fafPath));
+    const realScore = await compiler.compile(fafPath);
+
+    console.log(chalk.cyan("📊 Current .faf score:"), chalk.bold(`${realScore.score}%`));
+
+    // WARNING: This is a mock implementation
+    console.log(chalk.yellow("⚠️  Enhancement is currently in beta and may not improve scores"));
 
     // Determine enhancement focus
     const focus = options.focus || detectEnhancementFocus(fafData);
@@ -214,12 +223,14 @@ async function executeBig3Enhancement(
 async function generateMockEnhancement(fafData: any, focus: string): Promise<any> {
   // Simulate AI analysis delay
   await new Promise(resolve => setTimeout(resolve, 200));
-  
+
   const improvements = {
     'human-context': {
-      who: fafData.human_context?.who || 'Development teams building next-generation software',
-      what: fafData.human_context?.what || 'AI-powered development infrastructure with trust-driven workflows',
-      why: fafData.human_context?.why || 'Transform developer psychology from hope-driven to trust-driven AI collaboration'
+      // Don't add generic placeholders - they provide no value
+      // Only keep existing values or leave empty for user to fill
+      who: fafData.human_context?.who,
+      what: fafData.human_context?.what,
+      why: fafData.human_context?.why
     },
     'ai-instructions': {
       priority_order: [

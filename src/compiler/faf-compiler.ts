@@ -382,21 +382,33 @@ export class FafCompiler {
     this.addSlot(slots, 'project.goal', ast.project?.goal, 'string', 'original', 1);
     this.addSlot(slots, 'project.main_language', ast.project?.main_language, 'string', 'original', 1);
 
-    // Stack slots (12)
-    this.addSlot(slots, 'stack.frontend', ast.stack?.frontend, 'string', 'original', 1);
-    this.addSlot(slots, 'stack.css_framework', ast.stack?.css_framework, 'string', 'original', 1);
-    this.addSlot(slots, 'stack.ui_library', ast.stack?.ui_library, 'string', 'original', 1);
-    this.addSlot(slots, 'stack.state_management', ast.stack?.state_management, 'string', 'original', 1);
-    this.addSlot(slots, 'stack.backend', ast.stack?.backend, 'string', 'original', 1);
-    this.addSlot(slots, 'stack.api_type', ast.stack?.api_type, 'string', 'original', 1);
-    this.addSlot(slots, 'stack.runtime', ast.stack?.runtime, 'string', 'original', 1);
-    this.addSlot(slots, 'stack.database', ast.stack?.database, 'string', 'original', 1);
-    this.addSlot(slots, 'stack.connection', ast.stack?.connection, 'string', 'original', 1);
+    // Detect project type to determine applicable stack slots
+    const projectType = this.detectProjectTypeFromContext(ast);
+    const isFrontendProject = this.requiresFrontendStack(projectType);
+    const isBackendProject = this.requiresBackendStack(projectType);
+
+    // Stack slots - only add relevant ones based on project type
+    if (isFrontendProject) {
+      this.addSlot(slots, 'stack.frontend', ast.stack?.frontend, 'string', 'original', 1);
+      this.addSlot(slots, 'stack.css_framework', ast.stack?.css_framework, 'string', 'original', 1);
+      this.addSlot(slots, 'stack.ui_library', ast.stack?.ui_library, 'string', 'original', 1);
+      this.addSlot(slots, 'stack.state_management', ast.stack?.state_management, 'string', 'original', 1);
+    }
+
+    if (isBackendProject) {
+      this.addSlot(slots, 'stack.backend', ast.stack?.backend, 'string', 'original', 1);
+      this.addSlot(slots, 'stack.api_type', ast.stack?.api_type, 'string', 'original', 1);
+      this.addSlot(slots, 'stack.runtime', ast.stack?.runtime, 'string', 'original', 1);
+      this.addSlot(slots, 'stack.database', ast.stack?.database, 'string', 'original', 1);
+      this.addSlot(slots, 'stack.connection', ast.stack?.connection, 'string', 'original', 1);
+    }
+
+    // Universal stack slots (apply to all project types)
     this.addSlot(slots, 'stack.hosting', ast.stack?.hosting, 'string', 'original', 1);
     this.addSlot(slots, 'stack.build', ast.stack?.build, 'string', 'original', 1);
     this.addSlot(slots, 'stack.cicd', ast.stack?.cicd, 'string', 'original', 1);
 
-    // Human context slots (6)
+    // Human context slots (6) - always applicable
     this.addSlot(slots, 'human.who', ast.human_context?.who, 'string', 'original', 1);
     this.addSlot(slots, 'human.what', ast.human_context?.what, 'string', 'original', 1);
     this.addSlot(slots, 'human.why', ast.human_context?.why, 'string', 'original', 1);
@@ -454,7 +466,19 @@ export class FafCompiler {
     if (typeof value === 'string') {
       // Also treat string representations of null/undefined as empty
       const empty = ['', 'None', 'Unknown', 'Not specified', 'N/A', 'null', 'undefined', '~'];
-      return !empty.includes(value.trim());
+      // Also reject generic placeholders that provide no real context
+      const genericPlaceholders = [
+        'Development teams',
+        'Software development solution',
+        'Improve development efficiency',
+        'Cloud platform',
+        'Ongoing development',
+        'Modern development practices',
+        'Development teams building next-generation software',
+        'AI-powered development infrastructure with trust-driven workflows'
+      ];
+      const trimmed = value.trim();
+      return !empty.includes(trimmed) && !genericPlaceholders.includes(trimmed);
     }
 
     if (typeof value === 'number') {
@@ -481,6 +505,58 @@ export class FafCompiler {
     }
 
     return this.isSlotFilled(current);
+  }
+
+  private detectProjectTypeFromContext(ast: any): string {
+    // Check for explicit project type
+    if (ast.project?.type) return ast.project.type;
+
+    // Infer from goal and context
+    const goal = (ast.project?.goal || '').toLowerCase();
+    const what = (ast.human_context?.what || '').toLowerCase();
+    const mainLanguage = (ast.project?.main_language || '').toLowerCase();
+
+    // CLI tool indicators
+    if (goal.includes('cli') || what.includes('cli') ||
+        goal.includes('command line') || what.includes('command line')) {
+      return 'cli-tool';
+    }
+
+    // Library indicators
+    if (goal.includes('library') || what.includes('library') ||
+        goal.includes('package') || what.includes('npm package')) {
+      return 'library';
+    }
+
+    // API/Backend indicators
+    if (goal.includes('api') || what.includes('api') ||
+        goal.includes('backend') || what.includes('backend') ||
+        ast.stack?.backend && !ast.stack?.frontend) {
+      return 'backend-api';
+    }
+
+    // Frontend indicators
+    if (ast.stack?.frontend || ast.stack?.css_framework || ast.stack?.ui_library) {
+      return ast.stack?.backend ? 'fullstack' : 'frontend';
+    }
+
+    // Language-based defaults
+    if (mainLanguage === 'python') {
+      if (ast.stack?.frontend) return 'fullstack';
+      return 'python-app'; // Could be CLI, API, or data science
+    }
+
+    return 'generic';
+  }
+
+  private requiresFrontendStack(projectType: string): boolean {
+    const frontendTypes = ['frontend', 'fullstack', 'svelte', 'react', 'vue', 'angular'];
+    return frontendTypes.includes(projectType);
+  }
+
+  private requiresBackendStack(projectType: string): boolean {
+    const backendTypes = ['backend-api', 'fullstack', 'cli-tool', 'library', 'python-app', 'node-api'];
+    return backendTypes.includes(projectType);
   }
 
   private calculateSlots(ir: IRSlot[]): {

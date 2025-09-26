@@ -22,7 +22,11 @@ export async function scoreCommandV3(
   file?: string,
   options: ScoreOptions = {}
 ) {
-  console.log(chalk.blue("\n🏎️ FAF Score Compiler v3.0\n"));
+  // Only show header if not in quiet mode
+  const isQuiet = process.argv.includes('--quiet');
+  if (!isQuiet) {
+    console.log(chalk.blue("\n🏎️ FAF Score Compiler v3.0\n"));
+  }
 
   try {
     // Find .faf file
@@ -39,8 +43,13 @@ export async function scoreCommandV3(
     }
 
     if (!fafPath) {
-      console.error(chalk.red("❌ No .faf file found"));
-      console.log(chalk.yellow('💡 Run "faf init" to create one'));
+      if (file) {
+        console.error(chalk.red(`❌ No .faf file found at: ${file}`));
+        console.log(chalk.yellow(`💡 Check the path or run "faf init" in that directory`));
+      } else {
+        console.error(chalk.red("❌ No .faf file found in current directory"));
+        console.log(chalk.yellow('💡 Run "faf init" to create one'));
+      }
       process.exit(1);
     }
 

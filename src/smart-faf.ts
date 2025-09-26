@@ -58,7 +58,7 @@ class SmartFaf {
         this.updateState({ synced: true });
 
         // After bi-sync, suggest commit
-        console.log('\n🏆 You\'re at 99%+ with perfect sync!');
+        this.displayChampionshipScore(99);
         console.log('→ Run: faf commit');
         console.log('   Lock in this excellence forever\n');
         return;
@@ -247,10 +247,37 @@ class SmartFaf {
   }
 
   /**
+   * Display championship score with ASCII art
+   */
+  private displayChampionshipScore(score: number): void {
+    console.log();
+    console.log('╔════════════════════════════════════╗');
+    console.log('║       🏆 CHAMPIONSHIP SCORE 🏆      ║');
+    console.log('╠════════════════════════════════════╣');
+    console.log(`║              ${score >= 99 ? '⭐' : '  '} ${String(score).padStart(3)}% ${score >= 99 ? '⭐' : '  '}             ║`);
+    console.log('╠════════════════════════════════════╣');
+    if (score >= 99) {
+      console.log('║     🎯 PERFECT AI READINESS! 🎯    ║');
+      console.log('║        You are at POLE POSITION!   ║');
+    } else if (score >= 85) {
+      console.log('║      ✨ EXCELLENT PROGRESS! ✨     ║');
+      console.log('║         Championship level!        ║');
+    } else if (score >= 70) {
+      console.log('║       📈 GOOD PROGRESS! 📈         ║');
+      console.log('║        Keep pushing forward!       ║');
+    } else {
+      console.log('║       🌱 GROWING STRONG! 🌱        ║');
+      console.log('║         Room to improve!           ║');
+    }
+    console.log('╚════════════════════════════════════╝');
+    console.log();
+  }
+
+  /**
    * Suggest commit when at 99% but not locked
    */
   private suggestCommit(state: FafState): void {
-    console.log(`🏆 You're at ${state.score}% excellence!\n`);
+    this.displayChampionshipScore(state.score);
     console.log('Your AI context is perfect, but not locked in.\n');
     console.log('→ Run: faf commit');
     console.log('   Lock in this excellence forever');

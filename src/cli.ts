@@ -120,6 +120,12 @@ function withAnalyticsTracking<T extends (...args: any[]) => Promise<any> | any>
 }
 
 function showHeaderIfAppropriate(commandName?: string) {
+  // Check for quiet mode
+  const opts = program.opts();
+  if (opts.quiet) {
+    return; // Skip header in quiet mode
+  }
+
   const showHeaderCommands = ['help', 'init', 'clear', 'enhance', 'analyze', 'chat', 'formats', 'score', 'version'];
   if (!commandName || showHeaderCommands.includes(commandName)) {
     console.log(generateFAFHeader());
@@ -132,6 +138,7 @@ program
   .version(version)
   .option('--no-color', 'Disable colored output for accessibility')
   .option('--color-scheme <scheme>', 'Color scheme for colorblind accessibility: normal|deuteranopia|protanopia|tritanopia', 'normal')
+  .option('--quiet', 'Quiet mode - minimal output, no ASCII banners')
   .option('--auto', 'Auto mode - menu-driven interface for learning and exploration')
   .option('--manual', 'Manual mode - direct command-line interface for power users')
   .addHelpText('after', `
@@ -533,6 +540,55 @@ program
     await toText(file);
   }));
 
+// 👋 faf welcome - First-time user guide
+program
+  .command('welcome')
+  .description('👋 Welcome guide for new users')
+  .action(withAnalyticsTracking('welcome', async () => {
+    const { welcomeCommand } = await import('./commands/welcome');
+    return welcomeCommand();
+  }));
+
+// 🏥 faf doctor - Diagnose issues
+program
+  .command('doctor')
+  .description('🏥 Diagnose and fix common FAF issues')
+  .addHelpText('after', `
+Examples:
+  $ faf doctor                       # Run health check
+
+🏥 Health Checks:
+  • .faf file validity
+  • Score assessment
+  • Project detection
+  • Configuration status
+  • Provides fixes for any issues found`)
+  .action(withAnalyticsTracking('doctor', async () => {
+    const { doctorCommand } = await import('./commands/doctor');
+    return doctorCommand();
+  }));
+
+// ⚡ faf quick - Lightning-fast one-liner .faf creation
+program
+  .command('quick [input]')
+  .description('⚡ Quick .faf creation - one-liner format for instant context')
+  .option('--force', 'Overwrite existing .faf file')
+  .addHelpText('after', `
+Examples:
+  $ faf quick "my-app, e-commerce platform, typescript, react, vercel"
+  $ faf quick "api, REST API for mobile, python, fastapi, aws"
+  $ faf quick "cli-tool, dev productivity, go"
+
+⚡ Lightning Format:
+  • Comma-separated: name, description, language, framework, hosting
+  • Minimum: just name and description
+  • Auto-detects the rest from your project
+  • 0 to .faf in under 100ms!`)
+  .action(withAnalyticsTracking('quick', async (input, options) => {
+    const { quickCommand } = await import('./commands/quick');
+    return quickCommand(input, options);
+  }));
+
 // 🗣️ faf chat - Natural Language .faf Generation
 program
   .command('chat')
@@ -540,7 +596,7 @@ program
   .addHelpText('after', `
 Examples:
   $ faf chat                         # Start conversational .faf creation
-  
+
 🗣️ Simple Natural Language Interface:
   • Answer simple questions about your project
   • Choose from numbered options (KISS method)

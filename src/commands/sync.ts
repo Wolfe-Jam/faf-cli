@@ -56,6 +56,12 @@ export async function syncFafFile(file?: string, options: SyncOptions = {}) {
     // Apply changes
     if (options.auto) {
       console.log(chalk.blue("\n🤖 Auto-applying changes..."));
+
+      // Create backup before applying changes
+      const backupPath = `${fafPath}.backup-${Date.now()}`;
+      await fs.copyFile(fafPath, backupPath);
+      console.log(chalk.dim(`📁 Backup created: ${backupPath}`));
+
       applyChanges(fafData, changes);
     } else {
       // Interactive mode (simplified for now)

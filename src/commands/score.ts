@@ -27,8 +27,11 @@ interface ScoreOptions {
 }
 
 export async function scoreFafFile(file?: string, options: ScoreOptions = {}) {
-  // Use compiler-based scoring if requested
-  if (options.compiler || options.trace || options.verify || options.checksum || options.breakdown) {
+  // Always use compiler-based scoring for accurate project-aware results
+  // The compiler now has project type awareness for fair scoring
+  const useCompiler = true;
+
+  if (useCompiler || options.compiler || options.trace || options.verify || options.checksum || options.breakdown) {
     return scoreCommandV3(file, {
       trace: options.trace,
       verify: options.verify,
@@ -38,7 +41,7 @@ export async function scoreFafFile(file?: string, options: ScoreOptions = {}) {
     });
   }
 
-  // Legacy scoring
+  // Legacy scoring (deprecated path)
   try {
     let fafPath: string | null = null;
     
@@ -63,8 +66,13 @@ export async function scoreFafFile(file?: string, options: ScoreOptions = {}) {
     }
 
     if (!fafPath) {
-      console.error(chalk.red("❌ No .faf file found"));
-      console.log(chalk.yellow('💡 Run "faf init" to create one'));
+      if (file) {
+        console.error(chalk.red(`❌ No .faf file found at: ${file}`));
+        console.log(chalk.yellow(`💡 Check the path or run "faf init" in that directory`));
+      } else {
+        console.error(chalk.red("❌ No .faf file found in current directory"));
+        console.log(chalk.yellow('💡 Run "faf init" to create one'));
+      }
       process.exit(1);
     }
 
