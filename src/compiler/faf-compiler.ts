@@ -516,6 +516,14 @@ export class FafCompiler {
     const what = (ast.human_context?.what || '').toLowerCase();
     const mainLanguage = (ast.project?.main_language || '').toLowerCase();
 
+    // Chrome Extension indicators
+    if (goal.includes('chrome extension') || what.includes('chrome extension') ||
+        goal.includes('browser extension') || what.includes('browser extension') ||
+        goal.includes('extension') && (goal.includes('chrome') || what.includes('chrome')) ||
+        ast.stack?.framework === 'Chrome Extension') {
+      return 'chrome-extension';
+    }
+
     // CLI tool indicators
     if (goal.includes('cli') || what.includes('cli') ||
         goal.includes('command line') || what.includes('command line')) {
@@ -551,12 +559,14 @@ export class FafCompiler {
 
   private requiresFrontendStack(projectType: string): boolean {
     const frontendTypes = ['frontend', 'fullstack', 'svelte', 'react', 'vue', 'angular'];
-    return frontendTypes.includes(projectType);
+    // Chrome extensions don't need traditional frontend stack
+    return frontendTypes.includes(projectType) && projectType !== 'chrome-extension';
   }
 
   private requiresBackendStack(projectType: string): boolean {
     const backendTypes = ['backend-api', 'fullstack', 'cli-tool', 'library', 'python-app', 'node-api'];
-    return backendTypes.includes(projectType);
+    // Chrome extensions don't need traditional backend stack
+    return backendTypes.includes(projectType) && projectType !== 'chrome-extension';
   }
 
   private calculateSlots(ir: IRSlot[]): {
