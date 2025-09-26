@@ -41,7 +41,7 @@ export async function enhanceFafWithAI(
   console.log();
   return;
 
-  // Original code temporarily disabled
+  /* Original code temporarily disabled
   try {
     const fafPath = file || (await findFafFile());
 
@@ -95,6 +95,7 @@ export async function enhanceFafWithAI(
     );
     process.exit(1);
   }
+  */
 }
 
 /**
