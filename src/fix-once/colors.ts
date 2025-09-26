@@ -35,7 +35,7 @@ export const colors = {
 
   // FAF specific colors (Championship theme)
   fafCyan: (text: string): string => chalk.cyan(text),
-  fafOrange: (text: string): string => chalk.yellow(text), // Yellow as orange fallback
+  fafOrange: (text: string): string => chalk.hex('#FF6B35')(text), // True FAF Orange
   fafGreen: (text: string): string => chalk.green(text),
   fafWhite: (text: string): string => chalk.white(text),
 

@@ -141,8 +141,8 @@ function objectToYaml(obj: Record<string, any>, indent = 0): string {
       // Escape YAML special characters and long strings
       let escapedValue = value;
       if (typeof value === 'string') {
-        // Quote strings that start with @, contain :, or are very long
-        if (value.startsWith('@') || value.includes(': ') || value.length > 80) {
+        // Quote strings that start with @, -, contain :, or are very long
+        if (value.startsWith('@') || value.startsWith('-') || value.includes(': ') || value.length > 80) {
           escapedValue = `"${value.replace(/"/g, '\\"')}"`;
         }
       }
