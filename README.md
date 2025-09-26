@@ -254,8 +254,10 @@ Built with thousands of hours of expert development. From the creators of `.iff`
 
 ### **Stop Faffing About. Start Shipping.**
 
-[🏁 Get Started Now](https://faf.one) • [💎 Founder $9/month](https://faf.one/founders)
+[🏁 Get Started Now](https://faf.one) • **FREE for ALL Devs**
 
-**Made with 🧡 by the .faf Team**
+**Made with 🧡 by 🏎️⚡️ wolfejam.dev**
+
+[☕ Buy Me a Coffee](https://buymeacoffee.com/wolfejam) if FAF saves you time!
 
 </div>
