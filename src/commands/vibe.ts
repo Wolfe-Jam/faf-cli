@@ -1,6 +1,6 @@
 /**
  * ⚡️ FAF VIBE Command - For No-Code/Low-Code Builders
- * Detects platform and shows special $9 tier eligibility
+ * Detects platform type (no-code vs professional)
  */
 
 import chalk from 'chalk';
@@ -27,12 +27,10 @@ export async function vibeCommand(options: any = {}) {
     console.log();
     
     if (platform.tier === 'vibe') {
-      console.log(FAF_COLORS.fafOrange(`${FAF_ICONS.lightning} FAF VIBE ELIGIBLE! ${FAF_ICONS.turbo_cat}`));
-      console.log(FAF_COLORS.fafGreen(`   ${FAF_ICONS.gem} Special Price: $${pricing.price}/month FOREVER`));
-      console.log(FAF_COLORS.fafWhite(`   ${FAF_ICONS.rocket} Same features as $100 Pro Plan`));
+      console.log(FAF_COLORS.fafOrange(`${FAF_ICONS.lightning} NO-CODE PLATFORM DETECTED! ${FAF_ICONS.turbo_cat}`));
+      console.log(FAF_COLORS.fafGreen(`   ${FAF_ICONS.gem} Platform: ${pricing.name}`));
+      console.log(FAF_COLORS.fafWhite(`   ${FAF_ICONS.rocket} FREE CLI for all platforms`));
       console.log(FAF_COLORS.fafCyan(`   ${FAF_ICONS.heart_orange} Because builders come in all forms`));
-      console.log();
-      console.log(FAF_COLORS.fafOrange('   ⚠️  LIMITED TIME OFFER - Lock it in NOW!'));
       
       // Show TURBO-CAT message
       console.log();
@@ -40,7 +38,7 @@ export async function vibeCommand(options: any = {}) {
                   FAF_COLORS.fafWhite(' "Meow! Let\'s make your AI happy!"'));
     } else {
       console.log(FAF_COLORS.fafCyan(`${FAF_ICONS.trophy} ${pricing.name}`));
-      console.log(FAF_COLORS.fafWhite(`   Professional pricing: $${pricing.price}/month`));
+      console.log(FAF_COLORS.fafWhite(`   ${FAF_ICONS.rocket} FREE CLI for all users`));
       console.log(FAF_COLORS.fafWhite(`   F1-Inspired Software Engineering`));
     }
   } else {
@@ -55,7 +53,7 @@ export async function vibeCommand(options: any = {}) {
     console.log(FAF_COLORS.fafWhite('   • CodeSandbox'));
     console.log(FAF_COLORS.fafWhite('   • Stackblitz'));
     console.log();
-    console.log(FAF_COLORS.fafCyan(`${FAF_ICONS.trophy} Professional Plan: $100/month`));
+    console.log(FAF_COLORS.fafCyan(`${FAF_ICONS.trophy} Platform: Professional Development`));
   }
   
   // Show quick TURBO-CAT discovery preview
