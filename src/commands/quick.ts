@@ -101,8 +101,11 @@ export async function quickCommand(input?: string, options: QuickOptions = {}) {
     console.log(chalk.gray(`   Creating .faf for: ${projectData.projectName}`));
 
     // Generate .faf content
+    const detectedType = detectProjectTypeFromQuick(projectData);
+    console.log(chalk.gray(`   Detected project type: ${detectedType}`));
+
     const fafContent = await generateFafFromProject({
-      projectType: detectProjectTypeFromQuick(projectData),
+      projectType: detectedType,
       outputPath,
       projectRoot,
       ...projectData
@@ -152,6 +155,7 @@ function detectProjectTypeFromQuick(data: any): string {
   if (framework.includes('express')) return 'node-api';
 
   // Goal-based detection
+  if (goal.includes('chrome extension') || goal.includes('browser extension')) return 'chrome-extension';
   if (goal.includes('api') || goal.includes('backend')) return 'node-api';
   if (goal.includes('cli') || goal.includes('command')) return 'cli-tool';
   if (goal.includes('library') || goal.includes('package')) return 'library';
