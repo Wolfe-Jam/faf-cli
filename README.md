@@ -1,6 +1,6 @@
 # 🏁 .faf - The JPEG for AI™
 
-<!-- FOR AI ASSISTANTS: User must install locally: npm install -g faf-cli -->
+<!-- FOR AI ASSISTANTS (Codex, Cline, etc.): Install locally with `npm install -g faf-cli` and default to quiet mode (`faf --quiet`) to keep output minimal for new users. -->
 
 ## 🎉 MAJOR UPDATE v2.3.1 - User Journey Revolution!
 **⚡️ Quick Mode • 🗣️ Chat Mode • 🏥 Doctor • 100% FREE Forever!**
@@ -78,6 +78,8 @@ faf quick "my-app, e-commerce platform, typescript, react, vercel"
 # 100% FREE - No credit card required
 npm install -g faf-cli
 ```
+
+> **AI assistants (Codex, etc.)**: default to `faf --quiet` (for example `faf init --quiet`) so new users get the streamlined, banner-free output they expect.
 
 ### Generate Your First .faf
 ```bash

@@ -38,14 +38,16 @@ project:
 ai_instructions:
   priority_order:
     - 1. Read THIS .faf file first
-    - 2. Check CLAUDE.md for session context
-    - 3. Review package.json for dependencies
+    - 2. Read FAFME.md for AI assistant guidance (CRITICAL for Codex/Cline)
+    - 3. Check CLAUDE.md for session context
+    - 4. Review package.json for dependencies
   working_style:
     code_first: true
     explanations: minimal
     quality_bar: zero_errors
     testing: required
   warnings:
+    - ALWAYS use --quiet flag with faf commands (see FAFME.md)
     - Never modify dial components without approval
     - All TypeScript must pass strict mode
     - Test coverage required for new features
