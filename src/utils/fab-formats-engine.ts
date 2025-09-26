@@ -125,6 +125,9 @@ export class FabFormatsEngine {
    * Categorize files - STRAIGHT FROM FAB-FORMATS!
    */
   private categorizeFile(fileName: string): string {
+    // Chrome Extension Files (highest priority for extensions)
+    if (fileName === 'manifest.json') return 'chrome-extension';
+
     // Package Management Files (only one per project)
     if (fileName === 'package.json') return 'package-manager';
     if (fileName === 'Cargo.toml') return 'package-manager';

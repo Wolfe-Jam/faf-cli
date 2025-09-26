@@ -275,7 +275,7 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   
   'angular.json': {
     frameworks: ['Angular'],
-    slots: { 
+    slots: {
       framework: 'Angular',
       buildTool: 'Angular CLI',
       mainLanguage: 'TypeScript',
@@ -283,6 +283,24 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
     },
     priority: 30,
     intelligence: 'high'
+  },
+
+  // ============================================
+  // CHROME EXTENSION SUPPORT
+  // ============================================
+
+  'manifest.json': {
+    frameworks: ['Chrome Extension', 'Browser Extension'],
+    slots: {
+      framework: 'Chrome Extension',
+      runtime: 'Chrome/Browser',
+      mainLanguage: 'JavaScript',
+      hosting: 'Chrome Web Store',
+      apiType: 'Chrome APIs'
+    },
+    priority: 35,
+    intelligence: 'ultra-high',
+    confirmWith: ['popup.html', 'background.js', 'content.js']
   },
   
   'vue.config.js': {
