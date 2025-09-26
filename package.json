@@ -1,7 +1,7 @@
 {
   "name": "faf-cli",
-  "version": "2.1.3",
-  "description": "🏎️🏁 STOP faffing About! - AI-context ⚡️ FAST AF | Universal, shareable AI-context for any AI, human or team",
+  "version": "2.1.8",
+  "description": "🩵⚡️ .faf CLI - The JPEG for AI™ | Universal, shareable AI-context for any AI, human or team. Stop faffing about!",
   "icon": "https://faf.one/orange-smiley.svg",
   "logo": "https://faf.one/orange-smiley.svg",
   "main": "dist/index.js",
@@ -68,18 +68,17 @@
   "author": "🏎️⚡️_wolfejam.dev",
   "license": "MIT",
   "dependencies": {
+    "@faf/core": "file:./packages/core",
     "@faf/engine": "file:./faf-engine",
-    "@types/inquirer": "^9.0.9",
     "chalk": "^4.1.2",
     "commander": "^9.5.0",
-    "enquirer": "^2.4.1",
-    "glob": "^8.1.0",
+    "glob": "^11.0.3",
     "inquirer": "^12.9.4",
-    "openai": "^5.16.0",
     "yaml": "^2.4.1"
   },
   "devDependencies": {
     "@types/glob": "^8.1.0",
+    "@types/inquirer": "^9.0.9",
     "@types/jest": "^29.5.14",
     "@types/node": "^20.11.17",
     "@typescript-eslint/eslint-plugin": "^8.41.0",

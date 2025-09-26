@@ -1,4 +1,4 @@
-# 🔧 The FAF Rebuild Protocol - F1 Speed, Championship Quality
+# 🔧 The FAF Rebuild Protocol - F1-Inspired Performance, Championship Quality
 
 ## When Things Break, We Fix Them in Hours, Not Quarters
 

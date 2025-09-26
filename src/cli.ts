@@ -35,6 +35,7 @@ import { indexCommand } from './commands/index';
 import { shareCommand } from './commands/share';
 import { chatCommand } from './commands/chat';
 import { convertCommand, toMarkdown, toText } from './commands/convert';
+import { emailCommand } from './commands/email';
 import { setColorOptions, type ColorScheme } from './utils/color-utils';
 import { generateFAFHeader, generateHelpHeader, FAF_COLORS } from './utils/championship-style';
 import { analytics, trackCommand, trackError, withPerformanceTracking } from './telemetry/analytics';
@@ -332,6 +333,18 @@ program
   .command('version')
   .description('🏆 Show FAF version with MK2 Engine and TURBO-CAT status')
   .action(withAnalyticsTracking('version', () => versionCommand()));
+
+// 🏎️ faf cache - FileSystem Cache Management
+program
+  .command('cache')
+  .description('🏎️ Manage FileSystem cache (70% speed improvement)')
+  .option('-c, --clear', 'Clear the cache')
+  .option('-s, --stats', 'Show cache statistics')
+  .option('-w, --warm', 'Warm the cache')
+  .action(async (options) => {
+    const { cacheCommand } = await import('./commands/cache');
+    await cacheCommand(options);
+  });
 
 // 🧡 faf trust - Consolidated Trust Dashboard (The Emotional Core)
 program
@@ -763,6 +776,29 @@ Championship Bi-Sync Features:
       auto: options.auto,
       watch: options.watch,
       force: options.force || false
+    });
+  });
+
+// 📧 faf email - Free .faf delivery service
+program
+  .command('email [to]')
+  .description('📧 Email your .faf file as a hard copy attachment (free service!)')
+  .option('-s, --send', 'Send immediately without prompts')
+  .addHelpText('after', `
+Examples:
+  $ faf email                    # Interactive: where to send your .faf
+  $ faf email me@example.com     # Quick send .faf to email
+  $ faf email --send             # Send to previously saved email
+
+📧 What You Get:
+  • .faf file as email attachment (hard copy)
+  • Quick start instructions
+  • Tips to get 99% scores (feed the cat!)
+  • We don't judge freeloaders... we just feed the cat 😸`)
+  .action(async (to, options) => {
+    await emailCommand(process.cwd(), {
+      to: to,
+      send: options.send
     });
   });
 

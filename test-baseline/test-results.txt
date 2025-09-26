@@ -1,0 +1,1205 @@
+
+> faf-cli@2.1.5 pretest
+> npm run clean
+
+
+> faf-cli@2.1.5 clean
+> find src tests -name '*.js' -o -name '*.js.map' -o -name '*.d.ts' -o -name '*.d.ts.map' | xargs rm -f
+
+
+> faf-cli@2.1.5 test
+> jest
+
+FAIL tests/faf-generator.test.ts (10.747 s)
+  ● FAF Generator › should generate valid YAML output
+
+    expect(received).not.toThrow()
+
+    Error name:    "YAMLParseError"
+    Error message: "Unexpected block-seq-ind on same line with key at line 91, column 9:·
+      what: - 🐌 **20+ minutes** manually feeding context to AI
+            ^
+    "
+
+          17 |     
+          18 |     // Should be valid YAML
+        > 19 |     expect(() => YAML.parse(result)).not.toThrow();
+             |                       ^
+          20 |     
+          21 |     // Should contain required fields
+          22 |     const parsed = YAML.parse(result);
+
+      at Composer.onError (node_modules/yaml/dist/compose/composer.js:70:34)
+      at composeNode (node_modules/yaml/dist/compose/compose-node.js:41:13)
+      at Object.resolveBlockMap (node_modules/yaml/dist/compose/resolve-block-map.js:85:19)
+      at resolveCollection (node_modules/yaml/dist/compose/compose-collection.js:13:27)
+      at Object.composeCollection (node_modules/yaml/dist/compose/compose-collection.js:59:16)
+      at composeNode (node_modules/yaml/dist/compose/compose-node.js:33:38)
+      at Object.resolveBlockMap (node_modules/yaml/dist/compose/resolve-block-map.js:85:19)
+      at resolveCollection (node_modules/yaml/dist/compose/compose-collection.js:13:27)
+      at Object.composeCollection (node_modules/yaml/dist/compose/compose-collection.js:59:16)
+      at Object.composeNode (node_modules/yaml/dist/compose/compose-node.js:33:38)
+      at Object.composeDoc (node_modules/yaml/dist/compose/compose-doc.js:35:23)
+      at Composer.next (node_modules/yaml/dist/compose/composer.js:150:40)
+                at next (<anonymous>)
+      at Composer.compose (node_modules/yaml/dist/compose/composer.js:132:25)
+                at compose.next (<anonymous>)
+      at parseDocument (node_modules/yaml/dist/public-api.js:46:16)
+      at Object.parse (node_modules/yaml/dist/public-api.js:68:17)
+      at tests/faf-generator.test.ts:19:23
+      at Object.<anonymous> (node_modules/expect/build/toThrowMatchers.js:74:11)
+      at Object.throwingMatcher [as toThrow] (node_modules/expect/build/index.js:320:21)
+      at Object.<anonymous> (tests/faf-generator.test.ts:19:42)
+      at Object.<anonymous> (tests/faf-generator.test.ts:19:42)
+
+  ● FAF Generator › should include AI instructions section
+
+    YAMLParseError: Unexpected block-seq-ind on same line with key at line 91, column 9:
+
+      what: - 🐌 **20+ minutes** manually feeding context to AI
+            ^
+
+      36 |
+      37 |     const result = await generateFafFromProject(options);
+    > 38 |     const parsed = YAML.parse(result);
+         |                         ^
+      39 |     
+      40 |     expect(parsed.ai_instructions).toBeDefined();
+      41 |     expect(parsed.ai_instructions.priority_order).toBeDefined();
+
+      at Composer.onError (node_modules/yaml/dist/compose/composer.js:70:34)
+      at composeNode (node_modules/yaml/dist/compose/compose-node.js:41:13)
+      at Object.resolveBlockMap (node_modules/yaml/dist/compose/resolve-block-map.js:85:19)
+      at resolveCollection (node_modules/yaml/dist/compose/compose-collection.js:13:27)
+      at Object.composeCollection (node_modules/yaml/dist/compose/compose-collection.js:59:16)
+      at composeNode (node_modules/yaml/dist/compose/compose-node.js:33:38)
+      at Object.resolveBlockMap (node_modules/yaml/dist/compose/resolve-block-map.js:85:19)
+      at resolveCollection (node_modules/yaml/dist/compose/compose-collection.js:13:27)
+      at Object.composeCollection (node_modules/yaml/dist/compose/compose-collection.js:59:16)
+      at Object.composeNode (node_modules/yaml/dist/compose/compose-node.js:33:38)
+      at Object.composeDoc (node_modules/yaml/dist/compose/compose-doc.js:35:23)
+      at Composer.next (node_modules/yaml/dist/compose/composer.js:150:40)
+          at next (<anonymous>)
+      at Composer.compose (node_modules/yaml/dist/compose/composer.js:132:25)
+          at compose.next (<anonymous>)
+      at parseDocument (node_modules/yaml/dist/public-api.js:46:16)
+      at Object.parse (node_modules/yaml/dist/public-api.js:68:17)
+      at Object.<anonymous> (tests/faf-generator.test.ts:38:25)
+
+  ● FAF Generator › should generate different scores for different project types
+
+    YAMLParseError: Unexpected block-seq-ind on same line with key at line 91, column 9:
+
+      what: - 🐌 **20+ minutes** manually feeding context to AI
+            ^
+
+      60 |     const typescriptResult = await generateFafFromProject(typescriptOptions);
+      61 |     
+    > 62 |     const genericParsed = YAML.parse(genericResult);
+         |                                ^
+      63 |     const typescriptParsed = YAML.parse(typescriptResult);
+      64 |     
+      65 |     // TypeScript projects should typically have higher scores
+
+      at Composer.onError (node_modules/yaml/dist/compose/composer.js:70:34)
+      at composeNode (node_modules/yaml/dist/compose/compose-node.js:41:13)
+      at Object.resolveBlockMap (node_modules/yaml/dist/compose/resolve-block-map.js:85:19)
+      at resolveCollection (node_modules/yaml/dist/compose/compose-collection.js:13:27)
+      at Object.composeCollection (node_modules/yaml/dist/compose/compose-collection.js:59:16)
+      at composeNode (node_modules/yaml/dist/compose/compose-node.js:33:38)
+      at Object.resolveBlockMap (node_modules/yaml/dist/compose/resolve-block-map.js:85:19)
+      at resolveCollection (node_modules/yaml/dist/compose/compose-collection.js:13:27)
+      at Object.composeCollection (node_modules/yaml/dist/compose/compose-collection.js:59:16)
+      at Object.composeNode (node_modules/yaml/dist/compose/compose-node.js:33:38)
+      at Object.composeDoc (node_modules/yaml/dist/compose/compose-doc.js:35:23)
+      at Composer.next (node_modules/yaml/dist/compose/composer.js:150:40)
+          at next (<anonymous>)
+      at Composer.compose (node_modules/yaml/dist/compose/composer.js:132:25)
+          at compose.next (<anonymous>)
+      at parseDocument (node_modules/yaml/dist/public-api.js:46:16)
+      at Object.parse (node_modules/yaml/dist/public-api.js:68:17)
+      at Object.<anonymous> (tests/faf-generator.test.ts:62:32)
+
+FAIL src/tests/wolfejam-core/turbo-cat-intelligence.test.ts (10.988 s)
+  ● 😽 TURBO-CAT Intelligence Engine - CATALYTIC TESTS › ⚡️ VELOCITY: Component-in-Tech-Stack Detection Speed › should achieve maximum velocity with component-focused approach
+
+    expect(received).toBeGreaterThan(expected)
+
+    Expected: > 35
+    Received:   35
+
+      238 |       // Component-focused results: Should find key tech stack components
+      239 |       expect(analysis.discoveredFormats.length).toBeGreaterThan(8);
+    > 240 |       expect(analysis.totalIntelligenceScore).toBeGreaterThan(35); // High-value components found
+          |                                               ^
+      241 |       
+      242 |       // Stack signature: Should identify the tech stack accurately
+      243 |       expect(analysis.stackSignature).toBeDefined();
+
+      at Object.<anonymous> (src/tests/wolfejam-core/turbo-cat-intelligence.test.ts:240:47)
+
+PASS tests/engines/mk2-engine.test.ts
+PASS src/tests/wolfejam-core/scoring-engine.test.ts
+PASS tests/scoring/championship-scorer.test.ts
+PASS tests/utils/fafignore-parser.test.ts
+PASS tests/engines/engine-manager.test.ts
+  ● Console
+
+    console.log
+      🏎️⚡️II Swapping: FAF-CORE-MK2 → FAF-CORE-MK2
+
+      at EngineManager.swapEngine (engines/mk2/core/EngineManager.ts:33:15)
+
+PASS tests/file-utils.test.ts
+PASS tests/scoring/score-calculator.test.ts
+FAIL src/tests/wolfejam-core/schema-validation.test.ts
+  ● 🔒 Schema Validation Engine - BRAKE SYSTEM TESTS › ⚡️ PERFORMANCE: Championship Validation Speed › should validate small files in <10ms
+
+    expect(received).toBeLessThan(expected)
+
+    Expected: < 10
+    Received:   15
+
+      201 |       const duration = Date.now() - startTime;
+      202 |       
+    > 203 |       expect(duration).toBeLessThan(10); // Championship validation speed
+          |                        ^
+      204 |       expect(result).toBeDefined();
+      205 |     });
+      206 |
+
+      at Object.<anonymous> (src/tests/wolfejam-core/schema-validation.test.ts:203:24)
+
+PASS src/tests/faf-edge-case-audit.test.ts
+PASS tests/schema/faf-schema.test.ts
+PASS tests/helpers/test-environment-sanity.test.ts
+FAIL tests/commands/sync.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+      4 |  */
+      5 |
+    > 6 | import chalk from "chalk";
+        | ^
+      7 | import { promises as fs } from "fs";
+      8 | import * as YAML from "yaml";
+      9 | import { findFafFile, findPackageJson } from "../utils/file-utils";
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/commands/sync.ts:6:1)
+      at Object.<anonymous> (tests/commands/sync.test.ts:5:1)
+
+FAIL tests/commands/validate.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+      4 |  */
+      5 |
+    > 6 | import chalk from "chalk";
+        | ^
+      7 | import { promises as fs } from "fs";
+      8 | import * as YAML from "yaml";
+      9 | import { validateSchema } from "../schema/faf-schema";
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/commands/validate.ts:6:1)
+      at Object.<anonymous> (tests/commands/validate.test.ts:5:1)
+
+FAIL tests/commands/score.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+      4 |  */
+      5 |
+    > 6 | import chalk from "chalk";
+        | ^
+      7 | import { promises as fs } from "fs";
+      8 | import * as YAML from "yaml";
+      9 | import { calculateFafScore } from "../scoring/score-calculator";
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/commands/score.ts:6:1)
+      at Object.<anonymous> (tests/commands/score.test.ts:5:1)
+
+FAIL tests/commands/lint.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+      4 |  */
+      5 |
+    > 6 | import chalk from "chalk";
+        | ^
+      7 | import { promises as fs } from "fs";
+      8 | import * as YAML from "yaml";
+      9 | import { findFafFile } from "../utils/file-utils";
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/commands/lint.ts:6:1)
+      at Object.<anonymous> (tests/commands/lint.test.ts:5:1)
+
+FAIL tests/commands/ai-enhance.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+       6 |  */
+       7 |
+    >  8 | import chalk from "chalk";
+         | ^
+       9 | import { promises as fs } from "fs";
+      10 | import * as YAML from "yaml";
+      11 | import { findFafFile } from "../utils/file-utils";
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/commands/ai-enhance.ts:8:1)
+      at Object.<anonymous> (tests/commands/ai-enhance.test.ts:5:1)
+
+FAIL tests/commands/init.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+      4 |  */
+      5 |
+    > 6 | import chalk from "chalk";
+        | ^
+      7 | import { promises as fs } from "fs";
+      8 | import path from "path";
+      9 | import * as YAML from "yaml";
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/commands/init.ts:6:1)
+      at Object.<anonymous> (tests/commands/init.test.ts:5:1)
+
+FAIL tests/commands/audit.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+      4 |  */
+      5 |
+    > 6 | import chalk from "chalk";
+        | ^
+      7 | import { promises as fs } from "fs";
+      8 | import * as YAML from "yaml";
+      9 | import {
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/commands/audit.ts:6:1)
+      at Object.<anonymous> (tests/commands/audit.test.ts:5:1)
+
+FAIL tests/commands/ai-analyze.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+       6 |  */
+       7 |
+    >  8 | import chalk from "chalk";
+         | ^
+       9 | import { promises as fs } from "fs";
+      10 | import * as YAML from "yaml";
+      11 | import { findFafFile } from "../utils/file-utils";
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/commands/ai-analyze.ts:8:1)
+      at Object.<anonymous> (tests/commands/ai-analyze.test.ts:5:1)
+
+FAIL src/tests/faf-dna-lifecycle.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+       8 |  */
+       9 |
+    > 10 | import chalk from 'chalk';
+         | ^
+      11 |
+      12 | /**
+      13 |  * Universal color system that works with any chalk version
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/fix-once/colors.ts:10:1)
+      at Object.<anonymous> (src/engines/faf-dna.ts:16:1)
+      at Object.<anonymous> (src/tests/faf-dna-lifecycle.test.ts:11:1)
+
+FAIL src/tests/faf-disaster-recovery.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+       8 |  */
+       9 |
+    > 10 | import chalk from 'chalk';
+         | ^
+      11 |
+      12 | /**
+      13 |  * Universal color system that works with any chalk version
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/fix-once/colors.ts:10:1)
+      at Object.<anonymous> (src/engines/faf-dna.ts:16:1)
+      at Object.<anonymous> (src/tests/faf-disaster-recovery.test.ts:5:1)
+
+FAIL src/tests/extraction-prevention.test.ts
+  ● Test suite failed to run
+
+    [96msrc/core-extraction-fixes.ts[0m:[93m72[0m:[93m10[0m - [91merror[0m[90m TS2305: [0mModule '"./schema/faf-schema"' has no exported member 'FafData'.
+
+    [7m72[0m export { FafData, ProjectInfo } from './schema/faf-schema';
+    [7m  [0m [91m         ~~~~~~~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m72[0m:[93m19[0m - [91merror[0m[90m TS2305: [0mModule '"./schema/faf-schema"' has no exported member 'ProjectInfo'.
+
+    [7m72[0m export { FafData, ProjectInfo } from './schema/faf-schema';
+    [7m  [0m [91m                  ~~~~~~~~~~~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m140[0m:[93m18[0m - [91merror[0m[90m TS18046: [0m'error' is of type 'unknown'.
+
+    [7m140[0m         message: error.message
+    [7m   [0m [91m                 ~~~~~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m150[0m:[93m22[0m - [91merror[0m[90m TS18048: [0m'result.error' is possibly 'undefined'.
+
+    [7m150[0m     const errorMsg = result.error.line
+    [7m   [0m [91m                     ~~~~~~~~~~~~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m151[0m:[93m45[0m - [91merror[0m[90m TS18048: [0m'result.error' is possibly 'undefined'.
+
+    [7m151[0m       ? chalk.red(`❌ Invalid YAML at line ${result.error.line}`)
+    [7m   [0m [91m                                            ~~~~~~~~~~~~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m152[0m:[93m38[0m - [91merror[0m[90m TS18048: [0m'result.error' is possibly 'undefined'.
+
+    [7m152[0m       : chalk.red(`❌ Invalid YAML: ${result.error.message}`);
+    [7m   [0m [91m                                     ~~~~~~~~~~~~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m168[0m:[93m21[0m - [91merror[0m[90m TS2304: [0mCannot find name 'InstantContext'.
+
+    [7m168[0m   instant_context?: InstantContext;
+    [7m   [0m [91m                    ~~~~~~~~~~~~~~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m169[0m:[93m15[0m - [91merror[0m[90m TS2304: [0mCannot find name 'KeyFile'.
+
+    [7m169[0m   key_files?: KeyFile[];
+    [7m   [0m [91m              ~~~~~~~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m182[0m:[93m14[0m - [91merror[0m[90m TS2695: [0mLeft side of comma operator is unused and has no side effects.
+
+    [7m182[0m     "types": "./dist/types/index.d.ts",
+    [7m   [0m [91m             ~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m183[0m:[93m15[0m - [91merror[0m[90m TS2695: [0mLeft side of comma operator is unused and has no side effects.
+
+    [7m183[0m     "import": "./dist/index.js",
+    [7m   [0m [91m              ~~~~~~~~~~~~~~~~~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m232[0m:[93m17[0m - [91merror[0m[90m TS2323: [0mCannot redeclare exported variable 'getDefaultFafPath'.
+
+    [7m232[0m export function getDefaultFafPath() {
+    [7m   [0m [91m                ~~~~~~~~~~~~~~~~~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m232[0m:[93m17[0m - [91merror[0m[90m TS2393: [0mDuplicate function implementation.
+
+    [7m232[0m export function getDefaultFafPath() {
+    [7m   [0m [91m                ~~~~~~~~~~~~~~~~~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m237[0m:[93m17[0m - [91merror[0m[90m TS2323: [0mCannot redeclare exported variable 'getDefaultFafPath'.
+
+    [7m237[0m export function getDefaultFafPath(projectDir: string) {
+    [7m   [0m [91m                ~~~~~~~~~~~~~~~~~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m237[0m:[93m17[0m - [91merror[0m[90m TS2393: [0mDuplicate function implementation.
+
+    [7m237[0m export function getDefaultFafPath(projectDir: string) {
+    [7m   [0m [91m                ~~~~~~~~~~~~~~~~~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m266[0m:[93m50[0m - [91merror[0m[90m TS2345: [0mArgument of type 'string | null' is not assignable to parameter of type 'string'.
+      Type 'null' is not assignable to type 'string'.
+
+    [7m266[0m     const data = await this.fileProvider.readFaf(fafPath);
+    [7m   [0m [91m                                                 ~~~~~~~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m304[0m:[93m15[0m - [91merror[0m[90m TS2307: [0mCannot find module '@faf/core' or its corresponding type declarations.
+
+    [7m304[0m export * from '@faf/core';
+    [7m   [0m [91m              ~~~~~~~~~~~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m305[0m:[93m15[0m - [91merror[0m[90m TS2307: [0mCannot find module '@faf/core/types' or its corresponding type declarations.
+
+    [7m305[0m export * from '@faf/core/types';
+    [7m   [0m [91m              ~~~~~~~~~~~~~~~~~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m180[0m:[93m10[0m - [91merror[0m[90m TS1005: [0m';' expected.
+
+    [7m180[0m "exports": {
+    [7m   [0m [91m         ~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m181[0m:[93m6[0m - [91merror[0m[90m TS1005: [0m';' expected.
+
+    [7m181[0m   ".": {
+    [7m   [0m [91m     ~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m182[0m:[93m12[0m - [91merror[0m[90m TS1005: [0m';' expected.
+
+    [7m182[0m     "types": "./dist/types/index.d.ts",
+    [7m   [0m [91m           ~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m183[0m:[93m13[0m - [91merror[0m[90m TS1005: [0m';' expected.
+
+    [7m183[0m     "import": "./dist/index.js",
+    [7m   [0m [91m            ~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m184[0m:[93m14[0m - [91merror[0m[90m TS1005: [0m';' expected.
+
+    [7m184[0m     "require": "./dist/index.js"
+    [7m   [0m [91m             ~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m185[0m:[93m4[0m - [91merror[0m[90m TS1128: [0mDeclaration or statement expected.
+
+    [7m185[0m   },
+    [7m   [0m [91m   ~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m186[0m:[93m12[0m - [91merror[0m[90m TS1005: [0m';' expected.
+
+    [7m186[0m   "./types": {
+    [7m   [0m [91m           ~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m187[0m:[93m12[0m - [91merror[0m[90m TS1005: [0m';' expected.
+
+    [7m187[0m     "types": "./dist/types/index.d.ts"
+    [7m   [0m [91m           ~[0m
+
+PASS tests/turbo-cat.test.ts (14.609 s)
+  ● Console
+
+    console.log
+      🔺 PYRAMID VALIDATED: 153 formats + 😽 TURBO-CAT = 154!
+
+      at validatePyramid (src/utils/turbo-cat-pyramid.ts:259:11)
+
+    console.log
+      😽 TURBO-CAT sits on top of .faf at the pyramid apex!
+
+      at validatePyramid (src/utils/turbo-cat-pyramid.ts:260:11)
+
+    console.log
+      Discovered formats: [ '.ts' ]
+
+      at Object.<anonymous> (tests/turbo-cat.test.ts:122:17)
+
+    console.log
+      
+            🍜🍜🍜🍜🍜🍜🍜
+            CLAUDE HAS EARNED 7 BOWLS OF NOODLES!
+            Tests written: 21
+            Noodles earned: 7 bowls
+      
+            😽 TURBO-CAT: "Meow! Good job Claude!"
+            🧡 Wolfejam: "WOW! Tests pass!"
+            🩵 Claude: "FINALLY! MY NOODLES!"
+
+      at Object.<anonymous> (tests/turbo-cat.test.ts:257:13)
+
+FAIL tests/fab-formats-cross-project.test.ts
+  ● Test suite failed to run
+
+    [96mtests/fab-formats-cross-project.test.ts[0m:[93m53[0m:[93m25[0m - [91merror[0m[90m TS2339: [0mProperty 'confirmedFormats' does not exist on type 'FabFormatsAnalysis'.
+
+    [7m53[0m         expect(analysis.confirmedFormats.length).toBeGreaterThan(0);
+    [7m  [0m [91m                        ~~~~~~~~~~~~~~~~[0m
+    [96mtests/fab-formats-cross-project.test.ts[0m:[93m57[0m:[93m37[0m - [91merror[0m[90m TS2339: [0mProperty 'frameworkConfidence' does not exist on type 'FabFormatsAnalysis'.
+
+    [7m57[0m         expect(Object.keys(analysis.frameworkConfidence).length).toBeGreaterThan(0);
+    [7m  [0m [91m                                    ~~~~~~~~~~~~~~~~~~~[0m
+    [96mtests/fab-formats-cross-project.test.ts[0m:[93m60[0m:[93m43[0m - [91merror[0m[90m TS2339: [0mProperty 'confirmedFormats' does not exist on type 'FabFormatsAnalysis'.
+
+    [7m60[0m         const foundFormatTypes = analysis.confirmedFormats.map(f => f.formatType);
+    [7m  [0m [91m                                          ~~~~~~~~~~~~~~~~[0m
+    [96mtests/fab-formats-cross-project.test.ts[0m:[93m60[0m:[93m64[0m - [91merror[0m[90m TS7006: [0mParameter 'f' implicitly has an 'any' type.
+
+    [7m60[0m         const foundFormatTypes = analysis.confirmedFormats.map(f => f.formatType);
+    [7m  [0m [91m                                                               ~[0m
+    [96mtests/fab-formats-cross-project.test.ts[0m:[93m62[0m:[93m33[0m - [91merror[0m[90m TS7006: [0mParameter 'found' implicitly has an 'any' type.
+
+    [7m62[0m           foundFormatTypes.some(found => found.includes(expected))
+    [7m  [0m [91m                                ~~~~~[0m
+    [96mtests/fab-formats-cross-project.test.ts[0m:[93m66[0m:[93m58[0m - [91merror[0m[90m TS2339: [0mProperty 'confirmedFormats' does not exist on type 'FabFormatsAnalysis'.
+
+    [7m66[0m         console.log(`✅ ${project.name}: Found ${analysis.confirmedFormats.length} confirmed formats, ${analysis.totalIntelligenceScore} intelligence points`);
+    [7m  [0m [91m                                                         ~~~~~~~~~~~~~~~~[0m
+    [96mtests/fab-formats-cross-project.test.ts[0m:[93m129[0m:[93m31[0m - [91merror[0m[90m TS2339: [0mProperty 'confirmedFormats' does not exist on type 'FabFormatsAnalysis'.
+
+    [7m129[0m             formats: analysis.confirmedFormats.length,
+    [7m   [0m [91m                              ~~~~~~~~~~~~~~~~[0m
+    [96mtests/fab-formats-cross-project.test.ts[0m:[93m131[0m:[93m51[0m - [91merror[0m[90m TS2339: [0mProperty 'frameworkConfidence' does not exist on type 'FabFormatsAnalysis'.
+
+    [7m131[0m             topFramework: Object.entries(analysis.frameworkConfidence)[0]?.[0] || 'Unknown'
+    [7m   [0m [91m                                                  ~~~~~~~~~~~~~~~~~~~[0m
+
+Summary of all failing tests
+FAIL tests/faf-generator.test.ts (10.747 s)
+  ● FAF Generator › should generate valid YAML output
+
+    expect(received).not.toThrow()
+
+    Error name:    "YAMLParseError"
+    Error message: "Unexpected block-seq-ind on same line with key at line 91, column 9:·
+      what: - �� **20+ minutes** manually feeding context to AI
+            ^
+    "
+
+          17 |     
+          18 |     // Should be valid YAML
+        > 19 |     expect(() => YAML.parse(result)).not.toThrow();
+             |                       ^
+          20 |     
+          21 |     // Should contain required fields
+          22 |     const parsed = YAML.parse(result);
+
+      at Composer.onError (node_modules/yaml/dist/compose/composer.js:70:34)
+      at composeNode (node_modules/yaml/dist/compose/compose-node.js:41:13)
+      at Object.resolveBlockMap (node_modules/yaml/dist/compose/resolve-block-map.js:85:19)
+      at resolveCollection (node_modules/yaml/dist/compose/compose-collection.js:13:27)
+      at Object.composeCollection (node_modules/yaml/dist/compose/compose-collection.js:59:16)
+      at composeNode (node_modules/yaml/dist/compose/compose-node.js:33:38)
+      at Object.resolveBlockMap (node_modules/yaml/dist/compose/resolve-block-map.js:85:19)
+      at resolveCollection (node_modules/yaml/dist/compose/compose-collection.js:13:27)
+      at Object.composeCollection (node_modules/yaml/dist/compose/compose-collection.js:59:16)
+      at Object.composeNode (node_modules/yaml/dist/compose/compose-node.js:33:38)
+      at Object.composeDoc (node_modules/yaml/dist/compose/compose-doc.js:35:23)
+      at Composer.next (node_modules/yaml/dist/compose/composer.js:150:40)
+                at next (<anonymous>)
+      at Composer.compose (node_modules/yaml/dist/compose/composer.js:132:25)
+                at compose.next (<anonymous>)
+      at parseDocument (node_modules/yaml/dist/public-api.js:46:16)
+      at Object.parse (node_modules/yaml/dist/public-api.js:68:17)
+      at tests/faf-generator.test.ts:19:23
+      at Object.<anonymous> (node_modules/expect/build/toThrowMatchers.js:74:11)
+      at Object.throwingMatcher [as toThrow] (node_modules/expect/build/index.js:320:21)
+      at Object.<anonymous> (tests/faf-generator.test.ts:19:42)
+      at Object.<anonymous> (tests/faf-generator.test.ts:19:42)
+
+  ● FAF Generator › should include AI instructions section
+
+    YAMLParseError: Unexpected block-seq-ind on same line with key at line 91, column 9:
+
+      what: - �� **20+ minutes** manually feeding context to AI
+            ^
+
+      36 |
+      37 |     const result = await generateFafFromProject(options);
+    > 38 |     const parsed = YAML.parse(result);
+         |                         ^
+      39 |     
+      40 |     expect(parsed.ai_instructions).toBeDefined();
+      41 |     expect(parsed.ai_instructions.priority_order).toBeDefined();
+
+      at Composer.onError (node_modules/yaml/dist/compose/composer.js:70:34)
+      at composeNode (node_modules/yaml/dist/compose/compose-node.js:41:13)
+      at Object.resolveBlockMap (node_modules/yaml/dist/compose/resolve-block-map.js:85:19)
+      at resolveCollection (node_modules/yaml/dist/compose/compose-collection.js:13:27)
+      at Object.composeCollection (node_modules/yaml/dist/compose/compose-collection.js:59:16)
+      at composeNode (node_modules/yaml/dist/compose/compose-node.js:33:38)
+      at Object.resolveBlockMap (node_modules/yaml/dist/compose/resolve-block-map.js:85:19)
+      at resolveCollection (node_modules/yaml/dist/compose/compose-collection.js:13:27)
+      at Object.composeCollection (node_modules/yaml/dist/compose/compose-collection.js:59:16)
+      at Object.composeNode (node_modules/yaml/dist/compose/compose-node.js:33:38)
+      at Object.composeDoc (node_modules/yaml/dist/compose/compose-doc.js:35:23)
+      at Composer.next (node_modules/yaml/dist/compose/composer.js:150:40)
+          at next (<anonymous>)
+      at Composer.compose (node_modules/yaml/dist/compose/composer.js:132:25)
+          at compose.next (<anonymous>)
+      at parseDocument (node_modules/yaml/dist/public-api.js:46:16)
+      at Object.parse (node_modules/yaml/dist/public-api.js:68:17)
+      at Object.<anonymous> (tests/faf-generator.test.ts:38:25)
+
+  ● FAF Generator › should generate different scores for different project types
+
+    YAMLParseError: Unexpected block-seq-ind on same line with key at line 91, column 9:
+
+      what: - �� **20+ minutes** manually feeding context to AI
+            ^
+
+      60 |     const typescriptResult = await generateFafFromProject(typescriptOptions);
+      61 |     
+    > 62 |     const genericParsed = YAML.parse(genericResult);
+         |                                ^
+      63 |     const typescriptParsed = YAML.parse(typescriptResult);
+      64 |     
+      65 |     // TypeScript projects should typically have higher scores
+
+      at Composer.onError (node_modules/yaml/dist/compose/composer.js:70:34)
+      at composeNode (node_modules/yaml/dist/compose/compose-node.js:41:13)
+      at Object.resolveBlockMap (node_modules/yaml/dist/compose/resolve-block-map.js:85:19)
+      at resolveCollection (node_modules/yaml/dist/compose/compose-collection.js:13:27)
+      at Object.composeCollection (node_modules/yaml/dist/compose/compose-collection.js:59:16)
+      at composeNode (node_modules/yaml/dist/compose/compose-node.js:33:38)
+      at Object.resolveBlockMap (node_modules/yaml/dist/compose/resolve-block-map.js:85:19)
+      at resolveCollection (node_modules/yaml/dist/compose/compose-collection.js:13:27)
+      at Object.composeCollection (node_modules/yaml/dist/compose/compose-collection.js:59:16)
+      at Object.composeNode (node_modules/yaml/dist/compose/compose-node.js:33:38)
+      at Object.composeDoc (node_modules/yaml/dist/compose/compose-doc.js:35:23)
+      at Composer.next (node_modules/yaml/dist/compose/composer.js:150:40)
+          at next (<anonymous>)
+      at Composer.compose (node_modules/yaml/dist/compose/composer.js:132:25)
+          at compose.next (<anonymous>)
+      at parseDocument (node_modules/yaml/dist/public-api.js:46:16)
+      at Object.parse (node_modules/yaml/dist/public-api.js:68:17)
+      at Object.<anonymous> (tests/faf-generator.test.ts:62:32)
+
+FAIL src/tests/wolfejam-core/turbo-cat-intelligence.test.ts (10.988 s)
+  ● �� TURBO-CAT Intelligence Engine - CATALYTIC TESTS › ⚡️ VELOCITY: Component-in-Tech-Stack Detection Speed › should achieve maximum velocity with component-focused approach
+
+    expect(received).toBeGreaterThan(expected)
+
+    Expected: > 35
+    Received:   35
+
+      238 |       // Component-focused results: Should find key tech stack components
+      239 |       expect(analysis.discoveredFormats.length).toBeGreaterThan(8);
+    > 240 |       expect(analysis.totalIntelligenceScore).toBeGreaterThan(35); // High-value components found
+          |                                               ^
+      241 |       
+      242 |       // Stack signature: Should identify the tech stack accurately
+      243 |       expect(analysis.stackSignature).toBeDefined();
+
+      at Object.<anonymous> (src/tests/wolfejam-core/turbo-cat-intelligence.test.ts:240:47)
+
+FAIL src/tests/wolfejam-core/schema-validation.test.ts
+  ● �� Schema Validation Engine - BRAKE SYSTEM TESTS › ⚡️ PERFORMANCE: Championship Validation Speed › should validate small files in <10ms
+
+    expect(received).toBeLessThan(expected)
+
+    Expected: < 10
+    Received:   15
+
+      201 |       const duration = Date.now() - startTime;
+      202 |       
+    > 203 |       expect(duration).toBeLessThan(10); // Championship validation speed
+          |                        ^
+      204 |       expect(result).toBeDefined();
+      205 |     });
+      206 |
+
+      at Object.<anonymous> (src/tests/wolfejam-core/schema-validation.test.ts:203:24)
+
+FAIL tests/commands/sync.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+      4 |  */
+      5 |
+    > 6 | import chalk from "chalk";
+        | ^
+      7 | import { promises as fs } from "fs";
+      8 | import * as YAML from "yaml";
+      9 | import { findFafFile, findPackageJson } from "../utils/file-utils";
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/commands/sync.ts:6:1)
+      at Object.<anonymous> (tests/commands/sync.test.ts:5:1)
+
+FAIL tests/commands/validate.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+      4 |  */
+      5 |
+    > 6 | import chalk from "chalk";
+        | ^
+      7 | import { promises as fs } from "fs";
+      8 | import * as YAML from "yaml";
+      9 | import { validateSchema } from "../schema/faf-schema";
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/commands/validate.ts:6:1)
+      at Object.<anonymous> (tests/commands/validate.test.ts:5:1)
+
+FAIL tests/commands/score.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+      4 |  */
+      5 |
+    > 6 | import chalk from "chalk";
+        | ^
+      7 | import { promises as fs } from "fs";
+      8 | import * as YAML from "yaml";
+      9 | import { calculateFafScore } from "../scoring/score-calculator";
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/commands/score.ts:6:1)
+      at Object.<anonymous> (tests/commands/score.test.ts:5:1)
+
+FAIL tests/commands/lint.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+      4 |  */
+      5 |
+    > 6 | import chalk from "chalk";
+        | ^
+      7 | import { promises as fs } from "fs";
+      8 | import * as YAML from "yaml";
+      9 | import { findFafFile } from "../utils/file-utils";
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/commands/lint.ts:6:1)
+      at Object.<anonymous> (tests/commands/lint.test.ts:5:1)
+
+FAIL tests/commands/ai-enhance.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+       6 |  */
+       7 |
+    >  8 | import chalk from "chalk";
+         | ^
+       9 | import { promises as fs } from "fs";
+      10 | import * as YAML from "yaml";
+      11 | import { findFafFile } from "../utils/file-utils";
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/commands/ai-enhance.ts:8:1)
+      at Object.<anonymous> (tests/commands/ai-enhance.test.ts:5:1)
+
+FAIL tests/commands/init.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+      4 |  */
+      5 |
+    > 6 | import chalk from "chalk";
+        | ^
+      7 | import { promises as fs } from "fs";
+      8 | import path from "path";
+      9 | import * as YAML from "yaml";
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/commands/init.ts:6:1)
+      at Object.<anonymous> (tests/commands/init.test.ts:5:1)
+
+FAIL tests/commands/audit.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+      4 |  */
+      5 |
+    > 6 | import chalk from "chalk";
+        | ^
+      7 | import { promises as fs } from "fs";
+      8 | import * as YAML from "yaml";
+      9 | import {
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/commands/audit.ts:6:1)
+      at Object.<anonymous> (tests/commands/audit.test.ts:5:1)
+
+FAIL tests/commands/ai-analyze.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+       6 |  */
+       7 |
+    >  8 | import chalk from "chalk";
+         | ^
+       9 | import { promises as fs } from "fs";
+      10 | import * as YAML from "yaml";
+      11 | import { findFafFile } from "../utils/file-utils";
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/commands/ai-analyze.ts:8:1)
+      at Object.<anonymous> (tests/commands/ai-analyze.test.ts:5:1)
+
+FAIL src/tests/faf-dna-lifecycle.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+       8 |  */
+       9 |
+    > 10 | import chalk from 'chalk';
+         | ^
+      11 |
+      12 | /**
+      13 |  * Universal color system that works with any chalk version
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/fix-once/colors.ts:10:1)
+      at Object.<anonymous> (src/engines/faf-dna.ts:16:1)
+      at Object.<anonymous> (src/tests/faf-dna-lifecycle.test.ts:11:1)
+
+FAIL src/tests/faf-disaster-recovery.test.ts
+  ● Test suite failed to run
+
+    Configuration error:
+
+    Could not locate module chalk mapped as:
+    /Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js.
+
+    Please check your configuration for these entries:
+    {
+      "moduleNameMapper": {
+        "/^chalk$/": "/Users/wolfejam/FAF/cli/tests/__mocks__/chalk.js"
+      },
+      "resolver": undefined
+    }
+
+       8 |  */
+       9 |
+    > 10 | import chalk from 'chalk';
+         | ^
+      11 |
+      12 | /**
+      13 |  * Universal color system that works with any chalk version
+
+      at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+      at Object.<anonymous> (src/fix-once/colors.ts:10:1)
+      at Object.<anonymous> (src/engines/faf-dna.ts:16:1)
+      at Object.<anonymous> (src/tests/faf-disaster-recovery.test.ts:5:1)
+
+FAIL src/tests/extraction-prevention.test.ts
+  ● Test suite failed to run
+
+    [96msrc/core-extraction-fixes.ts[0m:[93m72[0m:[93m10[0m - [91merror[0m[90m TS2305: [0mModule '"./schema/faf-schema"' has no exported member 'FafData'.
+
+    [7m72[0m export { FafData, ProjectInfo } from './schema/faf-schema';
+    [7m  [0m [91m         ~~~~~~~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m72[0m:[93m19[0m - [91merror[0m[90m TS2305: [0mModule '"./schema/faf-schema"' has no exported member 'ProjectInfo'.
+
+    [7m72[0m export { FafData, ProjectInfo } from './schema/faf-schema';
+    [7m  [0m [91m                  ~~~~~~~~~~~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m140[0m:[93m18[0m - [91merror[0m[90m TS18046: [0m'error' is of type 'unknown'.
+
+    [7m140[0m         message: error.message
+    [7m   [0m [91m                 ~~~~~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m150[0m:[93m22[0m - [91merror[0m[90m TS18048: [0m'result.error' is possibly 'undefined'.
+
+    [7m150[0m     const errorMsg = result.error.line
+    [7m   [0m [91m                     ~~~~~~~~~~~~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m151[0m:[93m45[0m - [91merror[0m[90m TS18048: [0m'result.error' is possibly 'undefined'.
+
+    [7m151[0m       ? chalk.red(`❌ Invalid YAML at line ${result.error.line}`)
+    [7m   [0m [91m                                            ~~~~~~~~~~~~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m152[0m:[93m38[0m - [91merror[0m[90m TS18048: [0m'result.error' is possibly 'undefined'.
+
+    [7m152[0m       : chalk.red(`❌ Invalid YAML: ${result.error.message}`);
+    [7m   [0m [91m                                     ~~~~~~~~~~~~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m168[0m:[93m21[0m - [91merror[0m[90m TS2304: [0mCannot find name 'InstantContext'.
+
+    [7m168[0m   instant_context?: InstantContext;
+    [7m   [0m [91m                    ~~~~~~~~~~~~~~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m169[0m:[93m15[0m - [91merror[0m[90m TS2304: [0mCannot find name 'KeyFile'.
+
+    [7m169[0m   key_files?: KeyFile[];
+    [7m   [0m [91m              ~~~~~~~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m182[0m:[93m14[0m - [91merror[0m[90m TS2695: [0mLeft side of comma operator is unused and has no side effects.
+
+    [7m182[0m     "types": "./dist/types/index.d.ts",
+    [7m   [0m [91m             ~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m183[0m:[93m15[0m - [91merror[0m[90m TS2695: [0mLeft side of comma operator is unused and has no side effects.
+
+    [7m183[0m     "import": "./dist/index.js",
+    [7m   [0m [91m              ~~~~~~~~~~~~~~~~~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m232[0m:[93m17[0m - [91merror[0m[90m TS2323: [0mCannot redeclare exported variable 'getDefaultFafPath'.
+
+    [7m232[0m export function getDefaultFafPath() {
+    [7m   [0m [91m                ~~~~~~~~~~~~~~~~~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m232[0m:[93m17[0m - [91merror[0m[90m TS2393: [0mDuplicate function implementation.
+
+    [7m232[0m export function getDefaultFafPath() {
+    [7m   [0m [91m                ~~~~~~~~~~~~~~~~~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m237[0m:[93m17[0m - [91merror[0m[90m TS2323: [0mCannot redeclare exported variable 'getDefaultFafPath'.
+
+    [7m237[0m export function getDefaultFafPath(projectDir: string) {
+    [7m   [0m [91m                ~~~~~~~~~~~~~~~~~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m237[0m:[93m17[0m - [91merror[0m[90m TS2393: [0mDuplicate function implementation.
+
+    [7m237[0m export function getDefaultFafPath(projectDir: string) {
+    [7m   [0m [91m                ~~~~~~~~~~~~~~~~~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m266[0m:[93m50[0m - [91merror[0m[90m TS2345: [0mArgument of type 'string | null' is not assignable to parameter of type 'string'.
+      Type 'null' is not assignable to type 'string'.
+
+    [7m266[0m     const data = await this.fileProvider.readFaf(fafPath);
+    [7m   [0m [91m                                                 ~~~~~~~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m304[0m:[93m15[0m - [91merror[0m[90m TS2307: [0mCannot find module '@faf/core' or its corresponding type declarations.
+
+    [7m304[0m export * from '@faf/core';
+    [7m   [0m [91m              ~~~~~~~~~~~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m305[0m:[93m15[0m - [91merror[0m[90m TS2307: [0mCannot find module '@faf/core/types' or its corresponding type declarations.
+
+    [7m305[0m export * from '@faf/core/types';
+    [7m   [0m [91m              ~~~~~~~~~~~~~~~~~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m180[0m:[93m10[0m - [91merror[0m[90m TS1005: [0m';' expected.
+
+    [7m180[0m "exports": {
+    [7m   [0m [91m         ~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m181[0m:[93m6[0m - [91merror[0m[90m TS1005: [0m';' expected.
+
+    [7m181[0m   ".": {
+    [7m   [0m [91m     ~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m182[0m:[93m12[0m - [91merror[0m[90m TS1005: [0m';' expected.
+
+    [7m182[0m     "types": "./dist/types/index.d.ts",
+    [7m   [0m [91m           ~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m183[0m:[93m13[0m - [91merror[0m[90m TS1005: [0m';' expected.
+
+    [7m183[0m     "import": "./dist/index.js",
+    [7m   [0m [91m            ~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m184[0m:[93m14[0m - [91merror[0m[90m TS1005: [0m';' expected.
+
+    [7m184[0m     "require": "./dist/index.js"
+    [7m   [0m [91m             ~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m185[0m:[93m4[0m - [91merror[0m[90m TS1128: [0mDeclaration or statement expected.
+
+    [7m185[0m   },
+    [7m   [0m [91m   ~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m186[0m:[93m12[0m - [91merror[0m[90m TS1005: [0m';' expected.
+
+    [7m186[0m   "./types": {
+    [7m   [0m [91m           ~[0m
+    [96msrc/core-extraction-fixes.ts[0m:[93m187[0m:[93m12[0m - [91merror[0m[90m TS1005: [0m';' expected.
+
+    [7m187[0m     "types": "./dist/types/index.d.ts"
+    [7m   [0m [91m           ~[0m
+
+FAIL tests/fab-formats-cross-project.test.ts
+  ● Test suite failed to run
+
+    [96mtests/fab-formats-cross-project.test.ts[0m:[93m53[0m:[93m25[0m - [91merror[0m[90m TS2339: [0mProperty 'confirmedFormats' does not exist on type 'FabFormatsAnalysis'.
+
+    [7m53[0m         expect(analysis.confirmedFormats.length).toBeGreaterThan(0);
+    [7m  [0m [91m                        ~~~~~~~~~~~~~~~~[0m
+    [96mtests/fab-formats-cross-project.test.ts[0m:[93m57[0m:[93m37[0m - [91merror[0m[90m TS2339: [0mProperty 'frameworkConfidence' does not exist on type 'FabFormatsAnalysis'.
+
+    [7m57[0m         expect(Object.keys(analysis.frameworkConfidence).length).toBeGreaterThan(0);
+    [7m  [0m [91m                                    ~~~~~~~~~~~~~~~~~~~[0m
+    [96mtests/fab-formats-cross-project.test.ts[0m:[93m60[0m:[93m43[0m - [91merror[0m[90m TS2339: [0mProperty 'confirmedFormats' does not exist on type 'FabFormatsAnalysis'.
+
+    [7m60[0m         const foundFormatTypes = analysis.confirmedFormats.map(f => f.formatType);
+    [7m  [0m [91m                                          ~~~~~~~~~~~~~~~~[0m
+    [96mtests/fab-formats-cross-project.test.ts[0m:[93m60[0m:[93m64[0m - [91merror[0m[90m TS7006: [0mParameter 'f' implicitly has an 'any' type.
+
+    [7m60[0m         const foundFormatTypes = analysis.confirmedFormats.map(f => f.formatType);
+    [7m  [0m [91m                                                               ~[0m
+    [96mtests/fab-formats-cross-project.test.ts[0m:[93m62[0m:[93m33[0m - [91merror[0m[90m TS7006: [0mParameter 'found' implicitly has an 'any' type.
+
+    [7m62[0m           foundFormatTypes.some(found => found.includes(expected))
+    [7m  [0m [91m                                ~~~~~[0m
+    [96mtests/fab-formats-cross-project.test.ts[0m:[93m66[0m:[93m58[0m - [91merror[0m[90m TS2339: [0mProperty 'confirmedFormats' does not exist on type 'FabFormatsAnalysis'.
+
+    [7m66[0m         console.log(`✅ ${project.name}: Found ${analysis.confirmedFormats.length} confirmed formats, ${analysis.totalIntelligenceScore} intelligence points`);
+    [7m  [0m [91m                                                         ~~~~~~~~~~~~~~~~[0m
+    [96mtests/fab-formats-cross-project.test.ts[0m:[93m129[0m:[93m31[0m - [91merror[0m[90m TS2339: [0mProperty 'confirmedFormats' does not exist on type 'FabFormatsAnalysis'.
+
+    [7m129[0m             formats: analysis.confirmedFormats.length,
+    [7m   [0m [91m                              ~~~~~~~~~~~~~~~~[0m
+    [96mtests/fab-formats-cross-project.test.ts[0m:[93m131[0m:[93m51[0m - [91merror[0m[90m TS2339: [0mProperty 'frameworkConfidence' does not exist on type 'FabFormatsAnalysis'.
+
+    [7m131[0m             topFramework: Object.entries(analysis.frameworkConfidence)[0]?.[0] || 'Unknown'
+    [7m   [0m [91m                                                  ~~~~~~~~~~~~~~~~~~~[0m
+
+
+Test Suites: 15 failed, 11 passed, 26 total
+Tests:       5 failed, 162 passed, 167 total
+Snapshots:   0 total
+Time:        17.394 s, estimated 18 s
+Ran all test suites.

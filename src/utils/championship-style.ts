@@ -7,6 +7,11 @@
 
 import { colors } from '../fix-once/colors';
 
+// Environment-based output control
+const QUIET = process.env.FAF_QUIET === 'true';
+const NO_EMOJI = process.env.FAF_NO_EMOJI === 'true';
+const VERBOSE = process.env.FAF_VERBOSE === 'true';
+
 // 🎨 Championship Color Trinity (v2.0.0 White Stripe Edition)
 export const FAF_COLORS = {
   // Primary Color Palette
@@ -218,3 +223,40 @@ export function formatTechnicalCredit(credit: number): string {
     return `${credit} (debt)`;
   }
 }
+
+// 🔇 Environment-aware output functions
+export const log = QUIET ? () => {} : console.log;
+export const error = QUIET ? () => {} : console.error;
+export const warn = QUIET ? () => {} : console.warn;
+export const debug = VERBOSE ? console.log : () => {};
+
+// 🎨 Smart emoji wrapper - strips emojis when NO_EMOJI is set
+export function emoji(emojiChar: string, fallback: string = ''): string {
+  return NO_EMOJI ? fallback : emojiChar;
+}
+
+// 📝 Smart formatter - respects environment settings
+export function format(text: string, withColor: (str: string) => string = (s) => s): string {
+  if (QUIET) return '';
+  if (NO_EMOJI) {
+    // Strip all emojis from the text
+    text = text.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F000}-\u{1F02F}]|[\u{1F0A0}-\u{1F0FF}]|[\u{1F100}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{1F910}-\u{1F96B}]|[\u{1F980}-\u{1F9E0}]/gu, '');
+  }
+  return withColor(text);
+}
+
+// 🏁 Championship header with environment awareness
+export function getHeader(): string {
+  if (QUIET) return '';
+  if (NO_EMOJI) {
+    return `FAF CLI v2.1.3\nFoundational AI-context Format`;
+  }
+  return generateFAFHeader();
+}
+
+// Export environment flags for other modules
+export const OUTPUT_CONFIG = {
+  quiet: QUIET,
+  noEmoji: NO_EMOJI,
+  verbose: VERBOSE
+};
