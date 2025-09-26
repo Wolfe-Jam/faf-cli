@@ -662,11 +662,19 @@ program
   .description('Rate your .faf completeness (0-100%). Aim for 70%+ for good AI context.')
   .option('-d, --details', 'Show detailed scoring breakdown')
   .option('-m, --minimum <score>', 'Minimum required score (fails if below)')
+  .option('-c, --compiler', 'Use new compiler-based scoring (v3)')
+  .option('--trace', 'Show compilation trace (with --compiler)')
+  .option('--verify <checksum>', 'Verify checksum (with --compiler)')
+  .option('--checksum', 'Show checksum for verification')
+  .option('--breakdown', 'Show section breakdown (with --compiler)')
   .addHelpText('after', `
 Examples:
   $ faf score                    # Quick score check
   $ faf score --details          # See what's missing for higher score
-  $ faf score --minimum 80       # Fail if score below 80%`)
+  $ faf score --minimum 80       # Fail if score below 80%
+  $ faf score --compiler         # Use v3 compiler scoring
+  $ faf score -c --trace         # Show compilation process
+  $ faf score -c --checksum      # Get verification checksum`)
   .action(withAnalyticsTracking('score', scoreFafFile));
 
 // 📝 faf edit - Edit helper
