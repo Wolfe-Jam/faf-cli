@@ -26,6 +26,22 @@ export async function enhanceFafWithAI(
   file?: string,
   options: EnhanceOptions = {},
 ): Promise<void> {
+  // MAINTENANCE MODE - Temporarily disabled for improvements
+  console.log();
+  console.log(chalk.yellow('⚠️  FAF Enhance is temporarily under maintenance'));
+  console.log(chalk.gray('   We discovered the AI enhancement was showing incorrect scores.'));
+  console.log(chalk.gray('   We\'re improving this feature to provide real, accurate enhancements.'));
+  console.log();
+  console.log(chalk.cyan('🔧 Alternative options while we fix this:'));
+  console.log(chalk.white('   • Use "faf chat" for guided improvements'));
+  console.log(chalk.white('   • Use "faf edit" to manually improve your .faf'));
+  console.log(chalk.white('   • Use "faf score --details" to see what needs improvement'));
+  console.log();
+  console.log(chalk.gray('   Expected back: v2.4.0 (coming soon)'));
+  console.log();
+  return;
+
+  // Original code temporarily disabled
   try {
     const fafPath = file || (await findFafFile());
 
