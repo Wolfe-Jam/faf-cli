@@ -53,7 +53,10 @@ export async function scoreFafFile(file?: string, options: ScoreOptions = {}) {
     console.log(chalk.blue(`📈 Scoring: ${fafPath}`));
 
     // Read and parse .faf file
-    const content = await fs.readFile(fafPath, "utf-8");
+    // Use cache if enabled
+    const content = process.env.FAF_CACHE === 'true'
+      ? await require('../utils/filesystem-cache').cachedOps.readFile(fafPath, "utf-8")
+      : await fs.readFile(fafPath, "utf-8");
     const fafData = YAML.parse(content);
 
     // Calculate score with fab-formats discovery for enhanced context!
@@ -73,6 +76,12 @@ export async function scoreFafFile(file?: string, options: ScoreOptions = {}) {
         dna.birthCertificate.born,
         { showGrowth: true, showJourney: true }
       );
+
+      // Warm cache for likely next commands
+      if (process.env.FAF_CACHE === 'true') {
+        const { cachedOps } = require('../utils/filesystem-cache');
+        await cachedOps.warmCache('score');
+      }
     } else {
       // Fallback to old display if no DNA yet
       const scoreColor = getScoreColor(percentage);
