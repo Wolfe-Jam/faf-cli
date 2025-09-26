@@ -21,6 +21,13 @@ export interface GenerateOptions {
   projectType?: string;
   outputPath: string;
   projectRoot: string;
+  // Quick mode fields (optional)
+  projectName?: string;
+  projectGoal?: string;
+  mainLanguage?: string;
+  framework?: string;
+  hosting?: string;
+  [key: string]: any;  // Allow additional fields
 }
 
 export async function generateFafFromProject(
@@ -139,13 +146,30 @@ export async function generateFafFromProject(
   // Map all discovered slots (21-slot system)
   const contextSlotsFilled: Record<string, any> = {};
 
+  // IF: Quick mode data takes priority (user explicitly provided it)
+  if (options.projectGoal) {
+    contextSlotsFilled['project_goal'] = options.projectGoal;
+  }
+  if (options.projectName) {
+    contextSlotsFilled['project_name'] = options.projectName;
+  }
+  if (options.mainLanguage) {
+    contextSlotsFilled['main_language'] = options.mainLanguage;
+  }
+  if (options.framework && options.framework !== 'none') {
+    contextSlotsFilled['framework'] = options.framework;
+  }
+  if (options.hosting && options.hosting !== 'cloud') {
+    contextSlotsFilled['hosting'] = options.hosting;
+  }
+
   // Apply championship context extraction
   if (fabAnalysis.context) {
     const ctx = fabAnalysis.context;
 
-    // Technical slots (15)
-    if (ctx.projectName) contextSlotsFilled['project_name'] = ctx.projectName;
-    if (ctx.projectGoal) contextSlotsFilled['project_goal'] = ctx.projectGoal;
+    // Technical slots (15) - only fill if not already set by quick mode
+    if (ctx.projectName && !contextSlotsFilled['project_name']) contextSlotsFilled['project_name'] = ctx.projectName;
+    if (ctx.projectGoal && !contextSlotsFilled['project_goal']) contextSlotsFilled['project_goal'] = ctx.projectGoal;
     if (ctx.mainLanguage) contextSlotsFilled['main_language'] = ctx.mainLanguage;
     if (ctx.framework) contextSlotsFilled['framework'] = ctx.framework;
     if (ctx.backend) contextSlotsFilled['backend'] = ctx.backend;

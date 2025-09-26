@@ -8,6 +8,7 @@
 
 import * as YAML from 'yaml';
 import * as crypto from 'crypto';
+import { ChromeExtensionDetector } from '../utils/chrome-extension-detector';
 import { FabFormatsProcessor } from '../engines/fab-formats-processor';
 import * as path from 'path';
 
@@ -387,6 +388,34 @@ export class FafCompiler {
     const isFrontendProject = this.requiresFrontendStack(projectType);
     const isBackendProject = this.requiresBackendStack(projectType);
 
+    // Chrome Extension auto-fill: If it's a Chrome Extension, intelligently fill slots
+    if (projectType === 'chrome-extension') {
+      // Auto-fill Chrome Extension technical context
+      if (!ast.stack) ast.stack = {};
+      if (!ast.stack.runtime) ast.stack.runtime = 'Chrome/Browser';
+      if (!ast.stack.hosting) ast.stack.hosting = 'Chrome Web Store';
+      if (!ast.stack.api_type) ast.stack.api_type = 'Chrome Extension APIs';
+      if (!ast.stack.backend) ast.stack.backend = 'Service Worker';
+      if (!ast.stack.database) ast.stack.database = 'chrome.storage API';
+      if (!ast.deployment) ast.deployment = 'Web Store Upload';
+
+      // Add Chrome Extension specific slots
+      this.addSlot(slots, 'stack.runtime', ast.stack.runtime, 'string', 'discovered', 1);
+      this.addSlot(slots, 'stack.hosting', ast.stack.hosting, 'string', 'discovered', 1);
+      this.addSlot(slots, 'stack.api_type', ast.stack.api_type, 'string', 'discovered', 1);
+      this.addSlot(slots, 'stack.backend', ast.stack.backend, 'string', 'discovered', 1);
+      this.addSlot(slots, 'stack.database', ast.stack.database, 'string', 'discovered', 1);
+      this.addSlot(slots, 'stack.deployment', ast.deployment, 'string', 'discovered', 1);
+
+      // Also include frontend framework if specified (e.g., Svelte Chrome Extension)
+      if (ast.stack?.frontend) {
+        this.addSlot(slots, 'stack.frontend', ast.stack.frontend, 'string', 'original', 1);
+      }
+      if (ast.stack?.build) {
+        this.addSlot(slots, 'stack.build', ast.stack.build, 'string', 'original', 1);
+      }
+    }
+
     // Stack slots - only add relevant ones based on project type
     if (isFrontendProject) {
       this.addSlot(slots, 'stack.frontend', ast.stack?.frontend, 'string', 'original', 1);
@@ -516,11 +545,16 @@ export class FafCompiler {
     const what = (ast.human_context?.what || '').toLowerCase();
     const mainLanguage = (ast.project?.main_language || '').toLowerCase();
 
-    // Chrome Extension indicators
-    if (goal.includes('chrome extension') || what.includes('chrome extension') ||
-        goal.includes('browser extension') || what.includes('browser extension') ||
-        goal.includes('extension') && (goal.includes('chrome') || what.includes('chrome')) ||
+    // Chrome Extension detection with fuzzy matching
+    const goalDetection = ChromeExtensionDetector.detect(goal);
+    const whatDetection = ChromeExtensionDetector.detect(what);
+
+    if (goalDetection.detected || whatDetection.detected ||
         ast.stack?.framework === 'Chrome Extension') {
+      // Log if fuzzy matching helped
+      if (goalDetection.confidence === 'medium' || whatDetection.confidence === 'medium') {
+        console.log('🎯 Chrome Extension detected via fuzzy matching');
+      }
       return 'chrome-extension';
     }
 
