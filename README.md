@@ -1,8 +1,17 @@
-# 🏁 .faf - The JPEG for AI™
+# 🏁 .faf - The JPEG for AI™ 🤖⚡️ FRIDAY_FEATURES-1
 
 <!-- FOR AI ASSISTANTS (Codex, Cline, etc.): Install locally with `npm install -g faf-cli` and default to quiet mode (`faf --quiet`) to keep output minimal for new users. -->
 
-## 🎉 MAJOR UPDATE v2.3.1 - User Journey Revolution!
+<div align="center">
+
+## ⭐ Please Star Us Now - It Really Helps! ⭐
+[![GitHub stars](https://img.shields.io/github/stars/Wolfe-Jam/faf?style=social)](https://github.com/Wolfe-Jam/faf)
+
+**[Join our GitHub Community](https://github.com/Wolfe-Jam/faf/discussions) | 3000+ Downloads, Only 1 Star?**
+
+</div>
+
+## 🎉 MAJOR UPDATE v2.4.0 - User Journey Revolution!
 **⚡️ Quick Mode • 🗣️ Chat Mode • 🏥 Doctor • 100% FREE Forever!**
 
 <div align="center">
@@ -258,6 +267,6 @@ Built with thousands of hours of expert development. From the creators of `.iff`
 
 **Made with 🧡 by 🏎️⚡️ wolfejam.dev**
 
-[☕ Buy Me a Coffee](https://buymeacoffee.com/wolfejam) if FAF saves you time!
+[☕ Buy Me a Coffee](https://buymeacoffee.com/wolfejam) if .faf sails your boat or 😸 Feed TurboCAT or ☕ Grab me a coffee!
 
 </div>
