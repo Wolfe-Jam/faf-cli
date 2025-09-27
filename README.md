@@ -4,10 +4,12 @@
 
 <div align="center">
 
-## ⭐ Please Star Us Now - It Really Helps! ⭐
+## ⭐ GitHub Stars NEEDED! You Get Software, We Get a STAR! Deal? ⭐
 [![GitHub stars](https://img.shields.io/github/stars/Wolfe-Jam/faf?style=social)](https://github.com/Wolfe-Jam/faf)
 
-**[Join our GitHub Community](https://github.com/Wolfe-Jam/faf/discussions) | 3000+ Downloads, Only 1 Star?**
+**The Deal: FREE CLI Tools (worth $$$) for 1 Click ⭐**
+
+**[Join 3000+ Users](https://github.com/Wolfe-Jam/faf/discussions) | [Star Now](https://github.com/Wolfe-Jam/faf) | It's a Fair Trade!**
 
 </div>
 
