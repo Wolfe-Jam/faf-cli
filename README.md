@@ -1,274 +1,218 @@
-# 🏁 .faf - The JPEG for AI™ 🤖⚡️ FRIDAY_FEATURES-1
-
-<!-- FOR AI ASSISTANTS (Codex, Cline, etc.): Install locally with `npm install -g faf-cli` and default to quiet mode (`faf --quiet`) to keep output minimal for new users. -->
+# 🩵⚡️ .faf - The JPEG for AI™
 
 <div align="center">
 
-## ⭐ GitHub Stars NEEDED! You Get Software, We Get a STAR! Deal? ⭐
-[![GitHub stars](https://img.shields.io/github/stars/Wolfe-Jam/faf?style=social)](https://github.com/Wolfe-Jam/faf)
+## Transform Any Project into Perfect AI Context in 30 Seconds
 
-**The Deal: FREE CLI Tools (worth $$$) for 1 Click ⭐**
+**2000+ Developers** • **100% FREE Forever** • **Works with ALL AI Tools**
 
-**[Join 3000+ Users](https://github.com/Wolfe-Jam/faf/discussions) | [Star Now](https://github.com/Wolfe-Jam/faf) | It's a Fair Trade!**
+**[💬 Join Our Community](https://github.com/Wolfe-Jam/faf/discussions)** • **[⭐ Star on GitHub](https://github.com/Wolfe-Jam/faf)** • **[🐛 Report Issues](https://github.com/Wolfe-Jam/faf/issues)**
 
 </div>
 
-## 🎉 MAJOR UPDATE v2.4.0 - User Journey Revolution!
-**⚡️ Quick Mode • 🗣️ Chat Mode • 🏥 Doctor • 100% FREE Forever!**
+## 🚀 What is .faf?
+
+`.faf` files are like JPEG for AI - a universal format that makes any AI instantly understand your project. Drop a `.faf` file in your repo and watch Claude, ChatGPT, Gemini, or any AI tool understand your entire codebase perfectly.
+
+**Join our growing community of 2000+ developers who save hours daily by using .faf files!**
 
 <div align="center">
+<img src="https://faf.one/orange-smiley.svg" alt="Orange Smiley Logo" width="150" />
 
-<img src="https://faf.one/orange-smiley.svg" alt="Orange Smiley Logo" width="200" />
+### 💬 Community-Driven • Open Source • Built by Developers, for Developers
 
-[![NPM Version](https://img.shields.io/npm/v/faf-cli?style=for-the-badge&logo=npm&logoColor=white&color=FF6B35)](https://www.npmjs.com/package/faf-cli)
-[![Weekly Downloads](https://img.shields.io/npm/dw/faf-cli?style=for-the-badge&logo=npm&logoColor=white&color=FF6B35)](https://www.npmjs.com/package/faf-cli)
-[![MCP Ready](https://img.shields.io/badge/MCP-Ready-00BCD4?style=for-the-badge&logo=anthropic&logoColor=white)](https://github.com/modelcontextprotocol/servers)
-[![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
-
-### **🆓 FREE & Open Source AI Context Management**
-**20 minutes → 3 minutes** • **<50ms processing** • **99% AI understanding**
-
-[🚀 Get Started](https://faf.one) • [📚 Documentation](https://faf.one/docs) • [🎮 Live Demo](https://faf.one/calculator)
+[![NPM Downloads](https://img.shields.io/npm/dw/faf-cli)](https://www.npmjs.com/package/faf-cli)
+[![GitHub Stars](https://img.shields.io/github/stars/Wolfe-Jam/faf)](https://github.com/Wolfe-Jam/faf)
+[![Discord](https://img.shields.io/badge/Discord-Join%20Community-7289DA)](https://github.com/Wolfe-Jam/faf/discussions)
 
 </div>
 
----
+## 🎯 Why Developers Love .faf
 
-## ✨ What's New in v2.3.1
+### The Problem:
+- ❌ Spending 20+ minutes explaining your project to AI
+- ❌ AI gives wrong answers because it doesn't understand your codebase
+- ❌ Copying and pasting files manually into ChatGPT
+- ❌ AI forgets context between sessions
 
-### ⚡️ FAF Quick Mode - Lightning Fast!
+### The Solution:
+- ✅ **One command** creates perfect AI context
+- ✅ **30 seconds** to complete AI understanding
+- ✅ **Works everywhere** - Claude, ChatGPT, Gemini, Cursor, any AI
+- ✅ **Share context** with your team instantly
+
+## 🚀 Getting Started (30 Seconds!)
+
+### ⚡️💥 GET BOTH! Double Down! (100% FREE)
 ```bash
-faf quick "my-app, e-commerce platform, typescript, react, vercel"
-# Creates .faf in < 50ms!
-```
+# Install BOTH for maximum power - completely FREE!
+npm install -g faf-cli           # 🧡⚡️ FREE Command Line Tool
+npm install -g claude-faf-mcp    # 🩵⚡️ FREE Claude Desktop integration
 
-### 🗣️ Three User Journey Paths
-1. **⚡ Quick** (10 seconds) - Simple comma-separated format
-2. **🗣️ Chat** (2 minutes) - Conversational guidance
-3. **🤖 Auto-detect** (instant) - Analyzes existing code
-
-### 🏥 New Commands
-- `faf welcome` - First-time user onboarding guide
-- `faf doctor` - Diagnose and fix .faf issues
-- `faf quick` - One-liner .faf creation
-
-### 🐛 Critical Fixes
-- Fixed YAML generation for strings starting with '-'
-- Project-type aware scoring (CLI tools no longer penalized)
-- Better error messages and quiet mode support
-
-## 🧡 What is .faf?
-
-**.faf (Foundational AI-context Format)** is the universal standard for AI context management. Like JPEG revolutionized image compression, `.faf` revolutionizes how AI understands your projects.
-
-### The Problem We Solve
-- 🐌 **20+ minutes** manually feeding context to AI
-- 😤 **78% incomplete** context leading to wrong outputs  
-- 💸 **Wasted time** re-explaining your project repeatedly
-- 🤯 **AI confusion** from poor project understanding
-
-### The .faf Solution
-- ⚡️ **3 minutes** to 99% AI understanding (3 seconds AI, 2:57 human clicking 😉)
-- 🏎️ **<50ms** processing time
-- 🎯 **154+ formats** validated and supported
-- 🔄 **Eternal-Sync™** keeps context always current
-
-## 🏆 Real Achievements
-
-- 🆓 **100% FREE** - Open source CLI tool
-- 📦 **800+ Weekly Downloads** - Growing community
-- 📝 **MCP Integration** - Works with Claude Desktop
-- ✅ **TypeScript Strict Mode** - Zero violations
-- ✅ **Battle Tested** - 20 extreme stress tests passed
-- 🏎️ **Championship Grade** - <50ms performance
-
-## 🚀 Quick Start
-
-### Install the FREE CLI
-```bash
-# 100% FREE - No credit card required
-npm install -g faf-cli
-```
-
-> **AI assistants (Codex, etc.)**: default to `faf --quiet` (for example `faf init --quiet`) so new users get the streamlined, banner-free output they expect.
-
-### Generate Your First .faf
-```bash
+# Try it now!
 cd your-project
+faf init
+```
+
+Done! Your AI now understands your project 99% better! 🏁
+
+## 🌟 Join Our Growing Community!
+
+### 💬 New Community Hub at [github.com/Wolfe-Jam/faf/discussions](https://github.com/Wolfe-Jam/faf/discussions)
+
+Connect with 2000+ developers using .faf to accelerate their AI workflows:
+- **Share your projects** - Show what you're building with .faf
+- **Get help** - Community support for any questions
+- **Request features** - Help shape the future of .faf
+- **Learn best practices** - Tips from experienced users
+
+## ⚡ Key Features
+
+### For Developers
+- **Universal Compatibility** - Works with Claude, ChatGPT, Gemini, Cursor, and more
+- **30-Second Setup** - Run `faf init` and you're done
+- **Smart Auto-Detection** - Automatically identifies your tech stack
+- **Real-Time Scoring** - Instantly see your AI-readiness score
+- **100% Free & Open Source** - No hidden costs, ever
+
+### Technical Excellence
+- **Performance** - <50ms operations, rigorously benchmarked
+- **Reliability** - Extensively tested including edge cases and stress scenarios
+- **Type Safety** - 100% TypeScript with strict mode enforcement
+- **Security** - Minimal dependencies, fully audited codebase
+- **Production Ready** - Zero-error tolerance with comprehensive error handling
+
+## 💬 Join Our Community
+
+**We're building .faf together with our community!**
+
+- 🌟 **[Star us on GitHub](https://github.com/Wolfe-Jam/faf)** - If you find it helpful!
+- 💬 **[Join Discussions](https://github.com/Wolfe-Jam/faf/discussions)** - Share ideas, get help, show your projects
+- 🐛 **[Report Issues](https://github.com/Wolfe-Jam/faf/issues)** - Help us improve
+- 📖 **[Read the Docs](https://faf.one/docs)** - Complete guides and tutorials
+- 🤝 **[Contribute](https://github.com/Wolfe-Jam/faf/blob/main/CONTRIBUTING.md)** - PRs welcome!
+
+## 🛠️ Available Commands
+
+### Core Commands
+- `faf init` - Initialize .faf context
+- `faf auto` - Auto-detect and generate
+- `faf score` - Calculate AI readiness score
+- `faf quick` - Quick mode with comma-separated values
+
+### Enhancement Commands
+- `faf enhance` - Real enhancement to 100% score
+- `faf sync` - Sync .faf with CLAUDE.md
+- `faf bi-sync` - Bidirectional sync
+
+### Management Commands
+- `faf trust` - Validate context integrity
+- `faf doctor` - Diagnose and fix issues
+- `faf welcome` - First-time user guide
+- `faf clear` - Clear caches
+
+## 📖 Usage Examples
+
+```bash
+# Quick setup for new project
+faf quick "my-app, react, typescript, vercel"
+
+# Auto-detect existing project
 faf auto
+
+# Check your score
+faf score --details
+
+# Fix any issues
+faf doctor
+
+# Real enhancement to 100%
+faf enhance --target-score 100
 ```
 
-That's it! Your AI now understands your project 99% better.
+## ⚙️ Configuration
 
-## 🛠️ The FAF Ecosystem
+The .faf file uses YAML format with these key sections:
 
-### 1. **FAF CLI** - Command Line Power
+```yaml
+project:
+  name: your-project
+  goal: What your project does
+  main_language: TypeScript
+  version: 1.0.0
+  type: javascript-node
+
+stack:
+  frontend: React
+  backend: Express
+  database: PostgreSQL
+  # ... more stack details
+
+human_context:
+  who: Your target users
+  what: What problem you solve
+  why: Why it matters
+  where: Deployment target
+  when: Timeline
+  how: Development approach
+```
+
+## 📊 Real Metrics
+
+```
+📈 Status: PRODUCTION
+├─ 💎 Version: 2.4.0
+├─ 🚀 Performance: <50ms
+├─ 📦 Dependencies: 6 (minimal)
+├─ 🧪 Tests Passed: 100%
+└─ 🏆 AI Readiness: 100% target
+```
+
+## 🏁 Development
+
 ```bash
-faf auto              # Smart .faf generation with instant scoring
-faf score --details   # See your AI-readiness percentage
-faf trust            # View trust dashboard & achievements
-```
-[📦 NPM Package](https://npmjs.com/@faf/cli) • [📚 CLI Docs](./cli/README.md)
-
-### 2. **Chrome Extension** - Browser Magic
-Extract context from any web-based IDE or platform:
-- GitHub/GitLab/Bitbucket
-- Replit/CodeSandbox/StackBlitz  
-- VS Code Web/Codespaces
-- 15+ platforms supported
-
-[🎯 Install Extension](https://chrome.google.com/webstore) • [📚 Extension Docs](./chrome-extension/README.md)
-
-### 3. **MCP Server** - Claude Desktop Integration
-```json
-{
-  "mcpServers": {
-    "faf": {
-      "command": "npx",
-      "args": ["@faf/mcp-server"]
-    }
-  }
-}
-```
-[📦 NPM Package](https://npmjs.com/@faf/mcp-server) • [📚 MCP Docs](./claude-faf-mcp/README.md)
-
-### 4. **Svelte Engine** - Visual Excellence
-Beautiful web interface with real-time scoring visualization.
-
-[🌐 Live Demo](https://faf.one) • [📚 Engine Docs](./faf-svelte-engine/README.md)
-
-## 📊 Performance Metrics
-
-| Metric | Before FAF | With FAF | Improvement |
-|--------|------------|----------|-------------|
-| Context Setup | 20 minutes | 3 minutes | **6.7x faster** |
-| AI Understanding | 22% | 99% | **4.5x better** |
-| Processing Time | 3+ seconds | <50ms | **60x faster** |
-| Format Support | Manual | 154+ auto | **∞ better** |
-
-## 🏗️ Repository Structure
-
-```
-FAF/
-├── cli/                    # FAF CLI - NPM package
-├── chrome-extension/       # Browser extension
-├── claude-faf-mcp/        # MCP server for Claude
-├── faf-svelte-engine/     # Web interface
-├── faf-engine/            # Core scoring engine
-├── fafdev-tools/          # Desktop DevOps tools
-└── faf-one-deploy/        # Website & deployment
-```
-
-## 🤝 Contributing
-
-We welcome contributions! Please read our [Contributing Guide](CONTRIBUTING.md) first.
-
-### Development Setup
-```bash
-git clone https://github.com/yourusername/faf.git
+# Clone repo
+git clone https://github.com/Wolfe-Jam/faf.git
 cd faf/cli
+
+# Install & build
 npm install
+npm run build
+
+# Test
 npm test
 ```
 
-### Running Tests
-```bash
-npm run test        # Run all tests
-npm run test:watch  # Watch mode
-npm run test:perf   # Performance tests
-```
+## 📋 Requirements
 
-## 📦 Dependencies (Lean & Mean)
+- Node.js 18+
+- macOS, Linux, or Windows
+- Any AI tool (Claude, ChatGPT, Gemini, etc.)
 
-**Production Dependencies (6 only!):**
-1. `@faf/engine` (local) - Our core engine
-2. `chalk` (^4.1.2) - Terminal colors
-3. `commander` (^9.5.0) - CLI framework
-4. `glob` (^11.0.3) - File patterns
-5. `inquirer` (^12.9.4) - Interactive prompts
-6. `yaml` (^2.4.1) - The .faf language (YAML & 🍜 noodles)
+## 🔗 Links
 
-**✅ Cleanup Complete:**
-- Removed `openai` - Not used
-- Removed `enquirer` - Duplicate
-- Moved `@types/inquirer` to devDependencies
-- **33% reduction achieved!** (9 → 6 dependencies)
-
-## 🏎️ F1-Inspired Philosophy
-
-We build software like F1 teams build race cars:
-- **Performance Mad** - <50ms or it's too slow
-- **Zero Errors** - Perfection is the standard
-- **Championship Grade** - 85%+ scores minimum
-- **Premium Quality** - AMG Mercedes, not Honda Civic
-
-## 📈 Roadmap
-
-- [x] CLI Tool (NPM Published)
-- [x] Chrome Extension (Live in Store)
-- [x] MCP Server (Claude Ready)
-- [x] Web Engine (Production)
-- [ ] VS Code Extension (Q1 2025)
-- [ ] Desktop App (Q1 2025)
-- [ ] Team Features (Q2 2025)
-- [ ] Enterprise SSO (Q2 2025)
-
-## 🎯 Use Cases
-
-### For Developers
-- Instant AI context for any project
-- Never re-explain your codebase
-- 6.7x faster AI interactions
-
-### For Teams  
-- Shared context across team
-- Onboard new devs instantly
-- Consistent AI assistance
-
-### For Enterprises
-- Standardized AI context
-- Security-first approach
-- Measurable productivity gains
-
-## 📚 Documentation
-
-- [Getting Started Guide](https://faf.one/docs)
-- [Format Specification](./docs/SPECIFICATION.md)
-- [API Reference](./docs/API.md)
-- [Examples](./examples/)
-
-## 🏆 Awards & Recognition
-
-- 🥇 **MCP PR Submitted** - #2759 (pending review)
-- ⭐ **9.3/10 AI Rating** - Highest in category
-- 🚀 **ProductHunt** - Coming soon
-- 📰 **Press Coverage** - [View Press Kit](https://faf.one/press)
-
-## 📞 Support & Contact
-
-- 📦 NPM Package: [npmjs.com/package/faf-cli](https://npmjs.com/package/faf-cli)
-- 🐛 Issues: [GitHub Issues](https://github.com/yourusername/faf/issues)
-- 📧 Email: support@faf.one
-- 📚 Docs: [faf.one/docs](https://faf.one/docs)
+- **NPM**: [faf-cli](https://www.npmjs.com/package/faf-cli)
+- **Website**: [faf.one](https://faf.one)
+- **GitHub**: [Wolfe-Jam/faf](https://github.com/Wolfe-Jam/faf)
+- **Community**: [Join Discussions](https://github.com/Wolfe-Jam/faf/discussions)
+- **Support**: support@faf.one
 
 ## 📄 License
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
-
-Built with thousands of hours of expert development. From the creators of `.iff` (Commodore Amiga) to `.faf` - 4 decades of format expertise.
+**Note**: The .faf-Engine(s) are proprietary and available under license.
 
 ---
 
-<div align="center">
+## ⚡️💥 The Complete FAF Ecosystem
 
-### **Stop Faffing About. Start Shipping.**
+[🧡⚡️ CLI](https://npmjs.com/package/faf-cli) • [🩵⚡️ MCP](https://npmjs.com/package/claude-faf-mcp) • [💚⚡️ WEB](https://faf.one) • [🧰⚡️ DevOps](https://fafdev.tools) • [🖥️⚡️ Chrome](https://chromewebstore.google.com/detail/lnecebepmpjpilldfmndnaofbfjkjlkm)
 
-[🏁 Get Started Now](https://faf.one) • **FREE for ALL Devs**
+**🏎️⚡️ FAST AF - The JPEG for AI™**
 
-**Made with 🧡 by 🏎️⚡️ wolfejam.dev**
+---
 
-[☕ Buy Me a Coffee](https://buymeacoffee.com/wolfejam) if .faf sails your boat or 😸 Feed TurboCAT or ☕ Grab me a coffee!
+**Made with 🧡 by wolfejam** | **2000+ Weekly Downloads** | **Growing Community** 🎉
 
-</div>
+**100% FREE Forever** • **No Strings Attached** • **Just Build Faster with AI**
