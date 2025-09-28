@@ -1,7 +1,7 @@
 {
   "name": "faf-cli",
-  "version": "2.4.0",
-  "description": "⭐ STAR us: github.com/Wolfe-Jam/faf | 💬 Join 3000+ users: github.com/Wolfe-Jam/faf/discussions | The JPEG for AI™ - FREE tools for a star! Deal?",
+  "version": "2.4.2",
+  "description": "Transform any project into perfect AI context in 30 seconds. Works with Claude, ChatGPT, Gemini & all AI tools. Join 2000+ developers using .faf files to make AI understand their code instantly. 100% FREE • Open Source • If helpful, a ⭐ is appreciated!",
   "icon": "https://faf.one/orange-smiley.svg",
   "logo": "https://faf.one/orange-smiley.svg",
   "main": "dist/index.js",
