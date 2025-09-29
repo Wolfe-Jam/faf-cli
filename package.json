@@ -1,7 +1,7 @@
 {
   "name": "faf-cli",
-  "version": "2.4.2",
-  "description": "Transform any project into perfect AI context in 30 seconds. Works with Claude, ChatGPT, Gemini & all AI tools. Join 2000+ developers using .faf files to make AI understand their code instantly. 100% FREE • Open Source • If helpful, a ⭐ is appreciated!",
+  "version": "2.4.4",
+  "description": "🩵 Cyan CLI - Transform any project into perfect AI context in 30 seconds. Works with Claude, ChatGPT, Gemini & all AI tools. Join 3000+ developers using .faf files. 100% FREE • Open Source • If helpful, a ⭐ is appreciated!",
   "icon": "https://faf.one/orange-smiley.svg",
   "logo": "https://faf.one/orange-smiley.svg",
   "main": "dist/index.js",
@@ -74,7 +74,6 @@
   "author": "🏎️⚡️_wolfejam.dev",
   "license": "MIT",
   "dependencies": {
-    "@wolfejam/faf-engine": "^1.0.0",
     "chalk": "^4.1.2",
     "commander": "^9.5.0",
     "glob": "^11.0.3",
