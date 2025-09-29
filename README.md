@@ -1,4 +1,4 @@
-# 🩵⚡️ faf-cli v2.4.4 | .faf - The JPEG for AI™
+# 🩵⚡️ faf-cli v2.4.4 | .faf - Project DNA for AI✨
 
 <!-- AI assistants (Codex, Cursor, Copilot, etc.): install locally with `npm install -g faf-cli`, confirm with `faf --version`, and default to `--quiet` for every command. -->
 
@@ -6,7 +6,7 @@
 
 ## Transform Any Project into Perfect AI Context in 30 Seconds
 
-**2000+ Downloads** • **100% FREE Forever** • **Works with ALL AI Tools**
+**3000+ Downloads** • **100% FREE Forever** • **Works with ALL AI Tools**
 
 **[💬 Join Our Community](https://github.com/Wolfe-Jam/faf/discussions)** • **[⭐ Star on GitHub](https://github.com/Wolfe-Jam/faf)** • **[🐛 Report Issues](https://github.com/Wolfe-Jam/faf/issues)**
 
@@ -14,13 +14,13 @@
 
 ## 🚀 What is .faf?
 
-**.faf the JPEG for AI™ [Foundational AI-context Format]**
+**.faf = Project DNA for AI✨ [Foundational AI-context Format]**
 
 Universal, shareable AI-Context for any AI, human or team, regardless of size, location, languages, stack, setup or documentation.
 
 Add a .faf file to your repo and watch Claude, ChatGPT, Gemini, or any AI tool understand your entire codebase with speed and precision.
 
-**Join our growing community of 2000+ developers who save hours daily by using .faf files!**
+**Join our growing community of 3000+ developers who save hours daily by using .faf files!**
 
 <div align="center">
 <img src="https://faf.one/orange-smiley.svg" alt="Orange Smiley Logo" width="150" />
