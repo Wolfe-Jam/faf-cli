@@ -19,6 +19,7 @@ import { syncFafFile } from './commands/sync';
 import { auditFafFile } from './commands/audit';
 import { lintFafFile } from './commands/lint';
 import { enhanceFafWithAI } from './commands/ai-enhance';
+import { realEnhanceFaf } from './commands/enhance-real';
 import { analyzeFafWithAI } from './commands/ai-analyze';
 import { trustCommand } from './commands/trust';
 import { statusCommand } from './commands/status';
@@ -35,6 +36,7 @@ import { indexCommand } from './commands/index';
 import { shareCommand } from './commands/share';
 import { chatCommand } from './commands/chat';
 import { convertCommand, toMarkdown, toText } from './commands/convert';
+import { notificationsCommand } from './commands/notifications';
 import { setColorOptions, type ColorScheme } from './utils/color-utils';
 import { generateFAFHeader, generateHelpHeader, FAF_COLORS } from './utils/championship-style';
 import { analytics, trackCommand, trackError, withPerformanceTracking } from './telemetry/analytics';
@@ -43,6 +45,7 @@ import { findFafFile } from './utils/file-utils';
 import { calculateFafScore } from './scoring/score-calculator';
 import { getTrustCache } from './utils/trust-cache';
 import * as YAML from 'yaml';
+import { showV240Announcement } from './utils/announcements';
 
 const version = require('../package.json').version;
 
@@ -135,7 +138,7 @@ function showHeaderIfAppropriate(commandName?: string) {
 
 program
   .name('faf')
-  .description('.faf = THE JPEG for AI | Foundational AI-context Format | SPEEDY AI you can TRUST! 🧡⚡️')
+  .description('.faf = Project DNA for AI✨ | Foundational AI-context Format | SPEEDY AI you can TRUST! 🧡⚡️')
   .version(version)
   .option('--no-color', 'Disable colored output for accessibility')
   .option('--color-scheme <scheme>', 'Color scheme for colorblind accessibility: normal|deuteranopia|protanopia|tritanopia', 'normal')
@@ -156,7 +159,7 @@ ${FAF_COLORS.fafCyan('🚀 Quick Start - Get Perfect AI Context:')}
   ${FAF_COLORS.fafOrange('4.')} ${chalk.cyan('faf bi-sync')}  ${chalk.gray('# Set & forget - persistent context-mirroring')}
 
 ${FAF_COLORS.fafCyan('🎯 What is .faf?')}
-  .faf = Foundational AI-context Format (THE JPEG for AI!)
+  .faf = Foundational AI-context Format (Project DNA for AI✨)
   Just like JPEG makes images universal, .faf makes projects AI-readable.
   bi-sync = persistent context-mirroring through thick and thin
   Get high score, build trust, share freely!
@@ -240,7 +243,7 @@ Examples:
 🔐 Birth Certificate:
   • Proves origin of your context
   • Tracks evolution from birth weight
-  • Enables Context-Mirroring guarantee`)
+  • Enables Context-Mirroring recovery`)
   .action(withAnalyticsTracking('auth', () => {
     const authCommand = require('./commands/faf-auth');
     return authCommand.default?.();
@@ -344,12 +347,12 @@ program
 // 🧡 faf trust - Consolidated Trust Dashboard (The Emotional Core)
 program
   .command('trust')
-  .description('🧡 Unified trust dashboard - confidence, garage, panic, guarantee modes')
+  .description('🧡 Unified trust dashboard - confidence, garage, panic, quality modes')
   .option('-d, --detailed', 'Show detailed trust metrics')
   .option('--confidence', 'Show AI confidence analysis')
   .option('--garage', 'Safe experimentation mode with backup')
   .option('--panic', 'Emergency context repair mode')
-  .option('--guarantee', 'Quality assurance mode (85%+ threshold)')
+  .option('--quality', 'Quality checks and validation mode')
   .addHelpText('after', `
 Examples:
   $ faf trust                        # Main trust dashboard
@@ -357,13 +360,13 @@ Examples:
   $ faf trust --confidence           # AI confidence analysis
   $ faf trust --garage               # Safe experiment mode
   $ faf trust --panic                # Emergency repair
-  $ faf trust --guarantee            # Quality guarantee check
+  $ faf trust --quality              # Quality validation check
   
 Trust Modes:
   • Confidence: AI confidence levels and boosting tips
   • Garage: Safe experimentation with automatic backup  
   • Panic: Emergency repair and restoration
-  • Guarantee: Championship quality assurance (85%+ standard)`)
+  • Quality: Championship quality checks and validation`)
   .action(withAnalyticsTracking('trust', (options) => trustCommand(options)));
 
 // ⚡️ faf vibe - No-Code/Low-Code Builder Edition
@@ -469,7 +472,7 @@ Examples:
 The Everything Catalog:
   • ⚡️ Commands: All available commands with usage
   • 💡 Concepts: Core FAF concepts (bi-sync, technical-credit, etc.)
-  • 🧡 Features: Specialized features (garage, panic, guarantee modes)
+  • 🧡 Features: Specialized features (garage, panic, quality modes)
   • 📂 Categories: core, ai, trust, utilities, improvement, psychology
   
 Perfect for:
@@ -830,6 +833,28 @@ Championship Bi-Sync Features:
     });
   });
 
+// 📧 faf notifications - Version update notifications
+program
+  .command('notifications')
+  .description('📧 Add your email for new version notifications')
+  .option('--email <email>', 'Add email for notifications')
+  .option('--status', 'Check notification status')
+  .option('--remove', 'Remove email from notifications')
+  .option('--quiet', 'Skip interactive prompts')
+  .addHelpText('after', `
+Examples:
+  $ faf notifications            # Interactive email add
+  $ faf notifications --email me@example.com  # Direct add
+  $ faf notifications --status   # Check if email added
+  $ faf notifications --remove   # Remove your email
+
+What you get notified about:
+  • New versions with features
+  • Breaking changes that affect you
+  • Critical security updates
+  • Only major releases (not every patch)`)
+  .action((options) => notificationsCommand(options));
+
 // 🧹 faf clear - Reset caches and state (Claude Code consistency)
 program
   .command('clear')
@@ -965,24 +990,34 @@ Examples:
   $ faf lint --schema-version 2.4.0  # Use specific schema`)
   .action(lintFafFile);
 
-// 🚀 faf enhance - Claude-First, Big-3 Compatible Enhancement
+// 🚀 faf enhance - REAL Enhancement based on facts
 program
   .command('enhance [file]')
-  .description('🚀 Claude-First AI Enhancement - Big-3 Compatible, Bullet-proof Universal')
-  .option('-m, --model <model>', 'AI model: claude|chatgpt|gemini|big3|universal', 'claude')
-  .option('-f, --focus <area>', 'Focus: human-context|ai-instructions|completeness|claude-exclusive', 'completeness')
-  .option('--consensus', 'Build consensus from multiple models')
-  .option('--dry-run', 'Show enhancement prompt without executing')
+  .description('🚀 REAL Enhancement - Analyzes your project for actual improvements')
+  .option('-v, --verbose', 'Show detailed changes')
+  .option('--dry-run', 'Preview improvements without applying')
+  .option('--auto-fill', 'Automatically fill all detectable fields')
+  .option('-t, --target-score <score>', 'Target score to achieve (default: 100)', '100')
+  .option('-i, --interactive <bool>', 'Ask for missing data (default: true)', 'true')
   .addHelpText('after', `
-🤖 Claude-First Enhancement:
-  $ faf enhance                           # Claude intelligence (default)
-  $ faf enhance --model big3              # Big-3 consensus enhancement
-  $ faf enhance --focus claude-exclusive  # Claude's F1-inspired specialty
-  $ faf enhance --consensus               # Multi-model consensus
-  $ faf enhance --dry-run                 # Preview enhancement
+🚀 REAL Enhancement:
+  $ faf enhance              # Apply real improvements from project analysis
+  $ faf enhance --dry-run    # Preview what will be improved
+  $ faf enhance --verbose    # Show detailed changes
+  $ faf enhance -t 90        # RELENTLESSLY enhance until 90% score
 
-🚀 NO EXTERNAL DEPENDENCIES - Uses our own Big-3 verification engine!`)
-  .action(enhanceFafWithAI);
+✅ No BS, No Placeholders - Only facts from your actual project!
+🎯 Relentless mode: Keeps enhancing until target score achieved`)
+  .action((file, options) => {
+    const enhanceOptions = {
+      verbose: options.verbose,
+      dryRun: options.dryRun,
+      autoFill: options.autoFill,
+      targetScore: parseInt(options.targetScore),
+      interactive: options.interactive !== 'false'
+    };
+    return realEnhanceFaf(file, enhanceOptions);
+  });
 
 // 🔍 faf analyze - Claude-First, Big-3 Compatible Analysis
 program
@@ -1271,6 +1306,9 @@ if (!commandUsed) {
     checkForUpdates({ quiet: options.quiet }).catch(() => {
       // Silent fail - update check is not critical
     });
+
+    // Show v2.4.0 announcement to existing users (one time only)
+    showV240Announcement();
 
     // Apply color accessibility settings after parsing
     if (options.noColor || process.env.NO_COLOR) {

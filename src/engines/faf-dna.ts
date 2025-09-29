@@ -80,7 +80,7 @@ export interface FafDNA {
   // Current State
   current: CurrentState;
   
-  // Immortality - Recovery guarantee
+  // Immortality - Recovery capability
   recovery: RecoveryInfo;
   
   // Analytics

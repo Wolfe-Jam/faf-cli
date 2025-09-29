@@ -9,6 +9,7 @@ import * as path from 'path';
 import * as os from 'os';
 import https from 'https';
 import { FAF_COLORS } from './championship-style';
+import { showUpdateAvailable } from './announcements';
 
 const CACHE_FILE = path.join(os.homedir(), '.faf-cli-cache', 'update-check.json');
 const CHECK_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours
@@ -143,18 +144,8 @@ export async function checkForUpdates(options?: { quiet?: boolean }): Promise<vo
  * Show update message
  */
 function showUpdateMessage(latest: string, current: string): void {
-  console.log();
-  console.log(FAF_COLORS.fafOrange('━'.repeat(50)));
-  console.log(FAF_COLORS.fafCyan(`  🆕 FAF Update Available!`));
-  console.log(chalk.gray(`     Current: v${current}`));
-  console.log(FAF_COLORS.fafGreen(`     Latest:  v${latest}`));
-  console.log();
-  console.log(chalk.white(`  Update with:`));
-  console.log(FAF_COLORS.fafCyan(`     npm update -g faf-cli`));
-  console.log();
-  console.log(chalk.gray(`  What's new: https://github.com/faf-cli/releases`));
-  console.log(FAF_COLORS.fafOrange('━'.repeat(50)));
-  console.log();
+  // Use the new announcement system for cleaner display
+  showUpdateAvailable(current, latest);
 }
 
 /**

@@ -1,0 +1,59 @@
+# FAF CLI - NPM Ignore
+# PROTECT THE SECRET SAUCE!
+
+# Never publish TypeScript source
+src/**/*.ts
+*.ts
+!*.d.ts
+
+# CRITICAL - Never publish engine source!
+src/engines/*.ts
+src/utils/turbo-cat*.ts
+src/utils/championship*.ts
+src/scoring/*-secret.ts
+
+# Never publish tests
+tests/
+test/
+*.test.ts
+*.spec.ts
+*.test.js
+*.spec.js
+
+# Never publish development files
+.vscode/
+.idea/
+*.log
+.DS_Store
+.env
+.env.*
+
+# Never publish docs/internal
+docs/internal/
+PROTECT-*.md
+*-SECRET.md
+*-PRIVATE.md
+
+# Never publish build configs
+webpack.*.js
+tsconfig.json
+jest.config.js
+.eslintrc*
+.prettierrc*
+
+# Never publish git
+.git/
+.github/
+.gitignore
+
+# Never publish secret sauce repos
+faf-engine/
+faf-engine-private/
+engine-mk2/
+
+# ONLY publish these:
+# dist/**/*.js (compiled code)
+# dist/**/*.d.ts (type definitions)
+# README.md
+# LICENSE
+# package.json

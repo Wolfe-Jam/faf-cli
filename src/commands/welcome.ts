@@ -13,7 +13,7 @@ export async function welcomeCommand(): Promise<void> {
   console.log();
   console.log(FAF_COLORS.fafCyan('━'.repeat(50)));
   console.log();
-  console.log(FAF_COLORS.fafOrange(`  👋 Welcome to FAF - The JPEG for AI™`));
+  console.log(FAF_COLORS.fafOrange(`  👋 Welcome to FAF - Project DNA for AI✨`));
   console.log();
   console.log(FAF_COLORS.fafCyan('━'.repeat(50)));
   console.log();

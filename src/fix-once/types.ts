@@ -112,7 +112,7 @@ export interface TrustDashboardOptions {
   confidence?: boolean;
   garage?: boolean;
   panic?: boolean;
-  guarantee?: boolean;
+  quality?: boolean;
 }
 
 // ============================================
