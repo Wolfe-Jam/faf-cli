@@ -6,14 +6,12 @@ import chalk from "chalk";
 import { FAF_COLORS, generateFAFHeader } from "../utils/championship-style";
 
 export async function versionCommand() {
-  // Show the FAF banner
-  console.log(generateFAFHeader());
-
+  // FAF banner is now shown by cli.ts - removed duplicate
   const version = require('../../package.json').version;
 
   console.log();
-  console.log(FAF_COLORS.fafCyan(`🏆 FAF Championship Edition`));
-  console.log(FAF_COLORS.fafCyan(`════════════════════════════`));
+  console.log(FAF_COLORS.fafCyan(`🏆 FAF Podium Edition 🏁`));
+  console.log(FAF_COLORS.fafCyan(`══════════════════════════`));
   console.log();
   console.log(FAF_COLORS.fafOrange(`   Version: ${version}`));
   console.log(FAF_COLORS.fafGreen(`   Engine: MK2 ⚡️`));

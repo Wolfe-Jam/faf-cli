@@ -1,0 +1,32 @@
+{
+  "name": "@faf/engine-mk3",
+  "version": "1.0.0",
+  "description": "Protected FAF Engine MK3 - Championship Scoring Core",
+  "private": true,
+  "main": "dist/engine.min.js",
+  "types": "types/index.d.ts",
+  "scripts": {
+    "build": "webpack --config webpack.config.js",
+    "build:min": "webpack --config webpack.config.js --mode production",
+    "clean": "rm -rf dist",
+    "prepare": "npm run clean && npm run build:min"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^20.11.17",
+    "javascript-obfuscator": "^4.1.0",
+    "terser-webpack-plugin": "^5.3.10",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.3.3",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-node-externals": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "files": [
+    "dist/engine.min.js",
+    "types/index.d.ts"
+  ]
+}

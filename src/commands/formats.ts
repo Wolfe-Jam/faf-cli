@@ -14,12 +14,11 @@ interface FormatOptions {
 }
 
 export async function formatsCommand(projectPath?: string, options: FormatOptions = {}) {
-  // Show the FAF banner
-  console.log(generateFAFHeader());
+  // FAF banner is now shown by cli.ts - removed duplicate
 
   console.log();
-  console.log(FAF_COLORS.fafCyan(`😽 TURBO-CAT™ Format Discovery v2.0.0`));
-  console.log(FAF_COLORS.fafCyan(`════════════════════════════════════`));
+  console.log(FAF_COLORS.fafCyan(`😽 TURBO-CAT™ --Prowling... v2.0.0`));
+  console.log(FAF_COLORS.fafCyan(`═══════════════════════════════════`));
   console.log();
 
   const fabFormats = new FabFormatsEngine();

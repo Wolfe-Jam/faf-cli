@@ -198,10 +198,10 @@ const FAF_INDEX: Record<string, IndexEntry> = {
     examples: ['faf --auto', 'faf --manual', 'faf (hybrid mode)'],
     related: ['auto-mode', 'manual-mode', 'inquirer']
   },
-  'guarantee': {
+  'quality': {
     type: 'feature', 
-    description: 'Quality assurance mode (85%+ threshold)',
-    usage: 'faf trust --guarantee',
+    description: 'Quality checks and validation mode',
+    usage: 'faf trust --quality',
     related: ['trust'],
     category: 'trust'
   },
@@ -303,8 +303,8 @@ const FAF_INDEX: Record<string, IndexEntry> = {
   },
   'trust': {
     type: 'command',
-    description: 'Unified trust dashboard with confidence, garage, panic, guarantee modes',
-    usage: 'faf trust [--detailed] [--confidence] [--garage] [--panic] [--guarantee]',
+    description: 'Unified trust dashboard with confidence, garage, panic, quality modes',
+    usage: 'faf trust [--detailed] [--confidence] [--garage] [--panic] [--quality]',
     category: 'trust',
     examples: ['faf trust', 'faf trust --confidence', 'faf trust --garage', 'faf trust --panic']
   },

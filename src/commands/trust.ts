@@ -27,7 +27,7 @@ export interface TrustDashboardOptions {
   confidence?: boolean;  // Show AI confidence levels
   garage?: boolean;      // Safe experimentation mode  
   panic?: boolean;       // Emergency repair mode
-  guarantee?: boolean;   // Quality assurance mode
+  quality?: boolean;     // Quality check mode
 }
 
 /**
@@ -283,19 +283,14 @@ async function showPanicMode(fafPath: string): Promise<void> {
   }
 }
 
-async function showGuaranteeMode(fafPath: string): Promise<void> {
-  console.log(chalk.blue('🛡️ Quality Assurance Mode'));
+async function showQualityMode(fafPath: string): Promise<void> {
+  console.log(chalk.blue('🛡️ Quality Check Mode'));
   console.log('├─ Running comprehensive quality checks...');
-  
+
   const trustScore = await calculateTrustScore(fafPath);
-  const passed = trustScore.overall >= 85;
-  
-  if (passed) {
-    console.log('└─ ☑️ QUALITY GUARANTEED - Context meets championship standards!');
-  } else {
-    console.log('├─ ⚠️ Quality below guarantee threshold (85%)');
-    console.log('└─ Run: faf todo for improvement plan');
-  }
+
+  // Just show the score
+  console.log(`└─ Trust Score: ${trustScore.overall}%`);
 }
 
 /**
@@ -327,8 +322,8 @@ export async function trustCommand(options: TrustDashboardOptions = {}): Promise
       return;
     }
     
-    if (options.guarantee) {
-      await showGuaranteeMode(fafPath);
+    if (options.quality) {
+      await showQualityMode(fafPath);
       return;
     }
     

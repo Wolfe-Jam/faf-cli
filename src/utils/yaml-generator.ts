@@ -3,6 +3,25 @@
  * Generates .faf files with instant AI onboarding structure
  */
 
+// Helper function to restore markdown formatting from escaped YAML
+export function unescapeFromYaml(value: string): string {
+  if (!value) return value;
+
+  // Remove surrounding quotes if present
+  let unquoted = value;
+  if ((value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))) {
+    unquoted = value.slice(1, -1);
+  }
+
+  // Unescape special characters
+  unquoted = unquoted.replace(/\\"/g, '"');
+
+  // Could optionally restore markdown if we detect patterns
+  // But for now, just return the clean unescaped value
+  return unquoted;
+}
+
 // Helper function to generate stack string
 function generateStackString(data: any): string {
   const parts = [];
@@ -24,7 +43,7 @@ function getConfidenceLevel(percentage: number): string {
 }
 
 // Helper function to safely escape YAML values
-function escapeForYaml(value: string | undefined): string {
+export function escapeForYaml(value: string | undefined): string {
   if (!value) {return 'Not specified';}
   
   // Clean up markdown-style lists and formatting
@@ -135,16 +154,15 @@ function objectToYaml(obj: Record<string, any>, indent = 0): string {
     } else if (Array.isArray(value)) {
       yaml += `${spacing}${key}:\n`;
       for (const item of value) {
-        yaml += `${spacing}  - ${item}\n`;
+        // Also escape array items if they're strings
+        const escapedItem = typeof item === 'string' ? escapeForYaml(item) : item;
+        yaml += `${spacing}  - ${escapedItem}\n`;
       }
     } else {
-      // Escape YAML special characters and long strings
+      // ALWAYS use escapeForYaml for strings to remove markdown and special chars
       let escapedValue = value;
       if (typeof value === 'string') {
-        // Quote strings that start with @, -, contain :, or are very long
-        if (value.startsWith('@') || value.startsWith('-') || value.includes(': ') || value.length > 80) {
-          escapedValue = `"${value.replace(/"/g, '\\"')}"`;
-        }
+        escapedValue = escapeForYaml(value);
       }
       yaml += `${spacing}${key}: ${escapedValue}\n`;
     }
@@ -307,14 +325,14 @@ export function generateFafContent(projectData: {
     // 🏷️ Search & Discovery Tags
     tags: generateProjectTags(projectData),
     
-    // 👥 Human Context (The 6 W's)
+    // 👥 Human Context (The 6 W's) - ALWAYS ESCAPE to remove markdown
     human_context: projectData.targetUser || projectData.coreProblem ? {
-      who: projectData.targetUser || 'Not specified',
-      what: projectData.coreProblem || 'Not specified',
-      why: projectData.missionPurpose || 'Not specified',
-      where: projectData.deploymentMarket || 'Not specified',
-      when: projectData.timeline || 'Not specified',
-      how: projectData.approach || 'Not specified',
+      who: escapeForYaml(projectData.targetUser || 'Not specified'),
+      what: escapeForYaml(projectData.coreProblem || 'Not specified'),
+      why: escapeForYaml(projectData.missionPurpose || 'Not specified'),
+      where: escapeForYaml(projectData.deploymentMarket || 'Not specified'),
+      when: escapeForYaml(projectData.timeline || 'Not specified'),
+      how: escapeForYaml(projectData.approach || 'Not specified'),
       additional_context: {
         who: projectData.additionalWho && projectData.additionalWho.length > 0 ? projectData.additionalWho : undefined,
         what: projectData.additionalWhat && projectData.additionalWhat.length > 0 ? projectData.additionalWhat : undefined,

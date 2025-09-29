@@ -25,6 +25,7 @@ import { BalanceVisualizer } from "../utils/balance-visualizer";
 import { FafDNAManager, displayScoreWithBirthWeight } from "../engines/faf-dna";
 import { fabFormatsProcessor } from "../engines/fab-formats-processor";
 import { PlatformDetector } from "../utils/platform-detector";
+import { promptEmailOptIn } from "../utils/email-opt-in";
 
 interface InitOptions {
   force?: boolean;
@@ -32,6 +33,8 @@ interface InitOptions {
   choose?: boolean;
   template?: string;
   output?: string;
+  quiet?: boolean;
+  subscribe?: string;
 }
 
 export async function initFafFile(
@@ -40,12 +43,8 @@ export async function initFafFile(
 ) {
   const startTime = Date.now();
 
-  // Show the FAF banner (unless quiet mode)
-  const isQuiet = process.argv.includes('--quiet');
-  if (!isQuiet) {
-    const { generateFAFHeader } = require('../utils/championship-style');
-    console.log(generateFAFHeader());
-  }
+  // FAF banner is now shown by cli.ts - removed duplicate
+  // (The main cli.ts handles showing the banner for 'init' command)
 
   try {
     const projectRoot = projectPath || process.cwd();
@@ -110,7 +109,7 @@ export async function initFafFile(
     const elapsedTime = Date.now() - startTime;
     console.log(chalk.green(`☑️ Created ${outputPath}`));
     console.log();
-    console.log(FAF_COLORS.fafOrange('🤖 .faf = Foundational AI-context Format = THE JPEG for AI! 🧡⚡️'));
+    console.log(FAF_COLORS.fafOrange('🤖 .faf = Foundational AI-context Format = Project DNA for AI✨ 🧡⚡️'));
     console.log(FAF_COLORS.fafOrange('🧡 Trust: Context verified'));
     console.log(FAF_COLORS.fafCyan(`⚡️ Speed: Generated in ${elapsedTime}ms`));
     console.log(FAF_COLORS.fafGreen('SPEEDY AI you can TRUST!'));
@@ -225,6 +224,9 @@ export async function initFafFile(
 
     console.log();
     console.log(FAF_COLORS.fafWhite(`Your FAF journey has begun: ${birthWeight}% → ${currentScore}%`));
+
+    // Prompt for email opt-in (first time users only, respects quiet mode)
+    await promptEmailOptIn({ quiet: options.quiet });
   } catch (error) {
     console.log(chalk.red("💥 Initialization failed:"));
     console.log(

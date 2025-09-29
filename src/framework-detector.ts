@@ -33,7 +33,7 @@ export interface DetectionResult {
 
 /**
  * TIER 1: Unique File Signatures
- * These files guarantee specific frameworks with 100% confidence
+ * These files identify specific frameworks with 100% confidence
  */
 export const UNIQUE_SIGNATURES: Record<string, FrameworkSignature> = {
   // Next.js

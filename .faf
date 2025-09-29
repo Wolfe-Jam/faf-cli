@@ -1,115 +1,34 @@
-faf_version: 2.4.0
-ai_scoring_system: 2025-08-30
-ai_score: 65%
-ai_confidence: MODERATE
-ai_value: 30_seconds_replaces_20_minutes_of_questions
-ai_tldr:
-  project: 🏁 .faf - The JPEG for AI™ - "🏁 .faf - The JPEG for AI™ - Universal
-    AI-context for any AI, human or team"
-  stack: TypeScript
-  quality_bar: ZERO_ERRORS_F1_STANDARDS
-  current_focus: Production deployment preparation
-  your_role: Build features with perfect context
-instant_context:
-  what_building: 🏁 .faf - The JPEG for AI™ - Universal AI-context for any AI, human or team
-  tech_stack: TypeScript
-  main_language: TypeScript
-  deployment: None
-  key_files:
-    - package.json
-    - tsconfig.json
-context_quality:
-  slots_filled: 11/21 (52%)
-  ai_confidence: LOW
-  handoff_ready: false
-  missing_context:
-    - CI/CD pipeline
-    - Database
 project:
-  name: 🏁 .faf - The JPEG for AI™
-  goal: 🏁 .faf - The JPEG for AI™ - Universal AI-context for any AI, human or team
+  name: test-project
+  goal: Complete testing application with all features
   main_language: TypeScript
-  generated: 2025-09-26T06:19:38.427Z
-  mission: 🚀 Make Your AI Happy! 🧡 Trust-Driven 🤖
-  revolution: 30 seconds replaces 20 minutes of questions
-  brand: F1-Inspired Software Engineering - Championship AI Context
-  enhanced_date: 2025-09-26T06:46:57.687Z
-  enhanced_by: faf-ai-enhance
-ai_instructions:
-  priority_order:
-    - 1. Read THIS .faf file first
-    - 2. Read FAFME.md for AI assistant guidance (CRITICAL for Codex/Cline)
-    - 3. Check CLAUDE.md for session context
-    - 4. Review package.json for dependencies
-  working_style:
-    code_first: true
-    explanations: minimal
-    quality_bar: zero_errors
-    testing: required
-  warnings:
-    - ALWAYS use --quiet flag with faf commands (see FAFME.md)
-    - Never modify dial components without approval
-    - All TypeScript must pass strict mode
-    - Test coverage required for new features
-stack:
-  frontend: None
-  css_framework: None
-  ui_library: None
-  state_management: None
-  backend: None
-  runtime: None
-  database: None
-  build: None
-  package_manager: npm
-  api_type: REST
-  hosting: None
-  cicd: None
-preferences:
-  quality_bar: zero_errors
-  commit_style: conventional_emoji
-  response_style: concise_code_first
-  explanation_level: minimal
-  communication: direct
-  testing: required
-  documentation: as_needed
-state:
-  phase: development
   version: 1.0.0
-  focus: production_deployment
-  status: green_flag
-  next_milestone: npm_publication
-  blockers: null
-tags:
-  auto_generated:
-    - -faf---the-jpeg-for-ai
-    - none
-    - typescript
-  smart_defaults:
-    - .faf
-    - ai-ready
-    - 2025
-    - software
-    - open-source
-  user_defined: null
+  type: fullstack
+stack:
+  frontend: React
+  backend: Express
+  database: PostgreSQL
+  hosting: Vercel
+  build: Vite
+  testing: Vitest
+  cicd: GitHub Actions
+  runtime: Node.js
+  api_type: GraphQL
+  language: TypeScript
+  css_framework: Tailwind
+  ui_library: Radix UI
+  state_management: Zustand
+  connection: PostgreSQL Pool
 human_context:
-  who: all Developers
-  what: "- 🐌 **20+ minutes** manually feeding context to AI"
-  why: Improve development efficiency
-  where: Cloud platform
-  when: 'release:patch": "npm run release -- --type patch"'
-  how: Test-driven development
-  additional_context: null
-  context_score: 0
-  total_prd_score: 65
-  success_rate: 50%
-ai_scoring_details:
-  system_date: 2025-08-30
-  slot_based_percentage: 52
-  ai_score: 65
-  total_slots: 21
-  filled_slots: 11
-  scoring_method: Honest percentage - no fake minimums
-  trust_embedded: COUNT ONCE architecture - trust MY embedded scores
+  who: Frontend developers building modern web applications
+  what: Simplifies state management and API integration in React apps
+  why: Reduces development time by 50% and improves code maintainability
+  where: Global cloud deployment with CDN distribution
+  when: Q1 2025 launch with ongoing updates
+  how: Agile development with CI/CD and automated testing
 projectName: faf-cli
-projectGoal: 🏁 .faf - The JPEG for AI™ - Universal AI-context for any AI, human or team
-generated: 2025-09-26T06:36:59.818Z
+projectGoal: 🩵 Cyan CLI - Transform any project into perfect AI context in 30
+  seconds. Works with Claude, ChatGPT, Gemini & all AI tools. Join 2000+
+  developers using .faf files. 100% FREE • Open Source • If helpful, a ⭐ is
+  appreciated!
+generated: 2025-09-29T15:52:49.832Z
