@@ -40,18 +40,19 @@ console.log(`📚 LAST 5 PUBLISHED:     ${allVersions.slice(-5).join(', ')}`);
 console.log('');
 
 // 5. CONFLICT DETECTION
+let hasConflict = false;
 if (localVersion === npmVersion) {
   console.log('❌ CONFLICT: Local version matches npm!');
   console.log('   You need to bump version before publishing:');
   console.log('   → npm version patch');
   console.log('');
-  process.exit(1);
+  hasConflict = true;
 } else if (allVersions.includes(localVersion)) {
   console.log('❌ CONFLICT: Version already exists on npm!');
   console.log(`   v${localVersion} was already published`);
   console.log('   → npm version patch');
   console.log('');
-  process.exit(1);
+  hasConflict = true;
 } else {
   console.log('✅ CLEAR: Ready to publish!');
   console.log(`   Will publish as v${localVersion}`);
@@ -70,3 +71,8 @@ console.log(`   Minor:  v${suggestedMinor} (new features)`);
 console.log(`   Major:  v${suggestedMajor} (breaking changes)`);
 console.log('');
 console.log('💡 Run: npm version patch|minor|major');
+
+// Exit with error if conflict
+if (hasConflict) {
+  process.exit(1);
+}
