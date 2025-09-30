@@ -50,7 +50,9 @@
     "performance:ci": "npm run performance -- --tests status,help,index",
     "performance:full": "npm run performance -- --verbose",
     "version:update": "node scripts/update-version.js",
-    "version:check": "node scripts/check-version.js",
+    "version:check": "node scripts/version-check.js",
+    "version:truth": "node scripts/version-check.js",
+    "prepublish:check": "npm run version:truth",
     "precommit": "npm run version:check",
     "postinstall": "echo '\n🧡⚡️ FAF CLI v2.4.5 - FREE for all Developers!\nRun \"faf --help\" to get started\n'"
   },
