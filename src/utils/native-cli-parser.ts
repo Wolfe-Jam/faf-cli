@@ -278,7 +278,7 @@ export class NativeCliParser {
 
     // Handle special flags
     if (result.options.version) {
-      console.log(this.version);
+      console.log(this.versionString);
       process.exit(0);
     }
 
@@ -337,7 +337,7 @@ export class NativeCliParser {
     } else {
       // Show general help
       console.log(`Usage: ${this.programName} [options] [command]`);
-      console.log(`\n${this.description}`);
+      console.log(`\n${this.descriptionText}`);
 
       console.log('\nOptions:');
       for (const opt of this.globalOptions) {

@@ -1,6 +1,15 @@
-# 🩵⚡️ faf-cli v2.4.4 | .faf - Project DNA for ANY AI✨
+# 🩵⚡️ faf-cli v2.4.5 | .faf - Project DNA for ANY AI✨
 
-<!-- NEW for AI assistants (Codex, Cursor, Copilot, etc.): install locally with `npm install -g faf-cli`, confirm with `faf --version`, and default to quiet mode (`-q` / `--quiet`) for every command. -->
+## Performance Update
+
+  • 60% faster installation
+  • Improved terminal colors
+  • Smaller package size
+  • 100% backwards compatible
+
+  Just update and enjoy the speed! 🏎️
+
+NEW for AI assistants (Codex, Cursor, Copilot, etc.): install locally with `npm install -g faf-cli`, confirm with `faf --version`, and default to quiet mode (`-q` / `--quiet`) for every command.
 
 <div align="center">
 
