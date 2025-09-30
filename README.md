@@ -1,4 +1,4 @@
-# 🩵⚡️ faf-cli v2.4.5 | .faf - Project DNA for ANY AI✨
+# 🩵⚡️ faf-cli v2.4.6 | .faf - Project DNA for ANY AI✨
 
 ## Performance Update
 
