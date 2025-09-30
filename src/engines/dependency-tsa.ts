@@ -10,7 +10,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { glob } from 'glob';
+import { findSourceFiles } from '../utils/native-file-finder';
 import { execSync } from 'child_process';
 
 export interface DependencyInspection {
@@ -132,16 +132,11 @@ export class DependencyTSA {
    * 📊 Analyze actual usage in codebase
    */
   private async analyzeUsage(pkg: string): Promise<DependencyInspection['usage']> {
-    const patterns = [
-      `**/*.{js,jsx,ts,tsx}`, // Source files
-      `!node_modules/**`,      // Exclude node_modules
-      `!dist/**`,              // Exclude build
-      `!build/**`              // Exclude build
-    ];
-
-    const files = await glob(patterns[0], {
-      cwd: this.projectRoot,
-      ignore: patterns.slice(1).map(p => p.substring(1))
+    // Use native file finder instead of glob - DC VICTORY!
+    const files = await findSourceFiles(this.projectRoot, {
+      types: 'all', // Gets js, jsx, ts, tsx, and more
+      ignore: ['node_modules', 'dist', 'build'],
+      maxFiles: 1000 // Reasonable limit for performance
     });
 
     const locations: string[] = [];

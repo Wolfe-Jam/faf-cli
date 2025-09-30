@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
-import { Command } from 'commander';
+import { Command } from '../fix-once/commander';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as yaml from 'yaml';
-import chalk from 'chalk';
+import { chalk } from '../fix-once/colors';
 
 // Simple color utilities
 const colors = {

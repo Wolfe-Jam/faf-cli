@@ -4,8 +4,8 @@
  * Universal AI Context Format Tooling
  */
 
-import { program } from 'commander';
-import chalk from 'chalk';
+import { program } from './fix-once/commander';
+import { chalk } from './fix-once/colors';
 import inquirer from 'inquirer';
 import { validateFafFile } from './commands/validate';
 import { initFafFile } from './commands/init';

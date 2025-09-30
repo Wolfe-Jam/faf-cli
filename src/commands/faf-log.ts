@@ -6,7 +6,7 @@
  * The complete DNA record of your project's AI context
  */
 
-import { Command } from 'commander';
+import { Command } from '../fix-once/commander';
 import { FafDNAManager, displayScoreWithBirthWeight } from '../engines/faf-dna';
 import { colors } from '../fix-once/colors';
 import * as path from 'path';

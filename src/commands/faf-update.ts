@@ -6,7 +6,7 @@
  * Just saves your current version as a checkpoint
  */
 
-import { Command } from 'commander';
+import { Command } from '../fix-once/commander';
 import { FafDNAManager } from '../engines/faf-dna';
 import { colors } from '../fix-once/colors';
 

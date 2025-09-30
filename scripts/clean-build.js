@@ -1,32 +1,34 @@
 #!/usr/bin/env node
 const fs = require('fs');
 const path = require('path');
-const glob = require('glob');
 
-const patterns = [
-  'src/**/*.js',
-  'src/**/*.js.map',
-  'src/**/*.d.ts',
-  'src/**/*.d.ts.map',
-  'tests/**/*.js',
-  'tests/**/*.js.map',
-  'tests/**/*.d.ts',
-  'tests/**/*.d.ts.map'
-];
+// Native file cleaning - no glob needed!
+function cleanDirectory(dir, extensions) {
+  if (!fs.existsSync(dir)) return;
 
-const seen = new Set();
-for (const pattern of patterns) {
-  const matches = glob.sync(pattern, { absolute: true, nodir: true });
-  for (const file of matches) {
-    if (seen.has(file)) continue;
-    try {
-      fs.rmSync(file);
-      seen.add(file);
-    } catch (error) {
-      if (error.code !== 'ENOENT') {
-        console.error(`Failed to remove ${file}:`, error.message);
-        process.exitCode = 1;
+  const files = fs.readdirSync(dir, { withFileTypes: true });
+
+  for (const file of files) {
+    const fullPath = path.join(dir, file.name);
+
+    if (file.isDirectory()) {
+      cleanDirectory(fullPath, extensions);
+    } else if (file.isFile()) {
+      if (extensions.some(ext => file.name.endsWith(ext))) {
+        try {
+          fs.rmSync(fullPath);
+        } catch (error) {
+          if (error.code !== 'ENOENT') {
+            console.error(`Failed to remove ${fullPath}:`, error.message);
+            process.exitCode = 1;
+          }
+        }
       }
     }
   }
 }
+
+// Clean generated files
+const extensionsToClean = ['.js', '.js.map', '.d.ts', '.d.ts.map'];
+cleanDirectory('./src', extensionsToClean);
+cleanDirectory('./tests', extensionsToClean);

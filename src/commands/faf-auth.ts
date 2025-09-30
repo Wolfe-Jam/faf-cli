@@ -7,7 +7,7 @@
  * Like a blockchain of context evolution
  */
 
-import { Command } from 'commander';
+import { Command } from '../fix-once/commander';
 import * as path from 'path';
 import { FafDNAManager, displayScoreWithBirthWeight } from '../engines/faf-dna';
 import { colors } from '../fix-once/colors';

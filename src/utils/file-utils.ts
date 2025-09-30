@@ -5,7 +5,7 @@
 
 import { promises as fs } from "fs";
 import path from "path";
-import { glob } from "glob";
+import { globReplacements } from "./native-file-finder";
 import { parseFafIgnore } from "./fafignore-parser";
 
 /**
@@ -305,14 +305,9 @@ export async function detectProjectType(
   // Get ignore patterns from .fafignore
   const ignorePatterns = await parseFafIgnore(projectDir);
 
-  // File-based detection
-  const files = await new Promise<string[]>((resolve, reject) => {
-    glob("**/*.{svelte,jsx,tsx,vue,ts,js,py}", {
-      cwd: projectDir,
-      ignore: ignorePatterns.filter((p) => !p.startsWith("*.")), // glob doesn't like *.ext patterns
-    })
-      .then(matches => resolve(matches))
-      .catch(err => reject(err));
+  // File-based detection - using native file finder (NO GLOB!)
+  const files = await globReplacements.allSource(projectDir, {
+    ignore: ignorePatterns.filter((p) => !p.startsWith("*.")) // Remove *.ext patterns
   });
 
   // Python pattern detection (Option B)

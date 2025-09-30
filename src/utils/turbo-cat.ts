@@ -8,7 +8,7 @@
 
 import { promises as fs } from "fs";
 import path from "path";
-import { glob } from "glob";
+import { findFiles } from "./native-file-finder";
 
 // 😽 Import TURBO-CAT Knowledge Chamber - 134 Format Catalyst
 import { KNOWLEDGE_BASE } from './turbo-cat-knowledge';
@@ -155,16 +155,12 @@ export class TurboCat {
    */
   private async scanPatternFiles(projectDir: string, results: FormatDiscoveryResult[]): Promise<void> {
     try {
-      // 🏎️ F1-OPTIMIZATION: Single glob with multiple extensions (10x faster)
-      const files = await new Promise<string[]>((resolve, reject) => {
-        glob('**/*.{py,ts,tsx,js,jsx,svelte,vue}', {
-          cwd: projectDir,
-          ignore: ['node_modules/**', '.git/**', 'dist/**', 'build/**', 'venv/**', '__pycache__/**'],
-          absolute: true,
-          nodir: true  // Only files, skip directories
-        })
-          .then(matches => resolve(matches.slice(0, 10))) // Limit total files for speed
-          .catch(err => reject(err));
+      // 🏎️ F1-OPTIMIZATION: Native file finder - ZERO dependencies!
+      const files = await findFiles(projectDir, {
+        extensions: ['.py', '.ts', '.tsx', '.js', '.jsx', '.svelte', '.vue'],
+        ignore: ['node_modules', '.git', 'dist', 'build', 'venv', '__pycache__'],
+        maxFiles: 10,  // Limit total files for speed
+        absolute: true
       });
 
       // 🏎️ F1-OPTIMIZATION: Process files in parallel batches
