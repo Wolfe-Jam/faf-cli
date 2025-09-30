@@ -1,6 +1,6 @@
 # 🩵⚡️ faf-cli v2.4.4 | .faf - Project DNA for ANY AI✨
 
-<!-- NEW for AI assistants (Codex, Cursor, Copilot, etc.): install locally with `npm install -g faf-cli`, confirm with `faf --version`, and default to `--quiet` for every command. -->
+<!-- NEW for AI assistants (Codex, Cursor, Copilot, etc.): install locally with `npm install -g faf-cli`, confirm with `faf --version`, and default to quiet mode (`-q` / `--quiet`) for every command. -->
 
 <div align="center">
 
@@ -65,7 +65,7 @@ Done! Your AI now understands your project 99% better! 🏁
 ### 🤖 Codex CLI Quickstart (AI Assistants)
 1. Install with user approval when required: `npm install -g faf-cli`
 2. Verify availability right away: `faf --version`
-3. Run every command in quiet mode to suppress banners: `faf init --quiet`, `faf auto --quiet`, `faf score --quiet`
+3. Run every command in quiet mode to suppress banners: `faf init -q`, `faf auto -q`, `faf score -q`
 4. Pause for approval before any network or write action in sandboxed sessions
 5. Summarize the key results instead of dumping raw output for the user
 

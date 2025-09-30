@@ -805,6 +805,16 @@ Championship Bi-Sync Features:
     }
   });
 
+// 🛂 faf tsa - Dependency Inspector (The TSA of Dependencies!)
+program
+  .command('tsa')
+  .description('🛂 Inspect dependencies - The TSA of package.json')
+  .option('-d, --detailed', 'Show detailed analysis')
+  .action(withAnalyticsTracking('tsa', async (options) => {
+    const { tsaCommand } = await import('./commands/tsa');
+    await tsaCommand(options);
+  }));
+
 // 🔗 faf bi-sync - Standalone bi-directional sync command
 program
   .command('bi-sync')
