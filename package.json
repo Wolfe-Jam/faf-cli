@@ -14,7 +14,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "clean": "find src tests -name '*.js' -o -name '*.js.map' -o -name '*.d.ts' -o -name '*.d.ts.map' | xargs rm -f",
+    "clean": "node scripts/clean-build.js",
     "clean:cache": "rm -rf node_modules/.cache && jest --clearCache",
     "build": "npm run clean && tsc",
     "dev": "ts-node src/cli.ts",
