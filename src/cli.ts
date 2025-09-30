@@ -150,7 +150,7 @@ ${FAF_COLORS.fafOrange('💡 In Terminal:')} Use ${chalk.cyan('faf')} prefix - l
 
 ${FAF_COLORS.fafCyan('🚀 Quick Start - Get Perfect AI Context:')}
 
-  ${chalk.bold.green('FASTEST:')} ${chalk.cyan('faf auto')}     ${chalk.gray('# ONE COMMAND - Zero to Championship!')}
+  ${chalk.green(chalk.bold('FASTEST:'))} ${chalk.cyan('faf auto')}     ${chalk.gray('# ONE COMMAND - Zero to Championship!')}
 
   ${chalk.gray('Or step by step:')}
   ${FAF_COLORS.fafOrange('1.')} ${chalk.cyan('faf init')}     ${chalk.gray('# Get your .faf file')}
@@ -1051,7 +1051,7 @@ program
 
 // Handle unknown commands with helpful suggestions
 program
-  .command('*', { noHelp: true })
+  .command('*')
   .action((cmd) => {
     console.log(chalk.red(`❌ Unknown command: ${cmd}`));
     console.log('');

@@ -198,8 +198,32 @@ export function getTrustEmoji(trustLevel: number): string {
 // Export default for convenience
 export default colors;
 
-// Export chalk alias for compatibility
-export const chalk = colors;
+// Create chainable chalk replacement
+const createChainableColor = () => {
+  const chainable: any = {};
+
+  // Add all color methods
+  Object.keys(colors).forEach(key => {
+    if (typeof colors[key as keyof typeof colors] === 'function') {
+      chainable[key] = colors[key as keyof typeof colors];
+      // Make each color chainable
+      Object.keys(colors).forEach(innerKey => {
+        if (typeof colors[innerKey as keyof typeof colors] === 'function') {
+          chainable[key][innerKey] = (text: string) => {
+            return colors[key as keyof typeof colors](
+              colors[innerKey as keyof typeof colors](text)
+            );
+          };
+        }
+      });
+    }
+  });
+
+  return chainable;
+};
+
+// Export chalk alias for compatibility with chaining support
+export const chalk = createChainableColor();
 
 // Individual exports for compatibility (destructure from colors)
 export const { cyan, green, yellow, red, blue, gray, orange, bold, dim, bgBlue, black, white, magenta } = colors;
