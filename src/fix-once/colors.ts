@@ -1,61 +1,108 @@
 /**
- * 🎨 FIX-ONCE Color System
+ * 🎨 FIX-ONCE Color System - NATIVE ANSI EDITION
  * Single source of truth for all colors in FAF CLI
  *
- * APPROVAL REQUIRED TO MODIFY THIS FILE
- * This abstraction prevents chalk version breaks
- * Fix once = Works indefinitely
+ * CHALK HAS BEEN CHALKED OFF! ✅
+ * Using native ANSI escape codes - ZERO dependencies
+ * Fix once = Works FOREVER
  */
 
-import chalk from 'chalk';
+/**
+ * ANSI Escape Codes Reference
+ * No more pink surprises, no more chalk bugs!
+ */
+const ANSI = {
+  // Reset
+  reset: '\x1b[0m',
+
+  // Styles
+  bold: '\x1b[1m',
+  dim: '\x1b[2m',
+  italic: '\x1b[3m',
+  underline: '\x1b[4m',
+
+  // Colors
+  black: '\x1b[30m',
+  red: '\x1b[31m',
+  green: '\x1b[32m',
+  yellow: '\x1b[33m',
+  blue: '\x1b[34m',
+  magenta: '\x1b[35m',
+  cyan: '\x1b[36m',
+  white: '\x1b[37m',
+  gray: '\x1b[90m',
+
+  // Bright colors
+  brightRed: '\x1b[91m',
+  brightGreen: '\x1b[92m',
+  brightYellow: '\x1b[93m',
+  brightBlue: '\x1b[94m',
+  brightMagenta: '\x1b[95m',
+  brightCyan: '\x1b[96m',
+  brightWhite: '\x1b[97m',
+
+  // 256 color mode for orange (closest to #FF6B35)
+  orange: '\x1b[38;5;208m', // Orange in 256 color mode
+};
 
 /**
- * Universal color system that works with any chalk version
- * Never call chalk directly - always use this wrapper
+ * Helper to wrap text in ANSI codes
+ */
+function ansi(text: string, ...codes: string[]): string {
+  // NO_COLOR environment variable support
+  if (process.env.NO_COLOR) {
+    return text;
+  }
+  return `${codes.join('')}${text}${ANSI.reset}`;
+}
+
+/**
+ * Universal color system - CHALK FREE! 🎉
+ * Never import chalk again - this is all we need
  */
 export const colors = {
   // Primary brand colors
-  primary: (text: string): string => chalk.cyan(text),
-  secondary: (text: string): string => chalk.yellow(text),
-  success: (text: string): string => chalk.green(text),
-  error: (text: string): string => chalk.red(text),
-  warning: (text: string): string => chalk.yellow(text),
+  primary: (text: string): string => ansi(text, ANSI.cyan),
+  secondary: (text: string): string => ansi(text, ANSI.yellow),
+  success: (text: string): string => ansi(text, ANSI.green),
+  error: (text: string): string => ansi(text, ANSI.red),
+  warning: (text: string): string => ansi(text, ANSI.yellow),
 
   // Semantic colors
-  info: (text: string): string => chalk.blue(text),
-  muted: (text: string): string => chalk.gray(text),
-  bright: (text: string): string => chalk.white(text),
-  dim: (text: string): string => chalk.dim(text),
-  highlight: (text: string): string => chalk.yellow.bold(text),
+  info: (text: string): string => ansi(text, ANSI.blue),
+  muted: (text: string): string => ansi(text, ANSI.gray),
+  bright: (text: string): string => ansi(text, ANSI.white),
+  dim: (text: string): string => ansi(text, ANSI.dim),
+  highlight: (text: string): string => ansi(text, ANSI.yellow, ANSI.bold),
 
   // Style modifiers
-  bold: (text: string): string => chalk.bold(text),
-  italic: (text: string): string => chalk.italic(text),
-  underline: (text: string): string => chalk.underline(text),
+  bold: (text: string): string => ansi(text, ANSI.bold),
+  italic: (text: string): string => ansi(text, ANSI.italic),
+  underline: (text: string): string => ansi(text, ANSI.underline),
 
   // FAF specific colors (Championship theme)
-  fafCyan: (text: string): string => chalk.cyan(text),
-  fafOrange: (text: string): string => chalk.hex('#FF6B35')(text), // True FAF Orange
-  fafGreen: (text: string): string => chalk.green(text),
-  fafWhite: (text: string): string => chalk.white(text),
+  fafCyan: (text: string): string => ansi(text, ANSI.cyan),
+  fafOrange: (text: string): string => ansi(text, ANSI.orange), // True FAF Orange (256 color)
+  fafGreen: (text: string): string => ansi(text, ANSI.green),
+  fafWhite: (text: string): string => ansi(text, ANSI.white),
 
   // Special effects
-  championship: (text: string): string => chalk.bold.cyan(text),
-  trust: (text: string): string => chalk.bold.green(text),
+  championship: (text: string): string => ansi(text, ANSI.bold, ANSI.cyan),
+  trust: (text: string): string => ansi(text, ANSI.bold, ANSI.green),
   score: (text: string): string => {
     const match = text.match(/(\d+)%/);
     if (match) {
       const score = parseInt(match[1]);
-      if (score >= 85) return chalk.green(text);
-      if (score >= 70) return chalk.yellow(text);
-      return chalk.red(text);
+      if (score >= 85) return ansi(text, ANSI.green);
+      if (score >= 70) return ansi(text, ANSI.yellow);
+      return ansi(text, ANSI.red);
     }
     return text;
   },
 
   // NO_COLOR support (accessibility)
   strip: (text: string): string => {
-    return process.env.NO_COLOR ? text.replace(/\x1b\[[0-9;]*m/g, '') : text;
+    return text.replace(/\x1b\[[0-9;]*m/g, '');
   }
 };
 
@@ -124,16 +171,19 @@ export function getTrustEmoji(trustLevel: number): string {
 export default colors;
 
 /**
- * CASCADE EFFECTS OF THIS MODULE:
+ * CASCADE EFFECTS OF CHALKING OFF CHALK:
  *
- * 1. Fixes ALL chalk.hex() errors immediately
- * 2. Provides consistent colors across entire CLI
- * 3. Enables theme switching (future feature)
- * 4. Supports NO_COLOR accessibility standard
- * 5. Centralizes score/trust coloring logic
- * 6. Makes testing easier (mock one module)
- * 7. Prevents future chalk version breaks
+ * 1. NO MORE PINK SURPRISES! Colors work correctly
+ * 2. ZERO dependency on chalk - one less thing to break
+ * 3. Faster startup - no chalk loading
+ * 4. Smaller package size - no chalk bloat
+ * 5. Works in ALL environments - just ANSI codes
+ * 6. NO_COLOR still supported for accessibility
+ * 7. Future proof - ANSI codes are eternal
  *
  * MAINTENANCE: This file should NEVER import from other modules
  * It should be the LOWEST level dependency
+ *
+ * CHALK STATUS: ❌ CHALKED OFF!
+ * DC STATUS: 1/3 dependencies eliminated! 🏁
  */
