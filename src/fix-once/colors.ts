@@ -43,6 +43,15 @@ const ANSI = {
 
   // 256 color mode for orange (closest to #FF6B35)
   orange: '\x1b[38;5;208m', // Orange in 256 color mode
+
+  // Background colors
+  bgRed: '\x1b[41m',
+  bgGreen: '\x1b[42m',
+  bgYellow: '\x1b[43m',
+  bgBlue: '\x1b[44m',
+  bgMagenta: '\x1b[45m',
+  bgCyan: '\x1b[46m',
+  bgWhite: '\x1b[47m',
 };
 
 /**
@@ -99,6 +108,25 @@ export const colors = {
     }
     return text;
   },
+
+  // Additional colors for chalk compatibility
+  cyan: (text: string): string => ansi(text, ANSI.cyan),
+  green: (text: string): string => ansi(text, ANSI.green),
+  yellow: (text: string): string => ansi(text, ANSI.yellow),
+  red: (text: string): string => ansi(text, ANSI.red),
+  blue: (text: string): string => ansi(text, ANSI.blue),
+  gray: (text: string): string => ansi(text, ANSI.gray),
+  orange: (text: string): string => ansi(text, ANSI.orange),
+  black: (text: string): string => ansi(text, ANSI.black),
+  white: (text: string): string => ansi(text, ANSI.white),
+  magenta: (text: string): string => ansi(text, ANSI.magenta),
+  bgRed: (text: string): string => ansi(text, ANSI.bgRed),
+  bgGreen: (text: string): string => ansi(text, ANSI.bgGreen),
+  bgYellow: (text: string): string => ansi(text, ANSI.bgYellow),
+  bgBlue: (text: string): string => ansi(text, ANSI.bgBlue),
+  bgMagenta: (text: string): string => ansi(text, ANSI.bgMagenta),
+  bgCyan: (text: string): string => ansi(text, ANSI.bgCyan),
+  bgWhite: (text: string): string => ansi(text, ANSI.bgWhite),
 
   // NO_COLOR support (accessibility)
   strip: (text: string): string => {
@@ -169,6 +197,12 @@ export function getTrustEmoji(trustLevel: number): string {
 
 // Export default for convenience
 export default colors;
+
+// Export chalk alias for compatibility
+export const chalk = colors;
+
+// Individual exports for compatibility (destructure from colors)
+export const { cyan, green, yellow, red, blue, gray, orange, bold, dim, bgBlue, black, white, magenta } = colors;
 
 /**
  * CASCADE EFFECTS OF CHALKING OFF CHALK:
