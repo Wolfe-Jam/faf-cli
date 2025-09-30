@@ -14,11 +14,11 @@
 
 ## 🚀 What is .faf?
 
-**.faf = Project DNA for AI✨ [Foundational AI-context Format]**
+**.faf = Project DNA for ANY AI✨ [Foundational AI-context Format]**
 
 Universal, shareable AI-Context for any AI, human or team, regardless of size, location, languages, stack, setup or documentation.
 
-Add a .faf file to your repo and watch Claude, ChatGPT, Gemini, or any AI tool understand your entire codebase with speed and precision.
+Add a .faf file to your repo and watch Claude, Codex, Gemini, or any AI tool understand your entire codebase with speed and precision.
 
 **Join our growing community of 3000+ developers who save hours daily by using .faf files!**
 
