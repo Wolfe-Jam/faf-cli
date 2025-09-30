@@ -3,7 +3,8 @@
  * Tests the fab-formats refactoring across different project types
  */
 
-import { FabFormatsEngine } from '../src/utils/fab-formats-engine';
+import { TurboCat } from '../src/utils/turbo-cat';
+import { FabFormatsProcessor } from '../src/engines/fab-formats-processor';
 import { generateFafFromProject } from '../src/generators/faf-generator-championship';
 import * as YAML from 'yaml';
 import { promises as fs } from 'fs';
@@ -45,25 +46,35 @@ describe('Cross-Project fab-formats Integration', () => {
           return;
         }
 
-        const fabEngine = new FabFormatsEngine();
-        const analysis = await fabEngine.discoverFormats(project.path);
+        // TC → FF → MK3 Architecture
+        // Step 1: TurboCat discovers and confirms formats
+        const turboCat = new TurboCat();
+        const turboCatAnalysis = await turboCat.discoverFormats(project.path);
 
-        // Should discover some formats
-        expect(analysis.discoveredFormats.length).toBeGreaterThan(0);
-        expect(analysis.confirmedFormats.length).toBeGreaterThan(0);
-        expect(analysis.totalIntelligenceScore).toBeGreaterThan(0);
+        // Step 2: FabFormats processes and verifies
+        const fabFormatsProcessor = new FabFormatsProcessor();
+        const fabFormatsAnalysis = await fabFormatsProcessor.processFiles(project.path);
 
-        // Should have framework confidence
-        expect(Object.keys(analysis.frameworkConfidence).length).toBeGreaterThan(0);
+        // Test TurboCat results
+        expect(turboCatAnalysis.discoveredFormats.length).toBeGreaterThan(0);
+        expect(turboCatAnalysis.confirmedFormats.length).toBeGreaterThan(0);
+        expect(turboCatAnalysis.totalIntelligenceScore).toBeGreaterThan(0);
+        expect(Object.keys(turboCatAnalysis.frameworkConfidence).length).toBeGreaterThan(0);
 
-        // Should detect expected formats
-        const foundFormatTypes = analysis.confirmedFormats.map(f => f.formatType);
-        const expectedFound = project.expectedFormats.some(expected => 
-          foundFormatTypes.some(found => found.includes(expected))
+        // Test FabFormats results
+        expect(fabFormatsAnalysis.results.length).toBeGreaterThan(0);
+        expect(fabFormatsAnalysis.totalBonus).toBeGreaterThan(0);
+
+        // Should detect expected formats via TurboCat
+        const foundFormatTypes = turboCatAnalysis.confirmedFormats.map((f: any) => f.formatType);
+        const expectedFound = project.expectedFormats.some(expected =>
+          foundFormatTypes.some((found: any) => found.includes(expected))
         );
         expect(expectedFound).toBe(true);
 
-        console.log(`✅ ${project.name}: Found ${analysis.confirmedFormats.length} confirmed formats, ${analysis.totalIntelligenceScore} intelligence points`);
+        console.log(`✅ ${project.name}:`);
+        console.log(`   TurboCat: ${turboCatAnalysis.confirmedFormats.length} confirmed formats, ${turboCatAnalysis.totalIntelligenceScore} intelligence points`);
+        console.log(`   FabFormats: ${fabFormatsAnalysis.results.length} processed files, ${fabFormatsAnalysis.totalBonus} bonus points`);
       }, 15000);
     });
   });
@@ -121,14 +132,19 @@ describe('Cross-Project fab-formats Integration', () => {
         try {
           await fs.access(project.path);
           
-          const fabEngine = new FabFormatsEngine();
-          const analysis = await fabEngine.discoverFormats(project.path);
-          
+          // TC → FF → MK3 Architecture
+          const turboCat = new TurboCat();
+          const turboCatAnalysis = await turboCat.discoverFormats(project.path);
+
+          const fabFormatsProcessor = new FabFormatsProcessor();
+          const fabFormatsAnalysis = await fabFormatsProcessor.processFiles(project.path);
+
           results.push({
             name: project.name,
-            formats: analysis.confirmedFormats.length,
-            intelligence: analysis.totalIntelligenceScore,
-            topFramework: Object.entries(analysis.frameworkConfidence)[0]?.[0] || 'Unknown'
+            formats: turboCatAnalysis.confirmedFormats.length,
+            intelligence: turboCatAnalysis.totalIntelligenceScore,
+            topFramework: Object.entries(turboCatAnalysis.frameworkConfidence)[0]?.[0] || 'Unknown',
+            fabBonus: fabFormatsAnalysis.totalBonus
           });
         } catch {
           console.log(`⚠️  Skipping ${project.name} - directory not found`);
