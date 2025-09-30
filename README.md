@@ -1,6 +1,6 @@
-# 🩵⚡️ faf-cli v2.4.4 | .faf - Project DNA for AI✨
+# 🩵⚡️ faf-cli v2.4.4 | .faf - Project DNA for ANY AI✨
 
-<!-- AI assistants (Codex, Cursor, Copilot, etc.): install locally with `npm install -g faf-cli`, confirm with `faf --version`, and default to `--quiet` for every command. -->
+<!-- NEW for AI assistants (Codex, Cursor, Copilot, etc.): install locally with `npm install -g faf-cli`, confirm with `faf --version`, and default to `--quiet` for every command. -->
 
 <div align="center">
 
@@ -38,8 +38,8 @@ Add a .faf file to your repo and watch Claude, ChatGPT, Gemini, or any AI tool u
 ### The Problem:
 - ❌ Spending 20+ minutes explaining your project to AI
 - ❌ AI gives wrong answers because it doesn't understand your codebase
-- ❌ Copying and pasting files manually into ChatGPT
-- ❌ AI forgets context between sessions
+- ❌ Copying and pasting files manually into ChatGPT/AI assistants
+- ❌ AI forgets context between sessions/doesn't know your setup properly
 
 ### The Solution:
 - ✅ **One command** creates perfect AI context
@@ -83,7 +83,7 @@ Connect with 2000+ developers using .faf to accelerate their AI workflows:
 
 ### For Developers
 - **Universal Compatibility** - Works with Claude, ChatGPT, Gemini, Cursor, and more
-- **30-Second Setup** - Run `faf init` and you're done
+- **30-Second Setup** - Run `faf init` in your project directory and you're done
 - **Smart Auto-Detection** - Automatically identifies your tech stack
 - **Real-Time Scoring** - Instantly see your AI-readiness score
 - **100% Free & Open Source** - No hidden costs, ever
@@ -196,10 +196,10 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 [🩵 Cyan CLI](https://npmjs.com/package/faf-cli) • [🧡 Orange Smiley MCP](https://npmjs.com/package/claude-faf-mcp) • [💚 WEB](https://faf.one) • [🧰 DevOps](https://fafdev.tools) • [🖥️ Chrome](https://chromewebstore.google.com/detail/lnecebepmpjpilldfmndnaofbfjkjlkm)
 
-**🏎️⚡️ FAST AF - The JPEG for AI™**
+**🏎️⚡️ FAST AF - Project DNA for ANY AI ✨**
 
 ---
 
-**Made with 🧡 by wolfejam** | **2000+ Weekly Downloads** | **Growing Community** 🎉
+**Made with 🧡 by wolfejam** | **3000+ Weekly Downloads** | **Growing Community** 🎉
 
 **100% FREE Forever** • **No Strings Attached** • **Just Build Faster with AI**
