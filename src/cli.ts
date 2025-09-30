@@ -142,7 +142,7 @@ program
   .version(version)
   .option('--no-color', 'Disable colored output for accessibility')
   .option('--color-scheme <scheme>', 'Color scheme for colorblind accessibility: normal|deuteranopia|protanopia|tritanopia', 'normal')
-  .option('--quiet', 'Quiet mode - minimal output, no ASCII banners')
+  .option('-q, --quiet', 'Quiet mode - minimal output, no ASCII banners (AI/Codex mode)')
   .option('--auto', 'Auto mode - menu-driven interface for learning and exploration')
   .option('--manual', 'Manual mode - direct command-line interface for power users')
   .addHelpText('after', `
@@ -840,7 +840,7 @@ program
   .option('--email <email>', 'Add email for notifications')
   .option('--status', 'Check notification status')
   .option('--remove', 'Remove email from notifications')
-  .option('--quiet', 'Skip interactive prompts')
+  .option('-q, --quiet', 'Skip interactive prompts')
   .addHelpText('after', `
 Examples:
   $ faf notifications            # Interactive email add
