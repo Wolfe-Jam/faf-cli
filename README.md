@@ -1,8 +1,9 @@
-# 🩵⚡️ faf-cli v2.4.6 | .faf - Project DNA for ANY AI✨
+# 🩵⚡️ faf-cli v2.4.7 | .faf - Project DNA for ANY AI✨
 
 ## 🏎️⚡️ PERFORMANCE EDITION - 60% FASTER!
 
-### 💥 What's New in v2.4.6:
+### 💥 What's New in v2.4.7:
+  **🐛 CRITICAL FIX** - Removed chalk dependency completely (was causing install errors)
   **⚡ 60% FASTER npm install** - From 5 dependencies to just 2!
   **🏎️ NATIVE PERFORMANCE** - Built our own engine, removed the bloat
   **🎨 ZERO COLOR BUGS** - Fixed all terminal display issues forever
@@ -161,7 +162,7 @@ faf enhance
 📈 Status: PRODUCTION
 ├─ 💎 Production Ready
 ├─ 🚀 Performance: <50ms
-├─ 📦 Dependencies: 6 (minimal)
+├─ 📦 Dependencies: 2 (MINIMAL!)
 ├─ 🧪 Tests Passed: 100%
 └─ 🏆 AI Readiness: 100% target
 ```

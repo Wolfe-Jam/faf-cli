@@ -7,7 +7,7 @@
 
 import { promises as fs } from 'fs';
 import path from 'path';
-import chalk from 'chalk';
+import { chalk } from '../fix-once/colors';
 import { findFafFile } from '../utils/file-utils';
 import { calculateTrustScore } from './trust';
 import { 

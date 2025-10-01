@@ -3,7 +3,7 @@
  * Validates .faf files against schema with detailed feedback
  */
 
-import chalk from "chalk";
+import { chalk } from "../fix-once/colors";
 import { promises as fs } from "fs";
 import * as YAML from "yaml";
 import { validateSchema } from "../schema/faf-schema";
