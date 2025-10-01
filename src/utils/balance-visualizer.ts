@@ -184,7 +184,8 @@ export class BalanceVisualizer {
    * Generate a compact balance indicator for inline display
    */
   static generateCompactBalance(balance: BalanceData): string {
-    const { aiPercentage, humanPercentage, isBalanced } = balance;
+    const { aiPercentage, isBalanced } = balance;
+    const humanPercentage = 100 - aiPercentage; // Force balance to 100%
 
     if (isBalanced) {
       return colors.success('⚖️ BALANCED');
