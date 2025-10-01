@@ -2,7 +2,7 @@
 
 ## Sonnet 4.5 hits 100% 🧡 New ASCII Art too⚡️🏁
 
-![FAF Championship Banner](./faf-banner.png)
+![FAF Championship Banner](https://raw.githubusercontent.com/Wolfe-Jam/faf/main/cli/faf-banner.png)
 
 > **💎 See it live in your terminal:** `faf version`
 
