@@ -157,7 +157,10 @@ ${FAF_COLORS.fafCyan('└──────────────────�
  */
 export function generateFAFHeader(): string {
   const version = require('../../package.json').version;
-  return `\n${FAF_COLORS.fafCyan('┌─────────────────────────────────────────┐')}
+  return `
+🏆 Hidden Banner lives here: 🏁 << type, Ctrl+O to get your fix 🏎️⚡️
+
+${FAF_COLORS.fafCyan('┌─────────────────────────────────────────┐')}
 ${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafWhite('███████')}${FAF_COLORS.fafWhite('╗')} ${FAF_COLORS.fafWhite('█████')}${FAF_COLORS.fafWhite('╗')} ${FAF_COLORS.fafWhite('███████')}${FAF_COLORS.fafWhite('╗')}  🏎️⚡️🏁 v${version} ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafCyan('██')}${FAF_COLORS.fafWhite('╔════╝')}${FAF_COLORS.fafCyan('██')}${FAF_COLORS.fafWhite('╔══')}${FAF_COLORS.fafCyan('██')}${FAF_COLORS.fafWhite('╗')}${FAF_COLORS.fafCyan('██')}${FAF_COLORS.fafWhite('╔════╝')}                ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafCyan('█████')}${FAF_COLORS.fafWhite('╗  ')}${FAF_COLORS.fafCyan('███████')}${FAF_COLORS.fafWhite('║')}${FAF_COLORS.fafCyan('█████')}${FAF_COLORS.fafWhite('╗')}                  ${FAF_COLORS.fafCyan('│')}
