@@ -3,7 +3,7 @@
  * Calculates .faf completeness score with detailed breakdown
  */
 
-import chalk from "chalk";
+import { chalk } from "../fix-once/colors";
 import { promises as fs } from "fs";
 import * as YAML from "yaml";
 import { calculateFafScore } from "../scoring/score-calculator";

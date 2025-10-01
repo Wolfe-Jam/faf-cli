@@ -3,7 +3,7 @@
  * Provides colorblind-friendly and no-color support
  */
 
-import chalk from 'chalk';
+import { chalk } from '../fix-once/colors';
 
 export type ColorScheme = 'normal' | 'deuteranopia' | 'protanopia' | 'tritanopia';
 

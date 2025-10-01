@@ -3,7 +3,7 @@
  * Commands, concepts, features, everything FAF can do!
  */
 
-import chalk from 'chalk';
+import { chalk } from '../fix-once/colors';
 import { 
   FAF_ICONS, 
   FAF_COLORS

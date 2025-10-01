@@ -3,7 +3,7 @@
  * Golden Rule: .faf = YAML → Convert to MD or TXT
  */
 
-import chalk from 'chalk';
+import { chalk } from '../fix-once/colors';
 import { convertFaf, saveConversion } from '../converters/faf-converters';
 import * as path from 'path';
 import * as fs from 'fs';

@@ -3,7 +3,7 @@
  * Opens .faf file in default editor or shows edit instructions
  */
 
-import chalk from 'chalk';
+import { chalk } from '../fix-once/colors';
 import { promises as fs } from 'fs';
 import { spawn } from 'child_process';
 import { findFafFile } from '../utils/file-utils';

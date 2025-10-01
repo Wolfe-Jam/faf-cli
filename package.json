@@ -1,6 +1,6 @@
 {
   "name": "faf-cli",
-  "version": "2.4.7",
+  "version": "2.4.12",
   "description": "🩵 Cyan CLI - Transform any project into perfect AI context in 30 seconds. Works with Claude, Codex, Gemini & ALL AI tools. Join 3000+ developers using .faf files. 100% FREE • Open Source • If helpful, a ⭐ is appreciated!",
   "icon": "https://faf.one/orange-smiley.svg",
   "logo": "https://faf.one/orange-smiley.svg",
@@ -54,7 +54,7 @@
     "version:truth": "node scripts/version-check.js",
     "prepublish:check": "npm run version:truth",
     "precommit": "npm run version:check",
-    "postinstall": "echo '\n🧡⚡️ FAF CLI v2.4.7 - FREE for all Developers!\nRun \"faf --help\" to get started\n'"
+    "postinstall": "echo '\n🧡⚡️ FAF CLI v2.4.11 - FREE for all Developers!\nRun \"faf --help\" to get started\n'"
   },
   "keywords": [
     "faf",

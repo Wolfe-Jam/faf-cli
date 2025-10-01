@@ -3,7 +3,7 @@
  * Checks once per day, non-intrusive, respects quiet mode
  */
 
-import chalk from 'chalk';
+import { chalk } from '../fix-once/colors';
 import { promises as fs } from 'fs';
 import * as path from 'path';
 import * as os from 'os';

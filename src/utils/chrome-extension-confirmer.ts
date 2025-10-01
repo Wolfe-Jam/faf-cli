@@ -4,7 +4,7 @@
  */
 
 import inquirer from 'inquirer';
-import chalk from 'chalk';
+import { chalk } from '../fix-once/colors';
 import { ChromeExtensionDetector } from './chrome-extension-detector';
 
 export class ChromeExtensionConfirmer {

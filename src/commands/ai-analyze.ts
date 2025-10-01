@@ -5,7 +5,7 @@
  * Architecture: Claude-first → Big-3 Compatible → Bullet-proof Universal
  */
 
-import chalk from "chalk";
+import { chalk } from "../fix-once/colors";
 import { promises as fs } from "fs";
 import * as YAML from "yaml";
 import { findFafFile } from "../utils/file-utils";

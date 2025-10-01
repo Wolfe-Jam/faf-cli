@@ -2,7 +2,7 @@
  * 🏆 faf version - Show version with MK2 Engine status
  */
 
-import chalk from "chalk";
+import { chalk } from "../fix-once/colors";
 import { FAF_COLORS, generateFAFHeader } from "../utils/championship-style";
 
 export async function versionCommand() {

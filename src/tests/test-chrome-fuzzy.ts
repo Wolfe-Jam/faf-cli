@@ -3,7 +3,7 @@
  */
 
 import { ChromeExtensionDetector } from '../utils/chrome-extension-detector';
-import chalk from 'chalk';
+import { chalk } from '../fix-once/colors';
 
 console.log(chalk.cyan('🧪 Testing Chrome Extension Fuzzy Detection'));
 console.log('=' .repeat(50));

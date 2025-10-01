@@ -3,7 +3,7 @@
  * Format compliance and style checking for .faf files
  */
 
-import chalk from "chalk";
+import { chalk } from "../fix-once/colors";
 import { promises as fs } from "fs";
 import * as YAML from "yaml";
 import { findFafFile } from "../utils/file-utils";

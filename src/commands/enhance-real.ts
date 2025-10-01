@@ -4,7 +4,7 @@
  * RELENTLESS pursuit of highest score through real data or human input
  */
 
-import chalk from "chalk";
+import { chalk } from "../fix-once/colors";
 import { promises as fs } from "fs";
 import * as path from "path";
 import * as YAML from "yaml";

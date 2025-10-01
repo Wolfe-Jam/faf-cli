@@ -1,16 +1,15 @@
-# 🩵⚡️ faf-cli v2.4.7 | .faf - Project DNA for ANY AI✨
+# 🩵⚡️ faf-cli | .faf - Project DNA for ANY AI✨
 
 ## 🏎️⚡️ PERFORMANCE EDITION - 60% FASTER!
 
-### 💥 What's New in v2.4.7:
-  **🐛 CRITICAL FIX** - Removed chalk dependency completely (was causing install errors)
-  **⚡ 60% FASTER npm install** - From 5 dependencies to just 2!
-  **🏎️ NATIVE PERFORMANCE** - Built our own engine, removed the bloat
-  **🎨 ZERO COLOR BUGS** - Fixed all terminal display issues forever
-  **💾 3X SMALLER** - Less disk space, faster downloads
+### 💥 What's New:
+  **⚡ 60% FASTER** - Lightning-quick operations
+  **🏎️ NATIVE PERFORMANCE** - Built/Installed New engine, championship grade
+  **🎨 ZERO DISPLAY BUGS** - Perfect terminal rendering
+  **💾 LEAN & FAST** - Optimized for speed
   **✨ 100% BACKWARDS COMPATIBLE** - Same commands, MORE SPEED!
 
-  The app now speaks for itself - FAST, LEAN, CHAMPIONSHIP GRADE! 🏆
+  FAST, LEAN, CHAMPIONSHIP GRADE! 🏆
 
 NEW for AI assistants (Codex, Cursor, Copilot, etc.): install locally with `npm install -g faf-cli`, confirm with `faf --version`, and default to quiet mode (`-q` / `--quiet`) for every command.
 

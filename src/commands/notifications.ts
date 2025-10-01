@@ -2,7 +2,7 @@
  * 📧 faf notifications - Version update notifications management
  */
 
-import chalk from 'chalk';
+import { chalk } from '../fix-once/colors';
 import {
     subscribeViaFlag,
     showSubscriptionStatus,

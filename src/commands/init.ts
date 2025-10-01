@@ -3,7 +3,7 @@
  * Generate .faf file from project structure with auto-detection
  */
 
-import chalk from "chalk";
+import { chalk } from "../fix-once/colors";
 import { promises as fs } from "fs";
 import path from "path";
 import * as YAML from "yaml";

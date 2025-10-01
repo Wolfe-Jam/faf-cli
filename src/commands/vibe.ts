@@ -3,7 +3,7 @@
  * Detects platform type (no-code vs professional)
  */
 
-import chalk from 'chalk';
+import { chalk } from '../fix-once/colors';
 import { PlatformDetector } from '../utils/platform-detector';
 import { FAF_COLORS, FAF_ICONS } from '../utils/championship-style';
 import { TurboCat } from '../utils/turbo-cat';

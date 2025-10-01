@@ -3,7 +3,7 @@
  * Check .faf file freshness and completeness gaps
  */
 
-import chalk from "chalk";
+import { chalk } from "../fix-once/colors";
 import { promises as fs } from "fs";
 import * as YAML from "yaml";
 import {
