@@ -5,7 +5,7 @@
  */
 
 import inquirer from 'inquirer';
-import chalk from 'chalk';
+import { chalk } from '../fix-once/colors';
 import { generateFafFromProject } from '../generators/faf-generator-championship';
 import { FAF_COLORS, FAF_ICONS } from '../utils/championship-style';
 import { findFafFile } from '../utils/file-utils';

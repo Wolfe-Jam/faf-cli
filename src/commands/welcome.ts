@@ -3,7 +3,7 @@
  * Shows a friendly guide for new users
  */
 
-import chalk from 'chalk';
+import { chalk } from '../fix-once/colors';
 import { FAF_COLORS, FAF_ICONS } from '../utils/championship-style';
 import { fileExists } from '../utils/file-utils';
 import * as path from 'path';

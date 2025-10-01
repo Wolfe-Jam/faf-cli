@@ -3,7 +3,7 @@
  * Display FAQ and search functionality
  */
 
-import chalk from 'chalk';
+import { chalk } from '../fix-once/colors';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { FAF_COLORS } from '../utils/championship-style';

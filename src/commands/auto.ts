@@ -3,7 +3,7 @@
  * Zero to Championship in one command - no faffing about!
  */
 
-import chalk from "chalk";
+import { chalk } from "../fix-once/colors";
 import { promises as fs } from "fs";
 import * as path from "path";
 import { findFafFile } from "../utils/file-utils";

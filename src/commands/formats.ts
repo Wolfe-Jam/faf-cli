@@ -3,7 +3,7 @@
  * Lists all discovered formats in the project
  */
 
-import chalk from "chalk";
+import { chalk } from "../fix-once/colors";
 import { FAF_COLORS, FAF_ICONS, generateFAFHeader } from "../utils/championship-style";
 import { FabFormatsEngine } from "../utils/fab-formats-engine";
 

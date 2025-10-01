@@ -3,7 +3,7 @@
  * Sync .faf file with project changes (package.json, git, etc.)
  */
 
-import chalk from "chalk";
+import { chalk } from "../fix-once/colors";
 import { promises as fs } from "fs";
 import * as YAML from "yaml";
 import { findFafFile, findPackageJson } from "../utils/file-utils";

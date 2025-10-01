@@ -3,7 +3,7 @@
  * We only collect stars we deserve
  */
 
-import chalk from 'chalk';
+import { chalk } from '../fix-once/colors';
 
 // FAF Cyan color
 const fafCyan = chalk.hex('#0CC0DF');

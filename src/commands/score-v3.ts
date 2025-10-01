@@ -3,7 +3,7 @@
  * Deterministic, traceable, reproducible scores
  */
 
-import chalk from "chalk";
+import { chalk } from "../fix-once/colors";
 import { FafCompiler } from "../compiler/faf-compiler";
 import { findFafFile } from "../utils/file-utils";
 import { FafDNAManager, displayScoreWithBirthWeight } from "../engines/faf-dna";

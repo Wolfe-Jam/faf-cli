@@ -3,7 +3,7 @@
  * Shows current score + birth score in a clean box
  */
 
-import chalk from 'chalk';
+import { chalk } from '../fix-once/colors';
 import { FAF_COLORS } from './championship-style';
 
 export interface ScoreData {

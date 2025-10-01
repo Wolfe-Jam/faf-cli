@@ -5,7 +5,7 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import chalk from 'chalk';
+import { chalk } from '../fix-once/colors';
 
 const FAF_DIR = path.join(os.homedir(), '.faf');
 const ANNOUNCEMENTS_FILE = path.join(FAF_DIR, '.announcements-seen');

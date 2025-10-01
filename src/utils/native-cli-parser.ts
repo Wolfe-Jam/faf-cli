@@ -15,6 +15,7 @@ export interface ParsedArgs {
 
 export interface CommandDefinition {
   name: string;
+  fullSignature?: string; // e.g., "index [term]" for checking optional args
   description: string;
   options?: OptionDefinition[];
   action?: (...args: any[]) => void | Promise<void>;
@@ -126,6 +127,7 @@ export class NativeCliParser {
     const [name, ...argDefs] = nameAndArgs.split(' ');
     const command: CommandDefinition = {
       name,
+      fullSignature: nameAndArgs, // Store full signature for optional arg detection
       description: '',
       options: []
     };
@@ -292,6 +294,8 @@ export class NativeCliParser {
 
   /**
    * Execute parsed command
+   * 
+   * 🏁 FIXED: Commander standard is args first, options last!
    */
   async execute(parsed: ParsedArgs): Promise<void> {
     if (!parsed.command) {
@@ -307,7 +311,24 @@ export class NativeCliParser {
     }
 
     if (command.action) {
-      await command.action(parsed.options, ...parsed.args);
+      // ✅ FIXED: Pass positional args first, then options (Commander standard)
+
+      // Check if required args are missing
+      if (command.fullSignature?.includes('<') && parsed.args.length === 0) {
+        // Command has required args but none provided
+        console.error(`Error: missing required argument for '${parsed.command}'`);
+        this.showHelp(parsed.command);
+        process.exit(1);
+      }
+
+      // For commands with optional positional args like [term], we need to pass undefined
+      // when no args provided, so options object goes in correct position
+      if (parsed.args.length === 0 && command.fullSignature?.includes('[')) {
+        // Command has optional positional args but none provided
+        await command.action(undefined, parsed.options);
+      } else {
+        await command.action(...parsed.args, parsed.options);
+      }
     }
   }
 
@@ -496,6 +517,7 @@ export const Command = NativeCliParser;
  * ✅ Generates help text
  * ✅ Routes commands
  * ✅ Drop-in commander replacement
+ * ✅ FIXED: Correct argument order (args first, options last)
  *
  * Total lines: ~300 (vs 9,500 bytes of commander)
  * Dependencies: ZERO

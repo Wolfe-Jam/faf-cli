@@ -1295,7 +1295,7 @@ if (!commandUsed) {
   });
 } else {
   // Parse CLI arguments to check for gearbox flags
-  program.parse(process.argv);
+  const parsed = program.parse(process.argv);
   const options = program.opts();
 
   // Gearbox system: Auto/Manual mode detection
@@ -1334,6 +1334,12 @@ if (!commandUsed) {
         process.exit(1);
       }
     }
+
+    // Execute the parsed command
+    program.execute(parsed).catch(err => {
+      console.error(err);
+      process.exit(1);
+    });
   }
 }
 
