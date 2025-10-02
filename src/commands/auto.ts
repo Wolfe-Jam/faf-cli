@@ -56,9 +56,9 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
       }
     }
 
-    console.log(chalk.bold.blue("\n🏎️ FAF AUTO - CHAMPIONSHIP MODE ENGAGED!"));
+    console.log(chalk.bold.blue("\n🏎️⚡️ FAF AUTO - CHAMPIONSHIP MODE ENGAGED!"));
     if (fafPath) {
-      console.log(chalk.white(`  Birth: ${birthScore}% | ADDED: ${addedScore}% | .FAF score: ${currentScore}%`));
+      console.log(chalk.white(`Birth: ${birthScore}% | ADDED: ${addedScore}% | .FAF score: ${currentScore}%`));
     }
     console.log(chalk.gray("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"));
 
