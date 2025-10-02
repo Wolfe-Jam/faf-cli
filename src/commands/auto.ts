@@ -60,7 +60,7 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
     if (fafPath) {
       console.log(chalk.white(`Birth: ${birthScore}% | ADDED: ${addedScore}% | .FAF score: ${currentScore}%`));
     }
-    console.log(chalk.gray("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"));
+    console.log(chalk.gray("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"));
 
     if (!fafPath) {
       console.log(chalk.yellow("📋 No .faf found - Creating championship context..."));
