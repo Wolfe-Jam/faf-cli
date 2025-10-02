@@ -1,156 +1,132 @@
-# 🩵⚡️ faf-cli | .faf - Project DNA for ANY AI✨
+# faf-cli v2.4.21
 
-## Sonnet 4.5 hits 100% 🧡 New ASCII Art too⚡️🏁
+<div align="center">
 
-![FAF Championship Banner](https://raw.githubusercontent.com/Wolfe-Jam/faf/main/cli/faf-banner.png)
+<img src="https://cdn.jsdelivr.net/npm/faf-cli@latest/assets/icons/orange-smiley.svg" alt="Orange Smiley" width="48" />
 
-> **💎 See it live in your terminal:** `faf version`
+**Project DNA ✨ for ANY AI** • **60% Faster** • **Championship Scoring**
 
-## AI|HUMAN Balance is here 🧡⚡️🩵 50|50
+[![NPM Version](https://img.shields.io/npm/v/faf-cli)](https://www.npmjs.com/package/faf-cli)
+[![Downloads](https://img.shields.io/npm/dt/faf-cli)](https://www.npmjs.com/package/faf-cli)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-100%25%20Strict-3178C6?logo=typescript)](https://www.typescriptlang.org/)
 
-See the balance between AI-detected tech and your human context:
+**[Website](https://faf.one)** • **[Community](https://github.com/Wolfe-Jam/faf/discussions)** • **[Issues](https://github.com/Wolfe-Jam/faf/issues)**
 
-```bash
-⚖️ Balance: AI:75% | HUMAN:25%
+</div>
+
+---
+
+![FAF Championship Banner](https://cdn.jsdelivr.net/npm/faf-cli@latest/faf-banner.png)
+
+---
+
+## 🏆 Championship Scoring System
+
+Track your project's AI-readiness with F1-inspired tiers:
+
+```
+🏆 Trophy (100%)    - Championship - Perfect 50|50 AI|HUMAN balance
+🥇 Gold (99%)       - Gold standard
+🥈 Silver (95-98%)  - Excellence
+🥉 Bronze (85-94%)  - Production ready
+🟢 Green (70-84%)   - Good foundation
+🟡 Yellow (55-69%)  - Getting there
+🔴 Red (0-54%)      - Needs attention
 ```
 
-Add Project Details for AI to reach championship 50|50 balance! 🏆
+**Live output in your terminal:**
 
-### 💥 Also New:
-  **⚡ 60% FASTER** - Lightning-quick operations
-  **🏎️ NATIVE PERFORMANCE** - Built/Installed New engine, championship grade
-  **🎨 ZERO DISPLAY BUGS** - Perfect terminal rendering
-  **💾 LEAN & FAST** - Optimized for speed
-  **✨ 100% BACKWARDS COMPATIBLE** - Same commands, MORE SPEED!
+```
+🏎️ FAF Status
+━━━━━━━━━━━━
+Score: 85% 🥉 Bronze
+⚖️  Balance: AI:75% | HUMAN:25%
 
-  FAST, LEAN, CHAMPIONSHIP GRADE! 🏆
+Next: 95% 🥈 Silver (10% to go!)
+Add Project Details to reach 50|50 balance! 🏆
+```
 
-NEW for AI assistants (Codex, Cursor, Copilot, etc.): install locally with `npm install -g faf-cli`, confirm with `faf --version`, and default to quiet mode (`-q` / `--quiet`) for every command.
+---
 
-<div align="center">
+## 🚀 Quick Start
 
-## Transform Any Project into Perfect AI Context in 30 Seconds
-
-**3000+ Downloads** • **100% FREE Forever** • **Works with ALL AI Tools**
-
-**[💬 Join Our Community](https://github.com/Wolfe-Jam/faf/discussions)** • **[⭐ Star on GitHub](https://github.com/Wolfe-Jam/faf)** • **[🐛 Report Issues](https://github.com/Wolfe-Jam/faf/issues)**
-
-</div>
-
-## 🚀 What is .faf?
-
-**.faf = Project DNA for ANY AI✨ [Foundational AI-context Format]**
-
-Universal, shareable AI-Context for any AI, human or team, regardless of size, location, languages, stack, setup or documentation.
-
-Add a .faf file to your repo and watch Claude, Codex, Gemini, or any AI tool understand your entire codebase with speed and precision.
-
-**Join our growing community of 3000+ developers who save hours daily by using .faf files!**
-
-<div align="center">
-<img src="https://faf.one/orange-smiley.svg" alt="Orange Smiley Logo" width="150" />
-
-### 💬 Community-Driven • Open Source • Built by Developers, for Developers
-
-[![NPM Downloads](https://img.shields.io/npm/dw/faf-cli)](https://www.npmjs.com/package/faf-cli)
-[![GitHub Stars](https://img.shields.io/github/stars/Wolfe-Jam/faf)](https://github.com/Wolfe-Jam/faf)
-[![Discussions](https://img.shields.io/badge/Discussions-Join%20Community-7289DA)](https://github.com/Wolfe-Jam/faf/discussions)
-
-</div>
-
-## 🎯 Why Developers Love .faf
-
-### The Problem:
-- ❌ Spending 20+ minutes explaining your project to AI
-- ❌ AI gives wrong answers because it doesn't understand your codebase
-- ❌ Copying and pasting files manually into ChatGPT/AI assistants
-- ❌ AI forgets context between sessions/doesn't know your setup properly
-
-### The Solution:
-- ✅ **One command** creates perfect AI context
-- ✅ **30 seconds** to complete AI understanding
-- ✅ **Works everywhere** - Claude, ChatGPT, Gemini, Cursor, any AI
-- ✅ **Share context** with your team instantly
-
-## 🚀 Getting Started (30 Seconds!)
-
-### ⚡️💥 GET BOTH! Double Down! (100% FREE)
 ```bash
-# Install BOTH for maximum power - completely FREE!
-npm install -g faf-cli           # 🩵 Cyan CLI - Command Line Tool
-npm install -g claude-faf-mcp    # 🧡 Orange Smiley MCP - Claude Desktop integration
+# Install globally
+npm install -g faf-cli
 
-# Try it now!
+# Initialize in any project
 cd your-project
 faf init
+
+# Auto-detect and score
+faf auto
+faf score
 ```
 
-Done! Your AI now understands your project 99% better! 🏁
+Your AI now understands your project! 🏁
 
-### 🤖 Codex CLI Quickstart (AI Assistants)
-1. Install with user approval when required: `npm install -g faf-cli`
-2. Verify availability right away: `faf --version`
-3. Run every command in quiet mode to suppress banners: `faf init -q`, `faf auto -q`, `faf score -q`
-4. Pause for approval before any network or write action in sandboxed sessions
-5. Summarize the key results instead of dumping raw output for the user
+---
 
-## 🌟 Join Our Growing Community!
+## 🎯 What is faf-cli?
 
-### 💬 New Community Hub at [github.com/Wolfe-Jam/faf/discussions](https://github.com/Wolfe-Jam/faf/discussions)
+Command-line tool that creates `.faf` files for instant AI project understanding.
 
-Connect with 2000+ developers using .faf to accelerate their AI workflows:
-- **Share your projects** - Show what you're building with .faf
-- **Get help** - Community support for any questions
-- **Request features** - Help shape the future of .faf
-- **Learn best practices** - Tips from experienced users
+**.faf = Project DNA for ANY AI ✨**
+Universal, shareable context for Claude, ChatGPT, Gemini, Cursor - regardless of stack, size, or setup.
 
-## ⚡ Key Features
+### Why Developers Love It
 
-### For Developers
-- **Universal Compatibility** - Works with Claude, ChatGPT, Gemini, Cursor, and more
-- **30-Second Setup** - Run `faf init` in your project directory and you're done
-- **Smart Auto-Detection** - Automatically identifies your tech stack
-- **Real-Time Scoring** - Instantly see your AI-readiness score
-- **100% Free & Open Source** - No hidden costs, ever
+**The Problem:**
+- ❌ 20+ minutes explaining projects to AI
+- ❌ AI gives wrong answers without context
+- ❌ Manual copy/paste into chat interfaces
+- ❌ Context lost between sessions
 
-### Technical Excellence
-- **Performance** - <50ms operations, rigorously benchmarked
-- **Reliability** - Extensively tested including edge cases and stress scenarios
-- **Type Safety** - 100% TypeScript with strict mode enforcement
-- **Security** - Minimal dependencies, fully audited codebase
-- **Production Ready** - Zero-error tolerance with comprehensive error handling
+**The Solution:**
+- ✅ One command creates perfect context
+- ✅ 30 seconds to complete understanding
+- ✅ Works with every AI tool
+- ✅ Share context with your team instantly
 
-## 💬 Join Our Community
+### Key Features
 
-**We're building .faf together with our community!**
+- ✅ **Universal** - Works with all AI tools
+- ✅ **Fast** - <50ms operations, 60% faster than v2.3
+- ✅ **Smart** - Auto-detects your tech stack
+- ✅ **Simple** - One command setup
+- ✅ **Free** - 100% open source, forever
 
-- 🌟 **[Star us on GitHub](https://github.com/Wolfe-Jam/faf)** - If you find it helpful!
-- 💬 **[Join Discussions](https://github.com/Wolfe-Jam/faf/discussions)** - Share ideas, get help, show your projects
-- 🐛 **[Report Issues](https://github.com/Wolfe-Jam/faf/issues)** - Help us improve
-- 📖 **[Read the Docs](https://faf.one/docs)** - Complete guides and tutorials
-- 🤝 **[Contribute](https://github.com/Wolfe-Jam/faf/blob/main/CONTRIBUTING.md)** - PRs welcome!
+---
 
 ## 🛠️ Available Commands
 
 ### Core Commands
-- `faf init` - Initialize .faf context
-- `faf auto` - Auto-detect and generate
-- `faf score` - Calculate AI readiness score
-- `faf quick` - Quick mode with comma-separated values
-- `faf index` - Universal A-Z reference of all commands and concepts
+- `faf init` - Initialize project context
+- `faf auto` - Auto-detect and populate
+- `faf score` - Calculate AI readiness
+- `faf status` - Project health check
+- `faf quick "app, react, vercel"` - Quick setup
 
 ### Enhancement Commands
-- `faf enhance` - Optimized scoring system
-- `faf sync` - Sync .faf with CLAUDE.md
+- `faf enhance` - Optimize scoring
+- `faf sync` - Sync with CLAUDE.md
 - `faf bi-sync` - Bidirectional sync
 
 ### Management Commands
-- `faf trust` - Validate context integrity
-- `faf doctor` - Diagnose and fix issues
-- `faf welcome` - First-time user guide
+- `faf trust` - Validate integrity
+- `faf doctor` - Diagnose issues
 - `faf clear` - Clear caches
+- `faf index` - A-Z command reference
 
-## 📖 Usage Examples
+### Utility Commands
+- `faf version` - Show version (with ASCII art!)
+- `faf welcome` - First-time guide
+- `faf help` - Command help
+
+---
+
+## 💡 Usage Examples
 
 ```bash
 # Quick setup for new project
@@ -159,96 +135,131 @@ faf quick "my-app, react, typescript, vercel"
 # Auto-detect existing project
 faf auto
 
-# Check your score
+# Check your score with details
 faf score --details
+
+# See current status
+faf status
 
 # Fix any issues
 faf doctor
 
 # Optimize scoring
 faf enhance
+
+# Quiet mode (for AI assistants)
+faf init -q
+faf auto -q
 ```
 
-## 🏆 Championship Medal System
+---
 
-Track your AI-context quality through our F1-inspired progression system:
+## 🎉 What's New in v2.4.6
 
-### Medal Tiers
-- **🏆 Trophy (100%)** - Championship - with 50|50 AI|HUMAN balance
-- **🥇 Gold (99%)** - Gold standard
-- **🥈 Silver (95-98%)** - Target 2 achieved
-- **🥉 Bronze (85-94%)** - Target 1 achieved
-- **🟢 Green (70-84%)** - GO! - Ready for Target 1
-- **🟡 Yellow (55-69%)** - Caution - Getting ready
-- **🔴 Red (0-54%)** - Stop - Needs work
+### Performance Championship
+- **60% faster** operations across all commands
+- **Native engine** - Championship-grade performance
+- **Zero display bugs** - Perfect terminal rendering
+- **Lean & optimized** - Minimal footprint
+- **100% backwards compatible** - Same commands, more speed
 
-See your current status:
+### v2.4 Highlights
+- **AI|HUMAN Balance** - Track 50|50 balance for championship
+- **Enhanced auto-detection** - Smarter tech stack recognition
+- **Improved scoring** - More accurate AI-readiness metrics
+- **TypeScript strict mode** - Full type safety
+
+---
+
+## 📊 Technical Specs
+
+```
+Version:       2.4.6
+Performance:   <50ms operations
+Improvement:   60% faster than v2.3
+TypeScript:    100% strict mode
+Dependencies:  2 (minimal)
+Tests:         100% passing
+Build:         Zero errors
+```
+
+---
+
+## 🤖 For AI Assistants (Codex, Cursor, Copilot)
+
+When using faf-cli programmatically:
+
+1. Install with user approval: `npm install -g faf-cli`
+2. Verify: `faf --version`
+3. Use quiet mode: `faf init -q`, `faf auto -q`, `faf score -q`
+4. Request approval before network/write operations
+5. Summarize results instead of raw output
+
+---
+
+## 🏗️ Development
+
 ```bash
-faf status
-
-# Output:
-🏎️ FAF Status
-━━━━━━━━━━━━
-Score: 85% 🥉 Target 1 - Bronze
-Next: 95% 🥈 Target 2 - Silver (10% to go!)
-```
-
-## 📊 Real Metrics
-
-```
-📈 Status: PRODUCTION
-├─ 💎 Production Ready
-├─ 🚀 Performance: <50ms
-├─ 📦 Dependencies: 2 (MINIMAL!)
-├─ 🧪 Tests Passed: 100%
-└─ 🏆 AI Readiness: 100% target
-```
-
-## 🏁 Development
-
-```bash
-# Clone repo
+# Clone
 git clone https://github.com/Wolfe-Jam/faf.git
 cd faf/cli
 
-# Install & build
+# Install & Build
 npm install
 npm run build
 
 # Test
 npm test
+
+# Link locally
+npm link
 ```
+
+---
 
 ## 📋 Requirements
 
-- Node.js 18+
-- macOS, Linux, or Windows
-- Any AI tool (Claude, ChatGPT, Gemini, etc.)
+- **Node.js** 18+
+- **OS**: macOS, Linux, or Windows
+- **AI Tools**: Works with Claude, ChatGPT, Gemini, Cursor, etc.
 
-## 🔗 Links
+---
 
-- **NPM**: [faf-cli](https://www.npmjs.com/package/faf-cli)
-- **Website**: [faf.one](https://faf.one)
-- **GitHub**: [Wolfe-Jam/faf](https://github.com/Wolfe-Jam/faf)
-- **Community**: [Join Discussions](https://github.com/Wolfe-Jam/faf/discussions)
-- **Support**: support@faf.one
+## 🔗 The FAF Ecosystem
+
+- [🩵 **faf-cli**](https://npmjs.com/package/faf-cli) - This command-line tool
+- [🧡 **claude-faf-mcp**](https://npmjs.com/package/claude-faf-mcp) - MCP server for Claude Desktop
+- [💚 **faf.one**](https://faf.one) - Documentation & guides
+- [🖥️ **Chrome Extension**](https://chromewebstore.google.com/detail/lnecebepmpjpilldfmndnaofbfjkjlkm) - Browser integration
+
+---
 
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+MIT License - See [LICENSE](./LICENSE) file
 
-**Note**: The .faf-Engine(s) are proprietary and available under license.
-
----
-
-## ⚡️💥 The Complete FAF Ecosystem
-
-[🩵 Cyan CLI](https://npmjs.com/package/faf-cli) • [🧡 Orange Smiley MCP](https://npmjs.com/package/claude-faf-mcp) • [💚 WEB](https://faf.one) • [🧰 DevOps](https://fafdev.tools) • [🖥️ Chrome](https://chromewebstore.google.com/detail/lnecebepmpjpilldfmndnaofbfjkjlkm)
-
-**🏎️⚡️ FAST AF - Project DNA for ANY AI ✨**
+**Note**: The .faf-Engine is proprietary and available under separate license.
 
 ---
 
-**Made with 🧡 by wolfejam** | **3000+ Weekly Downloads** | **Growing Community** 🎉
+## 🤝 Contributing
 
-**100% FREE Forever** • **No Strings Attached** • **Just Build Faster with AI**
+We welcome contributions! Join our [community discussions](https://github.com/Wolfe-Jam/faf/discussions) or submit issues/PRs.
+
+**Connect with 3000+ developers** using .faf to accelerate their AI workflows:
+- Share your projects
+- Get help from the community
+- Request features
+- Learn best practices
+
+---
+
+<div align="center">
+
+**Made with 🧡 by wolfejam**
+
+**100% FREE Forever** • **3000+ Weekly Downloads** • **Zero Faff™**
+
+[⭐ Star on GitHub](https://github.com/Wolfe-Jam/faf) • [📦 View on NPM](https://www.npmjs.com/package/faf-cli)
+
+</div>
