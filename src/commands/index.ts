@@ -175,12 +175,7 @@ const FAF_INDEX: Record<string, IndexEntry> = {
   },
 
   // === F ===
-  'fab-formats': {
-    type: 'concept',
-    description: 'Velocity-driven component detection engine (not needle-in-haystack)',
-    related: ['stacks', 'score'],
-    category: 'concepts'
-  },
+  // (fab-formats is internal engine - users access via auto/enhance/score)
 
   // === G ===
   'garage': {

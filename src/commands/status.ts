@@ -20,6 +20,7 @@ import {
   PERFORMANCE_STANDARDS
 } from '../utils/championship-style';
 import { getScoreEmoji } from '../utils/color-utils';
+import { getTierInfo as getChampionshipTierInfo } from '../utils/championship-core';
 
 export interface StatusOptions {
   // Minimal options for speed
@@ -95,59 +96,9 @@ async function checkClaudeMd(projectDir: string) {
 
 /**
  * Get tier information for current score and next target
+ * NOW USING CHAMPIONSHIP CORE - The DNA both brothers share! 🏆
  */
-function getTierInfo(score: number): {
-  current: string;
-  next?: string;
-  nextTarget?: number;
-  nextMedal?: string;
-} {
-  if (score >= 100) {
-    return { current: 'Trophy - Championship' };
-  } else if (score >= 99) {
-    return {
-      current: 'Gold',
-      next: 'Trophy - Championship',
-      nextTarget: 100,
-      nextMedal: '🏆'
-    };
-  } else if (score >= 95) {
-    return {
-      current: 'Target 2 - Silver',
-      next: 'Gold',
-      nextTarget: 99,
-      nextMedal: '🥇'
-    };
-  } else if (score >= 85) {
-    return {
-      current: 'Target 1 - Bronze',
-      next: 'Target 2 - Silver',
-      nextTarget: 95,
-      nextMedal: '🥈'
-    };
-  } else if (score >= 70) {
-    return {
-      current: 'GO! - Ready for Target 1',
-      next: 'Target 1 - Bronze',
-      nextTarget: 85,
-      nextMedal: '🥉'
-    };
-  } else if (score >= 55) {
-    return {
-      current: 'Caution - Getting ready',
-      next: 'GO! - Ready for Target 1',
-      nextTarget: 70,
-      nextMedal: '🟢'
-    };
-  } else {
-    return {
-      current: 'Stop - Needs work',
-      next: 'Caution - Getting ready',
-      nextTarget: 55,
-      nextMedal: '🟡'
-    };
-  }
-}
+const getTierInfo = getChampionshipTierInfo;
 
 /**
  * 🏁 Championship Status Dashboard - <38ms Performance Target
