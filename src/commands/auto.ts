@@ -4,7 +4,7 @@
  */
 
 import { chalk } from "../fix-once/colors";
-import { promises as fs } from "fs";
+import * as fs from "fs/promises";
 import * as path from "path";
 import { findFafFile } from "../utils/file-utils";
 import { initFafFile } from "./init";
@@ -12,6 +12,8 @@ import { syncFafFile } from "./sync";
 import { enhanceFafWithAI } from "./ai-enhance";
 import { biSyncCommand } from "./bi-sync";
 import { showFafScoreCard } from "./show";
+import yamlUtils from "../fix-once/yaml";
+import { calculateFafScore } from "../scoring/score-calculator";
 
 interface AutoOptions {
   force?: boolean;
@@ -30,12 +32,35 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
     return;
   }
 
-  console.log(chalk.bold.blue("\n🏎️ FAF AUTO - CHAMPIONSHIP MODE ENGAGED!"));
-  console.log(chalk.gray("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"));
-
   try {
     // Step 1: Check if .faf exists
     let fafPath = await findFafFile(targetDir);
+
+    // Get scores for header display
+    let birthScore = 0;
+    let currentScore = 0;
+    let addedScore = 0;
+
+    if (fafPath) {
+      try {
+        const fafData = await fs.readFile(fafPath, 'utf-8');
+        const parsed = yamlUtils.parse(fafData);
+        if (parsed.faf_dna?.birth_weight !== undefined) {
+          birthScore = Math.round(parsed.faf_dna.birth_weight);
+        }
+        const scoreResult = await calculateFafScore(fafPath);
+        currentScore = Math.round(scoreResult.totalScore);
+        addedScore = currentScore - birthScore;
+      } catch (e) {
+        // Ignore score errors, will show 0%
+      }
+    }
+
+    console.log(chalk.bold.blue("\n🏎️ FAF AUTO - CHAMPIONSHIP MODE ENGAGED!"));
+    if (fafPath) {
+      console.log(chalk.white(`  Birth: ${birthScore}% | ADDED: ${addedScore}% | .FAF score: ${currentScore}%`));
+    }
+    console.log(chalk.gray("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"));
 
     if (!fafPath) {
       console.log(chalk.yellow("📋 No .faf found - Creating championship context..."));
