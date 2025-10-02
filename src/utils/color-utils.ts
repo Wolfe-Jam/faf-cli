@@ -52,17 +52,23 @@ export function getScoreColor(percentage: number): (text: string) => string {
   }
 }
 
-// Emoji alternatives for no-color mode
+// Championship Medal System
 export function getScoreEmoji(percentage: number, useEmoji: boolean = true): string {
   if (!globalColorEnabled || !useEmoji) {
-    if (percentage >= 90) {return '[EXCELLENT]';}
-    if (percentage >= 70) {return '[GOOD]';}
-    return '[NEEDS_WORK]';
+    if (percentage >= 100) {return '[TROPHY]';}
+    if (percentage >= 99) {return '[GOLD]';}
+    if (percentage >= 95) {return '[SILVER]';}
+    if (percentage >= 85) {return '[BRONZE]';}
+    return '[IN_PROGRESS]';
   }
-  
-  if (percentage >= 90) {return '🟢';}
-  if (percentage >= 70) {return '🟡';}
-  return '🔴';
+
+  if (percentage >= 100) {return '🏆';}  // Trophy - 100% with 50|50 balance
+  if (percentage >= 99) {return '🥇';}   // Gold - 99%
+  if (percentage >= 95) {return '🥈';}   // Silver (Target 2) - 95%
+  if (percentage >= 85) {return '🥉';}   // Bronze (Target 1) - 85%
+  if (percentage >= 70) {return '🟢';}   // GO! - Ready for Target 1
+  if (percentage >= 55) {return '🟡';}   // Getting ready
+  return '🔴';                            // Stop - Needs work
 }
 
 // Simplified color utilities
