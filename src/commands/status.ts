@@ -10,15 +10,16 @@ import path from 'path';
 import { chalk } from '../fix-once/colors';
 import { findFafFile } from '../utils/file-utils';
 import { calculateTrustScore } from './trust';
-import { 
-  FAF_ICONS, 
-  FAF_COLORS, 
-  formatTrustLevel, 
-  formatPerformance, 
+import {
+  FAF_ICONS,
+  FAF_COLORS,
+  formatTrustLevel,
+  formatPerformance,
   // formatAIHappiness, // unused for now
   formatTechnicalCredit,
-  PERFORMANCE_STANDARDS 
+  PERFORMANCE_STANDARDS
 } from '../utils/championship-style';
+import { getScoreEmoji } from '../utils/color-utils';
 
 export interface StatusOptions {
   // Minimal options for speed
@@ -93,26 +94,91 @@ async function checkClaudeMd(projectDir: string) {
 }
 
 /**
+ * Get tier information for current score and next target
+ */
+function getTierInfo(score: number): {
+  current: string;
+  next?: string;
+  nextTarget?: number;
+  nextMedal?: string;
+} {
+  if (score >= 100) {
+    return { current: 'Trophy - Championship' };
+  } else if (score >= 99) {
+    return {
+      current: 'Gold',
+      next: 'Trophy - Championship',
+      nextTarget: 100,
+      nextMedal: '🏆'
+    };
+  } else if (score >= 95) {
+    return {
+      current: 'Target 2 - Silver',
+      next: 'Gold',
+      nextTarget: 99,
+      nextMedal: '🥇'
+    };
+  } else if (score >= 85) {
+    return {
+      current: 'Target 1 - Bronze',
+      next: 'Target 2 - Silver',
+      nextTarget: 95,
+      nextMedal: '🥈'
+    };
+  } else if (score >= 70) {
+    return {
+      current: 'GO! - Ready for Target 1',
+      next: 'Target 1 - Bronze',
+      nextTarget: 85,
+      nextMedal: '🥉'
+    };
+  } else if (score >= 55) {
+    return {
+      current: 'Caution - Getting ready',
+      next: 'GO! - Ready for Target 1',
+      nextTarget: 70,
+      nextMedal: '🟢'
+    };
+  } else {
+    return {
+      current: 'Stop - Needs work',
+      next: 'Caution - Getting ready',
+      nextTarget: 55,
+      nextMedal: '🟡'
+    };
+  }
+}
+
+/**
  * 🏁 Championship Status Dashboard - <38ms Performance Target
  */
 function displayStatus(
-  fafPath: string, 
-  status: { trustScore: number; lines: number; lastSyncText: string; isHealthy: boolean }, 
-  hasClaudeMd: boolean, 
+  fafPath: string,
+  status: { trustScore: number; lines: number; lastSyncText: string; isHealthy: boolean },
+  hasClaudeMd: boolean,
   duration: number
 ): void {
   const { trustScore, lines, lastSyncText } = status;
-  
+
   // Championship performance check
   const performanceGrade = duration <= PERFORMANCE_STANDARDS.status_command ? 'CHAMPION' : 'GOOD';
   const speedEmoji = duration <= PERFORMANCE_STANDARDS.status_command ? FAF_ICONS.trophy : FAF_ICONS.lightning;
-  
+
   // Calculate Technical Credit (mock for now)
   const technicalCredit = Math.floor((trustScore - 50) / 10) * 5;
-  
+
+  // Get medal emoji and tier info
+  const medal = getScoreEmoji(trustScore);
+  const tierInfo = getTierInfo(trustScore);
+
   console.log();
-  console.log(FAF_COLORS.fafCyan(`${FAF_ICONS.chart_up} Project Status ${speedEmoji} (${performanceGrade})`));
-  console.log(`${FAF_COLORS.fafCyan('├─ ')  }${FAF_ICONS.gem} .faf Context: ${formatTrustLevel(trustScore)}`);
+  console.log(FAF_COLORS.fafCyan('🏎️ FAF Status'));
+  console.log(FAF_COLORS.fafCyan('━━━━━━━━━━━━'));
+  console.log(`Score: ${trustScore}% ${medal} ${tierInfo.current}`);
+  if (tierInfo.next && tierInfo.nextTarget) {
+    console.log(`Next: ${tierInfo.nextTarget}% ${tierInfo.nextMedal} ${tierInfo.next} (${tierInfo.nextTarget - trustScore}% to go!)`);
+  }
+  console.log();
   console.log(`${FAF_COLORS.fafCyan('├─ ')  }${FAF_ICONS.robot} AI Readiness: ${trustScore >= 80 ? '☑️ Optimized' : '🟡 Improving'}`);
   console.log(`${FAF_COLORS.fafCyan('├─ ')  }${FAF_ICONS.file} Files Tracked: ${lines} lines`);
   console.log(`${FAF_COLORS.fafCyan('├─ ')  }${FAF_ICONS.zap} Performance: ${formatPerformance(duration)}`);

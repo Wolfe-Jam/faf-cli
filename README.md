@@ -169,6 +169,30 @@ faf doctor
 faf enhance
 ```
 
+## 🏆 Championship Medal System
+
+Track your AI-context quality through our F1-inspired progression system:
+
+### Medal Tiers
+- **🏆 Trophy (100%)** - Championship - with 50|50 AI|HUMAN balance
+- **🥇 Gold (99%)** - Gold standard
+- **🥈 Silver (95-98%)** - Target 2 achieved
+- **🥉 Bronze (85-94%)** - Target 1 achieved
+- **🟢 Green (70-84%)** - GO! - Ready for Target 1
+- **🟡 Yellow (55-69%)** - Caution - Getting ready
+- **🔴 Red (0-54%)** - Stop - Needs work
+
+See your current status:
+```bash
+faf status
+
+# Output:
+🏎️ FAF Status
+━━━━━━━━━━━━
+Score: 85% 🥉 Target 1 - Bronze
+Next: 95% 🥈 Target 2 - Silver (10% to go!)
+```
+
 ## 📊 Real Metrics
 
 ```
