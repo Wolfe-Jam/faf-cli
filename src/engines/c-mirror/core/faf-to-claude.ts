@@ -39,7 +39,10 @@ export async function fafToClaudeMd(fafContent: string, projectPath: string = pr
       } as SyncProgressData, { projectPath })
     );
 
-    const fafData = YAML.parse(fafContent);
+    const parsedData = YAML.parse(fafContent);
+
+    // Handle empty or invalid .faf files with defaults
+    const fafData = (!parsedData || typeof parsedData !== 'object') ? {} : parsedData;
 
     // Step 2: Extract core data
     mirrorEvents.emitMirrorEvent(

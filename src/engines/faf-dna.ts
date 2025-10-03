@@ -598,29 +598,49 @@ export function displayScoreWithBirthWeight(
   options: { showGrowth?: boolean; showJourney?: boolean } = {}
 ): void {
   // Import championship medal system
-  const { getScoreMedal } = require('../utils/championship-core');
+  const { getScoreMedal, getTierInfo } = require('../utils/championship-core');
 
   // Get medal for current score
   const { medal, status } = getScoreMedal(current);
+  const tierInfo = getTierInfo(current);
   const growth = current - birthWeight;
 
-  // CHAMPIONSHIP MEDAL BANNER - always visible by default!
-  console.log('');
-  console.log(colors.success(colors.bold(`${medal} ${status.toUpperCase()} | Birth: ${birthWeight}% | ADDED: +${growth}% | .FAF: ${current}%`)));
-  console.log(colors.secondary('━'.repeat(80)));
-  console.log('');
+  // OPTIMIZED FIRST TWO LINES - Match MCP's championship scorecard format
+  // Line 1: Score with medal
+  console.log(colors.success(colors.bold(`${medal} Score: ${current}/100`)));
 
-  // Journey visualization
-  if (options.showJourney) {
-    console.log(colors.secondary(`   📍 Journey: ${birthWeight}% → ${current}% (born ${birthDate.toISOString().split('T')[0]})`));
+  // Line 2: Progress bar (like MCP)
+  const barWidth = 24;
+  const filled = Math.floor((current / 100) * barWidth);
+  const empty = barWidth - filled;
+  const progressBar = '█'.repeat(filled) + '░'.repeat(empty);
+  console.log(colors.success(`${progressBar} ${current}%`));
+
+  // Line 3: Status
+  console.log(colors.info(`Status: ${status}`));
+
+  // Line 4: Next milestone (if exists)
+  if (tierInfo.next && tierInfo.nextTarget && tierInfo.nextMedal) {
+    const pointsToGo = tierInfo.nextTarget - current;
+    console.log('');
+    console.log(colors.info(`Next milestone: ${tierInfo.nextTarget}% ${tierInfo.nextMedal} ${tierInfo.next} (${pointsToGo} points to go!)`));
   }
 
-  // Growth details if requested
-  if (options.showGrowth) {
-    const emoji = growth > 50 ? '🚀' : growth > 30 ? '📈' : '📊';
-    const daysOld = Math.floor((Date.now() - new Date(birthDate).getTime()) / (1000 * 60 * 60 * 24));
-    console.log(colors.info(`   ${emoji} Growth: +${growth}% over ${daysOld} days`));
+  // Detailed breakdown (collapsed in Claude Code, visible in terminal)
+  console.log('');
+  console.log(colors.primary('🏎️ FAF Championship Status'));
+  console.log(colors.secondary('━'.repeat(40)));
+  console.log(colors.success(`Score: ${current}% ${medal} ${status}`));
+  console.log(colors.info(`Birth Weight: ${birthWeight}% (born ${birthDate.toISOString().split('T')[0]})`));
+
+  const daysOld = Math.floor((Date.now() - new Date(birthDate).getTime()) / (1000 * 60 * 60 * 24));
+  console.log(colors.info(`Growth: +${growth}% over ${daysOld} days`));
+
+  if (tierInfo.next && tierInfo.nextTarget && tierInfo.nextMedal) {
+    const pointsToGo = tierInfo.nextTarget - current;
+    console.log(colors.info(`Next Milestone: ${tierInfo.nextTarget}% ${tierInfo.nextMedal} ${tierInfo.next} (${pointsToGo}% to go!)`));
   }
+  console.log('');
 }
 
 /**
