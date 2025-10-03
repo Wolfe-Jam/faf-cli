@@ -20,7 +20,8 @@ import {
   PERFORMANCE_STANDARDS
 } from '../utils/championship-style';
 import { getScoreEmoji } from '../utils/color-utils';
-import { getTierInfo as getChampionshipTierInfo } from '../utils/championship-core';
+import { getTierInfo as getChampionshipTierInfo, getScoreMedal } from '../utils/championship-core';
+import { FafCompiler } from '../compiler/faf-compiler';
 
 export interface StatusOptions {
   // Minimal options for speed
@@ -28,28 +29,31 @@ export interface StatusOptions {
 
 /**
  * Get quick status overview for .faf file
+ * NOW USING FAB-FORMATS COMPILER - Championship scoring! 🏆
  */
 async function getQuickStatus(fafPath: string) {
   try {
     const stats = await fs.stat(fafPath);
     const fafContent = await fs.readFile(fafPath, 'utf-8');
-    
+
     // Quick health indicators
     const hasBasicStructure = fafContent.includes('project:') && fafContent.includes('metadata:');
     const lines = fafContent.split('\n').length;
     const size = stats.size;
     const lastModified = stats.mtime;
-    
-    // Quick trust calculation (simplified for speed)
-    const trustScore = await calculateTrustScore(fafPath);
-    
+
+    // USE COMPILER SCORE (not trust score!) - Championship engine 🏎️
+    const compiler = new FafCompiler();
+    const compilerResult = await compiler.compile(fafPath);
+    const score = compilerResult.score || 0;
+
     // Calculate time since last modification
     const now = new Date();
     const timeDiff = now.getTime() - lastModified.getTime();
     const minutesAgo = Math.floor(timeDiff / (1000 * 60));
     const hoursAgo = Math.floor(minutesAgo / 60);
     const daysAgo = Math.floor(hoursAgo / 24);
-    
+
     let lastSyncText = '';
     if (daysAgo > 0) {
       lastSyncText = `${daysAgo} day${daysAgo > 1 ? 's' : ''} ago`;
@@ -60,14 +64,14 @@ async function getQuickStatus(fafPath: string) {
     } else {
       lastSyncText = 'just now';
     }
-    
+
     return {
-      trustScore: trustScore.overall,
+      trustScore: score, // Actually compiler score now!
       hasBasicStructure,
       lines,
       size,
       lastSyncText,
-      isHealthy: hasBasicStructure && trustScore.overall > 70
+      isHealthy: hasBasicStructure && score > 70
     };
   } catch {
     return {
@@ -123,7 +127,7 @@ function displayStatus(
   const tierInfo = getTierInfo(trustScore);
 
   console.log();
-  console.log(FAF_COLORS.fafCyan('🏎️ FAF Status'));
+  console.log(FAF_COLORS.fafCyan('🏎️  FAF Status'));
   console.log(FAF_COLORS.fafCyan('━━━━━━━━━━━━'));
   console.log(`Score: ${trustScore}% ${medal} ${tierInfo.current}`);
   if (tierInfo.next && tierInfo.nextTarget) {
