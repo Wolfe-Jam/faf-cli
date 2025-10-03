@@ -628,7 +628,7 @@ export function displayScoreWithBirthWeight(
 
   // Detailed breakdown (collapsed in Claude Code, visible in terminal)
   console.log('');
-  console.log(colors.bold('🏎️ FAF Championship Status'));
+  console.log(colors.bold('🏎️  FAF Championship Status'));
   console.log('━'.repeat(40));
   console.log(colors.bold(`Score: ${current}% ${medal} ${status}`));
   console.log(`Birth Weight: ${birthWeight}% (born ${birthDate.toISOString().split('T')[0]})`);
