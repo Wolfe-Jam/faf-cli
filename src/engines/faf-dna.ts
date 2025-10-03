@@ -630,7 +630,6 @@ export function displayScoreWithBirthWeight(
   console.log('');
   console.log(colors.bold('🏎️  FAF Championship Status'));
   console.log('━'.repeat(40));
-  console.log(colors.bold(`Score: ${current}% ${medal} ${status}`));
   console.log(`Birth Weight: ${birthWeight}% (born ${birthDate.toISOString().split('T')[0]})`);
 
   const daysOld = Math.floor((Date.now() - new Date(birthDate).getTime()) / (1000 * 60 * 60 * 24));
