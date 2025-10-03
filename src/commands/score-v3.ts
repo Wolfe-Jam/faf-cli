@@ -25,7 +25,7 @@ export async function scoreCommandV3(
   // Only show header if not in quiet mode
   const isQuiet = process.argv.includes('--quiet');
   if (!isQuiet) {
-    console.log(chalk.blue("\n🏎️ FAF Score Compiler v3.0\n"));
+    console.log(chalk.cyan("\n🏎️ FAF Score Compiler v3.0\n"));
   }
 
   try {
@@ -118,7 +118,7 @@ export async function scoreCommandV3(
     }
 
     // Main score display
-    console.log(chalk.blue(`📈 Scoring: ${fafPath}`));
+    console.log(chalk.cyan(`📈 Scoring: ${fafPath}`));
 
     // Try to show with DNA (birth weight)
     const projectPath = path.dirname(fafPath);
