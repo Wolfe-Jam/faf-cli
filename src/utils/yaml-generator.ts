@@ -45,7 +45,7 @@ function getConfidenceLevel(percentage: number): string {
 // Helper function to safely escape YAML values
 export function escapeForYaml(value: string | undefined): string {
   if (!value) {return 'Not specified';}
-  
+
   // Clean up markdown-style lists and formatting
   const cleaned = value
     .replace(/^[\s]*[-*]\s*/gm, '') // Remove list markers
@@ -53,14 +53,20 @@ export function escapeForYaml(value: string | undefined): string {
     .replace(/\*(.+?)\*/g, '$1')     // Remove italic
     .replace(/\n+/g, ' ')            // Replace newlines with spaces
     .trim();
-  
+
+  // If it looks like JSON or already quoted, return as-is to avoid double-escaping
+  if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
+    return cleaned;
+  }
+
   // If it contains special characters or starts with special chars, quote it
-  if (cleaned.includes(':') || cleaned.includes('-') || cleaned.includes('[') || 
+  if (cleaned.includes(':') || cleaned.includes('-') || cleaned.includes('[') ||
       cleaned.includes('#') || cleaned.includes('|') || cleaned.includes('>') ||
       cleaned.match(/^[\d\-[\]{}]/)) {
+    // Single-escape quotes only
     return `"${cleaned.replace(/"/g, '\\"')}"`;
   }
-  
+
   return cleaned;
 }
 
@@ -219,9 +225,9 @@ export function generateFafContent(projectData: {
 
   const fafData = {
     // FAF schema version (not CLI version)
-    faf_version: '2.4.0',
-    // 🤖 AI-FIRST SCORING SYSTEM - Live date instead of versions
-    ai_scoring_system: '2025-08-30',  // MY scoring logic live date (COUNT ONCE architecture)
+    faf_version: '2.5.0',
+    // 🤖 AI-FIRST SCORING SYSTEM - Championship Engine with FAB-FORMATS
+    ai_scoring_system: '2025-09-20',  // faf-engine-mk3 compiler live date
     ai_score: `${projectData.fafScore}%`,  // MY evaluation
     ai_confidence: getConfidenceLevel(projectData.fafScore),  // MY trust level
     ai_value: '30_seconds_replaces_20_minutes_of_questions',
@@ -348,7 +354,7 @@ export function generateFafContent(projectData: {
     
     // 📊 AI Scoring Details (For Transparency)
     ai_scoring_details: {
-      system_date: '2025-08-30',  // When MY scoring logic went live
+      system_date: '2025-09-20',  // faf-engine-mk3 Championship Engine
       slot_based_percentage: projectData.slotBasedPercentage,
       ai_score: projectData.fafScore,
       total_slots: 21,

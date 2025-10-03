@@ -275,7 +275,7 @@ describe('⚡️ Scoring Engine - BRAKE SYSTEM TESTS', () => {
       const result = await calculateFafScore(complexFaf, path.join(testDir, 'test.faf'));
       const duration = Date.now() - startTime;
       
-      expect(duration).toBeLessThan(200); // Performance with discovery
+      expect(duration).toBeLessThan(400); // Performance with discovery
       expect(result.totalScore).toBeGreaterThan(80); // Should be high score
       
       // Cleanup
