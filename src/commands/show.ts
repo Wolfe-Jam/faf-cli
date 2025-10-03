@@ -6,7 +6,7 @@
 import { chalk } from "../fix-once/colors";
 import { promises as fs } from "fs";
 import * as YAML from "yaml";
-import { calculateFafScore } from "../scoring/score-calculator";
+import { FafCompiler } from "../compiler/faf-compiler";
 import { findFafFile } from "../utils/file-utils";
 import { getScoreColor, getScoreEmoji } from "../utils/color-utils";
 
@@ -32,8 +32,9 @@ export async function showFafScoreCard(directory?: string, options: ShowOptions 
     const fafData = YAML.parse(content);
 
     // Calculate score
-    const scoreResult = await calculateFafScore(fafData, fafPath);
-    const percentage = Math.round(scoreResult.totalScore);
+    const compiler = new FafCompiler();
+    const scoreResult = await compiler.compile(fafPath);
+    const percentage = Math.round(scoreResult.score || 0);
 
     // 🍫🍊 CHOCOLATE ORANGE - NO WRAPPERS!
     // Clean markdown output for direct display
@@ -61,13 +62,10 @@ ${percentage >= 99 ? '🏁 **CHAMPIONSHIP STATUS ACHIEVED!**' :
 ${fafData.ai_models ? `- **AI Models**: ${fafData.ai_models.join(', ')}` : ''}
 
 ### Score Breakdown
-${Object.entries(scoreResult.sectionScores).map(([section, score]) => {
-  const sectionPercentage = Math.round(score.percentage);
-  return `- **${section}**: ${sectionPercentage}% (${score.filled}/${score.total})`;
-}).join('\n')}
+Coming soon - compiler section scores
 
 ${percentage < 100 ? `### Next Steps
-${scoreResult.suggestions.slice(0, 3).map((s, i) => `${i + 1}. ${s}`).join('\n')}` : ''}
+Coming soon - compiler suggestions` : ''}
 
 ---
 *🏎️ FAF Engine | Championship Grade Context*`;
@@ -113,24 +111,25 @@ ${scoreResult.suggestions.slice(0, 3).map((s, i) => `${i + 1}. ${s}`).join('\n')
         console.log(`   AI Models: ${chalk.white(fafData.ai_models.join(', '))}`);
       }
 
-      // Score breakdown
-      console.log(chalk.blue("\n📊 Score Breakdown:"));
-      Object.entries(scoreResult.sectionScores).forEach(([section, score]) => {
-        const sectionPercentage = Math.round(score.percentage);
-        const sectionColor = sectionPercentage >= 70 ? chalk.green :
-                           sectionPercentage >= 40 ? chalk.yellow :
-                           chalk.red;
+      // TODO: Add score breakdown back when compiler supports sectionScores
+      // console.log(chalk.blue("\n📊 Score Breakdown:"));
+      // Object.entries(scoreResult.sectionScores).forEach(([section, score]) => {
+      //   const sectionPercentage = Math.round(score.percentage);
+      //   const sectionColor = sectionPercentage >= 70 ? chalk.green :
+      //                      sectionPercentage >= 40 ? chalk.yellow :
+      //                      chalk.red;
 
-        console.log(`   ${sectionColor(section)}: ${sectionPercentage}% (${score.filled}/${score.total})`);
-      });
+      //   console.log(`   ${sectionColor(section)}: ${sectionPercentage}% (${score.filled}/${score.total})`);
+      // });
 
       // Next steps if not perfect
-      if (percentage < 100) {
-        console.log(chalk.blue("\n💡 Next Steps:"));
-        scoreResult.suggestions.slice(0, 3).forEach((suggestion, index) => {
-          console.log(chalk.yellow(`   ${index + 1}. ${suggestion}`));
-        });
-      }
+      // TODO: Add suggestions back when compiler supports them
+      // if (percentage < 100) {
+      //   console.log(chalk.blue("\n💡 Next Steps:"));
+      //   scoreResult.suggestions.slice(0, 3).forEach((suggestion: string, index: number) => {
+      //     console.log(chalk.yellow(`   ${index + 1}. ${suggestion}`));
+      //   });
+      // }
 
       console.log(chalk.gray("\n---"));
       console.log(chalk.gray("🏎️ FAF Engine | Championship Grade Context"));

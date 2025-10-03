@@ -3,7 +3,7 @@
  * Transform low scores into exciting gamified todo lists
  */
 
-import { calculateFafScore } from '../scoring/score-calculator';
+import { FafCompiler } from '../compiler/faf-compiler';
 import { findFafFile, fileExists } from '../utils/file-utils';
 import { createClaudeTodoEngine, TodoEngineUtils, type TodoList, type TodoItem } from '../engines/claude-todo-engine';
 import { 
@@ -71,7 +71,8 @@ export async function todoCommand(options: TodoCommandOptions = {}): Promise<voi
  */
 async function generateImprovementPlan(fafPath: string): Promise<void> {
   // Calculate current score and context
-  const scoreResult = await calculateFafScore(undefined, path.dirname(fafPath));
+  const compiler = new FafCompiler();
+  const scoreResult = await compiler.compile(fafPath);
   const projectDir = path.dirname(fafPath);
   
   // Get existing files for context
@@ -86,7 +87,7 @@ async function generateImprovementPlan(fafPath: string): Promise<void> {
   // Create todo engine and generate plan
   const engine = createClaudeTodoEngine();
   const todoList = engine.generateTodoList({
-    currentScore: scoreResult.totalScore,
+    currentScore: scoreResult.score || 0,
     projectType: fafData.project?.name || 'unknown',
     missingSlots,
     existingFiles,
@@ -195,11 +196,12 @@ async function completeTask(taskIdentifier: string, fafPath: string): Promise<vo
   }
 
   // Recalculate score to get new project score
-  const scoreResult = await calculateFafScore(undefined, path.dirname(fafPath));
-  
+  const compiler = new FafCompiler();
+  const scoreResult = await compiler.compile(fafPath);
+
   // Complete the task
   const engine = createClaudeTodoEngine();
-  const improvement = engine.completeTask(todoList, task.id, scoreResult.totalScore);
+  const improvement = engine.completeTask(todoList, task.id, scoreResult.score || 0);
   
   // Save updated todo list
   await saveTodoList(todoList, fafPath);
