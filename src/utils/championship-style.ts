@@ -175,9 +175,7 @@ ${FAF_COLORS.fafCyan('│')}                                         ${FAF_COLOR
 ${FAF_COLORS.fafCyan('│')}   AI needed a format, it got one— .faf  ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('│')}  ─────────────────────────────────────  ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('│')}    🌐 Foundational AI-context Format    ${FAF_COLORS.fafCyan('│')}
-${FAF_COLORS.fafCyan('└─────────────────────────────────────────┘')}
-
-${FAF_COLORS.fafWhite('👇 Scroll down to see your results 👇')}`;
+${FAF_COLORS.fafCyan('└─────────────────────────────────────────┘')}`;
 }
 
 // 🏁 Default ASCII Art Header (for backwards compatibility)
