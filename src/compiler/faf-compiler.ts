@@ -553,7 +553,7 @@ export class FafCompiler {
         ast.stack?.framework === 'Chrome Extension') {
       // Log if fuzzy matching helped
       if (goalDetection.confidence === 'medium' || whatDetection.confidence === 'medium') {
-        console.log('🎯 Chrome Extension detected via fuzzy matching');
+        console.log('⚡️ Chrome Extension detected via fuzzy matching');
       }
       return 'chrome-extension';
     }

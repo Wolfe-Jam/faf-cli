@@ -153,14 +153,18 @@ ${FAF_COLORS.fafCyan('└──────────────────�
 }
 
 /**
- * Generate static championship header (no contextual subtitles)
+ * Generate static championship header (with optional scoreboard title)
  */
-export function generateFAFHeader(): string {
+export function generateFAFHeader(scoreboardTitle?: string): string {
   const version = require('../../package.json').version;
-  return `
-🏆 Hidden Banner lives here: 🏁 << type, Ctrl+O to get your fix 🏎️⚡️
 
-${FAF_COLORS.fafCyan('┌─────────────────────────────────────────┐')}
+  // Title line above ASCII box (scoreboard or default)
+  const titleLine = scoreboardTitle
+    ? `${scoreboardTitle}\n`
+    : '🏆 Hidden Banner lives here: 🏁 << type, Ctrl+O to get your fix 🏎️⚡️\n\n';
+
+  return `
+${titleLine}${FAF_COLORS.fafCyan('┌─────────────────────────────────────────┐')}
 ${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafWhite('███████')}${FAF_COLORS.fafWhite('╗')} ${FAF_COLORS.fafWhite('█████')}${FAF_COLORS.fafWhite('╗')} ${FAF_COLORS.fafWhite('███████')}${FAF_COLORS.fafWhite('╗')}  🏎️⚡️🏁 v${version} ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafCyan('██')}${FAF_COLORS.fafWhite('╔════╝')}${FAF_COLORS.fafCyan('██')}${FAF_COLORS.fafWhite('╔══')}${FAF_COLORS.fafCyan('██')}${FAF_COLORS.fafWhite('╗')}${FAF_COLORS.fafCyan('██')}${FAF_COLORS.fafWhite('╔════╝')}                ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafCyan('█████')}${FAF_COLORS.fafWhite('╗  ')}${FAF_COLORS.fafCyan('███████')}${FAF_COLORS.fafWhite('║')}${FAF_COLORS.fafCyan('█████')}${FAF_COLORS.fafWhite('╗')}                  ${FAF_COLORS.fafCyan('│')}

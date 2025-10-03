@@ -109,10 +109,10 @@ function withAnalyticsTracking<T extends (...args: any[]) => Promise<any> | any>
       const result = await fn(...args);
       const duration = Date.now() - start;
       await trackCommand(commandName, commandArgs, duration, true);
-      
-      // Show score footer after every command
-      await showScoreFooter('device');
-      
+
+      // DEPRECATED: Old score footer removed - conflicts with new compiler scores
+      // await showScoreFooter('device');
+
       return result;
     } catch (error) {
       const duration = Date.now() - start;
@@ -130,7 +130,7 @@ function showHeaderIfAppropriate(commandName?: string) {
     return; // Skip header in quiet mode
   }
 
-  const showHeaderCommands = ['help', 'init', 'clear', 'enhance', 'analyze', 'chat', 'formats', 'score', 'version'];
+  const showHeaderCommands = ['help', 'init', 'clear', 'enhance', 'analyze', 'chat', 'formats', 'version'];
   if (!commandName || showHeaderCommands.includes(commandName)) {
     console.log(generateFAFHeader());
   }
@@ -1085,7 +1085,8 @@ async function showInteractiveWelcome() {
   console.log('');
   
   // Footer - show BEFORE menu
-  await showScoreFooter();
+  // DEPRECATED: Old score footer removed
+  // await showScoreFooter();
   console.log('');
   
   try {
@@ -1244,7 +1245,8 @@ async function showInteractiveWelcome() {
         
         // Show footer after each command (unless it was help which shows its own footer)
         if (command !== 'help' && command !== '') {
-          await showScoreFooter('faf');
+          // DEPRECATED: Old score footer removed
+          // await showScoreFooter('faf');
         }
         console.log('');
       }

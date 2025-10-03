@@ -601,7 +601,7 @@ export function displayScoreWithBirthWeight(
   const { getScoreMedal, getTierInfo } = require('../utils/championship-core');
 
   // Get medal for current score
-  const { medal, status } = getScoreMedal(current);
+  const { medal, status} = getScoreMedal(current);
   const tierInfo = getTierInfo(current);
   const growth = current - birthWeight;
 
