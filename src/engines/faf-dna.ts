@@ -606,39 +606,39 @@ export function displayScoreWithBirthWeight(
   const growth = current - birthWeight;
 
   // OPTIMIZED FIRST TWO LINES - Match MCP's championship scorecard format
-  // Line 1: Score with medal
-  console.log(colors.success(colors.bold(`${medal} Score: ${current}/100`)));
+  // Line 1: Score with medal (STRONG WHITE BOLD - default)
+  console.log(colors.bold(`${medal} Score: ${current}/100`));
 
-  // Line 2: Progress bar (like MCP)
+  // Line 2: Progress bar (STRONG WHITE - default)
   const barWidth = 24;
   const filled = Math.floor((current / 100) * barWidth);
   const empty = barWidth - filled;
   const progressBar = '█'.repeat(filled) + '░'.repeat(empty);
-  console.log(colors.success(`${progressBar} ${current}%`));
+  console.log(colors.bold(`${progressBar} ${current}%`));
 
-  // Line 3: Status
-  console.log(colors.info(`Status: ${status}`));
+  // Line 3: Status (STRONG WHITE - default)
+  console.log(colors.bold(`Status: ${status}`));
 
-  // Line 4: Next milestone (if exists)
+  // Line 4: Next milestone (STRONG WHITE - default)
   if (tierInfo.next && tierInfo.nextTarget && tierInfo.nextMedal) {
     const pointsToGo = tierInfo.nextTarget - current;
     console.log('');
-    console.log(colors.info(`Next milestone: ${tierInfo.nextTarget}% ${tierInfo.nextMedal} ${tierInfo.next} (${pointsToGo} points to go!)`));
+    console.log(colors.bold(`Next milestone: ${tierInfo.nextTarget}% ${tierInfo.nextMedal} ${tierInfo.next} (${pointsToGo} points to go!)`));
   }
 
   // Detailed breakdown (collapsed in Claude Code, visible in terminal)
   console.log('');
-  console.log(colors.primary('🏎️ FAF Championship Status'));
-  console.log(colors.secondary('━'.repeat(40)));
-  console.log(colors.success(`Score: ${current}% ${medal} ${status}`));
-  console.log(colors.info(`Birth Weight: ${birthWeight}% (born ${birthDate.toISOString().split('T')[0]})`));
+  console.log(colors.bold('🏎️ FAF Championship Status'));
+  console.log('━'.repeat(40));
+  console.log(colors.bold(`Score: ${current}% ${medal} ${status}`));
+  console.log(`Birth Weight: ${birthWeight}% (born ${birthDate.toISOString().split('T')[0]})`);
 
   const daysOld = Math.floor((Date.now() - new Date(birthDate).getTime()) / (1000 * 60 * 60 * 24));
-  console.log(colors.info(`Growth: +${growth}% over ${daysOld} days`));
+  console.log(`Growth: +${growth}% over ${daysOld} days`);
 
   if (tierInfo.next && tierInfo.nextTarget && tierInfo.nextMedal) {
     const pointsToGo = tierInfo.nextTarget - current;
-    console.log(colors.info(`Next Milestone: ${tierInfo.nextTarget}% ${tierInfo.nextMedal} ${tierInfo.next} (${pointsToGo}% to go!)`));
+    console.log(colors.bold(`Next Milestone: ${tierInfo.nextTarget}% ${tierInfo.nextMedal} ${tierInfo.next} (${pointsToGo}% to go!)`));
   }
   console.log('');
 }
