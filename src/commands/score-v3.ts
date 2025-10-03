@@ -7,6 +7,7 @@ import { chalk } from "../fix-once/colors";
 import { FafCompiler } from "../compiler/faf-compiler";
 import { findFafFile } from "../utils/file-utils";
 import { FafDNAManager, displayScoreWithBirthWeight } from "../engines/faf-dna";
+import { generateFAFHeader } from "../utils/championship-style";
 import * as path from "path";
 
 interface ScoreOptions {
@@ -22,11 +23,8 @@ export async function scoreCommandV3(
   file?: string,
   options: ScoreOptions = {}
 ) {
-  // Only show header if not in quiet mode
+  // Quiet mode check
   const isQuiet = process.argv.includes('--quiet');
-  if (!isQuiet) {
-    console.log(chalk.cyan("\n🏎️ FAF Score Compiler v3.0\n"));
-  }
 
   try {
     // Find .faf file
@@ -117,13 +115,25 @@ export async function scoreCommandV3(
       }
     }
 
-    // Main score display
-    console.log(chalk.cyan(`📈 Scoring: ${fafPath}`));
-
     // Try to show with DNA (birth weight)
     const projectPath = path.dirname(fafPath);
     const dnaManager = new FafDNAManager(projectPath);
     const dna = await dnaManager.load();
+
+    // Show ASCII header with scoreboard title (if DNA exists)
+    if (!isQuiet) {
+      if (dna) {
+        const { getScoreMedal } = require('../utils/championship-core');
+        const { medal } = getScoreMedal(result.score);
+        const scoreboardTitle = chalk.bold(`Birth: ${dna.birthCertificate.birthWeight}% | ${medal} ${result.score}/100`);
+        console.log(generateFAFHeader(scoreboardTitle));
+      } else {
+        console.log(generateFAFHeader());
+      }
+    }
+
+    // Main score display
+    console.log(chalk.cyan(`Scoring: ${fafPath}`));
 
     if (dna) {
       displayScoreWithBirthWeight(
