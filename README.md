@@ -1,4 +1,4 @@
-# faf-cli v2.5.0
+# faf-cli v2.5.2
 
 <div align="center">
 
@@ -21,34 +21,51 @@
 
 ---
 
-## 🚀 What's New in v2.5.0
+## 🚀 What's New in v2.5.2
 
-### Context-Mirroring: Bidirectional Sync in Sub-20ms
+### Championship Scoring Display - MCP Visual Polish Arrives in CLI
 
-**The Breakthrough:** Keep `.faf` (structured data) and `CLAUDE.md` (human-readable) in perfect sync automatically.
+**The Upgrade:** Experience the same polished progress bar format from `claude-faf-mcp`, now in your terminal.
 
 ```bash
-# Edit either file, both stay synchronized
-faf bi-sync
+faf score
 
-# Result: 15ms average sync, zero data loss
-🔗 C-MIRROR LIVE
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-└─ 🎉 Synchronized in ~17ms 🏎️
-✅ Integrity: PERFECT
+# Visual output with championship polish:
+🥉 Score: 89/100
+█████████████████████░░░ 89%
+Status: Target 1 - Bronze
+
+Next milestone: 95% 🥈 Target 2 - Silver (6 points to go!)
+
+🏎️  FAF Championship Status
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Birth Weight: 12% (born 2025-10-03)
+Growth: +77% over 0 days
+Next Milestone: 95% 🥈 Target 2 - Silver (6% to go!)
+
+⚖️  Balance: ████████████████░░░░ AI:75% | ░░░░████ HUMAN:25%
 ```
+
+**What's New:**
+- **Progress Bar Format** - MCP's championship-grade visualization ported to CLI
+- **Scoreboard Title** - Birth weight → Current score tracking above ASCII art
+- **Visual Polish** - Clean white text with FAF brand colors (cyan/orange)
+- **Asset Fix** - Orange smiley logo and ASCII banner load properly on npm
+- **Brotherhood Sync** - CLI and MCP now share same visual DNA
+
+### Context-Mirroring Married to Championship Scoring
+
+We **married** them! Context-Mirroring now follows your journey from **Lonely Heart 🤍 0%** → **🏆 100% Podium Champion**.
+
+Keep `.faf` (structured data) and `CLAUDE.md` (human-readable) in perfect sync automatically, while tracking every improvement milestone.
 
 **Key Features:**
 - **15ms average** sync (95% under 50ms)
 - **Bidirectional**: `.faf` → `CLAUDE.md` → `.faf`
+- **Journey tracking**: From 🤍 project birth to the 🏆 podium
 - **Zero-slippage**: Atomic file operations guarantee
 - **Cross-platform**: Mac + Windows tested (20/20 tests)
 - **Universal**: Works with Claude, Gemini, Cursor, all AI tools
-
-**C-Mirror Stack:**
-1. **Context-Mirroring** - The standard (industry-level concept)
-2. **C-Mirror** - The engine (FAF's implementation)
-3. **`faf bi-sync`** - The command (what you type)
 
 ---
 
@@ -94,7 +111,7 @@ faf init
 faf auto
 faf score
 
-# Sync with CLAUDE.md (NEW in v2.5.0!)
+# Sync with CLAUDE.md (NEW in v2.5.2!)
 faf bi-sync
 ```
 
@@ -144,7 +161,7 @@ Universal, shareable context for Claude, ChatGPT, Gemini, Cursor - regardless of
 - `faf status` - Project health check
 - `faf quick "app, react, vercel"` - Quick setup
 
-### Context-Mirroring (NEW in v2.5.0)
+### Context-Mirroring (NEW in v2.5.2)
 - `faf bi-sync` - **Bidirectional sync** (.faf ↔ CLAUDE.md)
   - 15ms average performance
   - Zero data loss guarantee
@@ -201,6 +218,12 @@ faf auto -q
 
 ## 🎉 Version History
 
+### v2.5.2 (October 3rd, 2025) - Championship Scoring & Asset Fix
+- **Championship Scoring Display** - MCP's progress bar format ported to CLI
+- **Asset Fix** - Orange smiley logo and ASCII banner now load properly on npm
+- **Visual Polish** - Clean white text with FAF brand colors
+- **Scoreboard Title** - Birth weight and current score above ASCII art box
+
 ### v2.5.0 (October 3rd, 2025) - Context-Mirroring Release
 - **Context-Mirroring engine** - Bidirectional .faf ↔ CLAUDE.md sync
 - **C-Mirror** - Championship-grade sync in 15ms average
@@ -226,7 +249,7 @@ faf auto -q
 ## 📊 Technical Specs
 
 ```
-Version:       2.5.0
+Version:       2.5.2
 Performance:   Sub-20ms sync (15ms average)
 C-Mirror:      95% of operations under 50ms
 TypeScript:    100% strict mode
