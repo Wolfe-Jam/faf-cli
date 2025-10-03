@@ -1,0 +1,14 @@
+project:
+  name: "API: The REST Service"
+  description: "Building a service with endpoint: /api/v1/users"
+  goal: "Deploy at: https://api.example.com:8080"
+instant_context:
+  what_building: "Service using protocol: HTTP/2"
+  tech_stack: "Node.js: v18, Express: v4"
+  main_language: JavaScript
+faf_score: 85%
+ai_score: 40
+human_score: 45
+metadata:
+  last_claude_sync: 2025-10-03T12:46:46.519Z
+  bi_sync: active

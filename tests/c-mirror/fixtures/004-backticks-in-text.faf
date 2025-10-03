@@ -1,0 +1,30 @@
+project:
+  name: "Code Examples App"
+  description: "Use `console.log()` and `fetch()` in your code"
+  goal: "Teach developers to use `const` and `let` instead of `var`"
+
+instant_context:
+  what_building: "Tutorial with code: `npm install` and `npm run dev`"
+  main_language: JavaScript
+  tech_stack: "Use `node -v` to check version"
+  frameworks: "Try `npx create-react-app` or `npm init vite`"
+
+key_files:
+  - path: "src/examples.js"
+    purpose: "Shows `Array.map()`, `Object.keys()`, and `Promise.all()`"
+  - path: "README.md"
+    purpose: "Run `npm test` and use `console.log('debug')` for debugging"
+  - path: "package.json"
+    purpose: "Contains scripts: `start`, `build`, `test`"
+
+context_quality:
+  overall_assessment: "Use `git status` to check repo state"
+
+faf_score: 92%
+ai_score: 46
+human_score: 46
+
+metadata:
+  commands: "Common: `cd`, `ls`, `pwd`, `mkdir`, `rm -rf`"
+  code_example: "Use `const x = 10` not `var x = 10`"
+  nested_backticks: "In Markdown use `` `code` `` to show backticks"

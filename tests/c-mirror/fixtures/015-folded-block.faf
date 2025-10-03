@@ -1,0 +1,22 @@
+project:
+  name: "Folded Block Test"
+  description: >
+    This is a folded block scalar.
+    Multiple lines will be folded
+    into a single long paragraph.
+
+    Blank lines create paragraph breaks.
+
+    This is the second paragraph.
+  goal: "Test folded block handling"
+
+instant_context:
+  what_building: >
+    A very long description that spans
+    multiple lines but should be treated
+    as a single paragraph when processed.
+  main_language: JavaScript
+
+faf_score: 76%
+ai_score: 38
+human_score: 38

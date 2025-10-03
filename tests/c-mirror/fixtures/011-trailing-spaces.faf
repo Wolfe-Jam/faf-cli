@@ -1,0 +1,12 @@
+project:
+  name: "Trailing Space Test    "
+  description: "Text with trailing spaces    "
+  goal: "Preserve or trim?    "
+
+instant_context:
+  what_building: "Testing whitespace    "
+  main_language: JavaScript
+
+faf_score: 80%
+ai_score: 40
+human_score: 40

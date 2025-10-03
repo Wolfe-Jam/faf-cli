@@ -1,0 +1,39 @@
+project:
+  name: "Null Test"
+  description: "Testing all forms of null/empty values"
+  goal: null
+
+instant_context:
+  what_building: ~
+  main_language: JavaScript
+  tech_stack:
+  frameworks: null
+  optional_field: ~
+  empty_string: ""
+  null_string: "null"
+  tilde_string: "~"
+
+key_files:
+  - path: "src/null.js"
+    purpose: null
+  - path: "src/empty.js"
+    purpose:
+  - path: "src/tilde.js"
+    purpose: ~
+
+context_quality:
+  overall_assessment:
+  note: null
+  comment: ~
+
+faf_score: 75%
+ai_score: 35
+human_score: 40
+
+metadata:
+  null_field: null
+  tilde_field: ~
+  empty_field:
+  string_null: "null"
+  string_tilde: "~"
+  string_empty: ""

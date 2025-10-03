@@ -1,0 +1,27 @@
+project:
+  name: Windows Path Test
+  description: Joh's project on PC with paths like C:\Users\Joh\code
+  goal: Support both C:\Windows\paths and /unix/paths
+instant_context:
+  what_building: "Cross-platform tool: works on C:\\Program Files\\ and /usr/local/"
+  main_language: JavaScript
+  tech_stack: Node.js (handles \n \t \r escape sequences)
+key_files:
+  - path: C:\Users\Joh\projects\api\src\index.js
+    purpose: "Main entry: handles \\n newlines and \\t tabs"
+  - path: C:\Program Files\nodejs\node.exe
+    purpose: "Node executable: C:\\Windows\\System32\\"
+  - path: /Users/wolfejam/projects/api/src/index.js
+    purpose: "Mac path: no backslashes needed"
+context_quality:
+  overall_assessment: Testing \backslash\ preservation
+faf_score: 90%
+ai_score: 45
+human_score: 45
+metadata:
+  windows_path: C:\Users\Joh\AppData\Local\Temp\
+  unix_path: /tmp/test/
+  regex: \d+\w+\s*
+  escape_sequences: Use \n for newline, \t for tab, \\ for backslash
+  last_claude_sync: 2025-10-03T12:46:46.570Z
+  bi_sync: active

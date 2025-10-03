@@ -1,0 +1,25 @@
+project:
+  name: "مشروع عالمي"
+  description: "Global app with 中文, العربية, Ελληνικά, 日本語, and Русский"
+  goal: "Support all languages: English, Español, Français, Deutsch, हिन्दी"
+
+instant_context:
+  what_building: "Multi-language platform: 한국어, עברית, ไทย support"
+  main_language: JavaScript
+  tech_stack: "React + i18n (国际化)"
+
+key_files:
+  - path: "translations/ar.json"
+    purpose: "Arabic: مرحبا بكم"
+  - path: "translations/zh.json"
+    purpose: "Chinese: 欢迎"
+  - path: "translations/el.json"
+    purpose: "Greek: Καλώς ορίσατε"
+  - path: "translations/ja.json"
+    purpose: "Japanese: ようこそ"
+  - path: "translations/ru.json"
+    purpose: "Russian: Добро пожаловать"
+
+faf_score: 94%
+ai_score: 47
+human_score: 47

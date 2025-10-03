@@ -1,6 +1,6 @@
 {
   "name": "faf-cli",
-  "version": "2.4.21",
+  "version": "2.5.0",
   "description": "🩵 Cyan CLI - Transform any project into perfect AI context in 30 seconds. Works with Claude, Codex, Gemini & ALL AI tools. Join 3000+ developers using .faf files. 100% FREE • Open Source • If helpful, a ⭐ is appreciated!",
   "icon": "https://faf.one/orange-smiley.svg",
   "logo": "https://faf.one/orange-smiley.svg",
@@ -58,12 +58,15 @@
     "version:truth": "node scripts/version-check.js",
     "prepublish:check": "npm run version:truth",
     "precommit": "npm run version:check",
-    "postinstall": "echo '\n🧡⚡️ FAF CLI v2.4.11 - FREE for all Developers!\nRun \"faf --help\" to get started\n'"
+    "postinstall": "echo '\n🩵⚡️ FAF CLI v2.5.0 - FREE for all Developers!\nRun \"faf --help\" to get started\n'"
   },
   "keywords": [
     "faf",
     "anti-faff",
     "ai-context",
+    "context-mirroring",
+    "c-mirror",
+    "bi-sync",
     "cli",
     "dna-lifecycle",
     "disaster-recovery",
@@ -75,10 +78,21 @@
     "developer-productivity",
     "claude",
     "chatgpt",
-    "gemini"
+    "gemini",
+    "ai-tools",
+    "cursor"
   ],
   "author": "🏎️⚡️_wolfejam.dev",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Wolfe-Jam/faf.git",
+    "directory": "cli"
+  },
+  "homepage": "https://faf.one",
+  "bugs": {
+    "url": "https://github.com/Wolfe-Jam/faf/issues"
+  },
   "dependencies": {
     "inquirer": "^12.9.4",
     "yaml": "^2.4.1"

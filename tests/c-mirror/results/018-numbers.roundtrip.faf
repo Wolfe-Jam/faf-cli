@@ -1,0 +1,26 @@
+project:
+  name: Number Test
+  description: Testing number parsing
+  goal: Preserve number formats
+decimal: 1.5
+version: 2
+pi: 3.14159
+count: 100
+zero: 0
+negative: -42
+octal: 123
+hex: 255
+hex_lower: 255
+scientific: 12300000000
+scientific2: 0.00001
+string_decimal: "1.5"
+string_version: "2.0"
+string_octal: "0123"
+faf_score: 83%
+ai_score: 41
+human_score: 42
+instant_context:
+  tech_stack: Unknown
+metadata:
+  last_claude_sync: 2025-10-03T12:46:46.762Z
+  bi_sync: active

@@ -1,0 +1,14 @@
+project:
+  name: Blank Lines Test
+  description: Paragraph one.
+  goal: Preserve blank line count
+instant_context:
+  what_building: Testing spacing
+  main_language: JavaScript
+  tech_stack: Unknown
+faf_score: 77%
+ai_score: 38
+human_score: 39
+metadata:
+  last_claude_sync: 2025-10-03T12:46:46.595Z
+  bi_sync: active

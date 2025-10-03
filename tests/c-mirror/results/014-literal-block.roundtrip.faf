@@ -1,0 +1,14 @@
+project:
+  name: Multi-line Test
+  description: This is a literal block scalar.
+  goal: Test multiline YAML
+instant_context:
+  what_building: Testing system
+  main_language: JavaScript
+  tech_stack: Unknown
+faf_score: 75%
+ai_score: 35
+human_score: 40
+metadata:
+  last_claude_sync: 2025-10-03T12:46:46.600Z
+  bi_sync: active

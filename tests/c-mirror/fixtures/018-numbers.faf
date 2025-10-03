@@ -1,0 +1,34 @@
+project:
+  name: "Number Test"
+  description: "Testing number parsing"
+  goal: "Preserve number formats"
+
+# Decimal numbers
+decimal: 1.5
+version: 2.0
+pi: 3.14159
+
+# Integers
+count: 100
+zero: 0
+negative: -42
+
+# Octal (starts with 0)
+octal: 0123
+
+# Hex (starts with 0x)
+hex: 0xFF
+hex_lower: 0xff
+
+# Scientific notation
+scientific: 1.23e+10
+scientific2: 1e-5
+
+# Strings that look like numbers
+string_decimal: "1.5"
+string_version: "2.0"
+string_octal: "0123"
+
+faf_score: 83%
+ai_score: 41
+human_score: 42

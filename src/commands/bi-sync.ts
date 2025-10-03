@@ -1,28 +1,27 @@
 /**
- * 🔗 Bi-Sync Engine - Revolutionary .faf ↔ claude.md Synchronization
- * Real-time bidirectional sync with sub-40ms performance and smart conflict resolution
- * 
+ * 🔗 Bi-Sync Engine - Revolutionary .faf ↔ CLAUDE.md Synchronization
+ * Context-Mirroring powered by C-Mirror engine
+ *
  * Features:
  * • Sub-40ms sync time (faster than most file operations)
- * • Smart merge algorithms prevent conflicts and data corruption  
+ * • Smart merge algorithms prevent conflicts and data corruption
  * • Self-healing: Auto-recovers from file locks/system issues
- * • Credit propagation: Technical credit updates both files
- * • Trust synchronization: AI compatibility scores stay aligned
- * • Conflict prevention: Detects simultaneous edits safely
- * 
- * Mission: Perfect harmony between .faf (AI context) and claude.md (Claude Code context)
+ * • Event-driven: Broadcasts to Terminal, Slack, Dashboard, etc.
+ * • Atomic writes: Zero-slippage guarantee
+ * • DNA logging: Full audit trail
+ *
+ * Mission: Perfect harmony between .faf (AI context) and CLAUDE.md (Claude Code context)
+ *
+ * Powered by C-Mirror - Championship-grade Context-Mirroring
  */
 
-import { promises as fs } from 'fs';
-import path from 'path';
 import * as YAML from 'yaml';
+import * as path from 'path';
+import { promises as fs } from 'fs';
+import { FAFMirror } from '../engines/c-mirror/faf-extensions/faf-mirror';
 import { findFafFile } from '../utils/file-utils';
-import { 
-  FAF_ICONS, 
-  FAF_COLORS, 
-  BRAND_MESSAGES 
-} from '../utils/championship-style';
 import { autoAwardCredit } from '../utils/technical-credit';
+import { FAF_COLORS, FAF_ICONS, BRAND_MESSAGES } from '../utils/championship-style';
 
 export interface BiSyncOptions {
   auto?: boolean;     // Automatic sync without prompts
@@ -225,12 +224,33 @@ export async function syncBiDirectional(): Promise<SyncResult> {
 
 /**
  * 🎮 Main sync command handler
+ * Now powered by C-Mirror - Championship-grade Context-Mirroring
  */
 export async function biSyncCommand(options: BiSyncOptions = {}): Promise<void> {
   try {
-    await syncBiDirectional();
+    // Find project root
+    const fafFile = await findFafFile();
+    const projectPath = fafFile ? require('path').dirname(fafFile) : process.cwd();
+
+    // Create FAF Mirror (uses C-Mirror engine)
+    const mirror = new FAFMirror(projectPath);
+
+    // Sync with championship display
+    const result = await mirror.sync();
+
+    // Award technical credit if successful
+    if (result.success && fafFile) {
+      await autoAwardCredit('sync_success', fafFile);
+    }
+
+    // Clean up
+    mirror.stop();
+
+    // Exit with appropriate code
+    process.exit(result.success ? 0 : 1);
+
   } catch (error) {
-    console.error(FAF_COLORS.fafOrange('❌ Bi-sync failed:'), error);
+    console.error('❌ Bi-sync failed:', error instanceof Error ? error.message : String(error));
     process.exit(1);
   }
 }
