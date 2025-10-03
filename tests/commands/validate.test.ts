@@ -36,7 +36,7 @@ describe('Validate Command', () => {
   it('should attempt to validate a .faf file', async () => {
     await fs.mkdir(testDir, { recursive: true });
     
-    const validFafContent = `faf_version: 2.4.0
+    const validFafContent = `faf_version: 2.5.0
 generated: "${new Date().toISOString()}"
 project:
   name: "test-project"

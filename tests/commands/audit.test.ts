@@ -36,7 +36,7 @@ describe('Audit Command', () => {
   it('should attempt to audit a .faf file', async () => {
     await fs.mkdir(testDir, { recursive: true });
     
-    const fafContent = `faf_version: 2.4.0
+    const fafContent = `faf_version: 2.5.0
 generated: "${new Date().toISOString()}"
 project:
   name: "audit-test"

@@ -36,7 +36,7 @@ describe('Score Command', () => {
   it('should calculate score for a well-formed .faf file', async () => {
     await fs.mkdir(testDir, { recursive: true });
     
-    const goodFafContent = `faf_version: 2.4.0
+    const goodFafContent = `faf_version: 2.5.0
 project:
   name: "high-score-project"
   description: "A well-documented project with high score"
@@ -106,7 +106,7 @@ dependencies:
   it('should show detailed score breakdown when requested', async () => {
     await fs.mkdir(testDir, { recursive: true });
     
-    const fafContent = `faf_version: 2.4.0
+    const fafContent = `faf_version: 2.5.0
 project:
   name: "detail-test"
   description: "Test detailed scoring"
@@ -144,7 +144,7 @@ technical_context:
   it('should fail when score is below minimum threshold', async () => {
     await fs.mkdir(testDir, { recursive: true });
     
-    const lowScoreFafContent = `faf_version: 2.4.0
+    const lowScoreFafContent = `faf_version: 2.5.0
 project:
   name: "minimal-project"
   faf_score: 20
