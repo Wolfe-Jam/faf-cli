@@ -50,7 +50,7 @@ describe('Sync Command', () => {
       JSON.stringify(packageJson, null, 2)
     );
 
-    const fafContent = `faf_version: 2.4.0
+    const fafContent = `faf_version: 2.5.0
 generated: "${new Date().toISOString()}"
 project:
   name: "sync-test"
@@ -93,7 +93,7 @@ scores:
       JSON.stringify(packageJson, null, 2)
     );
 
-    const fafContent = `faf_version: 2.4.0
+    const fafContent = `faf_version: 2.5.0
 project:
   name: "auto-sync-test"
   main_language: "JavaScript"

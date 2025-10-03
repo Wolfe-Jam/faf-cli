@@ -36,7 +36,7 @@ describe('Lint Command', () => {
   it('should attempt to lint a .faf file', async () => {
     await fs.mkdir(testDir, { recursive: true });
     
-    const fafContent = `faf_version: 2.4.0
+    const fafContent = `faf_version: 2.5.0
 generated: "${new Date().toISOString()}"
 project:
   name: "lint-test"
@@ -69,7 +69,7 @@ scores:
   it('should attempt to fix issues when requested', async () => {
     await fs.mkdir(testDir, { recursive: true });
     
-    const fafContent = `faf_version: 2.4.0
+    const fafContent = `faf_version: 2.5.0
 project:
   name: "fix-test"
   main_language: "TypeScript"

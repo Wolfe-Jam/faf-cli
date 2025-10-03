@@ -64,7 +64,7 @@ describe('AI Analyze Command', () => {
   it('should attempt to analyze existing file', async () => {
     await fs.mkdir(testDir, { recursive: true });
     
-    const fafContent = `faf_version: 2.4.0
+    const fafContent = `faf_version: 2.5.0
 project:
   name: "analyze-test"
   main_language: "TypeScript"

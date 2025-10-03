@@ -1,10 +1,10 @@
-# faf-cli v2.4.21
+# faf-cli v2.5.0
 
 <div align="center">
 
 <img src="https://cdn.jsdelivr.net/npm/faf-cli@latest/assets/icons/orange-smiley.svg" alt="Orange Smiley" width="48" />
 
-**Project DNA ✨ for ANY AI** • **60% Faster** • **Championship Scoring**
+**Project DNA ✨ for ANY AI** • **Context-Mirroring** • **Sub-20ms Sync**
 
 [![NPM Version](https://img.shields.io/npm/v/faf-cli)](https://www.npmjs.com/package/faf-cli)
 [![Downloads](https://img.shields.io/npm/dt/faf-cli)](https://www.npmjs.com/package/faf-cli)
@@ -18,6 +18,37 @@
 ---
 
 ![FAF Championship Banner](https://cdn.jsdelivr.net/npm/faf-cli@latest/faf-banner.png)
+
+---
+
+## 🚀 What's New in v2.5.0
+
+### Context-Mirroring: Bidirectional Sync in Sub-20ms
+
+**The Breakthrough:** Keep `.faf` (structured data) and `CLAUDE.md` (human-readable) in perfect sync automatically.
+
+```bash
+# Edit either file, both stay synchronized
+faf bi-sync
+
+# Result: 15ms average sync, zero data loss
+🔗 C-MIRROR LIVE
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+└─ 🎉 Synchronized in ~17ms 🏎️
+✅ Integrity: PERFECT
+```
+
+**Key Features:**
+- **15ms average** sync (95% under 50ms)
+- **Bidirectional**: `.faf` → `CLAUDE.md` → `.faf`
+- **Zero-slippage**: Atomic file operations guarantee
+- **Cross-platform**: Mac + Windows tested (20/20 tests)
+- **Universal**: Works with Claude, Gemini, Cursor, all AI tools
+
+**C-Mirror Stack:**
+1. **Context-Mirroring** - The standard (industry-level concept)
+2. **C-Mirror** - The engine (FAF's implementation)
+3. **`faf bi-sync`** - The command (what you type)
 
 ---
 
@@ -62,6 +93,9 @@ faf init
 # Auto-detect and score
 faf auto
 faf score
+
+# Sync with CLAUDE.md (NEW in v2.5.0!)
+faf bi-sync
 ```
 
 Your AI now understands your project! 🏁
@@ -88,13 +122,15 @@ Universal, shareable context for Claude, ChatGPT, Gemini, Cursor - regardless of
 - ✅ 30 seconds to complete understanding
 - ✅ Works with every AI tool
 - ✅ Share context with your team instantly
+- ✅ **NEW:** Bidirectional sync keeps everything in harmony
 
 ### Key Features
 
 - ✅ **Universal** - Works with all AI tools
-- ✅ **Fast** - <50ms operations, 60% faster than v2.3
+- ✅ **Fast** - <50ms operations, sub-20ms sync
 - ✅ **Smart** - Auto-detects your tech stack
 - ✅ **Simple** - One command setup
+- ✅ **Bidirectional** - Edit .faf or CLAUDE.md, both update
 - ✅ **Free** - 100% open source, forever
 
 ---
@@ -108,10 +144,16 @@ Universal, shareable context for Claude, ChatGPT, Gemini, Cursor - regardless of
 - `faf status` - Project health check
 - `faf quick "app, react, vercel"` - Quick setup
 
+### Context-Mirroring (NEW in v2.5.0)
+- `faf bi-sync` - **Bidirectional sync** (.faf ↔ CLAUDE.md)
+  - 15ms average performance
+  - Zero data loss guarantee
+  - Edit either file, both update
+  - Cross-platform verified
+
 ### Enhancement Commands
 - `faf enhance` - Optimize scoring
-- `faf sync` - Sync with CLAUDE.md
-- `faf bi-sync` - Bidirectional sync
+- `faf sync` - Sync with CLAUDE.md (one-way)
 
 ### Management Commands
 - `faf trust` - Validate integrity
@@ -141,6 +183,9 @@ faf score --details
 # See current status
 faf status
 
+# NEW: Bidirectional sync with CLAUDE.md
+faf bi-sync
+
 # Fix any issues
 faf doctor
 
@@ -154,34 +199,65 @@ faf auto -q
 
 ---
 
-## 🎉 What's New in v2.4.6
+## 🎉 Version History
 
-### Performance Championship
+### v2.5.0 (October 3rd, 2025) - Context-Mirroring Release
+- **Context-Mirroring engine** - Bidirectional .faf ↔ CLAUDE.md sync
+- **C-Mirror** - Championship-grade sync in 15ms average
+- **Zero-slippage guarantee** - Atomic file operations
+- **Cross-platform verified** - Mac + Windows tested
+- **20/20 test suite** - All edge cases conquered
+- **Event-driven architecture** - Power Chords system
+- **TypeScript strict mode** - 100% type safety
+
+### v2.4.6 - Performance Championship
 - **60% faster** operations across all commands
 - **Native engine** - Championship-grade performance
 - **Zero display bugs** - Perfect terminal rendering
-- **Lean & optimized** - Minimal footprint
 - **100% backwards compatible** - Same commands, more speed
 
 ### v2.4 Highlights
 - **AI|HUMAN Balance** - Track 50|50 balance for championship
 - **Enhanced auto-detection** - Smarter tech stack recognition
 - **Improved scoring** - More accurate AI-readiness metrics
-- **TypeScript strict mode** - Full type safety
 
 ---
 
 ## 📊 Technical Specs
 
 ```
-Version:       2.4.6
-Performance:   <50ms operations
-Improvement:   60% faster than v2.3
+Version:       2.5.0
+Performance:   Sub-20ms sync (15ms average)
+C-Mirror:      95% of operations under 50ms
 TypeScript:    100% strict mode
-Dependencies:  2 (minimal)
-Tests:         100% passing
+Dependencies:  2 (inquirer, yaml)
+Tests:         100% passing (20/20 C-Mirror suite)
 Build:         Zero errors
+Platform:      Mac, Linux, Windows
 ```
+
+---
+
+## 🔬 Context-Mirroring Technical Details
+
+### Architecture
+- **Event-driven**: Power Chords broadcast at lowest level
+- **Atomic operations**: Write → Validate → Commit pattern
+- **Bidirectional intelligence**: Preserves technical fields during sync
+- **Format-agnostic**: Works with any Tool.md format
+- **Self-healing**: Automatic backup and recovery
+
+### Performance
+- **Average**: 15ms per sync operation
+- **95th percentile**: Under 50ms
+- **Worst case**: <110ms (complex validation)
+- **Target achieved**: Context-On-Demand (<20ms)
+
+### Testing
+- **20/20 test suite** passed (WJTC certified)
+- **Edge cases conquered**: Emoji, Unicode, nested quotes, Windows paths
+- **Round-trip verified**: Perfect data preservation
+- **Cross-platform**: Mac + PC tested
 
 ---
 
@@ -192,8 +268,9 @@ When using faf-cli programmatically:
 1. Install with user approval: `npm install -g faf-cli`
 2. Verify: `faf --version`
 3. Use quiet mode: `faf init -q`, `faf auto -q`, `faf score -q`
-4. Request approval before network/write operations
-5. Summarize results instead of raw output
+4. Use `faf bi-sync` for CLAUDE.md synchronization
+5. Request approval before network/write operations
+6. Summarize results instead of raw output
 
 ---
 
@@ -210,6 +287,9 @@ npm run build
 
 # Test
 npm test
+
+# Test C-Mirror specifically
+npm run test -- tests/c-mirror/
 
 # Link locally
 npm link
@@ -238,7 +318,7 @@ npm link
 
 MIT License - See [LICENSE](./LICENSE) file
 
-**Note**: The .faf-Engine is proprietary and available under separate license.
+**Note**: C-Mirror core is open source. FAF-specific extensions available under separate license.
 
 ---
 

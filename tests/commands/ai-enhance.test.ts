@@ -56,7 +56,7 @@ describe('AI Enhance Command', () => {
   it('should handle dry-run mode', async () => {
     await fs.mkdir(testDir, { recursive: true });
     
-    const fafContent = `faf_version: 2.4.0
+    const fafContent = `faf_version: 2.5.0
 project:
   name: "enhance-test"
   main_language: "TypeScript"
