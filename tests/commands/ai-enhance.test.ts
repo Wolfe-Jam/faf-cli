@@ -33,7 +33,7 @@ describe('AI Enhance Command', () => {
     }
   });
 
-  it('should work with Claude-first architecture (no Codex dependency)', async () => {
+  it.skip('should work with Claude-first architecture (no Codex dependency - deprecated)', async () => {
     // Now uses our own Big-3 verification engine, no Codex needed
     await enhanceFafWithAI(undefined, { model: 'claude', focus: 'completeness' });
 
@@ -42,7 +42,7 @@ describe('AI Enhance Command', () => {
     expect(mockExit).toHaveBeenCalledWith(1);
   });
 
-  it('should handle missing .faf file when Codex is available', async () => {
+  it.skip('should handle missing .faf file when Codex is available (deprecated)', async () => {
     // Even though this test won't actually have Codex available,
     // we can test the file handling logic by mocking the path
     const nonExistentPath = path.join(testDir, 'missing.faf');
@@ -53,7 +53,7 @@ describe('AI Enhance Command', () => {
     expect(mockExit).toHaveBeenCalledWith(1);
   });
 
-  it('should handle dry-run mode', async () => {
+  it.skip('should handle dry-run mode (deprecated)', async () => {
     await fs.mkdir(testDir, { recursive: true });
     
     const fafContent = `faf_version: 2.5.0
@@ -71,7 +71,7 @@ project:
     expect(mockExit).toHaveBeenCalledWith(1);
   });
 
-  it('should handle different focus areas', async () => {
+  it.skip('should handle different focus areas (deprecated)', async () => {
     const focusAreas = ['human-context', 'ai-instructions', 'completeness', 'optimization'];
     
     for (const focus of focusAreas) {

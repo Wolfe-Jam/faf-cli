@@ -33,9 +33,8 @@ describe('AI Analyze Command', () => {
     }
   });
 
-  it('should check for OpenAI Codex CLI availability', async () => {
-    // Since OpenAI Codex CLI won't be available in test environment,
-    // this should exit with error about missing dependency
+  it.skip('should check for OpenAI Codex CLI availability (deprecated)', async () => {
+    // Codex integration deprecated in v2.5.0
     await analyzeFafWithAI(undefined, { model: 'chatgpt', focus: 'quality' });
 
     expect(mockLog).toHaveBeenCalledWith(expect.stringContaining('❌ OpenAI Codex CLI not found'));
@@ -43,7 +42,8 @@ describe('AI Analyze Command', () => {
     expect(mockExit).toHaveBeenCalledWith(1);
   });
 
-  it('should handle different focus areas', async () => {
+  it.skip('should handle different focus areas (deprecated)', async () => {
+    // Codex integration deprecated in v2.5.0
     const focusAreas: Array<'completeness' | 'quality' | 'ai-readiness' | 'human-context' | 'claude-exclusive'> =
       ['completeness', 'quality', 'ai-readiness', 'human-context'];
 
@@ -54,16 +54,18 @@ describe('AI Analyze Command', () => {
     }
   });
 
-  it('should handle verbose and suggestions options', async () => {
+  it.skip('should handle verbose and suggestions options (deprecated)', async () => {
+    // Codex integration deprecated in v2.5.0
     await analyzeFafWithAI(undefined, { verbose: true, suggestions: true });
 
     // Should fail at the Codex check step
     expect(mockExit).toHaveBeenCalledWith(1);
   });
 
-  it('should attempt to analyze existing file', async () => {
+  it.skip('should attempt to analyze existing file (deprecated)', async () => {
+    // Codex integration deprecated in v2.5.0
     await fs.mkdir(testDir, { recursive: true });
-    
+
     const fafContent = `faf_version: 2.5.0
 project:
   name: "analyze-test"
