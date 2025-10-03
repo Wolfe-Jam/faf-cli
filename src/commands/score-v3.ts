@@ -120,16 +120,13 @@ export async function scoreCommandV3(
     const dnaManager = new FafDNAManager(projectPath);
     const dna = await dnaManager.load();
 
-    // Show ASCII header with scoreboard title (if DNA exists)
+    // Show ASCII header with scoreboard title
     if (!isQuiet) {
-      if (dna) {
-        const { getScoreMedal } = require('../utils/championship-core');
-        const { medal } = getScoreMedal(result.score);
-        const scoreboardTitle = chalk.bold(`Birth: ${dna.birthCertificate.birthWeight}% | ${medal} ${result.score}/100`);
-        console.log(generateFAFHeader(scoreboardTitle));
-      } else {
-        console.log(generateFAFHeader());
-      }
+      const { getScoreMedal } = require('../utils/championship-core');
+      const { medal } = getScoreMedal(result.score);
+      const birthWeight = dna ? dna.birthCertificate.birthWeight : 0;
+      const scoreboardTitle = chalk.bold(`Birth: ${birthWeight}% | ${medal} ${result.score}/100`);
+      console.log(generateFAFHeader(scoreboardTitle));
     }
 
     // Main score display
