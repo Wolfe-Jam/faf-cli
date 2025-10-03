@@ -257,7 +257,8 @@ export class MirrorEngine {
 
       // Parse .faf to get score
       const fafContent = await safeRead(this.config.structuredFile, this.projectPath);
-      const fafData = YAML.parse(fafContent);
+      const parsedData = YAML.parse(fafContent);
+      const fafData = (!parsedData || typeof parsedData !== 'object') ? {} : parsedData;
 
       const score = fafData.ai_score !== undefined && fafData.human_score !== undefined ? {
         ai: fafData.ai_score,
