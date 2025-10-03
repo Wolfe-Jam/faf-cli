@@ -7,6 +7,7 @@ import { chalk } from "../fix-once/colors";
 import { promises as fs } from "fs";
 import * as YAML from "yaml";
 import { findFafFile, findPackageJson } from "../utils/file-utils";
+import { FAF_COLORS } from "../utils/championship-style";
 
 interface SyncOptions {
   auto?: boolean;
@@ -23,7 +24,7 @@ export async function syncFafFile(file?: string, options: SyncOptions = {}) {
       process.exit(1);
     }
 
-    console.log(chalk.blue(`🔄 Syncing: ${fafPath}`));
+    console.log(FAF_COLORS.fafCyan(`🔄 Syncing: ${fafPath}`));
 
     // Read current .faf file
     const content = await fs.readFile(fafPath, "utf-8");
