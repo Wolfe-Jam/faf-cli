@@ -11,7 +11,7 @@ import {
   getFileModTime,
   daysSinceModified,
 } from "../utils/file-utils";
-import { calculateFafScore } from "../scoring/score-calculator";
+import { FafCompiler } from "../compiler/faf-compiler";
 
 interface AuditOptions {
   warnDays?: string;
@@ -80,8 +80,9 @@ export async function auditFafFile(file?: string, options: AuditOptions = {}) {
     }
 
     // 3. Completeness Audit
-    const scoreResult = await calculateFafScore(fafData, fafPath);
-    const completenessScore = scoreResult.totalScore;
+    const compiler = new FafCompiler();
+    const scoreResult = await compiler.compile(fafPath);
+    const completenessScore = scoreResult.score || 0;
 
     if (completenessScore < 50) {
       issues.push(`Low completeness score: ${Math.round(completenessScore)}%`);
@@ -103,12 +104,15 @@ export async function auditFafFile(file?: string, options: AuditOptions = {}) {
     });
 
     // 5. Quality Indicators Audit
-    if (!scoreResult.qualityIndicators.hasAiInstructions) {
+    const hasAiInstructions = fafData.ai_instructions && Object.keys(fafData.ai_instructions).length > 0;
+    if (!hasAiInstructions) {
       warnings.push("Missing AI instructions for context handoff");
       auditScore -= 5;
     }
 
-    if (!scoreResult.qualityIndicators.hasHumanContext) {
+    const hasHumanContext = fafData.human_context &&
+      (fafData.human_context.who || fafData.human_context.what || fafData.human_context.why);
+    if (!hasHumanContext) {
       warnings.push("Missing human context (6 Ws) for deeper understanding");
       auditScore -= 10;
     }

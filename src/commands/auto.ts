@@ -13,7 +13,7 @@ import { enhanceFafWithAI } from "./ai-enhance";
 import { biSyncCommand } from "./bi-sync";
 import { showFafScoreCard } from "./show";
 import yamlUtils from "../fix-once/yaml";
-import { calculateFafScore } from "../scoring/score-calculator";
+import { FafCompiler } from "../compiler/faf-compiler";
 
 interface AutoOptions {
   force?: boolean;
@@ -48,8 +48,9 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
         if (parsed.faf_dna?.birth_weight !== undefined) {
           birthScore = Math.round(parsed.faf_dna.birth_weight);
         }
-        const scoreResult = await calculateFafScore(fafPath);
-        currentScore = Math.round(scoreResult.totalScore);
+        const compiler = new FafCompiler();
+        const scoreResult = await compiler.compile(fafPath);
+        currentScore = Math.round(scoreResult.score || 0);
         addedScore = currentScore - birthScore;
       } catch (e) {
         // Ignore score errors, will show 0%
