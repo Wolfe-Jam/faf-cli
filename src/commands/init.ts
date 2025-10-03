@@ -11,7 +11,8 @@ import {
   FAF_ICONS,
   FAF_COLORS,
   BRAND_MESSAGES,
-  formatPerformance
+  formatPerformance,
+  generateFAFHeader
 } from "../utils/championship-style";
 import { autoAwardCredit } from "../utils/technical-credit";
 import {
@@ -167,6 +168,15 @@ export async function initFafFile(
     // Record first growth if different from birth weight
     if (currentScore !== birthWeight) {
       await dnaManager.recordGrowth(currentScore, ['Initial .faf generation from project']);
+    }
+
+    // Show ASCII header with scoreboard
+    if (!options.quiet) {
+      const { getScoreMedal } = require('../utils/championship-core');
+      const { medal } = getScoreMedal(currentScore);
+      const scoreboardTitle = chalk.bold(`Birth: ${birthWeight}% | ${medal} ${currentScore}/100`);
+      console.log();
+      console.log(generateFAFHeader(scoreboardTitle));
     }
 
     // Display with birth weight

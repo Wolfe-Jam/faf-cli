@@ -130,7 +130,7 @@ function showHeaderIfAppropriate(commandName?: string) {
     return; // Skip header in quiet mode
   }
 
-  const showHeaderCommands = ['help', 'init', 'clear', 'enhance', 'analyze', 'chat', 'formats', 'version'];
+  const showHeaderCommands = ['help', 'clear', 'enhance', 'analyze', 'chat', 'formats', 'version'];
   if (!commandName || showHeaderCommands.includes(commandName)) {
     console.log(generateFAFHeader());
   }
