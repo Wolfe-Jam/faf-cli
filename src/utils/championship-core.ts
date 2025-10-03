@@ -51,6 +51,7 @@ export const CHAMPIONSHIP_MEDALS: readonly ChampionshipMedal[] = Object.freeze([
  * IDENTICAL logic in CLI and MCP
  */
 export function getScoreMedal(score: number): { medal: string; status: string } {
+  if (score === 0) return { medal: '🤍', status: 'Good luck!' };
   if (score >= 100) return { medal: '🏆', status: 'Trophy - Championship' };
   if (score >= 99) return { medal: '🥇', status: 'Gold' };
   if (score >= 95) return { medal: '🥈', status: 'Target 2 - Silver' };
