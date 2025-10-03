@@ -1,0 +1,23 @@
+project:
+  name: Quote's "Nightmare" App
+  description: She said "use 'single' quotes" and he said 'use "double" quotes'
+  goal: "Handle: \"quotes\", 'apostrophes', and mixed 'em\"bedded ones"
+instant_context:
+  what_building: "Parser that handles: \"nested\", 'mixed', and `code` quotes"
+  main_language: JavaScript
+  tech_stack: "Node's \"best\" framework: Express's 'router'"
+  frameworks: React's "hooks" and Vue's 'composition API'
+key_files:
+  - path: src/parser.js
+    purpose: Parse text with "quotes" and 'apostrophes'
+  - path: test/quotes.test.js
+    purpose: "Test: \"Does it work?\" Answer: 'Yes!'"
+context_quality:
+  overall_assessment: It's "good" but could be 'better'
+faf_score: 88%
+ai_score: 44
+human_score: 44
+metadata:
+  note: This's a "test" of 'quote' handling
+  last_claude_sync: 2025-10-03T12:46:46.565Z
+  bi_sync: active

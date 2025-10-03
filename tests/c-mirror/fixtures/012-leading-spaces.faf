@@ -1,0 +1,12 @@
+project:
+  name: "    Leading Space Test"
+  description: "    Text with leading spaces"
+  goal: "    Preserve indentation?"
+
+instant_context:
+  what_building: "    Testing whitespace"
+  main_language: JavaScript
+
+faf_score: 79%
+ai_score: 39
+human_score: 40

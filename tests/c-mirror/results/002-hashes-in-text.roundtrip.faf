@@ -1,0 +1,14 @@
+project:
+  name: Social App
+  description: "Use #hashtags and #mentions in posts"
+  goal: "Support #trending and #popular features"
+instant_context:
+  what_building: "#1 social platform with #viral content"
+  main_language: TypeScript
+  tech_stack: Unknown
+faf_score: 90%
+ai_score: 45
+human_score: 45
+metadata:
+  last_claude_sync: 2025-10-03T12:46:46.529Z
+  bi_sync: active

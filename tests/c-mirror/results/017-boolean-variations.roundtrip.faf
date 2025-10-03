@@ -1,0 +1,44 @@
+project:
+  name: Boolean Test
+  description: All the ways YAML represents true/false
+  goal: Preserve boolean values through conversion
+instant_context:
+  what_building: Boolean parser
+  main_language: JavaScript
+  tech_stack: Unknown
+bool_true_yes: yes
+bool_true_Yes: Yes
+bool_true_YES: YES
+bool_true_true: true
+bool_true_True: true
+bool_true_TRUE: true
+bool_true_on: on
+bool_true_On: On
+bool_true_ON: ON
+bool_false_no: no
+bool_false_No: No
+bool_false_NO: NO
+bool_false_false: false
+bool_false_False: false
+bool_false_FALSE: false
+bool_false_off: off
+bool_false_Off: Off
+bool_false_OFF: OFF
+string_yes: yes
+string_no: no
+string_true: "true"
+string_false: "false"
+string_on: on
+string_off: off
+active: yes
+enabled: true
+running: on
+disabled: false
+stopped: no
+inactive: off
+faf_score: 85%
+ai_score: 42
+human_score: 43
+metadata:
+  last_claude_sync: 2025-10-03T12:46:46.751Z
+  bi_sync: active

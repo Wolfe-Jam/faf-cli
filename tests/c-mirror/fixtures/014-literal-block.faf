@@ -1,0 +1,20 @@
+project:
+  name: "Multi-line Test"
+  description: |
+    This is a literal block scalar.
+    It preserves line breaks.
+
+    Even blank lines!
+
+    And maintains:
+      - indentation
+      - structure
+  goal: "Test multiline YAML"
+
+instant_context:
+  what_building: "Testing system"
+  main_language: JavaScript
+
+faf_score: 75%
+ai_score: 35
+human_score: 40

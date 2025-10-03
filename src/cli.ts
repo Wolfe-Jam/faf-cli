@@ -138,7 +138,7 @@ function showHeaderIfAppropriate(commandName?: string) {
 
 program
   .name('faf')
-  .description('.faf = Project DNA for ANY AI✨ | Foundational AI-context Format | SPEEDY AI you can TRUST! 🧡⚡️')
+  .description('.faf = Project DNA ✨ for ANY AI | Foundational AI-context Format | SPEEDY AI you can TRUST! 🧡⚡️')
   .version(version)
   .option('--no-color', 'Disable colored output for accessibility')
   .option('--color-scheme <scheme>', 'Color scheme for colorblind accessibility: normal|deuteranopia|protanopia|tritanopia', 'normal')

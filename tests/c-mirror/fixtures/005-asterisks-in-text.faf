@@ -1,0 +1,19 @@
+project:
+  name: "Markdown * Test"
+  description: "Important * notice with *emphasis* and **bold** text"
+  goal: "Handle * asterisks * everywhere *"
+
+instant_context:
+  what_building: "App with *special* features and **critical** components"
+  main_language: JavaScript
+  tech_stack: "*Node.js*, *Express*, and *MongoDB*"
+
+key_files:
+  - path: "src/*.js"
+    purpose: "All JS files (* wildcard)"
+  - path: "test/**/*.test.js"
+    purpose: "Glob pattern: ** for recursive, * for files"
+
+faf_score: 87%
+ai_score: 43
+human_score: 44

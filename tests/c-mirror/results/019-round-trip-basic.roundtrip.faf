@@ -1,0 +1,31 @@
+project:
+  name: Round Trip Test
+  description: This must survive conversion and back
+  goal: Perfect preservation
+instant_context:
+  what_building: Testing round-trip conversion
+  main_language: TypeScript
+  tech_stack: Node.js, Jest
+  frameworks: Express, React
+key_files:
+  - path: src/index.ts
+    purpose: Main entry point
+  - path: test/conversion.test.ts
+    purpose: Conversion tests
+context_quality:
+  overall_assessment: Excellent
+faf_score: 95%
+ai_score: 47
+human_score: 48
+technical_credit:
+  total_points: 100
+  actions:
+    - action: init
+      points: 10
+    - action: enhance
+      points: 20
+metadata:
+  last_enhanced: 2025-10-03T10:00:00.000Z
+  version: 1.0.0
+  last_claude_sync: 2025-10-03T12:46:46.768Z
+  bi_sync: active

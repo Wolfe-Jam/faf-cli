@@ -1,0 +1,17 @@
+project:
+  name: Data Pipeline
+  description: "Process: Extract | Transform | Load"
+  goal: "Build pipeline: Source | Filter | Destination"
+instant_context:
+  what_building: "ETL system with stages: Input | Process | Output"
+  main_language: Python
+  tech_stack: Unknown
+key_files:
+  - path: pipeline.py
+    purpose: "Handles: Read | Parse | Write operations"
+faf_score: 88%
+ai_score: 44
+human_score: 44
+metadata:
+  last_claude_sync: 2025-10-03T12:46:46.535Z
+  bi_sync: active

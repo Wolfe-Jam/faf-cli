@@ -1,0 +1,67 @@
+project:
+  name: Complex Nested Test
+  description: Deep nesting with arrays and objects
+  goal: Survive 5+ levels deep
+  metadata:
+    created: 2025-10-03
+    author:
+      name: Wolfejam
+      email: wolf@example.com
+      projects:
+        - name: FAF CLI
+          status: active
+          tech:
+            - TypeScript
+            - Node.js
+        - name: C-Mirror
+          status: active
+          features:
+            - name: Bi-sync
+              priority: 1
+              components:
+                - engine
+                - display
+                - events
+instant_context:
+  what_building: Nested structures test
+  main_language: TypeScript
+  tech_stack: Node.js, YAML, Markdown
+  architecture:
+    layers:
+      - name: Core
+        modules:
+          - mirror-engine
+          - transformations
+      - name: Broadcast
+        modules:
+          - terminal-display
+          - events
+key_files:
+  - path: src/core/mirror-engine.ts
+    purpose: Main orchestrator
+  - path: src/core/faf-to-claude.ts
+    purpose: YAML to Markdown
+faf_score: 96%
+ai_score: 48
+human_score: 48
+technical_credit:
+  total_points: 150
+  categories:
+    - name: Development
+      points: 100
+      actions:
+        - action: init
+          points: 10
+          date: 2025-10-01
+        - action: enhance
+          points: 20
+          date: 2025-10-02
+    - name: Testing
+      points: 50
+      actions:
+        - action: test_suite
+          points: 30
+          date: 2025-10-03
+metadata:
+  last_claude_sync: 2025-10-03T12:46:46.780Z
+  bi_sync: active

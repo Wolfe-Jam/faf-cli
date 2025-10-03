@@ -1,0 +1,19 @@
+project:
+  name: 🚀 Rocket App 🏎️
+  description: Build with 💎 quality and ⚡️ speed
+  goal: Make users say 🎉 and ❤️
+instant_context:
+  what_building: App with 🔥 features and 💯 uptime
+  main_language: JavaScript
+  tech_stack: React ⚛️, Node 🟢, MongoDB 🍃
+key_files:
+  - path: src/components/Button.tsx
+    purpose: Render 👆 clickable buttons with 🎨 styling
+  - path: README.md
+    purpose: Explain everything 📖 to developers 👨‍💻
+faf_score: 100%
+ai_score: 50
+human_score: 50
+metadata:
+  last_claude_sync: 2025-10-03T12:46:46.576Z
+  bi_sync: active

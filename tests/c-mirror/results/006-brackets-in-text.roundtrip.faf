@@ -1,0 +1,19 @@
+project:
+  name: "[BREAKING] Major Update"
+  description: Release [v2.0.0] with [NEW] features and [FIXED] bugs
+  goal: Support [semantic] versioning and [conventional] commits
+instant_context:
+  what_building: Tool with [alpha], [beta], and [stable] releases
+  main_language: TypeScript
+  tech_stack: "[Node.js] + [React] + [PostgreSQL]"
+key_files:
+  - path: CHANGELOG.md
+    purpose: "[ADDED], [CHANGED], [DEPRECATED], [REMOVED], [FIXED], [SECURITY]"
+  - path: package.json
+    purpose: "Version: [2.0.0-beta.1]"
+faf_score: 91%
+ai_score: 45
+human_score: 46
+metadata:
+  last_claude_sync: 2025-10-03T12:46:46.558Z
+  bi_sync: active

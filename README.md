@@ -72,7 +72,7 @@ Your AI now understands your project! 🏁
 
 Command-line tool that creates `.faf` files for instant AI project understanding.
 
-**.faf = Project DNA for ANY AI ✨**
+**.faf = Project DNA ✨ for ANY AI**
 Universal, shareable context for Claude, ChatGPT, Gemini, Cursor - regardless of stack, size, or setup.
 
 ### Why Developers Love It

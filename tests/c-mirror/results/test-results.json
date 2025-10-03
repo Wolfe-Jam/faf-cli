@@ -1,0 +1,169 @@
+{
+  "totalTests": 20,
+  "passed": 20,
+  "failed": 0,
+  "errors": 0,
+  "duration": 294,
+  "results": [
+    {
+      "testId": "001-colons-in-text",
+      "name": "Colons in text values",
+      "category": "Special Characters",
+      "passed": true,
+      "duration": 34,
+      "roundTripPassed": true
+    },
+    {
+      "testId": "002-hashes-in-text",
+      "name": "Hash symbols in text",
+      "category": "Special Characters",
+      "passed": true,
+      "duration": 5,
+      "roundTripPassed": true
+    },
+    {
+      "testId": "003-pipes-in-text",
+      "name": "Pipe symbols in text",
+      "category": "Special Characters",
+      "passed": true,
+      "duration": 6,
+      "roundTripPassed": true
+    },
+    {
+      "testId": "004-backticks-in-text",
+      "name": "Backticks in text",
+      "category": "Special Characters",
+      "passed": true,
+      "duration": 9,
+      "roundTripPassed": true
+    },
+    {
+      "testId": "005-asterisks-in-text",
+      "name": "Asterisks in text",
+      "category": "Special Characters",
+      "passed": true,
+      "duration": 9,
+      "roundTripPassed": true
+    },
+    {
+      "testId": "006-brackets-in-text",
+      "name": "Brackets in text",
+      "category": "Special Characters",
+      "passed": true,
+      "duration": 6,
+      "roundTripPassed": true
+    },
+    {
+      "testId": "007-quotes-in-text",
+      "name": "Quotes in text",
+      "category": "Special Characters",
+      "passed": true,
+      "duration": 6,
+      "roundTripPassed": true
+    },
+    {
+      "testId": "008-backslashes",
+      "name": "Backslashes in paths",
+      "category": "Special Characters",
+      "passed": true,
+      "duration": 5,
+      "roundTripPassed": true
+    },
+    {
+      "testId": "009-emoji-hell",
+      "name": "Emoji chaos",
+      "category": "Special Characters",
+      "passed": true,
+      "duration": 6,
+      "roundTripPassed": true
+    },
+    {
+      "testId": "010-unicode",
+      "name": "Unicode characters",
+      "category": "Special Characters",
+      "passed": true,
+      "duration": 6,
+      "roundTripPassed": true
+    },
+    {
+      "testId": "011-trailing-spaces",
+      "name": "Trailing spaces",
+      "category": "Whitespace",
+      "passed": true,
+      "duration": 4,
+      "roundTripPassed": true
+    },
+    {
+      "testId": "012-leading-spaces",
+      "name": "Leading spaces",
+      "category": "Whitespace",
+      "passed": true,
+      "duration": 4,
+      "roundTripPassed": true
+    },
+    {
+      "testId": "013-multiple-blank-lines",
+      "name": "Multiple blank lines",
+      "category": "Whitespace",
+      "passed": true,
+      "duration": 5,
+      "roundTripPassed": true
+    },
+    {
+      "testId": "014-literal-block",
+      "name": "Literal block scalar",
+      "category": "Multiline",
+      "passed": true,
+      "duration": 4,
+      "roundTripPassed": true
+    },
+    {
+      "testId": "015-folded-block",
+      "name": "Folded block scalar",
+      "category": "Multiline",
+      "passed": true,
+      "duration": 9,
+      "roundTripPassed": true
+    },
+    {
+      "testId": "016-null-values",
+      "name": "Null values",
+      "category": "YAML Edge Cases",
+      "passed": true,
+      "duration": 47,
+      "roundTripPassed": true
+    },
+    {
+      "testId": "017-boolean-variations",
+      "name": "Boolean variations",
+      "category": "YAML Edge Cases",
+      "passed": true,
+      "duration": 102,
+      "roundTripPassed": true
+    },
+    {
+      "testId": "018-numbers",
+      "name": "Number types",
+      "category": "YAML Edge Cases",
+      "passed": true,
+      "duration": 5,
+      "roundTripPassed": true
+    },
+    {
+      "testId": "019-round-trip-basic",
+      "name": "Basic round-trip",
+      "category": "Round-Trip",
+      "passed": true,
+      "duration": 8,
+      "roundTripPassed": true
+    },
+    {
+      "testId": "020-round-trip-complex",
+      "name": "Complex nested round-trip",
+      "category": "Round-Trip",
+      "passed": true,
+      "duration": 14,
+      "roundTripPassed": true
+    }
+  ]
+}
