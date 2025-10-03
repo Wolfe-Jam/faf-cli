@@ -597,24 +597,29 @@ export function displayScoreWithBirthWeight(
   birthDate: Date,
   options: { showGrowth?: boolean; showJourney?: boolean } = {}
 ): void {
-  // Main score - large and bold
-  console.log(colors.success(`📈 Current Score: ${current}% ${getScoreEmoji(current)}`));
-  
-  // Birth weight - smaller, gray but ALWAYS THERE
-  console.log(colors.secondary(`   Original Score: ${birthWeight}% (born ${birthDate.toISOString().split('T')[0]})`));
-  
-  // Growth if requested
-  if (options.showGrowth) {
-    const growth = current - birthWeight;
-    const emoji = growth > 50 ? '🚀' : growth > 30 ? '📈' : '📊';
-    console.log(colors.info(`   Growth: +${growth}% ${emoji}`));
+  // Import championship medal system
+  const { getScoreMedal } = require('../utils/championship-core');
+
+  // Get medal for current score
+  const { medal, status } = getScoreMedal(current);
+  const growth = current - birthWeight;
+
+  // CHAMPIONSHIP MEDAL BANNER - always visible by default!
+  console.log('');
+  console.log(colors.success(colors.bold(`${medal} ${status.toUpperCase()} | Birth: ${birthWeight}% | ADDED: +${growth}% | .FAF: ${current}%`)));
+  console.log(colors.secondary('━'.repeat(80)));
+  console.log('');
+
+  // Journey visualization
+  if (options.showJourney) {
+    console.log(colors.secondary(`   📍 Journey: ${birthWeight}% → ${current}% (born ${birthDate.toISOString().split('T')[0]})`));
   }
 
-  // Journey if requested
-  if (options.showJourney) {
-    // This would connect to the DNA manager to show full journey
-    // For now, just a placeholder
-    console.log(colors.secondary(`   Journey: ${birthWeight}% → ${current}%`));
+  // Growth details if requested
+  if (options.showGrowth) {
+    const emoji = growth > 50 ? '🚀' : growth > 30 ? '📈' : '📊';
+    const daysOld = Math.floor((Date.now() - new Date(birthDate).getTime()) / (1000 * 60 * 60 * 24));
+    console.log(colors.info(`   ${emoji} Growth: +${growth}% over ${daysOld} days`));
   }
 }
 
