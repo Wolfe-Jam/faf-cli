@@ -718,7 +718,7 @@ Examples:
 // 📈 faf score - See how complete your context is
 program
   .command('score [file]')
-  .description('Rate your .faf completeness (0-100%). Aim for 70%+ for good AI context.')
+  .description('Rate your .faf completeness (0-100%). Aim for 🥉85% BRONZE+ for solid AI context you can build on')
   .option('-d, --details', 'Show detailed scoring breakdown')
   .option('-m, --minimum <score>', 'Minimum required score (fails if below)')
   .option('-c, --compiler', 'Use new compiler-based scoring (v3)')
