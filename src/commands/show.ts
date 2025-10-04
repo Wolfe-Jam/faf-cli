@@ -41,7 +41,7 @@ export async function showFafScoreCard(directory?: string, options: ShowOptions 
 
     if (options.raw) {
       // Raw markdown output (for piping, etc.)
-      const output = `# 🏎️ FAF Championship Score Card
+      const output = `# 🏎️  FAF Stats
 
 ## **Project Score: ${percentage}/100**
 
@@ -76,8 +76,8 @@ Coming soon - compiler suggestions` : ''}
       const scoreColor = getScoreColor(percentage);
       const scoreEmoji = getScoreEmoji(percentage);
 
-      console.log(chalk.bold.blue("\n🏎️ FAF Championship Score Card"));
-      console.log(chalk.bold.blue("================================\n"));
+      console.log(chalk.bold.blue("\n🏎️  FAF Stats"));
+      console.log(chalk.bold.blue("=============\n"));
 
       // Score display
       console.log(scoreColor(chalk.bold(`${scoreEmoji} Project Score: ${percentage}/100`)));

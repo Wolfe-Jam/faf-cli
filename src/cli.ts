@@ -749,10 +749,10 @@ Examples:
 Helps you understand which fields to fill for a higher score.`)
   .action(withAnalyticsTracking('edit', editFafFile));
 
-// 🏎️ faf show - Championship Score Card Display
+// 🏎️  faf show - FAF Stats Display
 program
   .command('show [directory]')
-  .description('🏎️ Display FAF Championship Score Card with clean markdown output')
+  .description('🏎️  Display FAF Stats with clean markdown output')
   .option('-r, --raw', 'Output raw markdown (for piping)')
   .addHelpText('after', `
 Examples:
