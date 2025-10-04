@@ -76,8 +76,6 @@ Next milestone: 95% 🥈 Target 2 - Silver (6 points to go!)
 Initial DNA: 12% (born 2025-10-03)
 Growth: +77% over 0 days
 Next Milestone: 95% 🥈 Target 2 - Silver (6% to go!)
-
-⚖️  Balance: ████████████████░░░░ AI:75% | ░░░░████ HUMAN:25%
 ```
 
 **What's New:**
