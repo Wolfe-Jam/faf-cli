@@ -9,7 +9,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { chalk } from '../fix-once/colors';
 import { findFafFile } from '../utils/file-utils';
-import { calculateFafScore } from '../scoring/score-calculator';
+import { FafCompiler } from '../compiler/faf-compiler';
 import { getTrustCache } from '../utils/trust-cache';
 import YAML from 'yaml';
 import { dropCoach } from '../engines/drop-coach';
@@ -45,8 +45,9 @@ export async function calculateTrustScore(fafPath: string): Promise<TrustScore> 
                    fafData.metadata;
     
     // Calculate context completeness using existing scoring
-    const scoreResult = await calculateFafScore(fafData, fafPath);
-    const contextCompleteness = scoreResult.totalScore;
+    const compiler = new FafCompiler();
+    const scoreResult = await compiler.compile(fafPath);
+    const contextCompleteness = scoreResult.score || 0;
     
     // Calculate freshness (based on timestamp if available)
     const freshnessScore = calculateFreshness(fafData);

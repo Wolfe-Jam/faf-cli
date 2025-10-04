@@ -9,7 +9,7 @@ import { chalk } from '../fix-once/colors';
 import { generateFafFromProject } from '../generators/faf-generator-championship';
 import { FAF_COLORS, FAF_ICONS } from '../utils/championship-style';
 import { findFafFile } from '../utils/file-utils';
-import { calculateFafScore } from '../scoring/score-calculator';
+import { FafCompiler } from '../compiler/faf-compiler';
 import * as YAML from 'yaml';
 import { relentlessExtractor } from '../engines/relentless-context-extractor';
 import * as path from 'path';
@@ -43,8 +43,9 @@ export async function chatCommand(): Promise<void> {
       const fs = await import('fs').then(m => m.promises);
       const fafContent = await fs.readFile(existingFafPath, 'utf-8');
       const fafData = YAML.parse(fafContent);
-      const scoreResult = await calculateFafScore(existingFafPath, fafData);
-      const percentage = Math.round(scoreResult.totalScore);
+      const compiler = new FafCompiler();
+      const scoreResult = await compiler.compile(existingFafPath);
+      const percentage = Math.round(scoreResult.score || 0);
       statusLine = `Current score: ${percentage}% AI-Ready`;
     } else {
       statusLine = 'No .faf file - Let\'s create one! 🚀';
