@@ -6,8 +6,10 @@
 import { chalk } from "../fix-once/colors";
 import { promises as fs } from "fs";
 import * as YAML from "yaml";
+import path from "path";
 import { findFafFile, findPackageJson } from "../utils/file-utils";
 import { FAF_COLORS } from "../utils/championship-style";
+import { FafDNAManager } from "../engines/faf-dna";
 
 interface SyncOptions {
   auto?: boolean;
@@ -28,7 +30,57 @@ export async function syncFafFile(file?: string, options: SyncOptions = {}) {
 
     // Read current .faf file
     const content = await fs.readFile(fafPath, "utf-8");
-    const fafData = YAML.parse(content);
+
+    // Auto-migrate markdown-style .faf files (legacy MCP v2.2.0)
+    let fafData;
+    try {
+      fafData = YAML.parse(content);
+    } catch (parseError) {
+      // Check if it's a markdown-style .faf file
+      if (content.includes('## Context') || content.includes('## Stack') || content.includes('## Performance')) {
+        console.log(FAF_COLORS.fafOrange('🔄 Detected legacy markdown-style .faf file'));
+        console.log(chalk.dim('   Auto-migrating to YAML format...'));
+
+        // Create backup
+        const backupPath = `${fafPath}.markdown-backup-${Date.now()}`;
+        await fs.copyFile(fafPath, backupPath);
+        console.log(chalk.dim(`   📁 Backup saved: ${backupPath}`));
+
+        // Convert markdown to YAML
+        fafData = await convertMarkdownFafToYaml(content, fafPath);
+
+        // Write new YAML format
+        const yamlContent = YAML.stringify(fafData);
+        await fs.writeFile(fafPath, yamlContent, 'utf-8');
+
+        console.log(chalk.green('   ✅ Migration complete - now using YAML format'));
+
+        // Create DNA for migrated project
+        const projectRoot = path.dirname(fafPath);
+        const dnaManager = new FafDNAManager(projectRoot);
+
+        // Check if DNA already exists
+        const existingDNA = await dnaManager.load();
+        if (!existingDNA) {
+          console.log(FAF_COLORS.fafCyan('   🧬 Creating DNA for your project...'));
+
+          // Get initial score from migrated data
+          const initialScore = parseInt(String(fafData.ai_score || '50').replace('%', ''));
+
+          // Initialize DNA with birth certificate (false = legacy migration source)
+          const dna = await dnaManager.birth(initialScore, false);
+          await dnaManager.recordGrowth(initialScore, ['Migrated from legacy markdown format to YAML v2.5.0']);
+
+          console.log(FAF_COLORS.fafGreen(`   ✅ DNA created! Certificate: ${dna.birthCertificate.certificate}`));
+          console.log(FAF_COLORS.fafWhite(`   📊 Birth weight: ${initialScore}%`));
+        }
+
+        console.log('');
+      } else {
+        // Not markdown, re-throw original error
+        throw parseError;
+      }
+    }
 
     // Detect changes
     const changes = await detectProjectChanges(fafData);
@@ -322,4 +374,202 @@ function applyChanges(fafData: any, changes: ProjectChange[]): void {
 function setNestedValue(obj: any, path: string, value: any): void {
   // For flat .faf structure, path is just the direct property name
   obj[path] = value;
+}
+
+/**
+ * Convert legacy markdown-style .faf to proper YAML format
+ */
+async function convertMarkdownFafToYaml(content: string, fafPath: string): Promise<any> {
+  // Extract key info from markdown format
+  const lines = content.split('\n');
+  const projectLine = lines.find(l => l.startsWith('project:'));
+  const versionLine = lines.find(l => l.startsWith('version:'));
+
+  const projectName = projectLine ? projectLine.replace('project:', '').trim() : 'Unknown Project';
+  const version = versionLine ? versionLine.replace('version:', '').trim() : '1.0.0';
+
+  // Extract context section
+  let contextText = '';
+  let inContext = false;
+  for (const line of lines) {
+    if (line.startsWith('## Context')) {
+      inContext = true;
+      continue;
+    }
+    if (line.startsWith('## ')) {
+      inContext = false;
+    }
+    if (inContext && line.trim()) {
+      contextText += line.trim() + ' ';
+    }
+  }
+
+  // Extract stack info
+  const stackLines: string[] = [];
+  let inStack = false;
+  for (const line of lines) {
+    if (line.startsWith('## Stack')) {
+      inStack = true;
+      continue;
+    }
+    if (line.startsWith('## ')) {
+      inStack = false;
+    }
+    if (inStack && line.trim().startsWith('-')) {
+      stackLines.push(line.trim().replace(/^-\s*/, ''));
+    }
+  }
+
+  // Detect framework from stack
+  let framework = 'None';
+  let language = 'TypeScript';
+  const stackStr = stackLines.join(' ').toLowerCase();
+
+  if (stackStr.includes('svelte')) framework = 'SvelteKit';
+  else if (stackStr.includes('react')) framework = 'React';
+  else if (stackStr.includes('vue')) framework = 'Vue';
+  else if (stackStr.includes('angular')) framework = 'Angular';
+
+  if (stackStr.includes('typescript')) language = 'TypeScript';
+  else if (stackStr.includes('javascript')) language = 'JavaScript';
+  else if (stackStr.includes('python')) language = 'Python';
+
+  // Build proper YAML structure
+  return {
+    faf_version: '2.5.0',
+    ai_scoring_system: '2025-09-20',
+    ai_score: '50%',
+    ai_confidence: 'LOW',
+    ai_value: '30_seconds_replaces_20_minutes_of_questions',
+    ai_tldr: {
+      project: `${projectName} - ${contextText.trim() || 'Migrated from legacy format'}`,
+      stack: stackLines.join('/') || language,
+      quality_bar: 'ZERO_ERRORS_F1_STANDARDS',
+      current_focus: 'Production deployment preparation',
+      your_role: 'Build features with perfect context'
+    },
+    instant_context: {
+      what_building: contextText.trim() || 'Project migrated from legacy .faf format',
+      tech_stack: stackLines.join('/') || language,
+      main_language: language,
+      deployment: 'None',
+      key_files: ['package.json', 'tsconfig.json']
+    },
+    context_quality: {
+      slots_filled: '10/21 (48%)',
+      ai_confidence: 'LOW',
+      handoff_ready: false,
+      missing_context: [
+        'CI/CD pipeline',
+        'Database',
+        'Human context (who/what/why/where/when/how)'
+      ]
+    },
+    project: {
+      name: projectName,
+      goal: contextText.trim() || 'Migrated from legacy format',
+      main_language: language,
+      generated: new Date().toISOString(),
+      mission: '🚀 Make Your AI Happy! 🧡 Trust-Driven 🤖',
+      revolution: '30 seconds replaces 20 minutes of questions',
+      brand: 'F1-Inspired Software Engineering - Championship AI Context',
+      version: version,
+      type: framework.toLowerCase()
+    },
+    ai_instructions: {
+      priority_order: [
+        '1. Read THIS .faf file first',
+        '2. Check CLAUDE.md for session context',
+        '3. Review package.json for dependencies'
+      ],
+      working_style: {
+        code_first: true,
+        explanations: 'minimal',
+        quality_bar: 'zero_errors',
+        testing: 'required'
+      },
+      warnings: [
+        'Never modify dial components without approval',
+        'All TypeScript must pass strict mode',
+        'Test coverage required for new features'
+      ]
+    },
+    stack: {
+      frontend: framework !== 'None' ? framework : 'None',
+      css_framework: 'None',
+      ui_library: 'None',
+      state_management: 'None',
+      backend: stackLines.find(s => s.toLowerCase().includes('node')) ? 'Node.js' : 'None',
+      runtime: stackLines.find(s => s.toLowerCase().includes('node')) ? 'Node.js' : 'None',
+      database: 'None',
+      build: 'Vite',
+      package_manager: 'npm',
+      api_type: stackLines.find(s => s.toLowerCase().includes('mcp')) ? 'MCP' : 'REST',
+      hosting: 'None',
+      cicd: 'None',
+      testing: 'None',
+      language: language
+    },
+    preferences: {
+      quality_bar: 'zero_errors',
+      commit_style: 'conventional_emoji',
+      response_style: 'concise_code_first',
+      explanation_level: 'minimal',
+      communication: 'direct',
+      testing: 'required',
+      documentation: 'as_needed'
+    },
+    state: {
+      phase: 'development',
+      version: version,
+      focus: 'production_deployment',
+      status: 'green_flag',
+      next_milestone: 'npm_publication',
+      blockers: null
+    },
+    tags: {
+      auto_generated: [
+        projectName.toLowerCase().replace(/\s+/g, '-'),
+        ...stackLines.map(s => s.toLowerCase())
+      ],
+      smart_defaults: [
+        '.faf',
+        'ai-ready',
+        '2025',
+        'software',
+        'open-source'
+      ],
+      user_defined: null
+    },
+    human_context: {
+      who: null,
+      what: null,
+      why: null,
+      where: null,
+      when: null,
+      how: null,
+      additional_context: null,
+      context_score: 0,
+      total_prd_score: 50,
+      success_rate: '50%'
+    },
+    ai_scoring_details: {
+      system_date: '2025-09-20',
+      slot_based_percentage: 48,
+      ai_score: 50,
+      total_slots: 21,
+      filled_slots: 10,
+      scoring_method: 'Honest percentage - no fake minimums',
+      trust_embedded: 'COUNT ONCE architecture - trust MY embedded scores'
+    },
+    meta: {
+      last_enhanced: new Date().toISOString(),
+      enhanced_by: 'faf-auto-migration'
+    },
+    projectName: projectName.toLowerCase().replace(/\s+/g, '-'),
+    projectGoal: contextText.trim() || 'Migrated from legacy format',
+    framework: framework,
+    buildTool: 'Vite',
+    generated: new Date().toISOString()
+  };
 }

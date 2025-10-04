@@ -29,8 +29,9 @@
 
 ```bash
 faf score
+```
 
-# Visual output with championship polish:
+```
 🥉 Score: 89/100
 █████████████████████░░░ 89%
 Status: Target 1 - Bronze
@@ -86,13 +87,15 @@ Track your project's AI-readiness with F1-inspired tiers:
 **Live output in your terminal:**
 
 ```
-🏎️ FAF Status
-━━━━━━━━━━━━
-Score: 85% 🥉 Bronze
-⚖️  Balance: AI:75% | HUMAN:25%
+🏎️  FAF Stats
+═════════════
 
-Next: 95% 🥈 Silver (10% to go!)
-Add Project Details to reach 50|50 balance! 🏆
+📊 Score: 100% 🏆
+
+🏆 Status: Championship - You're at the podium!
+⚖️  Balance: ███████████░░░░░░░░░ AI:55% | ░░░░█████████ HUMAN:45%
+
+🎯 Achievement: Perfect AI readiness - Championship balance!
 ```
 
 ---

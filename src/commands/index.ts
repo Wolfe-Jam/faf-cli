@@ -241,7 +241,7 @@ const FAF_INDEX: Record<string, IndexEntry> = {
   // === S ===
   'score': {
     type: 'command',
-    description: 'Rate your .faf completeness (0-100%). Aim for 70%+ for good AI context',
+    description: 'Rate your .faf completeness (0-100%). Aim for 🥉85% BRONZE+ for solid AI context you can build on',
     usage: 'faf score [file] [--details] [--minimum 80]',
     category: 'core',
     examples: ['faf score', 'faf score --details', 'faf score --minimum 80']
