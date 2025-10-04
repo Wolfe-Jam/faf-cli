@@ -9,7 +9,7 @@ import { chalk } from "../fix-once/colors";
 import { promises as fs } from "fs";
 import * as YAML from "yaml";
 import { findFafFile } from "../utils/file-utils";
-import { calculateFafScore } from "../scoring/score-calculator";
+import { FafCompiler } from "../compiler/faf-compiler";
 import { getTrustCache } from '../utils/trust-cache';
 
 export interface AnalyzeOptions {
@@ -42,7 +42,8 @@ export async function analyzeFafWithAI(
     // Read and score current .faf file
     const content = await fs.readFile(fafPath, "utf-8");
     const fafData = YAML.parse(content);
-    const scoreResult = await calculateFafScore(fafData, fafPath);
+    const compiler = new FafCompiler();
+    const scoreResult = await compiler.compile(fafPath);
 
     // Get verification data if available
     const trustCache = await getTrustCache(fafPath);
@@ -57,9 +58,10 @@ export async function analyzeFafWithAI(
       console.log(chalk.green(`\n✨ ${getModelDisplay(model)} Analysis Complete`));
       displayAnalysisResults(insights);
       
-      if (options.suggestions && scoreResult.suggestions.length > 0) {
-        displayAutomatedSuggestions(scoreResult.suggestions);
-      }
+      // TODO: Add suggestions when compiler supports them
+      // if (options.suggestions && scoreResult.suggestions?.length > 0) {
+      //   displayAutomatedSuggestions(scoreResult.suggestions);
+      // }
       
       if (options.comparative && model === 'big3') {
         displayComparativeInsights(insights);
@@ -94,20 +96,20 @@ function getModelDisplay(model: string): string {
  */
 function displayCurrentAnalysis(scoreResult: any, trustCache: any, verbose?: boolean): void {
   console.log(chalk.cyan("\n📊 Current Analysis:"));
-  console.log(chalk.cyan("  Score:"), chalk.bold(`${Math.round(scoreResult.totalScore)}%`));
-  console.log(chalk.cyan("  Filled Slots:"), `${scoreResult.filledSlots}/${scoreResult.totalSlots}`);
-  
+  console.log(chalk.cyan("  Score:"), chalk.bold(`${Math.round(scoreResult.score || 0)}%`));
+
   if (trustCache) {
     console.log(chalk.cyan("  AI Trust:"), chalk.bold(`${trustCache.aiCompatibilityScore}% (Verified)`));
   }
-  
-  if (verbose) {
-    console.log(chalk.cyan("\n📋 Section Breakdown:"));
-    Object.entries(scoreResult.sectionScores).forEach(([section, score]: [string, any]) => {
-      const icon = score.percentage > 80 ? "☑️" : score.percentage > 50 ? "🟡" : "❌";
-      console.log(chalk.cyan(`  ${icon} ${section}:`), `${Math.round(score.percentage)}% (${score.filled}/${score.total})`);
-    });
-  }
+
+  // TODO: Add section breakdown when compiler supports sectionScores
+  // if (verbose) {
+  //   console.log(chalk.cyan("\n📋 Section Breakdown:"));
+  //   Object.entries(scoreResult.sectionScores).forEach(([section, score]: [string, any]) => {
+  //     const icon = score.percentage > 80 ? "☑️" : score.percentage > 50 ? "🟡" : "❌";
+  //     console.log(chalk.cyan(`  ${icon} ${section}:`), `${Math.round(score.percentage)}% (${score.filled}/${score.total})`);
+  //   });
+  // }
 }
 
 /**
@@ -142,7 +144,7 @@ async function executeBig3Analysis(
  * Generate mock analysis using Big-3 intelligence
  */
 async function generateMockAnalysis(fafData: any, scoreResult: any, focus: string, models: string[]): Promise<any> {
-  const score = Math.round(scoreResult.totalScore);
+  const score = Math.round(scoreResult.score || 0);
   
   const analysisInsights = {
     claude: {
