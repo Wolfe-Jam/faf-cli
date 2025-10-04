@@ -20,7 +20,7 @@ import {
   fileExists,
 } from "../utils/file-utils";
 import { generateFafFromProject } from "../generators/faf-generator-championship";
-import { calculateFafScore } from "../scoring/score-calculator";
+import { FafCompiler } from "../compiler/faf-compiler";
 import { createDefaultFafIgnore } from "../utils/fafignore-parser";
 import { BalanceVisualizer } from "../utils/balance-visualizer";
 import { FafDNAManager, displayScoreWithBirthWeight } from "../engines/faf-dna";
@@ -162,8 +162,9 @@ export async function initFafFile(
 
     // Now calculate ACTUAL score from full .faf
     const fafData = YAML.parse(fafContent);
-    const scoreResult = await calculateFafScore(fafData, outputPath);
-    const currentScore = fafData.faf_score ? parseInt(fafData.faf_score.replace('%', '')) : scoreResult.totalScore;
+    const compiler = new FafCompiler();
+    const scoreResult = await compiler.compile(outputPath);
+    const currentScore = fafData.faf_score ? parseInt(fafData.faf_score.replace('%', '')) : Math.round(scoreResult.score || 0);
 
     // Record first growth if different from birth weight
     if (currentScore !== birthWeight) {
