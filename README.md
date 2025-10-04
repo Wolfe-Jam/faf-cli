@@ -4,7 +4,7 @@
 
 <img src="https://cdn.jsdelivr.net/npm/faf-cli@latest/assets/icons/orange-smiley.svg" alt="Orange Smiley" width="48" />
 
-**Project DNA ✨ for ANY AI** • **Context-Mirroring** • **Sub-20ms Sync**
+**Project DNA ✨ for ANY AI** • **Context-Mirroring** • **As fast as 8ms Sync**
 
 [![NPM Version](https://img.shields.io/npm/v/faf-cli)](https://www.npmjs.com/package/faf-cli)
 [![Downloads](https://img.shields.io/npm/dt/faf-cli)](https://www.npmjs.com/package/faf-cli)
@@ -23,6 +23,39 @@
 
 ## 🚀 What's New in v2.5.2
 
+### Context-Mirroring Married to Championship Scoring
+
+We **married** them! Context-Mirroring now follows your journey from **Lonely Heart 🤍 0%** → **🏆 100% Podium Champion**.
+
+Keep `.faf` (structured data) and `CLAUDE.md` (human-readable) in perfect sync automatically, while tracking every improvement milestone.
+
+**Live C-MIRROR output:**
+
+```
+🔗 C-MIRROR LIVE
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+├─ Syncing ← claude-to-faf...
+├─ ██░░░░░░░░░░░░░░░░░░░░░░ 10% - Parsing CLAUDE.md content...
+├─ █████████░░░░░░░░░░░░░░░ 40% - Merging human context updates...
+├─ ████████████████░░░░░░░░ 70% - Updating sync metadata...
+├─ █████████████████████░░░ 90% - Generating .faf YAML...
+└─ 🎉 Synchronized in 8ms 🏎️⚡️💥
+   Files: .faf
+
+✅ Integrity: PERFECT
+   Mirror verified - zero slippage
+💎 Technical Credit 💎 +1 +4 points
+└─ Bi-sync harmony maintained
+```
+
+**Key Features:**
+- **As fast as 8ms** (typical 10-15ms, 95% under 50ms)
+- **Bidirectional**: `.faf` ↔ `CLAUDE.md`
+- **Journey tracking**: From 🤍 project birth to the 🏆 podium
+- **Zero-slippage**: Atomic file operations guarantee
+- **Cross-platform**: Mac + Windows tested (20/20 tests)
+- **Universal**: Works with Claude, Gemini, Cursor, all AI tools
+
 ### Championship Scoring Display - MCP Visual Polish Arrives in CLI
 
 **The Upgrade:** Experience the same polished progress bar format from `claude-faf-mcp`, now in your terminal.
@@ -40,7 +73,7 @@ Next milestone: 95% 🥈 Target 2 - Silver (6 points to go!)
 
 🏎️  FAF Championship Status
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Birth Weight: 12% (born 2025-10-03)
+Initial DNA: 12% (born 2025-10-03)
 Growth: +77% over 0 days
 Next Milestone: 95% 🥈 Target 2 - Silver (6% to go!)
 
@@ -49,24 +82,10 @@ Next Milestone: 95% 🥈 Target 2 - Silver (6% to go!)
 
 **What's New:**
 - **Progress Bar Format** - MCP's championship-grade visualization ported to CLI
-- **Scoreboard Title** - Birth weight → Current score tracking above ASCII art
+- **Scoreboard Title** - Initial DNA → Current score tracking above ASCII art
 - **Visual Polish** - Clean white text with FAF brand colors (cyan/orange)
 - **Asset Fix** - Orange smiley logo and ASCII banner load properly on npm
 - **Brotherhood Sync** - CLI and MCP now share same visual DNA
-
-### Context-Mirroring Married to Championship Scoring
-
-We **married** them! Context-Mirroring now follows your journey from **Lonely Heart 🤍 0%** → **🏆 100% Podium Champion**.
-
-Keep `.faf` (structured data) and `CLAUDE.md` (human-readable) in perfect sync automatically, while tracking every improvement milestone.
-
-**Key Features:**
-- **15ms average** sync (95% under 50ms)
-- **Bidirectional**: `.faf` → `CLAUDE.md` → `.faf`
-- **Journey tracking**: From 🤍 project birth to the 🏆 podium
-- **Zero-slippage**: Atomic file operations guarantee
-- **Cross-platform**: Mac + Windows tested (20/20 tests)
-- **Universal**: Works with Claude, Gemini, Cursor, all AI tools
 
 ---
 
@@ -147,7 +166,7 @@ Universal, shareable context for Claude, ChatGPT, Gemini, Cursor - regardless of
 ### Key Features
 
 - ✅ **Universal** - Works with all AI tools
-- ✅ **Fast** - <50ms operations, sub-20ms sync
+- ✅ **Fast** - As fast as 8ms sync (typical 10-15ms)
 - ✅ **Smart** - Auto-detects your tech stack
 - ✅ **Simple** - One command setup
 - ✅ **Bidirectional** - Edit .faf or CLAUDE.md, both update
@@ -166,7 +185,7 @@ Universal, shareable context for Claude, ChatGPT, Gemini, Cursor - regardless of
 
 ### Context-Mirroring (NEW in v2.5.2)
 - `faf bi-sync` - **Bidirectional sync** (.faf ↔ CLAUDE.md)
-  - 15ms average performance
+  - As fast as 8ms (typical 10-15ms)
   - Zero data loss guarantee
   - Edit either file, both update
   - Cross-platform verified
@@ -221,13 +240,13 @@ faf auto -q
 
 ## 🎉 Version History
 
-### v2.5.2 (October 3rd, 2025) - Championship Scoring & Asset Fix
+### v2.5.2 (October 3rd, 2024) - Championship Scoring & Asset Fix
 - **Championship Scoring Display** - MCP's progress bar format ported to CLI
 - **Asset Fix** - Orange smiley logo and ASCII banner now load properly on npm
 - **Visual Polish** - Clean white text with FAF brand colors
-- **Scoreboard Title** - Birth weight and current score above ASCII art box
+- **Scoreboard Title** - Initial DNA and current score above ASCII art box
 
-### v2.5.0 (October 3rd, 2025) - Context-Mirroring Release
+### v2.5.0 (October 3rd, 2024) - Context-Mirroring Release
 - **Context-Mirroring engine** - Bidirectional .faf ↔ CLAUDE.md sync
 - **C-Mirror** - Championship-grade sync in 15ms average
 - **Zero-slippage guarantee** - Atomic file operations
@@ -253,8 +272,8 @@ faf auto -q
 
 ```
 Version:       2.5.2
-Performance:   Sub-20ms sync (15ms average)
-C-Mirror:      95% of operations under 50ms
+Performance:   As fast as 8ms (typical 10-15ms, 95% under 50ms)
+C-Mirror:      Championship-grade bidirectional sync
 TypeScript:    100% strict mode
 Dependencies:  2 (inquirer, yaml)
 Tests:         100% passing (20/20 C-Mirror suite)
@@ -274,10 +293,10 @@ Platform:      Mac, Linux, Windows
 - **Self-healing**: Automatic backup and recovery
 
 ### Performance
-- **Average**: 15ms per sync operation
+- **Best case**: 8ms (championship performance)
+- **Typical**: 10-15ms per sync operation
 - **95th percentile**: Under 50ms
 - **Worst case**: <110ms (complex validation)
-- **Target achieved**: Context-On-Demand (<20ms)
 
 ### Testing
 - **20/20 test suite** passed (WJTC certified)
