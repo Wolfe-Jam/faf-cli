@@ -1,4 +1,4 @@
-# faf-cli v2.5.4 - Birth DNA Edition
+# faf-cli v2.5.4 - When Claude Forgot FAF | Birth DNA Edition
 
 <div align="center">
 
@@ -21,17 +21,42 @@
 
 ---
 
-## 🚀 What's New in v2.5.4 - Birth DNA Edition
+## The Meta-Proof: Even Claude Forgot .FAF
 
-### 🧬 "When Claude Forgot FAF" - The Birth DNA Story
+**The AI that built FAF scored it at 12% without `.faf`.**
 
-Every `.faf` file now has a **Birth Certificate** with **Birth DNA** - your project's initial AI context score from `CLAUDE.md`. Watch your growth journey from humble beginnings to championship performance!
+We created this tool together across thousands of conversations. Yet without project DNA, even Claude couldn't recognize its own work. That's the problem FAF solves.
 
+### Before `.faf` - Birth: 12%
 <div align="center">
-<img src="https://cdn.jsdelivr.net/npm/faf-cli@latest/assets/birth-dna-12-percent.png" alt="Birth DNA: 12%" width="600" />
-
-**Birth: 12%** → **Current: 89%** = **+77% Growth!** 🚀
+<img src="https://cdn.jsdelivr.net/npm/faf-cli@latest/assets/birth-dna-12-percent.png" alt="FAF CLI birth score: 12% context" width="700" />
 </div>
+
+**Context Score: 12%** — Even the AI that built it couldn't recognize it
+
+---
+
+### The Transformation - 344ms Later
+<div align="center">
+<img src="https://cdn.jsdelivr.net/npm/faf-cli@latest/assets/faf-init-demo.gif" alt="Running faf init - 344ms" width="700" />
+</div>
+
+**`faf init`** — One command. Zero configuration. Project DNA created.
+
+---
+
+### After `.faf` - Current: 89%
+<div align="center">
+<img src="https://cdn.jsdelivr.net/npm/faf-cli@latest/assets/growth-to-89-percent.png" alt="FAF CLI after .faf: 89% context score" width="700" />
+</div>
+
+**Context Score: 89%** — Instant comprehension. Persistent memory.
+
+**+77% improvement in 344ms.** That's what project DNA does for ANY AI, ANY project.
+
+---
+
+## 🚀 What's New in v2.5.4 - Birth DNA Edition
 
 **What's New:**
 - ✨ **Birth DNA** terminology (goodbye confusing "birth weight")
@@ -253,6 +278,14 @@ faf auto -q
 ---
 
 ## 🎉 Version History
+
+### v2.5.4 (October 5th, 2025) - When Claude Forgot FAF | Birth DNA Edition
+- **Meta-proof section** - 12% → 89% transformation documented with before/after screenshots
+- **Birth DNA terminology** - Clearer language replacing "birth weight"
+- **Birth Certificates** - Unique IDs for every project (e.g., FAF-2025-CLIX-651L)
+- **Smart time display** - Minutes/hours/days since project birth
+- **Chrome Extension detection fix** - Only shows when contextually relevant
+- **faf log command** - Track complete project evolution
 
 ### v2.5.3 (October 4th, 2025)
 - Removed Mk2 engine fragments from scoring
