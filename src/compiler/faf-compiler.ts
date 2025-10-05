@@ -545,23 +545,19 @@ export class FafCompiler {
     const what = (ast.human_context?.what || '').toLowerCase();
     const mainLanguage = (ast.project?.main_language || '').toLowerCase();
 
-    // Chrome Extension detection with fuzzy matching
+    // CLI tool indicators (check BEFORE Chrome Extension to avoid false positives)
+    if (goal.includes('cli') || what.includes('cli') ||
+        goal.includes('command line') || what.includes('command line')) {
+      return 'cli-tool';
+    }
+
+    // Chrome Extension detection with fuzzy matching (only if not CLI)
     const goalDetection = ChromeExtensionDetector.detect(goal);
     const whatDetection = ChromeExtensionDetector.detect(what);
 
     if (goalDetection.detected || whatDetection.detected ||
         ast.stack?.framework === 'Chrome Extension') {
-      // Log if fuzzy matching helped
-      if (goalDetection.confidence === 'medium' || whatDetection.confidence === 'medium') {
-        console.log('⚡️ Chrome Extension detected via fuzzy matching');
-      }
       return 'chrome-extension';
-    }
-
-    // CLI tool indicators
-    if (goal.includes('cli') || what.includes('cli') ||
-        goal.includes('command line') || what.includes('command line')) {
-      return 'cli-tool';
     }
 
     // Library indicators

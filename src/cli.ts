@@ -42,57 +42,11 @@ import { generateFAFHeader, generateHelpHeader, FAF_COLORS } from './utils/champ
 import { analytics, trackCommand, trackError, withPerformanceTracking } from './telemetry/analytics';
 import { checkForUpdates, forceUpdateCheck } from './utils/update-checker';
 import { findFafFile } from './utils/file-utils';
-import { calculateFafScore } from './scoring/score-calculator';
 import { getTrustCache } from './utils/trust-cache';
 import * as YAML from 'yaml';
 import { showV240Announcement } from './utils/announcements';
 
 const version = require('../package.json').version;
-
-
-/**
- * Show current score as footer
- */
-async function showScoreFooter(context?: string) {
-  console.log('');
-  // Show context status line
-  if (context === 'device') {
-    console.log(chalk.dim('Using Device CLI'));
-  } else if (context === 'faf') {
-    console.log(chalk.dim('Using faf CLI'));
-  } else if (context === 'chat') {
-    console.log(chalk.dim('Using faf chat'));
-  }
-  
-  try {
-    const existingFafPath = await findFafFile();
-    if (existingFafPath) {
-      const fs = await import('fs').then(m => m.promises);
-      const fafContent = await fs.readFile(existingFafPath, 'utf-8');
-      const fafData = YAML.parse(fafContent);
-      const scoreResult = await calculateFafScore(fafData, existingFafPath);
-      const percentage = Math.round(scoreResult.totalScore);
-      
-      // Get AI readiness from trust cache
-      const trustCache = await getTrustCache(existingFafPath);
-      const aiReadiness = trustCache?.aiCompatibilityScore || 0;
-      
-      // Style the scores with championship colors
-      const scoreColor = percentage >= 85 ? FAF_COLORS.fafGreen : percentage >= 70 ? FAF_COLORS.fafCyan : FAF_COLORS.fafOrange;
-      
-      // RULE: Only show AI-Predictive if it's greater than FAF Score
-      if (aiReadiness > percentage) {
-        console.log(`Current Score: ${scoreColor(percentage + '%')} > AI-Predictive: ${FAF_COLORS.fafCyan(aiReadiness + '%')}`);
-      } else {
-        console.log(`Current Score: ${scoreColor(percentage + '%')}`);
-      }
-    } else {
-      console.log(`Current Score: 0% > AI-Predictive: ${FAF_COLORS.fafCyan('0%')}`);
-    }
-  } catch {
-    console.log(`Current Score: 0% > AI-Predictive: ${FAF_COLORS.fafCyan('0%')}`);
-  }
-}
 
 /**
  * Analytics tracking wrapper for commands
@@ -109,9 +63,6 @@ function withAnalyticsTracking<T extends (...args: any[]) => Promise<any> | any>
       const result = await fn(...args);
       const duration = Date.now() - start;
       await trackCommand(commandName, commandArgs, duration, true);
-
-      // DEPRECATED: Old score footer removed - conflicts with new compiler scores
-      // await showScoreFooter('device');
 
       return result;
     } catch (error) {
@@ -1083,12 +1034,7 @@ async function showInteractiveWelcome() {
   // Ready message
   console.log(chalk.white('  Ready to make your AI happy again?'));
   console.log('');
-  
-  // Footer - show BEFORE menu
-  // DEPRECATED: Old score footer removed
-  // await showScoreFooter();
-  console.log('');
-  
+
   try {
     const answer = await inquirer.prompt([
       {
@@ -1242,12 +1188,7 @@ async function showInteractiveWelcome() {
             }
             break;
         }
-        
-        // Show footer after each command (unless it was help which shows its own footer)
-        if (command !== 'help' && command !== '') {
-          // DEPRECATED: Old score footer removed
-          // await showScoreFooter('faf');
-        }
+
         console.log('');
       }
     } else {

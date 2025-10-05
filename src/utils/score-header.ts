@@ -11,7 +11,7 @@ export interface ScoreData {
   birthScore?: number;
   aiPredictive?: number;
   dna?: {
-    birthWeight?: number;
+    birthDNA?: number;
     currentWeight?: number;
   };
 }
@@ -49,8 +49,8 @@ export function generateScoreHeader(data: ScoreData): string {
   let dnaDisplay = '';
   if (dna?.currentWeight) {
     dnaDisplay = chalk.gray(` | Weight: ${dna.currentWeight.toFixed(1)}KB`);
-    if (dna.birthWeight && dna.birthWeight !== dna.currentWeight) {
-      const growth = ((dna.currentWeight - dna.birthWeight) / dna.birthWeight * 100).toFixed(0);
+    if (dna.birthDNA && dna.birthDNA !== dna.currentWeight) {
+      const growth = ((dna.currentWeight - dna.birthDNA) / dna.birthDNA * 100).toFixed(0);
       dnaDisplay += chalk.gray(` (+${growth}%)`);
     }
   }

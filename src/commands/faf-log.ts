@@ -7,7 +7,7 @@
  */
 
 import { Command } from '../fix-once/commander';
-import { FafDNAManager, displayScoreWithBirthWeight } from '../engines/faf-dna';
+import { FafDNAManager, displayScoreWithBirthDNA } from '../engines/faf-dna';
 import { colors } from '../fix-once/colors';
 import * as path from 'path';
 
@@ -47,7 +47,7 @@ program
         console.log();
 
         for (const milestone of dna.growth.milestones) {
-          const growth = milestone.score - dna.birthCertificate.birthWeight;
+          const growth = milestone.score - dna.birthCertificate.birthDNA;
           const growthStr = growth > 0 ? `+${growth}%` : `${growth}%`;
           
           console.log(
@@ -78,10 +78,10 @@ program
         console.log();
 
         const analytics = dna.growth;
-        const birthWeight = dna.birthCertificate.birthWeight;
-        
+        const birthDNA = dna.birthCertificate.birthDNA;
+
         console.log(colors.info('Growth Metrics:'));
-        console.log(colors.secondary(`  • Birth Weight: ${birthWeight}%`));
+        console.log(colors.secondary(`  • Birth DNA: ${birthDNA}%`));
         console.log(colors.secondary(`  • Current Score: ${dna.current.score}%`));
         console.log(colors.highlight(`  • Total Growth: +${analytics.totalGrowth}%`));
         console.log();
@@ -124,7 +124,7 @@ program
       console.log(colors.highlight('BIRTH CERTIFICATE'));
       console.log(colors.secondary(`Certificate: ${dna.birthCertificate.certificate}`));
       console.log(colors.secondary(`Born: ${dna.birthCertificate.born.toISOString()}`));
-      console.log(colors.secondary(`Birth Weight: ${dna.birthCertificate.birthWeight}% (from ${dna.birthCertificate.birthWeightSource})`));
+      console.log(colors.secondary(`Birth DNA: ${dna.birthCertificate.birthDNA}% (from ${dna.birthCertificate.birthDNASource})`));
       console.log(colors.secondary(`Authenticated: ${dna.birthCertificate.authenticated ? 'Yes' : 'No'}`));
       console.log();
       console.log(colors.secondary('─'.repeat(60)));
@@ -145,11 +145,11 @@ program
       
       // Current status
       console.log(colors.highlight('CURRENT STATUS'));
-      const birthWeightInfo = dnaManager.getBirthWeightDisplay();
-      displayScoreWithBirthWeight(
-        birthWeightInfo.current,
-        birthWeightInfo.birthWeight,
-        birthWeightInfo.birthDate,
+      const birthDNAInfo = dnaManager.getBirthDNADisplay();
+      displayScoreWithBirthDNA(
+        birthDNAInfo.current,
+        birthDNAInfo.birthDNA,
+        birthDNAInfo.birthDate,
         { showGrowth: true, showJourney: true }
       );
       

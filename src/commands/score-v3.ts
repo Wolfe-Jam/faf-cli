@@ -6,7 +6,7 @@
 import { chalk } from "../fix-once/colors";
 import { FafCompiler } from "../compiler/faf-compiler";
 import { findFafFile } from "../utils/file-utils";
-import { FafDNAManager, displayScoreWithBirthWeight } from "../engines/faf-dna";
+import { FafDNAManager, displayScoreWithBirthDNA } from "../engines/faf-dna";
 import { generateFAFHeader } from "../utils/championship-style";
 import * as path from "path";
 
@@ -124,8 +124,8 @@ export async function scoreCommandV3(
     if (!isQuiet) {
       const { getScoreMedal } = require('../utils/championship-core');
       const { medal } = getScoreMedal(result.score);
-      const birthWeight = dna ? dna.birthCertificate.birthWeight : 0;
-      const scoreboardTitle = chalk.bold(`Birth: ${birthWeight}% | ${medal} ${result.score}/100`);
+      const birthDNA = dna ? dna.birthCertificate.birthDNA : 0;
+      const scoreboardTitle = chalk.bold(`Birth: ${birthDNA}% | ${medal} ${result.score}/100`);
       console.log(generateFAFHeader(scoreboardTitle));
     }
 
@@ -133,9 +133,9 @@ export async function scoreCommandV3(
     console.log(chalk.cyan(`Scoring: ${fafPath}`));
 
     if (dna) {
-      displayScoreWithBirthWeight(
+      displayScoreWithBirthDNA(
         result.score,
-        dna.birthCertificate.birthWeight,
+        dna.birthCertificate.birthDNA,
         dna.birthCertificate.born,
         { showGrowth: true, showJourney: true }
       );

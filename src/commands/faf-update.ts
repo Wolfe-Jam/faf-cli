@@ -39,7 +39,7 @@ program
       // Show update details
       console.log(colors.info(`Version: ${dna.current.version}`));
       console.log(colors.info(`Score: ${dna.current.score}%`));
-      console.log(colors.info(`Growth from birth: +${dna.current.score - dna.birthCertificate.birthWeight}%`));
+      console.log(colors.info(`Growth from birth: +${dna.current.score - dna.birthCertificate.birthDNA}%`));
       console.log();
 
       // Show journey

@@ -1,10 +1,10 @@
 /**
  * FAF DNA - The Lifecycle of AI Context
- * 
+ *
  * Revolutionary Context Authentication & Versioning System
  * Every .faf has:
  * - Birth Certificate (Authentication)
- * - Birth Weight (Initial score from CLAUDE.md)
+ * - Birth DNA (Initial score from CLAUDE.md)
  * - Growth Record (Version history)
  * - Life Events (Log of all changes)
  * - Immortality (Disaster recovery through bi-sync)
@@ -19,8 +19,8 @@ import { colors } from '../fix-once/colors';
 
 export interface BirthCertificate {
   born: Date;
-  birthWeight: number;  // Initial score from CLAUDE.md only
-  birthWeightSource: 'CLAUDE.md' | 'legacy';
+  birthDNA: number;  // Initial score from CLAUDE.md only
+  birthDNASource: 'CLAUDE.md' | 'legacy';
   projectDNA: string;   // Hash of initial state
   authenticated: boolean;
   certificate: string;  // FAF-YYYY-PROJECT-XXXX
@@ -106,12 +106,12 @@ export class FafDNAManager {
   /**
    * Initialize DNA (Birth)
    */
-  async birth(birthWeight: number, fromClaudeMD: boolean = true): Promise<FafDNA> {
+  async birth(birthDNA: number, fromClaudeMD: boolean = true): Promise<FafDNA> {
     // Generate birth certificate
     const birthCertificate: BirthCertificate = {
       born: new Date(),
-      birthWeight,
-      birthWeightSource: fromClaudeMD ? 'CLAUDE.md' : 'legacy',
+      birthDNA,
+      birthDNASource: fromClaudeMD ? 'CLAUDE.md' : 'legacy',
       projectDNA: await this.generateProjectDNA(),
       authenticated: false,
       certificate: this.generateCertificate()
@@ -121,7 +121,7 @@ export class FafDNAManager {
     const initialVersion: VersionEntry = {
       version: 'v1.0.0',
       timestamp: new Date(),
-      score: birthWeight,
+      score: birthDNA,
       changes: ['Initial context from CLAUDE.md'],
       approved: false,
       growth: 0,
@@ -134,7 +134,7 @@ export class FafDNAManager {
       versions: [initialVersion],
       current: {
         version: 'v1.0.0',
-        score: birthWeight,
+        score: birthDNA,
         approved: false,
         lastSync: new Date()
       },
@@ -153,7 +153,7 @@ export class FafDNAManager {
         milestones: [
           {
             type: 'birth',
-            score: birthWeight,
+            score: birthDNA,
             date: new Date(),
             version: 'v1.0.0',
             label: 'Birth',
@@ -189,7 +189,7 @@ export class FafDNAManager {
     if (!this.dna) throw new Error('DNA not initialized');
 
     // Calculate growth metrics
-    const growth = newScore - this.dna.birthCertificate.birthWeight;
+    const growth = newScore - this.dna.birthCertificate.birthDNA;
     const daysSinceBirth = this.getDaysSince(this.dna.birthCertificate.born);
     const growthRate = daysSinceBirth > 0 ? growth / daysSinceBirth : growth;
 
@@ -250,7 +250,7 @@ export class FafDNAManager {
         score: this.dna.current.score,
         changes: ['User approved'],
         approved: true,
-        growth: this.dna.current.score - this.dna.birthCertificate.birthWeight,
+        growth: this.dna.current.score - this.dna.birthCertificate.birthDNA,
         growthRate: this.calculateGrowthRate()
       };
       
@@ -314,17 +314,17 @@ export class FafDNAManager {
   }
 
   /**
-   * Get birth weight display (always show origin)
+   * Get Birth DNA display (always show origin)
    */
-  getBirthWeightDisplay(): { current: number; birthWeight: number; growth: number; birthDate: Date } {
+  getBirthDNADisplay(): { current: number; birthDNA: number; growth: number; birthDate: Date } {
     if (!this.dna) {
-      return { current: 0, birthWeight: 0, growth: 0, birthDate: new Date() };
+      return { current: 0, birthDNA: 0, growth: 0, birthDate: new Date() };
     }
 
     return {
       current: this.dna.current.score,
-      birthWeight: this.dna.birthCertificate.birthWeight,
-      growth: this.dna.current.score - this.dna.birthCertificate.birthWeight,
+      birthDNA: this.dna.birthCertificate.birthDNA,
+      growth: this.dna.current.score - this.dna.birthCertificate.birthDNA,
       birthDate: this.dna.birthCertificate.born
     };
   }
@@ -450,10 +450,10 @@ export class FafDNAManager {
     if (!this.dna) return;
 
     const milestones = this.dna.growth.milestones;
-    const birthWeight = this.dna.birthCertificate.birthWeight;
+    const birthDNA = this.dna.birthCertificate.birthDNA;
 
     // Check for doubled score
-    if (score >= birthWeight * 2 && !milestones.find(m => m.type === 'doubled')) {
+    if (score >= birthDNA * 2 && !milestones.find(m => m.type === 'doubled')) {
       milestones.push({
         type: 'doubled',
         score,
@@ -541,7 +541,7 @@ export class FafDNAManager {
   private updateAnalytics(score: number): void {
     if (!this.dna) return;
 
-    const growth = score - this.dna.birthCertificate.birthWeight;
+    const growth = score - this.dna.birthCertificate.birthDNA;
     const daysSinceBirth = this.getDaysSince(this.dna.birthCertificate.born);
 
     this.dna.growth.totalGrowth = growth;
@@ -549,7 +549,7 @@ export class FafDNAManager {
     this.dna.growth.averageDailyGrowth = daysSinceBirth > 0 ? growth / daysSinceBirth : growth;
 
     // Check for best day
-    const todayGrowth = score - (this.dna.versions[this.dna.versions.length - 2]?.score || this.dna.birthCertificate.birthWeight);
+    const todayGrowth = score - (this.dna.versions[this.dna.versions.length - 2]?.score || this.dna.birthCertificate.birthDNA);
     if (todayGrowth > this.dna.growth.bestDay.growth) {
       this.dna.growth.bestDay = {
         date: new Date(),
@@ -573,8 +573,8 @@ export class FafDNAManager {
    */
   private calculateGrowthRate(): number {
     if (!this.dna) return 0;
-    
-    const growth = this.dna.current.score - this.dna.birthCertificate.birthWeight;
+
+    const growth = this.dna.current.score - this.dna.birthCertificate.birthDNA;
     const days = this.getDaysSince(this.dna.birthCertificate.born);
     
     return days > 0 ? growth / days : growth;
@@ -589,11 +589,11 @@ export class FafDNAManager {
 }
 
 /**
- * Display helper for birth weight in all score outputs
+ * Display helper for Birth DNA in all score outputs
  */
-export function displayScoreWithBirthWeight(
+export function displayScoreWithBirthDNA(
   current: number,
-  birthWeight: number,
+  birthDNA: number,
   birthDate: Date,
   options: { showGrowth?: boolean; showJourney?: boolean } = {}
 ): void {
@@ -603,7 +603,7 @@ export function displayScoreWithBirthWeight(
   // Get medal for current score
   const { medal, status} = getScoreMedal(current);
   const tierInfo = getTierInfo(current);
-  const growth = current - birthWeight;
+  const growth = current - birthDNA;
 
   // OPTIMIZED FIRST TWO LINES - Match MCP's championship scorecard format
   // Line 1: Score with medal (STRONG WHITE BOLD - default)
@@ -630,7 +630,7 @@ export function displayScoreWithBirthWeight(
   console.log('');
   console.log(colors.bold('🏎️  FAF Championship Status'));
   console.log('━'.repeat(40));
-  console.log(`Initial DNA: ${birthWeight}% (born ${birthDate.toISOString().split('T')[0]})`);
+  console.log(`Birth DNA: ${birthDNA}% (born ${birthDate.toISOString().split('T')[0]})`);
 
   const daysOld = Math.floor((Date.now() - new Date(birthDate).getTime()) / (1000 * 60 * 60 * 24));
   console.log(`Growth: +${growth}% over ${daysOld} days`);

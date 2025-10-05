@@ -122,8 +122,8 @@ describe('🧬 FAF DNA Lifecycle - PROOF IT WORKS', () => {
         const dnaManager = new FafDNAManager(tempDir);
         const dna = await dnaManager.birth(stack.expectedBirthWeight, true);
 
-        expect(dna.birthCertificate.birthWeight).toBe(stack.expectedBirthWeight);
-        expect(dna.birthCertificate.birthWeightSource).toBe('CLAUDE.md');
+        expect(dna.birthCertificate.birthDNA).toBe(stack.expectedBirthWeight);
+        expect(dna.birthCertificate.birthDNASource).toBe('CLAUDE.md');
         expect(dna.birthCertificate.certificate).toMatch(/^FAF-\d{4}-[A-Z0-9]+-[A-Z0-9]{4}$/);
       });
     });
@@ -398,10 +398,10 @@ describe('🧬 FAF DNA Lifecycle - PROOF IT WORKS', () => {
     it('should handle multiple projects for same user', async () => {
       // Simulate user with multiple dotFaffed projects
       const projects = [
-        { name: 'main-app', birthWeight: 15, currentScore: 92 },
-        { name: 'side-project', birthWeight: 8, currentScore: 67 },
-        { name: 'oss-library', birthWeight: 25, currentScore: 85 },
-        { name: 'hackathon', birthWeight: 5, currentScore: 45 }
+        { name: 'main-app', birthDNA: 15, currentScore: 92 },
+        { name: 'side-project', birthDNA: 8, currentScore: 67 },
+        { name: 'oss-library', birthDNA: 25, currentScore: 85 },
+        { name: 'hackathon', birthDNA: 5, currentScore: 45 }
       ];
 
       const projectDNAs = [];
@@ -417,7 +417,7 @@ describe('🧬 FAF DNA Lifecycle - PROOF IT WORKS', () => {
         );
 
         const dnaManager = new FafDNAManager(projectDir);
-        await dnaManager.birth(project.birthWeight, true);
+        await dnaManager.birth(project.birthDNA, true);
         await dnaManager.recordGrowth(project.currentScore, ['Development progress']);
         
         const dna = await dnaManager.load();
@@ -496,7 +496,7 @@ describe('🏁 Integration: Complete Developer Journey', () => {
 
     const dnaManager = new FafDNAManager(tempDir);
     const day1 = await dnaManager.birth(8, true);
-    expect(day1.birthCertificate.birthWeight).toBe(8);
+    expect(day1.birthCertificate.birthDNA).toBe(8);
 
     // Day 2: Add package.json
     await fs.writeFile(
@@ -589,7 +589,7 @@ describe('🏁 Integration: Complete Developer Journey', () => {
     console.log('\n🏆 COMPLETE JOURNEY VERIFIED:');
     console.log(`   Certificate: ${certificate}`);
     console.log(`   Journey: ${journey}`);
-    console.log(`   Birth Weight: ${finalDNA!.birthCertificate.birthWeight}%`);
+    console.log(`   Birth DNA: ${finalDNA!.birthCertificate.birthDNA}%`);
     console.log(`   Peak Score: 96%`);
     console.log(`   Current: 91%`);
     console.log(`   Total Growth: +${finalDNA!.growth.totalGrowth}%`);
