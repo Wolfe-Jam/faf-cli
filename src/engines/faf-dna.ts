@@ -632,8 +632,21 @@ export function displayScoreWithBirthDNA(
   console.log('━'.repeat(40));
   console.log(`Birth DNA: ${birthDNA}% (born ${birthDate.toISOString().split('T')[0]})`);
 
-  const daysOld = Math.floor((Date.now() - new Date(birthDate).getTime()) / (1000 * 60 * 60 * 24));
-  console.log(`Growth: +${growth}% over ${daysOld} days`);
+  const timeMs = Date.now() - new Date(birthDate).getTime();
+  const daysOld = Math.floor(timeMs / (1000 * 60 * 60 * 24));
+  const hoursOld = Math.floor(timeMs / (1000 * 60 * 60));
+
+  let timeDisplay = '';
+  if (daysOld > 0) {
+    timeDisplay = `${daysOld} day${daysOld === 1 ? '' : 's'}`;
+  } else if (hoursOld > 0) {
+    timeDisplay = `${hoursOld} hour${hoursOld === 1 ? '' : 's'}`;
+  } else {
+    const minutesOld = Math.floor(timeMs / (1000 * 60));
+    timeDisplay = `${minutesOld} minute${minutesOld === 1 ? '' : 's'}`;
+  }
+
+  console.log(`Growth: +${growth}% over ${timeDisplay}`);
 
   if (tierInfo.next && tierInfo.nextTarget && tierInfo.nextMedal) {
     const pointsToGo = tierInfo.nextTarget - current;
