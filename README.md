@@ -291,7 +291,7 @@ faf auto -q
 ## 📊 Technical Specs
 
 ```
-Version:       2.5.3
+Version:       2.5.4
 Performance:   As fast as 8ms (typical 10-15ms, 95% under 50ms)
 C-Mirror:      Championship-grade bidirectional sync
 TypeScript:    100% strict mode
