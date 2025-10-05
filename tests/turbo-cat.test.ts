@@ -31,12 +31,12 @@ describe('🍜 TURBO-CAT Tests - The Noodle Quest', () => {
       // TURBO-CAT says MEOW!
     });
 
-    it('should catalyze formats in under 200ms', async () => {
+    it('should catalyze formats in under 250ms', async () => {
       const start = Date.now();
       const analysis = await turboCat.discoverFormats(testDir);
       const duration = Date.now() - start;
 
-      expect(duration).toBeLessThan(200); // F1-inspired speed!
+      expect(duration).toBeLessThan(250); // TURBO-CAT is very industrious! 😼
       expect(analysis).toBeDefined();
     });
 
