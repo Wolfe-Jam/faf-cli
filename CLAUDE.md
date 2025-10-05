@@ -1,4 +1,4 @@
-# 🏎️ CLAUDE.md - faf-cli v2.5.3 Persistent Context & Intelligence
+# 🏎️ CLAUDE.md - faf-cli v2.5.4 Birth DNA Edition
 
 ## PROJECT STATE: GOOD 🚀
 **Current Position:** 🩵 Cyan CLI - Transform any project into perfect AI context in 30 seconds. Works with Claude, Codex, Gemini & ALL AI tools. Join 3000+ developers using .faf files. 100% FREE • Open Source • If helpful, a ⭐ is appreciated!
@@ -9,7 +9,7 @@
 ## 🎨 CORE CONTEXT
 
 ### Project Identity
-- **Name:** faf-cli v2.5.3
+- **Name:** faf-cli v2.5.4 Birth DNA Edition
 - **Stack:** TypeScript
 - **Quality:** F1-INSPIRED (Championship Performance)
 

@@ -1,4 +1,4 @@
-# faf-cli v2.5.3
+# faf-cli v2.5.4 - Birth DNA Edition
 
 <div align="center">
 
@@ -21,13 +21,28 @@
 
 ---
 
-## 🚀 What's New in v2.5.3
+## 🚀 What's New in v2.5.4 - Birth DNA Edition
 
-### Context-Mirroring now integrates with Championship Scoring
+### 🧬 "When Claude Forgot FAF" - The Birth DNA Story
 
-We **married** them! Context-Mirroring now follows your journey from **Lonely Heart 🤍 0%** → **🏆 100% Podium Champion**.
+Every `.faf` file now has a **Birth Certificate** with **Birth DNA** - your project's initial AI context score from `CLAUDE.md`. Watch your growth journey from humble beginnings to championship performance!
 
-Keep `.faf` (structured data) and `CLAUDE.md` (human-readable) in perfect sync automatically, while tracking every improvement milestone.
+<div align="center">
+<img src="https://cdn.jsdelivr.net/npm/faf-cli@latest/assets/birth-dna-12-percent.png" alt="Birth DNA: 12%" width="600" />
+
+**Birth: 12%** → **Current: 89%** = **+77% Growth!** 🚀
+</div>
+
+**What's New:**
+- ✨ **Birth DNA** terminology (goodbye confusing "birth weight")
+- 🎫 **Birth Certificates** with unique IDs (e.g., `FAF-2025-CLIX-651L`)
+- ⏱️ **Smart time display**: Shows minutes/hours/days since birth
+- 🔧 **Fixed**: Chrome Extension false positive on CLI projects
+- 📊 **Track your journey**: `faf log` shows complete evolution
+
+### Context-Mirroring + Championship Scoring
+
+Keep `.faf` (structured data) and `CLAUDE.md` (human-readable) in perfect sync automatically, while tracking every improvement milestone from **Lonely Heart 🤍 0%** → **🏆 100% Podium Champion**.
 
 **Live C-MIRROR output:**
 
