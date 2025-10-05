@@ -45,8 +45,8 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
       try {
         const fafData = await fs.readFile(fafPath, 'utf-8');
         const parsed = yamlUtils.parse(fafData);
-        if (parsed.faf_dna?.birth_weight !== undefined) {
-          birthScore = Math.round(parsed.faf_dna.birth_weight);
+        if (parsed.faf_dna?.birth_dna !== undefined) {
+          birthScore = Math.round(parsed.faf_dna.birth_dna);
         }
         const compiler = new FafCompiler();
         const scoreResult = await compiler.compile(fafPath);

@@ -9,7 +9,7 @@
 
 import { Command } from '../fix-once/commander';
 import * as path from 'path';
-import { FafDNAManager, displayScoreWithBirthWeight } from '../engines/faf-dna';
+import { FafDNAManager, displayScoreWithBirthDNA } from '../engines/faf-dna';
 import { colors } from '../fix-once/colors';
 import { promises as fs } from 'fs';
 
@@ -40,7 +40,7 @@ program
           console.log(colors.success('✅ Certificate VALID'));
           console.log(colors.info(`Project: ${path.basename(projectPath)}`));
           console.log(colors.info(`Born: ${dna.birthCertificate.born.toISOString().split('T')[0]}`));
-          console.log(colors.info(`Birth Weight: ${dna.birthCertificate.birthWeight}%`));
+          console.log(colors.info(`Birth DNA: ${dna.birthCertificate.birthDNA}%`));
           console.log(colors.info(`Authenticated: ${dna.birthCertificate.authenticated ? 'Yes' : 'No'}`));
         } else {
           console.log(colors.error('❌ Certificate INVALID'));
@@ -62,8 +62,8 @@ program
         console.log();
         console.log(colors.info(`Certificate: ${dna.birthCertificate.certificate}`));
         console.log(colors.info(`Born: ${dna.birthCertificate.born.toISOString()}`));
-        console.log(colors.info(`Birth Weight: ${dna.birthCertificate.birthWeight}%`));
-        console.log(colors.info(`Source: ${dna.birthCertificate.birthWeightSource}`));
+        console.log(colors.info(`Birth DNA: ${dna.birthCertificate.birthDNA}%`));
+        console.log(colors.info(`Source: ${dna.birthCertificate.birthDNASource}`));
         console.log();
         
         if (dna.birthCertificate.authenticated) {
@@ -120,7 +120,7 @@ program
       console.log();
       console.log(colors.info('Project DNA:'));
       console.log(colors.secondary(`  Born: ${dna.birthCertificate.born.toISOString()}`));
-      console.log(colors.secondary(`  Birth Weight: ${dna.birthCertificate.birthWeight}%`));
+      console.log(colors.secondary(`  Birth DNA: ${dna.birthCertificate.birthDNA}%`));
       console.log(colors.secondary(`  Project Hash: ${dna.birthCertificate.projectDNA}`));
       console.log();
       console.log(colors.secondary('═'.repeat(50)));

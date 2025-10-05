@@ -1,4 +1,4 @@
-# faf-cli v2.5.2
+# faf-cli v2.5.3
 
 <div align="center">
 
@@ -21,9 +21,9 @@
 
 ---
 
-## 🚀 What's New in v2.5.2
+## 🚀 What's New in v2.5.3
 
-### Context-Mirroring Married to Championship Scoring
+### Context-Mirroring now integrates with Championship Scoring
 
 We **married** them! Context-Mirroring now follows your journey from **Lonely Heart 🤍 0%** → **🏆 100% Podium Champion**.
 
@@ -99,6 +99,7 @@ Track your project's AI-readiness with F1-inspired tiers:
 🟢 Green (70-84%)   - Good foundation
 🟡 Yellow (55-69%)  - Getting there
 🔴 Red (0-54%)      - Needs attention
+🤍 Heart 0%         = Starting Good Luck!
 ```
 
 **Live output in your terminal:**
@@ -131,7 +132,7 @@ faf init
 faf auto
 faf score
 
-# Sync with CLAUDE.md (NEW in v2.5.2!)
+# Sync with CLAUDE.md (NEW!)
 faf bi-sync
 ```
 
@@ -181,7 +182,7 @@ Universal, shareable context for Claude, ChatGPT, Gemini, Cursor - regardless of
 - `faf status` - Project health check
 - `faf quick "app, react, vercel"` - Quick setup
 
-### Context-Mirroring (NEW in v2.5.2)
+### Context-Mirroring
 - `faf bi-sync` - **Bidirectional sync** (.faf ↔ CLAUDE.md)
   - As fast as 8ms (typical 10-15ms)
   - Zero data loss guarantee
@@ -238,13 +239,19 @@ faf auto -q
 
 ## 🎉 Version History
 
-### v2.5.2 (October 3rd, 2024) - Championship Scoring & Asset Fix
+### v2.5.3 (October 4th, 2025)
+- Removed Mk2 engine fragments from scoring
+- TypeScript strict mode improvements
+- Code cleanup and review refinements
+- Updated documentation
+
+### v2.5.2 (October 3rd, 2025) - Championship Scoring & Asset Fix
 - **Championship Scoring Display** - MCP's progress bar format ported to CLI
 - **Asset Fix** - Orange smiley logo and ASCII banner now load properly on npm
 - **Visual Polish** - Clean white text with FAF brand colors
 - **Scoreboard Title** - Initial DNA and current score above ASCII art box
 
-### v2.5.0 (October 3rd, 2024) - Context-Mirroring Release
+### v2.5.0 (October 3rd, 2025) - Context-Mirroring Release
 - **Context-Mirroring engine** - Bidirectional .faf ↔ CLAUDE.md sync
 - **C-Mirror** - Championship-grade sync in 15ms average
 - **Zero-slippage guarantee** - Atomic file operations
@@ -269,7 +276,7 @@ faf auto -q
 ## 📊 Technical Specs
 
 ```
-Version:       2.5.2
+Version:       2.5.3
 Performance:   As fast as 8ms (typical 10-15ms, 95% under 50ms)
 C-Mirror:      Championship-grade bidirectional sync
 TypeScript:    100% strict mode
@@ -360,8 +367,6 @@ npm link
 ## 📄 License
 
 MIT License - See [LICENSE](./LICENSE) file
-
-**Note**: C-Mirror core is open source. FAF-specific extensions available under separate license.
 
 ---
 

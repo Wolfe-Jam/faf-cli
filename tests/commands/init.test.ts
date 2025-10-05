@@ -86,7 +86,7 @@ describe('Init Command', () => {
 
     // Verify file content
     const fafContent = await fs.readFile(fafPath, 'utf-8');
-    expect(fafContent).toContain('faf_version: "2.5.0"');
+    expect(fafContent).toContain('faf_version: 2.5.0');
     expect(fafContent).toContain('name: Test Typescript Project');
     expect(fafContent).toContain('TypeScript');
   });

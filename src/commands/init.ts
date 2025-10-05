@@ -23,7 +23,7 @@ import { generateFafFromProject } from "../generators/faf-generator-championship
 import { FafCompiler } from "../compiler/faf-compiler";
 import { createDefaultFafIgnore } from "../utils/fafignore-parser";
 import { BalanceVisualizer } from "../utils/balance-visualizer";
-import { FafDNAManager, displayScoreWithBirthWeight } from "../engines/faf-dna";
+import { FafDNAManager, displayScoreWithBirthDNA } from "../engines/faf-dna";
 import { fabFormatsProcessor } from "../engines/fab-formats-processor";
 import { PlatformDetector } from "../utils/platform-detector";
 import { promptEmailOptIn } from "../utils/email-opt-in";
@@ -119,42 +119,42 @@ export async function initFafFile(
     // Award technical credit for successful initialization
     await autoAwardCredit('init_success', outputPath);
 
-    // REVOLUTIONARY: Score CLAUDE.md ONLY for birth weight!
+    // REVOLUTIONARY: Score CLAUDE.md ONLY for Birth DNA!
     // This is the TRUE starting point - what AI sees initially
     console.log();
-    console.log(FAF_COLORS.fafCyan(`${FAF_ICONS.magic_wand} Analyzing CLAUDE.md for birth weight...`));
+    console.log(FAF_COLORS.fafCyan(`${FAF_ICONS.magic_wand} Analyzing CLAUDE.md for Birth DNA...`));
 
     const claudeMdPath = path.join(projectRoot, 'CLAUDE.md');
-    let birthWeight = 0;
+    let birthDNA = 0;
     let fromClaudeMD = false;
 
     if (await fileExists(claudeMdPath)) {
-      // Score ONLY CLAUDE.md for birth weight
+      // Score ONLY CLAUDE.md for Birth DNA
       const claudeMdContent = await fs.readFile(claudeMdPath, 'utf-8');
       const claudeMdAnalysis = await fabFormatsProcessor.processFiles(projectRoot);
 
-      // Calculate birth weight from CLAUDE.md context quality
+      // Calculate Birth DNA from CLAUDE.md context quality
       // Low scores are GOOD - they show the journey!
       if (claudeMdContent.length < 100) {
-        birthWeight = 5;  // Almost empty CLAUDE.md
+        birthDNA = 5;  // Almost empty CLAUDE.md
       } else if (claudeMdContent.includes('FAF')) {
-        birthWeight = 22; // Has some FAF context
+        birthDNA = 22; // Has some FAF context
       } else {
-        birthWeight = 12; // Generic CLAUDE.md
+        birthDNA = 12; // Generic CLAUDE.md
       }
       fromClaudeMD = true;
 
-      console.log(FAF_COLORS.fafOrange(`   Birth weight from CLAUDE.md: ${birthWeight}%`));
+      console.log(FAF_COLORS.fafOrange(`   Birth DNA from CLAUDE.md: ${birthDNA}%`));
       console.log(FAF_COLORS.fafWhite(`   (Low scores are normal - they show your growth journey!)`));
     } else {
-      // No CLAUDE.md - use minimal birth weight
-      birthWeight = 0;
-      console.log(FAF_COLORS.fafOrange(`   No CLAUDE.md found - birth weight: ${birthWeight}%`));
+      // No CLAUDE.md - use minimal Birth DNA
+      birthDNA = 0;
+      console.log(FAF_COLORS.fafOrange(`   No CLAUDE.md found - Birth DNA: ${birthDNA}%`));
     }
 
     // Initialize FAF DNA with birth certificate
     const dnaManager = new FafDNAManager(projectRoot);
-    const dna = await dnaManager.birth(birthWeight, fromClaudeMD);
+    const dna = await dnaManager.birth(birthDNA, fromClaudeMD);
 
     console.log();
     console.log(FAF_COLORS.fafGreen(`${FAF_ICONS.dna} FAF DNA created with birth certificate!`));
@@ -166,25 +166,37 @@ export async function initFafFile(
     const scoreResult = await compiler.compile(outputPath);
     const currentScore = fafData.faf_score ? parseInt(fafData.faf_score.replace('%', '')) : Math.round(scoreResult.score || 0);
 
-    // Record first growth if different from birth weight
-    if (currentScore !== birthWeight) {
+    // Record first growth if different from Birth DNA
+    if (currentScore !== birthDNA) {
       await dnaManager.recordGrowth(currentScore, ['Initial .faf generation from project']);
     }
+
+    // Add faf_dna section to .faf file for faf auto to read
+    const updatedFafData = {
+      ...fafData,
+      faf_dna: {
+        birth_dna: birthDNA,
+        birth_certificate: dna.birthCertificate.certificate,
+        birth_date: dna.birthCertificate.born.toISOString(),
+        current_score: currentScore
+      }
+    };
+    await fs.writeFile(outputPath, YAML.stringify(updatedFafData), 'utf-8');
 
     // Show ASCII header with scoreboard
     if (!options.quiet) {
       const { getScoreMedal } = require('../utils/championship-core');
       const { medal } = getScoreMedal(currentScore);
-      const scoreboardTitle = chalk.bold(`Birth: ${birthWeight}% | ${medal} ${currentScore}/100`);
+      const scoreboardTitle = chalk.bold(`Birth: ${birthDNA}% | ${medal} ${currentScore}/100`);
       console.log();
       console.log(generateFAFHeader(scoreboardTitle));
     }
 
-    // Display with birth weight
+    // Display with Birth DNA
     console.log();
-    displayScoreWithBirthWeight(
+    displayScoreWithBirthDNA(
       currentScore,
-      birthWeight,
+      birthDNA,
       dna.birthCertificate.born,
       { showGrowth: true }
     );
@@ -221,10 +233,10 @@ export async function initFafFile(
     console.log(`${FAF_COLORS.fafCyan('   5. ')  }faf log${  FAF_COLORS.fafCyan(' - View your context evolution')}`);
 
     // Growth-focused messaging
-    const growth = currentScore - birthWeight;
+    const growth = currentScore - birthDNA;
     if (growth > 0) {
       console.log();
-      console.log(FAF_COLORS.fafGreen(`${FAF_ICONS.rocket} Already improved +${growth}% from birth weight!`));
+      console.log(FAF_COLORS.fafGreen(`${FAF_ICONS.rocket} Already improved +${growth}% from Birth DNA!`));
     }
 
     if (currentScore < 70) {
@@ -234,7 +246,7 @@ export async function initFafFile(
     }
 
     console.log();
-    console.log(FAF_COLORS.fafWhite(`Your FAF journey has begun: ${birthWeight}% → ${currentScore}%`));
+    console.log(FAF_COLORS.fafWhite(`Your FAF journey has begun: ${birthDNA}% → ${currentScore}%`));
 
     // Prompt for email opt-in (first time users only, respects quiet mode)
     await promptEmailOptIn({ quiet: options.quiet });

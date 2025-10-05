@@ -41,9 +41,9 @@ program
       console.log();
       
       // Quick summary
-      const birthWeight = dna.birthCertificate.birthWeight;
+      const birthDNA = dna.birthCertificate.birthDNA;
       const current = dna.current.score;
-      const growth = current - birthWeight;
+      const growth = current - birthDNA;
       const daysActive = Math.floor((Date.now() - dna.birthCertificate.born.getTime()) / (1000 * 60 * 60 * 24));
       
       console.log(colors.secondary('═'.repeat(50)));
@@ -72,7 +72,7 @@ program
       const allPossibleMilestones = [
         { type: 'birth', label: 'Born', threshold: 0 },
         { type: 'first_save', label: 'First Save', threshold: 0 },
-        { type: 'doubled', label: 'Doubled', threshold: birthWeight * 2 },
+        { type: 'doubled', label: 'Doubled', threshold: birthDNA * 2 },
         { type: 'championship', label: 'Championship', threshold: 70 },
         { type: 'elite', label: 'Elite', threshold: 85 },
         { type: 'peak', label: 'Peak', threshold: 95 },
