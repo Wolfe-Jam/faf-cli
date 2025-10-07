@@ -88,3 +88,8 @@ WJTC-*.md
 *.log
 .DS_Store
 .vercel
+
+# Partnership & Business Docs (Planet FAF only)
+WARP-*.md
+*PARTNERSHIP*.md
+*-PITCH.md
