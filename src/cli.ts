@@ -915,8 +915,8 @@ Privacy Controls:
     } else if (options.enable) {
       await analytics.enableTelemetry();
     } else if (options.reset) {
-      // Reset analytics would be implemented
-      console.log('🔄 Analytics reset functionality coming soon!');
+      console.log(chalk.yellow('⚠️  Analytics reset not available'));
+      console.log(chalk.gray('   Use: faf analytics --disable to turn off analytics'));
     } else {
       // Default: show summary
       await analytics.showAnalyticsSummary();
