@@ -8,7 +8,7 @@
 import { chalk } from "../fix-once/colors";
 import { promises as fs } from "fs";
 import * as path from "path";
-import * as YAML from "yaml";
+import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
 import { findFafFile } from "../utils/file-utils";
 // Removed unused imports
 
@@ -54,7 +54,7 @@ export async function enhanceFafWithAI(
 
     // Read current .faf file
     const content = await fs.readFile(fafPath, "utf-8");
-    const fafData = YAML.parse(content);
+    const fafData = parseYAML(content);
 
     // Calculate real score, don't trust embedded score
     const { FafCompiler } = require('../compiler/faf-compiler');
@@ -159,7 +159,7 @@ Analyze and enhance this .faf (Universal AI-context Format) file.
 
 Current .faf content:
 \`\`\`yaml
-${YAML.stringify(fafData, null, 2)}
+${stringifyYAML(fafData, null, 2)}
 \`\`\`
 
 Enhancement focus: ${focus}
@@ -211,7 +211,7 @@ async function executeBig3Enhancement(
       await fs.copyFile(fafPath, `${fafPath}.backup-${Date.now()}`);
       
       // Write enhanced version 
-      const enhancedYaml = YAML.stringify(enhanced, null, 2);
+      const enhancedYaml = stringifyYAML(enhanced, null, 2);
       await fs.writeFile(fafPath, enhancedYaml);
       
       console.log(chalk.green(`☑️ Enhanced .faf with ${getModelDisplay(model)} intelligence`));

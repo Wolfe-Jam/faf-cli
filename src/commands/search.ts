@@ -10,7 +10,7 @@ import {
 import { findFafFile } from '../utils/file-utils';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import * as YAML from 'yaml';
+import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
 
 export interface SearchCommandOptions {
   section?: string;     // Search in specific section only
@@ -45,7 +45,7 @@ export async function searchCommand(query: string, options: SearchCommandOptions
     console.log(`${FAF_COLORS.fafCyan('├─ ')}Searching: ${path.relative(process.cwd(), fafPath)}`);
     
     const content = await fs.readFile(fafPath, 'utf-8');
-    const fafData = YAML.parse(content) || {};
+    const fafData = parseYAML(content) || {};
     
     const matches = await searchFafData(fafData, query, options);
     

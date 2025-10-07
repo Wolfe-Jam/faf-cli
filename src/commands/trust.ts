@@ -11,7 +11,7 @@ import { chalk } from '../fix-once/colors';
 import { findFafFile } from '../utils/file-utils';
 import { FafCompiler } from '../compiler/faf-compiler';
 import { getTrustCache } from '../utils/trust-cache';
-import YAML from 'yaml';
+import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
 import { dropCoach } from '../engines/drop-coach';
 
 export interface TrustScore {
@@ -36,7 +36,7 @@ export interface TrustDashboardOptions {
 export async function calculateTrustScore(fafPath: string): Promise<TrustScore> {
   try {
     const fafContent = await fs.readFile(fafPath, 'utf-8');
-    const fafData = YAML.parse(fafContent);
+    const fafData = parseYAML(fafContent);
     
     // Basic validation - check if essential sections exist
     const isValid = fafData && 

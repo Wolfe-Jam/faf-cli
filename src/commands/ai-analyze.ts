@@ -7,7 +7,7 @@
 
 import { chalk } from "../fix-once/colors";
 import { promises as fs } from "fs";
-import * as YAML from "yaml";
+import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
 import { findFafFile } from "../utils/file-utils";
 import { FafCompiler } from "../compiler/faf-compiler";
 import { getTrustCache } from '../utils/trust-cache';
@@ -41,7 +41,7 @@ export async function analyzeFafWithAI(
 
     // Read and score current .faf file
     const content = await fs.readFile(fafPath, "utf-8");
-    const fafData = YAML.parse(content);
+    const fafData = parseYAML(content);
     const compiler = new FafCompiler();
     const scoreResult = await compiler.compile(fafPath);
 

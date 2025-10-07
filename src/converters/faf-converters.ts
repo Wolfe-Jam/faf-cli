@@ -6,7 +6,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import * as yaml from 'yaml';
+import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
 
 export interface FafData {
   ai_scoring_system?: string;
@@ -32,7 +32,7 @@ export interface FafData {
  */
 export function fafToMarkdown(fafPath: string): string {
   const yamlContent = fs.readFileSync(fafPath, 'utf-8');
-  const data: FafData = yaml.parse(yamlContent);
+  const data: FafData = parseYAML(yamlContent);
 
   let md = `# 🏎️ FAF Context - ${data.project?.name || 'Project'}\n\n`;
 
@@ -92,7 +92,7 @@ export function fafToMarkdown(fafPath: string): string {
  */
 export function fafToText(fafPath: string): string {
   const yamlContent = fs.readFileSync(fafPath, 'utf-8');
-  const data: FafData = yaml.parse(yamlContent);
+  const data: FafData = parseYAML(yamlContent);
 
   let txt = `FAF CONTEXT REPORT\n`;
   txt += `==================\n\n`;

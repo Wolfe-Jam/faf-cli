@@ -9,7 +9,7 @@ import {
 } from '../utils/championship-style';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import * as YAML from 'yaml';
+import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
 
 export interface ShareCommandOptions {
   private?: boolean;    // Keep sensitive info (default: sanitize)
@@ -35,7 +35,7 @@ export async function shareCommand(fafPath?: string, options: ShareCommandOption
     
     // Load and parse .faf
     const fafContent = await fs.readFile(resolvedPath, 'utf-8');
-    const fafData = YAML.parse(fafContent);
+    const fafData = parseYAML(fafContent);
     
     // Sanitize for sharing
     const sanitizedData = options.private ? fafData : await sanitizeFafData(fafData, options);
@@ -157,7 +157,7 @@ async function generateShareableVersion(sanitizedData: any, options: ShareComman
       };
       
     default: // yaml
-      const yamlContent = YAML.stringify(sanitizedData, { indent: 2 });
+      const yamlContent = stringifyYAML(sanitizedData, { indent: 2 });
       return {
         format: 'yaml',
         content: yamlContent,

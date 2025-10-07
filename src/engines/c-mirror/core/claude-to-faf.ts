@@ -11,7 +11,7 @@
  * Emits events at each step for broad broadcasting
  */
 
-import * as YAML from 'yaml';
+import { parse as parseYAML, stringify as stringifyYAML } from '../../../fix-once/yaml';
 import { mirrorEvents } from './events/event-emitter';
 import { MirrorEventType, createMirrorEvent, SyncProgressData } from './events/mirror-events';
 
@@ -130,7 +130,7 @@ export async function claudeMdToFaf(
       } as SyncProgressData, { projectPath })
     );
 
-    const yamlContent = YAML.stringify(updatedFaf, {
+    const yamlContent = stringifyYAML(updatedFaf, {
       indent: 2,
       lineWidth: 0, // No line wrapping
       minContentWidth: 0

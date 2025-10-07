@@ -1,21 +1,140 @@
 /**
- * 🍜 YAML FIX-ONCE ABSTRACTION
+ * 🔥 YAML FIX-ONCE ABSTRACTION
  *
- * This module will handle the transition from external yaml
- * to bundled yaml seamlessly!
+ * ROCK SOLID YAML PARSING - FIX ONCE, DONE FOREVER
  *
- * CURRENT STATUS: Using external yaml
- * FUTURE STATUS: Will use bundled yaml
+ * This module handles ALL YAML edge cases:
+ * ✅ Empty files
+ * ✅ Null/undefined content
+ * ✅ Invalid YAML syntax
+ * ✅ Type validation
+ * ✅ Corrupted files
+ * ✅ Clear error messages
+ * ✅ Primitive vs Object validation
+ *
+ * NEVER touch raw YAML parsing outside this file.
  */
 
-// For now, use the external yaml package
 import * as yaml from 'yaml';
+import { chalk } from './colors';
 
-// Export everything FAF uses
-export const parse = yaml.parse;
-export const stringify = yaml.stringify;
-export const Document = yaml.Document;
+/**
+ * Safe YAML parse - handles ALL edge cases
+ * ROCK SOLID - FIX ONCE, DONE FOREVER
+ */
+export function parse(content: string | null | undefined, options?: { filepath?: string }): any {
+  const filepath = options?.filepath || 'unknown file';
+
+  // Edge case 1: Null/undefined (CHECK FIRST before any operations)
+  if (content === null || content === undefined) {
+    throw new Error(
+      `${chalk.red('Empty content passed to YAML parser')}\n` +
+      `File: ${filepath}\n` +
+      `Fix: Ensure file exists and has content before parsing`
+    );
+  }
+
+  // Edge case 2: Not a string (CHECK BEFORE calling string methods)
+  if (typeof content !== 'string') {
+    throw new Error(
+      `${chalk.red('Invalid content type passed to YAML parser')}\n` +
+      `Expected: string\n` +
+      `Got: ${typeof content}\n` +
+      `File: ${filepath}`
+    );
+  }
+
+  // Edge case 3: Empty string or whitespace only
+  if (content.trim() === '') {
+    throw new Error(
+      `${chalk.red('Empty .faf file detected')}\n` +
+      `File: ${filepath}\n` +
+      `Fix: Run ${chalk.cyan('faf init')} to recreate the file`
+    );
+  }
+
+  // Edge case 4: Parse YAML and handle syntax errors
+  let result: any;
+  try {
+    result = yaml.parse(content);
+  } catch (error: any) {
+    // Wrap yaml parsing errors with helpful context
+    throw new Error(
+      `${chalk.red('Invalid YAML syntax')}\n` +
+      `File: ${filepath}\n` +
+      `Error: ${error.message}\n` +
+      `Fix: Check file syntax or run ${chalk.cyan('faf init --force')} to recreate`
+    );
+  }
+
+  // Edge case 5: Parsed successfully but result is null/undefined
+  // (valid YAML like "null" or "~" or empty documents)
+  if (result === null || result === undefined) {
+    throw new Error(
+      `${chalk.red('YAML file parsed but contains no data')}\n` +
+      `File: ${filepath}\n` +
+      `Fix: Ensure file has valid YAML content or run ${chalk.cyan('faf init')}`
+    );
+  }
+
+  // Edge case 6: Parsed to primitive (not an object)
+  // .faf files must be YAML objects, not scalars
+  if (typeof result !== 'object' || Array.isArray(result)) {
+    throw new Error(
+      `${chalk.red('Invalid .faf structure - must be a YAML object')}\n` +
+      `File: ${filepath}\n` +
+      `Got: ${Array.isArray(result) ? 'array' : typeof result}\n` +
+      `Fix: .faf files must contain key-value pairs, not ${Array.isArray(result) ? 'lists' : 'simple values'}`
+    );
+  }
+
+  return result;
+}
+
+/**
+ * Safe YAML stringify - handles edge cases
+ * ROCK SOLID - FIX ONCE, DONE FOREVER
+ */
+export function stringify(data: any, options?: any): string {
+  // Edge case 1: Null/undefined data
+  if (data === null || data === undefined) {
+    throw new Error(
+      `${chalk.red('Cannot stringify null/undefined data to YAML')}\n` +
+      `Fix: Provide valid data object`
+    );
+  }
+
+  // Edge case 2: Not an object (primitives should not be stringified for .faf)
+  if (typeof data !== 'object' || Array.isArray(data)) {
+    throw new Error(
+      `${chalk.red('Invalid data for .faf stringify')}\n` +
+      `Expected: object\n` +
+      `Got: ${Array.isArray(data) ? 'array' : typeof data}\n` +
+      `Fix: .faf files must be objects with key-value pairs`
+    );
+  }
+
+  // Edge case 3: Stringify and catch any errors
+  try {
+    const result = yaml.stringify(data, options);
+
+    // Edge case 4: Empty result
+    if (!result || result.trim() === '') {
+      throw new Error('Stringify produced empty output');
+    }
+
+    return result;
+  } catch (error: any) {
+    throw new Error(
+      `${chalk.red('Failed to convert data to YAML')}\n` +
+      `Error: ${error.message}`
+    );
+  }
+}
+
+// Export raw versions for advanced usage (use with caution)
 export const parseDocument = yaml.parseDocument;
+export const Document = yaml.Document;
 
 // Re-export as default for compatibility
 export default {
@@ -34,30 +153,15 @@ export const YAML = {
 };
 
 /**
- * FIX-ONCE BENEFITS:
- * 1. All yaml imports go through here
- * 2. Easy to switch to bundled version later
- * 3. Can add logging/debugging if needed
- * 4. Single place to manage yaml
+ * 🔥 ROCK SOLID STATUS: ACHIEVED
  *
- * BUNDLE STRATEGY:
- * When we're ready to bundle, we'll:
- * 1. Copy yaml source into src/bundled/
- * 2. Update this file to import from there
- * 3. Remove yaml from package.json
- * 4. Done! YAML is part of FAF!
- */
-
-/**
- * FAF YAML USAGE PATTERNS:
+ * All edge cases handled:
+ * ✅ Null/undefined → Clear error
+ * ✅ Empty files → Clear error
+ * ✅ Wrong types → Clear error
+ * ✅ Invalid YAML → Wrapped error with context
+ * ✅ Primitives → Clear error (.faf must be objects)
+ * ✅ Arrays → Clear error (.faf must be objects)
  *
- * 1. Parsing .faf files:
- *    const config = parse(fileContent);
- *
- * 2. Writing .faf files:
- *    const yamlString = stringify(config);
- *
- * 3. That's literally it! We keep it simple!
- *
- * 🍜 NOODLE PRESERVATION STATUS: SECURED
+ * FIX ONCE, DONE FOREVER
  */

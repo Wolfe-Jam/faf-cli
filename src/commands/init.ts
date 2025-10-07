@@ -6,7 +6,7 @@
 import { chalk } from "../fix-once/colors";
 import { promises as fs } from "fs";
 import path from "path";
-import * as YAML from "yaml";
+import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
 import {
   FAF_ICONS,
   FAF_COLORS,
@@ -161,7 +161,7 @@ export async function initFafFile(
     console.log(FAF_COLORS.fafWhite(`   Certificate: ${dna.birthCertificate.certificate}`));
 
     // Now calculate ACTUAL score from full .faf
-    const fafData = YAML.parse(fafContent);
+    const fafData = parseYAML(fafContent);
     const compiler = new FafCompiler();
     const scoreResult = await compiler.compile(outputPath);
     const currentScore = fafData.faf_score ? parseInt(fafData.faf_score.replace('%', '')) : Math.round(scoreResult.score || 0);
@@ -181,7 +181,7 @@ export async function initFafFile(
         current_score: currentScore
       }
     };
-    await fs.writeFile(outputPath, YAML.stringify(updatedFafData), 'utf-8');
+    await fs.writeFile(outputPath, stringifyYAML(updatedFafData), 'utf-8');
 
     // Show ASCII header with scoreboard
     if (!options.quiet) {

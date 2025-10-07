@@ -7,7 +7,7 @@
 import { chalk } from "../fix-once/colors";
 import { promises as fs } from "fs";
 import * as path from "path";
-import * as YAML from "yaml";
+import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
 import inquirer from "inquirer";
 import { findFafFile } from "../utils/file-utils";
 import { FafCompiler } from "../compiler/faf-compiler";
@@ -47,7 +47,7 @@ export async function realEnhanceFaf(
 
     // Read current .faf file
     const content = await fs.readFile(fafPath, "utf-8");
-    let fafData = YAML.parse(content) || {};
+    let fafData = parseYAML(content) || {};
 
     // Get REAL current score with detailed breakdown
     const compiler = new FafCompiler();
@@ -130,7 +130,7 @@ export async function realEnhanceFaf(
       fafData.meta.enhanced_by = 'faf-real-enhance';
 
       // Save enhanced file
-      const enhancedYaml = YAML.stringify(fafData, null, 2);
+      const enhancedYaml = stringifyYAML(fafData, null, 2);
       await fs.writeFile(fafPath, enhancedYaml);
 
       // Calculate new score

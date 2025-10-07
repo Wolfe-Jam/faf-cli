@@ -5,7 +5,7 @@
 
 import { chalk } from "../fix-once/colors";
 import { promises as fs } from "fs";
-import * as YAML from "yaml";
+import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
 import {
   findFafFile,
   getFileModTime,
@@ -32,7 +32,7 @@ export async function auditFafFile(file?: string, options: AuditOptions = {}) {
 
     // Read and parse .faf file
     const content = await fs.readFile(fafPath, "utf-8");
-    const fafData = YAML.parse(content);
+    const fafData = parseYAML(content);
 
     const warnDays = parseInt(options.warnDays || "7");
     const errorDays = parseInt(options.errorDays || "30");
