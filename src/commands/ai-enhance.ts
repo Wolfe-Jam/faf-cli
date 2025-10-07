@@ -32,12 +32,10 @@ export async function enhanceFafWithAI(
   console.log(chalk.gray('   We discovered the AI enhancement was showing incorrect scores.'));
   console.log(chalk.gray('   We\'re improving this feature to provide real, accurate enhancements.'));
   console.log();
-  console.log(chalk.cyan('🔧 Alternative options while we fix this:'));
+  console.log(chalk.cyan('🔧 Alternative options:'));
   console.log(chalk.white('   • Use "faf chat" for guided improvements'));
   console.log(chalk.white('   • Use "faf edit" to manually improve your .faf'));
   console.log(chalk.white('   • Use "faf score --details" to see what needs improvement'));
-  console.log();
-  console.log(chalk.gray('   Expected back: v2.4.0 (coming soon)'));
   console.log();
   return;
 

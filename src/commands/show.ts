@@ -62,10 +62,7 @@ ${percentage >= 99 ? '🏁 **CHAMPIONSHIP STATUS ACHIEVED!**' :
 ${fafData.ai_models ? `- **AI Models**: ${fafData.ai_models.join(', ')}` : ''}
 
 ### Score Breakdown
-Coming soon - compiler section scores
-
-${percentage < 100 ? `### Next Steps
-Coming soon - compiler suggestions` : ''}
+Use \`faf score --details\` for complete breakdown
 
 ---
 *🏎️ FAF Engine | Championship Grade Context*`;

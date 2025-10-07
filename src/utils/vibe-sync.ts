@@ -104,7 +104,7 @@ export class VibeSync {
           
         case 'api':
           // Future: POST to FAF cloud service
-          console.log('API sync coming soon!');
+          console.log(chalk.gray('API sync not available - use clipboard mode'));
           return false;
           
         default:
