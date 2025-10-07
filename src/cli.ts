@@ -43,7 +43,7 @@ import { analytics, trackCommand, trackError, withPerformanceTracking } from './
 import { checkForUpdates, forceUpdateCheck } from './utils/update-checker';
 import { findFafFile } from './utils/file-utils';
 import { getTrustCache } from './utils/trust-cache';
-import * as YAML from 'yaml';
+import { parse as parseYAML, stringify as stringifyYAML } from './fix-once/yaml';
 import { showV240Announcement } from './utils/announcements';
 
 const version = require('../package.json').version;

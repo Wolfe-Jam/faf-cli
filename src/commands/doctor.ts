@@ -6,7 +6,7 @@
 import { chalk } from '../fix-once/colors';
 import { promises as fs } from 'fs';
 import * as path from 'path';
-import * as YAML from 'yaml';
+import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
 import { findFafFile, fileExists } from '../utils/file-utils';
 import { FAF_COLORS, FAF_ICONS } from '../utils/championship-style';
 import { FafCompiler } from '../compiler/faf-compiler';
@@ -54,7 +54,7 @@ export async function doctorCommand(): Promise<void> {
     console.log(chalk.gray('Validating .faf structure...'));
     try {
       const content = await fs.readFile(fafPath, 'utf-8');
-      const fafData = YAML.parse(content);
+      const fafData = parseYAML(content);
 
       if (!fafData) {
         results.push({

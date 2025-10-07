@@ -5,7 +5,7 @@
 
 import { chalk } from "../fix-once/colors";
 import { promises as fs } from "fs";
-import * as YAML from "yaml";
+import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
 import { FafCompiler } from "../compiler/faf-compiler";
 import { findFafFile } from "../utils/file-utils";
 import { getScoreColor, getScoreEmoji } from "../utils/color-utils";
@@ -29,7 +29,7 @@ export async function showFafScoreCard(directory?: string, options: ShowOptions 
 
     // Read and parse .faf file
     const content = await fs.readFile(fafPath, "utf-8");
-    const fafData = YAML.parse(content);
+    const fafData = parseYAML(content);
 
     // Calculate score
     const compiler = new FafCompiler();

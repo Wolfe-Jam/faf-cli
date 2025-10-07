@@ -3,7 +3,7 @@
 import { Command } from '../fix-once/commander';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import * as yaml from 'yaml';
+import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
 import { chalk } from '../fix-once/colors';
 
 // Simple color utilities
@@ -76,7 +76,7 @@ async function checkFafHealth(projectRoot: string): Promise<RecoveryReport> {
     // Try to parse .faf
     try {
       const content = await fs.readFile(fafPath, 'utf-8');
-      yaml.parse(content);
+      parseYAML(content);
     } catch (error) {
       report.status = 'corrupted';
       report.issues.push('.faf file is corrupted (invalid YAML)');
@@ -140,7 +140,7 @@ async function autoRecover(projectRoot: string, report: RecoveryReport): Promise
     try {
       // Validate backup first
       const backupContent = await fs.readFile(backupPath, 'utf-8');
-      yaml.parse(backupContent); // Will throw if invalid
+      parseYAML(backupContent); // Will throw if invalid
 
       // Backup is valid, restore it
       await fs.copyFile(backupPath, fafPath);

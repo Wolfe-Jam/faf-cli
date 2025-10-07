@@ -15,7 +15,7 @@
  * Powered by C-Mirror - Championship-grade Context-Mirroring
  */
 
-import * as YAML from 'yaml';
+import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
 import * as path from 'path';
 import { promises as fs } from 'fs';
 import { FAFMirror } from '../engines/c-mirror/faf-extensions/faf-mirror';
@@ -42,7 +42,7 @@ export interface SyncResult {
  */
 export function fafToClaudeMd(fafContent: string): string {
   try {
-    const fafData = YAML.parse(fafContent);
+    const fafData = parseYAML(fafContent);
     
     let claudeMd = `# 🏎️ CLAUDE.md - ${fafData.project?.name || 'Project'} Persistent Context & Intelligence\n\n`;
     
@@ -134,7 +134,7 @@ export function claudeMdToFaf(claudeMdContent: string, existingFafData: any): st
   updatedFaf.metadata.last_claude_sync = new Date().toISOString();
   updatedFaf.metadata.bi_sync = 'active';
   
-  return YAML.stringify(updatedFaf, { indent: 2 });
+  return stringifyYAML(updatedFaf, { indent: 2 });
 }
 
 /**
@@ -166,7 +166,7 @@ export async function syncBiDirectional(): Promise<SyncResult> {
     
     // Show score FIRST - top line
     const fafContent = await fs.readFile(fafPath, 'utf-8');
-    const fafData = YAML.parse(fafContent);
+    const fafData = parseYAML(fafContent);
     const currentScore = fafData.faf_score || '0%';
 
     console.log(FAF_COLORS.fafOrange(`🏆 FAF Score: ${currentScore} | Bi-Sync Engine ${FAF_ICONS.link}`));

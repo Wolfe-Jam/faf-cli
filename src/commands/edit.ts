@@ -14,7 +14,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as os from 'os';
 import { spawn } from 'child_process';
-import * as YAML from 'yaml';
+import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
 
 export interface EditCommandOptions {
   editor?: string;    // Specific editor to use (code, vim, nano, etc.)
@@ -61,7 +61,7 @@ export async function editCommand(options: EditCommandOptions = {}): Promise<voi
       
       if (hasChanges) {
         try {
-          const fafData = YAML.parse(newContent);
+          const fafData = parseYAML(newContent);
           const validation = validateSchema(fafData);
           
           if (validation.valid) {
@@ -133,7 +133,7 @@ async function editSection(fafPath: string, sectionName: string): Promise<void> 
   console.log(`${FAF_COLORS.fafCyan('├─ ')}Editing section: ${sectionName}`);
   
   const content = await fs.readFile(fafPath, 'utf-8');
-  const fafData = YAML.parse(content) || {};
+  const fafData = parseYAML(content) || {};
   
   const availableSections = ['project', 'stack', 'scores', 'ai_instructions', 'preferences', 'state', 'human_context'];
   
@@ -148,7 +148,7 @@ async function editSection(fafPath: string, sectionName: string): Promise<void> 
   const tempFile = path.join(tempDir, `faf-section-${sectionName}-${Date.now()}.yaml`);
   
   const sectionData = fafData[sectionName] || {};
-  const sectionYaml = YAML.stringify({ [sectionName]: sectionData }, { indent: 2 });
+  const sectionYaml = stringifyYAML({ [sectionName]: sectionData }, { indent: 2 });
   
   await fs.writeFile(tempFile, sectionYaml);
   
@@ -158,12 +158,12 @@ async function editSection(fafPath: string, sectionName: string): Promise<void> 
     
     // Read back the edited section
     const editedContent = await fs.readFile(tempFile, 'utf-8');
-    const editedData = YAML.parse(editedContent);
+    const editedData = parseYAML(editedContent);
     
     // Merge back into main .faf
     fafData[sectionName] = editedData[sectionName];
     
-    const newFafContent = YAML.stringify(fafData, { indent: 2 });
+    const newFafContent = stringifyYAML(fafData, { indent: 2 });
     await fs.writeFile(fafPath, newFafContent);
     
     console.log(`${FAF_COLORS.fafGreen('├─ ')}Section ${sectionName} updated successfully`);

@@ -14,7 +14,7 @@
  *   const result = await engine.sync();
  */
 
-import * as YAML from 'yaml';
+import { parse as parseYAML, stringify as stringifyYAML } from '../../../fix-once/yaml';
 import { IMirrorConfig, IMirrorResult, FileState } from './interfaces';
 import { fafToClaudeMd } from './faf-to-claude';
 import { claudeMdToFaf } from './claude-to-faf';
@@ -224,7 +224,7 @@ export class MirrorEngine {
     let existingFafData: any = {};
     if (analysis.fafState.exists) {
       const fafContent = await safeRead(this.config.structuredFile, this.projectPath);
-      existingFafData = YAML.parse(fafContent);
+      existingFafData = parseYAML(fafContent);
     }
 
     const updatedFafContent = await claudeMdToFaf(claudeContent, existingFafData, this.projectPath);
@@ -257,7 +257,7 @@ export class MirrorEngine {
 
       // Parse .faf to get score
       const fafContent = await safeRead(this.config.structuredFile, this.projectPath);
-      const parsedData = YAML.parse(fafContent);
+      const parsedData = parseYAML(fafContent);
       const fafData = (!parsedData || typeof parsedData !== 'object') ? {} : parsedData;
 
       const score = fafData.ai_score !== undefined && fafData.human_score !== undefined ? {

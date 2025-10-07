@@ -5,7 +5,7 @@
 
 import { chalk } from "../fix-once/colors";
 import { promises as fs } from "fs";
-import * as YAML from "yaml";
+import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
 import { findFafFile } from "../utils/file-utils";
 import { validateSchema } from "../schema/faf-schema";
 
@@ -42,7 +42,7 @@ export async function lintFafFile(file?: string, options: LintOptions = {}) {
     const issues: LintIssue[] = [];
 
     try {
-      fafData = YAML.parse(content);
+      fafData = parseYAML(content);
     } catch (parseError) {
       issues.push({
         type: "error",
@@ -130,7 +130,7 @@ export async function lintFafFile(file?: string, options: LintOptions = {}) {
       });
 
       // Write fixed content
-      const fixedContent = YAML.stringify(fafData, { lineWidth: 100 });
+      const fixedContent = stringifyYAML(fafData, { lineWidth: 100 });
       await fs.writeFile(fafPath, fixedContent, "utf-8");
 
       console.log(chalk.green("☑️ Auto-fixes applied"));
@@ -162,7 +162,7 @@ function performFormatLinting(
 ): void {
   // Check YAML formatting
   try {
-    const normalizedYaml = YAML.stringify(fafData, { lineWidth: 100 });
+    const normalizedYaml = stringifyYAML(fafData, { lineWidth: 100 });
     const currentLines = content.split("\n").map((line) => line.trimEnd());
     const normalizedLines = normalizedYaml
       .split("\n")

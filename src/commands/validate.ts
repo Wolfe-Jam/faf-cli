@@ -5,7 +5,7 @@
 
 import { chalk } from "../fix-once/colors";
 import { promises as fs } from "fs";
-import * as YAML from "yaml";
+import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
 import { validateSchema } from "../schema/faf-schema";
 import { findFafFile } from "../utils/file-utils";
 import { autoAwardCredit } from "../utils/technical-credit";
@@ -32,7 +32,7 @@ export async function validateFafFile(
 
     // Read and parse .faf file
     const content = await fs.readFile(fafPath, "utf-8");
-    const fafData = YAML.parse(content);
+    const fafData = parseYAML(content);
 
     // Validate against schema
     const validation = validateSchema(fafData, options.schema || "latest");

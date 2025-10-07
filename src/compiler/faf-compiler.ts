@@ -6,7 +6,7 @@
  * Result: Pure, traceable, reproducible scores
  */
 
-import * as YAML from 'yaml';
+import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
 import * as crypto from 'crypto';
 import { ChromeExtensionDetector } from '../utils/chrome-extension-detector';
 import { FabFormatsProcessor } from '../engines/fab-formats-processor';
@@ -185,7 +185,7 @@ export class FafCompiler {
     const start = Date.now();
 
     try {
-      const ast = YAML.parse(source);
+      const ast = parseYAML(source);
 
       if (!ast || typeof ast !== 'object') {
         this.addDiagnostic('error', 'Invalid YAML: must be an object');

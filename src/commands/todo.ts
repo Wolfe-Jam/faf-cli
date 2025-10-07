@@ -13,7 +13,7 @@ import {
 } from '../utils/championship-style';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import * as YAML from 'yaml';
+import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
 
 export interface TodoCommandOptions {
   show?: boolean;    // Show current todo list
@@ -80,7 +80,7 @@ async function generateImprovementPlan(fafPath: string): Promise<void> {
   
   // Read .faf for missing context analysis
   const fafContent = await fs.readFile(fafPath, 'utf-8');
-  const fafData = YAML.parse(fafContent) || {};
+  const fafData = parseYAML(fafContent) || {};
   
   const missingSlots = identifyMissingSlots(fafData, existingFiles);
   

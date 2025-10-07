@@ -1,16 +1,16 @@
 {
   "birthCertificate": {
-    "born": "2025-10-07T02:21:34.657Z",
+    "born": "2025-10-07T02:54:01.153Z",
     "birthDNA": 22,
     "birthDNASource": "CLAUDE.md",
-    "projectDNA": "9e6d97aa6b32bed8",
+    "projectDNA": "bbf2c542a3db7153",
     "authenticated": false,
-    "certificate": "FAF-2025-CLIX-RSYN"
+    "certificate": "FAF-2025-CLIX-9A3X"
   },
   "versions": [
     {
       "version": "v1.0.0",
-      "timestamp": "2025-10-07T02:21:34.657Z",
+      "timestamp": "2025-10-07T02:54:01.153Z",
       "score": 22,
       "changes": [
         "Initial context from CLAUDE.md"
@@ -21,7 +21,7 @@
     },
     {
       "version": "v1.0.1",
-      "timestamp": "2025-10-07T02:21:34.699Z",
+      "timestamp": "2025-10-07T02:54:01.246Z",
       "score": 59,
       "changes": [
         "Initial .faf generation from project"
@@ -35,11 +35,11 @@
     "version": "v1.0.1",
     "score": 59,
     "approved": false,
-    "lastSync": "2025-10-07T02:21:34.700Z"
+    "lastSync": "2025-10-07T02:54:01.246Z"
   },
   "recovery": {
     "claudeMD": "/Users/wolfejam/FAF/cli/CLAUDE.md",
-    "lastBackup": "2025-10-07T02:21:34.657Z",
+    "lastBackup": "2025-10-07T02:54:01.153Z",
     "syncStatus": "active",
     "autoRecover": true
   },
@@ -48,18 +48,18 @@
     "daysActive": 0,
     "averageDailyGrowth": 37,
     "bestDay": {
-      "date": "2025-10-07T02:21:34.700Z",
+      "date": "2025-10-07T02:54:01.246Z",
       "growth": 37
     },
     "bestWeek": {
-      "start": "2025-10-07T02:21:34.657Z",
+      "start": "2025-10-07T02:54:01.154Z",
       "growth": 0
     },
     "milestones": [
       {
         "type": "birth",
         "score": 22,
-        "date": "2025-10-07T02:21:34.657Z",
+        "date": "2025-10-07T02:54:01.154Z",
         "version": "v1.0.0",
         "label": "Birth",
         "emoji": "🐣"
@@ -67,7 +67,7 @@
       {
         "type": "doubled",
         "score": 59,
-        "date": "2025-10-07T02:21:34.700Z",
+        "date": "2025-10-07T02:54:01.246Z",
         "version": "v1.0.1",
         "label": "Doubled",
         "emoji": "2️⃣"
@@ -75,7 +75,7 @@
       {
         "type": "peak",
         "score": 59,
-        "date": "2025-10-07T02:21:34.700Z",
+        "date": "2025-10-07T02:54:01.246Z",
         "version": "v1.0.1",
         "label": "Peak",
         "emoji": "🏔️"
@@ -83,13 +83,13 @@
       {
         "type": "current",
         "score": 59,
-        "date": "2025-10-07T02:21:34.700Z",
+        "date": "2025-10-07T02:54:01.246Z",
         "version": "v1.0.1",
         "label": "Current",
         "emoji": "📍"
       }
     ]
   },
-  "lastModified": "2025-10-07T02:21:34.700Z",
+  "lastModified": "2025-10-07T02:54:01.246Z",
   "format": "faf-dna-v1"
 }

@@ -10,7 +10,7 @@ import path from 'path';
 import { chalk } from '../fix-once/colors';
 import { findFafFile } from '../utils/file-utils';
 import { saveTrustCache } from '../utils/trust-cache';
-import YAML from 'yaml';
+import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
 
 export interface VerificationResult {
   model: string;
@@ -37,7 +37,7 @@ async function mockAIVerification(model: string, fafContent: string): Promise<Ve
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, Math.random() * 1000 + 500));
   
-  const fafData = YAML.parse(fafContent);
+  const fafData = parseYAML(fafContent);
   
   // Analyze content quality
   const hasProjectGoal = fafData?.project?.goal && !fafData.project.goal.includes('!CI');

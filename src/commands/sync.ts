@@ -5,7 +5,7 @@
 
 import { chalk } from "../fix-once/colors";
 import { promises as fs } from "fs";
-import * as YAML from "yaml";
+import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
 import path from "path";
 import { findFafFile, findPackageJson } from "../utils/file-utils";
 import { FAF_COLORS } from "../utils/championship-style";
@@ -34,7 +34,7 @@ export async function syncFafFile(file?: string, options: SyncOptions = {}) {
     // Auto-migrate markdown-style .faf files (legacy MCP v2.2.0)
     let fafData;
     try {
-      fafData = YAML.parse(content);
+      fafData = parseYAML(content);
     } catch (parseError) {
       // Check if it's a markdown-style .faf file
       if (content.includes('## Context') || content.includes('## Stack') || content.includes('## Performance')) {
@@ -50,7 +50,7 @@ export async function syncFafFile(file?: string, options: SyncOptions = {}) {
         fafData = await convertMarkdownFafToYaml(content, fafPath);
 
         // Write new YAML format
-        const yamlContent = YAML.stringify(fafData);
+        const yamlContent = stringifyYAML(fafData);
         await fs.writeFile(fafPath, yamlContent, 'utf-8');
 
         console.log(chalk.green('   ✅ Migration complete - now using YAML format'));
@@ -129,7 +129,7 @@ export async function syncFafFile(file?: string, options: SyncOptions = {}) {
     fafData.generated = new Date().toISOString();
 
     // Write updated .faf file
-    const updatedContent = YAML.stringify(fafData);
+    const updatedContent = stringifyYAML(fafData);
     await fs.writeFile(fafPath, updatedContent, "utf-8");
 
     console.log(chalk.green("☑️ .faf file synced successfully"));
