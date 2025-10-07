@@ -214,6 +214,72 @@ export async function generateFafFromProject(
     }
   }
 
+  // CLI-specific detection and smart slot reuse
+  const deps = {
+    ...packageData.dependencies,
+    ...packageData.devDependencies
+  };
+
+  const isCLI = packageData.bin ||
+                packageData.name?.includes('cli') ||
+                packageData.keywords?.includes('cli') ||
+                packageData.keywords?.includes('command-line') ||
+                deps?.commander ||
+                deps?.yargs ||
+                deps?.oclif ||
+                deps?.inquirer;
+
+  if (isCLI) {
+    // Smart slot reuse for CLI projects
+    contextSlotsFilled['framework'] = 'CLI';  // frontend = CLI
+    contextSlotsFilled['api_type'] = 'CLI';
+    contextSlotsFilled['hosting'] = 'npm registry';
+    contextSlotsFilled['backend'] = 'Node.js';
+
+    // Detect terminal UI framework
+    if (deps?.chalk) contextSlotsFilled['css_framework'] = 'chalk (terminal colors)';
+    else if (deps?.colors) contextSlotsFilled['css_framework'] = 'colors';
+    else if (deps?.ora) contextSlotsFilled['css_framework'] = 'ora';
+
+    // Detect interactive framework
+    if (deps?.inquirer) contextSlotsFilled['ui_library'] = 'inquirer (interactive prompts)';
+    else if (deps?.prompts) contextSlotsFilled['ui_library'] = 'prompts';
+    else if (deps?.enquirer) contextSlotsFilled['ui_library'] = 'enquirer';
+
+    // Detect CLI framework
+    if (deps?.commander) contextSlotsFilled['cli_framework'] = 'commander';
+    else if (deps?.yargs) contextSlotsFilled['cli_framework'] = 'yargs';
+    else if (deps?.oclif) contextSlotsFilled['cli_framework'] = 'oclif';
+
+    // Detect runtime
+    if (packageData.engines?.node) {
+      contextSlotsFilled['runtime'] = `Node.js ${packageData.engines.node}`;
+    } else {
+      contextSlotsFilled['runtime'] = 'Node.js v16+';
+    }
+
+    // Detect build system
+    if (deps?.typescript || deps?.['@types/node']) {
+      contextSlotsFilled['build_tool'] = 'TypeScript (tsc)';
+    }
+
+    // Detect testing
+    if (deps?.jest) contextSlotsFilled['test_framework'] = 'Jest';
+    else if (deps?.mocha) contextSlotsFilled['test_framework'] = 'Mocha';
+    else if (deps?.vitest) contextSlotsFilled['test_framework'] = 'Vitest';
+
+    // Detect CI/CD - check for .github/workflows directory
+    try {
+      const githubWorkflowsPath = path.join(projectRoot, '.github', 'workflows');
+      const githubWorkflowsExists = await fs.access(githubWorkflowsPath).then(() => true).catch(() => false);
+      if (githubWorkflowsExists) {
+        contextSlotsFilled['cicd'] = 'GitHub Actions';
+      }
+    } catch {
+      // Continue without CI/CD detection
+    }
+  }
+
   // Override with package.json if more specific
   if (packageData.name && !contextSlotsFilled['project_name']) {
     contextSlotsFilled['project_name'] = packageData.name;
@@ -340,12 +406,12 @@ export async function generateFafFromProject(
     projectGoal: contextSlotsFilled['project_goal'] || 'Build amazing software',
     mainLanguage: contextSlotsFilled['main_language'] || 'JavaScript',
     framework: contextSlotsFilled['framework'] || 'None',
-    cssFramework: undefined,
-    uiLibrary: undefined,
+    cssFramework: contextSlotsFilled['css_framework'] || undefined,
+    uiLibrary: contextSlotsFilled['ui_library'] || undefined,
     stateManagement: undefined,
     backend: contextSlotsFilled['backend'] || 'None',
     apiType: contextSlotsFilled['api_type'] || 'REST',
-    server: contextSlotsFilled['server'] || 'None',
+    server: contextSlotsFilled['runtime'] || contextSlotsFilled['server'] || 'None',
     database: contextSlotsFilled['database'] || 'None',
     connection: 'None',
     hosting: contextSlotsFilled['hosting'] || 'None',
