@@ -159,7 +159,7 @@ Analyze and enhance this .faf (Universal AI-context Format) file.
 
 Current .faf content:
 \`\`\`yaml
-${stringifyYAML(fafData, null, 2)}
+${stringifyYAML(fafData)}
 \`\`\`
 
 Enhancement focus: ${focus}
@@ -211,7 +211,7 @@ async function executeBig3Enhancement(
       await fs.copyFile(fafPath, `${fafPath}.backup-${Date.now()}`);
       
       // Write enhanced version 
-      const enhancedYaml = stringifyYAML(enhanced, null, 2);
+      const enhancedYaml = stringifyYAML(enhanced);
       await fs.writeFile(fafPath, enhancedYaml);
       
       console.log(chalk.green(`☑️ Enhanced .faf with ${getModelDisplay(model)} intelligence`));
