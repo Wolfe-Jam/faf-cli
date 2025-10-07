@@ -280,6 +280,20 @@ export async function detectProjectType(
         hasTypeScript = true;
       }
 
+      // CLI detection - check for bin field or CLI-specific dependencies
+      const isCLI = packageData.bin ||
+                    packageData.name?.includes('cli') ||
+                    packageData.keywords?.includes('cli') ||
+                    packageData.keywords?.includes('command-line') ||
+                    deps.commander ||
+                    deps.yargs ||
+                    deps.oclif ||
+                    deps.inquirer;
+
+      if (isCLI) {
+        return hasTypeScript ? "cli-ts" : "cli";
+      }
+
       // Framework detection with TypeScript awareness
       if (deps.svelte || deps["@sveltejs/kit"]) {
         return hasTypeScript ? "svelte-ts" : "svelte";

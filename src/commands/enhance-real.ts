@@ -130,7 +130,7 @@ export async function realEnhanceFaf(
       fafData.meta.enhanced_by = 'faf-real-enhance';
 
       // Save enhanced file
-      const enhancedYaml = stringifyYAML(fafData, null, 2);
+      const enhancedYaml = stringifyYAML(fafData);
       await fs.writeFile(fafPath, enhancedYaml);
 
       // Calculate new score
