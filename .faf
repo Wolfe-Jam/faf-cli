@@ -4,19 +4,18 @@ ai_score: 65%
 ai_confidence: MODERATE
 ai_value: 30_seconds_replaces_20_minutes_of_questions
 ai_tldr:
-  project: faf-cli v2.5.3 - "🩵 Cyan CLI - Transform any project into perfect AI
-    context in 30 seconds. Works with Claude, Codex, Gemini & ALL AI tools. Join
-    3000+ developers using .faf files. 100% FREE • Open Source • If helpful, a ⭐
-    is appreciated!"
+  project: faf-cli v2.5.4 - When Claude Forgot FAF | Birth DNA Edition - "🩵⚡️ CLI
+    for .faf | Project DNA ✨ for true AI context for ANY AI (incl. Claude,
+    Gemini, Codex, Cursor et al.) • Join 3000+ developers • 100% FREE • Open
+    Source • If helpful, a ⭐ is appreciated!"
   stack: TypeScript
   quality_bar: ZERO_ERRORS_F1_STANDARDS
   current_focus: Production deployment preparation
   your_role: Build features with perfect context
 instant_context:
-  what_building: 🩵 Cyan CLI - Transform any project into perfect AI context in 30
-    seconds. Works with Claude, Codex, Gemini & ALL AI tools. Join 3000+
-    developers using .faf files. 100% FREE • Open Source • If helpful, a ⭐ is
-    appreciated!
+  what_building: 🩵⚡️ CLI for .faf | Project DNA ✨ for true AI context for ANY AI
+    (incl. Claude, Gemini, Codex, Cursor et al.) • Join 3000+ developers • 100%
+    FREE • Open Source • If helpful, a ⭐ is appreciated!
   tech_stack: TypeScript
   main_language: TypeScript
   deployment: None
@@ -31,12 +30,12 @@ context_quality:
     - CI/CD pipeline
     - Database
 project:
-  name: faf-cli v2.5.3
-  goal: 🩵 Cyan CLI - Transform any project into perfect AI context in 30 seconds.
-    Works with Claude, Codex, Gemini & ALL AI tools. Join 3000+ developers using
-    .faf files. 100% FREE • Open Source • If helpful, a ⭐ is appreciated!
+  name: faf-cli v2.5.4 - When Claude Forgot FAF | Birth DNA Edition
+  goal: 🩵⚡️ CLI for .faf | Project DNA ✨ for true AI context for ANY AI (incl.
+    Claude, Gemini, Codex, Cursor et al.) • Join 3000+ developers • 100% FREE •
+    Open Source • If helpful, a ⭐ is appreciated!
   main_language: TypeScript
-  generated: 2025-10-05T20:55:22.591Z
+  generated: 2025-10-07T02:21:34.628Z
   mission: 🚀 Make Your AI Happy! 🧡 Trust-Driven 🤖
   revolution: 30 seconds replaces 20 minutes of questions
   brand: F1-Inspired Software Engineering - Championship AI Context
@@ -84,7 +83,7 @@ state:
   blockers: null
 tags:
   auto_generated:
-    - faf-cli-v253
+    - faf-cli-v254---when-claude-for
     - none
     - typescript
   smart_defaults:
@@ -96,9 +95,9 @@ tags:
   user_defined: null
 human_context:
   who: all Developers
-  what: 🩵 Cyan CLI - Transform any project into perfect AI context in 30 seconds.
-    Works with Claude, Codex, Gemini & ALL AI tools. Join 3000+ developers using
-    .faf files. 100% FREE • Open Source • If helpful, a ⭐ is appreciated!
+  what: 🩵⚡️ CLI for .faf | Project DNA ✨ for true AI context for ANY AI (incl.
+    Claude, Gemini, Codex, Cursor et al.) • Join 3000+ developers • 100% FREE •
+    Open Source • If helpful, a ⭐ is appreciated!
   why: To from the community
   where: Web platform
   when: 'release": "ts-node scripts/prepare-release'
@@ -116,7 +115,7 @@ ai_scoring_details:
   scoring_method: Honest percentage - no fake minimums
   trust_embedded: COUNT ONCE architecture - trust MY embedded scores
 faf_dna:
-  birth_dna: 12
-  birth_certificate: FAF-2025-CLIX-W6QQ
-  birth_date: 2025-10-05T20:55:22.608Z
+  birth_dna: 22
+  birth_certificate: FAF-2025-CLIX-RSYN
+  birth_date: 2025-10-07T02:21:34.657Z
   current_score: 59

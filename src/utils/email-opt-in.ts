@@ -59,13 +59,15 @@ async function subscribeEmail(email: string): Promise<boolean> {
         }));
 
         // Try to send to server (don't block if it fails)
-        fetch('https://faf.one/api/subscribe', {
+        fetch('https://formspree.io/f/xnngaegg', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 email,
                 source: 'cli',
-                version: process.env.npm_package_version
+                version: process.env.npm_package_version,
+                type: 'FAF CLI Email Notifications',
+                timestamp: new Date().toISOString()
             })
         }).catch(() => {
             // Silently fail - we have it stored locally

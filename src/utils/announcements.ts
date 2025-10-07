@@ -96,11 +96,6 @@ export function showV240Announcement(): void {
     console.log(chalk.green('  🏥 Doctor command: faf doctor (fix issues)'));
     console.log(chalk.green('  🔄 Improved bi-sync performance'));
     console.log();
-    console.log(chalk.yellow.bold('  Coming Next:'));
-    console.log(chalk.gray('  🚀 Vercel integration - fix build failures with AI'));
-    console.log(chalk.gray('  📊 Stack analysis - "Your stack actually sucks"'));
-    console.log(chalk.gray('  🤖 More MCP tools for Claude Desktop'));
-    console.log();
     console.log(chalk.white('  💡 Get notified of new features:'));
     console.log(chalk.cyan.bold('     faf notifications'));
     console.log();
