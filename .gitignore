@@ -79,9 +79,9 @@ temp/
 # Test files
 test-*.faf
 
-# Internal documents
-WJTC-*.md
-*-INTERNAL.md
+# Internal documents - ALL .md files go to FAF-GOLD/PLANET-FAF
+*.md
+!README.md
 
 # Temporary files
 *.tmp
