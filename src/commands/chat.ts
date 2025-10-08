@@ -32,6 +32,16 @@ interface ChatAnswers {
 }
 
 export async function chatCommand(): Promise<void> {
+  // Check if we're in an interactive terminal
+  if (!process.stdin.isTTY) {
+    console.log('\n🏎️ FAF Chat requires an interactive terminal\n');
+    console.log('💡 When using AI assistants or CI/CD:\n');
+    console.log('   faf auto      - Automatically enhance context');
+    console.log('   faf enhance   - Improve .faf programmatically');
+    console.log('   faf init      - Create basic .faf file\n');
+    return;
+  }
+
   console.log(`\n${FAF_COLORS.fafCyan('🗣️  FAF Chat - Let\'s build your .faf file!')}`);
   console.log(`${FAF_COLORS.fafWhite('────────────────────────────────────────────')}\n`);
 

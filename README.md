@@ -11,7 +11,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-100%25%20Strict-3178C6?logo=typescript)](https://www.typescriptlang.org/)
 
-**[Website](https://faf.one)** • **[Community](https://github.com/Wolfe-Jam/faf/discussions)** • **[Issues](https://github.com/Wolfe-Jam/faf/issues)**
+**[Website](https://faf.one)** • **[GitHub](https://github.com/Wolfe-Jam/faf-cli)** • **[Community](https://github.com/Wolfe-Jam/faf-cli/discussions)** • **[Issues](https://github.com/Wolfe-Jam/faf-cli/issues)**
 
 </div>
 
@@ -213,6 +213,34 @@ Universal, shareable context for Claude, ChatGPT, Gemini, Cursor - regardless of
 
 ---
 
+## 🤖 Using FAF with AI Assistants
+
+When using **Claude Code**, **Cursor**, or other AI assistants that run commands for you:
+
+### ✅ These Commands Work Great
+```bash
+faf init      # Create .faf file
+faf auto      # Automatically enhance context
+faf enhance   # Improve .faf programmatically
+faf score     # Check your score
+faf bi-sync   # Sync .faf ↔ CLAUDE.md
+```
+
+### ❌ Avoid Interactive Commands
+```bash
+faf chat      # Requires interactive terminal (TTY)
+faf           # Interactive menu requires TTY
+```
+
+**Why?** Interactive commands use `inquirer` for beautiful CLI menus with arrow keys and selections. These work perfectly in regular terminals but cannot work in AI assistant environments because:
+- AI assistants capture output but can't forward keyboard input
+- Arrow keys and Enter don't reach the process
+- This is expected behavior, not a bug
+
+**Solution:** Use `faf auto` in AI assistant environments - it's designed for this use case and works perfectly!
+
+---
+
 ## 🛠️ Available Commands
 
 ### Core Commands
@@ -376,8 +404,8 @@ When using faf-cli programmatically:
 
 ```bash
 # Clone
-git clone https://github.com/Wolfe-Jam/faf.git
-cd faf/cli
+git clone https://github.com/Wolfe-Jam/faf-cli.git
+cd faf-cli
 
 # Install & Build
 npm install
@@ -420,9 +448,9 @@ MIT License - See [LICENSE](./LICENSE) file
 
 ## 🤝 Contributing
 
-We welcome contributions! Join our [community discussions](https://github.com/Wolfe-Jam/faf/discussions) or submit issues/PRs.
+We welcome contributions! Join our [community discussions](https://github.com/Wolfe-Jam/faf-cli/discussions) or submit issues/PRs.
 
-**Connect with 3000+ developers** using .faf to accelerate their AI workflows:
+**Connect with 7,900+ developers** using .faf to accelerate their AI workflows:
 - Share your projects
 - Get help from the community
 - Request features
@@ -434,8 +462,8 @@ We welcome contributions! Join our [community discussions](https://github.com/Wo
 
 **Made with 🧡 by wolfejam**
 
-**100% FREE Forever** • **3000+ Weekly Downloads** • **Zero Faff™**
+**100% FREE Forever** • **3,127 Weekly Downloads** • **Zero Faff™**
 
-[⭐ Star on GitHub](https://github.com/Wolfe-Jam/faf) • [📦 View on NPM](https://www.npmjs.com/package/faf-cli)
+[⭐ Star on GitHub](https://github.com/Wolfe-Jam/faf-cli) • [📦 View on NPM](https://www.npmjs.com/package/faf-cli)
 
 </div>

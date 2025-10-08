@@ -217,6 +217,17 @@ function displayMissingSlots(score: any): void {
  * RELENTLESS 1-6 questionnaire for the 6 W's of Human Context
  */
 async function askHumanForMissingData(currentFaf: any, score: any): Promise<any> {
+  // Check if we're in an interactive terminal
+  if (!process.stdin.isTTY) {
+    console.log(chalk.yellow('\n⚠️  Interactive questions require a terminal (TTY)'));
+    console.log(chalk.gray('   Skipping interactive questionnaire...'));
+    console.log(chalk.cyan('\n💡 When using AI assistants or CI/CD:'));
+    console.log(chalk.gray('   faf auto      - Automatically enhance context'));
+    console.log(chalk.gray('   faf chat      - Interactive mode (terminal only)'));
+    console.log(chalk.gray('   Run in a real terminal for full interactive enhancement\n'));
+    return {}; // Return empty improvements
+  }
+
   const improvements: any = {};
   const questions: any[] = [];
 
