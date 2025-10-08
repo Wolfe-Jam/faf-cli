@@ -161,7 +161,7 @@ export function generateFAFHeader(scoreboardTitle?: string): string {
   // Title line above ASCII box (scoreboard or default)
   const titleLine = scoreboardTitle
     ? `${scoreboardTitle}\n`
-    : '🏆 Hidden Banner lives here: 🏁 << type, Ctrl+O to get your fix 🏎️⚡️\n\n';
+    : '🏎️⚡️ FAF Championship Edition 🏁\n\n';
 
   return `
 ${titleLine}${FAF_COLORS.fafCyan('┌─────────────────────────────────────────┐')}
