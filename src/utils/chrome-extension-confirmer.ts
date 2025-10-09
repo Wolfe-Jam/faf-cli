@@ -16,6 +16,11 @@ export class ChromeExtensionConfirmer {
     text: string,
     confidence: 'medium' | 'low'
   ): Promise<boolean> {
+    // Check if we're in an interactive terminal
+    if (!process.stdin.isTTY) {
+      // In non-TTY, use confidence level for auto-decision
+      return confidence === 'medium'; // Assume yes for medium confidence
+    }
 
     const messages = {
       medium: `🎯 Detected possible Chrome Extension from: "${chalk.yellow(text)}"`,
@@ -50,6 +55,12 @@ export class ChromeExtensionConfirmer {
 
     if (suggestions.length === 0) {
       return null;
+    }
+
+    // Check if we're in an interactive terminal
+    if (!process.stdin.isTTY) {
+      // In non-TTY, return first suggestion or null
+      return suggestions[0]?.value || null;
     }
 
     console.log();
@@ -157,6 +168,12 @@ export class ChromeExtensionConfirmer {
           return 'chrome-extension';
         }
       }
+    }
+
+    // Check if we're in an interactive terminal
+    if (!process.stdin.isTTY) {
+      // In non-TTY, return best guess or default
+      return currentInput ? this.guessDefault(currentInput) : 'web-app';
     }
 
     const { projectType } = await inquirer.prompt([
