@@ -1,8 +1,8 @@
 /**
  * 🧡 Trust Dashboard Command - The Emotional Core
  * Transforms developer psychology from hope-driven to trust-driven AI development
- * 
- * Mission: "I don't worry about ANY of that AI shit anymore"
+ *
+ * Mission: "I don't worry about AI context complexity anymore"
  */
 
 import { promises as fs } from 'fs';
