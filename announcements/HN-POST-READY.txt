@@ -1,0 +1,37 @@
+TITLE:
+AI CLI/MCP about to hit 10k on npm goes OPEN-SOURCE
+
+POST BODY:
+Hey HN!
+
+I'm launching FAF CLI v3.0.0 Championship Edition – a foundational AI context format standard that automatically generates and maintains project context for any AI tool in <50ms.
+
+What it does: Scans any codebase and generates structured .faf files (YAML) that work with Claude Code, Cursor, OpenAI Codex CLI, Gemini CLI, Warp, Windsurf, and any AI that reads project context.
+
+Key features:
+- TURBO-CAT format discovery: Detects 153+ frameworks/configs automatically
+- Bi-directional sync: Keeps .faf ↔ CLAUDE/tool.md in perfect sync (8ms average)
+- DNA tracking: Audit trail for every context change
+- Zero config: `faf init` and you're done
+- TypeScript strict mode: 100% type-safe, zero errors
+
+Technical highlights:
+- C-Mirror engine: Context-mirroring with atomic writes (zero-slippage design)
+- 1,000+ comprehensive tests (WJTTC GOLD certified)
+- Sub-50ms operations target (championship performance) 18ms avg. 
+- Works offline, no API keys, no telemetry beyond basic analytics
+
+Why it matters: Right now, every AI tool has its own context format. Claude wants CLAUDE.md, Cursor wants .cursorrules, others want different formats. FAF provides a single source of truth that connects with AI and works everywhere.
+
+Open source: MIT license, free forever. No vendor lock-in.
+
+Built this after frustration with managing context across multiple AI tools. Tested with Google Gemini, Anthropic Claude, and OpenAI teams. Now approaching 10,000 downloads across ecosystem (CLI + MCP combined).
+
+GitHub: https://github.com/Wolfe-Jam/faf-cli
+npm: https://www.npmjs.com/package/faf-cli
+Full announcement: https://www.faf.one/blog/v3-launch
+
+npm install -g faf-cli
+faf init
+
+Happy to answer questions about the architecture, format discovery engine, or the context-mirroring approach!
