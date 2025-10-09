@@ -1,4 +1,4 @@
-# faf-cli v3.0.0 - Championship Edition 🏆 
+# faf-cli v3.0.1 - Championship Edition 🏆 
 with Turbo Cat 😽
 
 <div align="center">
@@ -78,79 +78,6 @@ with Turbo Cat 😽
 ---
 
 **100% verified. Real AI responses. Not marketing copy.**
-
----
-
-## 💎 Choose Your Speed
-
-FAF follows the proven model:
-
-<div align="center">
-
-### Like **VS Code + Copilot** • **Spotify Free + Premium** • **Zoom Basic + Pro**
-
-</div>
-
-<table>
-<tr>
-<td width="50%" valign="top">
-
-### **FAF v3.0.0 (FREE FOREVER to all Developers)** 🆓
-
-✅ **41 Championship Commands**
-- Project initialization & auto-detection
-- TURBO-CAT format discovery (153 formats)
-- Birth DNA lifecycle tracking
-- AI readiness scoring
-- Context-mirroring (bi-sync)
-- Health checks & diagnostics
-
-✅ **Performance**
-- <50ms command execution
-- 8ms bi-sync (championship speed)
-- F1-inspired engineering
-
-✅ **Universal Compatibility**
-- Works with Claude, Codex CLI, Gemini CLI, Cursor
-- Mac, Linux, Windows support
-- Open source, MIT licensed
-
-```bash
-npm install -g faf-cli
-```
-
-</td>
-<td width="50%" valign="top">
-
-### **FAF v3.0.0 TURBO** 💨
-
-✅ **Everything in FREE, Plus:**
-
-🧬 **Deep Format Intelligence**
-- Pyramid-level insights (17 levels deep)
-- Cross-format relationship analysis
-- Stack health diagnostics
-- Migration path recommendations
-
-🔮 **Workflow Analysis**
-- n8n workflow parsing
-- OpenAI schema analysis
-- OPAL format processing
-- Custom format support
-
-🏆 **Premium Features**
-- Priority support & service plans
-- Advanced TURBO-CAT capabilities
-- Enterprise integrations
-- Early access to new features
-
-```bash
-Learn more: faf.one/turbo
-```
-
-</td>
-</tr>
-</table>
 
 ---
 
@@ -371,7 +298,7 @@ faf lint        # Fix formatting issues
 
 ## 🤖 Works with AI Assistants
 
-FAF v3.0.0 fully supports **Claude Code, Warp, Cursor, Copilot, Windsurf, OpenAI Codex CLI, Gemini CLI** and ALL AI coding assistants.
+FAF v3.0.1 fully supports **Claude Code, Warp, Cursor, Copilot, Windsurf, OpenAI Codex CLI, Gemini CLI** and ALL AI coding assistants.
 
 **PLUS AI-Automation platforms:** n8n, OpenAI Builder, Google Opal, Make.com
 
@@ -496,7 +423,7 @@ faf auto -q
 ## 📊 Technical Specs
 
 ```yaml
-Version:       3.0.0 - Championship Edition
+Version:       3.0.1 - Championship Edition
 Performance:   <50ms all commands, 18ms avg, 8ms bi-sync, 0ms operations achieved
 Engine:        FAF-Engine-Mk3
 TURBO-CAT:     v3.0.0 - Full Power (Introduced v2.0.0, 153 validated formats)
@@ -513,7 +440,7 @@ Automation:    n8n workflows, OpenAI Builder, Google Opal, Make.com - AI-Automat
 
 ## 🏆 WJTTC Championship Testing
 
-**FAF CLI v3.0.0 is WJTTC GOLD Certified** - tested to F1-grade standards.
+**FAF CLI v3.0.1 is WJTTC GOLD Certified** - tested to F1-grade standards.
 
 ### What is WJTTC?
 **WolfeJam Technical & Testing Center** - F1-inspired testing methodology ensuring championship-grade reliability.
@@ -682,7 +609,7 @@ Copy cats? Why bother.
 
 <div align="center">
 
-## 🏁 v3.0.0 - Championship Edition
+## 🏁 v3.0.1 - Championship Edition
 
 **FREE FOREVER** 🆓 • **TURBO-CAT Powered** 😽 • **10,000 Downloads** 🎉
 
@@ -694,8 +621,8 @@ Made with 🧡 by **[wolfejam](https://github.com/Wolfe-Jam)**
 
 ---
 
-**Like VS Code + Copilot** • **Like Spotify Free + Premium** • **Like Zoom Basic + Pro**
+The CLI is **FREE FOREVER**.
 
-The engine is FREE FOREVER. TURBO unlocks the pyramid. 😽🔺
+Love it? **TURBO** for advanced features coming real soon once you've kicked the tires! 😽💨
 
 </div>
