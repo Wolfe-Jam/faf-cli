@@ -1,11 +1,11 @@
 /**
  * ⚛️ Atomic File Writer
- * All-or-nothing file operations - Zero slippage guarantee
+ * All-or-nothing file operations - Zero slippage design
  *
  * Strategy:
  * 1. Write to .tmp file first
  * 2. Validate the write succeeded
- * 3. Atomic rename (OS-level guarantee)
+ * 3. Atomic rename (OS-level atomic operation)
  * 4. If ANY step fails, original file is untouched
  *
  * User NEVER sees partial state
@@ -18,7 +18,7 @@ import { MirrorEventType, createMirrorEvent } from '../core/events/mirror-events
 
 /**
  * Atomic file write
- * Guarantees all-or-nothing operation
+ * Implements all-or-nothing operation
  *
  * @param filePath - Target file path
  * @param content - Content to write
@@ -63,7 +63,7 @@ export async function atomicWrite(
       throw new Error('File validation failed: written content does not match');
     }
 
-    // Step 4: Atomic rename (OS-level guarantee)
+    // Step 4: Atomic rename (OS-level atomic operation)
     await fs.rename(tmpPath, filePath);
 
     // Step 5: Clean up backup

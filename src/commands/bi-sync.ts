@@ -7,7 +7,7 @@
  * • Smart merge algorithms prevent conflicts and data corruption
  * • Self-healing: Auto-recovers from file locks/system issues
  * • Event-driven: Broadcasts to Terminal, Slack, Dashboard, etc.
- * • Atomic writes: Zero-slippage guarantee
+ * • Atomic writes: Zero-slippage design
  * • DNA logging: Full audit trail
  *
  * Mission: Perfect harmony between .faf (AI context) and CLAUDE.md (Claude Code context)
