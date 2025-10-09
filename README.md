@@ -35,7 +35,7 @@
 - ⚡ **Championship Speed** - 8ms bi-sync, <50ms all commands, 18ms avg, 0ms operations achieved
 - 🏁 **WJTTC GOLD Certified** - 1,000+ comprehensive tests, unique test suite
 - 🤖 **BIG-3 AI Validation** - Verified by Google Gemini, Anthropic Claude, OpenAI Codex
-- 🌐 **Universal AI Support** - Claude, ChatGPT, Gemini, Cursor, Warp, Copilot, Windsurf, ALL AI coding assistants
+- 🌐 **Universal AI Support** - Claude Code, OpenAI Codex CLI, Gemini CLI, Cursor, Warp, Copilot, Windsurf, ALL AI coding assistants
 - 🤖 **AI-Automation Ready** - Reads n8n workflows, OpenAI Builder schemas, Google Opal, Make.com - Project DNA for automation platforms
 
 ---
@@ -260,7 +260,7 @@ We created this tool together across thousands of conversations. Yet without pro
 
 **`.faf` = Project DNA ✨**
 
-Universal, shareable AI context that works with **Claude, ChatGPT, Gemini, Cursor** - regardless of your stack, size, or setup.
+Universal, shareable AI context that works with **Claude Code, OpenAI Codex CLI, Gemini CLI, Cursor** - regardless of your stack, size, or setup.
 
 ### The Problem
 
@@ -274,7 +274,7 @@ Universal, shareable AI context that works with **Claude, ChatGPT, Gemini, Curso
 
 - ✅ **30 seconds** from zero to complete AI understanding
 - ✅ **One command** creates perfect context
-- ✅ **Works with every AI** - Claude, ChatGPT, Gemini, Cursor, all of them
+- ✅ **Works with every AI** - Claude Code, OpenAI Codex CLI, Gemini CLI, Cursor, all of them
 - ✅ **Share with your team** - Instant project onboarding
 - ✅ **Persistent memory** - Never explain your project again
 
@@ -324,7 +324,7 @@ faf quick       # One-liner instant context
 
 ### 🔍 Discovery & Verification
 ```bash
-faf verify      # Test with Claude, ChatGPT, Gemini
+faf verify      # Test with Claude Code, OpenAI Codex CLI, Gemini CLI
 faf doctor      # Diagnose & fix issues
 faf search      # Content search with highlighting
 ```
@@ -369,7 +369,7 @@ faf lint        # Fix formatting issues
 
 ## 🤖 Works with AI Assistants
 
-FAF v3.0.0 fully supports **Claude Code, Warp, Cursor, Copilot, Windsurf, ChatGPT, Gemini** and ALL AI coding assistants.
+FAF v3.0.0 fully supports **Claude Code, Warp, Cursor, Copilot, Windsurf, OpenAI Codex CLI, Gemini CLI** and ALL AI coding assistants.
 
 **PLUS AI-Automation platforms:** n8n, OpenAI Builder, Google Opal, Make.com
 
@@ -503,7 +503,7 @@ Dependencies:  2 (inquirer, yaml)
 Testing:       WJTTC GOLD Certified (1,000+ comprehensive, unique test suite)
 Certification: https://faf.one/wjttc
 Platform:      Mac, Linux, Windows
-AI Support:    Universal - Claude, ChatGPT, Gemini, Cursor, Warp, Copilot, Windsurf, ALL AI coding assistants
+AI Support:    Universal - Claude Code, OpenAI Codex CLI, Gemini CLI, Cursor, Warp, Copilot, Windsurf, ALL AI coding assistants
 Automation:    n8n workflows, OpenAI Builder, Google Opal, Make.com - AI-Automation platforms
 ```
 
@@ -537,7 +537,7 @@ Automation:    n8n workflows, OpenAI Builder, Google Opal, Make.com - AI-Automat
 **Platform Verified:**
 - ✅ Mac, Linux, Windows
 - ✅ Claude Code, Cursor, AI Assistants
-- ✅ Big-3 AI Compatible (Claude, ChatGPT, Gemini)
+- ✅ Big-3 AI Compatible (Claude Code, OpenAI Codex CLI, Gemini CLI)
 
 ---
 
