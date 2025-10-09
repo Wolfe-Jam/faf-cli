@@ -1,7 +1,7 @@
 {
   "name": "faf-cli",
-  "version": "2.5.4",
-  "description": "🩵⚡️ CLI for .faf | Project DNA ✨ for true AI context for ANY AI (incl. Claude, Gemini, Codex, Cursor et al.) • Join 3000+ developers • 100% FREE • Open Source • If helpful, a ⭐ is appreciated!",
+  "version": "3.0.0",
+  "description": "😽 TURBO-CAT: The Rapid Catalytic Converter • Project DNA ✨ for ANY AI • FREE FOREVER • Like VS Code + Copilot • 10,000+ developers • Championship Edition • Open Source MIT",
   "icon": "https://faf.one/orange-smiley.svg",
   "logo": "https://faf.one/orange-smiley.svg",
   "banner": "https://raw.githubusercontent.com/Wolfe-Jam/faf/main/cli/faf-banner.png",
@@ -59,40 +59,39 @@
     "version:truth": "node scripts/version-check.js",
     "prepublish:check": "npm run version:truth",
     "precommit": "npm run version:check",
-    "postinstall": "echo '\n🩵⚡️ FAF CLI v2.5.0 - FREE for all Developers!\nRun \"faf --help\" to get started\n'"
+    "postinstall": "echo '\n🩵⚡️FAF CLI v3.0.0 - Championship Edition - FREE FOREVER!\n😽TURBO-CAT Powered | The Rapid Catalytic Converter | 10,000+ Developers\n🏎️⚡️wolfejam|f1-inspired-engineering\n\nRun \"faf --help\" to get started\n'"
   },
   "keywords": [
     "faf",
-    "anti-faff",
+    "turbo-cat",
+    "format-discovery",
+    "catalytic-converter",
     "ai-context",
+    "project-dna",
     "context-mirroring",
     "c-mirror",
     "bi-sync",
     "cli",
-    "dna-lifecycle",
-    "disaster-recovery",
+    "free-forever",
     "championship",
     "fast-af",
-    "validation",
-    "project-context",
-    "stop-faffing",
-    "developer-productivity",
     "claude",
     "chatgpt",
     "gemini",
+    "cursor",
     "ai-tools",
-    "cursor"
+    "developer-productivity",
+    "anti-faff"
   ],
   "author": "🏎️⚡️_wolfejam.dev",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Wolfe-Jam/faf.git",
-    "directory": "cli"
+    "url": "https://github.com/Wolfe-Jam/faf-cli.git"
   },
   "homepage": "https://faf.one",
   "bugs": {
-    "url": "https://github.com/Wolfe-Jam/faf/issues"
+    "url": "https://github.com/Wolfe-Jam/faf-cli/issues"
   },
   "dependencies": {
     "inquirer": "^12.9.4",

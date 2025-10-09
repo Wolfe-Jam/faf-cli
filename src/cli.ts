@@ -35,7 +35,6 @@ import { searchCommand } from './commands/search';
 import { indexCommand } from './commands/index';
 import { shareCommand } from './commands/share';
 import { chatCommand } from './commands/chat';
-import { createCommand } from './commands/create';
 import { convertCommand, toMarkdown, toText } from './commands/convert';
 import { notificationsCommand } from './commands/notifications';
 import { setColorOptions, type ColorScheme } from './utils/color-utils';
@@ -564,37 +563,6 @@ Perfect for:
   • Quick project setup
   • Learning FAF concepts through conversation`)
   .action(withAnalyticsTracking('chat', () => chatCommand()));
-
-// ✨ faf create - Conversational Workflow Enrichment
-program
-  .command('create <file>')
-  .description('✨ Create RICH .faf from workflow files (n8n, OpenAI, OPAL)')
-  .option('-o, --output <path>', 'Output .faf file path (default: same as input with .faf extension)')
-  .option('-q, --quiet', 'Quiet mode - minimal output')
-  .addHelpText('after', `
-Examples:
-  $ faf create workflow.json                    # Create .faf from n8n workflow
-  $ faf create my-workflow.json -o custom.faf   # Custom output path
-  $ faf create workflow.json --quiet            # Minimal output
-
-✨ Conversational Enrichment:
-  • 3-question interface (minimal friction)
-  • Auto-corrects typos (Hermozis → Hormozi)
-  • Fills 6 W's intelligently (who/what/why/where/when/how)
-  • Generates championship .faf (85%+ score)
-
-Currently Supported:
-  • 🔵 n8n workflows (THE canonical .faf schema v1.0)
-  • 🔜 OpenAI GPT configs (coming soon)
-  • 🔜 Google OPAL tools (coming soon)
-  • 🔜 Make.com scenarios (coming soon)
-
-Perfect for:
-  • n8n workflow documentation
-  • AI-agent ready context
-  • Self-healing workflows
-  • FAF-MCP indexing`)
-  .action(withAnalyticsTracking('create', (file: string, options: any) => createCommand(file, options)));
 
 // 🤖 faf verify - AI Verification System (The Trust Builder)
 program
