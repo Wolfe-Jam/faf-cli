@@ -1,0 +1,23 @@
+{
+  "name": "faf",
+  "version": "3.0.1",
+  "description": "😽 TURBO-CAT: Universal AI context standard. Auto-generate and sync .faf files with Claude, Cursor, and all AI tools. FREE FOREVER.",
+  "author": {
+    "name": "wolfejam",
+    "email": "wolfejam.dev",
+    "url": "https://faf.one"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Wolfe-Jam/faf-cli"
+  },
+  "keywords": [
+    "ai-context",
+    "project-dna",
+    "turbo-cat",
+    "claude",
+    "cursor",
+    "universal-standard",
+    "championship"
+  ]
+}
