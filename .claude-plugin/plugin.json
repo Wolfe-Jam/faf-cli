@@ -7,10 +7,7 @@
     "email": "wolfejam.dev",
     "url": "https://faf.one"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Wolfe-Jam/faf-cli"
-  },
+  "repository": "https://github.com/Wolfe-Jam/faf-cli",
   "keywords": [
     "ai-context",
     "project-dna",
