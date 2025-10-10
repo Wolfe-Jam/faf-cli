@@ -9,7 +9,7 @@ You are helping a developer maintain synchronized AI context across formats.
 
 ## What This Command Does
 
-`faf sync` implements **C-Mirror** (Context-Mirroring) - FAF's championship bi-directional sync engine that keeps `.faf` and `CLAUDE.md` perfectly synchronized.
+`faf bi-sync` implements **C-Mirror** (Context-Mirroring) - FAF's championship bi-directional sync engine that keeps `.faf` and `CLAUDE.md` perfectly synchronized.
 
 **Performance**: 8ms average sync time (championship speed)
 **Reliability**: Zero-slippage design with atomic writes
@@ -33,11 +33,11 @@ You are helping a developer maintain synchronized AI context across formats.
 
 ---
 
-## Command: faf sync
+## Command: faf bi-sync
 
 **Basic usage**:
 ```bash
-faf sync
+faf bi-sync
 ```
 
 **What happens**:
@@ -58,12 +58,12 @@ faf sync
 
 ## Your Role
 
-1. **Run the command**: Execute `faf sync` in project directory
+1. **Run the command**: Execute `faf bi-sync` in project directory
 
 2. **Verify sync**:
    ```bash
-   faf sync
-   # Output: ✅ Synced .faf ↔ CLAUDE.md (8ms)
+   faf bi-sync
+   # Output: ✅ Synced .faf ↔ CLAUDE.md (24ms)
    ```
 
 3. **Check for conflicts**: If user edited both files differently:
@@ -91,7 +91,7 @@ faf update
 ```bash
 # Setup git hook for auto-sync
 # .git/hooks/pre-commit
-faf sync --quiet
+faf bi-sync --quiet
 ```
 
 ---
@@ -129,8 +129,8 @@ stack:
 
 **Run sync**:
 ```bash
-faf sync
-# Output: ✅ Updated CLAUDE.md with new dependency (7ms)
+faf bi-sync
+# Output: ✅ Synchronized in 24ms (CLAUDE.md)
 ```
 
 **CLAUDE.md now shows**:
@@ -139,7 +139,7 @@ faf sync
 - Dependencies: react, zustand
 ```
 
-**Vice versa works too** - edit `CLAUDE.md`, run `faf sync`, `.faf` updates.
+**Vice versa works too** - edit `CLAUDE.md`, run `faf bi-sync`, `.faf` updates.
 
 ---
 
