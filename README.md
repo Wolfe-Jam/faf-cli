@@ -1,11 +1,11 @@
-# faf-cli v3.0.1 - Championship Edition 🏆 
+# faf-cli v3.0.2 - Championship Edition 🏆 
 with Turbo Cat 😽
 
 <div align="center">
 
 <img src="https://cdn.jsdelivr.net/npm/faf-cli@latest/assets/icons/orange-smiley.svg" alt="FAF Logo" width="64" />
 
-## **FREE FOREVER** 🆓 • **Growing Fast** 📈 • **TURBO-CAT Powered** 😽
+## **FREE FOR ALL DEVS** 🆓 • **Growing Fast** 📈 • **TURBO-CAT Powered** 😽
 
 **Project DNA ✨ for ANY AI** • **Instant Context** • **Zero Faff™**
 
@@ -133,7 +133,7 @@ faf formats
 <tr>
 <td width="50%" valign="top">
 
-### **FAF v3.0.1 (FREE FOREVER)** 🆓
+### **FAF v3.0.2 (FREE FOR ALL DEVS)** 🆓
 
 ✅ **41 Championship Commands**
 - Project initialization & auto-detection
@@ -162,7 +162,7 @@ npm install -g faf-cli
 </td>
 <td width="50%" valign="top">
 
-### **FAF v3.0.1 TURBO** 💨
+### **FAF v3.0.2 TURBO** 💨
 
 ✅ **Everything in FREE, Plus:**
 
@@ -394,7 +394,7 @@ faf lint        # Fix formatting issues
 
 ## 🤖 Works with AI Assistants
 
-FAF v3.0.1 fully supports **Claude Code, Warp, Cursor, Copilot, Windsurf, OpenAI Codex CLI, Gemini CLI** and ALL AI coding assistants.
+FAF v3.0.2 fully supports **Claude Code, Warp, Cursor, Copilot, Windsurf, OpenAI Codex CLI, Gemini CLI** and ALL AI coding assistants.
 
 **PLUS AI-Automation platforms:** n8n, OpenAI Builder, Google Opal, Make.com
 
@@ -519,7 +519,7 @@ faf auto -q
 ## 📊 Technical Specs
 
 ```yaml
-Version:       3.0.1 - Championship Edition
+Version:       3.0.2 - Championship Edition
 Performance:   <50ms all commands, 18ms avg, 8ms bi-sync, 0ms operations achieved
 Engine:        FAF-Engine-Mk3
 TURBO-CAT:     v3.0.0 - Full Power (Introduced v2.0.0, 153 validated formats)
@@ -590,7 +590,7 @@ You do it **once**, use it **forever**. That's championship efficiency.
 
 ## 🏆 WJTTC Championship Testing
 
-**FAF CLI v3.0.1 is WJTTC GOLD Certified** - tested to F1-grade standards.
+**FAF CLI v3.0.2 is WJTTC GOLD Certified** - tested to F1-grade standards.
 
 ### What is WJTTC?
 **WolfeJam Technical & Testing Center** - F1-inspired testing methodology ensuring championship-grade reliability.
@@ -758,9 +758,9 @@ Copy cats? Why bother.
 
 <div align="center">
 
-## 🏁 v3.0.1 - Championship Edition
+## 🏁 v3.0.2 - Championship Edition
 
-**FREE FOREVER** 🆓 • **TURBO-CAT Powered** 😽 • **Growing Fast** 📈
+**FREE FOR ALL DEVS** 🆓 • **TURBO-CAT Powered** 😽 • **Growing Fast** 📈
 
 Made with 🧡 by **[wolfejam](https://github.com/Wolfe-Jam)**
 
@@ -770,7 +770,7 @@ Made with 🧡 by **[wolfejam](https://github.com/Wolfe-Jam)**
 
 ---
 
-The CLI is **FREE FOREVER**.
+The CLI is **FREE FOR ALL DEVS**.
 
 Love it? **TURBO** for advanced features coming real soon once you've kicked the tires! 😽💨
 

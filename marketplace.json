@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "faf-marketplace",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "Universal AI context standard - Auto-generate and sync project DNA for Claude, Cursor, and all AI tools",
   "owner": {
     "name": "wolfejam",
@@ -12,7 +12,7 @@
     {
       "name": "faf",
       "description": "😽 TURBO-CAT: Universal AI context standard. FREE FOREVER. Works with Claude, Cursor, Codex, Gemini, Warp, Windsurf - all AI tools.",
-      "version": "3.0.1",
+      "version": "3.0.2",
       "author": {
         "name": "wolfejam",
         "email": "wolfejam.dev",
