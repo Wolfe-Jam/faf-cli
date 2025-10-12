@@ -40,9 +40,9 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
     const n8nWorkflows = await findN8nWorkflows(targetDir);
     if (n8nWorkflows.length > 0) {
       console.log(chalk.yellow(`\n⚠️  n8n workflow detected: ${chalk.white(n8nWorkflows[0])}`));
-      console.log(chalk.cyan(`\n💡 For n8n workflows, use the specialist tool:`));
+      console.log(chalk.cyan(`\n💡 Fancy an 85% or even a 99%? 🏎️💨`));
       console.log(chalk.white(`   faf turbo analyze "${n8nWorkflows[0]}"`));
-      console.log(chalk.gray(`\n🏎️ TURBO extracts 48% AI context from n8n JSON in 3 seconds!`));
+      console.log(chalk.gray(`\n🏆 TURBO: 48% → 85%+ (with bi-sync) in 3 seconds!`));
       console.log(chalk.gray(`   vs. standard auto: 25% (generic detection)\n`));
 
       const readline = await import('readline');
@@ -70,9 +70,9 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
     const makeScenarios = await findMakeScenarios(targetDir);
     if (makeScenarios.length > 0) {
       console.log(chalk.yellow(`\n⚠️  Make.com scenario detected: ${chalk.white(makeScenarios[0])}`));
-      console.log(chalk.cyan(`\n💡 For Make.com scenarios, use the specialist tool:`));
+      console.log(chalk.cyan(`\n💡 Fancy an 85% or even a 99%? 🏎️💨`));
       console.log(chalk.white(`   faf turbo analyze "${makeScenarios[0]}"`));
-      console.log(chalk.gray(`\n🏎️ TURBO extracts 50% AI context from Make.com JSON in 3 seconds!`));
+      console.log(chalk.gray(`\n🏆 TURBO: 50% → 85%+ (with bi-sync) in 3 seconds!`));
       console.log(chalk.gray(`   vs. standard auto: 25% (generic detection)\n`));
 
       const readline = await import('readline');
@@ -100,9 +100,9 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
     const opalMiniApps = await findOpalMiniApps(targetDir);
     if (opalMiniApps.length > 0) {
       console.log(chalk.yellow(`\n⚠️  Google Opal mini-app detected: ${chalk.white(opalMiniApps[0])}`));
-      console.log(chalk.cyan(`\n💡 For Google Opal mini-apps, use the specialist tool:`));
+      console.log(chalk.cyan(`\n💡 Fancy an 85% or even a 99%? 🏎️💨`));
       console.log(chalk.white(`   faf turbo analyze "${opalMiniApps[0]}"`));
-      console.log(chalk.gray(`\n🏎️ TURBO extracts 45% AI context from Opal JSON in 3 seconds!`));
+      console.log(chalk.gray(`\n🏆 TURBO: 45% → 85%+ (with bi-sync) in 3 seconds!`));
       console.log(chalk.gray(`   vs. standard auto: 25% (generic detection)\n`));
 
       const readline = await import('readline');
@@ -130,9 +130,9 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
     const openaiAssistants = await findOpenAIAssistants(targetDir);
     if (openaiAssistants.length > 0) {
       console.log(chalk.yellow(`\n⚠️  OpenAI Assistant detected: ${chalk.white(openaiAssistants[0])}`));
-      console.log(chalk.cyan(`\n💡 For OpenAI Assistants, use the specialist tool:`));
+      console.log(chalk.cyan(`\n💡 Fancy an 85% or even a 99%? 🏎️💨`));
       console.log(chalk.white(`   faf turbo analyze "${openaiAssistants[0]}"`));
-      console.log(chalk.gray(`\n🏎️ TURBO extracts 55% AI context from OpenAPI schema in 3 seconds!`));
+      console.log(chalk.gray(`\n🏆 TURBO: 55% → 85%+ (with bi-sync) in 3 seconds!`));
       console.log(chalk.gray(`   vs. standard auto: 25% (generic detection)\n`));
 
       const readline = await import('readline');
