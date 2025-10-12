@@ -534,32 +534,11 @@ Automation:    n8n workflows, OpenAI Builder, Google Opal, Make.com - AI-Automat
 
 ---
 
-## 🏎️ Universal Intelligence Pattern
+## 🏎️ The .faf Pattern
 
-### FOUNDATIONAL FIRST, UNIVERSAL BY DEFAULT
+### Why .faf vs RAG?
 
-**.faf isn't trying to be universal—it already is.**
-
-Every intelligence source follows the same RAG-inspired pattern:
-
-```
-interrogation → extraction → filtering → generation
-```
-
-And the output is **always .faf**—the universal container for structured intelligence.
-
-### How It Works
-
-**Any input** goes through the pattern:
-- **n8n workflow** → interrogation → extraction → filtering → generation → **.faf**
-- **OpenAI Assistant** → interrogation → extraction → filtering → generation → **.faf**
-- **Opal mini-app** → interrogation → extraction → filtering → generation → **.faf**
-- **Make.com scenario** → interrogation → extraction → filtering → generation → **.faf**
-- **Code project** → interrogation → extraction → filtering → generation → **.faf**
-
-**Same pattern. Same output. Universal by design.**
-
-### vs RAG Comparison
+**.faf is pre-indexed intelligence.** Do the work once, use it forever.
 
 | Aspect | RAG Approach | .faf Approach |
 |--------|-------------|---------------|
@@ -570,21 +549,21 @@ And the output is **always .faf**—the universal container for structured intel
 | **Cost** | Per-query fees | Zero runtime cost |
 | **Versioning** | Difficult | Git-friendly YAML |
 
-**.faf is the pre-indexed result of RAG's interrogation-extraction-filter pipeline.**
+**.faf is RAG's output—captured once, reused infinitely.** Championship efficiency.
 
-You do it **once**, use it **forever**. That's championship efficiency.
+### Universal Pattern
 
-### Platform Support
+Every source follows the same pattern:
 
-| Platform | Status | Use Case |
-|----------|--------|----------|
-| **n8n** | ✅ Production | Workflow automation (RAG, ETL, Multi-Agent) |
-| **OpenAI** | ✅ Implemented | GPT Actions & Assistants API |
-| **Opal** | ✅ Ready | Google mini-app workflows |
-| **Make.com** | ✅ Ready | Scenario automation |
-| **Code** | ✅ Production | All programming languages |
+```
+interrogation → extraction → filtering → generation → .faf
+```
 
-**Adding a new platform?** Extend the pattern in <100 lines of code. See `/src/core/README-UNIVERSAL-PATTERN.md`
+**In FREE CLI:** Code projects → .faf (all languages, frameworks, stacks)
+
+**In TURBO:** Automation platforms → .faf (n8n, OpenAI Assistants, Opal, Make.com)
+
+Same pattern. Same output. Universal by design.
 
 ---
 
