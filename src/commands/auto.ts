@@ -33,10 +33,11 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
   }
 
   try {
-    // Step 0: Check for n8n workflows (funnel to TURBO)
-    const { findN8nWorkflows } = await import('../utils/file-utils');
-    const n8nWorkflows = await findN8nWorkflows(targetDir);
+    // Step 0: Check for platform workflows (funnel to TURBO)
+    const { findN8nWorkflows, findMakeScenarios, findOpalMiniApps, findOpenAIAssistants } = await import('../utils/file-utils');
 
+    // Check n8n workflows
+    const n8nWorkflows = await findN8nWorkflows(targetDir);
     if (n8nWorkflows.length > 0) {
       console.log(chalk.yellow(`\n⚠️  n8n workflow detected: ${chalk.white(n8nWorkflows[0])}`));
       console.log(chalk.cyan(`\n💡 For n8n workflows, use the specialist tool:`));
@@ -44,7 +45,6 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
       console.log(chalk.gray(`\n🏎️ TURBO extracts 48% AI context from n8n JSON in 3 seconds!`));
       console.log(chalk.gray(`   vs. standard auto: 25% (generic detection)\n`));
 
-      // Ask user if they want to continue with standard auto
       const readline = await import('readline');
       const rl = readline.createInterface({
         input: process.stdin,
@@ -64,6 +64,96 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
       }
 
       console.log(chalk.gray('\n⚠️  Proceeding with standard auto (n8n intelligence will be missed)...\n'));
+    }
+
+    // Check Make.com scenarios
+    const makeScenarios = await findMakeScenarios(targetDir);
+    if (makeScenarios.length > 0) {
+      console.log(chalk.yellow(`\n⚠️  Make.com scenario detected: ${chalk.white(makeScenarios[0])}`));
+      console.log(chalk.cyan(`\n💡 For Make.com scenarios, use the specialist tool:`));
+      console.log(chalk.white(`   faf turbo analyze "${makeScenarios[0]}"`));
+      console.log(chalk.gray(`\n🏎️ TURBO extracts 50% AI context from Make.com JSON in 3 seconds!`));
+      console.log(chalk.gray(`   vs. standard auto: 25% (generic detection)\n`));
+
+      const readline = await import('readline');
+      const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+      });
+
+      const answer: string = await new Promise((resolve) => {
+        rl.question(chalk.cyan('Continue with standard auto (not recommended)? [y/N]: '), resolve);
+      });
+      rl.close();
+
+      if (answer.toLowerCase() !== 'y') {
+        console.log(chalk.green(`\n✨ Run this instead:`));
+        console.log(chalk.white(`   faf turbo analyze "${makeScenarios[0]}"`));
+        console.log();
+        process.exit(0);
+      }
+
+      console.log(chalk.gray('\n⚠️  Proceeding with standard auto (Make.com intelligence will be missed)...\n'));
+    }
+
+    // Check Google Opal mini-apps
+    const opalMiniApps = await findOpalMiniApps(targetDir);
+    if (opalMiniApps.length > 0) {
+      console.log(chalk.yellow(`\n⚠️  Google Opal mini-app detected: ${chalk.white(opalMiniApps[0])}`));
+      console.log(chalk.cyan(`\n💡 For Google Opal mini-apps, use the specialist tool:`));
+      console.log(chalk.white(`   faf turbo analyze "${opalMiniApps[0]}"`));
+      console.log(chalk.gray(`\n🏎️ TURBO extracts 45% AI context from Opal JSON in 3 seconds!`));
+      console.log(chalk.gray(`   vs. standard auto: 25% (generic detection)\n`));
+
+      const readline = await import('readline');
+      const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+      });
+
+      const answer: string = await new Promise((resolve) => {
+        rl.question(chalk.cyan('Continue with standard auto (not recommended)? [y/N]: '), resolve);
+      });
+      rl.close();
+
+      if (answer.toLowerCase() !== 'y') {
+        console.log(chalk.green(`\n✨ Run this instead:`));
+        console.log(chalk.white(`   faf turbo analyze "${opalMiniApps[0]}"`));
+        console.log();
+        process.exit(0);
+      }
+
+      console.log(chalk.gray('\n⚠️  Proceeding with standard auto (Google Opal intelligence will be missed)...\n'));
+    }
+
+    // Check OpenAI Assistants
+    const openaiAssistants = await findOpenAIAssistants(targetDir);
+    if (openaiAssistants.length > 0) {
+      console.log(chalk.yellow(`\n⚠️  OpenAI Assistant detected: ${chalk.white(openaiAssistants[0])}`));
+      console.log(chalk.cyan(`\n💡 For OpenAI Assistants, use the specialist tool:`));
+      console.log(chalk.white(`   faf turbo analyze "${openaiAssistants[0]}"`));
+      console.log(chalk.gray(`\n🏎️ TURBO extracts 55% AI context from OpenAPI schema in 3 seconds!`));
+      console.log(chalk.gray(`   vs. standard auto: 25% (generic detection)\n`));
+
+      const readline = await import('readline');
+      const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+      });
+
+      const answer: string = await new Promise((resolve) => {
+        rl.question(chalk.cyan('Continue with standard auto (not recommended)? [y/N]: '), resolve);
+      });
+      rl.close();
+
+      if (answer.toLowerCase() !== 'y') {
+        console.log(chalk.green(`\n✨ Run this instead:`));
+        console.log(chalk.white(`   faf turbo analyze "${openaiAssistants[0]}"`));
+        console.log();
+        process.exit(0);
+      }
+
+      console.log(chalk.gray('\n⚠️  Proceeding with standard auto (OpenAI intelligence will be missed)...\n'));
     }
 
     // Step 1: Check if .faf exists

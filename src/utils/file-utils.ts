@@ -276,6 +276,134 @@ export async function findN8nWorkflows(
 }
 
 /**
+ * Find Make.com scenario files in a project directory
+ *
+ * Detects Make.com blueprint JSON files by checking for:
+ * - name string (scenario name)
+ * - flow array (modules/steps)
+ * - metadata object (scenario metadata)
+ *
+ * @param projectDir - Directory to search (defaults to cwd)
+ * @returns Array of Make.com scenario file names
+ */
+export async function findMakeScenarios(
+  projectDir: string = process.cwd()
+): Promise<string[]> {
+  const scenarios: string[] = [];
+
+  try {
+    const files = await fs.readdir(projectDir);
+
+    for (const file of files) {
+      if (file.endsWith('.json') && !file.includes('package')) {
+        try {
+          const filePath = path.join(projectDir, file);
+          const content = await fs.readFile(filePath, 'utf-8');
+          const json = JSON.parse(content);
+
+          // Check if it's a Make.com blueprint (has name, flow array, and metadata)
+          if (json.name && typeof json.name === 'string' &&
+              json.flow && Array.isArray(json.flow) &&
+              json.metadata && typeof json.metadata === 'object') {
+            scenarios.push(file);
+          }
+        } catch {
+          // Not valid JSON or not Make format, skip
+        }
+      }
+    }
+  } catch {
+    // Directory read error, return empty
+  }
+
+  return scenarios;
+}
+
+/**
+ * Find Google Opal mini-app files in a project directory
+ *
+ * Detects Opal mini-app JSON files by checking for:
+ * - steps array (mini-app steps)
+ * - model string (AI model used)
+ *
+ * @param projectDir - Directory to search (defaults to cwd)
+ * @returns Array of Opal mini-app file names
+ */
+export async function findOpalMiniApps(
+  projectDir: string = process.cwd()
+): Promise<string[]> {
+  const miniApps: string[] = [];
+
+  try {
+    const files = await fs.readdir(projectDir);
+
+    for (const file of files) {
+      if (file.endsWith('.json') && !file.includes('package')) {
+        try {
+          const filePath = path.join(projectDir, file);
+          const content = await fs.readFile(filePath, 'utf-8');
+          const json = JSON.parse(content);
+
+          // Check if it's an Opal mini-app (has steps and model)
+          if (json.steps && Array.isArray(json.steps) &&
+              json.model && typeof json.model === 'string') {
+            miniApps.push(file);
+          }
+        } catch {
+          // Not valid JSON or not Opal format, skip
+        }
+      }
+    }
+  } catch {
+    // Directory read error, return empty
+  }
+
+  return miniApps;
+}
+
+/**
+ * Find OpenAI Assistant files in a project directory
+ *
+ * Detects OpenAI Assistant JSON files (OpenAPI 3.x schemas) by checking for:
+ * - openapi string (OpenAPI version)
+ * - paths object (API endpoints/actions)
+ *
+ * @param projectDir - Directory to search (defaults to cwd)
+ * @returns Array of OpenAI Assistant file names
+ */
+export async function findOpenAIAssistants(
+  projectDir: string = process.cwd()
+): Promise<string[]> {
+  const assistants: string[] = [];
+
+  try {
+    const files = await fs.readdir(projectDir);
+
+    for (const file of files) {
+      if (file.endsWith('.json') && !file.includes('package')) {
+        try {
+          const filePath = path.join(projectDir, file);
+          const content = await fs.readFile(filePath, 'utf-8');
+          const json = JSON.parse(content);
+
+          // Check if it's an OpenAI Assistant schema (has openapi and paths)
+          if (json.openapi && typeof json.openapi === 'string' &&
+              json.paths && typeof json.paths === 'object') {
+            assistants.push(file);
+          }
+        } catch {
+          // Not valid JSON or not OpenAI format, skip
+        }
+      }
+    }
+  } catch {
+    // Directory read error, return empty
+  }
+
+  return assistants;
+}
+
+/**
  * Detect project type from files and structure
  */
 export async function detectProjectType(
