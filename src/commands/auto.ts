@@ -33,6 +33,39 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
   }
 
   try {
+    // Step 0: Check for n8n workflows (funnel to TURBO)
+    const { findN8nWorkflows } = await import('../utils/file-utils');
+    const n8nWorkflows = await findN8nWorkflows(targetDir);
+
+    if (n8nWorkflows.length > 0) {
+      console.log(chalk.yellow(`\n⚠️  n8n workflow detected: ${chalk.white(n8nWorkflows[0])}`));
+      console.log(chalk.cyan(`\n💡 For n8n workflows, use the specialist tool:`));
+      console.log(chalk.white(`   faf turbo analyze "${n8nWorkflows[0]}"`));
+      console.log(chalk.gray(`\n🏎️ TURBO extracts 48% AI context from n8n JSON in 3 seconds!`));
+      console.log(chalk.gray(`   vs. standard auto: 25% (generic detection)\n`));
+
+      // Ask user if they want to continue with standard auto
+      const readline = await import('readline');
+      const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+      });
+
+      const answer: string = await new Promise((resolve) => {
+        rl.question(chalk.cyan('Continue with standard auto (not recommended)? [y/N]: '), resolve);
+      });
+      rl.close();
+
+      if (answer.toLowerCase() !== 'y') {
+        console.log(chalk.green(`\n✨ Run this instead:`));
+        console.log(chalk.white(`   faf turbo analyze "${n8nWorkflows[0]}"`));
+        console.log();
+        process.exit(0);
+      }
+
+      console.log(chalk.gray('\n⚠️  Proceeding with standard auto (n8n intelligence will be missed)...\n'));
+    }
+
     // Step 1: Check if .faf exists
     let fafPath = await findFafFile(targetDir);
 
