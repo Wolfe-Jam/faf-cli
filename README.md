@@ -125,7 +125,7 @@ faf formats
 
 ## 💨 FAF TURBO - World-Class Automation Intelligence
 
-### Like **VS Code + Copilot** • **Spotify Free + Premium** • **Zoom Basic + Pro**
+### Like **VS Code + Copilot** • Same model that works!
 
 <div align="center">
 
@@ -195,7 +195,8 @@ Learn more: faf.one/turbo
 
 </div>
 
-**TURBO**: Where automation platforms (n8n, Make, Opal) get championship AI context. **Foundational first, universal by default.**
+**TURBO**: Where automation platforms (n8n, Make, Opal) get championship AI context. 
+**Foundational first, universal by default.**
 
 ---
 
@@ -751,6 +752,6 @@ Made with 🧡 by **[wolfejam](https://github.com/Wolfe-Jam)**
 
 The CLI is **FREE FOR ALL DEVS**.
 
-Love it? **TURBO** for advanced features coming real soon once you've kicked the tires! 😽💨
+Love it? **TURBO** for advanced features, ready for once you've kicked the tires! 😽💨
 
 </div>
