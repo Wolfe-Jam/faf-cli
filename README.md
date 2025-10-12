@@ -5,7 +5,7 @@ with Turbo Cat 😽
 
 <img src="https://cdn.jsdelivr.net/npm/faf-cli@latest/assets/icons/orange-smiley.svg" alt="FAF Logo" width="64" />
 
-## **FREE FOREVER** 🆓 • **10,000 Downloads** 🎉 • **TURBO-CAT Powered** 😽
+## **FREE FOREVER** 🆓 • **10,000 Downloads (CLI+MCP)** 🎉 • **TURBO-CAT Powered** 😽
 
 **Project DNA ✨ for ANY AI** • **Instant Context** • **Zero Faff™**
 
@@ -24,7 +24,7 @@ with Turbo Cat 😽
 
 ### The Championship Release
 
-**Celebrating 10,000 downloads** with the biggest release yet:
+**Celebrating 10,000 downloads (CLI+MCP combined)** with the biggest release yet:
 
 - 🆓 **FREE FOREVER .faf Core-Engine** - 41 championship commands, always free, open source, MIT License
 - 💨 **TURBO Model Introduced** - Like VS Code + Copilot, Spotify Free + Premium, Zoom Basic + Pro
@@ -123,6 +123,82 @@ faf formats
 
 ---
 
+## 💨 FAF TURBO - World-Class Automation Intelligence
+
+### Like **VS Code + Copilot** • **Spotify Free + Premium** • **Zoom Basic + Pro**
+
+<div align="center">
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### **FAF v3.0.1 (FREE FOREVER)** 🆓
+
+✅ **41 Championship Commands**
+- Project initialization & auto-detection
+- TURBO-CAT format discovery (153 formats)
+- Birth DNA lifecycle tracking
+- AI readiness scoring (0-100%)
+- Context-mirroring (bi-sync)
+- Health checks & diagnostics
+
+✅ **Performance**
+- <50ms command execution
+- 8ms bi-sync (championship speed)
+- F1-inspired engineering
+- 0ms operations achieved
+
+✅ **Universal Compatibility**
+- Works with Claude, Codex CLI, Gemini CLI, Cursor
+- Mac, Linux, Windows support
+- Open source, MIT licensed
+- 10,000+ downloads
+
+```bash
+npm install -g faf-cli
+```
+
+</td>
+<td width="50%" valign="top">
+
+### **FAF v3.0.1 TURBO** 💨
+
+✅ **Everything in FREE, Plus:**
+
+🧬 **Deep Format Intelligence**
+- Pyramid-level insights (17 levels deep)
+- Cross-format relationship analysis
+- Stack health diagnostics
+- Migration path recommendations
+
+🤖 **Universal Automation Intelligence**
+- **n8n workflow parsing** - RAG, ETL, Multi-Agent patterns
+- **OpenAI Assistants** - GPT Actions & function schemas
+- **Google Opal** - Visual mini-app workflows
+- **Make.com scenarios** - Module & integration analysis
+- **FOUNDATIONAL FIRST** - ONE pattern for ALL platforms
+
+🏆 **Premium Features**
+- Priority support & service plans
+- Advanced TURBO-CAT capabilities
+- Enterprise integrations
+- Early access to new features
+
+```bash
+Learn more: faf.one/turbo
+```
+
+</td>
+</tr>
+</table>
+
+</div>
+
+**TURBO**: Where automation platforms (n8n, Make, Opal) get championship AI context. **Foundational first, universal by default.**
+
+---
+
 ## 🚀 Quick Start
 
 ```bash
@@ -191,21 +267,41 @@ We created this tool together across thousands of conversations. Yet without pro
 
 Universal, shareable AI context that works with **Claude Code, OpenAI Codex CLI, Gemini CLI, Cursor** - regardless of your stack, size, or setup.
 
-### The Problem
+### Why Context Quality Matters
 
-- ❌ 20+ minutes explaining projects to AI
-- ❌ AI gives wrong answers without context
-- ❌ Manual copy/paste every session
-- ❌ Context lost between conversations
-- ❌ "Can you remind me what this project does?"
+**At 99% context quality**, AI knows exactly what you're building and helps at optimal levels—trusted decisions, accurate suggestions, championship performance.
 
-### The Solution
+**At 55% context quality**, you're flipping a coin on every decision. It's like handing a builder only half a blueprint and discussing it in a totally foreign language.
 
-- ✅ **30 seconds** from zero to complete AI understanding
-- ✅ **One command** creates perfect context
+FAF's **Professional 0→99% Podium Scoring System** makes context collection measurable, fun, and championship-grade. Track your project's evolution from 🤍 Heart (0%) to 🏆 Trophy (100%).
+
+### The REAL Problem: Project Health
+
+**This isn't about saving 20 minutes at setup.**
+
+Running projects on LOW AI context leads to:
+- ❌ **Project death** (worst case)
+- ❌ **Delays, costs, stress, heartache, disappointment**
+- ❌ **Wasted time, resources, and money**
+- ❌ **Poor outcomes for stakeholders and users**
+- ❌ **Burnout from constant re-explaining**
+
+**It's not a one-time config. It's a relationship.**
+
+A healthy Human + AI collaboration requires **high-quality, persistent context**. Without it, every interaction is a gamble. Every decision is questionable. Every suggestion needs verification.
+
+**Ignoring poor context on your project is like not brushing your child's teeth.**
+
+You're gonna end up with a **CAVITY**.
+
+### The Solution: Project DNA
+
+- ✅ **Championship context** (85-99% quality scores)
+- ✅ **Persistent intelligence** - AI remembers your project perfectly
+- ✅ **Seamless collaboration** - Human + AI working together optimally
+- ✅ **Project health monitoring** - Track context quality over time
 - ✅ **Works with every AI** - Claude Code, OpenAI Codex CLI, Gemini CLI, Cursor, all of them
-- ✅ **Share with your team** - Instant project onboarding
-- ✅ **Persistent memory** - Never explain your project again
+- ✅ **Team alignment** - Everyone (human AND AI) on the same page
 
 ---
 
@@ -438,6 +534,60 @@ Automation:    n8n workflows, OpenAI Builder, Google Opal, Make.com - AI-Automat
 
 ---
 
+## 🏎️ Universal Intelligence Pattern
+
+### FOUNDATIONAL FIRST, UNIVERSAL BY DEFAULT
+
+**.faf isn't trying to be universal—it already is.**
+
+Every intelligence source follows the same RAG-inspired pattern:
+
+```
+interrogation → extraction → filtering → generation
+```
+
+And the output is **always .faf**—the universal container for structured intelligence.
+
+### How It Works
+
+**Any input** goes through the pattern:
+- **n8n workflow** → interrogation → extraction → filtering → generation → **.faf**
+- **OpenAI Assistant** → interrogation → extraction → filtering → generation → **.faf**
+- **Opal mini-app** → interrogation → extraction → filtering → generation → **.faf**
+- **Make.com scenario** → interrogation → extraction → filtering → generation → **.faf**
+- **Code project** → interrogation → extraction → filtering → generation → **.faf**
+
+**Same pattern. Same output. Universal by design.**
+
+### vs RAG Comparison
+
+| Aspect | RAG Approach | .faf Approach |
+|--------|-------------|---------------|
+| **Indexing** | Runtime embedding (slow, $$) | One-time at creation (fast, free) |
+| **Retrieval** | Vector search per query ($$) | Instant file read (free) |
+| **Quality** | Probabilistic, incomplete | Structured, validated, scored |
+| **Latency** | Seconds (embedding + search) | Milliseconds (<50ms) |
+| **Cost** | Per-query fees | Zero runtime cost |
+| **Versioning** | Difficult | Git-friendly YAML |
+
+**.faf is the pre-indexed result of RAG's interrogation-extraction-filter pipeline.**
+
+You do it **once**, use it **forever**. That's championship efficiency.
+
+### Platform Support
+
+| Platform | Status | Use Case |
+|----------|--------|----------|
+| **n8n** | ✅ Production | Workflow automation (RAG, ETL, Multi-Agent) |
+| **OpenAI** | ✅ Implemented | GPT Actions & Assistants API |
+| **Opal** | ✅ Ready | Google mini-app workflows |
+| **Make.com** | ✅ Ready | Scenario automation |
+| **Code** | ✅ Production | All programming languages |
+
+**Adding a new platform?** Extend the pattern in <100 lines of code. See `/src/core/README-UNIVERSAL-PATTERN.md`
+
+---
+
 ## 🏆 WJTTC Championship Testing
 
 **FAF CLI v3.0.1 is WJTTC GOLD Certified** - tested to F1-grade standards.
@@ -553,7 +703,7 @@ We welcome contributions! Join our [community discussions](https://github.com/Wo
 
 **Position your brand alongside the universal AI context standard.**
 
-FAF CLI is defining a new category: **Universal AI Context Infrastructure**. With 10,000+ downloads, BIG-3 AI validation (Google, Anthropic, OpenAI), and adoption by leading AI development tools, FAF is becoming foundational infrastructure for the AI development ecosystem.
+FAF CLI is defining a new category: **Universal AI Context Infrastructure**. With 10,000+ downloads (CLI+MCP combined), BIG-3 AI validation (Google, Anthropic, OpenAI), and adoption by leading AI development tools, FAF is becoming foundational infrastructure for the AI development ecosystem.
 
 ### 📈 Growth Momentum
 
@@ -611,7 +761,7 @@ Copy cats? Why bother.
 
 ## 🏁 v3.0.1 - Championship Edition
 
-**FREE FOREVER** 🆓 • **TURBO-CAT Powered** 😽 • **10,000 Downloads** 🎉
+**FREE FOREVER** 🆓 • **TURBO-CAT Powered** 😽 • **10,000 Downloads (CLI+MCP)** 🎉
 
 Made with 🧡 by **[wolfejam](https://github.com/Wolfe-Jam)**
 

@@ -240,6 +240,42 @@ export interface TypeScriptContext {
 }
 
 /**
+ * Detect n8n workflow files in directory
+ */
+export async function findN8nWorkflows(
+  projectDir: string = process.cwd()
+): Promise<string[]> {
+  const workflows: string[] = [];
+
+  try {
+    const files = await fs.readdir(projectDir);
+
+    for (const file of files) {
+      if (file.endsWith('.json') && !file.includes('package')) {
+        try {
+          const filePath = path.join(projectDir, file);
+          const content = await fs.readFile(filePath, 'utf-8');
+          const json = JSON.parse(content);
+
+          // Check if it's an n8n workflow (has nodes, connections, and name)
+          if (json.nodes && Array.isArray(json.nodes) &&
+              json.connections && typeof json.connections === 'object' &&
+              json.name && typeof json.name === 'string') {
+            workflows.push(file);
+          }
+        } catch {
+          // Not valid JSON or not n8n format, skip
+        }
+      }
+    }
+  } catch {
+    // Directory read error, return empty
+  }
+
+  return workflows;
+}
+
+/**
  * Detect project type from files and structure
  */
 export async function detectProjectType(

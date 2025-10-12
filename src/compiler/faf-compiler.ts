@@ -378,15 +378,26 @@ export class FafCompiler {
   private buildIR(ast: any): IRSlot[] {
     const slots: IRSlot[] = [];
 
+    // Detect project type to determine applicable stack slots
+    const projectType = this.detectProjectTypeFromContext(ast);
+    if (process.env.FAF_DEBUG) {
+      console.log(`\n[DEBUG] Project type detected: ${projectType}`);
+    }
+    const isFrontendProject = this.requiresFrontendStack(projectType);
+    const isBackendProject = this.requiresBackendStack(projectType);
+
+    // Auto-fill project.main_language for n8n workflows BEFORE reading slots
+    if (projectType === 'n8n-workflow') {
+      if (!ast.project) ast.project = {};
+      if (!ast.project.main_language) {
+        ast.project.main_language = ast.tech_stack?.primary_language || 'JSON (workflow definition)';
+      }
+    }
+
     // Project slots (3)
     this.addSlot(slots, 'project.name', ast.project?.name, 'string', 'original', 1);
     this.addSlot(slots, 'project.goal', ast.project?.goal, 'string', 'original', 1);
     this.addSlot(slots, 'project.main_language', ast.project?.main_language, 'string', 'original', 1);
-
-    // Detect project type to determine applicable stack slots
-    const projectType = this.detectProjectTypeFromContext(ast);
-    const isFrontendProject = this.requiresFrontendStack(projectType);
-    const isBackendProject = this.requiresBackendStack(projectType);
 
     // Chrome Extension auto-fill: If it's a Chrome Extension, intelligently fill slots
     if (projectType === 'chrome-extension') {
@@ -414,6 +425,65 @@ export class FafCompiler {
       if (ast.stack?.build) {
         this.addSlot(slots, 'stack.build', ast.stack.build, 'string', 'original', 1);
       }
+    }
+
+    // n8n Workflow auto-fill: Map n8n-specific fields to standard 21-slot system
+    if (projectType === 'n8n-workflow') {
+      // Map n8n context to existing stack slots (efficient, no slot inflation)
+      if (!ast.stack) ast.stack = {};
+
+      // Runtime = workflow engine
+      if (!ast.stack.runtime) {
+        ast.stack.runtime = ast.tech_stack?.workflow_engine || 'n8n';
+      }
+
+      // Backend = n8n server runtime
+      if (!ast.stack.backend) {
+        ast.stack.backend = 'Node.js (n8n server)';
+      }
+
+      // API type = n8n trigger types
+      if (!ast.stack.api_type) {
+        ast.stack.api_type = 'Webhooks + HTTP';
+      }
+
+      // Database = vector DB or workflow state
+      if (!ast.stack.database) {
+        ast.stack.database = ast.tech_stack?.infrastructure?.vector_db || 'Workflow State';
+      }
+
+      // Hosting = deployment location
+      if (!ast.stack.hosting) {
+        ast.stack.hosting = 'n8n Cloud';
+      }
+
+      // Build tool = how workflows are created
+      if (!ast.stack.build) {
+        ast.stack.build = 'n8n Visual Editor';
+      }
+
+      // Connection = integrations (maps to stack.connection slot)
+      if (!ast.stack.connection && ast.tech_stack?.integrations) {
+        ast.stack.connection = Array.isArray(ast.tech_stack.integrations)
+          ? ast.tech_stack.integrations.join(', ')
+          : String(ast.tech_stack.integrations);
+      }
+
+      // Add n8n-specific slots (maps to standard 21-slot system)
+      // Backend slots (5)
+      this.addSlot(slots, 'stack.runtime', ast.stack.runtime, 'string', 'discovered', 1);
+      this.addSlot(slots, 'stack.backend', ast.stack.backend, 'string', 'discovered', 1);
+      this.addSlot(slots, 'stack.api_type', ast.stack.api_type, 'string', 'discovered', 1);
+      this.addSlot(slots, 'stack.database', ast.stack.database, 'string', 'discovered', 1);
+      this.addSlot(slots, 'stack.connection', ast.stack.connection, 'string', 'original', 1);
+
+      // Frontend slots (4) - n8n workflows don't have frontend, but we still count them
+      this.addSlot(slots, 'stack.frontend', ast.stack?.frontend, 'string', 'original', 1);
+      this.addSlot(slots, 'stack.css_framework', ast.stack?.css_framework, 'string', 'original', 1);
+      this.addSlot(slots, 'stack.ui_library', ast.stack?.ui_library, 'string', 'original', 1);
+      this.addSlot(slots, 'stack.state_management', ast.stack?.state_management, 'string', 'original', 1);
+
+      // Universal slots (3) will be added below (hosting, build, cicd)
     }
 
     // Stack slots - only add relevant ones based on project type
@@ -476,7 +546,20 @@ export class FafCompiler {
     source: 'original' | 'discovered',
     weight: number
   ): void {
+    // Deduplication: Check if slot path already exists
+    const exists = slots.some(slot => slot.path === path);
+    if (exists) {
+      if (process.env.FAF_DEBUG) {
+        console.log(`[DEBUG] Skipped duplicate slot: ${path}`);
+      }
+      return; // Skip duplicate slot
+    }
+
     const filled = this.isSlotFilled(value);
+    if (process.env.FAF_DEBUG) {
+      const valueStr = JSON.stringify(value) || '';
+      console.log(`[DEBUG] Added slot: ${path} | filled: ${filled} | value: ${valueStr.substring(0, 50)}`);
+    }
     slots.push({
       id: `slot_${slots.length + 1}`,
       path,
