@@ -5,7 +5,7 @@ with Turbo Cat 😽
 
 <img src="https://cdn.jsdelivr.net/npm/faf-cli@latest/assets/icons/orange-smiley.svg" alt="FAF Logo" width="64" />
 
-## **FREE FOREVER** 🆓 • **10,000 Downloads (CLI+MCP)** 🎉 • **TURBO-CAT Powered** 😽
+## **FREE FOREVER** 🆓 • **Growing Fast** 📈 • **TURBO-CAT Powered** 😽
 
 **Project DNA ✨ for ANY AI** • **Instant Context** • **Zero Faff™**
 
@@ -24,7 +24,7 @@ with Turbo Cat 😽
 
 ### The Championship Release
 
-**Celebrating 10,000 downloads (CLI+MCP combined)** with the biggest release yet:
+**The biggest release yet:**
 
 - 🆓 **FREE FOREVER .faf Core-Engine** - 41 championship commands, always free, open source, MIT License
 - 💨 **TURBO Model Introduced** - Like VS Code + Copilot, Spotify Free + Premium, Zoom Basic + Pro
@@ -153,7 +153,7 @@ faf formats
 - Works with Claude, Codex CLI, Gemini CLI, Cursor
 - Mac, Linux, Windows support
 - Open source, MIT licensed
-- 10,000+ downloads
+- Growing developer community
 
 ```bash
 npm install -g faf-cli
@@ -691,7 +691,7 @@ npm link
 
 We welcome contributions! Join our [community discussions](https://github.com/Wolfe-Jam/faf-cli/discussions) or submit issues/PRs.
 
-**Join 10,000+ developers** using `.faf` to accelerate their AI workflows:
+**Join our growing community** using `.faf` to accelerate their AI workflows:
 - Share your projects
 - Get help from the community
 - Request features
@@ -703,12 +703,11 @@ We welcome contributions! Join our [community discussions](https://github.com/Wo
 
 **Position your brand alongside the universal AI context standard.**
 
-FAF CLI is defining a new category: **Universal AI Context Infrastructure**. With 10,000+ downloads (CLI+MCP combined), BIG-3 AI validation (Google, Anthropic, OpenAI), and adoption by leading AI development tools, FAF is becoming foundational infrastructure for the AI development ecosystem.
+FAF CLI is defining a new category: **Universal AI Context Infrastructure**. With BIG-3 AI validation (Google, Anthropic, OpenAI) and adoption by leading AI development tools, FAF is becoming foundational infrastructure for the AI development ecosystem.
 
 ### 📈 Growth Momentum
 
-- **10,000+ total downloads** - Milestone reached (MCP + CLI combined)
-- **4,600 CLI downloads** - Rapid CLI adoption
+- **Rapid adoption** - See live stats on npm
 - **Category leader** - First universal AI context standard
 - **Enterprise traction** - Infrastructure-level adoption
 - **BIG-3 validated** - Tested and endorsed by Google Gemini, Anthropic Claude, OpenAI Codex
@@ -761,7 +760,7 @@ Copy cats? Why bother.
 
 ## 🏁 v3.0.1 - Championship Edition
 
-**FREE FOREVER** 🆓 • **TURBO-CAT Powered** 😽 • **10,000 Downloads (CLI+MCP)** 🎉
+**FREE FOREVER** 🆓 • **TURBO-CAT Powered** 😽 • **Growing Fast** 📈
 
 Made with 🧡 by **[wolfejam](https://github.com/Wolfe-Jam)**
 
