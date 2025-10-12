@@ -125,7 +125,7 @@ faf formats
 
 ## 💨 FAF TURBO - World-Class Automation Intelligence
 
-### Like **VS Code + Copilot** • **Spotify Free + Premium** • **Zoom Basic + Pro**
+### Like **VS Code + Copilot** • Same model that works!
 
 <div align="center">
 
@@ -195,7 +195,8 @@ Learn more: faf.one/turbo
 
 </div>
 
-**TURBO**: Where automation platforms (n8n, Make, Opal) get championship AI context. **Foundational first, universal by default.**
+**TURBO**: Where automation platforms (n8n, Make, Opal) get championship AI context. 
+**Foundational first, universal by default.**
 
 ---
 
@@ -533,58 +534,34 @@ Automation:    n8n workflows, OpenAI Builder, Google Opal, Make.com - AI-Automat
 ```
 
 ---
+⏺ 🏎️ The .faf Pattern
 
-## 🏎️ Universal Intelligence Pattern
+  Why .faf vs RAG?
 
-### FOUNDATIONAL FIRST, UNIVERSAL BY DEFAULT
+  .faf is pre-indexed intelligence. Do the work once, use it forever.
 
-**.faf isn't trying to be universal—it already is.**
+  | Aspect     | RAG Approach                 | .faf Approach                     |
+  |------------|------------------------------|-----------------------------------|
+  | Indexing   | Runtime embedding (slow, $$) | One-time at creation (fast, free) |
+  | Retrieval  | Vector search per query ($$) | Instant file read (free)          |
+  | Quality    | Probabilistic, incomplete    | Structured, validated, scored     |
+  | Latency    | Seconds (embedding + search) | Milliseconds (<50ms)              |
+  | Cost       | Per-query fees               | Zero runtime cost                 |
+  | Versioning | Difficult                    | Git-friendly YAML                 |
 
-Every intelligence source follows the same RAG-inspired pattern:
+  .faf is RAG's output—captured once, reused infinitely. Championship efficiency.
 
-```
-interrogation → extraction → filtering → generation
-```
+  Universal Pattern
 
-And the output is **always .faf**—the universal container for structured intelligence.
+  Every source follows the same pattern:
 
-### How It Works
+  interrogation → extraction → filtering → generation → .faf
 
-**Any input** goes through the pattern:
-- **n8n workflow** → interrogation → extraction → filtering → generation → **.faf**
-- **OpenAI Assistant** → interrogation → extraction → filtering → generation → **.faf**
-- **Opal mini-app** → interrogation → extraction → filtering → generation → **.faf**
-- **Make.com scenario** → interrogation → extraction → filtering → generation → **.faf**
-- **Code project** → interrogation → extraction → filtering → generation → **.faf**
+  In FREE CLI: Code projects → .faf (all languages, frameworks, stacks)
 
-**Same pattern. Same output. Universal by design.**
+  In TURBO: Automation platforms → .faf (n8n, OpenAI Assistants, Opal, Make.com)
 
-### vs RAG Comparison
-
-| Aspect | RAG Approach | .faf Approach |
-|--------|-------------|---------------|
-| **Indexing** | Runtime embedding (slow, $$) | One-time at creation (fast, free) |
-| **Retrieval** | Vector search per query ($$) | Instant file read (free) |
-| **Quality** | Probabilistic, incomplete | Structured, validated, scored |
-| **Latency** | Seconds (embedding + search) | Milliseconds (<50ms) |
-| **Cost** | Per-query fees | Zero runtime cost |
-| **Versioning** | Difficult | Git-friendly YAML |
-
-**.faf is the pre-indexed result of RAG's interrogation-extraction-filter pipeline.**
-
-You do it **once**, use it **forever**. That's championship efficiency.
-
-### Platform Support
-
-| Platform | Status | Use Case |
-|----------|--------|----------|
-| **n8n** | ✅ Production | Workflow automation (RAG, ETL, Multi-Agent) |
-| **OpenAI** | ✅ Implemented | GPT Actions & Assistants API |
-| **Opal** | ✅ Ready | Google mini-app workflows |
-| **Make.com** | ✅ Ready | Scenario automation |
-| **Code** | ✅ Production | All programming languages |
-
-**Adding a new platform?** Extend the pattern in <100 lines of code. See `/src/core/README-UNIVERSAL-PATTERN.md`
+  Same pattern. Same output. Universal by design.
 
 ---
 
@@ -772,6 +749,6 @@ Made with 🧡 by **[wolfejam](https://github.com/Wolfe-Jam)**
 
 The CLI is **FREE FOR ALL DEVS**.
 
-Love it? **TURBO** for advanced features coming real soon once you've kicked the tires! 😽💨
+Love it? **TURBO** for advanced features, ready for once you've kicked the tires! 😽💨
 
 </div>
