@@ -30,6 +30,7 @@ import { creditCommand } from './commands/credit';
 import { todoCommand } from './commands/todo';
 import { checkCommand } from './commands/check';
 import { clearCommand } from './commands/clear';
+import { famCommand } from './commands/fam';
 import { editCommand } from './commands/edit';
 import { searchCommand } from './commands/search';
 import { indexCommand } from './commands/index';
@@ -160,6 +161,28 @@ Examples:
   $ faf init my-app              # Create .faf for different directory
   $ faf init -t react            # Force React template`)
   .action(withAnalyticsTracking('init', (directory, options) => initFafFile(directory, options)));
+
+// 🇬🇧 faf innit - British slang fun version of init
+program
+  .command('innit [directory]')
+  .description('🇬🇧 British version of init - same championship, more bruv!')
+  .option('-f, --force', 'Overwrite existing .faf file')
+  .option('-n, --new', 'Create a fresh .faf file')
+  .option('-c, --choose', 'Interactive choice when .faf exists')
+  .option('-t, --template <type>', 'Use specific template', 'auto')
+  .option('-o, --output <file>', 'Output file path')
+  .addHelpText('after', `
+Examples:
+  $ faf innit                    # Init bruv!
+  $ faf innit --new              # Fresh start innit
+  $ faf innit my-app             # Create .faf for different directory
+
+🇬🇧 Same as 'faf init', just more British! Proper cheeky!`)
+  .action(withAnalyticsTracking('innit', (directory, options) => {
+    console.log(FAF_COLORS.fafOrange('🇬🇧 doing it now Bruv'));
+    console.log('');
+    return initFafFile(directory, options);
+  }));
 
 // 🧬 faf dna - Show your journey at a glance
 program
@@ -404,6 +427,31 @@ Philosophy:
 Expected Impact:
   📉 47% score → 📈 85% score through guided achievements`)
   .action((options) => todoCommand(options));
+
+// 🏆 faf fam - FAF Family Integration Marketplace
+program
+  .command('fam [subcommand] [arg]')
+  .description('🏆 FAF Family - Championship integration marketplace')
+  .option('-d, --detected', 'Show only detected integrations')
+  .option('-a, --available', 'Show only available integrations')
+  .addHelpText('after', `
+Examples:
+  $ faf fam                         # Show all integrations + status
+  $ faf fam show react              # Details about React integration
+  $ faf fam install n8n             # Install integration (TURBO required)
+
+🏆 FAF Family:
+  • Discover 6 championship integrations (React, Next.js, Svelte, TypeScript, Vite, n8n)
+  • See what's detected in YOUR project
+  • Get MCP server recommendations
+  • 74.8M+ developer ecosystem reach
+
+Integrations:
+  • Auto-detect modern stacks in your project
+  • Smart .faf context generation
+  • MCP server recommendations per stack
+  • Quality-gated: 85% minimum (Bronze tier)`)
+  .action(withAnalyticsTracking('fam', (subcommand, arg, options) => famCommand(subcommand, arg, options)));
 
 // 📚 faf index - Universal A-Z Reference (The Everything Catalog)
 program
