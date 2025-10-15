@@ -1,4 +1,4 @@
-# faf-cli v3.0.2 - Championship Edition 🏆 
+# faf-cli v3.0.3 - Championship Edition 🏆 
 with Turbo Cat 😽
 
 <div align="center">
@@ -17,6 +17,20 @@ with Turbo Cat 😽
 **[Website](https://faf.one)** • **[GitHub](https://github.com/Wolfe-Jam/faf-cli)** • **[Community](https://github.com/Wolfe-Jam/faf-cli/discussions)** • **[npm](https://www.npmjs.com/package/faf-cli)**
 
 </div>
+
+---
+
+## 🚀 Wanna GO Now>>
+
+```bash
+# Install via npm (works everywhere)
+npm install -g faf-cli
+
+# Or via Homebrew (macOS/Linux)
+brew install faf-cli
+```
+
+**One line. Zero config. Championship context.** 🏁
 
 ---
 
@@ -133,7 +147,7 @@ faf formats
 <tr>
 <td width="50%" valign="top">
 
-### **FAF v3.0.2 (FREE FOR ALL DEVS)** 🆓
+### **FAF v3.0.3 (FREE FOR ALL DEVS)** 🆓
 
 ✅ **41 Championship Commands**
 - Project initialization & auto-detection
@@ -162,7 +176,7 @@ npm install -g faf-cli
 </td>
 <td width="50%" valign="top">
 
-### **FAF v3.0.2 TURBO** 💨
+### **FAF v3.0.3 TURBO** 💨
 
 ✅ **Everything in FREE, Plus:**
 
@@ -395,7 +409,7 @@ faf lint        # Fix formatting issues
 
 ## 🤖 Works with AI Assistants
 
-FAF v3.0.2 fully supports **Claude Code, Warp, Cursor, Copilot, Windsurf, OpenAI Codex CLI, Gemini CLI** and ALL AI coding assistants.
+FAF v3.0.3 fully supports **Claude Code, Warp, Cursor, Copilot, Windsurf, OpenAI Codex CLI, Gemini CLI** and ALL AI coding assistants.
 
 **PLUS AI-Automation platforms:** n8n, OpenAI Builder, Google Opal, Make.com
 
@@ -520,7 +534,7 @@ faf auto -q
 ## 📊 Technical Specs
 
 ```yaml
-Version:       3.0.2 - Championship Edition
+Version:       3.0.3 - Championship Edition
 Performance:   <50ms all commands, 18ms avg, 8ms bi-sync, 0ms operations achieved
 Engine:        FAF-Engine-Mk3
 TURBO-CAT:     v3.0.0 - Full Power (Introduced v2.0.0, 153 validated formats)
@@ -570,7 +584,7 @@ Same pattern. Same output. Universal by design.
 
 ## 🏆 WJTTC Championship Testing
 
-**FAF CLI v3.0.2 is WJTTC GOLD Certified** - tested to F1-grade standards.
+**FAF CLI v3.0.3 is WJTTC GOLD Certified** - tested to F1-grade standards.
 
 ### What is WJTTC?
 **WolfeJam Technical & Testing Center** - F1-inspired testing methodology ensuring championship-grade reliability.
@@ -632,7 +646,7 @@ Keep `.faf` (structured data) and `CLAUDE.md` (human-readable) in perfect sync a
 
 ## 🔗 The FAF Ecosystem
 
-- 🩵 **[faf-cli](https://npmjs.com/package/faf-cli)** - This command-line tool (FREE FOREVER)
+- 🩵 **[faf-cli](https://github.com/Wolfe-Jam/faf-cli)** - This command-line tool (FREE FOREVER)
 - 🧡 **[claude-faf-mcp](https://npmjs.com/package/claude-faf-mcp)** - MCP server for Claude Desktop
 - 💚 **[faf.one](https://faf.one)** - Documentation & guides
 - 🖥️ **[Chrome Extension](https://chromewebstore.google.com/detail/lnecebepmpjpilldfmndnaofbfjkjlkm)** - Browser integration
@@ -739,7 +753,7 @@ Copy cats? Why bother.
 
 <div align="center">
 
-## 🏁 v3.0.2 - Championship Edition
+## 🏁 v3.0.3 - Championship Edition
 
 **FREE FOR ALL DEVS** 🆓 • **TURBO-CAT Powered** 😽 • **Growing Fast** 📈
 
