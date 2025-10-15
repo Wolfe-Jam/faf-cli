@@ -20,6 +20,8 @@ with Turbo Cat 😽
 
 ---
 
+**AI-Context: Avg. 0-55% kills projects 💀 .faf 85-99% AI totally gets it ✨**
+
 ## 🚀 Wanna GO Now>>
 
 ```bash
