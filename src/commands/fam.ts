@@ -51,6 +51,8 @@ export async function famCommand(subcommand?: string, arg?: string, options?: Fa
     return await showIntegration(arg!);
   } else if (subcommand === 'install') {
     return await installIntegration(arg!);
+  } else if (subcommand === 'detect') {
+    return await detectCommand();
   }
 
   // Default: List all integrations
@@ -156,6 +158,7 @@ async function listIntegrations(options?: FamOptions) {
     console.log(FAF_COLORS.fafOrange('💡 COMMANDS:'));
     console.log();
     console.log(`  ${chalk.cyan('faf fam')}              ${chalk.gray('# Show all integrations (this view)')}`);
+    console.log(`  ${chalk.cyan('faf fam detect')}       ${chalk.gray('# Auto-detect integrations in current project')}`);
     console.log(`  ${chalk.cyan('faf fam show react')}   ${chalk.gray('# Details about React integration')}`);
     console.log(`  ${chalk.cyan('faf fam install n8n')}  ${chalk.gray('# Install integration (coming soon)')}`);
     console.log();
@@ -280,4 +283,101 @@ async function installIntegration(name: string) {
   console.log(`  2. Run ${chalk.cyan('faf init')} to detect it`);
   console.log(`  3. Run ${chalk.cyan('faf fam')} to see it in YOUR PROJECT`);
   console.log();
+}
+
+/**
+ * Detect integrations in current project (focused view)
+ */
+async function detectCommand() {
+  console.log();
+  console.log(FAF_COLORS.fafCyan('🔍 Scanning project...'));
+  console.log();
+
+  try {
+    const projectPath = process.cwd();
+    const detected = await integrationRegistry.detectAll(projectPath);
+    const allIntegrations = Array.from(integrationRegistry.integrations.values());
+    const stats = integrationRegistry.getStats();
+
+    if (detected.length === 0) {
+      console.log(chalk.gray('❌ No FAF integrations detected in current project'));
+      console.log();
+      console.log(FAF_COLORS.fafOrange('💡 TIP:'));
+      console.log(`  Run ${chalk.cyan('faf fam')} to see all available integrations`);
+      console.log();
+      return;
+    }
+
+    // Show detected integrations
+    console.log(FAF_COLORS.fafCyan('🏆 DETECTED INTEGRATIONS:'));
+    console.log();
+
+    // Sort by tier quality
+    const tierOrder: Record<string, number> = { trophy: 1, gold: 2, silver: 3, bronze: 4 };
+    const sortedDetected = detected.sort((a, b) => {
+      return tierOrder[a.tier] - tierOrder[b.tier];
+    });
+
+    sortedDetected.forEach((integration) => {
+      const emoji = getTierEmoji(integration.tier);
+      const turboTag = requiresTurbo(integration.name)
+        ? ` ${FAF_COLORS.fafOrange('[TURBO ONLY]')}`
+        : '';
+
+      console.log(`  ${chalk.green('✅')} ${chalk.bold(integration.displayName)}${turboTag}`);
+      console.log(`     ${emoji} ${chalk.cyan(integration.tier)} tier • ${chalk.gray(formatNumber(integration.weeklyAdoption) + ' weekly devs')}`);
+
+      // Show MCP servers
+      if (integration.mcpServers.length > 0) {
+        console.log(`     ${chalk.gray('MCP Servers:')}`);
+        integration.mcpServers.forEach(server => {
+          console.log(`       ${chalk.cyan('•')} ${server}`);
+        });
+      }
+      console.log();
+    });
+
+    // Calculate total MCP servers and ecosystem reach
+    const allMcpServers = detected.flatMap(d => d.mcpServers);
+    const uniqueMcpServers = [...new Set(allMcpServers)];
+    const totalReach = detected.reduce((sum, d) => sum + d.weeklyAdoption, 0);
+
+    // Determine stack quality
+    const avgScore = detected.reduce((sum, d) => sum + d.qualityScore, 0) / detected.length;
+    let qualityTier = '🤍 Unrated';
+    if (avgScore >= 99) qualityTier = '🏆 Trophy Tier';
+    else if (avgScore >= 95) qualityTier = '🥇 Gold Tier';
+    else if (avgScore >= 90) qualityTier = '🥈 Silver Tier';
+    else if (avgScore >= 85) qualityTier = '🥉 Bronze Tier';
+
+    // Show summary
+    console.log(FAF_COLORS.fafOrange('📊 STACK QUALITY:') + ` ${qualityTier}`);
+    console.log(`📈 Total ecosystem reach: ${chalk.cyan(formatNumber(totalReach))} developers`);
+    console.log(`🔧 ${chalk.cyan(uniqueMcpServers.length.toString())} unique MCP servers recommended`);
+    console.log(`✨ ${chalk.cyan(detected.reduce((sum, d) => sum + d.contextContribution.length, 0).toString())} .faf context slots filled`);
+    console.log();
+
+    // Show NOT detected
+    const notDetected = allIntegrations.filter(
+      integration => !detected.find(d => d.name === integration.name)
+    );
+
+    if (notDetected.length > 0) {
+      console.log(FAF_COLORS.fafOrange('❌ NOT DETECTED:'));
+      const names = notDetected.map(i => i.displayName).join(', ');
+      console.log(`  ${chalk.gray(names)}`);
+      console.log();
+    }
+
+    console.log(chalk.gray('─'.repeat(50)));
+    console.log();
+    console.log(FAF_COLORS.fafOrange('💡 NEXT STEPS:'));
+    console.log(`  ${chalk.cyan('faf fam show <name>')}  - Details about specific integration`);
+    console.log(`  ${chalk.cyan('faf init')}             - Generate .faf with detected stack`);
+    console.log(`  ${chalk.cyan('faf fam')}              - See all available integrations`);
+    console.log();
+
+  } catch (error) {
+    console.error(chalk.red('❌ Error detecting integrations:'), error);
+  }
 }

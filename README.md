@@ -1,11 +1,11 @@
-# faf-cli v3.0.3 - Championship Edition 🏆 
-with Turbo Cat 😽
+# 🩵⚡️faf-cli v3.0.3 - CE 🏆 FAF Family
+with Turbo Cat 😽 Rapid Catalytic Converter
 
 <div align="center">
 
 <img src="https://cdn.jsdelivr.net/npm/faf-cli@latest/assets/icons/orange-smiley.svg" alt="FAF Logo" width="64" />
 
-## **FREE FOR ALL DEVS** 🆓 • **Growing Fast** 📈 • **TURBO-CAT Powered** 😽
+## **FREE FOR ALL DEVS** 🆓 • **Growing Fast** 📈 • **AI-Context, On-Demand.**
 
 **Project DNA ✨ for ANY AI** • **Instant Context** • **Zero Faff™**
 
@@ -172,7 +172,11 @@ faf formats
 - Growing developer community
 
 ```bash
+# Install via npm (works everywhere)
 npm install -g faf-cli
+
+# Or via Homebrew (macOS/Linux)
+brew install faf-cli
 ```
 
 </td>
@@ -219,8 +223,11 @@ Learn more: faf.one/turbo
 ## 🚀 Quick Start
 
 ```bash
-# Install
+# Install via npm (works everywhere)
 npm install -g faf-cli
+
+# Or via Homebrew (macOS/Linux)
+brew install faf-cli
 
 # Initialize in any project
 cd your-project
@@ -559,8 +566,8 @@ Automation:    n8n workflows, OpenAI Builder, Google Opal, Make.com - AI-Automat
 
 | Aspect | RAG Approach | .faf Approach |
 |--------|-------------|---------------|
-| **Indexing** | Runtime embedding (slow, $$) | One-time at creation (fast, free) |
-| **Retrieval** | Vector search per query ($$) | Instant file read (free) |
+| **Indexing** | Runtime embedding (slow, $) | One-time at creation (fast, free) |
+| **Retrieval** | Vector search per query ($) | Instant file read (free) |
 | **Quality** | Probabilistic, incomplete | Structured, validated, scored |
 | **Latency** | Seconds (embedding + search) | Milliseconds (<50ms) |
 | **Cost** | Per-query fees | Zero runtime cost |
@@ -757,7 +764,7 @@ Copy cats? Why bother.
 
 ## 🏁 v3.0.3 - Championship Edition
 
-**FREE FOR ALL DEVS** 🆓 • **TURBO-CAT Powered** 😽 • **Growing Fast** 📈
+**FREE FOR ALL DEVS** 🆓 • **Growing Fast** 📈 • **AI-Context, On-Demand.**
 
 Made with 🧡 by **[wolfejam](https://github.com/Wolfe-Jam)**
 

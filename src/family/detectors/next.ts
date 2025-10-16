@@ -14,7 +14,13 @@ export const nextDetector: IntegrationDetector = {
   tier: 'trophy', // Based on evaluation: Next will score 99+
   qualityScore: 99,
   weeklyAdoption: 5_000_000, // ~5M weekly downloads
-  mcpServers: ['@vercel/mcp-server', '@nextjs/mcp-tools'],
+  mcpServers: [
+    '@playwright/mcp',           // #2: 625k/week - Browser automation & testing
+    'chrome-devtools-mcp',       // #7: 156k/week - Chrome DevTools debugging
+    'mcp-handler',               // #11: 59k/week - Vercel adapter for Next.js
+    '@langchain/mcp-adapters',   // #13: 42k/week - LangChain AI integration
+    '@supabase/mcp-utils',       // #15: 25k/week - Supabase backend integration
+  ],
   contextContribution: ['frontend', 'backend', 'runtime', 'hosting', 'api_type'],
 
   detect(projectPath: string): boolean {
@@ -82,7 +88,11 @@ export const nextDetector: IntegrationDetector = {
         framework: 'next',
         mcp_servers: this.mcpServers,
         recommended_tools: [
-          '@vercel/mcp-server for deployment and analytics',
+          '@playwright/mcp - Browser automation & testing (625k weekly)',
+          'chrome-devtools-mcp - Chrome DevTools debugging (156k weekly)',
+          'mcp-handler - Vercel adapter for Next.js (59k weekly)',
+          '@langchain/mcp-adapters - LangChain AI integration (42k weekly)',
+          '@supabase/mcp-utils - Supabase backend integration (25k weekly)',
           'Next.js DevTools',
           'Vercel CLI for local development',
           'React Developer Tools',
