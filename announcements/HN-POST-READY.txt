@@ -31,7 +31,13 @@ GitHub: https://github.com/Wolfe-Jam/faf-cli
 npm: https://www.npmjs.com/package/faf-cli
 Full announcement: https://www.faf.one/blog/v3-launch
 
+# Install via npm (works everywhere)
 npm install -g faf-cli
+
+# Or via Homebrew (macOS/Linux)
+brew install faf-cli
+
+# Start
 faf init
 
 Happy to answer questions about the architecture, format discovery engine, or the context-mirroring approach!

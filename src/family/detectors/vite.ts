@@ -14,7 +14,10 @@ export const viteDetector: IntegrationDetector = {
   tier: 'gold', // Based on evaluation: Vite will score 95+
   qualityScore: 97,
   weeklyAdoption: 9_000_000, // ~9M weekly downloads
-  mcpServers: ['vite-mcp-server'],
+  mcpServers: [
+    'chrome-devtools-mcp',       // #7: 156k/week - Chrome DevTools debugging
+    '@playwright/mcp',           // #2: 625k/week - Browser automation & testing
+  ],
   contextContribution: ['build', 'package_manager'],
 
   detect(projectPath: string): boolean {
@@ -89,7 +92,8 @@ export const viteDetector: IntegrationDetector = {
         framework: 'vite',
         mcp_servers: this.mcpServers,
         recommended_tools: [
-          'vite-mcp-server for Claude Desktop integration',
+          'chrome-devtools-mcp - Chrome DevTools debugging (156k weekly)',
+          '@playwright/mcp - Browser automation & testing (625k weekly)',
           'Vite DevTools (browser extension)',
           '@vitejs/plugin-react or @vitejs/plugin-vue for framework support',
         ],

@@ -14,7 +14,10 @@ export const typescriptDetector: IntegrationDetector = {
   tier: 'trophy', // Based on evaluation: TypeScript will score 99+
   qualityScore: 99,
   weeklyAdoption: 40_000_000, // ~40M weekly downloads
-  mcpServers: ['typescript-language-server', '@typescript/mcp-tools'],
+  mcpServers: [
+    '@langchain/mcp-adapters',   // #13: 42k/week - LangChain AI integration
+    'chrome-devtools-mcp',       // #7: 156k/week - Chrome DevTools debugging
+  ],
   contextContribution: ['main_language', 'type_system'],
 
   detect(projectPath: string): boolean {
@@ -98,8 +101,9 @@ export const typescriptDetector: IntegrationDetector = {
         framework: 'typescript',
         mcp_servers: this.mcpServers,
         recommended_tools: [
+          '@langchain/mcp-adapters - LangChain AI integration (42k weekly)',
+          'chrome-devtools-mcp - Chrome DevTools debugging (156k weekly)',
           'typescript-language-server for LSP support',
-          '@typescript/mcp-tools for Claude Desktop',
           'ts-node for development',
           'ESLint with @typescript-eslint plugin',
         ],

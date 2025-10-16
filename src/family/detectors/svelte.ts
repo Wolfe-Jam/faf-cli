@@ -14,7 +14,11 @@ export const svelteDetector: IntegrationDetector = {
   tier: 'gold', // Based on evaluation: Svelte will score 95+
   qualityScore: 96,
   weeklyAdoption: 400_000, // ~400k weekly downloads
-  mcpServers: ['@sveltejs/mcp', 'svelte-kit-mcp'],
+  mcpServers: [
+    '@playwright/mcp',           // #2: 625k/week - Browser automation & testing
+    'chrome-devtools-mcp',       // #7: 156k/week - Chrome DevTools debugging
+    '@langchain/mcp-adapters',   // #13: 42k/week - LangChain AI integration
+  ],
   contextContribution: ['frontend', 'ui_library', 'state_management'],
 
   detect(projectPath: string): boolean {
@@ -73,8 +77,10 @@ export const svelteDetector: IntegrationDetector = {
         framework: 'svelte',
         mcp_servers: this.mcpServers,
         recommended_tools: [
+          '@playwright/mcp - Browser automation & testing (625k weekly)',
+          'chrome-devtools-mcp - Chrome DevTools debugging (156k weekly)',
+          '@langchain/mcp-adapters - LangChain AI integration (42k weekly)',
           'Svelte DevTools',
-          '@sveltejs/mcp for Claude Desktop integration',
           'Vite for build tooling',
         ],
       },

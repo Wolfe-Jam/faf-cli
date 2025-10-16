@@ -14,7 +14,11 @@ export const reactDetector: IntegrationDetector = {
   tier: 'trophy', // Based on evaluation: React will score 99+
   qualityScore: 99,
   weeklyAdoption: 20_000_000, // ~20M weekly downloads
-  mcpServers: ['@react-mcp/server', 'react-mcp-tools'],
+  mcpServers: [
+    '@playwright/mcp',           // #2: 625k/week - Browser automation & testing
+    'chrome-devtools-mcp',       // #7: 156k/week - Chrome DevTools debugging
+    '@langchain/mcp-adapters',   // #13: 42k/week - LangChain AI integration
+  ],
   contextContribution: ['frontend', 'ui_library', 'state_management'],
 
   detect(projectPath: string): boolean {
@@ -68,8 +72,10 @@ export const reactDetector: IntegrationDetector = {
         framework: 'react',
         mcp_servers: this.mcpServers,
         recommended_tools: [
+          '@playwright/mcp - Browser automation & testing (625k weekly)',
+          'chrome-devtools-mcp - Chrome DevTools debugging (156k weekly)',
+          '@langchain/mcp-adapters - LangChain AI integration (42k weekly)',
           'React Developer Tools (browser extension)',
-          '@react-mcp/server for Claude Desktop integration',
           'ESLint with react plugin',
         ],
       },
