@@ -15,8 +15,10 @@ export const viteDetector: IntegrationDetector = {
   qualityScore: 97,
   weeklyAdoption: 9_000_000, // ~9M weekly downloads
   mcpServers: [
-    'chrome-devtools-mcp',       // #7: 156k/week - Chrome DevTools debugging
     '@playwright/mcp',           // #2: 625k/week - Browser automation & testing
+    'mcp-proxy',                 // #6: 197k/week - Infrastructure & proxy
+    'chrome-devtools-mcp',       // #7: 156k/week - Chrome DevTools debugging
+    '@mastra/mcp',               // #8: 130k/week - AI workflows & automation
   ],
   contextContribution: ['build', 'package_manager'],
 
@@ -92,8 +94,10 @@ export const viteDetector: IntegrationDetector = {
         framework: 'vite',
         mcp_servers: this.mcpServers,
         recommended_tools: [
-          'chrome-devtools-mcp - Chrome DevTools debugging (156k weekly)',
           '@playwright/mcp - Browser automation & testing (625k weekly)',
+          'mcp-proxy - Infrastructure & proxy (197k weekly)',
+          'chrome-devtools-mcp - Chrome DevTools debugging (156k weekly)',
+          '@mastra/mcp - AI workflows & automation (130k weekly)',
           'Vite DevTools (browser extension)',
           '@vitejs/plugin-react or @vitejs/plugin-vue for framework support',
         ],

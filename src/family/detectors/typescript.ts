@@ -15,8 +15,11 @@ export const typescriptDetector: IntegrationDetector = {
   qualityScore: 99,
   weeklyAdoption: 40_000_000, // ~40M weekly downloads
   mcpServers: [
-    '@langchain/mcp-adapters',   // #13: 42k/week - LangChain AI integration
+    'mcp-proxy',                 // #6: 197k/week - Infrastructure & proxy
     'chrome-devtools-mcp',       // #7: 156k/week - Chrome DevTools debugging
+    '@mastra/mcp',               // #8: 130k/week - AI workflows & automation
+    'mcp-framework',             // #12: 58k/week - Framework for building MCPs
+    '@langchain/mcp-adapters',   // #13: 42k/week - LangChain AI integration
   ],
   contextContribution: ['main_language', 'type_system'],
 
@@ -101,8 +104,11 @@ export const typescriptDetector: IntegrationDetector = {
         framework: 'typescript',
         mcp_servers: this.mcpServers,
         recommended_tools: [
-          '@langchain/mcp-adapters - LangChain AI integration (42k weekly)',
+          'mcp-proxy - Infrastructure & proxy (197k weekly)',
           'chrome-devtools-mcp - Chrome DevTools debugging (156k weekly)',
+          '@mastra/mcp - AI workflows & automation (130k weekly)',
+          'mcp-framework - Framework for building MCPs (58k weekly)',
+          '@langchain/mcp-adapters - LangChain AI integration (42k weekly)',
           'typescript-language-server for LSP support',
           'ts-node for development',
           'ESLint with @typescript-eslint plugin',
