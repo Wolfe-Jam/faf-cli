@@ -16,7 +16,12 @@ export const n8nDetector: IntegrationDetector = {
   tier: 'gold', // Based on evaluation: n8n will score 90+
   qualityScore: 92,
   weeklyAdoption: 401_000, // 87k (n8n-mcp) + 314k (n8n-nodes-mcp)
-  mcpServers: ['n8n-mcp', 'n8n-nodes-mcp'],
+  mcpServers: [
+    'n8n-nodes-mcp',             // #4: 314k/week - n8n workflow nodes
+    '@upstash/context7-mcp',     // #5: 236k/week - Edge database & Redis
+    '@mastra/mcp',               // #8: 130k/week - AI workflows & automation
+    'n8n-mcp',                   // #9: 87k/week - n8n workflow integration
+  ],
   contextContribution: ['automation_platform', 'workflow_engine', 'integration_layer', 'api_orchestration'],
 
   detect(projectPath: string): boolean {
@@ -90,11 +95,13 @@ export const n8nDetector: IntegrationDetector = {
         framework: 'n8n',
         mcp_servers: this.mcpServers,
         recommended_tools: [
-          'n8n-mcp for MCP workflow integration (87k weekly)',
-          'n8n-nodes-mcp for custom node development (314k weekly)',
+          'n8n-nodes-mcp - Custom node development (314k weekly)',
+          '@upstash/context7-mcp - Edge database & Redis (236k weekly)',
+          '@mastra/mcp - AI workflows & automation (130k weekly)',
+          'n8n-mcp - MCP workflow integration (87k weekly)',
           'n8n Desktop for workflow management',
-          '@supabase/supabase-js for database integration (used by n8n-mcp)',
-          'axios for HTTP requests (used by n8n-mcp)',
+          '@supabase/supabase-js for database integration',
+          'axios for HTTP requests',
         ],
       },
     };

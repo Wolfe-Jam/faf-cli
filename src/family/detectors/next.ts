@@ -16,9 +16,14 @@ export const nextDetector: IntegrationDetector = {
   weeklyAdoption: 5_000_000, // ~5M weekly downloads
   mcpServers: [
     '@playwright/mcp',           // #2: 625k/week - Browser automation & testing
+    '@expo/mcp-tunnel',          // #3: 543k/week - React Native & Expo mobile development
+    '@upstash/context7-mcp',     // #5: 236k/week - Edge database & Redis
+    'mcp-proxy',                 // #6: 197k/week - Infrastructure & proxy
     'chrome-devtools-mcp',       // #7: 156k/week - Chrome DevTools debugging
+    '@mastra/mcp',               // #8: 130k/week - AI workflows & automation
     'mcp-handler',               // #11: 59k/week - Vercel adapter for Next.js
     '@langchain/mcp-adapters',   // #13: 42k/week - LangChain AI integration
+    '@mzxrai/mcp-webresearch',   // #14: 36k/week - Web research tools
     '@supabase/mcp-utils',       // #15: 25k/week - Supabase backend integration
   ],
   contextContribution: ['frontend', 'backend', 'runtime', 'hosting', 'api_type'],
@@ -89,9 +94,14 @@ export const nextDetector: IntegrationDetector = {
         mcp_servers: this.mcpServers,
         recommended_tools: [
           '@playwright/mcp - Browser automation & testing (625k weekly)',
+          '@expo/mcp-tunnel - React Native & Expo mobile (543k weekly)',
+          '@upstash/context7-mcp - Edge database & Redis (236k weekly)',
+          'mcp-proxy - Infrastructure & proxy (197k weekly)',
           'chrome-devtools-mcp - Chrome DevTools debugging (156k weekly)',
+          '@mastra/mcp - AI workflows & automation (130k weekly)',
           'mcp-handler - Vercel adapter for Next.js (59k weekly)',
           '@langchain/mcp-adapters - LangChain AI integration (42k weekly)',
+          '@mzxrai/mcp-webresearch - Web research tools (36k weekly)',
           '@supabase/mcp-utils - Supabase backend integration (25k weekly)',
           'Next.js DevTools',
           'Vercel CLI for local development',

@@ -16,8 +16,11 @@ export const svelteDetector: IntegrationDetector = {
   weeklyAdoption: 400_000, // ~400k weekly downloads
   mcpServers: [
     '@playwright/mcp',           // #2: 625k/week - Browser automation & testing
+    'mcp-proxy',                 // #6: 197k/week - Infrastructure & proxy
     'chrome-devtools-mcp',       // #7: 156k/week - Chrome DevTools debugging
+    '@mastra/mcp',               // #8: 130k/week - AI workflows & automation
     '@langchain/mcp-adapters',   // #13: 42k/week - LangChain AI integration
+    '@mzxrai/mcp-webresearch',   // #14: 36k/week - Web research tools
   ],
   contextContribution: ['frontend', 'ui_library', 'state_management'],
 
@@ -78,8 +81,11 @@ export const svelteDetector: IntegrationDetector = {
         mcp_servers: this.mcpServers,
         recommended_tools: [
           '@playwright/mcp - Browser automation & testing (625k weekly)',
+          'mcp-proxy - Infrastructure & proxy (197k weekly)',
           'chrome-devtools-mcp - Chrome DevTools debugging (156k weekly)',
+          '@mastra/mcp - AI workflows & automation (130k weekly)',
           '@langchain/mcp-adapters - LangChain AI integration (42k weekly)',
+          '@mzxrai/mcp-webresearch - Web research tools (36k weekly)',
           'Svelte DevTools',
           'Vite for build tooling',
         ],
