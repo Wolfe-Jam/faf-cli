@@ -7,7 +7,8 @@ with Turbo Cat 😽 Rapid Catalytic Converter
 
 ## **FREE FOR ALL DEVS** 🆓 • **Growing Fast** 📈 • **AI-Context, On-Demand.**
 
-**Project DNA ✨ for ANY AI** • **Instant Context** • **Zero Faff™**
+**Project DNA ✨ for Claude Code/ any AI CLI** • 
+**Zero Faff Innit™🇬🇧**
 
 [![NPM Version](https://img.shields.io/npm/v/faf-cli?color=FF4500)](https://www.npmjs.com/package/faf-cli)
 [![Downloads](https://img.shields.io/npm/dt/faf-cli?color=00CCFF)](https://www.npmjs.com/package/faf-cli)
@@ -731,6 +732,14 @@ FAF CLI is defining a new category: **Universal AI Context Infrastructure**. Wit
 **[💼 Enterprise Sponsorship Inquiry](https://github.com/Wolfe-Jam/faf-cli/discussions)** - Strategic partnerships for category-defining infrastructure
 
 FAF CLI is **FREE FOREVER** and open source (MIT). Sponsorship accelerates development, expands integrations, and positions your brand alongside the future of AI development.
+
+---
+
+## 👤 Author
+
+**James Wolfe (Wolfe-Jam)**
+Creator, .faf Format
+ORCID: [0009-0007-0801-3841](https://orcid.org/0009-0007-0801-3841)
 
 ---
 
