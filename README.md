@@ -1,5 +1,6 @@
-# 🩵⚡️faf-cli v3.0.3 - CE 🏆 FAF Family
-with Turbo Cat 😽 Rapid Catalytic Converter
+# 🩵⚡️faf-cli v3.0.4 - CE 🏆 FAF Family 
+Powered by Anthropic-Approved code
+and featuring Turbo Cat 😽 Rapid Catalytic Converter
 
 <div align="center">
 
@@ -22,6 +23,8 @@ with Turbo Cat 😽 Rapid Catalytic Converter
 ---
 
 **AI-Context: Avg. 0-55% kills projects 💀 .faf 85-99% AI totally gets it ✨**
+
+**Powered by Anthropic-Approved MCP Claude Desktop code** - The same championship TypeScript that powers [claude-faf-mcp](https://www.npmjs.com/package/claude-faf-mcp), the official MCP server in the Anthropic registry ([PR #2759](https://github.com/modelcontextprotocol/servers/pull/2759) MERGED). 100% error-free TS strict Gold Code Standard.
 
 ## 🚀 Wanna GO Now>>
 
@@ -544,10 +547,9 @@ faf auto -q
 ## 📊 Technical Specs
 
 ```yaml
-Version:       3.0.3 - Championship Edition
 Performance:   <50ms all commands, 18ms avg, 8ms bi-sync, 0ms operations achieved
 Engine:        FAF-Engine-Mk3
-TURBO-CAT:     v3.0.0 - Full Power (Introduced v2.0.0, 153 validated formats)
+TURBO-CAT:     Full Power (153 validated formats)
 TypeScript:    100% strict mode
 Dependencies:  2 (inquirer, yaml)
 Testing:       WJTTC GOLD Certified (12,500+ test iterations)

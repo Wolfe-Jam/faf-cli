@@ -1,7 +1,7 @@
 {
   "name": "faf-cli",
-  "version": "3.0.3",
-  "description": "😽 TURBO-CAT: The Rapid Catalytic Converter • Project DNA ✨ for ANY AI • Fully Integrated with React, Next.js, Svelte, TypeScript, Vite & n8n • FREE FOREVER • 10,000+ developers • Championship Edition",
+  "version": "3.0.4",
+  "description": "Anthropic-Approved codebase that powers claude-faf-mcp • Persistent project context, on-demand • Format-driven CLI • Open Source Universal Standard • MIT License",
   "icon": "https://faf.one/orange-smiley.svg",
   "logo": "https://faf.one/orange-smiley.svg",
   "banner": "https://raw.githubusercontent.com/Wolfe-Jam/faf/main/cli/faf-banner.png",

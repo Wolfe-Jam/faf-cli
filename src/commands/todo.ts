@@ -58,7 +58,7 @@ export async function todoCommand(options: TodoCommandOptions = {}): Promise<voi
     const duration = Date.now() - startTime;
     console.log();
     console.log(FAF_COLORS.fafGreen(`${FAF_ICONS.trophy} Improvement plan ready in ${duration}ms!`));
-    console.log(`${FAF_COLORS.fafCyan(`${FAF_ICONS.magic_wand} Try: `)}faf improve --show${FAF_COLORS.fafCyan(' - View your todo list')}`);
+    console.log(`${FAF_COLORS.fafCyan(`${FAF_ICONS.magic_wand} Try: `)}faf todo --show${FAF_COLORS.fafCyan(' - View your todo list')}`);
 
   } catch (error) {
     console.error(FAF_COLORS.fafOrange(`${FAF_ICONS.shield} Improvement failed: ${error instanceof Error ? error.message : String(error)}`));
@@ -138,7 +138,7 @@ function displayTodoList(todoList: TodoList): void {
     `🏆 Complete all tasks → ${FAF_COLORS.fafGreen(`${todoList.targetScore}% score!`)} Championship ready!`
   );
   console.log();
-  console.log(FAF_COLORS.fafCyan('💡 Complete tasks with: ') + FAF_COLORS.fafOrange('faf improve --complete <task-number>'));
+  console.log(FAF_COLORS.fafCyan('💡 Complete tasks with: ') + FAF_COLORS.fafOrange('faf todo --complete <task-number>'));
 }
 
 /**
@@ -146,9 +146,9 @@ function displayTodoList(todoList: TodoList): void {
  */
 async function showCurrentTodoList(fafPath: string): Promise<void> {
   const todoList = await loadTodoList(fafPath);
-  
+
   if (!todoList) {
-    console.log(`${FAF_COLORS.fafOrange('└─ ')}No active improvement plan. Run ${FAF_COLORS.fafCyan('faf improve')} to create one.`);
+    console.log(`${FAF_COLORS.fafOrange('└─ ')}No active improvement plan. Run ${FAF_COLORS.fafCyan('faf todo')} to create one.`);
     return;
   }
 
@@ -166,9 +166,9 @@ async function showCurrentTodoList(fafPath: string): Promise<void> {
  */
 async function completeTask(taskIdentifier: string, fafPath: string): Promise<void> {
   const todoList = await loadTodoList(fafPath);
-  
+
   if (!todoList) {
-    console.log(`${FAF_COLORS.fafOrange('└─ ')}No active todo list. Run ${FAF_COLORS.fafCyan('faf improve')} first.`);
+    console.log(`${FAF_COLORS.fafOrange('└─ ')}No active todo list. Run ${FAF_COLORS.fafCyan('faf todo')} first.`);
     return;
   }
 
@@ -179,14 +179,15 @@ async function completeTask(taskIdentifier: string, fafPath: string): Promise<vo
   if (!isNaN(taskIndex) && taskIndex >= 0 && taskIndex < todoList.items.length) {
     task = todoList.items[taskIndex];
   } else {
-    // Try to find by partial title match
-    task = todoList.items.find(item => 
-      item.title.toLowerCase().includes(taskIdentifier.toLowerCase())
+    // Try to find by partial title match (convert to string first)
+    const identifier = String(taskIdentifier);
+    task = todoList.items.find(item =>
+      item.title.toLowerCase().includes(identifier.toLowerCase())
     );
   }
 
   if (!task) {
-    console.log(`${FAF_COLORS.fafOrange('└─ ')}Task "${taskIdentifier}" not found. Use ${FAF_COLORS.fafCyan('faf improve --show')} to see available tasks.`);
+    console.log(`${FAF_COLORS.fafOrange('└─ ')}Task "${taskIdentifier}" not found. Use ${FAF_COLORS.fafCyan('faf todo --show')} to see available tasks.`);
     return;
   }
 
@@ -226,10 +227,10 @@ async function completeTask(taskIdentifier: string, fafPath: string): Promise<vo
  */
 async function resetTodoList(fafPath: string): Promise<void> {
   const todoPath = getTodoListPath(fafPath);
-  
+
   if (await fileExists(todoPath)) {
     await fs.unlink(todoPath);
-    console.log(`${FAF_COLORS.fafGreen('└─ ')}Todo list reset! Run ${FAF_COLORS.fafCyan('faf improve')} to create a new one.`);
+    console.log(`${FAF_COLORS.fafGreen('└─ ')}Todo list reset! Run ${FAF_COLORS.fafCyan('faf todo')} to create a new one.`);
   } else {
     console.log(`${FAF_COLORS.fafOrange('└─ ')}No todo list to reset.`);
   }
