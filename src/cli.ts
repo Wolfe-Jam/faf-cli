@@ -38,6 +38,7 @@ import { shareCommand } from './commands/share';
 import { chatCommand } from './commands/chat';
 import { convertCommand, toMarkdown, toText } from './commands/convert';
 import { notificationsCommand } from './commands/notifications';
+import { skillsCommand } from './commands/skills';
 import { setColorOptions, type ColorScheme } from './utils/color-utils';
 import { generateFAFHeader, generateHelpHeader, FAF_COLORS } from './utils/championship-style';
 import { analytics, trackCommand, trackError, withPerformanceTracking } from './telemetry/analytics';
@@ -927,6 +928,22 @@ Claude Code Consistency:
   • Intelligent highlighting of matches
   • Section-aware searching with path display`)
   .action(withAnalyticsTracking('search', (query, options) => searchCommand(query, options)));
+
+// 🎸 faf skills - Claude Code Skills Integration
+program
+  .command('skills')
+  .description('🎸 List Claude Code skills from .faf file')
+  .option('-p, --path <path>', 'Path to .faf file or directory')
+  .addHelpText('after', `
+Examples:
+  $ faf skills                   # List skills from .faf
+  $ faf skills --path ./project  # Check specific project
+
+Claude Code Skills:
+  • Skills are loaded from ~/.claude/skills/
+  • Configure in .faf: skills: [faf, wjttc-tester]
+  • See: https://github.com/anthropics/skills`)
+  .action(withAnalyticsTracking('skills', (options) => skillsCommand(options)));
 
 // 📊 faf analytics - Analytics & Telemetry Management
 program

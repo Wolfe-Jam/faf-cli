@@ -1,6 +1,6 @@
-# 🩵⚡️faf-cli v3.0.4 - CE 🏆 FAF Family 
+# 🩵⚡️faf-cli v3.0.5 - 🏆 1st Persistent Project AI Context CLI
 Powered by Anthropic-Approved code
-and featuring Turbo Cat 😽 Rapid Catalytic Converter
+and featuring New Skills.md 🎸 integration 
 
 <div align="center">
 
@@ -373,6 +373,11 @@ faf audit       # Freshness check
 ```bash
 faf chat        # Natural language generation (terminal only)
 faf quick       # One-liner instant context
+```
+
+### 🎸 Skills & Integration
+```bash
+faf skills      # List Claude Code skills from .faf file
 ```
 
 ### 🔍 Discovery & Verification

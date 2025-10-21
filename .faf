@@ -121,3 +121,7 @@ faf_dna:
   birth_certificate: FAF-2025-CLIX-O6XE
   birth_date: 2025-10-07T04:39:04.877Z
   current_score: 88
+skills:
+  - faf
+  - mcp-builder
+  - skill-creator
