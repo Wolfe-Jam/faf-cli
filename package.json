@@ -1,6 +1,6 @@
 {
   "name": "faf-cli",
-  "version": "3.0.5",
+  "version": "3.0.6",
   "description": "Anthropic-Approved codebase that powers claude-faf-mcp • Persistent project context, on-demand • Format-driven CLI • Open Source Universal Standard • MIT License",
   "icon": "https://faf.one/orange-smiley.svg",
   "logo": "https://faf.one/orange-smiley.svg",
@@ -111,7 +111,10 @@
     "url": "https://github.com/Wolfe-Jam/faf-cli/issues"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.67.0",
+    "commander": "^14.0.1",
     "inquirer": "^12.9.4",
+    "open": "^10.2.0",
     "yaml": "^2.4.1"
   },
   "devDependencies": {

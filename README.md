@@ -1,22 +1,54 @@
-# 🩵⚡️faf-cli v3.0.5 - 🏆 1st Persistent Project AI Context CLI
-Powered by Anthropic-Approved code
-and featuring New Skills.md 🎸 integration 
+# faf-cli
+
+## TL;DR
+
+**Problem:** AI needs persistent project context to work at its best.
+
+**Solution:** The .faf format provides that context. This CLI creates, scores, and improves .faf files from your codebase.
+
+**How it works:** Run `faf init` to create your .faf file. Get a score (0-100%) showing context quality. Higher scores = AI more in-tune with your project. Use `faf auto` and other commands to improve your score quickly. Align your .faf file with CLAUDE.md to maintain context persistently with bi-sync.
+
+**Install:**
+```bash
+# npm (works everywhere)
+npm install -g faf-cli
+
+# Homebrew (macOS/Linux)
+brew install faf-cli
+```
+
+**Quick start:**
+```bash
+cd your-project
+faf init        # Creates .faf file
+faf score       # Check AI-readiness (0-100%)
+```
+
+**CLI vs MCP clarity**
+- **faf-cli** (this): Command-line tool that creates .faf files from your codebase → attach to any AI
+- **claude-faf-mcp** ([npm](https://www.npmjs.com/package/claude-faf-mcp)): MCP server for Claude Desktop → lets Claude read .faf files natively
+
+Most users want both: faf-cli creates .faf files, claude-faf-mcp lets Claude read them automatically.
+
+[Website](https://faf.one) | [GitHub](https://github.com/Wolfe-Jam/faf-cli) | [Discussions](https://github.com/Wolfe-Jam/faf-cli/discussions)
+
+---
+
+## 📚 Complete Documentation
+
+**For developers who want the full story**, here's everything about FAF's architecture, testing, and championship engineering standards.
 
 <div align="center">
 
 <img src="https://cdn.jsdelivr.net/npm/faf-cli@latest/assets/icons/orange-smiley.svg" alt="FAF Logo" width="64" />
 
-## **FREE FOR ALL DEVS** 🆓 • **Growing Fast** 📈 • **AI-Context, On-Demand.**
-
-**Project DNA ✨ for Claude Code/ any AI CLI** • 
-**Zero Faff Innit™🇬🇧**
+**Free for all devs** 🆓 • **Project DNA ✨ for any AI** • **Zero Faff™🇬🇧**
 
 [![NPM Version](https://img.shields.io/npm/v/faf-cli?color=FF4500)](https://www.npmjs.com/package/faf-cli)
 [![Downloads](https://img.shields.io/npm/dt/faf-cli?color=00CCFF)](https://www.npmjs.com/package/faf-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![TypeScript](https://img.shields.io/badge/TypeScript-100%25-3178C6?logo=typescript)](https://www.typescriptlang.org/)
 
-**[Website](https://faf.one)** • **[GitHub](https://github.com/Wolfe-Jam/faf-cli)** • **[Community](https://github.com/Wolfe-Jam/faf-cli/discussions)** • **[npm](https://www.npmjs.com/package/faf-cli)**
+**[Website](https://faf.one)** • **[GitHub](https://github.com/Wolfe-Jam/faf-cli)** • **[Community](https://github.com/Wolfe-Jam/faf-cli/discussions)**
 
 </div>
 
