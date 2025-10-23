@@ -210,7 +210,7 @@ export const globReplacements = {
    */
   async allSource(dir: string, options?: { ignore?: string[]; maxFiles?: number }) {
     return findFiles(dir, {
-      extensions: ['.svelte', '.jsx', '.tsx', '.vue', '.ts', '.js', '.py'],
+      extensions: ['.svelte', '.jsx', '.tsx', '.vue', '.ts', '.js', '.py', '.html', '.css'],
       ...options
     });
   },

@@ -420,6 +420,7 @@ export async function generateFafFromProject(
     cicd: contextSlotsFilled['cicd'] || 'None',
     fafScore,
     slotBasedPercentage: Math.round(((technicalFilled + humanFilled) / 21) * 100),
+    projectType,  // Pass project type for compiler slot-filling patterns
     // Human Context (Project Details)
     targetUser: contextSlotsFilled['who'],
     coreProblem: contextSlotsFilled['what'],

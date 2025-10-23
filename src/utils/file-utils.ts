@@ -513,6 +513,20 @@ export async function detectProjectType(
   // Pure TypeScript project detection
   if (hasTypeScript) {return "typescript";}
 
+  // Static HTML site detection (before fallback to latest-idea)
+  const hasIndexHtml = files.some((f: string) => f.endsWith('index.html') || f === 'index.html');
+  const hasCssFiles = files.some((f: string) => f.endsWith('.css'));
+  const hasHtmlFiles = files.some((f: string) => f.endsWith('.html'));
+
+  // Check for package.json ONLY in project directory (not parent directories)
+  const projectPackageJson = path.join(projectDir, 'package.json');
+  const hasProjectPackageJson = await fileExists(projectPackageJson);
+
+  // Detect static HTML: index.html without package.json in project dir + (CSS files OR other HTML files)
+  if (hasIndexHtml && !hasProjectPackageJson && (hasCssFiles || hasHtmlFiles)) {
+    return 'static-html';
+  }
+
   return "latest-idea";
 }
 

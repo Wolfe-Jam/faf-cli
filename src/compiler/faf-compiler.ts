@@ -427,6 +427,22 @@ export class FafCompiler {
       }
     }
 
+    // Static HTML auto-fill: If it's a static HTML site, intelligently fill slots
+    if (projectType === 'static-html' || projectType === 'landing-page') {
+      if (!ast.stack) ast.stack = {};
+      if (!ast.stack.frontend) ast.stack.frontend = 'HTML/CSS/JavaScript';
+      if (!ast.stack.runtime) ast.stack.runtime = 'Browser';
+      if (!ast.stack.hosting) ast.stack.hosting = 'Static Hosting';
+      if (!ast.stack.build) ast.stack.build = 'None';
+
+      this.addSlot(slots, 'stack.frontend', ast.stack.frontend, 'string', 'discovered', 1);
+      this.addSlot(slots, 'stack.runtime', ast.stack.runtime, 'string', 'discovered', 1);
+      this.addSlot(slots, 'stack.hosting', ast.stack.hosting, 'string', 'discovered', 1);
+      this.addSlot(slots, 'stack.build', ast.stack.build, 'string', 'discovered', 1);
+
+      // Leave backend, database, cicd as "None" - legitimate for static sites
+    }
+
     // n8n Workflow auto-fill: Map n8n-specific fields to standard 21-slot system
     if (projectType === 'n8n-workflow') {
       // Map n8n context to existing stack slots (efficient, no slot inflation)

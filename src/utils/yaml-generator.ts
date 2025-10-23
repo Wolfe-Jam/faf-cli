@@ -196,6 +196,7 @@ export function generateFafContent(projectData: {
   cicd: string;
   fafScore: number;
   slotBasedPercentage: number;
+  projectType?: string;  // Project type for compiler slot-filling patterns
   // Human Context (Project Details)
   targetUser?: string;
   coreProblem?: string;
@@ -263,6 +264,7 @@ export function generateFafContent(projectData: {
       name: projectData.projectName || 'Untitled Project',
       goal: projectData.projectGoal ? escapeForYaml(projectData.projectGoal) : '⚡️ Transform developer psychology from hope-driven to trust-driven AI development - 30 seconds replaces 20 minutes of questions',
       main_language: projectData.mainLanguage || 'Unknown',
+      type: projectData.projectType,  // Project type for compiler slot-filling patterns
       generated: new Date().toISOString(),
       mission: '🚀 Make Your AI Happy! 🧡 Trust-Driven 🤖',
       revolution: '30 seconds replaces 20 minutes of questions',
