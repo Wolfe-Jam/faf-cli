@@ -39,6 +39,7 @@ import { chatCommand } from './commands/chat';
 import { convertCommand, toMarkdown, toText } from './commands/convert';
 import { notificationsCommand } from './commands/notifications';
 import { skillsCommand } from './commands/skills';
+import { driftCommand } from './commands/drift';
 import { setColorOptions, type ColorScheme } from './utils/color-utils';
 import { generateFAFHeader, generateHelpHeader, FAF_COLORS } from './utils/championship-style';
 import { analytics, trackCommand, trackError, withPerformanceTracking } from './telemetry/analytics';
@@ -886,7 +887,44 @@ Claude Code Consistency:
   • Removes temporary files and cached data`)
   .action((options) => clearCommand(options));
 
-// ✏️ faf edit - Interactive .faf editor (Claude Code consistency)  
+// 🍊 faf drift - Context-Drift Analyzer
+program
+  .command('drift')
+  .description('🍊 Analyze git history for context-drift - Context-drift makes you pay')
+  .option('--since <period>', 'Analyze drift since period (e.g., "90d", "6m")')
+  .option('--detailed', 'Show detailed breakdown of drift events')
+  .option('--export <file>', 'Export analysis to JSON file')
+  .addHelpText('after', `
+Examples:
+  $ faf drift                    # Analyze entire git history
+  $ faf drift --since 90d        # Last 90 days only
+  $ faf drift --detailed         # Full breakdown
+  $ faf drift --export drift.json # Save to file
+
+What is Context-Drift?
+  • AI makes decisions without project context
+  • Each guess creates drift from your true architecture
+  • Drift compounds: auth → state → styling → framework
+  • Eventually: rewrites, migrations, or project death
+
+What faf drift detects:
+  • Auth system changes (JWT → Firebase → Supabase)
+  • State management swaps (Redux → Zustand)
+  • Styling migrations (CSS → Tailwind)
+  • Framework changes (React → Next.js)
+  • Database migrations (MongoDB → Postgres)
+
+Shows you:
+  • Files rewritten due to drift
+  • Weeks lost to cascade fixes
+  • Future drift risk level
+  • What .faf would have prevented
+
+Context-drift makes you pay.
+.faf keeps you drift-free.`)
+  .action(withAnalyticsTracking('drift', (options) => driftCommand(options)));
+
+// ✏️ faf edit - Interactive .faf editor (Claude Code consistency)
 program
   .command('edit')
   .description('✏️ Interactive .faf editor with validation')

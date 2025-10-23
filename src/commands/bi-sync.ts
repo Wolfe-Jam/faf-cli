@@ -246,11 +246,17 @@ export async function biSyncCommand(options: BiSyncOptions = {}): Promise<void> 
     // Clean up
     mirror.stop();
 
-    // Exit with appropriate code
-    process.exit(result.success ? 0 : 1);
+    // Exit with appropriate code (unless called from auto command)
+    if (!options.auto) {
+      process.exit(result.success ? 0 : 1);
+    }
 
   } catch (error) {
     console.error('❌ Bi-sync failed:', error instanceof Error ? error.message : String(error));
-    process.exit(1);
+    if (!options.auto) {
+      process.exit(1);
+    } else {
+      throw error; // Let auto command handle the error
+    }
   }
 }

@@ -14,6 +14,7 @@ import { biSyncCommand } from "./bi-sync";
 import { showFafScoreCard } from "./show";
 import yamlUtils from "../fix-once/yaml";
 import { FafCompiler } from "../compiler/faf-compiler";
+import { TurboCat } from "../utils/turbo-cat";
 
 interface AutoOptions {
   force?: boolean;
@@ -159,31 +160,20 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
     // Step 1: Check if .faf exists
     let fafPath = await findFafFile(targetDir);
 
-    // Get scores for header display
-    let birthScore = 0;
+    // Get CURRENT score (before auto runs)
     let currentScore = 0;
-    let addedScore = 0;
 
     if (fafPath) {
       try {
-        const fafData = await fs.readFile(fafPath, 'utf-8');
-        const parsed = yamlUtils.parse(fafData);
-        if (parsed.faf_dna?.birth_dna !== undefined) {
-          birthScore = Math.round(parsed.faf_dna.birth_dna);
-        }
         const compiler = new FafCompiler();
         const scoreResult = await compiler.compile(fafPath);
         currentScore = Math.round(scoreResult.score || 0);
-        addedScore = currentScore - birthScore;
       } catch (e) {
         // Ignore score errors, will show 0%
       }
     }
 
     console.log(chalk.bold.blue("\n🏎️⚡️ FAF AUTO - CHAMPIONSHIP MODE ENGAGED!"));
-    if (fafPath) {
-      console.log(chalk.white(`Birth: ${birthScore}% | ADDED: ${addedScore}% | .FAF score: ${currentScore}%`));
-    }
     console.log(chalk.gray("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"));
 
     if (!fafPath) {
@@ -205,6 +195,49 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
     console.log(chalk.yellow("\n🔄 Syncing context with latest changes..."));
     await syncFafFile(fafPath || undefined, { auto: true });
     console.log(chalk.green("✅ Context synchronized!"));
+
+    // Step 2.5: TURBO-CAT Format Discovery (Championship Intelligence)
+    console.log(chalk.yellow("\n😽 Running TURBO-CAT format discovery..."));
+    try {
+      const turboCat = new TurboCat();
+      const analysis = await turboCat.discoverFormats(targetDir);
+
+      if (analysis.discoveredFormats.length > 0) {
+        // Apply TURBO-CAT discoveries to .faf file
+        const fafData = await fs.readFile(fafPath!, 'utf-8');
+        const parsed = yamlUtils.parse(fafData);
+
+        // Merge stack signature and intelligence
+        if (analysis.stackSignature && analysis.stackSignature !== 'unknown-stack') {
+          parsed.stack_signature = analysis.stackSignature;
+        }
+
+        // Add discovered frameworks
+        if (Object.keys(analysis.frameworkConfidence).length > 0) {
+          parsed.detected_frameworks = Object.keys(analysis.frameworkConfidence);
+        }
+
+        // Add format discoveries
+        parsed.discovered_formats = analysis.discoveredFormats.map(f => ({
+          file: f.fileName,
+          type: f.formatType,
+          intelligence: f.intelligence
+        }));
+
+        // Add TURBO-CAT intelligence score
+        parsed.turbo_cat_intelligence = analysis.totalIntelligenceScore;
+
+        // Write updated .faf
+        await fs.writeFile(fafPath!, yamlUtils.stringify(parsed), 'utf-8');
+
+        console.log(chalk.green(`✅ TURBO-CAT discovered ${analysis.discoveredFormats.length} formats (Intelligence: ${analysis.totalIntelligenceScore})`));
+      } else {
+        console.log(chalk.gray("   No additional formats detected"));
+      }
+    } catch (error) {
+      console.log(chalk.yellow("⚠️  TURBO-CAT analysis skipped (non-critical)"));
+      console.log(chalk.gray(`   ${error instanceof Error ? error.message : String(error)}`));
+    }
 
     // Step 3: Create/Update CLAUDE.md via bi-sync
     console.log(chalk.yellow("\n🔗 Creating CLAUDE.md bi-directional sync..."));
@@ -238,9 +271,32 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
       await showFafScoreCard(targetDir, { raw: false });
     }
 
+    // Calculate NEW score (after auto ran)
+    let newScore = 0;
+    if (fafPath) {
+      try {
+        const compiler = new FafCompiler();
+        const scoreResult = await compiler.compile(fafPath);
+        newScore = Math.round(scoreResult.score || 0);
+      } catch (e) {
+        newScore = currentScore; // fallback to current if error
+      }
+    }
+
+    // Show before/after scores
+    const scoreDelta = newScore - currentScore;
+    const deltaDisplay = scoreDelta === 0
+      ? chalk.gray('(no change)')
+      : scoreDelta > 0
+        ? chalk.green(`(+${scoreDelta}%)`)
+        : chalk.red(`(${scoreDelta}%)`);
+
     // Success message
     console.log(chalk.gray("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
     console.log(chalk.bold.green("\n🏁 FAF AUTO COMPLETE - CHAMPIONSHIP READY!"));
+    if (fafPath) {
+      console.log(chalk.white(`   Before: ${currentScore}% | After: ${newScore}% ${deltaDisplay}`));
+    }
     console.log(chalk.gray("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"));
 
     // Quick tips

@@ -1,0 +1,109 @@
+faf_version: "2.5.0"
+ai_scoring_system: "2025-09-20"
+ai_score: "89%"
+ai_confidence: HIGH
+ai_value: "30_seconds_replaces_20_minutes_of_questions"
+ai_tldr:
+  project: "FAF CLI - \".faf cli scoring for AI-Context\""
+  stack: CLI/TypeScript/TypeScript (tsc)/npm registry/Node.js
+  quality_bar: ZERO_ERRORS_F1_STANDARDS
+  current_focus: Production deployment preparation
+  your_role: Build features with perfect context
+instant_context:
+  what_building: ".faf cli scoring for AI-Context"
+  tech_stack: CLI/TypeScript/TypeScript (tsc)/npm registry/Node.js
+  main_language: TypeScript
+  deployment: npm registry
+  key_files:
+    - package.json
+    - tsconfig.json
+context_quality:
+  slots_filled: "17/21 (81%)"
+  ai_confidence: HIGH
+  handoff_ready: true
+  missing_context:
+    - Database
+project:
+  name: FAF CLI
+  goal: ".faf cli scoring for AI-Context"
+  main_language: TypeScript
+  generated: "2025-10-22T02:27:46.232Z"
+  mission: "🚀 Make Your AI Happy! 🧡 Trust-Driven 🤖"
+  revolution: "30 seconds replaces 20 minutes of questions"
+  brand: "F1-Inspired Software Engineering - Championship AI Context"
+ai_instructions:
+  priority_order:
+    - "1. Read THIS .faf file first"
+    - "2. Check CLAUDE.md for session context"
+    - "3. Review package.json for dependencies"
+  working_style:
+    code_first: true
+    explanations: minimal
+    quality_bar: zero_errors
+    testing: required
+  warnings:
+    - Never modify dial components without approval
+    - All TypeScript must pass strict mode
+    - Test coverage required for new features
+stack:
+  frontend: CLI
+  css_framework: None
+  ui_library: inquirer (interactive prompts)
+  state_management: None
+  backend: Node.js
+  runtime: "Node.js >=14.0.0"
+  database: None
+  build: TypeScript (tsc)
+  package_manager: npm
+  api_type: CLI
+  hosting: npm registry
+  cicd: GitHub Actions
+preferences:
+  quality_bar: zero_errors
+  commit_style: conventional_emoji
+  response_style: concise_code_first
+  explanation_level: minimal
+  communication: direct
+  testing: required
+  documentation: as_needed
+state:
+  phase: development
+  version: "1.0.0"
+  focus: production_deployment
+  status: green_flag
+  next_milestone: npm_publication
+  blockers:
+tags:
+  auto_generated:
+    - "faf-cli"
+    - cli
+    - typescript
+    - "typescript-(tsc)"
+    - "npm-registry"
+    - node.js
+  smart_defaults:
+    - .faf
+    - "ai-ready"
+    - "2025"
+    - software
+    - "open-source"
+  user_defined:
+human_context:
+  who: AI assistants! ⚡
+  what: "Anthropic-Approved codebase that powers claude-faf-mcp • Persistent project context, on-demand • Format-driven CLI • Open Source Universal Standard • MIT License"
+  why: To at optimal levels—trusted decisions
+  where: Web platform
+  when: "Launch The Rapid Catalytic Converter - Now Purring at Full Power"
+  how: "Powered by Anthropic-Approved MCP Claude Desktop code** - The same championship TypeScript that powers [claude-faf-mcp](https://www"
+  additional_context:
+  context_score: 0
+  total_prd_score: 89
+  success_rate: "50%"
+ai_scoring_details:
+  system_date: "2025-09-20"
+  slot_based_percentage: 81
+  ai_score: 89
+  total_slots: 21
+  filled_slots: 17
+  scoring_method: "Honest percentage - no fake minimums"
+  trust_embedded: "COUNT ONCE architecture - trust MY embedded scores"

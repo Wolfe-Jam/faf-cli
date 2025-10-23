@@ -25,10 +25,12 @@ faf score       # Check AI-readiness (0-100%)
 ```
 
 **CLI vs MCP clarity**
-- **faf-cli** (this): Command-line tool that creates .faf files from your codebase → attach to any AI
-- **claude-faf-mcp** ([npm](https://www.npmjs.com/package/claude-faf-mcp)): MCP server for Claude Desktop → lets Claude read .faf files natively
+- **faf-cli** (this): Runs on your machine locally in a terminal
+- **claude-faf-mcp** ([npm](https://www.npmjs.com/package/claude-faf-mcp)): Runs through Claude Desktop as a tool
 
-Most users want both: faf-cli creates .faf files, claude-faf-mcp lets Claude read them automatically.
+Same .faf, different way to use. Same Project DNA and scoring. Same capabilities (create, score, improve). Different execution layer.
+
+Use CLI for raw speed and local development; use MCP for AI-integrated workflows. No feature gaps between them - pick based on your flow.
 
 [Website](https://faf.one) | [GitHub](https://github.com/Wolfe-Jam/faf-cli) | [Discussions](https://github.com/Wolfe-Jam/faf-cli/discussions)
 
