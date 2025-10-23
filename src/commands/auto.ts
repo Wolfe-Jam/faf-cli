@@ -207,30 +207,39 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
         const fafData = await fs.readFile(fafPath!, 'utf-8');
         const parsed = yamlUtils.parse(fafData);
 
-        // Merge stack signature and intelligence
+        // Ensure stack section exists
+        if (!parsed.stack) {
+          parsed.stack = {};
+        }
+
+        // Apply TURBO-CAT slot fill recommendations to existing stack fields
+        if (analysis.slotFillRecommendations && Object.keys(analysis.slotFillRecommendations).length > 0) {
+          Object.entries(analysis.slotFillRecommendations).forEach(([key, value]) => {
+            // Only fill if current value is None/null/undefined
+            if (!parsed.stack[key] || parsed.stack[key] === 'None' || parsed.stack[key] === null) {
+              parsed.stack[key] = value;
+            }
+          });
+        }
+
+        // Merge stack signature and intelligence (metadata fields)
         if (analysis.stackSignature && analysis.stackSignature !== 'unknown-stack') {
           parsed.stack_signature = analysis.stackSignature;
         }
 
-        // Add discovered frameworks
+        // Add discovered frameworks (metadata)
         if (Object.keys(analysis.frameworkConfidence).length > 0) {
           parsed.detected_frameworks = Object.keys(analysis.frameworkConfidence);
         }
 
-        // Add format discoveries
-        parsed.discovered_formats = analysis.discoveredFormats.map(f => ({
-          file: f.fileName,
-          type: f.formatType,
-          intelligence: f.intelligence
-        }));
-
-        // Add TURBO-CAT intelligence score
+        // Add TURBO-CAT intelligence score (metadata)
         parsed.turbo_cat_intelligence = analysis.totalIntelligenceScore;
 
         // Write updated .faf
         await fs.writeFile(fafPath!, yamlUtils.stringify(parsed), 'utf-8');
 
-        console.log(chalk.green(`✅ TURBO-CAT discovered ${analysis.discoveredFormats.length} formats (Intelligence: ${analysis.totalIntelligenceScore})`));
+        const filledSlots = Object.keys(analysis.slotFillRecommendations).length;
+        console.log(chalk.green(`✅ TURBO-CAT discovered ${analysis.discoveredFormats.length} formats, filled ${filledSlots} stack slots (Intelligence: ${analysis.totalIntelligenceScore})`));
       } else {
         console.log(chalk.gray("   No additional formats detected"));
       }
