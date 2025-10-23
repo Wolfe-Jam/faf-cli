@@ -59,7 +59,7 @@
     "version:truth": "node scripts/version-check.js",
     "prepublish:check": "npm run version:truth",
     "precommit": "npm run version:check",
-    "postinstall": "echo '\n🏎️ Welcome to FAF!\n\n⚡ Getting started:\n   1. Run \"faf init\" in your project\n   2. Get AI-ready context in <50ms\n   3. Share .faf files with Claude/Gemini/OpenAI-Codex\n\n📚 Docs: faf.one/docs\n💨 Want TURBO? faf.one/pricing\n\n☑️ FREE FOREVER • 10,000+ developers • Championship Edition\n'"
+    "postinstall": "echo '\n🏎️ Welcome to FAF!\n\n⚡ Getting started:\n   1. Run \"faf init\" in your project\n   2. Get AI-ready context in <50ms\n   3. Share .faf files with Claude/Gemini/OpenAI-Codex\n\n📚 Docs: faf.one/docs\n💨 Want TURBO? faf.one/pricing\n\n☑️ FREE FOREVER • 10,000+ developers • Podium Edition\n'"
   },
   "keywords": [
     "faf",
@@ -73,7 +73,7 @@
     "bi-sync",
     "cli",
     "free-forever",
-    "championship",
+    "podium",
     "fast-af",
     "claude",
     "chatgpt",
