@@ -58,11 +58,20 @@ export interface GitOptions {
 /**
  * Main faf git command
  */
-export async function gitCommand(query?: string, options: GitOptions = {}) {
+export async function gitCommand(query?: string, options: any = {}) {
   try {
+    // Commander.js passes short flags by their letter, map -o to output
+    const normalizedOptions: GitOptions = {
+      output: options.output || options.o,
+      list: options.list,
+      category: options.category,
+      scan: options.scan,
+      clone: options.clone,
+    };
+
     // Handle --list flag
-    if (options.list) {
-      return await handleListCommand(options.category);
+    if (normalizedOptions.list) {
+      return await handleListCommand(normalizedOptions.category);
     }
 
     // Require query
@@ -109,11 +118,11 @@ export async function gitCommand(query?: string, options: GitOptions = {}) {
         showExtractionProgress(repo.owner, repo.repo);
 
         // Fetch metadata
-        const metadata = await fetchGitHubMetadata(repo.owner, repo.repo, !options.scan);
+        const metadata = await fetchGitHubMetadata(repo.owner, repo.repo, !normalizedOptions.scan);
 
         // Fetch file tree (unless --scan only)
         let files: any[] = [];
-        if (!options.scan) {
+        if (!normalizedOptions.scan) {
           files = await fetchGitHubFileTree(repo.owner, repo.repo, metadata.defaultBranch);
         }
 
@@ -127,7 +136,11 @@ export async function gitCommand(query?: string, options: GitOptions = {}) {
         const fafContent = generateFafFromGitHub(metadata, stacks, files, score);
 
         // Determine output path
-        const outputPath = options.output || `${repo.repo}.faf`;
+        // For single repo: respect -o flag if provided
+        // For multiple repos: use default names (batch mode)
+        const outputPath = (selectedRepos.length === 1 && normalizedOptions.output)
+          ? normalizedOptions.output
+          : `${repo.repo}.faf`;
 
         // Write .faf file
         await fs.writeFile(outputPath, fafContent, 'utf-8');
@@ -141,7 +154,7 @@ export async function gitCommand(query?: string, options: GitOptions = {}) {
         });
 
         // Clone if requested
-        if (options.clone) {
+        if (normalizedOptions.clone) {
           await cloneRepository(repo.owner, repo.repo);
         }
       } catch (error) {
