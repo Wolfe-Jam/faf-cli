@@ -40,6 +40,7 @@ import { convertCommand, toMarkdown, toText } from './commands/convert';
 import { notificationsCommand } from './commands/notifications';
 import { skillsCommand } from './commands/skills';
 import { driftCommand } from './commands/drift';
+import { gitCommand } from './commands/git';
 import { setColorOptions, type ColorScheme } from './utils/color-utils';
 import { generateFAFHeader, generateHelpHeader, FAF_COLORS } from './utils/championship-style';
 import { analytics, trackCommand, trackError, withPerformanceTracking } from './telemetry/analytics';
@@ -454,6 +455,41 @@ Integrations:
   • MCP server recommendations per stack
   • Quality-gated: 85% minimum (Bronze tier)`)
   .action(withAnalyticsTracking('fam', (subcommand, arg, options) => famCommand(subcommand, arg, options)));
+
+// 🚀 faf git - GitHub Repository Context Extractor
+program
+  .command('git [query]')
+  .description('🚀 Generate AI context for ANY GitHub repo without cloning')
+  .option('-o, --output <path>', 'Output path for .faf file')
+  .option('--list', 'Show popular repositories')
+  .option('--category <category>', 'Filter popular repos by category')
+  .option('--scan', 'Metadata only (skip file tree)')
+  .option('--clone', 'Clone repo after generating .faf')
+  .addHelpText('after', `
+Examples:
+  $ faf git react                     # Shorthand: facebook/react
+  $ faf git svelte                    # Auto-resolve: sveltejs/svelte
+  $ faf git facebook/react            # owner/repo format
+  $ faf git https://github.com/...    # Full URL
+  $ faf git --list                    # Show popular repos
+  $ faf git --list --category auth    # Show auth libraries
+
+  # Batch processing (comparison mode)
+  $ faf git react vue svelte          # Compare multiple repos
+
+🚀 Use Cases:
+  • Get AI context for libraries you DON'T own
+  • Compare repos before choosing one
+  • Understand architecture before cloning
+  • Ask AI about ANY repo instantly
+
+Features:
+  • ⚡ <200ms extraction (no clone needed)
+  • 🔍 Fuzzy matching for typos (svelt → svelte)
+  • 📊 Rich metadata (stars, topics, languages)
+  • 🏆 Quality scoring (0-100%)
+  • 🎯 Smart shorthand (react → facebook/react)`)
+  .action(withAnalyticsTracking('git', (query, options) => gitCommand(query, options)));
 
 // 📚 faf index - Universal A-Z Reference (The Everything Catalog)
 program
