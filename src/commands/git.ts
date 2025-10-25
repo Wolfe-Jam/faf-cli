@@ -200,7 +200,21 @@ async function resolveQuery(query: string): Promise<RepoMapping[]> {
         category: 'unknown'
       }];
     } catch (error) {
-      // Not found, fall through to other resolution methods
+      // Check if this was a 404 (repo doesn't exist)
+      if (error instanceof Error && error.message.toLowerCase().includes('not found')) {
+        console.log();
+        console.log(chalk.red(`❌ Repository not found: ${parsed.owner}/${parsed.repo}`));
+        console.log();
+        console.log(chalk.gray('This repository does not exist on GitHub or is private.'));
+        console.log();
+        console.log(chalk.gray('Suggestions:'));
+        console.log(chalk.gray('  • Check the owner and repo names'));
+        console.log(chalk.gray('  • Verify the repository is public'));
+        console.log(chalk.gray('  • Browse popular repos: faf git --list'));
+        console.log();
+        return [];
+      }
+      // Other error, fall through to try other resolution methods
     }
   }
 
