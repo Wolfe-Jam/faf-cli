@@ -41,6 +41,7 @@ import { notificationsCommand } from './commands/notifications';
 import { skillsCommand } from './commands/skills';
 import { driftCommand } from './commands/drift';
 import { gitCommand } from './commands/git';
+import { tafCommand } from './commands/taf';
 import { setColorOptions, type ColorScheme } from './utils/color-utils';
 import { generateFAFHeader, generateHelpHeader, FAF_COLORS } from './utils/championship-style';
 import { analytics, trackCommand, trackError, withPerformanceTracking } from './telemetry/analytics';
@@ -490,6 +491,36 @@ Features:
   • 🏆 Quality scoring (0-100%)
   • 🎯 Smart shorthand (react → facebook/react)`)
   .action(withAnalyticsTracking('git', (query, options) => gitCommand(query, options)));
+
+// 📊 faf taf - Testing Activity Feed
+program
+  .command('taf')
+  .description('📊 Testing Activity Feed - Git-friendly testing timeline')
+  .addHelpText('after', `
+Subcommands:
+  init              Initialize .taf file
+  log               Log a test run
+  validate          Validate .taf format
+  stats             Show test statistics
+
+Examples:
+  $ faf taf init                              # Create .taf file
+  $ faf taf log --total 173 --passed 173 --failed 0
+  $ faf taf validate                          # Check format
+  $ faf taf stats                             # View statistics
+
+Features:
+  • 📝 Git-friendly YAML format (append-only)
+  • 🔗 Native Reference with .faf
+  • 🏆 Podium scoring (🏆 🥇 🥈 🥉)
+  • 📊 Pass rate tracking and trends
+  • ⚡ Lightweight (5-60 lines per run)`)
+  .action(withAnalyticsTracking('taf', () => {
+    // Get raw arguments after 'taf' command
+    const tafIndex = process.argv.indexOf('taf');
+    const args = tafIndex >= 0 ? process.argv.slice(tafIndex + 1) : [];
+    return tafCommand(args);
+  }));
 
 // 📚 faf index - Universal A-Z Reference (The Everything Catalog)
 program
