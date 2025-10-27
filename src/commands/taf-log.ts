@@ -63,6 +63,56 @@ export async function tafLog(options: TAFLogOptions = {}): Promise<void> {
     process.exit(1);
   }
 
+  // Validate input types and values
+  const total = options.total;
+  const passed = options.passed;
+  const failed = options.failed;
+  const skipped = options.skipped || 0;
+
+  // Check for NaN
+  if (isNaN(total) || isNaN(passed) || isNaN(failed) || isNaN(skipped)) {
+    console.error('❌ Invalid input: test counts must be numbers');
+    console.log('\nExample: faf taf log --total 173 --passed 173 --failed 0');
+    process.exit(1);
+  }
+
+  // Check for negative numbers
+  if (total < 0 || passed < 0 || failed < 0 || skipped < 0) {
+    console.error('❌ Invalid input: test counts cannot be negative');
+    console.log(`\nReceived: total=${total}, passed=${passed}, failed=${failed}, skipped=${skipped}`);
+    process.exit(1);
+  }
+
+  // Check for integers
+  if (!Number.isInteger(total) || !Number.isInteger(passed) || !Number.isInteger(failed) || !Number.isInteger(skipped)) {
+    console.error('❌ Invalid input: test counts must be integers');
+    console.log(`\nReceived: total=${total}, passed=${passed}, failed=${failed}, skipped=${skipped}`);
+    process.exit(1);
+  }
+
+  // Check math: passed + failed + skipped should equal total
+  const sum = passed + failed + skipped;
+  if (sum !== total) {
+    console.error('❌ Invalid input: test counts do not add up');
+    console.log(`\nPassed (${passed}) + Failed (${failed}) + Skipped (${skipped}) = ${sum}`);
+    console.log(`But total is ${total}`);
+    console.log('\nThe numbers must add up correctly.');
+    process.exit(1);
+  }
+
+  // Check logical constraints
+  if (passed > total) {
+    console.error('❌ Invalid input: passed tests cannot exceed total tests');
+    console.log(`\nPassed: ${passed}, Total: ${total}`);
+    process.exit(1);
+  }
+
+  if (failed > total) {
+    console.error('❌ Invalid input: failed tests cannot exceed total tests');
+    console.log(`\nFailed: ${failed}, Total: ${total}`);
+    process.exit(1);
+  }
+
   // Detect result if not provided
   const previousRun = taf.test_history[taf.test_history.length - 1];
   const result = options.result || detectResult(
