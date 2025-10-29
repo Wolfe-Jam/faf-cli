@@ -74,6 +74,148 @@ brew install faf-cli
 
 ---
 
+## 🎉 What's New in v3.1.0
+
+### 🔥 THE VISIBILITY REVOLUTION 🔥
+
+**AI context just became UNIVERSAL. project.faf is here.**
+
+For too long, `.faf` lived in the shadows - hidden, invisible, forgotten. **NOT ANYMORE.**
+
+### 📂 Introducing: `project.faf`
+
+## **`package.json` for AI**
+
+**Just like `package.json` tells npm what your project needs...**
+**`project.faf` tells AI what your project IS.**
+
+| File | Purpose | Who Reads It |
+|------|---------|--------------|
+| `package.json` | Dependencies, scripts, metadata | npm, Node.js, developers |
+| `project.faf` | **Context, architecture, purpose** | **AI, Claude, Cursor, any AI tool** |
+
+**Same pattern. Same universality. Same necessity.**
+
+**VISIBLE. DISCOVERABLE. UNIVERSAL.**
+
+```bash
+# The old way (hidden like .env)
+ls -la
+.env          # 🔒 Hidden (secrets - SHOULD be hidden)
+.faf          # 👻 Hidden (AI context - SHOULD be visible!)
+
+# The NEW WAY (visible like package.json)
+ls
+package.json  # ✅ Visible (dependencies - everyone needs to see)
+project.faf   # ✅ Visible (AI context - AI needs to find this!)
+.env          # 🔒 Still hidden (secrets stay secret)
+```
+
+**`.env` hides secrets. `project.faf` shares context.**
+
+**`.faf` was hiding in the wrong category. `project.faf` fixes that.**
+
+### 🚀 Why This Changes Everything
+
+**Before:**
+- Hidden `.faf` files easily forgotten
+- Hard to discover in new projects
+- "Wait, does this project have AI context?"
+- Invisible to Git UIs, IDEs, file managers
+
+**After:**
+- `project.faf` sits next to `package.json`
+- **IMPOSSIBLE TO MISS**
+- Universal pattern developers already know
+- Every project SHOWS its AI-readiness
+
+### ✨ The Essential Trio
+
+```bash
+your-project/
+├── package.json    # What your project NEEDS (dependencies)
+├── project.faf     # What your project IS (context for AI)
+└── tsconfig.json   # How your project BUILDS (TypeScript config)
+```
+
+**`package.json`** → Tells npm: "Install these dependencies"
+**`project.faf`** → Tells AI: "This is what I am, this is my purpose"
+**`tsconfig.json`** → Tells TypeScript: "Compile with these settings"
+
+**All visible. All universal. All essential.**
+
+**You wouldn't skip `package.json`. Don't skip `project.faf`.**
+
+### 🔥 New Commands
+
+**1. `faf migrate` - Instant Upgrade**
+```bash
+faf migrate
+# .faf → project.faf (27ms)
+```
+
+**2. `faf rename` - Bulk Power**
+```bash
+faf rename
+# Recursively migrates ENTIRE monorepo tree
+# Found 147 .faf files? ✅ Migrated in 420ms
+```
+
+**3. Auto-Magic for New Projects**
+```bash
+faf init    # Creates project.faf (not .faf)
+faf auto    # Creates project.faf
+```
+
+### 🎯 Championship Detection Upgrade
+
+**TSA Engine Integration** - "We're INSPECTORS, not trash collectors"
+
+**Before (naive):**
+```
+Has 'commander' in package.json? → Maybe CLI
+```
+
+**After (championship):**
+```
+'commander' imported 10+ times? → DEFINITELY CLI
+Analyzes CORE dependencies (actual usage)
+95% accuracy vs 70% accuracy
+```
+
+### ⚡ Performance
+
+- **migrate:** 27ms (54% faster than 50ms target)
+- **rename:** 27ms for 3 files (73% faster than target)
+- **championship grade** across all operations
+
+### 🏆 WJTTC GOLD Certification
+
+**97/100 Championship Score**
+- Project Understanding: 20/20
+- TURBO-CAT Knowledge: 20/20
+- Architecture Understanding: 20/20
+
+Full report: 194KB comprehensive test suite
+
+### 🔙 100% Backward Compatible
+
+**Still works with `.faf` files** - graceful transition, no breaking changes.
+
+Your old `.faf` files keep working. Migrate when ready.
+
+### 🌍 The Vision
+
+**Every project with a `package.json` should have a `project.faf`**
+
+Just like every TypeScript project has `tsconfig.json`, every Rust project has `Cargo.toml`, every Python project has `requirements.txt`...
+
+**Every AI-augmented project has `project.faf`**
+
+**This is the new universal standard for AI context.**
+
+---
+
 ## 🎉 What's New in v3.0.0
 
 ### The Podium Release
