@@ -116,12 +116,12 @@ describe('🔍 FAF Edge Case Audit - CRITICAL REGRESSION PREVENTION', () => {
       expect(found).toBe(path.join(testDir, 'project.faf'));
     });
 
-    it('should prefer .faf over named files', async () => {
-      await fs.writeFile(path.join(testDir, 'project.faf'), 'named: true');
-      await fs.writeFile(path.join(testDir, '.faf'), 'default: true');
-      
+    it('should prefer project.faf over .faf (v1.2.0 standard)', async () => {
+      await fs.writeFile(path.join(testDir, 'project.faf'), 'standard: true');
+      await fs.writeFile(path.join(testDir, '.faf'), 'legacy: true');
+
       const found = await findFafFile(testDir);
-      expect(found).toBe(path.join(testDir, '.faf'));
+      expect(found).toBe(path.join(testDir, 'project.faf'));
     });
 
     it('should find myapp.faf', async () => {

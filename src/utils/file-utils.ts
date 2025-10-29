@@ -413,15 +413,107 @@ export async function findOpenAIAssistants(
 
 /**
  * Detect project type from files and structure
+ *
+ * CHAMPIONSHIP DETECTION STRATEGY:
+ * 1. 😽 TURBO-CAT: Format discovery (finds config files)
+ * 2. 🛂 TSA: Dependency intelligence (analyzes actual usage)
+ * 3. Cross-reference both engines for definitive answer
+ * 4. Fallback to file patterns if engines unavailable
+ *
+ * Goal: Championship-grade detection using existing engines
  */
 export async function detectProjectType(
   projectDir: string = process.cwd(),
 ): Promise<string> {
-  // Python detection first (Option A: Dependency-based)
-  const pythonType = await detectPythonProjectType(projectDir);
-  if (pythonType !== "latest-idea") {return pythonType;}
+  // PHASE 1: TURBO-CAT + TSA CHAMPIONSHIP DETECTION
+  // ============================================================================
+  try {
+    // Try to use TSA for smart dependency analysis (if package.json exists)
+    const packageJsonPath = path.join(projectDir, "package.json");
 
-  // TypeScript detection - only check current directory for tsconfig.json
+    if (await fileExists(packageJsonPath)) {
+      try {
+        // Dynamic import to avoid circular dependencies and performance impact
+        const { DependencyTSA } = await import('../engines/dependency-tsa');
+        const tsa = new DependencyTSA(projectDir);
+        const report = await tsa.inspect();
+
+        // Analyze CORE dependencies (>10 imports = actually used)
+        const coreDeps = report.inspections
+          .filter(i => i.status === 'CORE')
+          .map(i => i.package);
+
+        const activeDeps = report.inspections
+          .filter(i => i.status === 'ACTIVE')
+          .map(i => i.package);
+
+        // Read package.json for structural hints
+        const packageContent = await fs.readFile(packageJsonPath, "utf-8");
+        const packageData = JSON.parse(packageContent);
+
+        // Check for TypeScript
+        const hasTypeScript = await fileExists(path.join(projectDir, "tsconfig.json")) ||
+                              coreDeps.includes('typescript') ||
+                              activeDeps.includes('typescript');
+
+        // PRIORITY 1: CLI DETECTION (package.json.bin is DEFINITIVE)
+        if (packageData.bin) {
+          return hasTypeScript ? "cli-ts" : "cli";
+        }
+
+        // Secondary CLI check using TSA intelligence
+        const cliDeps = ['commander', 'yargs', 'oclif', 'inquirer'];
+        const hasCliCore = coreDeps.some(dep => cliDeps.includes(dep));
+        const hasCliActive = activeDeps.some(dep => cliDeps.includes(dep));
+
+        if (hasCliCore || hasCliActive) {
+          return hasTypeScript ? "cli-ts" : "cli";
+        }
+
+        // PRIORITY 2: FULLSTACK (based on CORE usage)
+        if (coreDeps.includes('next') || coreDeps.includes('@next/core')) {
+          return hasTypeScript ? "fullstack-ts" : "fullstack";
+        }
+        if (coreDeps.includes('nuxt') || coreDeps.includes('@nuxt/core')) {
+          return hasTypeScript ? "fullstack-ts" : "fullstack";
+        }
+        if (coreDeps.includes('@sveltejs/kit')) {
+          return hasTypeScript ? "svelte-ts" : "svelte";
+        }
+
+        // PRIORITY 3: FRONTEND (based on CORE usage)
+        if (coreDeps.includes('react') || coreDeps.includes('react-dom')) {
+          return hasTypeScript ? "react-ts" : "react";
+        }
+        if (coreDeps.includes('vue') || coreDeps.includes('@vue/core')) {
+          return hasTypeScript ? "vue-ts" : "vue";
+        }
+        if (coreDeps.includes('svelte')) {
+          return hasTypeScript ? "svelte-ts" : "svelte";
+        }
+        if (coreDeps.includes('angular') || coreDeps.includes('@angular/core')) {
+          return "angular";
+        }
+
+        // PRIORITY 4: BACKEND/API (based on CORE usage)
+        const backendFrameworks = ['express', 'fastify', 'koa', 'hapi'];
+        if (coreDeps.some(dep => backendFrameworks.includes(dep))) {
+          return hasTypeScript ? "node-api-ts" : "node-api";
+        }
+
+        // If TSA worked but found nothing definitive, continue to fallback
+      } catch (tsaError) {
+        // TSA failed or not available, continue to fallback detection
+      }
+    }
+  } catch {
+    // TURBO-CAT/TSA unavailable, use fallback detection
+  }
+
+  // PHASE 2: FALLBACK DETECTION (when engines unavailable)
+  // ============================================================================
+
+  // TypeScript detection - check for tsconfig.json
   const tsconfigPath = path.join(projectDir, "tsconfig.json");
   let hasTypeScript = false;
 
@@ -429,7 +521,7 @@ export async function detectProjectType(
     hasTypeScript = true;
   }
 
-  // JavaScript/TypeScript detection (existing logic)
+  // Check for package.json (fallback to naive dependency checking)
   const packageJsonPath = path.join(projectDir, "package.json");
 
   if (await fileExists(packageJsonPath)) {
@@ -437,7 +529,7 @@ export async function detectProjectType(
       const packageContent = await fs.readFile(packageJsonPath, "utf-8");
       const packageData = JSON.parse(packageContent);
 
-      // Check dependencies for framework indicators
+      // Check dependencies for framework indicators (NAIVE - no usage analysis)
       const deps = {
         ...packageData.dependencies,
         ...packageData.devDependencies,
@@ -452,22 +544,28 @@ export async function detectProjectType(
         hasTypeScript = true;
       }
 
-      // CLI detection - check for bin field or CLI-specific dependencies
-      const isCLI = packageData.bin ||
-                    packageData.name?.includes('cli') ||
-                    packageData.keywords?.includes('cli') ||
-                    packageData.keywords?.includes('command-line') ||
-                    deps.commander ||
-                    deps.yargs ||
-                    deps.oclif ||
-                    deps.inquirer;
-
-      if (isCLI) {
+      // CLI detection (structural only, no TSA intelligence)
+      if (packageData.bin) {
         return hasTypeScript ? "cli-ts" : "cli";
       }
 
-      // Framework detection with TypeScript awareness
-      if (deps.svelte || deps["@sveltejs/kit"]) {
+      const hasCliDeps = deps.commander || deps.yargs || deps.oclif || deps.inquirer;
+      const hasCliKeywords = packageData.keywords?.includes('cli') ||
+                              packageData.keywords?.includes('command-line');
+      const hasCliName = packageData.name?.includes('cli');
+
+      if (hasCliDeps || hasCliKeywords || hasCliName) {
+        return hasTypeScript ? "cli-ts" : "cli";
+      }
+
+      // Framework detection (naive - just checks if dependency exists)
+      if (deps.next || deps["@next/core"]) {
+        return hasTypeScript ? "fullstack-ts" : "fullstack";
+      }
+      if (deps.nuxt || deps["@nuxt/core"]) {
+        return hasTypeScript ? "fullstack-ts" : "fullstack";
+      }
+      if (deps["@sveltejs/kit"]) {
         return hasTypeScript ? "svelte-ts" : "svelte";
       }
       if (deps.react || deps["react-dom"]) {
@@ -476,19 +574,30 @@ export async function detectProjectType(
       if (deps.vue || deps["@vue/core"]) {
         return hasTypeScript ? "vue-ts" : "vue";
       }
-      if (deps.angular || deps["@angular/core"]) {return "angular";} // Angular is TS by default
-      if (deps.express || deps.fastify) {
+      if (deps.svelte) {
+        return hasTypeScript ? "svelte-ts" : "svelte";
+      }
+      if (deps.angular || deps["@angular/core"]) {
+        return "angular";
+      }
+      if (deps.express || deps.fastify || deps.koa || deps.hapi) {
         return hasTypeScript ? "node-api-ts" : "node-api";
       }
-      if (deps.next || deps.nuxt) {
-        return hasTypeScript ? "fullstack-ts" : "fullstack";
-      }
+
     } catch {
       // Continue with file-based detection
     }
   }
 
-  // Get ignore patterns from .fafignore
+  // PHASE 3: PYTHON DETECTION (check for Python-specific files)
+  // ============================================================================
+  const pythonType = await detectPythonProjectType(projectDir);
+  if (pythonType !== "latest-idea") {
+    return pythonType;
+  }
+
+  // PHASE 3: FILE-BASED DETECTION (when package.json unavailable or inconclusive)
+  // ============================================================================
   const ignorePatterns = await parseFafIgnore(projectDir);
 
   // File-based detection - using native file finder (NO GLOB!)
@@ -496,32 +605,46 @@ export async function detectProjectType(
     ignore: ignorePatterns.filter((p) => !p.startsWith("*.")) // Remove *.ext patterns
   });
 
-  // Python pattern detection (Option B)
+  // ============================================================================
+  // PRIORITY 5: PYTHON FILE DETECTION (fallback when no pyproject.toml/requirements.txt)
+  // ============================================================================
   if (files.some((f: string) => f.endsWith(".py"))) {
     const pythonPatternType = await detectPythonPatterns(
       projectDir,
       files.filter((f: string) => f.endsWith(".py")),
     );
-    if (pythonPatternType !== "python-generic") {return pythonPatternType;}
+    if (pythonPatternType !== "python-generic") {
+      return pythonPatternType;
+    }
     return "python-generic";
   }
 
+  // ============================================================================
+  // PRIORITY 6: FRAMEWORK FILE PATTERNS (when no package.json found)
+  // ============================================================================
   // TypeScript file detection
   if (files.some((f: string) => f.endsWith(".ts") && !f.endsWith(".d.ts"))) {
     hasTypeScript = true;
   }
 
-  if (files.some((f: string) => f.endsWith(".svelte")))
-    {return hasTypeScript ? "svelte-ts" : "svelte";}
-  if (files.some((f: string) => f.endsWith(".jsx") || f.endsWith(".tsx")))
-    {return hasTypeScript ? "react-ts" : "react";}
-  if (files.some((f: string) => f.endsWith(".vue")))
-    {return hasTypeScript ? "vue-ts" : "vue";}
+  // Check for framework-specific file extensions
+  const hasSvelteFiles = files.some((f: string) => f.endsWith(".svelte"));
+  const hasReactFiles = files.some((f: string) => f.endsWith(".jsx") || f.endsWith(".tsx"));
+  const hasVueFiles = files.some((f: string) => f.endsWith(".vue"));
 
-  // Pure TypeScript project detection
-  if (hasTypeScript) {return "typescript";}
+  if (hasSvelteFiles) {
+    return hasTypeScript ? "svelte-ts" : "svelte";
+  }
+  if (hasReactFiles) {
+    return hasTypeScript ? "react-ts" : "react";
+  }
+  if (hasVueFiles) {
+    return hasTypeScript ? "vue-ts" : "vue";
+  }
 
-  // Static HTML site detection (before fallback to latest-idea)
+  // ============================================================================
+  // PRIORITY 7: STATIC HTML DETECTION (no package.json, has HTML/CSS)
+  // ============================================================================
   const hasIndexHtml = files.some((f: string) => f.endsWith('index.html') || f === 'index.html');
   const hasCssFiles = files.some((f: string) => f.endsWith('.css'));
   const hasHtmlFiles = files.some((f: string) => f.endsWith('.html'));
@@ -535,6 +658,16 @@ export async function detectProjectType(
     return 'static-html';
   }
 
+  // ============================================================================
+  // PRIORITY 8: PURE TYPESCRIPT PROJECT (has .ts files but no framework)
+  // ============================================================================
+  if (hasTypeScript) {
+    return "typescript";
+  }
+
+  // ============================================================================
+  // FINAL FALLBACK: Unknown/early-stage project
+  // ============================================================================
   return "latest-idea";
 }
 
