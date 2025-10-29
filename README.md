@@ -129,6 +129,32 @@ project.faf   # ✅ Visible (AI context - AI needs to find this!)
 - Universal pattern developers already know
 - Every project SHOWS its AI-readiness
 
+### 🔺 The Golden Triangle
+
+**Three sides. Closed loop. Complete accountability.**
+
+```
+         project.faf
+          (WHAT IT IS)
+              /    \
+             /      \
+            /        \
+         repo    ←→   .taf
+        (CODE)    (PROOF IT WORKS)
+```
+
+Every project needs three things:
+- **Code that works** (repo)
+- **Context for AI** (project.faf)
+- **Proof it works** (.taf - git-tracked testing timeline)
+
+**TAF** (Testing Audit File) format tracks every test run in git. On-the-fly CI/CD updates. Permanent audit trail. Unheard of in CI/CD.
+
+**Traditional CI/CD:** Tests run → Results disappear → No permanent record
+**TAF:** Tests run → .taf updates → Git commits → Permanent timeline
+
+Format defined in **faf-taf-git** (GitHub Actions native support).
+
 ### ✨ The Essential Trio
 
 ```bash

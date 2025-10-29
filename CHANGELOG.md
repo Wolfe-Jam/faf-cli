@@ -90,6 +90,27 @@ faf rename
 faf init    # Creates project.faf automatically
 ```
 
+### The Golden Triangle
+
+Three sides. Closed loop. Complete accountability.
+
+```
+         project.faf
+          (WHAT IT IS)
+              /    \
+             /      \
+            /        \
+         repo    ←→   .taf
+        (CODE)    (PROOF IT WORKS)
+```
+
+Every project needs:
+- Code that works (repo)
+- Context for AI (project.faf)
+- Proof it works (.taf - git-tracked testing timeline)
+
+**TAF** (Testing Audit File) format tracks every test run in git. On-the-fly CI/CD updates. Permanent audit trail. Format defined in **faf-taf-git** (GitHub Actions native support).
+
 ### Why project.faf?
 
 Like `package.json` tells npm what your project needs, `project.faf` tells AI what your project IS.
