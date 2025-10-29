@@ -43,6 +43,7 @@ import { driftCommand } from './commands/drift';
 import { gitCommand } from './commands/git';
 import { tafCommand } from './commands/taf';
 import { migrateCommand } from './commands/migrate';
+import { renameCommand } from './commands/rename';
 import { setColorOptions, type ColorScheme } from './utils/color-utils';
 import { generateFAFHeader, generateHelpHeader, FAF_COLORS } from './utils/championship-style';
 import { analytics, trackCommand, trackError, withPerformanceTracking } from './telemetry/analytics';
@@ -203,6 +204,25 @@ Examples:
 
 v1.2.0: project.faf is the new standard (visible, like package.json)`)
   .action(withAnalyticsTracking('migrate', (directory, options) => migrateCommand(directory, options)));
+
+// 🔄 faf rename - Bulk migration across multiple projects
+program
+  .command('rename [path]')
+  .description('Bulk migrate all .faf files to project.faf recursively')
+  .option('-f, --force', 'Overwrite existing project.faf files')
+  .option('--dry-run', 'Preview migration without making changes')
+  .option('--no-confirm', 'Skip confirmation for large migrations')
+  .option('--max-depth <number>', 'Maximum directory depth to search', '10')
+  .addHelpText('after', `
+Examples:
+  $ faf rename ~/Projects          # Migrate all repos in ~/Projects
+  $ faf rename . --dry-run         # Preview what would be migrated
+  $ faf rename ~/code --force      # Overwrite existing project.faf files
+  $ faf rename --no-confirm        # Skip confirmation prompt
+
+Power user tool: Migrate your entire system in one command!
+Searches recursively and renames all .faf → project.faf`)
+  .action(withAnalyticsTracking('rename', (searchPath, options) => renameCommand(searchPath, options)));
 
 // 🧬 faf dna - Show your journey at a glance
 program
