@@ -992,9 +992,13 @@ Copy cats? Why bother.
 
 <div align="center">
 
-## 🏁 v3.0.3 - Podium Edition
+## 🏁 Powered by Anthropic-Approved MCP Claude Desktop code
 
-**FREE FOR ALL DEVS** 🆓 • **Growing Fast** 📈 • **AI-Context, On-Demand.**
+Developed for you, with love, for free.
+
+The new **project.faf** file provides persistent project context session after session. It optimizes AI, which in-turn reduces errors, and improves code, safely, securely and swiftly.
+
+We hope you reap the benefits of using the **project.faf** format and write some beautiful apps!
 
 Made with 🧡 by **[wolfejam](https://github.com/Wolfe-Jam)**
 
