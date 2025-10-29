@@ -36,6 +36,18 @@ Use CLI for raw speed and local development; use MCP for AI-integrated workflows
 
 ---
 
+### 📸 See It In Action
+
+<div align="center">
+<img src="./assets/screenshots/package-json+project-faf.png" alt="project.faf sits between package.json and README.md" width="500" />
+
+**`project.faf` sits right between `package.json` and `README.md`** - exactly where it belongs.
+
+Visible. Discoverable. Universal.
+</div>
+
+---
+
 ## 📚 Complete Documentation
 
 **For developers who want the full story**, here's everything about FAF's architecture, testing, and championship engineering standards.
