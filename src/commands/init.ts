@@ -58,22 +58,23 @@ export async function initFafFile(
       console.log(chalk.yellow('Please provide or cd my-project\n'));
       return;
     }
-    const outputPath = options.output ? options.output : `${projectRoot}/.faf`;
+    // v1.2.0: Use project.faf (standard) instead of .faf (legacy)
+    const outputPath = options.output ? options.output : `${projectRoot}/project.faf`;
 
-    // Check if .faf file already exists
+    // Check if project.faf file already exists
     if ((await fileExists(outputPath)) && !options.force && !options.new && !options.choose) {
       const username = require('os').userInfo().username;
       console.log();
       console.log(chalk.cyan.bold(`👋 Hi ${username}!`));
       console.log();
-      console.log(chalk.green(`🤖 We found a .faf file at: `) + chalk.cyan(outputPath));
+      console.log(chalk.green(`🤖 We found a project.faf file at: `) + chalk.cyan(outputPath));
       console.log(FAF_COLORS.fafOrange(`💡 Do you want to use this one? Or run `) + chalk.cyan('faf init --new') + FAF_COLORS.fafOrange(' to create a fresh one?'));
       console.log();
       return; // Don't exit, just return gracefully
     }
 
     console.log();
-    console.log(FAF_COLORS.fafCyan(`${FAF_ICONS.rocket} Initializing .faf file...`));
+    console.log(FAF_COLORS.fafCyan(`${FAF_ICONS.rocket} Initializing project.faf file...`));
 
     // Check for .fafignore
     const fafIgnorePath = path.join(projectRoot, ".fafignore");

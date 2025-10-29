@@ -1,6 +1,6 @@
 {
   "name": "faf-cli",
-  "version": "3.0.6",
+  "version": "3.1.0",
   "description": "Anthropic-Approved codebase that powers claude-faf-mcp • Persistent project context, on-demand • Format-driven CLI • Open Source Universal Standard • MIT License",
   "icon": "https://faf.one/orange-smiley.svg",
   "logo": "https://faf.one/orange-smiley.svg",
@@ -98,7 +98,12 @@
     "integration-system",
     "mcp",
     "model-context-protocol",
-    "mcp-server"
+    "mcp-server",
+    "persistent",
+    "persistent-context",
+    "persistent-project-context",
+    "context-on-demand",
+    "ai-readiness"
   ],
   "author": "🏎️⚡️_wolfejam.dev",
   "license": "MIT",

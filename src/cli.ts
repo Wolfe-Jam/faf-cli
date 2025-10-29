@@ -42,6 +42,7 @@ import { skillsCommand } from './commands/skills';
 import { driftCommand } from './commands/drift';
 import { gitCommand } from './commands/git';
 import { tafCommand } from './commands/taf';
+import { migrateCommand } from './commands/migrate';
 import { setColorOptions, type ColorScheme } from './utils/color-utils';
 import { generateFAFHeader, generateHelpHeader, FAF_COLORS } from './utils/championship-style';
 import { analytics, trackCommand, trackError, withPerformanceTracking } from './telemetry/analytics';
@@ -187,6 +188,21 @@ Examples:
     console.log('');
     return initFafFile(directory, options);
   }));
+
+// 🔄 faf migrate - Migrate .faf to project.faf (v1.2.0)
+program
+  .command('migrate [directory]')
+  .description('Migrate .faf (legacy) to project.faf (v1.2.0 standard)')
+  .option('-f, --force', 'Overwrite existing project.faf file')
+  .option('--dry-run', 'Preview migration without making changes')
+  .addHelpText('after', `
+Examples:
+  $ faf migrate                  # Migrate .faf to project.faf
+  $ faf migrate --dry-run        # Preview migration
+  $ faf migrate --force          # Overwrite existing project.faf
+
+v1.2.0: project.faf is the new standard (visible, like package.json)`)
+  .action(withAnalyticsTracking('migrate', (directory, options) => migrateCommand(directory, options)));
 
 // 🧬 faf dna - Show your journey at a glance
 program
