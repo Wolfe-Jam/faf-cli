@@ -1,10 +1,14 @@
 # faf-cli
 
+> **🏆 IANA-Registered Format** - .FAF is now an Internet-standard format.
+> Create official `application/vnd.faf+yaml` files from any codebase
+> Universal CLI for FAF (Foundational AI-context Format) using project.faf -
+> sits with package.json and README.md in every repo to provide AI context 
 ## TL;DR
 
 **Problem:** AI needs persistent project context to work at its best.
 
-**Solution:** The .faf format provides that context. This CLI creates, scores, and improves .faf files from your codebase.
+**Solution:** The .faf format provides that context. This CLI creates, scores, and improves .faf files from your codebase in the IANA-registered format.
 
 **How it works:** Run `faf init` to create your .faf file. Get a score (0-100%) showing context quality. Higher scores = AI more in-tune with your project. Use `faf auto` and other commands to improve your score quickly. Align your .faf file with CLAUDE.md to maintain context persistently with bi-sync.
 
@@ -60,6 +64,8 @@ Visible. Discoverable. Universal.
 
 [![NPM Version](https://img.shields.io/npm/v/faf-cli?color=FF4500)](https://www.npmjs.com/package/faf-cli)
 [![Downloads](https://img.shields.io/npm/dt/faf-cli?color=00CCFF)](https://www.npmjs.com/package/faf-cli)
+[![IANA Registered](https://img.shields.io/badge/IANA-application%2Fvnd.faf%2Byaml-blue)](https://faf.one/blog/iana-registration)
+[![Homebrew](https://img.shields.io/badge/Homebrew-faf--cli-orange)](https://github.com/Wolfe-Jam/homebrew-faf)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **[Website](https://faf.one)** • **[GitHub](https://github.com/Wolfe-Jam/faf-cli)** • **[Community](https://github.com/Wolfe-Jam/faf-cli/discussions)**
@@ -83,6 +89,23 @@ brew install faf-cli
 ```
 
 **One line. Zero config. Podium context.** 🏁
+
+---
+
+## 🎉 What's New in v3.1.1 - IANA Registration
+
+**v3.1.1 updates documentation with IANA registration achievement.**
+
+On **October 31, 2025**, the Internet Assigned Numbers Authority (IANA) officially registered `.faf` as `application/vnd.faf+yaml` - making it an Internet-standard format alongside PDF, JSON, and XML.
+
+**What this means:**
+- faf-cli now creates official Internet-standard files
+- Proper HTTP Content-Type headers (`application/vnd.faf+yaml`)
+- Browser and email client support for `.faf` files
+- API standardization across platforms
+- Infrastructure-level legitimacy
+
+This documentation update adds IANA information throughout the README to reflect this major achievement for the format.
 
 ---
 
@@ -438,19 +461,37 @@ Learn more: faf.one/turbo
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Start - Create IANA-Registered Files
+
+### Installation
 
 ```bash
-# Install via npm (works everywhere)
+# npm (creates official .faf files)
 npm install -g faf-cli
 
-# Or via Homebrew (macOS/Linux)
+# Homebrew (macOS/Linux)
 brew install faf-cli
+```
 
-# Initialize in any project
-cd your-project
+### Generate Your First .faf File
+
+```bash
+# Initialize with IANA-registered format
 faf init
 
+# Output: project.faf with official media type
+# Content-Type: application/vnd.faf+yaml
+```
+
+**What just happened:**
+- ✅ Created `.faf` file (IANA-registered format)
+- ✅ Generated project DNA (architecture, dependencies, quality score)
+- ✅ Ready for any AI (Claude, Cursor, Gemini, etc.)
+- ✅ Official Internet standard format
+
+### More Commands
+
+```bash
 # Auto-detect and enhance
 faf auto
 
@@ -508,6 +549,29 @@ We created this tool together across thousands of conversations. Yet without pro
 **`.faf` = Project DNA ✨ for AI**
 
 Universal, shareable AI context that works with **Claude Code, OpenAI Codex CLI, Gemini CLI, Cursor** - regardless of your stack, size, or setup.
+
+## Why IANA Registration Matters
+
+On **October 31, 2025**, the Internet Assigned Numbers Authority (IANA) officially registered `.faf` as `application/vnd.faf+yaml`.
+
+This means `.faf` is now:
+
+✅ **Recognized at Internet scale** - Same legitimacy as PDF, JSON, XML
+✅ **Properly handled by browsers** - Correct MIME type detection
+✅ **Supported in HTTP headers** - `Content-Type: application/vnd.faf+yaml`
+✅ **Email client compatible** - Attachments handled correctly
+✅ **API standardized** - Universal format for AI context exchange
+
+**faf-cli creates these official IANA-registered files.**
+
+### The Journey to IANA
+
+- **Aug 8, 2024** - Format specification created
+- **Sep 2025** - Google Chrome approvals (2x)
+- **Oct 17, 2025** - Anthropic MCP Registry merger
+- **Oct 31, 2025** - **IANA Registration** 🏆
+
+From concept to Internet standard in 15 months.
 
 ### Why Context Quality Matters
 
