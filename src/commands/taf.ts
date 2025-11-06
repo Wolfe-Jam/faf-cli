@@ -84,6 +84,18 @@ Options:
     --issues <list>       Comma-separated issues
     --root-cause <text>   Root cause analysis
     --resolution <text>   How it was fixed
+    --env-variance <type> Environment variance type (see below)
+    --env-notes <text>    Additional environment notes
+
+  Environment variance types:
+    background_execution  Test running in background shell
+    unstable_cwd          Working directory changing during test
+    missing_dependencies  Required dependencies not found
+    parallel_execution    Tests running in parallel when sequential expected
+    resource_contention   System resources constrained
+    network_unavailable   Network-dependent tests without network
+    timing_sensitive      Race conditions or timing issues
+    other                 Custom variance
 
 Learn more: https://faf.one/docs/taf
 `);

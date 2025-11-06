@@ -6,6 +6,10 @@ module.exports = {
     '**/__tests__/**/*.ts',
     '**/?(*.)+(spec|test).ts'
   ],
+  // CRITICAL FIX: Run tests sequentially to prevent cwd corruption
+  // Issue: Parallel tests change process.cwd(), then delete directories
+  // Result: Other tests fail with "ENOENT: uv_cwd" when cwd no longer exists
+  maxWorkers: 1,
   transform: {
     '^.+\\.ts$': ['ts-jest', {
       tsconfig: {

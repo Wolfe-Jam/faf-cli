@@ -5,7 +5,7 @@
  * Ready for MCP extraction
  */
 
-import { TAFFile, TestRun, TestResult } from './types';
+import { TAFFile, TestRun, TestResult, EnvironmentInfo } from './types';
 
 /**
  * Append a test run to TAF history
@@ -29,6 +29,7 @@ export function createMinimalRun(options: {
   passed: number;
   failed: number;
   skipped?: number;
+  environment?: EnvironmentInfo;
 }): TestRun {
   return {
     timestamp: new Date().toISOString(),
@@ -39,6 +40,7 @@ export function createMinimalRun(options: {
       failed: options.failed,
       skipped: options.skipped,
     },
+    environment: options.environment,
   };
 }
 
@@ -68,6 +70,7 @@ export function createDetailedRun(options: {
   root_cause?: string;
   resolution?: string;
   changes_since_last?: string[];
+  environment?: EnvironmentInfo;
 }): TestRun {
   return {
     timestamp: new Date().toISOString(),
@@ -83,6 +86,7 @@ export function createDetailedRun(options: {
     root_cause: options.root_cause,
     resolution: options.resolution,
     changes_since_last: options.changes_since_last,
+    environment: options.environment,
   };
 }
 

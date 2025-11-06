@@ -45,6 +45,9 @@ export interface TestRun {
 
   // Recovery tracking
   recovery?: RecoveryInfo;
+
+  // Environment variance tracking
+  environment?: EnvironmentInfo;
 }
 
 export interface TestCounts {
@@ -59,6 +62,27 @@ export interface RecoveryInfo {
   time_to_fix_minutes?: number;
   fix_summary?: string;
 }
+
+export interface EnvironmentInfo {
+  variance?: EnvironmentVariance[];
+  notes?: string;
+}
+
+export interface EnvironmentVariance {
+  type: VarianceType;
+  description: string;
+  detected_at?: string; // ISO8601
+}
+
+export type VarianceType =
+  | 'background_execution'  // Test running in background shell
+  | 'unstable_cwd'          // Working directory changing during test
+  | 'missing_dependencies'  // Required dependencies not found
+  | 'parallel_execution'    // Tests running in parallel when sequential expected
+  | 'resource_contention'   // System resources constrained
+  | 'network_unavailable'   // Network-dependent tests without network
+  | 'timing_sensitive'      // Race conditions or timing issues
+  | 'other';                // Custom variance
 
 export type TestResult = 'PASSED' | 'FAILED' | 'IMPROVED' | 'DEGRADED';
 

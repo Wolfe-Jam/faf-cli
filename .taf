@@ -1,16 +1,21 @@
-format_version: 1.0.0
-project: faf-cli
-created: 2025-10-27T14:00:00Z
-last_updated: 2025-10-28T00:26:27.122Z
+# .taf - Testing Activity Feed
+format_version: "1.0.0"
+project: "faf-cli"
+created: "2025-10-27T14:00:00Z"
+last_updated: "2025-10-30T12:16:30.079Z"
+
+# FAF Integration (Optional - Native Reference)
 faf_associated: true
-faf_location: .faf
+faf_location: ".faf"
 faf_score: 89
+
+# Test execution history (append-only)
 test_history:
-  - timestamp: 2025-10-27T14:32:00Z
-    run_id: test-run-001
-    command: npm test
-    trigger: Post keyword update + template literal changes
-    result: FAILED
+  - timestamp: "2025-10-27T14:32:00Z"
+    run_id: "test-run-001"
+    command: "npm test"
+    trigger: "Post keyword update + template literal changes"
+    result: "FAILED"
     suites:
       total: 24
       passed: 0
@@ -24,14 +29,13 @@ test_history:
     exit_code: 1
     issues:
       - "ENOENT: no such file or directory, uv_cwd"
-      - Jest cache corruption detected
-      - All test suites failing before any tests could run
-    root_cause: Jest cached corrupted process.cwd() state from previous test runs
-      that deleted directories while process was inside them
-  - timestamp: 2025-10-27T14:45:00Z
-    run_id: test-run-002
-    command: npm test
-    result: IMPROVED
+      - "Jest cache corruption detected"
+      - "All test suites failing before any tests could run"
+    root_cause: "Jest cached corrupted process.cwd() state from previous test runs that deleted directories while process was inside them"
+  - timestamp: "2025-10-27T14:45:00Z"
+    run_id: "test-run-002"
+    command: "npm test"
+    result: "IMPROVED"
     suites:
       total: 24
       passed: 5
@@ -45,13 +49,13 @@ test_history:
     exit_code: 1
     changes_since_last:
       - "Added maxWorkers: 1 to jest.config.js"
-      - Cleared Jest cache with npm run clean:cache
-    improvement: +5 suites passing, +104 tests passing
-    analysis: Sequential execution prevented parallel cwd corruption
-  - timestamp: 2025-10-27T14:52:00Z
-    run_id: test-run-003
-    command: npm test
-    result: IMPROVED
+      - "Cleared Jest cache with npm run clean:cache"
+    improvement: "+5 suites passing, +104 tests passing"
+    analysis: "Sequential execution prevented parallel cwd corruption"
+  - timestamp: "2025-10-27T14:52:00Z"
+    run_id: "test-run-003"
+    command: "npm test"
+    result: "IMPROVED"
     suites:
       total: 24
       passed: 5
@@ -64,14 +68,14 @@ test_history:
     duration_ms: 14876
     exit_code: 1
     changes_since_last:
-      - Fixed 11 template literal syntax bugs in drift.test.ts
-      - Changed execSync('node ${VAR}') to execSync(`node ${VAR}`)
-    improvement: Stable - no regressions
-    note: Template literal fixes did not affect current pass rate (were latent bugs)
-  - timestamp: 2025-10-27T15:05:23Z
-    run_id: test-run-004
-    command: npm test tests/meta-test-infrastructure-yolo.test.ts
-    result: PASSED
+      - "Fixed 11 template literal syntax bugs in drift.test.ts"
+      - "Changed execSync('node ${VAR}') to execSync(`node ${VAR}`)"
+    improvement: "Stable - no regressions"
+    note: "Template literal fixes did not affect current pass rate (were latent bugs)"
+  - timestamp: "2025-10-27T15:05:23Z"
+    run_id: "test-run-004"
+    command: "npm test tests/meta-test-infrastructure-yolo.test.ts"
+    result: "PASSED"
     suites:
       total: 1
       passed: 1
@@ -83,131 +87,135 @@ test_history:
       skipped: 0
     duration_ms: 9653
     exit_code: 0
-    milestone: Created meta-test infrastructure validation
+    milestone: "Created meta-test infrastructure validation"
     significance: "New testing tier: Tier 0 validates testing infrastructure itself"
     tests_created:
       - "Jest configuration safety (maxWorkers: 1 enforcement)"
-      - Cache clearing mechanisms validation
-      - Process state isolation detection
-      - Template literal syntax detection (automatic scanning)
-      - Test file quality gates
-      - Known failure pattern documentation
-  - timestamp: 2025-10-27T19:45:42.427Z
-    result: PASSED
+      - "Cache clearing mechanisms validation"
+      - "Process state isolation detection"
+      - "Template literal syntax detection (automatic scanning)"
+      - "Test file quality gates"
+      - "Known failure pattern documentation"
+  - timestamp: "2025-10-27T19:45:42.427Z"
+    result: "PASSED"
     tests:
       total: 173
       passed: 173
       failed: 0
-  - timestamp: 2025-10-28T00:26:27.121Z
-    result: PASSED
+  - timestamp: "2025-10-28T00:26:27.121Z"
+    result: "PASSED"
     tests:
       total: 173
       passed: 173
       failed: 0
-    trigger: github-actions
+    trigger: "github-actions"
+  - timestamp: "2025-10-30T12:16:30.078Z"
+    result: "PASSED"
+    tests:
+      total: 173
+      passed: 173
+      failed: 0
+    environment:
+      variance:
+        - type: "background_execution"
+          description: "Test running in background shell"
+          detected_at: "2025-10-30T12:16:30.077Z"
+      notes: "Tests run in background while working directory was unstable"
 stats:
   total_runs: 4
   total_duration_ms: 69066
-  pass_rate_current: 85%
-  pass_rate_session_start: 6%
-  improvement_delta: +79%
+  pass_rate_current: "85%"
+  pass_rate_session_start: "6%"
+  improvement_delta: "+79%"
   flaky_tests: []
   tests_created: 12
   bugs_fixed: 11
 health:
-  cache_last_cleared: 2025-10-27T14:45:00Z
+  cache_last_cleared: "2025-10-27T14:45:00Z"
   last_full_pass: null
   longest_failure_streak: 1
-  current_streak: improving
+  current_streak: "improving"
   known_pre_existing_failures: 19
   new_failures_introduced: 0
 root_causes:
-  - issue_id: RCA-001
+  - issue_id: "RCA-001"
     symptom: "ENOENT: no such file or directory, uv_cwd"
-    root_cause: Jest cache corruption from previous test runs that modified
-      process.cwd() and deleted directories while process was inside them
+    root_cause: "Jest cache corruption from previous test runs that modified process.cwd() and deleted directories while process was inside them"
     affected_runs: 1
-    severity: critical
-    fix: "Added maxWorkers: 1 to prevent parallel cwd corruption + npm run
-      clean:cache"
+    severity: "critical"
+    fix: "Added maxWorkers: 1 to prevent parallel cwd corruption + npm run clean:cache"
     prevention: "Meta-test now validates Jest config has maxWorkers: 1"
     resolution_time_minutes: 13
-  - issue_id: RCA-002
-    symptom: Parallel test race conditions causing cascade failures
-    root_cause: Multiple test workers simultaneously modifying global process.cwd() state
+  - issue_id: "RCA-002"
+    symptom: "Parallel test race conditions causing cascade failures"
+    root_cause: "Multiple test workers simultaneously modifying global process.cwd() state"
     affected_runs: 1
-    severity: high
+    severity: "high"
     fix: "Set maxWorkers: 1 in jest.config.js for sequential execution"
-    prevention: Meta-test validates sequential execution enforcement
+    prevention: "Meta-test validates sequential execution enforcement"
     resolution_time_minutes: 13
-  - issue_id: RCA-003
-    symptom: MODULE_NOT_FOUND for ${CLI_PATH}
-    root_cause: Template literal syntax bug - used single quotes instead of
-      backticks (11 instances)
-    affected_tests: drift.test.ts
+  - issue_id: "RCA-003"
+    symptom: "MODULE_NOT_FOUND for ${CLI_PATH}"
+    root_cause: "Template literal syntax bug - used single quotes instead of backticks (11 instances)"
+    affected_tests: "drift.test.ts"
     instances: 11
-    severity: medium
-    fix: Replaced all execSync('node ${VAR}') with execSync(`node ${VAR}`)
-    prevention: Meta-test now automatically scans all test files for this pattern
+    severity: "medium"
+    fix: "Replaced all execSync('node ${VAR}') with execSync(`node ${VAR}`)"
+    prevention: "Meta-test now automatically scans all test files for this pattern"
     resolution_time_minutes: 7
-    note: Latent bugs - did not affect current pass rate but would have caused
-      failures when those test branches executed
+    note: "Latent bugs - did not affect current pass rate but would have caused failures when those test branches executed"
 known_issues:
-  - id: issue-001
-    description: 19 test suites have pre-existing failures (unrelated to keyword
-      update work)
-    severity: medium
-    since: 2025-10-27T14:45:00Z
-    status: investigating
+  - id: "issue-001"
+    description: "19 test suites have pre-existing failures (unrelated to keyword update work)"
+    severity: "medium"
+    since: "2025-10-27T14:45:00Z"
+    status: "investigating"
     suites_affected: 19
     tests_affected: 20
-    note: These failures existed before keyword optimization work began
+    note: "These failures existed before keyword optimization work began"
 milestones:
-  - date: 2025-10-27T14:45:00Z
-    event: Fixed Jest cache corruption
-    significance: Recovered from 100% test failure (24/24 failing) to 79% pass rate
-      (5/24 passing)
+  - date: "2025-10-27T14:45:00Z"
+    event: "Fixed Jest cache corruption"
+    significance: "Recovered from 100% test failure (24/24 failing) to 79% pass rate (5/24 passing)"
     actions:
       - "Added maxWorkers: 1"
-      - Created clean:cache script
-      - Cleared Jest cache
-  - date: 2025-10-27T14:52:00Z
-    event: Fixed 11 template literal syntax bugs
-    significance: Prevented future MODULE_NOT_FOUND errors in drift tests
+      - "Created clean:cache script"
+      - "Cleared Jest cache"
+  - date: "2025-10-27T14:52:00Z"
+    event: "Fixed 11 template literal syntax bugs"
+    significance: "Prevented future MODULE_NOT_FOUND errors in drift tests"
     files_affected:
-      - tests/drift.test.ts
-  - date: 2025-10-27T15:05:23Z
-    event: Created meta-test-infrastructure-yolo.test.ts
-    significance: New Tier 0 testing - validates testing infrastructure itself
-      (WJTTC improvement)
+      - "tests/drift.test.ts"
+  - date: "2025-10-27T15:05:23Z"
+    event: "Created meta-test-infrastructure-yolo.test.ts"
+    significance: "New Tier 0 testing - validates testing infrastructure itself (WJTTC improvement)"
     tests_added: 12
     coverage:
-      - Jest configuration validation
-      - Process state isolation
-      - Template literal bug detection
-      - Test quality gates
-      - Known failure pattern documentation
+      - "Jest configuration validation"
+      - "Process state isolation"
+      - "Template literal bug detection"
+      - "Test quality gates"
+      - "Known failure pattern documentation"
 session_summary:
-  date: 2025-10-27
+  date: "2025-10-27"
   duration_hours: 1.5
-  initial_state: 24/24 test suites failing (100% failure rate)
-  final_state: 5/24 test suites passing, 112/132 tests passing (85% pass rate)
-  improvement: +79% pass rate improvement
+  initial_state: "24/24 test suites failing (100% failure rate)"
+  final_state: "5/24 test suites passing, 112/132 tests passing (85% pass rate)"
+  improvement: "+79% pass rate improvement"
   root_causes_identified: 3
   bugs_fixed: 11
   tests_created: 12
   infrastructure_improvements:
     - "Sequential test execution (maxWorkers: 1)"
-    - Cache clearing capability (npm run clean:cache)
-    - Meta-test infrastructure validation (Tier 0)
-    - Template literal detection (automatic scanning)
-    - Known failure pattern documentation
-  championship_achievement: Testing the tests - exposed WJTTC blind spot and closed it
+    - "Cache clearing capability (npm run clean:cache)"
+    - "Meta-test infrastructure validation (Tier 0)"
+    - "Template literal detection (automatic scanning)"
+    - "Known failure pattern documentation"
+  championship_achievement: "Testing the tests - exposed WJTTC blind spot and closed it"
 taf_metadata:
-  specification_version: 1.0.0
-  created_by: claude-faf-mcp
-  purpose: Lightweight testing changelog - fills gap between testing events and
-    git commits
-  storage_strategy: Lives alongside .faf in project root, commits with code changes
-  rotation_policy: Keep last 1000 runs, archive older runs to WJTTC
-  integration: Phase 1 (Manual) - proving the concept
+  specification_version: "1.0.0"
+  created_by: "claude-faf-mcp"
+  purpose: "Lightweight testing changelog - fills gap between testing events and git commits"
+  storage_strategy: "Lives alongside .faf in project root, commits with code changes"
+  rotation_policy: "Keep last 1000 runs, archive older runs to WJTTC"
+  integration: "Phase 1 (Manual) - proving the concept"

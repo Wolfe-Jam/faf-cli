@@ -42,7 +42,24 @@ export function parseGitHubUrl(url: string): { owner: string; repo: string } | n
     // github.com/owner/repo
     // owner/repo
 
-    const cleanUrl = url.replace(/^https?:\/\//, '').replace(/^github\.com\//, '');
+    // Strip query parameters and hash fragments first
+    let cleanedUrl = url.split('?')[0].split('#')[0];
+
+    // First, check if it's actually a GitHub URL (if it contains a domain)
+    if (cleanedUrl.includes('://') || cleanedUrl.includes('.com')) {
+      // Extract domain to validate it's GitHub
+      const domainMatch = cleanedUrl.match(/^(?:https?:\/\/)?(?:www\.)?([^\/]+)/);
+      if (domainMatch && domainMatch[1] !== 'github.com') {
+        return null; // Not a GitHub URL
+      }
+    }
+
+    // Clean the URL: remove protocol and GitHub domain (with or without www)
+    const cleanUrl = cleanedUrl
+      .replace(/^https?:\/\//, '')
+      .replace(/^www\./, '')
+      .replace(/^github\.com\//, '');
+
     const parts = cleanUrl.split('/').filter(Boolean);
 
     if (parts.length >= 2) {

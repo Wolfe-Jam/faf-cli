@@ -16,6 +16,8 @@ import {
   createDetailedRun,
   detectResult,
   TestResult,
+  EnvironmentInfo,
+  VarianceType,
 } from '../taf';
 
 interface TAFLogOptions {
@@ -30,6 +32,9 @@ interface TAFLogOptions {
   issues?: string[];
   root_cause?: string;
   resolution?: string;
+  environment?: EnvironmentInfo;
+  env_variance?: VarianceType;
+  env_notes?: string;
 }
 
 export async function tafLog(options: TAFLogOptions = {}): Promise<void> {
@@ -120,6 +125,19 @@ export async function tafLog(options: TAFLogOptions = {}): Promise<void> {
     previousRun ? { passed: previousRun.tests.passed, total: previousRun.tests.total } : undefined
   );
 
+  // Build environment info if variance detected
+  let environment: EnvironmentInfo | undefined;
+  if (options.env_variance || options.env_notes || options.environment) {
+    environment = options.environment || {
+      variance: options.env_variance ? [{
+        type: options.env_variance,
+        description: getVarianceDescription(options.env_variance),
+        detected_at: new Date().toISOString(),
+      }] : undefined,
+      notes: options.env_notes,
+    };
+  }
+
   // Create test run entry
   const run = options.minimal
     ? createMinimalRun({
@@ -128,6 +146,7 @@ export async function tafLog(options: TAFLogOptions = {}): Promise<void> {
         passed: options.passed,
         failed: options.failed,
         skipped: options.skipped,
+        environment,
       })
     : createDetailedRun({
         result,
@@ -142,6 +161,7 @@ export async function tafLog(options: TAFLogOptions = {}): Promise<void> {
         issues: options.issues,
         root_cause: options.root_cause,
         resolution: options.resolution,
+        environment,
       });
 
   // Append to TAF
@@ -161,6 +181,18 @@ export async function tafLog(options: TAFLogOptions = {}): Promise<void> {
   console.log(`${resultEmoji} Logged test run: ${result}`);
   console.log(`\n   Tests: ${options.passed}/${options.total} passing`);
 
+  // Show environment variance if flagged
+  if (environment?.variance && environment.variance.length > 0) {
+    console.log(`   ⚠️  Environment variance detected:`);
+    environment.variance.forEach(v => {
+      console.log(`      - ${v.type}: ${v.description}`);
+    });
+  }
+
+  if (environment?.notes) {
+    console.log(`   📝 Environment notes: ${environment.notes}`);
+  }
+
   if (result === 'PASSED') {
     const streak = countCurrentStreak(updatedTAF.test_history);
     if (streak > 1) {
@@ -177,6 +209,23 @@ export async function tafLog(options: TAFLogOptions = {}): Promise<void> {
   }
 
   console.log(`\nTotal runs: ${updatedTAF.test_history.length}`);
+}
+
+/**
+ * Get human-readable description for variance type
+ */
+function getVarianceDescription(type: VarianceType): string {
+  const descriptions: Record<VarianceType, string> = {
+    background_execution: 'Test running in background shell',
+    unstable_cwd: 'Working directory changing during test execution',
+    missing_dependencies: 'Required dependencies not found',
+    parallel_execution: 'Tests running in parallel when sequential expected',
+    resource_contention: 'System resources constrained',
+    network_unavailable: 'Network-dependent tests without network',
+    timing_sensitive: 'Race conditions or timing issues detected',
+    other: 'Custom environment variance',
+  };
+  return descriptions[type];
 }
 
 /**
@@ -257,6 +306,30 @@ export async function runTAFLog(args: string[]): Promise<void> {
   const issuesIndex = args.findIndex(arg => arg === '--issues' || arg === '-i');
   if (issuesIndex !== -1 && args[issuesIndex + 1]) {
     options.issues = args[issuesIndex + 1].split(',').map(s => s.trim());
+  }
+
+  // Parse environment variance
+  const envVarianceIndex = args.findIndex(arg => arg === '--env-variance');
+  if (envVarianceIndex !== -1 && args[envVarianceIndex + 1]) {
+    const variance = args[envVarianceIndex + 1];
+    const validVariances: VarianceType[] = [
+      'background_execution',
+      'unstable_cwd',
+      'missing_dependencies',
+      'parallel_execution',
+      'resource_contention',
+      'network_unavailable',
+      'timing_sensitive',
+      'other',
+    ];
+    if (validVariances.includes(variance as VarianceType)) {
+      options.env_variance = variance as VarianceType;
+    }
+  }
+
+  const envNotesIndex = args.findIndex(arg => arg === '--env-notes');
+  if (envNotesIndex !== -1 && args[envNotesIndex + 1]) {
+    options.env_notes = args[envNotesIndex + 1];
   }
 
   await tafLog(options);

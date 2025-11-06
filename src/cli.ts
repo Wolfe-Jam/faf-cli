@@ -325,15 +325,15 @@ Examples:
   • faf init --force: Start fresh (loses history)`)
   .action(withAnalyticsTracking('recover', (options) => {
     const { spawn } = require('child_process');
-    const recoverPath = require('path').join(__dirname, 'commands', 'faf-recover.ts');
-    const args = ['ts-node', recoverPath];
+    const recoverPath = require('path').join(__dirname, 'commands', 'faf-recover.js');
+    const args = [recoverPath];
 
     if (options.auto) args.push('--auto');
     if (options.backup) args.push('--backup');
     if (options.check) args.push('--check');
     if (options.force) args.push('--force');
 
-    const child = spawn('npx', args, { stdio: 'inherit' });
+    const child = spawn('node', args, { stdio: 'inherit' });
     child.on('exit', (code: number | null) => {
       process.exit(code || 0);
     });

@@ -296,27 +296,38 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
     // ⚡ Calculate lap time
     const lapTime = ((Date.now() - startTime) / 1000).toFixed(1);
 
-    // ⚡ Read personal record from .faf file
+    // ⚡ Read/update personal record from .faf file
     let personalRecord: number | null = null;
     let isNewRecord = false;
 
-    if (fafPath && newScore >= 99) {
+    if (fafPath) {
       try {
         const fafData = await fs.readFile(fafPath, 'utf-8');
         const parsed = yamlUtils.parse(fafData);
 
-        // Read previous record
+        // Read previous record (if exists)
         personalRecord = parsed.stats?.best_auto_time || null;
 
-        // Check if this is a new record
-        if (!personalRecord || parseFloat(lapTime) < personalRecord) {
-          isNewRecord = true;
+        // For 99% achievements, track record
+        if (newScore >= 99) {
+          if (!personalRecord || parseFloat(lapTime) < personalRecord) {
+            isNewRecord = true;
 
-          // Update .faf with new record
+            // Update .faf with new record
+            if (!parsed.stats) {
+              parsed.stats = {};
+            }
+            parsed.stats.best_auto_time = parseFloat(lapTime);
+            parsed.stats.last_auto_time = parseFloat(lapTime);
+            parsed.stats.times_run = (parsed.stats.times_run || 0) + 1;
+
+            await fs.writeFile(fafPath, yamlUtils.stringify(parsed), 'utf-8');
+          }
+        } else {
+          // For sub-99%, just track the attempt time
           if (!parsed.stats) {
             parsed.stats = {};
           }
-          parsed.stats.best_auto_time = parseFloat(lapTime);
           parsed.stats.last_auto_time = parseFloat(lapTime);
           parsed.stats.times_run = (parsed.stats.times_run || 0) + 1;
 
@@ -335,11 +346,12 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
         ? chalk.green(`(+${scoreDelta}%)`)
         : chalk.red(`(${scoreDelta}%)`);
 
-    // Success message
+    // Success message with lap time
     console.log(chalk.gray("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
 
-    // ⚡ Show lap time for 99% achievements
+    // ⚡ Show lap time ALWAYS
     if (newScore >= 99) {
+      // Championship achieved!
       console.log(chalk.bold.cyan(`\n⚡ 99% in ${lapTime}s ⚡`));
       console.log(chalk.gray("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
 
@@ -351,9 +363,23 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
       }
 
       console.log(chalk.gray("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
+    } else {
+      // Not 99% yet - show time with motivational message
+      console.log(chalk.bold.yellow(`\n⏱️  Scored ${newScore}% in ${lapTime}s`));
+      console.log(chalk.gray("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
+
+      const pointsNeeded = 99 - newScore;
+      console.log(chalk.white(`\nLet's get you to 99% - the clock is ticking! ⏰`));
+      console.log(chalk.gray(`Need ${pointsNeeded} more points for championship status`));
+
+      if (personalRecord !== null) {
+        console.log(chalk.gray(`Your 99% record: ${personalRecord}s - can you beat it?`));
+      }
+
+      console.log(chalk.gray("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
     }
 
-    console.log(chalk.bold.green("\n🏁 FAF AUTO COMPLETE - CHAMPIONSHIP READY!"));
+    console.log(chalk.bold.green("\n🏁 FAF AUTO COMPLETE"));
     if (fafPath) {
       console.log(chalk.white(`   Before: ${currentScore}% | After: ${newScore}% ${deltaDisplay}`));
     }
