@@ -23,6 +23,7 @@ interface AutoOptions {
 }
 
 export async function autoCommand(directory?: string, options: AutoOptions = {}) {
+  const startTime = Date.now(); // ⚡ Start timer for personal record tracking
   const targetDir = directory || process.cwd();
   const homeDir = require('os').homedir();
 
@@ -292,6 +293,40 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
       }
     }
 
+    // ⚡ Calculate lap time
+    const lapTime = ((Date.now() - startTime) / 1000).toFixed(1);
+
+    // ⚡ Read personal record from .faf file
+    let personalRecord: number | null = null;
+    let isNewRecord = false;
+
+    if (fafPath && newScore >= 99) {
+      try {
+        const fafData = await fs.readFile(fafPath, 'utf-8');
+        const parsed = yamlUtils.parse(fafData);
+
+        // Read previous record
+        personalRecord = parsed.stats?.best_auto_time || null;
+
+        // Check if this is a new record
+        if (!personalRecord || parseFloat(lapTime) < personalRecord) {
+          isNewRecord = true;
+
+          // Update .faf with new record
+          if (!parsed.stats) {
+            parsed.stats = {};
+          }
+          parsed.stats.best_auto_time = parseFloat(lapTime);
+          parsed.stats.last_auto_time = parseFloat(lapTime);
+          parsed.stats.times_run = (parsed.stats.times_run || 0) + 1;
+
+          await fs.writeFile(fafPath, yamlUtils.stringify(parsed), 'utf-8');
+        }
+      } catch (e) {
+        // Ignore errors, record tracking is non-critical
+      }
+    }
+
     // Show before/after scores
     const scoreDelta = newScore - currentScore;
     const deltaDisplay = scoreDelta === 0
@@ -302,6 +337,22 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
 
     // Success message
     console.log(chalk.gray("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
+
+    // ⚡ Show lap time for 99% achievements
+    if (newScore >= 99) {
+      console.log(chalk.bold.cyan(`\n⚡ 99% in ${lapTime}s ⚡`));
+      console.log(chalk.gray("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
+
+      if (personalRecord !== null) {
+        console.log(chalk.white(`\nYour Record: ${personalRecord}s`));
+        console.log(chalk.white(`This Run:    ${lapTime}s ${isNewRecord ? chalk.red('🔥 NEW RECORD!') : ''}`));
+      } else {
+        console.log(chalk.white(`\nThis Run: ${lapTime}s 🏁 First time!`));
+      }
+
+      console.log(chalk.gray("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
+    }
+
     console.log(chalk.bold.green("\n🏁 FAF AUTO COMPLETE - CHAMPIONSHIP READY!"));
     if (fafPath) {
       console.log(chalk.white(`   Before: ${currentScore}% | After: ${newScore}% ${deltaDisplay}`));
