@@ -36,8 +36,18 @@ class SmartFaf {
     const homeDir = require('os').homedir();
 
     if (currentDir === homeDir || currentDir === '/') {
-      console.log('\n⚠️  For speed and safety, we do not work on ROOT directories.');
-      console.log('Please provide or cd my-project\n');
+      console.log('\n🧡⚡️ FAF - AI Context, On-Demand\n');
+      console.log('DROP | PASTE | CREATE - Click & Go!\n');
+      console.log('🎯 What is FAF?');
+      console.log('Persistent Project Context - makes your project AI-readable in <50ms\n');
+      console.log('📂 How to start:');
+      console.log('• DROP: Navigate to your project: cd my-project && faf');
+      console.log('• PASTE: Provide path: faf --dir /path/to/project');
+      console.log('• CREATE: New project: faf quick "ProjectName, description, language"\n');
+      console.log('💡 Examples:');
+      console.log('  cd ~/my-app && faf');
+      console.log('  faf quick "my-app, e-commerce site, typescript, react"\n');
+      console.log('🧡⚡️ SPEEDY AI you can TRUST!\n');
       return;
     }
 
