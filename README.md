@@ -60,7 +60,7 @@ Visible. Discoverable. Universal.
 
 <img src="https://cdn.jsdelivr.net/npm/faf-cli@latest/assets/icons/orange-smiley.svg" alt="FAF Logo" width="64" />
 
-**Free for all devs** 🆓 • **Project DNA ✨ for any AI** • **Zero Faff™🇬🇧**
+**Free and Open Source** • **Project DNA for any AI** • **Zero Faff™**
 
 [![NPM Version](https://img.shields.io/npm/v/faf-cli?color=FF4500)](https://www.npmjs.com/package/faf-cli)
 [![Downloads](https://img.shields.io/npm/dt/faf-cli?color=00CCFF)](https://www.npmjs.com/package/faf-cli)
@@ -74,11 +74,11 @@ Visible. Discoverable. Universal.
 
 ---
 
-**AI-Context: Avg. 0-55% kills projects 💀 .faf 85-99% AI totally gets it ✨**
+**AI-Context Quality:** Most projects score 0-55% (insufficient context). With .faf: 85-99% (AI fully understands your project).
 
-**Powered by Anthropic-Approved MCP Claude Desktop code** - The same championship TypeScript that powers [claude-faf-mcp](https://www.npmjs.com/package/claude-faf-mcp), the official MCP server in the Anthropic registry ([PR #2759](https://github.com/modelcontextprotocol/servers/pull/2759) MERGED). 100% error-free TS strict Gold Code Standard.
+**Built on Championship TypeScript** - The same strict-mode code that powers [claude-faf-mcp](https://www.npmjs.com/package/claude-faf-mcp), the official MCP server in the Anthropic registry ([PR #2759](https://github.com/modelcontextprotocol/servers/pull/2759) merged).
 
-## 🚀 Wanna GO Now>>
+## Installation
 
 ```bash
 # Install via npm (works everywhere)
@@ -88,7 +88,7 @@ npm install -g faf-cli
 brew install faf-cli
 ```
 
-**One line. Zero config. Podium context.** 🏁
+**One command. Zero configuration. Production-ready.**
 
 ---
 
