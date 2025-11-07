@@ -64,11 +64,12 @@ Visible. Discoverable. Universal.
 
 [![NPM Version](https://img.shields.io/npm/v/faf-cli?color=FF4500)](https://www.npmjs.com/package/faf-cli)
 [![Downloads](https://img.shields.io/npm/dt/faf-cli?color=00CCFF)](https://www.npmjs.com/package/faf-cli)
+[![Discord](https://img.shields.io/badge/Discord-Join%20Community-5865F2?logo=discord&logoColor=white)](https://discord.com/invite/3pjzpKsP)
 [![IANA Registered](https://img.shields.io/badge/IANA-application%2Fvnd.faf%2Byaml-blue)](https://faf.one/blog/iana-registration)
 [![Homebrew](https://img.shields.io/badge/Homebrew-faf--cli-orange)](https://github.com/Wolfe-Jam/homebrew-faf)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**[Website](https://faf.one)** • **[GitHub](https://github.com/Wolfe-Jam/faf-cli)** • **[Community](https://github.com/Wolfe-Jam/faf-cli/discussions)**
+**[Website](https://faf.one)** • **[Discord](https://discord.com/invite/3pjzpKsP)** • **[GitHub](https://github.com/Wolfe-Jam/faf-cli)** • **[Discussions](https://github.com/Wolfe-Jam/faf-cli/discussions)**
 
 </div>
 
