@@ -1,0 +1,95 @@
+name: 📢 Discord Release Announcement
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  announce-discord:
+    name: 📢 Announce to Discord
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📦 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 📊 Extract release info
+        id: release
+        run: |
+          VERSION="${{ github.event.release.tag_name }}"
+          RELEASE_NAME="${{ github.event.release.name }}"
+          IS_PRERELEASE="${{ github.event.release.prerelease }}"
+          RELEASE_URL="${{ github.event.release.html_url }}"
+
+          # Get first 10 lines of changelog (Discord has char limits)
+          CHANGELOG=$(echo "${{ github.event.release.body }}" | grep "^- " | head -10)
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "name=$RELEASE_NAME" >> $GITHUB_OUTPUT
+          echo "prerelease=$IS_PRERELEASE" >> $GITHUB_OUTPUT
+          echo "url=$RELEASE_URL" >> $GITHUB_OUTPUT
+
+          # Save changelog safely for multiline
+          {
+            echo 'changelog<<EOF'
+            echo "$CHANGELOG"
+            echo 'EOF'
+          } >> $GITHUB_OUTPUT
+
+      - name: 🚀 Announce to Discord
+        run: |
+          # Determine emoji based on release type
+          if [[ "${{ steps.release.outputs.prerelease }}" == "true" ]]; then
+            EMOJI="🧪"
+            TYPE="Beta Release"
+          else
+            EMOJI="🚀"
+            TYPE="New Release"
+          fi
+
+          # Format the Discord message
+          DISCORD_MESSAGE=$(cat <<EOF
+          {
+            "content": null,
+            "embeds": [{
+              "title": "$EMOJI FAF CLI ${{ steps.release.outputs.version }}",
+              "description": "**$TYPE** - F1-Inspired Software Engineering",
+              "color": 16753920,
+              "fields": [
+                {
+                  "name": "📦 Install",
+                  "value": "\`\`\`bash\nnpm install -g faf-cli@${{ steps.release.outputs.version }}\n\`\`\`",
+                  "inline": false
+                },
+                {
+                  "name": "📋 What Changed",
+                  "value": "${{ steps.release.outputs.changelog }}",
+                  "inline": false
+                },
+                {
+                  "name": "🔗 Links",
+                  "value": "[GitHub Release](${{ steps.release.outputs.url }}) • [npm Package](https://www.npmjs.com/package/faf-cli) • [Docs](https://faf.one)",
+                  "inline": false
+                }
+              ],
+              "footer": {
+                "text": "faf-cli • IANA-registered AI Context Standard"
+              },
+              "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
+            }]
+          }
+          EOF
+          )
+
+          # Send to Discord webhook
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d "$DISCORD_MESSAGE" \
+               ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+          echo "✅ Discord announcement sent!"
+
+      - name: 🎉 Success
+        run: |
+          echo "📢 Discord community notified of ${{ steps.release.outputs.version }}"
+          echo "🏁 Release announcement complete!"
