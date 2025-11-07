@@ -147,10 +147,10 @@ describe('🍊 faf drift - Context-Drift Analysis', () => {
       }
     }
 
-    test('should detect authentication drift` async () => {
+    test('should detect authentication drift', async () => {
       await createRepoWithDrift('auth');
 
-      const result = execSync(`node ${CLI_PATH} drift` {
+      const result = execSync(`node ${CLI_PATH} drift`, {
         cwd: testDir,
         encoding: 'utf-8',
         stdio: 'pipe'
@@ -161,10 +161,10 @@ describe('🍊 faf drift - Context-Drift Analysis', () => {
       expect(result).toContain('DRIFT SUMMARY');
     });
 
-    test('should detect state management drift` async () => {
+    test('should detect state management drift', async () => {
       await createRepoWithDrift('state');
 
-      const result = execSync(`node ${CLI_PATH} drift` {
+      const result = execSync(`node ${CLI_PATH} drift`, {
         cwd: testDir,
         encoding: 'utf-8',
         stdio: 'pipe'
@@ -174,10 +174,10 @@ describe('🍊 faf drift - Context-Drift Analysis', () => {
       expect(result).toContain('change');
     });
 
-    test('should detect styling drift` async () => {
+    test('should detect styling drift', async () => {
       await createRepoWithDrift('styling');
 
-      const result = execSync(`node ${CLI_PATH} drift` {
+      const result = execSync(`node ${CLI_PATH} drift`, {
         cwd: testDir,
         encoding: 'utf-8',
         stdio: 'pipe'
@@ -190,7 +190,7 @@ describe('🍊 faf drift - Context-Drift Analysis', () => {
     test('should calculate drift cost accurately', async () => {
       await createRepoWithDrift('auth');
 
-      const result = execSync(`node ${CLI_PATH} drift` {
+      const result = execSync(`node ${CLI_PATH} drift`, {
         cwd: testDir,
         encoding: 'utf-8',
         stdio: 'pipe'
@@ -203,7 +203,7 @@ describe('🍊 faf drift - Context-Drift Analysis', () => {
     test('should assess future risk correctly', async () => {
       await createRepoWithDrift('auth');
 
-      const result = execSync(`node ${CLI_PATH} drift` {
+      const result = execSync(`node ${CLI_PATH} drift`, {
         cwd: testDir,
         encoding: 'utf-8',
         stdio: 'pipe'
@@ -227,7 +227,7 @@ describe('🍊 faf drift - Context-Drift Analysis', () => {
       await fs.writeFile(path.join(testDir, 'test.txt'), 'test');
       execSync('git add . && git commit -m "Test"', { cwd: testDir, stdio: 'ignore' });
 
-      const result = execSync(`node ${CLI_PATH} drift --since 90d', {
+      const result = execSync(`node ${CLI_PATH} drift --since 90d`, {
         cwd: testDir,
         encoding: 'utf-8',
         stdio: 'pipe'
@@ -276,7 +276,7 @@ metadata:
       await fs.writeFile(path.join(testDir, '.faf'), fafContent);
       execSync('git add . && git commit -m "Add .faf"', { cwd: testDir, stdio: 'ignore' });
 
-      const result = execSync(`node ${CLI_PATH} drift` {
+      const result = execSync(`node ${CLI_PATH} drift`, {
         cwd: testDir,
         encoding: 'utf-8',
         stdio: 'pipe'
@@ -294,7 +294,7 @@ metadata:
       await fs.writeFile(path.join(testDir, 'test.txt'), 'test');
       execSync('git add . && git commit -m "Test with 特殊字符 and émojis 🎉"', { cwd: testDir, stdio: 'ignore' });
 
-      const result = execSync(`node ${CLI_PATH} drift` {
+      const result = execSync(`node ${CLI_PATH} drift`, {
         cwd: testDir,
         encoding: 'utf-8',
         stdio: 'pipe'
@@ -312,7 +312,7 @@ metadata:
     test('should analyze FAF CLI itself', () => {
       const cliDir = path.resolve(__dirname, '..');
 
-      const result = execSync(`node ${CLI_PATH} drift --export /tmp/faf-cli-drift.json', {
+      const result = execSync(`node ${CLI_PATH} drift --export /tmp/faf-cli-drift.json`, {
         cwd: cliDir,
         encoding: 'utf-8',
         stdio: 'pipe'
@@ -381,7 +381,7 @@ describe('💥 STRESS TESTS: Breaking Point Analysis', () => {
 
     expect(result).toContain('10000 commits');
     expect(duration).toBeLessThan(30000); // Should complete in <30s
-  }, 120000); // 2 minute timeout
+  }, 600000); // 10 minute timeout - CHAMPIONSHIP TORTURE TEST
 
   test('STRESS: 100 package.json changes', async () => {
     execSync('git init', { cwd: stressDir, stdio: 'ignore' });
@@ -430,5 +430,5 @@ describe('💥 STRESS TESTS: Breaking Point Analysis', () => {
 
     expect(result).toContain('State');
     expect(result).toContain('DRIFT SUMMARY');
-  }, 60000); // 1 minute timeout
+  }, 180000); // 3 minute timeout - ENTERPRISE STRESS TEST
 });

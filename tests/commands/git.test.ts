@@ -28,10 +28,14 @@ afterAll(() => {
 
 describe('Git Command - Integration Tests', () => {
   const testDir = path.join(__dirname, '../temp-git');
+  let originalCwd: string;
 
   beforeEach(async () => {
     mockLog.mockClear();
     mockError.mockClear();
+
+    // Save original cwd before changing
+    originalCwd = process.cwd();
 
     // Create test directory
     await fs.mkdir(testDir, { recursive: true });
@@ -39,6 +43,9 @@ describe('Git Command - Integration Tests', () => {
   });
 
   afterEach(async () => {
+    // CRITICAL: Restore original cwd BEFORE deleting testDir
+    process.chdir(originalCwd);
+
     // Cleanup test directory
     try {
       await fs.rm(testDir, { recursive: true, force: true });
