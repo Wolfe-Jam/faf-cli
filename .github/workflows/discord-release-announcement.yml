@@ -43,7 +43,7 @@ jobs:
             EMOJI="🔧"
             TYPE="Beta Release"
           else
-            EMOJI="🏎️"
+            EMOJI="⚡️"
             TYPE="New Release"
           fi
 
