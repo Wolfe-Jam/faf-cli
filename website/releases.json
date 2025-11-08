@@ -1,1 +1,19 @@
-[]
+[
+  {
+    "version": "v3.1.2",
+    "name": "Discord Community Launch",
+    "date": "2025-11-07",
+    "timestamp": "2025-11-07T00:00:00.000Z",
+    "prerelease": false,
+    "changelog": "- Added Discord community server\n- GitHub Actions Discord automation\n- Championship stress test timeouts\n- Fixed critical test infrastructure bug\n- Enhanced release announcements",
+    "urls": {
+      "github": "https://github.com/Wolfe-Jam/faf-cli/releases/tag/v3.1.2",
+      "npm": "https://www.npmjs.com/package/faf-cli/v/v3.1.2",
+      "discord": "https://discord.com/invite/3pjzpKsP"
+    },
+    "install": {
+      "npm": "npm install -g faf-cli@v3.1.2",
+      "brew": "brew install faf-cli"
+    }
+  }
+]
