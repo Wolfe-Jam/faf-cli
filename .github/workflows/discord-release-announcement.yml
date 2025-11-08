@@ -63,7 +63,7 @@ jobs:
                 },
                 {
                   "name": "📦 Install",
-                  "value": "\`\`\`bash\nnpm install -g faf-cli@${{ steps.release.outputs.version }}\n\`\`\`\n\n\`\`\`bash\nbrew install faf-cli\n\`\`\`",
+                  "value": "`npm install -g faf-cli@${{ steps.release.outputs.version }}`\n\n`brew install faf-cli`",
                   "inline": false
                 },
                 {
