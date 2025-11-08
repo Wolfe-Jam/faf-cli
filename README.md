@@ -93,6 +93,29 @@ brew install faf-cli
 
 ---
 
+## 🎉 What's New in v3.1.2 - Discord Community Launch
+
+**The FAF community is now live!** Join us at [discord.com/invite/3pjzpKsP](https://discord.com/invite/3pjzpKsP)
+
+### 🎉 Community & Automation
+- **Official Discord Server** - 6 focused channels (announcements, general, showcase, help, integrations, w3c-and-standards)
+- **GitHub Actions Automation** - Automated release announcements to Discord
+- **Low Maintenance Design** - Open community structure with auto-moderation
+
+### 🏆 Championship Test Infrastructure
+- **Enterprise Stress Testing** - 10,000 commits torture test (10min timeout)
+- **Monorepo Ready** - 100 package.json changes stress test (3min timeout)
+- **Test Suite Stability** - Fixed critical uv_cwd bug affecting 24 test suites
+
+### 🐛 Bug Fixes
+- **git.test.ts** - Fixed process.cwd() restoration preventing cascading failures
+- **drift.test.ts** - Fixed 7 template literal syntax errors
+- **Test Infrastructure** - 281/327 core tests passing (86% success rate)
+
+**Join the community:** [discord.com/invite/3pjzpKsP](https://discord.com/invite/3pjzpKsP)
+
+---
+
 ## 🎉 What's New in v3.1.1 - IANA Registration
 
 **v3.1.1 updates documentation with IANA registration achievement.**
