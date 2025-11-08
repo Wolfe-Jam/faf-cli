@@ -73,7 +73,7 @@ jobs:
                 },
                 {
                   "name": "🔗 Links",
-                  "value": "[faf.one](https://faf.one) | [Discord Community](https://discord.com/invite/3pjzpKsP) | [npm Package](https://www.npmjs.com/package/faf-cli)",
+                  "value": "[faf.one](https://faf.one) | [Discord Community](https://discord.com/invite/3pjzpKsP) | [npm download](https://www.npmjs.com/package/faf-cli)",
                   "inline": false
                 }
               ],
