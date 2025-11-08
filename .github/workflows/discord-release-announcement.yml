@@ -40,10 +40,10 @@ jobs:
         run: |
           # Determine emoji based on release type
           if [[ "${{ steps.release.outputs.prerelease }}" == "true" ]]; then
-            EMOJI="🧪"
+            EMOJI="🔧"
             TYPE="Beta Release"
           else
-            EMOJI="🚀"
+            EMOJI="🏎️"
             TYPE="New Release"
           fi
 
@@ -57,8 +57,13 @@ jobs:
               "color": 16753920,
               "fields": [
                 {
+                  "name": "✨ Highlights",
+                  "value": "${{ steps.release.outputs.name }}",
+                  "inline": false
+                },
+                {
                   "name": "📦 Install",
-                  "value": "\`\`\`bash\nnpm install -g faf-cli@${{ steps.release.outputs.version }}\n\`\`\`",
+                  "value": "\`\`\`bash\nnpm install -g faf-cli@${{ steps.release.outputs.version }}\n\`\`\`\n\`\`\`bash\nbrew install faf-cli\n\`\`\`",
                   "inline": false
                 },
                 {
@@ -68,12 +73,12 @@ jobs:
                 },
                 {
                   "name": "🔗 Links",
-                  "value": "[GitHub Release](${{ steps.release.outputs.url }}) • [npm Package](https://www.npmjs.com/package/faf-cli) • [Docs](https://faf.one)",
+                  "value": "[faf.one](https://faf.one) | [Discord Community](https://discord.com/invite/3pjzpKsP) | [Downloads](${{ steps.release.outputs.url }})",
                   "inline": false
                 }
               ],
               "footer": {
-                "text": "faf-cli • IANA-registered AI Context Standard"
+                "text": "IANA-Registered AI Context Standard"
               },
               "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
             }]
