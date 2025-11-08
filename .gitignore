@@ -82,6 +82,7 @@ test-*.faf
 # Internal documents - ALL .md files go to FAF-GOLD/PLANET-FAF
 *.md
 !README.md
+!PUBLISH.md
 
 # Temporary files
 *.tmp
