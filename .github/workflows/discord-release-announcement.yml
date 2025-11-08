@@ -53,7 +53,7 @@ jobs:
             "content": null,
             "embeds": [{
               "title": "$EMOJI FAF CLI ${{ steps.release.outputs.version }}",
-              "description": "**$TYPE** - F1-Inspired Software Engineering",
+              "description": "**$TYPE** - IANA format-driven persistent project context for AI",
               "color": 16753920,
               "fields": [
                 {
