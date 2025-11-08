@@ -94,7 +94,56 @@ jobs:
 
           echo "✅ Discord announcement sent!"
 
+      - name: 🌐 Update releases.json
+        run: |
+          # Create release JSON object
+          RELEASE_JSON=$(cat <<EOF
+          {
+            "version": "${{ steps.release.outputs.version }}",
+            "name": "${{ steps.release.outputs.name }}",
+            "date": "$(date -u +%Y-%m-%d)",
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%S.000Z)",
+            "prerelease": ${{ steps.release.outputs.prerelease }},
+            "changelog": $(echo "${{ steps.release.outputs.changelog }}" | jq -Rs .),
+            "urls": {
+              "github": "${{ steps.release.outputs.url }}",
+              "npm": "https://www.npmjs.com/package/faf-cli/v/${{ steps.release.outputs.version }}",
+              "discord": "https://discord.com/invite/3pjzpKsP"
+            },
+            "install": {
+              "npm": "npm install -g faf-cli@${{ steps.release.outputs.version }}",
+              "brew": "brew install faf-cli"
+            }
+          }
+          EOF
+          )
+
+          # Prepend to releases.json (newest first)
+          jq --argjson new "$RELEASE_JSON" '. = [$new] + .' website/releases.json > website/releases.tmp.json
+          mv website/releases.tmp.json website/releases.json
+
+          # Show the update
+          echo "📝 Updated releases.json:"
+          jq '.[0]' website/releases.json
+
+      - name: 📤 Commit releases.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add website/releases.json
+          git commit -m "chore: add ${{ steps.release.outputs.version }} to releases.json
+
+Release: ${{ steps.release.outputs.name }}
+Date: $(date -u +%Y-%m-%d)
+Automated by GitHub Actions"
+
+          git push
+
+          echo "✅ releases.json updated and committed!"
+
       - name: 🎉 Success
         run: |
           echo "📢 Discord community notified of ${{ steps.release.outputs.version }}"
+          echo "🌐 releases.json updated at https://raw.githubusercontent.com/Wolfe-Jam/faf-cli/main/website/releases.json"
           echo "🏁 Release announcement complete!"
