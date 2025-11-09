@@ -1,7 +1,10 @@
-# faf-cli
+<div align="left">
+  <img src="https://raw.githubusercontent.com/Wolfe-Jam/faf/main/assets/logos/orange-smiley.svg" alt="FAF" width="40" align="left" style="margin-right: 12px;" />
+  <h1>faf-cli</h1>
+  <p><strong>IANA-Registered Format for AI Context</strong> · <code>application/vnd.faf+yaml</code></p>
+</div>
+<br clear="left"/>
 
-> **🏆 IANA-Registered Format** - .FAF is now an Internet-standard format.
-> Create official `application/vnd.faf+yaml` files from any codebase
 > Universal CLI for FAF (Foundational AI-context Format) using project.faf -
 > sits with package.json and README.md in every repo to provide AI context 
 ## TL;DR
@@ -58,7 +61,7 @@ Visible. Discoverable. Universal.
 
 <div align="center">
 
-<img src="https://cdn.jsdelivr.net/npm/faf-cli@latest/assets/icons/orange-smiley.svg" alt="FAF Logo" width="64" />
+<img src="https://raw.githubusercontent.com/Wolfe-Jam/faf/main/assets/logos/orange-smiley.svg" alt="FAF Logo" width="64" />
 
 **Free and Open Source** • **Project DNA for any AI** • **Zero Faff™**
 
@@ -535,7 +538,7 @@ We created this tool together across thousands of conversations. Yet without pro
 
 ### Before `.faf` - Birth: 12%
 <div align="center">
-<img src="https://cdn.jsdelivr.net/npm/faf-cli@latest/assets/birth-dna-12-percent.png" alt="FAF CLI birth score: 12% context" width="700" />
+<img src="https://raw.githubusercontent.com/Wolfe-Jam/faf/main/assets/demos/birth-dna-12-percent.png" alt="FAF CLI birth score: 12% context" width="700" />
 </div>
 
 **Context Score: 12%** — Even the AI that built it couldn't recognize it
@@ -544,7 +547,7 @@ We created this tool together across thousands of conversations. Yet without pro
 
 ### The Transformation - 344ms Later
 <div align="center">
-<img src="https://cdn.jsdelivr.net/npm/faf-cli@latest/assets/faf-init-demo.gif" alt="Running faf init - 344ms" width="700" />
+<img src="https://raw.githubusercontent.com/Wolfe-Jam/faf/main/assets/demos/faf-init-demo.gif" alt="Running faf init - 344ms" width="700" />
 </div>
 
 **`faf init`** — One command. Zero configuration. Project DNA created.
@@ -553,7 +556,7 @@ We created this tool together across thousands of conversations. Yet without pro
 
 ### After `.faf` - Current: 89%
 <div align="center">
-<img src="https://cdn.jsdelivr.net/npm/faf-cli@latest/assets/growth-to-89-percent.png" alt="FAF CLI after .faf: 89% context score" width="700" />
+<img src="https://raw.githubusercontent.com/Wolfe-Jam/faf/main/assets/demos/growth-to-89-percent.png" alt="FAF CLI after .faf: 89% context score" width="700" />
 </div>
 
 **Context Score: 89%** — Instant comprehension. Persistent memory.
@@ -792,7 +795,7 @@ Next Milestone: 95% 🥈 Silver (6% to go!)
 
 ### Normal Balance (Any Ratio)
 <div align="center">
-<img src="https://cdn.jsdelivr.net/npm/faf-cli@latest/assets/ai-human-balance-50-50.png" alt="AI|HUMAN Balance at 50/50" width="700" />
+<img src="https://raw.githubusercontent.com/Wolfe-Jam/faf/main/assets/demos/ai-human-balance-50-50.png" alt="AI|HUMAN Balance at 50/50" width="700" />
 </div>
 
 **AI 50% | HUMAN 50%** — Working toward optimal context
@@ -801,7 +804,7 @@ Next Milestone: 95% 🥈 Silver (6% to go!)
 
 ### 💚 PERFECT BALANCE ACHIEVED! (50|50)
 <div align="center">
-<img src="https://cdn.jsdelivr.net/npm/faf-cli@latest/assets/prd-balance-perfect-green.png" alt="PRD Balance - Perfect 50/50 goes GREEN" width="700" />
+<img src="https://raw.githubusercontent.com/Wolfe-Jam/faf/main/assets/demos/prd-balance-perfect-green.png" alt="PRD Balance - Perfect 50/50 goes GREEN" width="700" />
 </div>
 
 **⚖️ PERFECT BALANCE!** — When you hit exactly 50|50, the balance bar turns **GREEN 💚** signaling championship-level context optimization. This is the sweet spot where AI and human readers both get exactly what they need.
