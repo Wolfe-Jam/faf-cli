@@ -1,6 +1,6 @@
 <div align="left">
   <img src="https://raw.githubusercontent.com/Wolfe-Jam/faf/main/assets/logos/orange-smiley.svg" alt="FAF" width="40" align="left" style="margin-right: 12px;" />
-  <h1>faf-cli</h1>
+  <h1> faf-cli</h1>
   <p><strong>IANA-Registered Format for AI Context</strong> · <code>application/vnd.faf+yaml</code></p>
 </div>
 <br clear="left"/>
@@ -95,6 +95,29 @@ brew install faf-cli
 ```
 
 **One command. Zero configuration. Production-ready.**
+
+### Using Claude Desktop?
+
+Install the MCP server too for integrated workflows:
+
+```bash
+npm install -g claude-faf-mcp
+# or
+brew install wolfe-jam/faf/claude-faf-mcp
+```
+
+Add to `claude_desktop_config.json`:
+```json
+{
+  "mcpServers": {
+    "claude-faf-mcp": {
+      "command": "claude-faf-mcp"
+    }
+  }
+}
+```
+
+**[claude-faf-mcp on npm →](https://www.npmjs.com/package/claude-faf-mcp)**
 
 ---
 
