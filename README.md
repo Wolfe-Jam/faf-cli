@@ -1,6 +1,6 @@
 <div align="left">
   <img src="https://raw.githubusercontent.com/Wolfe-Jam/faf/main/assets/logos/orange-smiley.svg" alt="FAF" width="40" align="left" style="margin-right: 12px;" />
-  <h1>&nbsp;faf-cli</h1>
+  <h1 style="margin-left: 52px;">faf-cli</h1>
   <p><strong>IANA-Registered Format for AI Context</strong> · <code>application/vnd.faf+yaml</code></p>
 </div>
 <br clear="left"/>
@@ -165,7 +165,7 @@ For too long, `.faf` lived in the shadows - hidden, invisible, forgotten. **NOT 
 
 ### 📂 Introducing: `project.faf`
 
-## **`package.json` for AI**
+**`package.json` for AI**
 
 **Just like `package.json` tells npm what your project needs...**
 **`project.faf` tells AI what your project IS.**
