@@ -1,9 +1,10 @@
-<div align="left">
-  <img src="https://raw.githubusercontent.com/Wolfe-Jam/faf/main/assets/logos/orange-smiley.svg" alt="FAF" width="40" align="left" style="margin-right: 12px;" />
-  <h1 style="margin-left: 52px;">faf-cli</h1>
-  <p><strong>IANA-Registered Format for AI Context</strong> · <code>application/vnd.faf+yaml</code></p>
+<div style="display: flex; align-items: center; gap: 12px;">
+  <img src="https://raw.githubusercontent.com/Wolfe-Jam/faf/main/assets/logos/orange-smiley.svg" alt="FAF" width="40" />
+  <div>
+    <h1 style="margin: 0;">faf-cli</h1>
+    <p style="margin: 4px 0 0 0;"><strong>IANA-Registered Format for AI Context</strong> · <code>application/vnd.faf+yaml</code></p>
+  </div>
 </div>
-<br clear="left"/>
 
 > Universal CLI for FAF (Foundational AI-context Format) using project.faf -
 > sits with package.json and README.md in every repo to provide AI context 
