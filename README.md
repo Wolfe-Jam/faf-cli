@@ -1,6 +1,6 @@
 <div align="left">
   <img src="https://raw.githubusercontent.com/Wolfe-Jam/faf/main/assets/logos/orange-smiley.svg" alt="FAF" width="40" align="left" style="margin-right: 12px;" />
-  <h1> faf-cli</h1>
+  <h1>&nbsp;faf-cli</h1>
   <p><strong>IANA-Registered Format for AI Context</strong> · <code>application/vnd.faf+yaml</code></p>
 </div>
 <br clear="left"/>
