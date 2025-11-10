@@ -66,7 +66,6 @@ Visible. Discoverable. Universal.
 
 **Free and Open Source** • **Project DNA for any AI** • **Zero Faff™**
 
-[![GitHub stars](https://img.shields.io/github/stars/Wolfe-Jam/faf-cli?style=social)](https://github.com/Wolfe-Jam/faf-cli)
 [![NPM Downloads](https://img.shields.io/npm/dt/faf-cli?label=total%20downloads&color=00CCFF)](https://www.npmjs.com/package/faf-cli)
 [![Discord](https://img.shields.io/badge/Discord-Join%20Community-5865F2?logo=discord&logoColor=white)](https://discord.com/invite/3pjzpKsP)
 [![Homebrew](https://img.shields.io/badge/Homebrew-faf--cli-orange)](https://github.com/Wolfe-Jam/homebrew-faf)
