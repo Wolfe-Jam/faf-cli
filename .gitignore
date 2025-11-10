@@ -84,6 +84,11 @@ test-*.faf
 !README.md
 !CHANGELOG.md
 !PUBLISH.md
+!CONTRIBUTING.md
+!CODE_OF_CONDUCT.md
+!SECURITY.md
+!SUPPORT.md
+!.github/**/*.md
 
 # Temporary files
 *.tmp
