@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FAF CDN Image Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+        .image-test { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .image-test h3 { margin-top: 0; color: #333; }
+        .status { padding: 5px 10px; border-radius: 4px; display: inline-block; margin-left: 10px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        img { max-width: 100%; height: auto; }
+        .url { font-family: monospace; font-size: 12px; color: #666; word-break: break-all; }
+    </style>
+</head>
+<body>
+    <h1>FAF GitHub CDN Image Test</h1>
+    <p>Testing all images from centralized assets repository</p>
+
+    <div class="image-test">
+        <h3>Logo: Orange Smiley (SVG) <span class="status" id="status-1">Testing...</span></h3>
+        <p class="url">https://raw.githubusercontent.com/Wolfe-Jam/faf/main/assets/logos/orange-smiley.svg</p>
+        <img src="https://raw.githubusercontent.com/Wolfe-Jam/faf/main/assets/logos/orange-smiley.svg"
+             width="64"
+             onload="document.getElementById('status-1').className='status success'; document.getElementById('status-1').textContent='✓ Loaded'"
+             onerror="document.getElementById('status-1').className='status error'; document.getElementById('status-1').textContent='✗ Failed'">
+    </div>
+
+    <div class="image-test">
+        <h3>Demo: Birth DNA 12% <span class="status" id="status-2">Testing...</span></h3>
+        <p class="url">https://raw.githubusercontent.com/Wolfe-Jam/faf/main/assets/demos/birth-dna-12-percent.png</p>
+        <img src="https://raw.githubusercontent.com/Wolfe-Jam/faf/main/assets/demos/birth-dna-12-percent.png"
+             width="700"
+             onload="document.getElementById('status-2').className='status success'; document.getElementById('status-2').textContent='✓ Loaded'"
+             onerror="document.getElementById('status-2').className='status error'; document.getElementById('status-2').textContent='✗ Failed'">
+    </div>
+
+    <div class="image-test">
+        <h3>Demo: Init Demo GIF (3MB) <span class="status" id="status-3">Testing...</span></h3>
+        <p class="url">https://raw.githubusercontent.com/Wolfe-Jam/faf/main/assets/demos/faf-init-demo.gif</p>
+        <img src="https://raw.githubusercontent.com/Wolfe-Jam/faf/main/assets/demos/faf-init-demo.gif"
+             width="700"
+             onload="document.getElementById('status-3').className='status success'; document.getElementById('status-3').textContent='✓ Loaded'"
+             onerror="document.getElementById('status-3').className='status error'; document.getElementById('status-3').textContent='✗ Failed'">
+    </div>
+
+    <div class="image-test">
+        <h3>Demo: Growth to 89% <span class="status" id="status-4">Testing...</span></h3>
+        <p class="url">https://raw.githubusercontent.com/Wolfe-Jam/faf/main/assets/demos/growth-to-89-percent.png</p>
+        <img src="https://raw.githubusercontent.com/Wolfe-Jam/faf/main/assets/demos/growth-to-89-percent.png"
+             width="700"
+             onload="document.getElementById('status-4').className='status success'; document.getElementById('status-4').textContent='✓ Loaded'"
+             onerror="document.getElementById('status-4').className='status error'; document.getElementById('status-4').textContent='✗ Failed'">
+    </div>
+
+    <div class="image-test">
+        <h3>Demo: AI/Human Balance <span class="status" id="status-5">Testing...</span></h3>
+        <p class="url">https://raw.githubusercontent.com/Wolfe-Jam/faf/main/assets/demos/ai-human-balance-50-50.png</p>
+        <img src="https://raw.githubusercontent.com/Wolfe-Jam/faf/main/assets/demos/ai-human-balance-50-50.png"
+             width="700"
+             onload="document.getElementById('status-5').className='status success'; document.getElementById('status-5').textContent='✓ Loaded'"
+             onerror="document.getElementById('status-5').className='status error'; document.getElementById('status-5').textContent='✗ Failed'">
+    </div>
+
+    <div class="image-test">
+        <h3>Demo: PRD Balance Green <span class="status" id="status-6">Testing...</span></h3>
+        <p class="url">https://raw.githubusercontent.com/Wolfe-Jam/faf/main/assets/demos/prd-balance-perfect-green.png</p>
+        <img src="https://raw.githubusercontent.com/Wolfe-Jam/faf/main/assets/demos/prd-balance-perfect-green.png"
+             width="700"
+             onload="document.getElementById('status-6').className='status success'; document.getElementById('status-6').textContent='✓ Loaded'"
+             onerror="document.getElementById('status-6').className='status error'; document.getElementById('status-6').textContent='✗ Failed'">
+    </div>
+
+    <div class="image-test">
+        <h3>Screenshot: project.faf Placement <span class="status" id="status-7">Testing...</span></h3>
+        <p class="url">https://raw.githubusercontent.com/Wolfe-Jam/faf/main/assets/screenshots/package-json-project-faf.png</p>
+        <img src="https://raw.githubusercontent.com/Wolfe-Jam/faf/main/assets/screenshots/package-json-project-faf.png"
+             width="500"
+             onload="document.getElementById('status-7').className='status success'; document.getElementById('status-7').textContent='✓ Loaded'"
+             onerror="document.getElementById('status-7').className='status error'; document.getElementById('status-7').textContent='✗ Failed'">
+    </div>
+
+    <div class="image-test">
+        <h3>MCP: Championship Scorecard <span class="status" id="status-8">Testing...</span></h3>
+        <p class="url">https://raw.githubusercontent.com/Wolfe-Jam/faf/main/assets/demos/faf-championship-scorecard.png</p>
+        <img src="https://raw.githubusercontent.com/Wolfe-Jam/faf/main/assets/demos/faf-championship-scorecard.png"
+             width="700"
+             onload="document.getElementById('status-8').className='status success'; document.getElementById('status-8').textContent='✓ Loaded'"
+             onerror="document.getElementById('status-8').className='status error'; document.getElementById('status-8').textContent='✗ Failed'">
+    </div>
+
+    <script>
+        setTimeout(() => {
+            const statuses = document.querySelectorAll('.status');
+            statuses.forEach(status => {
+                if (status.textContent === 'Testing...') {
+                    status.className = 'status error';
+                    status.textContent = '✗ Timeout';
+                }
+            });
+        }, 10000);
+    </script>
+</body>
+</html>

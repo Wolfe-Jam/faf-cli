@@ -5,17 +5,36 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.5] - 2025-11-14
+
+### Added
+
+- **Auto-Update package.json for npm Packages** - Championship automation
+  - `faf init` now automatically adds `project.faf` to package.json "files" array
+  - Only updates if "files" array already exists (respects npm defaults)
+  - Checks for existing entries (.faf, project.faf) to avoid duplicates
+  - Graceful handling of edge cases (malformed JSON, non-array "files" field)
+  - Informative messages: success, already exists, or manual edit needed
+  - Solves the chicken-and-egg problem: package.json → faf init → auto-update!
+
+### Fixed
+
+- **npm Package Publishing Workflow** - No more manual edits required
+  - Previously: Create project.faf, manually edit package.json
+  - Now: Create project.faf, CLI auto-updates package.json
+  - Critical for faf-cli and all npm packages using FAF format
+
 ## [3.1.2] - 2025-11-07
 
 ### Discord Community Launch
 
-**The FAF community is now live** - Join us at [discord.com/invite/3pjzpKsP](https://discord.com/invite/3pjzpKsP)
+**The FAF community is now live** - Join us at [discord.com/invite/56fPBUJKfk](https://discord.com/invite/56fPBUJKfk)
 
 ### Added
 
 - **Discord Community Server** - Official FAF community launched
   - 6 focused channels: announcements, general, showcase, help, integrations, w3c-and-standards
-  - Permanent invite link: discord.com/invite/3pjzpKsP
+  - Permanent invite link: discord.com/invite/56fPBUJKfk
   - Low maintenance, open community structure
   - Auto-moderation enabled for spam/raid protection
 

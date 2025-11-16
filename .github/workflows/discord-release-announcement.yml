@@ -73,7 +73,7 @@ jobs:
                 },
                 {
                   "name": "🔗 Links",
-                  "value": "[faf.one](https://faf.one) | [Discord Community](https://discord.com/invite/3pjzpKsP) | [npm download](https://www.npmjs.com/package/faf-cli)",
+                  "value": "[faf.one](https://faf.one) | [Discord Community](https://discord.com/invite/56fPBUJKfk) | [npm download](https://www.npmjs.com/package/faf-cli)",
                   "inline": false
                 }
               ],
@@ -108,7 +108,7 @@ jobs:
             "urls": {
               "github": "${{ steps.release.outputs.url }}",
               "npm": "https://www.npmjs.com/package/faf-cli/v/${{ steps.release.outputs.version }}",
-              "discord": "https://discord.com/invite/3pjzpKsP"
+              "discord": "https://discord.com/invite/56fPBUJKfk"
             },
             "install": {
               "npm": "npm install -g faf-cli@${{ steps.release.outputs.version }}",

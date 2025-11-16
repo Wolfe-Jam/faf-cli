@@ -26,7 +26,7 @@
     "urls": {
       "github": "https://github.com/Wolfe-Jam/faf-cli/releases/tag/v3.1.3",
       "npm": "https://www.npmjs.com/package/faf-cli/v/v3.1.3",
-      "discord": "https://discord.com/invite/3pjzpKsP"
+      "discord": "https://discord.com/invite/56fPBUJKfk"
     },
     "install": {
       "npm": "npm install -g faf-cli@v3.1.3",

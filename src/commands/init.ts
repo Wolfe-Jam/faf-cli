@@ -108,6 +108,44 @@ export async function initFafFile(
     // Write .faf file
     await fs.writeFile(outputPath, fafContent, "utf-8");
 
+    // 🏎️ AUTO-UPDATE package.json "files" array for npm packages
+    const packageJsonPath = path.join(projectRoot, 'package.json');
+    if (await fileExists(packageJsonPath)) {
+      try {
+        const packageJsonContent = await fs.readFile(packageJsonPath, 'utf-8');
+        const packageJson = JSON.parse(packageJsonContent);
+
+        // Only update if there's a "files" array (explicit npm publishing config)
+        // If no "files" array exists, npm uses default behavior - don't interfere
+        if (packageJson.files && Array.isArray(packageJson.files)) {
+          const fafFileName = path.basename(outputPath); // Either 'project.faf' or '.faf'
+          const hasProjectFaf = packageJson.files.includes('project.faf');
+          const hasDotFaf = packageJson.files.includes('.faf');
+          const hasCurrentFile = packageJson.files.includes(fafFileName);
+
+          // Add the file we just created if it's not already there (in any form)
+          if (!hasProjectFaf && !hasDotFaf && !hasCurrentFile) {
+            packageJson.files.push(fafFileName);
+            await fs.writeFile(
+              packageJsonPath,
+              JSON.stringify(packageJson, null, 2) + '\n',
+              'utf-8'
+            );
+            console.log(chalk.green(`   ☑️ Updated package.json to include ${fafFileName} in published files`));
+          } else if (hasProjectFaf || hasDotFaf || hasCurrentFile) {
+            console.log(chalk.gray(`   ℹ️  package.json already includes FAF file in published files`));
+          }
+        } else if (packageJson.files !== undefined) {
+          // "files" exists but is not an array - warn user
+          console.log(chalk.yellow(`   ⚠️  package.json "files" field is not an array - please add "${path.basename(outputPath)}" manually`));
+        }
+      } catch (error) {
+        // Silent fail - not critical if package.json update fails
+        // Could be malformed JSON, permission issue, etc.
+        console.log(chalk.gray('   ℹ️  Could not auto-update package.json (manual edit may be needed)'));
+      }
+    }
+
     const elapsedTime = Date.now() - startTime;
     console.log(chalk.green(`☑️ Created ${outputPath}`));
     console.log();
