@@ -109,11 +109,67 @@ faf bi-sync
 
 ---
 
+## Human Context (The 6 Ws)
+
+Boost your score by 25-35% with human context - the information only YOU know about your project.
+
+### Auto-Extract from README
+
+```bash
+# Preview what can be extracted
+faf readme
+
+# Apply extracted content to empty slots
+faf readme --apply
+
+# Overwrite all slots (even filled ones)
+faf readme --apply --force
+```
+
+### Manual Entry
+
+```bash
+# Non-interactive (works in Claude Code)
+faf human-set who "Frontend team at Acme Corp"
+faf human-set what "Customer dashboard with real-time analytics"
+faf human-set why "10x faster than previous solution"
+
+# Interactive mode (terminal only)
+faf human
+```
+
+### Quality Check & Protection
+
+```bash
+# Inspect quality of human_context fields
+faf check
+
+# Output shows quality levels:
+#   empty     - Not filled
+#   generic   - Placeholder or too short
+#   good      - Quality content
+#   excellent - High-value content
+
+# Lock good content from being overwritten
+faf check --protect
+
+# Remove all protections
+faf check --unlock
+```
+
+Protected fields are skipped by `faf readme` and `faf auto`, preventing accidental overwrites of quality content.
+
+---
+
 ## Core Features
 
-### 41 Championship Commands
+### 44 Championship Commands
 - **faf auto** - Zero to Podium in one command
 - **faf init** - Create project.faf from your project
+- **faf readme** - Smart 6 Ws extraction from README.md
+- **faf human** - Interactive human context entry
+- **faf human-set** - Non-interactive field setting (Claude Code compatible)
+- **faf check** - Quality inspection + field protection
 - **faf enhance** - Real AI analysis and improvements
 - **faf score** - AI-readiness scoring (0-100%)
 - **faf formats** - 153 formats across 17-level pyramid
