@@ -845,26 +845,35 @@ Stack Discovery:
     }
   });
 
-// 🔍 faf check - Comprehensive validation & audit (merged validate + audit)
+// 🔍 faf check - Quality inspection & protection system
 program
   .command('check')
-  .description('🔍 Comprehensive .faf validation and freshness check')
-  .option('--format', 'Check format/validity only (old validate)')
-  .option('--fresh', 'Check freshness/completeness only (old audit)')
+  .description('🔍 Quality inspection for human_context + field protection')
+  .option('--format', 'Check format/validity (old validate)')
+  .option('--fresh', 'Check freshness/completeness (old audit)')
   .option('--fix', 'Auto-fix issues where possible')
   .option('-d, --detailed', 'Show detailed check results')
+  .option('--protect', 'Auto-protect good/excellent fields from overwrite')
+  .option('--unlock', 'Remove all field protections')
+  .option('-q, --quiet', 'Minimal output')
   .addHelpText('after', `
 Examples:
-  $ faf check                    # Full check (format + freshness)
+  $ faf check                    # Quality inspection of human_context
+  $ faf check --protect          # Lock good/excellent fields
+  $ faf check --unlock           # Remove all protections
   $ faf check --format           # Format validation only
   $ faf check --fresh            # Freshness audit only
-  $ faf check --fix              # Auto-fix issues
-  $ faf check --detailed         # Detailed diagnostics
-  
-Combines old validate + audit:
-  • Format validation (schema, YAML syntax, required fields)
-  • Freshness audit (up-to-date, completeness, staleness)
-  • Auto-fix capabilities for common issues`)
+
+Quality Levels:
+  ⬜ empty      - Not filled
+  🟡 generic    - Placeholder or too short
+  🟢 good       - Quality content
+  💎 excellent  - High-value content
+
+Protection:
+  • Protected fields are skipped by faf readme and faf auto
+  • Use --unlock to remove all protections
+  • Shows 🔒 next to protected fields`)
   .action((options) => checkCommand(options));
 
 // ✅ faf validate - Check if .faf file is valid

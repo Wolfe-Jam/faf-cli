@@ -12,6 +12,7 @@ import {
   FAF_COLORS,
 } from "../utils/championship-style";
 import { findFafFile, fileExists } from "../utils/file-utils";
+import { isFieldProtected } from "./check";
 
 interface ReadmeOptions {
   apply?: boolean;
@@ -450,12 +451,20 @@ export async function readmeCommand(
       }
 
       let appliedCount = 0;
+      let skippedProtected = 0;
       const fields: (keyof ExtractedContext)[] = ['who', 'what', 'why', 'where', 'when', 'how'];
 
       for (const field of fields) {
         const value = extracted[field];
         const existingValue = fafData.human_context[field];
         const isEmpty = !existingValue || existingValue === null || existingValue === '';
+
+        // Check if field is protected
+        if (isFieldProtected(fafData, field)) {
+          skippedProtected++;
+          console.log(chalk.gray(`   🔒 Skipped ${field} (protected)`));
+          continue;
+        }
 
         if (value && (isEmpty || options.force)) {
           fafData.human_context[field] = value;
@@ -473,10 +482,18 @@ export async function readmeCommand(
         await fs.writeFile(fafPath, stringifyYAML(fafData), 'utf-8');
         console.log();
         console.log(FAF_COLORS.fafGreen(`☑️ Applied ${appliedCount} fields to ${path.basename(fafPath)}`));
+        if (skippedProtected > 0) {
+          console.log(chalk.gray(`   (${skippedProtected} protected fields unchanged)`));
+        }
         console.log(chalk.gray('   Run: faf score --details to see your new score'));
       } else {
         console.log();
-        console.log(chalk.gray('   All slots already filled or no new data extracted'));
+        if (skippedProtected > 0) {
+          console.log(chalk.gray(`   ${skippedProtected} protected fields unchanged`));
+          console.log(chalk.gray('   Use: faf check --unlock to remove protection'));
+        } else {
+          console.log(chalk.gray('   All slots already filled or no new data extracted'));
+        }
       }
     } else if (filledCount > 0) {
       // Show hint to apply

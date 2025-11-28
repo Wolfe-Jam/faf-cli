@@ -110,14 +110,14 @@ tags:
     - open-source
   user_defined: null
 human_context:
-  who: all Developers
-  what: 🩵⚡️ CLI for .faf | Project DNA ✨ for true AI context for ANY AI (incl.
-    Claude, Gemini, Codex, Cursor et al.) • Join 3000+ developers • 100% FREE •
-    Open Source • If helpful, a ⭐ is appreciated!
-  why: To from the community
-  where: Web platform
-  when: 'release": "ts-node scripts/prepare-release'
-  how: Use `faf bi-sync` for CLAUDE
+  who: Developers using AI assistants (Claude, Gemini, Cursor, etc.)
+  what: Universal CLI for FAF (Foundational AI-context Format) - Terminal-based
+    tooling for creating, scoring, and improving project.faf files that provide
+    persistent AI context
+  why: AI needs persistent project context to work at its best.
+  where: npm, Homebrew, macOS, Linux
+  when: IANA-registered standard (production ready)
+  how: npm install -g faf-cli
   additional_context: null
   context_score: 0
   total_prd_score: 89
