@@ -44,6 +44,8 @@ import { gitCommand } from './commands/git';
 import { tafCommand } from './commands/taf';
 import { migrateCommand } from './commands/migrate';
 import { renameCommand } from './commands/rename';
+import { readmeCommand } from './commands/readme';
+import { humanCommand, humanSetCommand } from './commands/human';
 import { setColorOptions, type ColorScheme } from './utils/color-utils';
 import { generateFAFHeader, generateHelpHeader, FAF_COLORS } from './utils/championship-style';
 import { analytics, trackCommand, trackError, withPerformanceTracking } from './telemetry/analytics';
@@ -189,6 +191,76 @@ Examples:
     console.log('');
     return initFafFile(directory, options);
   }));
+
+// 📖 faf readme - Extract 6 Ws from README intelligently
+program
+  .command('readme [directory]')
+  .description('📖 Extract 6 Ws (Who/What/Why/Where/When/How) from README into human_context')
+  .option('-a, --apply', 'Apply extracted context to .faf file')
+  .option('--force', 'Overwrite existing human_context values')
+  .option('-f, --file <path>', 'Specify README file path')
+  .option('-q, --quiet', 'Minimal output, no source annotations')
+  .addHelpText('after', `
+Examples:
+  $ faf readme                   # Extract and preview 6 Ws from README
+  $ faf readme --apply           # Extract and apply to .faf human_context
+  $ faf readme --apply --force   # Replace existing human_context values
+  $ faf readme --file ABOUT.md   # Use a different file
+  $ faf readme ./my-project      # Analyze different directory
+
+📖 What faf readme does:
+  1. Reads your README.md intelligently
+  2. Extracts the 6 Ws for human_context:
+     - WHO: Target audience, users
+     - WHAT: Project description, purpose
+     - WHY: Problem solved, motivation
+     - WHERE: Platform, environment
+     - WHEN: Version, release status
+     - HOW: Installation, getting started
+  3. Shows confidence score for each extraction
+  4. Optionally applies to .faf (--apply)
+
+💡 Tip: Run 'faf init' first, then 'faf readme --apply' to boost your score!`)
+  .action(withAnalyticsTracking('readme', (directory, options) => readmeCommand(directory, options)));
+
+// 🧡 faf human - Interactive Human Context Collection
+program
+  .command('human [directory]')
+  .description('🧡 Fill human_context interactively - one question at a time')
+  .option('-a, --all', 'Ask all questions (even if already filled)')
+  .addHelpText('after', `
+Examples:
+  $ faf human                  # Fill empty human_context fields (interactive)
+  $ faf human --all            # Re-answer all 6 Ws (interactive)
+  $ faf human set why "Speed"  # Set single field (non-interactive)
+
+🧡 The 6 Ws - Human Context:
+  - WHO is this for?
+  - WHAT does it do?
+  - WHY does it exist?
+  - WHERE does it run?
+  - WHEN was it made?
+  - HOW do you use it?
+
+Interactive mode: Press Enter to skip any question.
+Non-interactive: Use 'faf human set <field> "<value>"'`)
+  .action(withAnalyticsTracking('human', (directory, options) => humanCommand(directory, options)));
+
+// 🧡 faf human set - Set single human_context field (non-interactive)
+program
+  .command('human-set <field> <value> [directory]')
+  .description('🧡 Set a single human_context field (non-interactive)')
+  .addHelpText('after', `
+Examples:
+  $ faf human-set who "xAI developers"
+  $ faf human-set what "6.4KB WASM scorer"
+  $ faf human-set why "32x faster than Rust"
+  $ faf human-set where "Browser, Edge, WASM"
+  $ faf human-set when "Thanksgiving 2025"
+  $ faf human-set how "zig build"
+
+Valid fields: who, what, why, where, when, how`)
+  .action(withAnalyticsTracking('human-set', (field, value, directory) => humanSetCommand(field, value, directory)));
 
 // 🔄 faf migrate - Migrate .faf to project.faf (v1.2.0)
 program
