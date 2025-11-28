@@ -40,6 +40,9 @@ export interface ContextSlots {
   server: string;
   connection: string;
   runtime: string;
+  // Display slots (for stack display compatibility)
+  frontend: string;
+  build: string;
   
   // Human context slots (16-21)
   targetUser: string;
@@ -1327,11 +1330,27 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   
   '*.zig': {
     frameworks: ['Zig'],
-    slots: { 
+    slots: {
       mainLanguage: 'Zig'
     },
     priority: 15,
     intelligence: 'low'
+  },
+
+  'build.zig': {
+    frameworks: ['Zig'],
+    slots: {
+      // camelCase slots (standard TURBO-CAT)
+      packageManager: 'Zig Package Manager',
+      mainLanguage: 'Zig',
+      buildTool: 'zig build',
+      framework: 'Zig',
+      // snake_case slots (template compatibility)
+      frontend: 'Zig',
+      build: 'zig build'
+    },
+    priority: 35,
+    intelligence: 'ultra-high'
   },
 
   // ============================================

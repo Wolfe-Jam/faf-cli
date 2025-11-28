@@ -203,6 +203,14 @@ export const UNIQUE_SIGNATURES: Record<string, FrameworkSignature> = {
     ecosystem: 'cargo',
     language: 'Rust'
   },
+
+  // Zig
+  'build.zig': {
+    framework: 'Zig',
+    confidence: 100,
+    ecosystem: 'zig package manager',
+    language: 'Zig'
+  },
   
   // Phoenix/Elixir
   'mix.exs': {

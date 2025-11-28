@@ -596,7 +596,30 @@ export async function detectProjectType(
     return pythonType;
   }
 
-  // PHASE 3: FILE-BASED DETECTION (when package.json unavailable or inconclusive)
+  // PHASE 3.5: NATIVE LANGUAGE DETECTION (Zig, Rust, Go)
+  // ============================================================================
+  // These should take priority over file-based detection because they have
+  // definitive build files that identify the project type unambiguously
+
+  // Zig detection - build.zig is definitive
+  const buildZigPath = path.join(projectDir, "build.zig");
+  if (await fileExists(buildZigPath)) {
+    return "zig";
+  }
+
+  // Rust detection - Cargo.toml is definitive
+  const cargoTomlPath = path.join(projectDir, "Cargo.toml");
+  if (await fileExists(cargoTomlPath)) {
+    return "rust";
+  }
+
+  // Go detection - go.mod is definitive
+  const goModPath = path.join(projectDir, "go.mod");
+  if (await fileExists(goModPath)) {
+    return "go";
+  }
+
+  // PHASE 4: FILE-BASED DETECTION (when package.json unavailable or inconclusive)
   // ============================================================================
   const ignorePatterns = await parseFafIgnore(projectDir);
 

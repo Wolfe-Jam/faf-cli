@@ -69,11 +69,17 @@ export class FabFormatsEngine {
 
   /**
    * Find all format files (no content reading yet!)
+   *
+   * MONOREPO SUPPORT: If the project directory has its own .git, we only scan
+   * that directory (not parent dirs) to avoid polluting with parent project configs.
    */
   private async findAllFormats(projectDir: string): Promise<string[]> {
     const formats: string[] = [];
 
-    // Upward traversal for root configs
+    // Check if starting directory has its own .git - if so, don't traverse up
+    const hasOwnGit = await this.hasGitDirectory(projectDir);
+
+    // Upward traversal for root configs (but respect monorepo boundaries)
     let currentDir = projectDir;
     for (let i = 0; i < 10; i++) {
       try {
@@ -86,6 +92,11 @@ export class FabFormatsEngine {
           }
         }
 
+        // MONOREPO BOUNDARY: If project has its own .git, stop after first dir
+        if (hasOwnGit && i === 0) {
+          break; // Don't pollute with parent project configs
+        }
+
         const parentDir = path.dirname(currentDir);
         if (parentDir === currentDir) break;
         currentDir = parentDir;
@@ -95,6 +106,19 @@ export class FabFormatsEngine {
     }
 
     return formats;
+  }
+
+  /**
+   * Check if directory has a .git folder (indicates project boundary)
+   */
+  private async hasGitDirectory(dir: string): Promise<boolean> {
+    try {
+      const gitPath = path.join(dir, '.git');
+      const stats = await fs.stat(gitPath);
+      return stats.isDirectory();
+    } catch {
+      return false;
+    }
   }
 
   private isKnownExtension(fileName: string): boolean {

@@ -136,12 +136,16 @@ export class FabFormatsProcessor {
       'go.mod',
       'pom.xml',
       'build.gradle',
+      'build.zig',  // Zig build file
       'Gemfile',
       'composer.json',
       '.faf'
     ];
 
-    // Check project directory and up to 3 levels up
+    // MONOREPO SUPPORT: Check if starting directory has its own .git
+    const hasOwnGit = await this.hasGitDirectory(projectDir);
+
+    // Check project directory and up to 3 levels up (unless in monorepo)
     let currentDir = projectDir;
     for (let level = 0; level < 4; level++) {
       if (visited.has(currentDir)) break;
@@ -163,6 +167,11 @@ export class FabFormatsProcessor {
           }
         }
 
+        // MONOREPO BOUNDARY: If project has its own .git, stop after first dir
+        if (hasOwnGit && level === 0) {
+          break; // Don't pollute with parent project configs
+        }
+
         // Move up one directory
         const parentDir = path.dirname(currentDir);
         if (parentDir === currentDir) break;
@@ -174,6 +183,19 @@ export class FabFormatsProcessor {
     }
 
     return discovered;
+  }
+
+  /**
+   * Check if directory has a .git folder (indicates project boundary)
+   */
+  private async hasGitDirectory(dir: string): Promise<boolean> {
+    try {
+      const gitPath = path.join(dir, '.git');
+      const stats = await fs.stat(gitPath);
+      return stats.isDirectory();
+    } catch {
+      return false;
+    }
   }
 
   /**
@@ -264,6 +286,8 @@ export class FabFormatsProcessor {
         return this.processCargoToml(fileName, content);
       } else if (fileName === 'go.mod') {
         return this.processGoMod(fileName, content);
+      } else if (fileName === 'build.zig') {
+        return this.processBuildZig(fileName, content);
       } else if (fileName === 'pom.xml') {
         return this.processMavenPom(fileName, content);
       } else if (fileName === 'build.gradle' || fileName === 'build.gradle.kts') {
@@ -298,6 +322,7 @@ export class FabFormatsProcessor {
     if (fileName === 'requirements.txt') return 'package-manager-python';
     if (fileName === 'pyproject.toml') return 'package-manager-python-modern';
     if (fileName === 'go.mod') return 'package-manager-go';
+    if (fileName === 'build.zig') return 'package-manager-zig';
     if (fileName === 'pom.xml') return 'package-manager-java';
     if (fileName === 'build.gradle') return 'package-manager-gradle';
     if (fileName === 'Gemfile') return 'package-manager-ruby';
@@ -899,6 +924,64 @@ export class FabFormatsProcessor {
       detectedFramework: this.context.framework,
       metadata,
       category: 'package-manager-go'
+    };
+  }
+
+  /**
+   * Process build.zig
+   */
+  private async processBuildZig(fileName: string, content: string): Promise<ProcessedFileResult> {
+    let intelligenceBonus = 70;
+    const metadata: Record<string, any> = {};
+
+    if (!this.context.mainLanguage) {
+      this.context.mainLanguage = 'Zig';
+    }
+
+    if (!this.context.packageManager) {
+      this.context.packageManager = 'Zig Package Manager';
+    }
+
+    if (!this.context.buildTool) {
+      this.context.buildTool = 'zig build';
+    }
+
+    // Extract project name from .name field
+    const nameMatch = content.match(/\.name\s*=\s*"([^"]+)"/);
+    if (nameMatch && !this.context.projectName) {
+      this.context.projectName = nameMatch[1];
+      intelligenceBonus += 10;
+    }
+
+    // Check for WASM target
+    if (!this.context.framework) {
+      if (content.includes('wasm32') || content.includes('.wasm')) {
+        this.context.framework = 'Zig WASM';
+        metadata.runtime = 'WASM32';
+        intelligenceBonus += 25;
+      } else if (content.includes('addExecutable')) {
+        this.context.framework = 'Zig CLI';
+        intelligenceBonus += 15;
+      } else if (content.includes('addStaticLibrary') || content.includes('addSharedLibrary')) {
+        this.context.framework = 'Zig Library';
+        intelligenceBonus += 15;
+      }
+    }
+
+    // Check for test step
+    if (content.includes('addTest')) {
+      metadata.hasTests = true;
+      intelligenceBonus += 10;
+    }
+
+    return {
+      fileName,
+      fileType: 'build.zig',
+      intelligenceBonus,
+      detectedLanguage: 'Zig',
+      detectedFramework: this.context.framework,
+      metadata,
+      category: 'package-manager-zig'
     };
   }
 

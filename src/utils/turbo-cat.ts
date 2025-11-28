@@ -92,16 +92,23 @@ export class TurboCat {
 
   /**
    * PHASE 1A: Use fs.readdir for known config files (optimal for specific files)
+   *
+   * MONOREPO SUPPORT: If the project directory has its own .git, we only scan
+   * that directory (not parent dirs) to avoid polluting with parent project configs.
    */
   private async scanConfigFiles(projectDir: string, results: FormatDiscoveryResult[]): Promise<void> {
     let currentDir = path.resolve(projectDir);
 
+    // Check if starting directory has its own .git - if so, don't traverse up
+    const hasOwnGit = await this.hasGitDirectory(projectDir);
+
     // Check up to 10 parent directories (same as .faf search)
+    // But stop at first iteration if project has its own .git (monorepo boundary)
     for (let i = 0; i < 10; i++) {
       try {
         // Fast directory scan using fs.readdir (optimal for specific files)
         const files = await fs.readdir(currentDir);
-        
+
         // Check each file against known config files
         for (const file of files) {
           const formatInfo = this.knowledgeBase[file];
@@ -133,6 +140,11 @@ export class TurboCat {
           }
         }
 
+        // MONOREPO BOUNDARY: If project has its own .git, stop after first dir
+        if (hasOwnGit && i === 0) {
+          break; // Don't pollute with parent project configs
+        }
+
         // Move to parent directory (proven .faf technique)
         const parentDir = path.dirname(currentDir);
         if (parentDir === currentDir) {
@@ -147,6 +159,19 @@ export class TurboCat {
         }
         currentDir = parentDir;
       }
+    }
+  }
+
+  /**
+   * Check if directory has a .git folder (indicates project boundary)
+   */
+  private async hasGitDirectory(dir: string): Promise<boolean> {
+    try {
+      const gitPath = path.join(dir, '.git');
+      const stats = await fs.stat(gitPath);
+      return stats.isDirectory();
+    } catch {
+      return false;
     }
   }
 
@@ -369,12 +394,17 @@ export class TurboCat {
       });
     });
 
-    // Generate slot fill recommendations
+    // Generate slot fill recommendations with priority tracking
+    // Higher priority formats should ALWAYS win, regardless of order
     const slotFillRecommendations: Record<string, string> = {};
+    const slotPriorities: Record<string, number> = {};
     confirmedFormats.forEach(format => {
       Object.entries(format.slotMappings).forEach(([slot, value]) => {
-        if (!slotFillRecommendations[slot] || format.priority > 20) {
+        const currentPriority = slotPriorities[slot] || 0;
+        // Only overwrite if this format has higher priority
+        if (!slotFillRecommendations[slot] || format.priority > currentPriority) {
           slotFillRecommendations[slot] = value;
+          slotPriorities[slot] = format.priority;
         }
       });
     });
