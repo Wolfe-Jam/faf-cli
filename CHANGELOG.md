@@ -5,6 +5,43 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.0] - 2025-11-28
+
+### Added
+
+- **`faf readme` - Smart README Extraction** - Auto-fill human_context from README.md
+  - Intelligently extracts the 6 Ws (WHO, WHAT, WHY, WHERE, WHEN, HOW)
+  - Pattern matching for common README structures (taglines, TL;DR, Quick Start)
+  - `--apply` to fill empty slots, `--force` to overwrite existing
+  - Shows confidence scores and extraction sources
+  - Tested results: 33% → 75%+ score boosts
+
+- **`faf human` - Interactive Human Context** - Fill one W at a time (terminal)
+  - Asks each question sequentially
+  - Press Enter to skip, `--all` to re-answer all fields
+  - Perfect for terminal users who want guided input
+
+- **`faf human-set` - Non-Interactive Human Context** - Works in Claude Code
+  - `faf human-set <field> "<value>"` - set one field at a time
+  - Valid fields: who, what, why, where, when, how
+  - Essential for AI assistants and automation scripts
+
+### Human Context Workflow
+
+```bash
+# Step 1: Initialize
+faf init                           # Creates .faf with ~50% score
+
+# Step 2: Auto-extract from README
+faf readme --apply --force         # +25-35 points (auto)
+
+# Step 3: Fill any gaps manually
+faf human-set why "32x faster"     # Non-interactive (Claude Code)
+faf human                          # Interactive (terminal)
+
+# Result: 75-85% score from human_context alone
+```
+
 ## [3.1.6] - 2025-11-16
 
 ### Fixed
