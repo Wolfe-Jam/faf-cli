@@ -78,7 +78,8 @@ describe('Init Command', () => {
 
     await initFafFile(testDir, { force: false, template: 'auto' });
 
-    const fafPath = path.join(testDir, '.faf');
+    // v1.2.0: init creates project.faf (standard) not .faf (legacy)
+    const fafPath = path.join(testDir, 'project.faf');
     const fafExists = await fs.access(fafPath).then(() => true).catch(() => false);
 
     expect(fafExists).toBe(true);
@@ -91,15 +92,15 @@ describe('Init Command', () => {
     expect(fafContent).toContain('TypeScript');
   });
 
-  it('should force overwrite existing .faf file', async () => {
+  it('should force overwrite existing project.faf file', async () => {
     await fs.mkdir(testDir, { recursive: true });
-    
-    // Create existing .faf file
+
+    // v1.2.0: Create existing project.faf file (standard)
     const existingFaf = `faf_version: 2.0.0
 project:
   name: "old-project"
 `;
-    const fafPath = path.join(testDir, '.faf');
+    const fafPath = path.join(testDir, 'project.faf');
     await fs.writeFile(fafPath, existingFaf, 'utf-8');
 
     // Create minimal project structure
