@@ -1,5 +1,5 @@
 /**
- * 🏆 faf version - Show version with MK2 Engine status
+ * 🏆 faf version - Show version with MK3 Engine status
  */
 
 import { chalk } from "../fix-once/colors";
@@ -14,7 +14,7 @@ export async function versionCommand() {
   console.log(FAF_COLORS.fafCyan(`══════════════════════════`));
   console.log();
   console.log(FAF_COLORS.fafOrange(`   Version: ${version}`));
-  console.log(FAF_COLORS.fafGreen(`   Engine: MK2 ⚡️`));
+  console.log(FAF_COLORS.fafGreen(`   Engine: MK3 ⚡️`));
   console.log(FAF_COLORS.fafCyan(`   TURBO-CAT: ACTIVE 😽`));
   console.log();
   console.log(chalk.gray(`   154 Validated Formats`));

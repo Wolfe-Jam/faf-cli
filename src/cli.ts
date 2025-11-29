@@ -424,10 +424,10 @@ Examples:
   $ faf formats --export         # Export as JSON`)
   .action(withAnalyticsTracking('formats', (directory, options) => formatsCommand(directory, options)));
 
-// 🏆 faf version - Show version with MK2 status
+// 🏆 faf version - Show version with MK3 status
 program
   .command('version')
-  .description('🏆 Show FAF version with MK2 Engine and TURBO-CAT status')
+  .description('🏆 Show FAF version with MK3 Engine and TURBO-CAT status')
   .action(withAnalyticsTracking('version', () => versionCommand()));
 
 // 🧡 faf trust - Consolidated Trust Dashboard (The Emotional Core)
