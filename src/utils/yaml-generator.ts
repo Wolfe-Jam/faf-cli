@@ -302,7 +302,7 @@ export function generateFafContent(projectData: {
       backend: projectData.backend || 'None',
       runtime: projectData.server || 'None',
       database: projectData.database || 'None',
-      build: projectData.buildTool || 'None',
+      build: projectData.buildTool || (projectData.projectType === 'static-html' || projectData.projectType === 'landing-page' ? 'Direct HTML (no build step)' : 'None'),
       package_manager: projectData.packageManager || 'npm',
       api_type: projectData.apiType || 'REST API',
       hosting: projectData.hosting || 'None',

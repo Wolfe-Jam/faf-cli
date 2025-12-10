@@ -433,7 +433,7 @@ export class FafCompiler {
       if (!ast.stack.frontend) ast.stack.frontend = 'HTML/CSS/JavaScript';
       if (!ast.stack.runtime) ast.stack.runtime = 'Browser';
       if (!ast.stack.hosting) ast.stack.hosting = 'Static Hosting';
-      if (!ast.stack.build) ast.stack.build = 'None';
+      if (!ast.stack.build) ast.stack.build = 'Direct HTML (no build step)';
 
       this.addSlot(slots, 'stack.frontend', ast.stack.frontend, 'string', 'discovered', 1);
       this.addSlot(slots, 'stack.runtime', ast.stack.runtime, 'string', 'discovered', 1);

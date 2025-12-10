@@ -415,7 +415,7 @@ export async function generateFafFromProject(
     database: contextSlotsFilled['database'] || 'None',
     connection: 'None',
     hosting: contextSlotsFilled['hosting'] || 'None',
-    buildTool: contextSlotsFilled['build_tool'] || 'None',
+    buildTool: contextSlotsFilled['build_tool'] || undefined,  // Let yaml-generator handle static-html default
     packageManager: contextSlotsFilled['package_manager'] || 'npm',
     cicd: contextSlotsFilled['cicd'] || 'None',
     fafScore,
