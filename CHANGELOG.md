@@ -5,6 +5,57 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.4] - 2025-12-17
+
+### TYPE_DEFINITIONS - Project Type-Aware Scoring
+
+**The scoring system now understands project types** - CLI projects no longer penalized for missing frontend/backend slots.
+
+### Added
+
+- **TYPE_DEFINITIONS** - Single source of truth for 94 project types
+  - **21-slot system**: Project(3) + Frontend(4) + Backend(5) + Universal(3) + Human(6)
+  - Types define which slot categories COUNT for scoring
+  - CLI type: 9 slots (project + human) - now scores 100% without hosting/cicd
+  - Fullstack type: 21 slots (all categories)
+  - Monorepos as containers: all 21 slots
+
+- **38 Type Aliases** - Intuitive shorthand mappings
+  - `k8s` → `kubernetes`, `api` → `backend-api`, `rn` → `react-native`
+  - `flask` → `python-api`, `turbo` → `turborepo`, and 32 more
+
+- **slot_ignore Escape Hatch** - Override type defaults per-project
+  - Array format: `slot_ignore: [stack.hosting, stack.cicd]`
+  - String format: `slot_ignore: "hosting, cicd"`
+  - Shorthand: `hosting` expands to `stack.hosting`
+
+- **WJTTC MCP Certification Standard** - 7-tier certification system for MCP servers
+  - Tier 1: Protocol Compliance (MCP spec 2025-11-25)
+  - Tier 2: Capability Negotiation
+  - Tier 3: Tool Integrity
+  - Tier 4: Resource Management
+  - Tier 5: Security Validation
+  - Tier 6: Performance Benchmarks (<50ms operations)
+  - Tier 7: Integration Readiness
+
+### Slot Categories by Type
+
+| Type Category | Slots | Example Types |
+|---------------|-------|---------------|
+| 9-slot | Project + Human | cli, library, npm-package, terraform, k8s |
+| 13-slot | + Frontend | mobile, react-native, flutter, desktop |
+| 14-slot | + Backend | mcp-server, data-science, ml-model |
+| 16-slot | + Universal | frontend, react, vue, svelte |
+| 17-slot | Backend + Universal | backend-api, node-api, graphql |
+| 21-slot | All | fullstack, nextjs, monorepo, django |
+
+### Impact
+
+- **xai-faf-cli**: 83% → 100% (CLI type counts 9/9 slots)
+- **claude-faf-mcp** v3.3.6: CHAMPIONSHIP GRADE (all 7 tiers PASS)
+- 125 WJTTC tests validating type system
+- Backwards compatible - existing .faf files work unchanged
+
 ## [3.2.0] - 2025-11-28
 
 ### Added

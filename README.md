@@ -199,6 +199,68 @@ Works with Claude Code, OpenAI Codex CLI, Gemini CLI, Cursor, Warp, Copilot, Win
 
 ---
 
+## Project Types (94 Supported)
+
+FAF now understands your project type and scores accordingly. CLI projects don't need frontend slots. Fullstack projects need everything.
+
+### How It Works
+
+Set your project type in `.faf`:
+```yaml
+project:
+  type: cli          # 9 slots (project + human)
+  type: frontend     # 16 slots (+ frontend + universal)
+  type: backend-api  # 17 slots (+ backend + universal)
+  type: fullstack    # 21 slots (all categories)
+```
+
+### Supported Types
+
+**9-Slot Types** (Project + Human):
+`cli` `library` `npm-package` `pip-package` `crate` `gem` `chrome-extension` `firefox-extension` `safari-extension` `terraform` `kubernetes` `docker` `ansible` `github-action` `embedded` `arduino` `wasm` `jupyter` `smart-contract` `e2e-tests`
+
+**13-Slot Types** (+ Frontend):
+`mobile` `react-native` `flutter` `ios` `android` `desktop` `electron` `tauri` `game` `unity` `dapp`
+
+**14-Slot Types** (+ Backend):
+`mcp-server` `data-science` `ml-model` `data-pipeline` `n8n-workflow` `python-app`
+
+**16-Slot Types** (+ Frontend + Universal):
+`frontend` `svelte` `react` `vue` `angular` `astro`
+
+**17-Slot Types** (+ Backend + Universal):
+`backend-api` `node-api` `python-api` `go-api` `rust-api` `graphql` `microservice` `strapi`
+
+**21-Slot Types** (All Categories):
+`fullstack` `nextjs` `remix` `t3` `mern` `mean` `django` `rails` `laravel` `wordpress` `monorepo` `turborepo` `nx` `lerna` `pnpm-workspace` `yarn-workspace`
+
+### Type Aliases (38 shortcuts)
+
+Use intuitive names - FAF maps them automatically:
+
+| Alias | Maps To | Alias | Maps To |
+|-------|---------|-------|---------|
+| `api` | backend-api | `k8s` | kubernetes |
+| `cli-tool` | cli | `rn` | react-native |
+| `flask` | python-api | `expo` | react-native |
+| `fastapi` | python-api | `turbo` | turborepo |
+| `express` | node-api | `next` | nextjs |
+| `tf` | terraform | `gha` | github-action |
+
+### slot_ignore Escape Hatch
+
+Override type defaults for your specific project:
+
+```yaml
+project:
+  type: cli
+slot_ignore: [stack.hosting, stack.cicd]  # These won't count
+```
+
+Formats: array `[a, b]`, string `"a, b"`, or shorthand `hosting` → `stack.hosting`
+
+---
+
 ## Documentation
 
 - **[CHANGELOG](./CHANGELOG.md)** - Version history and release notes
