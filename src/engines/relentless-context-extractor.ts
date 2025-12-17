@@ -192,11 +192,11 @@ export class RelentlessContextExtractor {
       };
     }
 
-    // DEFAULT - We NEVER give up!
+    // HONEST SCORING: 0% is a valid score - no fake placeholders
     return {
-      value: 'Development teams',
-      confidence: 'DEFAULT',
-      source: 'Standard assumption',
+      value: '',
+      confidence: 'MISSING',
+      source: 'No audience found',
       needsUserInput: true
     };
   }
@@ -263,10 +263,11 @@ export class RelentlessContextExtractor {
       };
     }
 
+    // HONEST SCORING: 0% is a valid score - no fake placeholders
     return {
-      value: 'Software development solution',
-      confidence: 'DEFAULT',
-      source: 'Standard assumption',
+      value: '',
+      confidence: 'MISSING',
+      source: 'No problem statement found',
       needsUserInput: true
     };
   }
@@ -322,11 +323,11 @@ export class RelentlessContextExtractor {
       }
     }
 
-    // TIER 3: INFERRED - From what
+    // HONEST SCORING: 0% is a valid score - no fake placeholders
     return {
-      value: 'Improve development efficiency',
-      confidence: 'INFERRED',
-      source: 'Standard goal',
+      value: '',
+      confidence: 'MISSING',
+      source: 'No mission/purpose found',
       needsUserInput: true
     };
   }
@@ -375,10 +376,11 @@ export class RelentlessContextExtractor {
       }
     }
 
+    // HONEST SCORING: 0% is a valid score - no fake placeholders
     return {
-      value: 'Cloud platform',
-      confidence: 'DEFAULT',
-      source: 'Standard deployment',
+      value: '',
+      confidence: 'MISSING',
+      source: 'No deployment target found',
       needsUserInput: true
     };
   }
@@ -417,10 +419,11 @@ export class RelentlessContextExtractor {
       }
     }
 
+    // HONEST SCORING: 0% is a valid score - no fake placeholders
     return {
-      value: 'Ongoing development',
-      confidence: 'DEFAULT',
-      source: 'Standard timeline',
+      value: '',
+      confidence: 'MISSING',
+      source: 'No timeline found',
       needsUserInput: true
     };
   }
@@ -462,10 +465,11 @@ export class RelentlessContextExtractor {
       };
     }
 
+    // HONEST SCORING: 0% is a valid score - no fake placeholders
     return {
-      value: 'Modern development practices',
-      confidence: 'DEFAULT',
-      source: 'Standard approach',
+      value: '',
+      confidence: 'MISSING',
+      source: 'No approach found',
       needsUserInput: true
     };
   }

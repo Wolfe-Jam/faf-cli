@@ -13,6 +13,7 @@ import { scoreFafFile } from './commands/score';
 import { showFafScoreCard } from './commands/show';
 import { editFafFile } from './commands/edit-helper';
 import { autoCommand } from './commands/auto';
+import { yoloCommand } from './commands/yolo';
 import { formatsCommand } from './commands/formats';
 import { versionCommand } from './commands/version';
 import { syncFafFile } from './commands/sync';
@@ -151,6 +152,27 @@ Examples:
 
 From 0% to 99% in one command. No faffing about!`)
   .action(withAnalyticsTracking('auto', autoCommand));
+
+// 🚀 faf yolo - Claude Power User Mode
+program
+  .command('yolo [directory]')
+  .description('🚀 Claude Power User Mode - Maximum extraction, no prompts, speed run!')
+  .option('-v, --verbose', 'Show verbose output')
+  .addHelpText('after', `
+Examples:
+  $ faf yolo                      # YOLO the current directory
+  $ faf yolo ./my-project         # YOLO a specific project
+  $ faf yolo -v                   # Verbose output
+
+🏎️ What FAF YOLO Does:
+  - Force creates fresh .faf (no prompts!)
+  - TURBO-CAT format discovery
+  - Aggressive human context extraction (accepts INFERRED!)
+  - Bi-syncs CLAUDE.md
+  - Speed optimized output
+
+For Claude power users who know what they want!`)
+  .action(withAnalyticsTracking('yolo', yoloCommand));
 
 // Add all the command definitions back
 program

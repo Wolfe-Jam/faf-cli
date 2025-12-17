@@ -15,6 +15,7 @@ import { showFafScoreCard } from "./show";
 import yamlUtils from "../fix-once/yaml";
 import { FafCompiler } from "../compiler/faf-compiler";
 import { TurboCat } from "../utils/turbo-cat";
+import { RelentlessContextExtractor } from "../engines/relentless-context-extractor";
 
 interface AutoOptions {
   force?: boolean;
@@ -247,6 +248,57 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
     } catch (error) {
       console.log(chalk.yellow("⚠️  TURBO-CAT analysis skipped (non-critical)"));
       console.log(chalk.gray(`   ${error instanceof Error ? error.message : String(error)}`));
+    }
+
+    // Step 2.6: RELENTLESS CONTEXT EXTRACTION (Human W's from README/CLAUDE.md)
+    console.log(chalk.yellow("\n📖 Extracting human context from README/CLAUDE.md..."));
+    try {
+      const extractor = new RelentlessContextExtractor();
+      const humanContext = await extractor.extractFromProject(targetDir);
+
+      // Apply extracted human context to .faf file
+      const fafData = await fs.readFile(fafPath!, 'utf-8');
+      const parsed = yamlUtils.parse(fafData);
+
+      // Ensure human_context section exists
+      if (!parsed.human_context) {
+        parsed.human_context = {};
+      }
+
+      // Fill in W's only if they're missing/null and we have confident extractions
+      let filledCount = 0;
+      const wFields = ['who', 'what', 'why', 'where', 'when', 'how'] as const;
+
+      for (const field of wFields) {
+        const extraction = humanContext[field];
+        const currentValue = parsed.human_context[field];
+
+        // Only fill if: current is empty AND extraction is confident
+        if ((!currentValue || currentValue === 'null' || currentValue === null) &&
+            extraction.value &&
+            !extraction.needsUserInput &&
+            (extraction.confidence === 'CERTAIN' || extraction.confidence === 'PROBABLE')) {
+          parsed.human_context[field] = extraction.value;
+          filledCount++;
+        }
+      }
+
+      if (filledCount > 0) {
+        await fs.writeFile(fafPath!, yamlUtils.stringify(parsed), 'utf-8');
+        console.log(chalk.green(`✅ Extracted ${filledCount} human context fields from README/CLAUDE.md`));
+      } else {
+        console.log(chalk.gray("   No additional human context found (add README.md for better results)"));
+      }
+
+      // Show TODOs for missing context
+      if (humanContext.todos && humanContext.todos.length > 0) {
+        const highPriorityTodos = humanContext.todos.filter(t => t.priority === 'CRITICAL' || t.priority === 'IMPORTANT');
+        if (highPriorityTodos.length > 0) {
+          console.log(chalk.cyan(`   💡 ${highPriorityTodos.length} human context fields can boost your score`));
+        }
+      }
+    } catch (error) {
+      console.log(chalk.gray("   Human context extraction skipped (non-critical)"));
     }
 
     // Step 3: Create/Update CLAUDE.md via bi-sync

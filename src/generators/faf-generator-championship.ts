@@ -141,7 +141,8 @@ export async function generateFafFromProject(
   }
 
   // START ENHANCED SCORING - Championship grade with FAB-FORMATS!
-  let enhancedScore = 10; // Base score for having a project
+  // HONEST SCORING: 0% is a valid score - no base points for merely existing!
+  let enhancedScore = 0;
 
   // Map all discovered slots (21-slot system)
   const contextSlotsFilled: Record<string, any> = {};
@@ -438,33 +439,35 @@ export async function generateFafFromProject(
   }
 
   // Extract the stack for display
+  // HONEST SCORING: No fake defaults - 0% is a valid score!
   const stack = {
-    frontend: contextSlotsFilled['framework'] || packageData.dependencies?.react ? 'React' : undefined,
+    frontend: contextSlotsFilled['framework'] || (packageData.dependencies?.react ? 'React' : undefined),
     backend: contextSlotsFilled['backend'],
     database: contextSlotsFilled['database'],
     build: contextSlotsFilled['build_tool'],
-    package_manager: contextSlotsFilled['package_manager'] || 'npm',
+    package_manager: contextSlotsFilled['package_manager'] || undefined,
     hosting: contextSlotsFilled['hosting'],
   };
 
   // Build the data structure for generateFafContent
+  // HONEST SCORING: No fake defaults - 0% is a valid score!
   const fafData = {
     projectName: contextSlotsFilled['project_name'] || path.basename(projectRoot),
-    projectGoal: contextSlotsFilled['project_goal'] || 'Build amazing software',
-    mainLanguage: contextSlotsFilled['main_language'] || 'JavaScript',
-    framework: contextSlotsFilled['framework'] || 'None',
+    projectGoal: contextSlotsFilled['project_goal'] || undefined,
+    mainLanguage: contextSlotsFilled['main_language'] || undefined,
+    framework: contextSlotsFilled['framework'] || undefined,
     cssFramework: contextSlotsFilled['css_framework'] || undefined,
     uiLibrary: contextSlotsFilled['ui_library'] || undefined,
     stateManagement: undefined,
-    backend: contextSlotsFilled['backend'] || 'None',
-    apiType: contextSlotsFilled['api_type'] || 'REST',
-    server: contextSlotsFilled['runtime'] || contextSlotsFilled['server'] || 'None',
-    database: contextSlotsFilled['database'] || 'None',
-    connection: 'None',
-    hosting: contextSlotsFilled['hosting'] || 'None',
-    buildTool: contextSlotsFilled['build_tool'] || undefined,  // Let yaml-generator handle static-html default
-    packageManager: contextSlotsFilled['package_manager'] || 'npm',
-    cicd: contextSlotsFilled['cicd'] || 'None',
+    backend: contextSlotsFilled['backend'] || undefined,
+    apiType: contextSlotsFilled['api_type'] || undefined,
+    server: contextSlotsFilled['runtime'] || contextSlotsFilled['server'] || undefined,
+    database: contextSlotsFilled['database'] || undefined,
+    connection: undefined,
+    hosting: contextSlotsFilled['hosting'] || undefined,
+    buildTool: contextSlotsFilled['build_tool'] || undefined,
+    packageManager: contextSlotsFilled['package_manager'] || undefined,
+    cicd: contextSlotsFilled['cicd'] || undefined,
     fafScore,
     slotBasedPercentage: Math.round(((technicalFilled + humanFilled) / 21) * 100),
     projectType,  // Pass project type for compiler slot-filling patterns

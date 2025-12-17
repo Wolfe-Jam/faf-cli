@@ -158,38 +158,26 @@ export async function initFafFile(
     // Award technical credit for successful initialization
     await autoAwardCredit('init_success', outputPath);
 
-    // REVOLUTIONARY: Score CLAUDE.md ONLY for Birth DNA!
-    // This is the TRUE starting point - what AI sees initially
+    // BIRTH DNA: The actual first score - honest starting point
+    // faf init = birth certificate with first score (even 0%)
+    // faf auto = machine fills slots to ~80%
+    // Human W's = final push to 100%
     console.log();
-    console.log(FAF_COLORS.fafCyan(`${FAF_ICONS.magic_wand} Analyzing CLAUDE.md for Birth DNA...`));
+    console.log(FAF_COLORS.fafCyan(`${FAF_ICONS.magic_wand} Calculating Birth DNA (first score)...`));
 
+    // Calculate ACTUAL score from the generated .faf - this IS the birth DNA
+    const fafData = parseYAML(fafContent);
+    const compiler = new FafCompiler();
+    const scoreResult = await compiler.compile(outputPath);
+    const birthDNA = fafData.faf_score ? parseInt(fafData.faf_score.replace('%', '')) : Math.round(scoreResult.score || 0);
+    const currentScore = birthDNA; // At init, current = birth
+
+    // Check if CLAUDE.md exists for tracking purposes
     const claudeMdPath = path.join(projectRoot, 'CLAUDE.md');
-    let birthDNA = 0;
-    let fromClaudeMD = false;
+    const fromClaudeMD = await fileExists(claudeMdPath);
 
-    if (await fileExists(claudeMdPath)) {
-      // Score ONLY CLAUDE.md for Birth DNA
-      const claudeMdContent = await fs.readFile(claudeMdPath, 'utf-8');
-      const claudeMdAnalysis = await fabFormatsProcessor.processFiles(projectRoot);
-
-      // Calculate Birth DNA from CLAUDE.md context quality
-      // Low scores are GOOD - they show the journey!
-      if (claudeMdContent.length < 100) {
-        birthDNA = 5;  // Almost empty CLAUDE.md
-      } else if (claudeMdContent.includes('FAF')) {
-        birthDNA = 22; // Has some FAF context
-      } else {
-        birthDNA = 12; // Generic CLAUDE.md
-      }
-      fromClaudeMD = true;
-
-      console.log(FAF_COLORS.fafOrange(`   Birth DNA from CLAUDE.md: ${birthDNA}%`));
-      console.log(FAF_COLORS.fafWhite(`   (Low scores are normal - they show your growth journey!)`));
-    } else {
-      // No CLAUDE.md - use minimal Birth DNA
-      birthDNA = 0;
-      console.log(FAF_COLORS.fafOrange(`   No CLAUDE.md found - Birth DNA: ${birthDNA}%`));
-    }
+    console.log(FAF_COLORS.fafOrange(`   Birth DNA: ${birthDNA}%`));
+    console.log(FAF_COLORS.fafWhite(`   (This is your starting point - run 'faf auto' to grow!)`));
 
     // Initialize FAF DNA with birth certificate
     const dnaManager = new FafDNAManager(projectRoot);
@@ -198,17 +186,6 @@ export async function initFafFile(
     console.log();
     console.log(FAF_COLORS.fafGreen(`${FAF_ICONS.dna} FAF DNA created with birth certificate!`));
     console.log(FAF_COLORS.fafWhite(`   Certificate: ${dna.birthCertificate.certificate}`));
-
-    // Now calculate ACTUAL score from full .faf
-    const fafData = parseYAML(fafContent);
-    const compiler = new FafCompiler();
-    const scoreResult = await compiler.compile(outputPath);
-    const currentScore = fafData.faf_score ? parseInt(fafData.faf_score.replace('%', '')) : Math.round(scoreResult.score || 0);
-
-    // Record first growth if different from Birth DNA
-    if (currentScore !== birthDNA) {
-      await dnaManager.recordGrowth(currentScore, ['Initial .faf generation from project']);
-    }
 
     // Add faf_dna section to .faf file for faf auto to read
     const updatedFafData = {

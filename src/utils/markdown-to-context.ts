@@ -36,13 +36,13 @@ export function markdownToContext(markdown: string): ExtractedContext {
   for (const line of lines) {
     // Extract title (first H1)
     if (line.startsWith('# ') && !context.title) {
-      context.title = escapeForYaml(line.substring(2).trim());
+      context.title = escapeForYaml(line.substring(2).trim()) || undefined;
       continue;
     }
 
     // Extract description (first paragraph after title)
     if (!context.description && line.trim() && !line.startsWith('#') && !line.startsWith('-')) {
-      context.description = escapeForYaml(line.trim());
+      context.description = escapeForYaml(line.trim()) || undefined;
       continue;
     }
 
@@ -60,7 +60,7 @@ export function markdownToContext(markdown: string): ExtractedContext {
     // Extract lists
     if (line.match(/^[\s]*[-*]\s+/)) {
       const item = escapeForYaml(line.replace(/^[\s]*[-*]\s+/, ''));
-      currentList.push(item);
+      if (item) currentList.push(item);
       continue;
     }
 
@@ -70,7 +70,7 @@ export function markdownToContext(markdown: string): ExtractedContext {
       if (match) {
         const cmd = match[1].trim();
         if (context.commands) {
-          context.commands[cmd] = escapeForYaml(line.trim());
+          context.commands[cmd] = escapeForYaml(line.trim()) || line.trim();
         }
       }
     }

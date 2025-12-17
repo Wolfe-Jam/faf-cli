@@ -43,8 +43,9 @@ function getConfidenceLevel(percentage: number): string {
 }
 
 // Helper function to safely escape YAML values
-export function escapeForYaml(value: string | undefined): string {
-  if (!value) {return 'Not specified';}
+// HONEST SCORING: Returns null for empty values - 0% is a valid score!
+export function escapeForYaml(value: string | undefined): string | null {
+  if (!value) {return null;}
 
   // Clean up markdown-style lists and formatting
   const cleaned = value
@@ -192,23 +193,24 @@ function objectToYaml(obj: Record<string, any>, indent = 0): string {
   return yaml;
 }
 
+// HONEST SCORING: All fields optional - 0% is a valid score!
 export function generateFafContent(projectData: {
   projectName: string;
-  projectGoal?: string | undefined;
-  mainLanguage: string;
-  framework: string;
+  projectGoal?: string;
+  mainLanguage?: string;
+  framework?: string;
   cssFramework?: string;
   uiLibrary?: string;
   stateManagement?: string;
-  backend: string;
-  apiType: string;
-  server: string;
-  database: string;
-  connection: string;
-  hosting: string;
-  buildTool: string;
+  backend?: string;
+  apiType?: string;
+  server?: string;
+  database?: string;
+  connection?: string;
+  hosting?: string;
+  buildTool?: string;
   packageManager?: string;
-  cicd: string;
+  cicd?: string;
   fafScore: number;
   slotBasedPercentage: number;
   projectType?: string;  // Project type for compiler slot-filling patterns
@@ -249,20 +251,24 @@ export function generateFafContent(projectData: {
     ai_value: '30_seconds_replaces_20_minutes_of_questions',
     
     // 🧠 AI READ THIS FIRST - 5-LINE TL;DR
+    // HONEST SCORING: No fake branding - show only detected values
     ai_tldr: {
-      project: `${projectData.projectName} - ${escapeForYaml(projectData.projectGoal) || 'Universal AI-context Infrastructure - Make Your AI Happy! 🤖'}`,
+      project: projectData.projectGoal
+        ? `${projectData.projectName} - ${escapeForYaml(projectData.projectGoal)}`
+        : projectData.projectName,
       stack: generateStackString(projectData),
       quality_bar: 'ZERO_ERRORS_F1_STANDARDS',
-      current_focus: 'Production deployment preparation',
+      current_focus: projectData.projectGoal ? 'Production deployment preparation' : 'Project initialization',
       your_role: 'Build features with perfect context'
     },
-    
+
     // ⚡ INSTANT CONTEXT - Everything critical in one place
+    // HONEST SCORING: null for undetected values - 0% is a valid score!
     instant_context: {
-      what_building: projectData.projectGoal ? escapeForYaml(projectData.projectGoal) : '🚀 Universal AI-context CLI - Trust-Driven Infrastructure that eliminates developer anxiety',
+      what_building: projectData.projectGoal ? escapeForYaml(projectData.projectGoal) : null,
       tech_stack: generateStackString(projectData),
-      main_language: projectData.mainLanguage || 'TypeScript',
-      deployment: projectData.hosting || 'Cloud platform',
+      main_language: projectData.mainLanguage || null,
+      deployment: projectData.hosting || null,
       key_files: detectKeyFiles(projectData)
     },
     
@@ -275,11 +281,12 @@ export function generateFafContent(projectData: {
     },
     
     // 📄 Project Details (Progressive Disclosure)
+    // HONEST SCORING: null for undetected values - 0% is a valid score!
     project: {
       name: projectData.projectName || 'Untitled Project',
-      goal: projectData.projectGoal ? escapeForYaml(projectData.projectGoal) : '⚡️ Transform developer psychology from hope-driven to trust-driven AI development - 30 seconds replaces 20 minutes of questions',
-      main_language: projectData.mainLanguage || 'Unknown',
-      type: projectData.projectType,  // Project type for compiler slot-filling patterns
+      goal: projectData.projectGoal ? escapeForYaml(projectData.projectGoal) : null,
+      main_language: projectData.mainLanguage || null,
+      type: projectData.projectType || null,  // Project type for compiler slot-filling patterns
       generated: new Date().toISOString(),
       mission: '🚀 Make Your AI Happy! 🧡 Trust-Driven 🤖',
       revolution: '30 seconds replaces 20 minutes of questions',
@@ -309,19 +316,20 @@ export function generateFafContent(projectData: {
     },
     
     // 🏗️ Technical Stack (Full Details)
+    // HONEST SCORING: null for undetected values - 0% is a valid score!
     stack: {
-      frontend: projectData.framework || 'None',
-      css_framework: projectData.cssFramework || 'None',
-      ui_library: projectData.uiLibrary || 'None', 
-      state_management: projectData.stateManagement || 'None',
-      backend: projectData.backend || 'None',
-      runtime: projectData.server || 'None',
-      database: projectData.database || 'None',
-      build: projectData.buildTool || (projectData.projectType === 'static-html' || projectData.projectType === 'landing-page' ? 'Direct HTML (no build step)' : 'None'),
-      package_manager: projectData.packageManager || 'npm',
-      api_type: projectData.apiType || 'REST API',
-      hosting: projectData.hosting || 'None',
-      cicd: projectData.cicd || 'None'
+      frontend: projectData.framework || null,
+      css_framework: projectData.cssFramework || null,
+      ui_library: projectData.uiLibrary || null,
+      state_management: projectData.stateManagement || null,
+      backend: projectData.backend || null,
+      runtime: projectData.server || null,
+      database: projectData.database || null,
+      build: projectData.buildTool || (projectData.projectType === 'static-html' || projectData.projectType === 'landing-page' ? 'Direct HTML (no build step)' : null),
+      package_manager: projectData.packageManager || null,
+      api_type: projectData.apiType || null,
+      hosting: projectData.hosting || null,
+      cicd: projectData.cicd || null
     },
     
     // ⚙️ Development Preferences
@@ -348,14 +356,14 @@ export function generateFafContent(projectData: {
     // 🏷️ Search & Discovery Tags
     tags: generateProjectTags(projectData),
     
-    // 👥 Human Context (The 6 W's) - ALWAYS ESCAPE to remove markdown
+    // 👥 Human Context (The 6 W's) - HONEST SCORING: null fields stay null!
     human_context: projectData.targetUser || projectData.coreProblem ? {
-      who: escapeForYaml(projectData.targetUser || 'Not specified'),
-      what: escapeForYaml(projectData.coreProblem || 'Not specified'),
-      why: escapeForYaml(projectData.missionPurpose || 'Not specified'),
-      where: escapeForYaml(projectData.deploymentMarket || 'Not specified'),
-      when: escapeForYaml(projectData.timeline || 'Not specified'),
-      how: escapeForYaml(projectData.approach || 'Not specified'),
+      who: escapeForYaml(projectData.targetUser) || null,
+      what: escapeForYaml(projectData.coreProblem) || null,
+      why: escapeForYaml(projectData.missionPurpose) || null,
+      where: escapeForYaml(projectData.deploymentMarket) || null,
+      when: escapeForYaml(projectData.timeline) || null,
+      how: escapeForYaml(projectData.approach) || null,
       additional_context: {
         who: projectData.additionalWho && projectData.additionalWho.length > 0 ? projectData.additionalWho : undefined,
         what: projectData.additionalWhat && projectData.additionalWhat.length > 0 ? projectData.additionalWhat : undefined,
