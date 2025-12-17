@@ -13,6 +13,628 @@ import { FabFormatsProcessor } from '../engines/fab-formats-processor';
 import * as path from 'path';
 
 // ============================================================================
+// TYPE_DEFINITIONS - Single Source of Truth for Project Types
+// ============================================================================
+// Design: 21 slots always exist. Types define which slots COUNT toward scoring.
+// slot_ignore in .faf file overrides type defaults for edge cases.
+
+/**
+ * All 21 slots in the FAF system
+ */
+const ALL_SLOTS = {
+  // Project slots (3)
+  project: ['project.name', 'project.goal', 'project.main_language'],
+
+  // Frontend slots (4)
+  frontend: ['stack.frontend', 'stack.css_framework', 'stack.ui_library', 'stack.state_management'],
+
+  // Backend slots (5)
+  backend: ['stack.backend', 'stack.api_type', 'stack.runtime', 'stack.database', 'stack.connection'],
+
+  // Universal slots (3)
+  universal: ['stack.hosting', 'stack.build', 'stack.cicd'],
+
+  // Human context slots (6)
+  human: ['human.who', 'human.what', 'human.why', 'human.where', 'human.when', 'human.how']
+} as const;
+
+/**
+ * TYPE_DEFINITIONS - Maps project types to their applicable slots
+ *
+ * Each type specifies which slot categories count toward scoring.
+ * slot_ignore in .faf can override these for edge cases.
+ */
+const TYPE_DEFINITIONS: Record<string, {
+  description: string;
+  categories: ('project' | 'frontend' | 'backend' | 'universal' | 'human')[];
+  aliases?: string[];
+}> = {
+  // ============================================================================
+  // CLI/Tool Types (9 slots: project + human)
+  // ============================================================================
+  'cli': {
+    description: 'Command-line interface tool',
+    categories: ['project', 'human'],
+    aliases: ['cli-tool', 'command-line']
+  },
+  'cli-tool': {
+    description: 'Command-line interface tool',
+    categories: ['project', 'human']
+  },
+
+  // ============================================================================
+  // Library/Package Types (9 slots: project + human)
+  // ============================================================================
+  'library': {
+    description: 'Reusable code library/package',
+    categories: ['project', 'human'],
+    aliases: ['lib', 'package']
+  },
+  'npm-package': {
+    description: 'NPM package',
+    categories: ['project', 'human']
+  },
+  'pip-package': {
+    description: 'Python pip package',
+    categories: ['project', 'human'],
+    aliases: ['pypi']
+  },
+  'crate': {
+    description: 'Rust crate',
+    categories: ['project', 'human'],
+    aliases: ['rust-crate']
+  },
+  'gem': {
+    description: 'Ruby gem',
+    categories: ['project', 'human'],
+    aliases: ['ruby-gem']
+  },
+
+  // ============================================================================
+  // AI/ML Types
+  // ============================================================================
+  'mcp-server': {
+    description: 'Model Context Protocol server',
+    categories: ['project', 'backend', 'human']
+  },
+  'data-science': {
+    description: 'Data science/analysis project',
+    categories: ['project', 'backend', 'human'],
+    aliases: ['data-analysis', 'analytics']
+  },
+  'ml-model': {
+    description: 'Machine learning model',
+    categories: ['project', 'backend', 'human'],
+    aliases: ['ai-model', 'ml', 'machine-learning']
+  },
+  'jupyter': {
+    description: 'Jupyter notebook project',
+    categories: ['project', 'human'],
+    aliases: ['notebook', 'ipynb']
+  },
+  'data-pipeline': {
+    description: 'Data pipeline/ETL',
+    categories: ['project', 'backend', 'human'],
+    aliases: ['etl', 'pipeline']
+  },
+
+  // ============================================================================
+  // API/Backend Types
+  // ============================================================================
+  'backend-api': {
+    description: 'Backend API service',
+    categories: ['project', 'backend', 'universal', 'human'],
+    aliases: ['api', 'backend', 'rest-api']
+  },
+  'node-api': {
+    description: 'Node.js API service',
+    categories: ['project', 'backend', 'universal', 'human'],
+    aliases: ['express', 'fastify', 'nest']
+  },
+  'python-api': {
+    description: 'Python API service',
+    categories: ['project', 'backend', 'universal', 'human'],
+    aliases: ['flask', 'fastapi', 'django-api']
+  },
+  'python-app': {
+    description: 'Python application',
+    categories: ['project', 'backend', 'human']
+  },
+  'go-api': {
+    description: 'Go API service',
+    categories: ['project', 'backend', 'universal', 'human'],
+    aliases: ['golang', 'gin', 'fiber']
+  },
+  'rust-api': {
+    description: 'Rust API service',
+    categories: ['project', 'backend', 'universal', 'human'],
+    aliases: ['actix', 'axum', 'rocket']
+  },
+  'graphql': {
+    description: 'GraphQL API service',
+    categories: ['project', 'backend', 'universal', 'human'],
+    aliases: ['graphql-api']
+  },
+  'microservice': {
+    description: 'Microservice',
+    categories: ['project', 'backend', 'universal', 'human'],
+    aliases: ['service']
+  },
+
+  // ============================================================================
+  // Frontend Types
+  // ============================================================================
+  'frontend': {
+    description: 'Frontend-only web application',
+    categories: ['project', 'frontend', 'universal', 'human']
+  },
+  'svelte': {
+    description: 'Svelte web application',
+    categories: ['project', 'frontend', 'universal', 'human'],
+    aliases: ['sveltekit']
+  },
+  'react': {
+    description: 'React web application',
+    categories: ['project', 'frontend', 'universal', 'human'],
+    aliases: ['reactjs']
+  },
+  'vue': {
+    description: 'Vue.js web application',
+    categories: ['project', 'frontend', 'universal', 'human'],
+    aliases: ['vuejs', 'nuxt']
+  },
+  'angular': {
+    description: 'Angular web application',
+    categories: ['project', 'frontend', 'universal', 'human']
+  },
+  'nextjs': {
+    description: 'Next.js application',
+    categories: ['project', 'frontend', 'backend', 'universal', 'human'],
+    aliases: ['next']
+  },
+  'remix': {
+    description: 'Remix application',
+    categories: ['project', 'frontend', 'backend', 'universal', 'human']
+  },
+  'astro': {
+    description: 'Astro static site',
+    categories: ['project', 'frontend', 'universal', 'human']
+  },
+  'solid': {
+    description: 'SolidJS application',
+    categories: ['project', 'frontend', 'universal', 'human'],
+    aliases: ['solidjs']
+  },
+  'qwik': {
+    description: 'Qwik application',
+    categories: ['project', 'frontend', 'universal', 'human']
+  },
+
+  // ============================================================================
+  // Fullstack Types
+  // ============================================================================
+  'fullstack': {
+    description: 'Full-stack web application',
+    categories: ['project', 'frontend', 'backend', 'universal', 'human']
+  },
+  't3': {
+    description: 'T3 Stack (Next.js + tRPC + Prisma)',
+    categories: ['project', 'frontend', 'backend', 'universal', 'human'],
+    aliases: ['t3-stack', 'create-t3-app']
+  },
+  'mern': {
+    description: 'MERN Stack (MongoDB + Express + React + Node)',
+    categories: ['project', 'frontend', 'backend', 'universal', 'human']
+  },
+  'mean': {
+    description: 'MEAN Stack (MongoDB + Express + Angular + Node)',
+    categories: ['project', 'frontend', 'backend', 'universal', 'human']
+  },
+  'lamp': {
+    description: 'LAMP Stack (Linux + Apache + MySQL + PHP)',
+    categories: ['project', 'frontend', 'backend', 'universal', 'human']
+  },
+  'django': {
+    description: 'Django web application',
+    categories: ['project', 'frontend', 'backend', 'universal', 'human']
+  },
+  'rails': {
+    description: 'Ruby on Rails application',
+    categories: ['project', 'frontend', 'backend', 'universal', 'human'],
+    aliases: ['ruby-on-rails', 'ror']
+  },
+  'laravel': {
+    description: 'Laravel PHP application',
+    categories: ['project', 'frontend', 'backend', 'universal', 'human']
+  },
+
+  // ============================================================================
+  // Mobile Types
+  // ============================================================================
+  'mobile': {
+    description: 'Mobile application',
+    categories: ['project', 'frontend', 'human'],
+    aliases: ['mobile-app']
+  },
+  'react-native': {
+    description: 'React Native mobile app',
+    categories: ['project', 'frontend', 'human'],
+    aliases: ['rn', 'expo']
+  },
+  'flutter': {
+    description: 'Flutter mobile app',
+    categories: ['project', 'frontend', 'human'],
+    aliases: ['dart']
+  },
+  'ios': {
+    description: 'iOS native app',
+    categories: ['project', 'frontend', 'human'],
+    aliases: ['swift', 'swiftui']
+  },
+  'android': {
+    description: 'Android native app',
+    categories: ['project', 'frontend', 'human'],
+    aliases: ['kotlin', 'kotlin-android']
+  },
+  'ionic': {
+    description: 'Ionic mobile app',
+    categories: ['project', 'frontend', 'human'],
+    aliases: ['capacitor']
+  },
+
+  // ============================================================================
+  // Desktop Types
+  // ============================================================================
+  'desktop': {
+    description: 'Desktop application',
+    categories: ['project', 'frontend', 'human'],
+    aliases: ['desktop-app']
+  },
+  'electron': {
+    description: 'Electron desktop app',
+    categories: ['project', 'frontend', 'human']
+  },
+  'tauri': {
+    description: 'Tauri desktop app',
+    categories: ['project', 'frontend', 'human']
+  },
+  'qt': {
+    description: 'Qt desktop application',
+    categories: ['project', 'frontend', 'human'],
+    aliases: ['pyqt', 'pyside']
+  },
+  'gtk': {
+    description: 'GTK desktop application',
+    categories: ['project', 'frontend', 'human']
+  },
+
+  // ============================================================================
+  // Browser Extensions
+  // ============================================================================
+  'chrome-extension': {
+    description: 'Chrome browser extension',
+    categories: ['project', 'human'],
+    aliases: ['browser-extension', 'extension']
+  },
+  'firefox-extension': {
+    description: 'Firefox browser extension',
+    categories: ['project', 'human'],
+    aliases: ['firefox-addon']
+  },
+  'safari-extension': {
+    description: 'Safari browser extension',
+    categories: ['project', 'human']
+  },
+
+  // ============================================================================
+  // Automation/Workflow Types
+  // ============================================================================
+  'n8n-workflow': {
+    description: 'n8n automation workflow',
+    categories: ['project', 'backend', 'human'],
+    aliases: ['n8n']
+  },
+  'zapier': {
+    description: 'Zapier integration',
+    categories: ['project', 'human']
+  },
+  'github-action': {
+    description: 'GitHub Action',
+    categories: ['project', 'human'],
+    aliases: ['gha', 'action']
+  },
+
+  // ============================================================================
+  // DevOps/Infrastructure Types
+  // ============================================================================
+  'terraform': {
+    description: 'Terraform infrastructure',
+    categories: ['project', 'human'],
+    aliases: ['tf', 'iac']
+  },
+  'kubernetes': {
+    description: 'Kubernetes configuration',
+    categories: ['project', 'human'],
+    aliases: ['k8s', 'helm']
+  },
+  'docker': {
+    description: 'Docker/container configuration',
+    categories: ['project', 'human'],
+    aliases: ['dockerfile', 'container']
+  },
+  'ansible': {
+    description: 'Ansible playbooks',
+    categories: ['project', 'human']
+  },
+  'pulumi': {
+    description: 'Pulumi infrastructure',
+    categories: ['project', 'human']
+  },
+  'infrastructure': {
+    description: 'Infrastructure as code',
+    categories: ['project', 'human'],
+    aliases: ['infra', 'devops']
+  },
+
+  // ============================================================================
+  // Static Sites / Documentation
+  // ============================================================================
+  'static-html': {
+    description: 'Static HTML website',
+    categories: ['project', 'frontend', 'human'],
+    aliases: ['static-site', 'html']
+  },
+  'landing-page': {
+    description: 'Landing page website',
+    categories: ['project', 'frontend', 'human'],
+    aliases: ['landing']
+  },
+  'documentation': {
+    description: 'Documentation site',
+    categories: ['project', 'frontend', 'human'],
+    aliases: ['docs']
+  },
+  'docusaurus': {
+    description: 'Docusaurus documentation site',
+    categories: ['project', 'frontend', 'human']
+  },
+  'mkdocs': {
+    description: 'MkDocs documentation site',
+    categories: ['project', 'human']
+  },
+  'vitepress': {
+    description: 'VitePress documentation site',
+    categories: ['project', 'frontend', 'human']
+  },
+  'storybook': {
+    description: 'Storybook component library',
+    categories: ['project', 'frontend', 'human']
+  },
+
+  // ============================================================================
+  // CMS Types
+  // ============================================================================
+  'wordpress': {
+    description: 'WordPress site/plugin/theme',
+    categories: ['project', 'frontend', 'backend', 'universal', 'human'],
+    aliases: ['wp']
+  },
+  'cms': {
+    description: 'Content management system',
+    categories: ['project', 'frontend', 'backend', 'human']
+  },
+  'strapi': {
+    description: 'Strapi headless CMS',
+    categories: ['project', 'backend', 'universal', 'human']
+  },
+  'sanity': {
+    description: 'Sanity.io CMS',
+    categories: ['project', 'backend', 'human']
+  },
+  'contentful': {
+    description: 'Contentful CMS integration',
+    categories: ['project', 'human']
+  },
+
+  // ============================================================================
+  // Game Development Types
+  // ============================================================================
+  'game': {
+    description: 'Game project',
+    categories: ['project', 'frontend', 'human'],
+    aliases: ['gamedev']
+  },
+  'unity': {
+    description: 'Unity game',
+    categories: ['project', 'frontend', 'human'],
+    aliases: ['unity3d']
+  },
+  'godot': {
+    description: 'Godot game',
+    categories: ['project', 'frontend', 'human']
+  },
+  'unreal': {
+    description: 'Unreal Engine game',
+    categories: ['project', 'frontend', 'human'],
+    aliases: ['ue4', 'ue5']
+  },
+  'phaser': {
+    description: 'Phaser.js game',
+    categories: ['project', 'frontend', 'human']
+  },
+  'threejs': {
+    description: 'Three.js 3D project',
+    categories: ['project', 'frontend', 'human'],
+    aliases: ['three', '3d', 'webgl']
+  },
+
+  // ============================================================================
+  // Blockchain/Web3 Types
+  // ============================================================================
+  'smart-contract': {
+    description: 'Smart contract',
+    categories: ['project', 'human'],
+    aliases: ['solidity', 'contract']
+  },
+  'dapp': {
+    description: 'Decentralized application',
+    categories: ['project', 'frontend', 'human'],
+    aliases: ['web3', 'blockchain']
+  },
+  'hardhat': {
+    description: 'Hardhat Ethereum project',
+    categories: ['project', 'human']
+  },
+  'foundry': {
+    description: 'Foundry Ethereum project',
+    categories: ['project', 'human'],
+    aliases: ['forge']
+  },
+
+  // ============================================================================
+  // Monorepo Types
+  // Monorepos are CONTAINERS - they need ALL slots because they can contain
+  // any combination of frontend, backend, libraries, etc.
+  // The monorepo root .faf describes the overall architecture.
+  // Individual packages can have their own .faf files with specific types.
+  // ============================================================================
+  'monorepo': {
+    description: 'Monorepo - multi-package repository',
+    categories: ['project', 'frontend', 'backend', 'universal', 'human'],
+    aliases: ['mono', 'workspace']
+  },
+  'turborepo': {
+    description: 'Turborepo monorepo',
+    categories: ['project', 'frontend', 'backend', 'universal', 'human'],
+    aliases: ['turbo']
+  },
+  'nx': {
+    description: 'Nx monorepo',
+    categories: ['project', 'frontend', 'backend', 'universal', 'human']
+  },
+  'lerna': {
+    description: 'Lerna monorepo',
+    categories: ['project', 'frontend', 'backend', 'universal', 'human']
+  },
+  'pnpm-workspace': {
+    description: 'pnpm workspace monorepo',
+    categories: ['project', 'frontend', 'backend', 'universal', 'human'],
+    aliases: ['pnpm-mono']
+  },
+  'yarn-workspace': {
+    description: 'Yarn workspace monorepo',
+    categories: ['project', 'frontend', 'backend', 'universal', 'human'],
+    aliases: ['yarn-mono']
+  },
+
+  // ============================================================================
+  // Embedded/Systems Types
+  // ============================================================================
+  'embedded': {
+    description: 'Embedded systems',
+    categories: ['project', 'human'],
+    aliases: ['firmware', 'iot']
+  },
+  'arduino': {
+    description: 'Arduino project',
+    categories: ['project', 'human']
+  },
+  'raspberry-pi': {
+    description: 'Raspberry Pi project',
+    categories: ['project', 'human'],
+    aliases: ['rpi']
+  },
+  'wasm': {
+    description: 'WebAssembly module',
+    categories: ['project', 'human'],
+    aliases: ['webassembly']
+  },
+
+  // ============================================================================
+  // Testing Types
+  // ============================================================================
+  'test-suite': {
+    description: 'Test suite/framework',
+    categories: ['project', 'human'],
+    aliases: ['testing', 'tests']
+  },
+  'e2e-tests': {
+    description: 'End-to-end test suite',
+    categories: ['project', 'human'],
+    aliases: ['e2e', 'playwright', 'cypress']
+  },
+
+  // ============================================================================
+  // Default
+  // ============================================================================
+  'generic': {
+    description: 'Generic project (fallback)',
+    categories: ['project', 'universal', 'human']
+  }
+};
+
+/**
+ * Get applicable slots for a project type
+ */
+function getSlotsForType(projectType: string): string[] {
+  // Check for aliases first
+  for (const [type, def] of Object.entries(TYPE_DEFINITIONS)) {
+    if (def.aliases?.includes(projectType)) {
+      projectType = type;
+      break;
+    }
+  }
+
+  const typeDef = TYPE_DEFINITIONS[projectType] || TYPE_DEFINITIONS['generic'];
+  const slots: string[] = [];
+
+  for (const category of typeDef.categories) {
+    slots.push(...ALL_SLOTS[category]);
+  }
+
+  return slots;
+}
+
+/**
+ * Parse slot_ignore from .faf content
+ * Accepts: slot_ignore: [hosting, cicd] or slot_ignore: hosting, cicd
+ */
+function parseSlotIgnore(ast: any): string[] {
+  const slotIgnore = ast.slot_ignore || ast.slotIgnore || ast.ignore_slots;
+  if (!slotIgnore) return [];
+
+  // Handle array format
+  if (Array.isArray(slotIgnore)) {
+    return slotIgnore.map((s: string) => normalizeSlotName(s));
+  }
+
+  // Handle string format (comma-separated)
+  if (typeof slotIgnore === 'string') {
+    return slotIgnore.split(',').map((s: string) => normalizeSlotName(s.trim()));
+  }
+
+  return [];
+}
+
+/**
+ * Normalize slot names to full path
+ * Examples: "hosting" -> "stack.hosting", "who" -> "human.who"
+ */
+function normalizeSlotName(slot: string): string {
+  // Already has prefix
+  if (slot.includes('.')) return slot;
+
+  // Check each category for the slot
+  for (const [category, slots] of Object.entries(ALL_SLOTS)) {
+    const fullSlot = slots.find(s => s.endsWith(`.${slot}`));
+    if (fullSlot) return fullSlot;
+  }
+
+  // Return as-is if not found (will be ignored)
+  return slot;
+}
+
+// ============================================================================
 // Type Definitions
 // ============================================================================
 
@@ -378,163 +1000,96 @@ export class FafCompiler {
   private buildIR(ast: any): IRSlot[] {
     const slots: IRSlot[] = [];
 
-    // Detect project type to determine applicable stack slots
+    // Detect project type to determine applicable slots
     const projectType = this.detectProjectTypeFromContext(ast);
     if (process.env.FAF_DEBUG) {
       console.log(`\n[DEBUG] Project type detected: ${projectType}`);
     }
-    const isFrontendProject = this.requiresFrontendStack(projectType);
-    const isBackendProject = this.requiresBackendStack(projectType);
 
-    // Auto-fill project.main_language for n8n workflows BEFORE reading slots
-    if (projectType === 'n8n-workflow') {
-      if (!ast.project) ast.project = {};
-      if (!ast.project.main_language) {
-        ast.project.main_language = ast.tech_stack?.primary_language || 'JSON (workflow definition)';
-      }
+    // Parse slot_ignore from the .faf file
+    const ignoredSlots = parseSlotIgnore(ast);
+    if (process.env.FAF_DEBUG && ignoredSlots.length > 0) {
+      console.log(`[DEBUG] slot_ignore: ${ignoredSlots.join(', ')}`);
     }
 
-    // Project slots (3)
-    this.addSlot(slots, 'project.name', ast.project?.name, 'string', 'original', 1);
-    this.addSlot(slots, 'project.goal', ast.project?.goal, 'string', 'original', 1);
-    this.addSlot(slots, 'project.main_language', ast.project?.main_language, 'string', 'original', 1);
+    // Get applicable slots for this project type
+    const applicableSlots = getSlotsForType(projectType);
+    if (process.env.FAF_DEBUG) {
+      console.log(`[DEBUG] Applicable slots (${applicableSlots.length}): ${applicableSlots.join(', ')}`);
+    }
 
-    // Chrome Extension auto-fill: If it's a Chrome Extension, intelligently fill slots
+    // Filter out ignored slots
+    const activeSlots = applicableSlots.filter(slot => !ignoredSlots.includes(slot));
+    if (process.env.FAF_DEBUG && ignoredSlots.length > 0) {
+      console.log(`[DEBUG] Active slots after ignore (${activeSlots.length}): ${activeSlots.join(', ')}`);
+    }
+
+    // Helper to get value from ast based on slot path
+    const getSlotValue = (slotPath: string): any => {
+      const parts = slotPath.split('.');
+      if (parts[0] === 'project') {
+        return ast.project?.[parts[1]];
+      } else if (parts[0] === 'stack') {
+        return ast.stack?.[parts[1]];
+      } else if (parts[0] === 'human') {
+        return ast.human_context?.[parts[1]];
+      }
+      return undefined;
+    };
+
+    // Add all active slots to the IR
+    for (const slotPath of activeSlots) {
+      const value = getSlotValue(slotPath);
+      this.addSlot(slots, slotPath, value, 'string', 'original', 1);
+    }
+
+    // Special handling for certain project types (auto-fill missing values)
+    // Chrome Extension: auto-fill technical context
     if (projectType === 'chrome-extension') {
-      // Auto-fill Chrome Extension technical context
       if (!ast.stack) ast.stack = {};
       if (!ast.stack.runtime) ast.stack.runtime = 'Chrome/Browser';
       if (!ast.stack.hosting) ast.stack.hosting = 'Chrome Web Store';
       if (!ast.stack.api_type) ast.stack.api_type = 'Chrome Extension APIs';
       if (!ast.stack.backend) ast.stack.backend = 'Service Worker';
       if (!ast.stack.database) ast.stack.database = 'chrome.storage API';
-      if (!ast.deployment) ast.deployment = 'Web Store Upload';
 
-      // Add Chrome Extension specific slots
-      this.addSlot(slots, 'stack.runtime', ast.stack.runtime, 'string', 'discovered', 1);
-      this.addSlot(slots, 'stack.hosting', ast.stack.hosting, 'string', 'discovered', 1);
-      this.addSlot(slots, 'stack.api_type', ast.stack.api_type, 'string', 'discovered', 1);
-      this.addSlot(slots, 'stack.backend', ast.stack.backend, 'string', 'discovered', 1);
-      this.addSlot(slots, 'stack.database', ast.stack.database, 'string', 'discovered', 1);
-      this.addSlot(slots, 'stack.deployment', ast.deployment, 'string', 'discovered', 1);
-
-      // Also include frontend framework if specified (e.g., Svelte Chrome Extension)
-      if (ast.stack?.frontend) {
-        this.addSlot(slots, 'stack.frontend', ast.stack.frontend, 'string', 'original', 1);
-      }
-      if (ast.stack?.build) {
-        this.addSlot(slots, 'stack.build', ast.stack.build, 'string', 'original', 1);
+      // Add auto-filled slots (only if they're in the active slots list)
+      const chromeSlots = ['stack.runtime', 'stack.hosting', 'stack.api_type', 'stack.backend', 'stack.database'];
+      for (const slot of chromeSlots) {
+        if (activeSlots.includes(slot) && !slots.find(s => s.path === slot)) {
+          this.addSlot(slots, slot, getSlotValue(slot), 'string', 'discovered', 1);
+        }
       }
     }
 
-    // Static HTML auto-fill: If it's a static HTML site, intelligently fill slots
+    // Static HTML: auto-fill technical context
     if (projectType === 'static-html' || projectType === 'landing-page') {
       if (!ast.stack) ast.stack = {};
       if (!ast.stack.frontend) ast.stack.frontend = 'HTML/CSS/JavaScript';
       if (!ast.stack.runtime) ast.stack.runtime = 'Browser';
       if (!ast.stack.hosting) ast.stack.hosting = 'Static Hosting';
       if (!ast.stack.build) ast.stack.build = 'Direct HTML (no build step)';
-
-      this.addSlot(slots, 'stack.frontend', ast.stack.frontend, 'string', 'discovered', 1);
-      this.addSlot(slots, 'stack.runtime', ast.stack.runtime, 'string', 'discovered', 1);
-      this.addSlot(slots, 'stack.hosting', ast.stack.hosting, 'string', 'discovered', 1);
-      this.addSlot(slots, 'stack.build', ast.stack.build, 'string', 'discovered', 1);
-
-      // Leave backend, database, cicd as "None" - legitimate for static sites
     }
 
-    // n8n Workflow auto-fill: Map n8n-specific fields to standard 21-slot system
+    // n8n Workflow: auto-fill technical context
     if (projectType === 'n8n-workflow') {
-      // Map n8n context to existing stack slots (efficient, no slot inflation)
+      if (!ast.project) ast.project = {};
+      if (!ast.project.main_language) {
+        ast.project.main_language = ast.tech_stack?.primary_language || 'JSON (workflow definition)';
+      }
       if (!ast.stack) ast.stack = {};
-
-      // Runtime = workflow engine
-      if (!ast.stack.runtime) {
-        ast.stack.runtime = ast.tech_stack?.workflow_engine || 'n8n';
-      }
-
-      // Backend = n8n server runtime
-      if (!ast.stack.backend) {
-        ast.stack.backend = 'Node.js (n8n server)';
-      }
-
-      // API type = n8n trigger types
-      if (!ast.stack.api_type) {
-        ast.stack.api_type = 'Webhooks + HTTP';
-      }
-
-      // Database = vector DB or workflow state
-      if (!ast.stack.database) {
-        ast.stack.database = ast.tech_stack?.infrastructure?.vector_db || 'Workflow State';
-      }
-
-      // Hosting = deployment location
-      if (!ast.stack.hosting) {
-        ast.stack.hosting = 'n8n Cloud';
-      }
-
-      // Build tool = how workflows are created
-      if (!ast.stack.build) {
-        ast.stack.build = 'n8n Visual Editor';
-      }
-
-      // Connection = integrations (maps to stack.connection slot)
-      if (!ast.stack.connection && ast.tech_stack?.integrations) {
-        ast.stack.connection = Array.isArray(ast.tech_stack.integrations)
-          ? ast.tech_stack.integrations.join(', ')
-          : String(ast.tech_stack.integrations);
-      }
-
-      // Add n8n-specific slots (maps to standard 21-slot system)
-      // Backend slots (5)
-      this.addSlot(slots, 'stack.runtime', ast.stack.runtime, 'string', 'discovered', 1);
-      this.addSlot(slots, 'stack.backend', ast.stack.backend, 'string', 'discovered', 1);
-      this.addSlot(slots, 'stack.api_type', ast.stack.api_type, 'string', 'discovered', 1);
-      this.addSlot(slots, 'stack.database', ast.stack.database, 'string', 'discovered', 1);
-      this.addSlot(slots, 'stack.connection', ast.stack.connection, 'string', 'original', 1);
-
-      // Frontend slots (4) - n8n workflows don't have frontend, but we still count them
-      this.addSlot(slots, 'stack.frontend', ast.stack?.frontend, 'string', 'original', 1);
-      this.addSlot(slots, 'stack.css_framework', ast.stack?.css_framework, 'string', 'original', 1);
-      this.addSlot(slots, 'stack.ui_library', ast.stack?.ui_library, 'string', 'original', 1);
-      this.addSlot(slots, 'stack.state_management', ast.stack?.state_management, 'string', 'original', 1);
-
-      // Universal slots (3) will be added below (hosting, build, cicd)
+      if (!ast.stack.runtime) ast.stack.runtime = ast.tech_stack?.workflow_engine || 'n8n';
+      if (!ast.stack.backend) ast.stack.backend = 'Node.js (n8n server)';
+      if (!ast.stack.api_type) ast.stack.api_type = 'Webhooks + HTTP';
+      if (!ast.stack.database) ast.stack.database = ast.tech_stack?.infrastructure?.vector_db || 'Workflow State';
+      if (!ast.stack.hosting) ast.stack.hosting = 'n8n Cloud';
+      if (!ast.stack.build) ast.stack.build = 'n8n Visual Editor';
     }
 
-    // Stack slots - only add relevant ones based on project type
-    if (isFrontendProject) {
-      this.addSlot(slots, 'stack.frontend', ast.stack?.frontend, 'string', 'original', 1);
-      this.addSlot(slots, 'stack.css_framework', ast.stack?.css_framework, 'string', 'original', 1);
-      this.addSlot(slots, 'stack.ui_library', ast.stack?.ui_library, 'string', 'original', 1);
-      this.addSlot(slots, 'stack.state_management', ast.stack?.state_management, 'string', 'original', 1);
-    }
-
-    if (isBackendProject) {
-      this.addSlot(slots, 'stack.backend', ast.stack?.backend, 'string', 'original', 1);
-      this.addSlot(slots, 'stack.api_type', ast.stack?.api_type, 'string', 'original', 1);
-      this.addSlot(slots, 'stack.runtime', ast.stack?.runtime, 'string', 'original', 1);
-      this.addSlot(slots, 'stack.database', ast.stack?.database, 'string', 'original', 1);
-      this.addSlot(slots, 'stack.connection', ast.stack?.connection, 'string', 'original', 1);
-    }
-
-    // Universal stack slots (apply to all project types)
-    this.addSlot(slots, 'stack.hosting', ast.stack?.hosting, 'string', 'original', 1);
-    this.addSlot(slots, 'stack.build', ast.stack?.build, 'string', 'original', 1);
-    this.addSlot(slots, 'stack.cicd', ast.stack?.cicd, 'string', 'original', 1);
-
-    // Human context slots (6) - always applicable
-    this.addSlot(slots, 'human.who', ast.human_context?.who, 'string', 'original', 1);
-    this.addSlot(slots, 'human.what', ast.human_context?.what, 'string', 'original', 1);
-    this.addSlot(slots, 'human.why', ast.human_context?.why, 'string', 'original', 1);
-    this.addSlot(slots, 'human.where', ast.human_context?.where, 'string', 'original', 1);
-    this.addSlot(slots, 'human.when', ast.human_context?.when, 'string', 'original', 1);
-    this.addSlot(slots, 'human.how', ast.human_context?.how, 'string', 'original', 1);
-
-    // Discovered slots (if any)
+    // Discovered slots (if any) - only add if slot is active and not already filled
     if (ast._discovered) {
       const discovered = ast._discovered;
-      const mapping = {
+      const mapping: Record<string, string> = {
         'projectName': 'project.name',
         'mainLanguage': 'project.main_language',
         'framework': 'stack.frontend',
@@ -544,9 +1099,12 @@ export class FafCompiler {
         'buildTool': 'stack.build'
       };
 
-      for (const [key, path] of Object.entries(mapping)) {
-        if (discovered[key] && !this.hasValue(ast, path)) {
-          this.addSlot(slots, `discovery.${path}`, discovered[key], 'string', 'discovered', 1);
+      for (const [key, slotPath] of Object.entries(mapping)) {
+        if (discovered[key] && activeSlots.includes(slotPath) && !this.hasValue(ast, slotPath)) {
+          // Only add to discovery if not already in slots
+          if (!slots.find(s => s.path === slotPath)) {
+            this.addSlot(slots, `discovery.${slotPath}`, discovered[key], 'string', 'discovered', 1);
+          }
         }
       }
     }
@@ -636,8 +1194,22 @@ export class FafCompiler {
   }
 
   private detectProjectTypeFromContext(ast: any): string {
-    // Check for explicit project type
-    if (ast.project?.type) return ast.project.type;
+    // Check for explicit project type first
+    if (ast.project?.type) {
+      const explicitType = ast.project.type.toLowerCase();
+      // Resolve aliases to canonical type
+      for (const [type, def] of Object.entries(TYPE_DEFINITIONS)) {
+        if (type === explicitType || def.aliases?.includes(explicitType)) {
+          return type;
+        }
+      }
+      // If the explicit type is in TYPE_DEFINITIONS, use it directly
+      if (TYPE_DEFINITIONS[explicitType]) {
+        return explicitType;
+      }
+      // Unknown explicit type - use as-is (will fall to generic in getSlotsForType)
+      return explicitType;
+    }
 
     // Infer from goal and context
     const goal = (ast.project?.goal || '').toLowerCase();
@@ -647,7 +1219,13 @@ export class FafCompiler {
     // CLI tool indicators (check BEFORE Chrome Extension to avoid false positives)
     if (goal.includes('cli') || what.includes('cli') ||
         goal.includes('command line') || what.includes('command line')) {
-      return 'cli-tool';
+      return 'cli';
+    }
+
+    // MCP Server indicators
+    if (goal.includes('mcp') || what.includes('mcp server') ||
+        goal.includes('model context protocol')) {
+      return 'mcp-server';
     }
 
     // Chrome Extension detection with fuzzy matching (only if not CLI)
