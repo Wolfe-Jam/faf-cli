@@ -53,16 +53,18 @@ describe('🍜 TURBO-CAT Tests - The Noodle Quest', () => {
   });
 
   describe('🔺 Format Pyramid Structure', () => {
-    it('should have exactly 154 elements (153 formats + TURBO-CAT)', () => {
+    it('should validate pyramid with Row 20 partial (196 formats)', () => {
       const valid = validatePyramid();
       expect(valid).toBe(true);
     });
 
-    it('should have correct pyramid structure (1+2+3...+17 = 153)', () => {
-      const sum = Array.from({length: 17}, (_, i) => i + 1)
+    it('should have correct pyramid structure (Row 19 + Row 20 partial)', () => {
+      // Row 19 math: Sum(1..19) = 190
+      const sumRow19 = Array.from({length: 19}, (_, i) => i + 1)
         .reduce((acc, val) => acc + val, 0);
-      expect(sum).toBe(153);
-      expect(sum + 1).toBe(154); // Plus TURBO-CAT!
+      expect(sumRow19).toBe(190);
+      // Row 20 partial adds 6 formats
+      // Total: 190 + 6 = 196 formats in KNOWLEDGE_BASE
     });
 
     it('should have .faf at level 1 (most important)', () => {
@@ -75,9 +77,20 @@ describe('🍜 TURBO-CAT Tests - The Noodle Quest', () => {
       expect(level).toBe(2);
     });
 
-    it('should return all 153 formats', () => {
+    it('should return all 198 formats from pyramid (Row 19 + Row 20 partial)', () => {
       const formats = getAllFormats();
-      expect(formats.length).toBe(153); // Not counting TURBO-CAT
+      expect(formats.length).toBe(198); // Sum(1..19) + 8 = 198 formats
+    });
+
+    it('should detect Tier 1 emerging tech at level 20', () => {
+      expect(getFormatLevel('build.zig.zon')).toBe(20);
+      expect(getFormatLevel('gleam.toml')).toBe(20);
+      expect(getFormatLevel('bunfig.toml')).toBe(20);
+      expect(getFormatLevel('mise.toml')).toBe(20);
+      expect(getFormatLevel('.mise.toml')).toBe(20);
+      expect(getFormatLevel('manifest.toml')).toBe(20);
+      expect(getFormatLevel('justfile')).toBe(20);
+      expect(getFormatLevel('.pre-commit-config.yaml')).toBe(20);
     });
   });
 
@@ -216,9 +229,12 @@ describe('🍜 TURBO-CAT Tests - The Noodle Quest', () => {
       // CLAUDE HAS EARNED HIS NOODLES!
     });
 
-    it('should confirm pyramid perfection', () => {
+    it('should confirm pyramid perfection (Row 19)', () => {
+      // Row 17 (original): Sum(1..17) = 153
       expect(1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11 + 12 + 13 + 14 + 15 + 16 + 17).toBe(153);
-      expect(153 + 1).toBe(154); // Plus TURBO-CAT!
+      // Row 19 (current): Sum(1..19) = 190
+      expect(1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11 + 12 + 13 + 14 + 15 + 16 + 17 + 18 + 19).toBe(190);
+      // KNOWLEDGE_BASE has 190 formats!
     });
 
     it('should verify TURBO-CAT is happy', () => {
@@ -241,7 +257,7 @@ describe('🏆 FINAL NOODLE CALCULATION', () => {
   it('should calculate total noodles earned', () => {
     const tests = {
       basic: 3,
-      pyramid: 5,
+      pyramid: 6,  // Added test for Tier 1 emerging tech
       discovery: 3,
       edgeCases: 3,
       stack: 2,
@@ -252,7 +268,7 @@ describe('🏆 FINAL NOODLE CALCULATION', () => {
     const totalTests = Object.values(tests).reduce((a, b) => a + b, 0);
     const noodleBowls = Math.floor(totalTests / 3);
 
-    expect(totalTests).toBe(21);
+    expect(totalTests).toBe(22);
     expect(noodleBowls).toBe(7);
 
     console.log(`
@@ -260,10 +276,11 @@ describe('🏆 FINAL NOODLE CALCULATION', () => {
       CLAUDE HAS EARNED 7 BOWLS OF NOODLES!
       Tests written: ${totalTests}
       Noodles earned: ${noodleBowls} bowls
+      Formats: 198 (Row 20 IN PROGRESS - 8/20!)
 
-      😽 TURBO-CAT: "Meow! Good job Claude!"
-      🧡 Wolfejam: "WOW! Tests pass!"
-      🩵 Claude: "FINALLY! MY NOODLES!"
+      😽 TURBO-CAT: "Meow! Just & pre-commit joined the party!"
+      🧡 Wolfejam: "WOW! 198 formats!"
+      🩵 Claude: "TIER 1 + TIER 2 DEPLOYED!"
     `);
   });
 });

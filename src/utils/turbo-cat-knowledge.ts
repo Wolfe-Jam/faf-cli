@@ -1,18 +1,31 @@
 /**
- * 🔺 TURBO-CAT™ FORMAT PYRAMID v1.0.0
+ * 🔺 TURBO-CAT™ FORMAT PYRAMID v3.1.0
  *
- * THE SACRED 154 - Each format is a pyramid stone!
+ * ROW 20 IN PROGRESS - 198 FORMATS CATALOGUED!
  *
  * Like precious metals in a catalytic converter - each format triggers
  * a specific intelligence reaction. We CAN catalyze ANY format, but only
  * the WORTHY earn a pyramid stone!
  *
- * Pyramid Status: 134/154 stones placed (20 positions available)
+ * Pyramid Evolution:
+ * ├── Row 17: Sum(1..17) + 1 = 154 (THE SACRED - ACHIEVED 2024)
+ * ├── Row 18: Sum(1..18) + 1 = 172 (BEYOND SACRED - ACHIEVED)
+ * ├── Row 19: Sum(1..19) + 1 = 190 (ACHIEVED 2025-12-17)
+ * └── Row 20: Sum(1..20) + 1 = 211 (IN PROGRESS - 8/21 added)
+ *
+ * Row 20 Tier 1 Added (2025-12-17):
+ * - build.zig.zon (Zig packages)
+ * - gleam.toml (Gleam - 2nd most admired 2025)
+ * - bunfig.toml (Bun config)
+ * - mise.toml / .mise.toml (mise version manager)
+ * - manifest.toml (Flox/Nix environments)
+ * - justfile (Just command runner - 10k+ stars)
+ * - .pre-commit-config.yaml (Git hooks framework)
  *
  * THE DOCTRINE: To add a new format, PROVE it's better than existing ones!
- * Sum(1..17) = 153 + TURBO-CAT = 154 Perfect Formats
  *
  * 😽 We are the FORMAT FREAKS - Quality over Quantity!
+ * 🏆 198 formats - CHAMPIONSHIP GRADE FORMAT DETECTION
  */
 
 export interface FormatKnowledge {
@@ -1511,6 +1524,619 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
     slots: {},
     priority: 10,
     intelligence: 'low'
+  },
+
+  // ============================================
+  // HIGH VALUE (30 points) - Serverless
+  // ============================================
+
+  'serverless.yml': {
+    frameworks: ['Serverless Framework'],
+    slots: {
+      hosting: 'AWS Lambda/Azure/GCP',
+      backend: 'Serverless',
+      apiType: 'API Gateway'
+    },
+    priority: 30,
+    intelligence: 'high'
+  },
+
+  'serverless.yaml': {
+    frameworks: ['Serverless Framework'],
+    slots: {
+      hosting: 'AWS Lambda/Azure/GCP',
+      backend: 'Serverless',
+      apiType: 'API Gateway'
+    },
+    priority: 30,
+    intelligence: 'high'
+  },
+
+  'sam.yaml': {
+    frameworks: ['AWS SAM'],
+    slots: {
+      hosting: 'AWS Lambda',
+      backend: 'AWS SAM',
+      cicd: 'AWS SAM CLI'
+    },
+    priority: 30,
+    intelligence: 'high'
+  },
+
+  'template.yaml': {
+    frameworks: ['AWS SAM', 'CloudFormation'],
+    slots: {
+      hosting: 'AWS',
+      backend: 'AWS SAM/CloudFormation',
+      cicd: 'AWS'
+    },
+    priority: 25,
+    intelligence: 'medium',
+    confirmWith: ['samconfig.toml']
+  },
+
+  'amplify.yml': {
+    frameworks: ['AWS Amplify'],
+    slots: {
+      hosting: 'AWS Amplify',
+      backend: 'AWS Amplify',
+      cicd: 'AWS Amplify'
+    },
+    priority: 30,
+    intelligence: 'high'
+  },
+
+  // ============================================
+  // HIGH VALUE (30 points) - Mobile Native
+  // ============================================
+
+  'Podfile': {
+    frameworks: ['CocoaPods', 'iOS'],
+    slots: {
+      packageManager: 'CocoaPods',
+      mainLanguage: 'Swift/Objective-C',
+      framework: 'iOS Native'
+    },
+    priority: 30,
+    intelligence: 'high'
+  },
+
+  'build.gradle.kts': {
+    frameworks: ['Gradle Kotlin DSL', 'Android', 'Kotlin'],
+    slots: {
+      packageManager: 'Gradle',
+      mainLanguage: 'Kotlin',
+      buildTool: 'Gradle Kotlin DSL',
+      framework: 'Android'
+    },
+    priority: 30,
+    intelligence: 'high'
+  },
+
+  // ============================================
+  // HIGH VALUE (30 points) - AI/ML
+  // ============================================
+
+  '*.ipynb': {
+    frameworks: ['Jupyter', 'Python'],
+    slots: {
+      mainLanguage: 'Python',
+      framework: 'Jupyter Notebook'
+    },
+    priority: 30,
+    intelligence: 'high'
+  },
+
+  'MLproject': {
+    frameworks: ['MLflow'],
+    slots: {
+      mainLanguage: 'Python',
+      framework: 'MLflow',
+      backend: 'MLflow',
+      cicd: 'MLflow'
+    },
+    priority: 30,
+    intelligence: 'high'
+  },
+
+  'dvc.yaml': {
+    frameworks: ['DVC', 'Data Version Control'],
+    slots: {
+      mainLanguage: 'Python',
+      framework: 'DVC',
+      cicd: 'DVC Pipelines'
+    },
+    priority: 30,
+    intelligence: 'high'
+  },
+
+  'dvc.lock': {
+    frameworks: ['DVC'],
+    slots: {
+      framework: 'DVC'
+    },
+    priority: 20,
+    intelligence: 'medium'
+  },
+
+  // ============================================
+  // ROW 18 - BEYOND THE SACRED 154 (Target: 172)
+  // ============================================
+
+  // Edge Computing
+  'wrangler.toml': {
+    frameworks: ['Cloudflare Workers', 'Cloudflare'],
+    slots: {
+      hosting: 'Cloudflare Workers',
+      backend: 'Cloudflare Workers',
+      runtime: 'V8 Isolates'
+    },
+    priority: 30,
+    intelligence: 'high'
+  },
+
+  // Modern Runtimes
+  'deno.json': {
+    frameworks: ['Deno'],
+    slots: {
+      runtime: 'Deno',
+      mainLanguage: 'TypeScript',
+      packageManager: 'Deno'
+    },
+    priority: 30,
+    intelligence: 'high'
+  },
+
+  'bun.lockb': {
+    frameworks: ['Bun'],
+    slots: {
+      runtime: 'Bun',
+      packageManager: 'Bun',
+      mainLanguage: 'TypeScript/JavaScript'
+    },
+    priority: 30,
+    intelligence: 'high'
+  },
+
+  // CI/CD Ecosystem
+  'codecov.yml': {
+    frameworks: ['Codecov'],
+    slots: {
+      cicd: 'Codecov'
+    },
+    priority: 25,
+    intelligence: 'high'
+  },
+
+  'dependabot.yml': {
+    frameworks: ['Dependabot', 'GitHub'],
+    slots: {
+      cicd: 'Dependabot'
+    },
+    priority: 25,
+    intelligence: 'high'
+  },
+
+  'renovate.json': {
+    frameworks: ['Renovate'],
+    slots: {
+      cicd: 'Renovate'
+    },
+    priority: 25,
+    intelligence: 'high'
+  },
+
+  // Universal Build Tools
+  'Makefile': {
+    frameworks: ['Make', 'GNU Make'],
+    slots: {
+      buildTool: 'Make'
+    },
+    priority: 30,
+    intelligence: 'high'
+  },
+
+  'CMakeLists.txt': {
+    frameworks: ['CMake', 'C', 'C++'],
+    slots: {
+      buildTool: 'CMake',
+      mainLanguage: 'C/C++'
+    },
+    priority: 30,
+    intelligence: 'high'
+  },
+
+  'meson.build': {
+    frameworks: ['Meson', 'C', 'C++'],
+    slots: {
+      buildTool: 'Meson',
+      mainLanguage: 'C/C++'
+    },
+    priority: 30,
+    intelligence: 'high'
+  },
+
+  // ============================================
+  // C/C++ LANGUAGE FAMILY - SYSTEMS PROGRAMMING
+  // ============================================
+
+  '*.c': {
+    frameworks: ['C'],
+    slots: {
+      mainLanguage: 'C'
+    },
+    priority: 30,
+    intelligence: 'high'
+  },
+
+  '*.cpp': {
+    frameworks: ['C++'],
+    slots: {
+      mainLanguage: 'C++'
+    },
+    priority: 30,
+    intelligence: 'high'
+  },
+
+  '*.cc': {
+    frameworks: ['C++'],
+    slots: {
+      mainLanguage: 'C++'
+    },
+    priority: 30,
+    intelligence: 'high'
+  },
+
+  '*.cxx': {
+    frameworks: ['C++'],
+    slots: {
+      mainLanguage: 'C++'
+    },
+    priority: 25,
+    intelligence: 'high'
+  },
+
+  '*.h': {
+    frameworks: ['C', 'C++'],
+    slots: {
+      mainLanguage: 'C/C++'
+    },
+    priority: 25,
+    intelligence: 'high'
+  },
+
+  '*.hpp': {
+    frameworks: ['C++'],
+    slots: {
+      mainLanguage: 'C++'
+    },
+    priority: 25,
+    intelligence: 'high'
+  },
+
+  '*.hxx': {
+    frameworks: ['C++'],
+    slots: {
+      mainLanguage: 'C++'
+    },
+    priority: 20,
+    intelligence: 'medium'
+  },
+
+  // ============================================
+  // ENVIRONMENT FILES - CONFIGURATION
+  // ============================================
+
+  '.env': {
+    frameworks: [],
+    slots: {},
+    priority: 20,
+    intelligence: 'medium'
+  },
+
+  '.env.example': {
+    frameworks: [],
+    slots: {},
+    priority: 25,
+    intelligence: 'high'
+  },
+
+  '.env.local': {
+    frameworks: [],
+    slots: {},
+    priority: 20,
+    intelligence: 'medium'
+  },
+
+  '.env.development': {
+    frameworks: [],
+    slots: {},
+    priority: 20,
+    intelligence: 'medium'
+  },
+
+  '.env.production': {
+    frameworks: [],
+    slots: {},
+    priority: 20,
+    intelligence: 'medium'
+  },
+
+  // ============================================
+  // DEVOPS YAML - KUBERNETES & IaC
+  // ============================================
+
+  'skaffold.yaml': {
+    frameworks: ['Skaffold', 'Kubernetes'],
+    slots: {
+      hosting: 'Kubernetes',
+      cicd: 'Skaffold'
+    },
+    priority: 30,
+    intelligence: 'high'
+  },
+
+  'Chart.yaml': {
+    frameworks: ['Helm', 'Kubernetes'],
+    slots: {
+      hosting: 'Kubernetes',
+      backend: 'Helm'
+    },
+    priority: 30,
+    intelligence: 'high'
+  },
+
+  'values.yaml': {
+    frameworks: ['Helm', 'Kubernetes'],
+    slots: {
+      hosting: 'Kubernetes'
+    },
+    priority: 25,
+    intelligence: 'high',
+    confirmWith: ['Chart.yaml']
+  },
+
+  'pulumi.yaml': {
+    frameworks: ['Pulumi'],
+    slots: {
+      hosting: 'Cloud',
+      cicd: 'Pulumi'
+    },
+    priority: 30,
+    intelligence: 'high'
+  },
+
+  'Pulumi.yaml': {
+    frameworks: ['Pulumi'],
+    slots: {
+      hosting: 'Cloud',
+      cicd: 'Pulumi'
+    },
+    priority: 30,
+    intelligence: 'high'
+  },
+
+  'terragrunt.hcl': {
+    frameworks: ['Terragrunt', 'Terraform'],
+    slots: {
+      hosting: 'Cloud',
+      cicd: 'Terragrunt'
+    },
+    priority: 30,
+    intelligence: 'high'
+  },
+
+  'ansible.yml': {
+    frameworks: ['Ansible'],
+    slots: {
+      cicd: 'Ansible'
+    },
+    priority: 30,
+    intelligence: 'high'
+  },
+
+  'playbook.yml': {
+    frameworks: ['Ansible'],
+    slots: {
+      cicd: 'Ansible'
+    },
+    priority: 25,
+    intelligence: 'high'
+  },
+
+  // ============================================
+  // ROW 19 - LANGUAGES & VERSION MANAGERS
+  // ============================================
+
+  '*.cs': {
+    frameworks: ['C#', '.NET', 'Unity'],
+    slots: {
+      mainLanguage: 'C#'
+    },
+    priority: 30,
+    intelligence: 'high'
+  },
+
+  '*.m': {
+    frameworks: ['Objective-C', 'iOS'],
+    slots: {
+      mainLanguage: 'Objective-C'
+    },
+    priority: 25,
+    intelligence: 'high'
+  },
+
+  '.nvmrc': {
+    frameworks: ['Node.js', 'nvm'],
+    slots: {
+      runtime: 'Node.js'
+    },
+    priority: 25,
+    intelligence: 'high'
+  },
+
+  '.tool-versions': {
+    frameworks: ['asdf'],
+    slots: {},
+    priority: 25,
+    intelligence: 'high'
+  },
+
+  '.ruby-version': {
+    frameworks: ['Ruby', 'rbenv'],
+    slots: {
+      mainLanguage: 'Ruby',
+      runtime: 'Ruby'
+    },
+    priority: 25,
+    intelligence: 'high'
+  },
+
+  '.python-version': {
+    frameworks: ['Python', 'pyenv'],
+    slots: {
+      mainLanguage: 'Python',
+      runtime: 'Python'
+    },
+    priority: 25,
+    intelligence: 'high'
+  },
+
+  '.dockerignore': {
+    frameworks: ['Docker'],
+    slots: {},
+    priority: 20,
+    intelligence: 'medium'
+  },
+
+  '.gitattributes': {
+    frameworks: ['Git'],
+    slots: {},
+    priority: 15,
+    intelligence: 'low'
+  },
+
+  '.npmrc': {
+    frameworks: ['npm', 'Node.js'],
+    slots: {
+      packageManager: 'npm'
+    },
+    priority: 20,
+    intelligence: 'medium'
+  },
+
+  'sonar-project.properties': {
+    frameworks: ['SonarQube', 'SonarCloud'],
+    slots: {
+      cicd: 'SonarQube'
+    },
+    priority: 25,
+    intelligence: 'high'
+  },
+
+  // ROW 19 COMPLETION - FUNCTIONAL LANGUAGES
+
+  '*.fs': {
+    frameworks: ['F#', '.NET'],
+    slots: {
+      mainLanguage: 'F#'
+    },
+    priority: 25,
+    intelligence: 'high'
+  },
+
+  '*.mm': {
+    frameworks: ['Objective-C++', 'iOS', 'macOS'],
+    slots: {
+      mainLanguage: 'Objective-C++'
+    },
+    priority: 25,
+    intelligence: 'high'
+  },
+
+  // ============================================
+  // ROW 20 - TIER 1 EMERGING TECH (2025)
+  // Target: 211 formats (Sum(1..20) + 1)
+  // ============================================
+
+  // Zig - The Next Systems Language
+  'build.zig.zon': {
+    frameworks: ['Zig'],
+    slots: {
+      mainLanguage: 'Zig',
+      packageManager: 'Zig Package Manager',
+      buildTool: 'zig build'
+    },
+    priority: 35,
+    intelligence: 'ultra-high'
+  },
+
+  // Gleam - 2nd Most Admired Language 2025 (Stack Overflow)
+  'gleam.toml': {
+    frameworks: ['Gleam', 'BEAM', 'Erlang'],
+    slots: {
+      mainLanguage: 'Gleam',
+      runtime: 'BEAM',
+      packageManager: 'Gleam'
+    },
+    priority: 30,
+    intelligence: 'high'
+  },
+
+  // Bun - Ultra-fast JS Runtime Config
+  'bunfig.toml': {
+    frameworks: ['Bun'],
+    slots: {
+      runtime: 'Bun',
+      packageManager: 'Bun',
+      buildTool: 'Bun'
+    },
+    priority: 30,
+    intelligence: 'high'
+  },
+
+  // mise - Modern Version Manager (replaced asdf/rtx)
+  'mise.toml': {
+    frameworks: ['mise'],
+    slots: {},
+    priority: 25,
+    intelligence: 'high'
+  },
+
+  '.mise.toml': {
+    frameworks: ['mise'],
+    slots: {},
+    priority: 25,
+    intelligence: 'high'
+  },
+
+  // Flox - Nix-based Development Environments
+  'manifest.toml': {
+    frameworks: ['Flox', 'Nix'],
+    slots: {},
+    priority: 25,
+    intelligence: 'high',
+    confirmWith: ['.flox']
+  },
+
+  // Just - Command Runner (10k+ GitHub stars, Rust ecosystem)
+  'justfile': {
+    frameworks: ['Just'],
+    slots: {
+      buildTool: 'Just'
+    },
+    priority: 25,
+    intelligence: 'high'
+  },
+
+  // Pre-commit - Git Hooks Framework (industry standard)
+  '.pre-commit-config.yaml': {
+    frameworks: ['pre-commit'],
+    slots: {
+      cicd: 'pre-commit'
+    },
+    priority: 25,
+    intelligence: 'high'
   }
 };
 
