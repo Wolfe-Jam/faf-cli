@@ -220,7 +220,28 @@ export async function generateFafFromProject(
     ...packageData.devDependencies
   };
 
-  const isCLI = packageData.bin ||
+  // 🦀 RUST CLI DETECTION: Check Cargo.toml for [[bin]] section
+  let isRustCLI = false;
+  let cargoTomlData: any = {};
+  const cargoTomlPath = path.join(projectRoot, 'Cargo.toml');
+  try {
+    const cargoContent = await fs.readFile(cargoTomlPath, 'utf-8');
+    // Detect CLI: [[bin]] section or clap/structopt dependencies
+    isRustCLI = cargoContent.includes('[[bin]]') ||
+                cargoContent.includes('clap') ||
+                cargoContent.includes('structopt') ||
+                cargoContent.includes('argh');
+    // Extract name from Cargo.toml
+    const nameMatch = cargoContent.match(/^name\s*=\s*"([^"]+)"/m);
+    if (nameMatch) cargoTomlData.name = nameMatch[1];
+    const descMatch = cargoContent.match(/^description\s*=\s*"([^"]+)"/m);
+    if (descMatch) cargoTomlData.description = descMatch[1];
+  } catch {
+    // No Cargo.toml or can't read it
+  }
+
+  // Node.js CLI detection
+  const isNodeCLI = packageData.bin ||
                 packageData.name?.includes('cli') ||
                 packageData.keywords?.includes('cli') ||
                 packageData.keywords?.includes('command-line') ||
@@ -229,7 +250,33 @@ export async function generateFafFromProject(
                 deps?.oclif ||
                 deps?.inquirer;
 
-  if (isCLI) {
+  const isCLI = isNodeCLI || isRustCLI;
+
+  // 🦀 RUST CLI: Smart slot assignment
+  if (isRustCLI) {
+    contextSlotsFilled['framework'] = 'CLI';
+    contextSlotsFilled['api_type'] = 'CLI';
+    contextSlotsFilled['hosting'] = 'crates.io / Binary distribution';
+    contextSlotsFilled['backend'] = 'Rust';
+    contextSlotsFilled['main_language'] = 'Rust';
+    contextSlotsFilled['build_tool'] = 'Cargo';
+    contextSlotsFilled['package_manager'] = 'Cargo';
+    contextSlotsFilled['runtime'] = 'Native binary';
+    // Set N/A for non-applicable slots (reduces slot count for CLI)
+    contextSlotsFilled['css_framework'] = 'N/A (CLI)';
+    contextSlotsFilled['ui_library'] = 'N/A (CLI)';
+    contextSlotsFilled['database'] = 'N/A (CLI)';
+    contextSlotsFilled['frontend'] = 'N/A (CLI)';
+    // Cargo.toml overrides
+    if (cargoTomlData.name && !contextSlotsFilled['project_name']) {
+      contextSlotsFilled['project_name'] = cargoTomlData.name;
+    }
+    if (cargoTomlData.description && !contextSlotsFilled['project_goal']) {
+      contextSlotsFilled['project_goal'] = cargoTomlData.description;
+    }
+  }
+
+  if (isNodeCLI) {
     // Smart slot reuse for CLI projects
     contextSlotsFilled['framework'] = 'CLI';  // frontend = CLI
     contextSlotsFilled['api_type'] = 'CLI';

@@ -82,11 +82,26 @@ function detectKeyFiles(data: any): string[] {
     files.push('App.vue', 'main.ts');
   } else if (data.mainLanguage?.toLowerCase().includes('python')) {
     files.push('main.py', 'requirements.txt');
+  } else if (data.mainLanguage?.toLowerCase().includes('rust')) {
+    // 🦀 RUST PROJECTS: Cargo.toml and src/main.rs or src/lib.rs
+    files.push('Cargo.toml', 'src/main.rs');
+    if (data.projectType === 'cli' || data.framework?.toLowerCase().includes('cli')) {
+      files.push('src/commands/', 'README.md');
+    }
+  } else if (data.mainLanguage?.toLowerCase().includes('go')) {
+    // 🐹 GO PROJECTS: go.mod and main.go
+    files.push('go.mod', 'main.go', 'cmd/');
+  } else if (data.mainLanguage?.toLowerCase().includes('zig')) {
+    // ⚡ ZIG PROJECTS: build.zig and src/main.zig
+    files.push('build.zig', 'src/main.zig');
   }
-  
+
   // 🐍 PYTHON CONTEXT-ON-DEMAND: Add appropriate config files
-  if (!data.mainLanguage?.toLowerCase().includes('python')) {
-    // Only add JS/TS files for non-Python projects
+  // Only add JS/TS files for JavaScript/TypeScript projects
+  const isJsTs = data.mainLanguage?.toLowerCase().includes('javascript') ||
+                 data.mainLanguage?.toLowerCase().includes('typescript') ||
+                 (!data.mainLanguage || data.mainLanguage === 'Unknown');
+  if (isJsTs && !data.mainLanguage?.toLowerCase().includes('python')) {
     files.push('package.json', 'tsconfig.json');
   }
   return files.slice(0, 5); // Max 5 files
