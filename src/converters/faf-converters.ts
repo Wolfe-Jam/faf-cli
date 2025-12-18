@@ -5,8 +5,7 @@
  */
 
 import * as fs from 'fs';
-import * as path from 'path';
-import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
+import { parse as parseYAML } from '../fix-once/yaml';
 
 export interface FafData {
   ai_scoring_system?: string;
@@ -73,11 +72,11 @@ export function fafToMarkdown(fafPath: string): string {
   // PODIUM Status
   const score = parseInt(data.ai_score?.replace('%', '') || '0');
   let podium = '';
-  if (score >= 105) podium = '🏆 TROPHY (Big Orange!)';
-  else if (score >= 99) podium = '🥇 GOLD';
-  else if (score >= 95) podium = '🥈 SILVER';
-  else if (score >= 85) podium = '🥉 BRONZE';
-  else podium = '🏗️ BUILDING';
+  if (score >= 105) {podium = '🏆 TROPHY (Big Orange!)';}
+  else if (score >= 99) {podium = '🥇 GOLD';}
+  else if (score >= 95) {podium = '🥈 SILVER';}
+  else if (score >= 85) {podium = '🥉 BRONZE';}
+  else {podium = '🏗️ BUILDING';}
 
   md += `## 🏁 PODIUM Status: ${podium}\n\n`;
 
@@ -128,11 +127,11 @@ export function fafToText(fafPath: string): string {
   const score = parseInt(data.ai_score?.replace('%', '') || '0');
   txt += `PODIUM STATUS\n`;
   txt += `-------------\n`;
-  if (score >= 105) txt += 'TROPHY - Big Orange Achievement!\n';
-  else if (score >= 99) txt += 'GOLD - Championship Ready!\n';
-  else if (score >= 95) txt += 'SILVER - Excellent Foundation!\n';
-  else if (score >= 85) txt += 'BRONZE - Good Progress!\n';
-  else txt += 'BUILDING - Keep Going!\n';
+  if (score >= 105) {txt += 'TROPHY - Big Orange Achievement!\n';}
+  else if (score >= 99) {txt += 'GOLD - Championship Ready!\n';}
+  else if (score >= 95) {txt += 'SILVER - Excellent Foundation!\n';}
+  else if (score >= 85) {txt += 'BRONZE - Good Progress!\n';}
+  else {txt += 'BUILDING - Keep Going!\n';}
 
   txt += `\n---\n`;
   txt += `Generated from .faf YAML\n`;
@@ -154,8 +153,9 @@ export function saveConversion(fafPath: string, format: 'md' | 'txt'): string {
 
     fs.writeFileSync(outputPath, converted);
     return outputPath;
-  } catch (error: any) {
-    throw new Error(`Conversion failed: ${error.message}`);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`Conversion failed: ${message}`);
   }
 }
 

@@ -184,7 +184,7 @@ export async function countFiles(
 ): Promise<number> {
   let count = 0;
 
-  for await (const _file of streamFiles(dir, { extensions })) {
+  for await (const _ of streamFiles(dir, { extensions })) {
     count++;
   }
 

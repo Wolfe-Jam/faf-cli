@@ -98,7 +98,7 @@ export class NativeCliParser {
   /**
    * Add help text (commander compatibility)
    */
-  addHelpText(position: 'before' | 'after', text: string): this {
+  addHelpText(_position: 'before' | 'after', _text: string): this {
     // For now, we'll just store this but not display it
     // Could be enhanced later to actually show the text
     return this;
@@ -124,7 +124,7 @@ export class NativeCliParser {
    * Add a command
    */
   command(nameAndArgs: string): CommandBuilder {
-    const [name, ...argDefs] = nameAndArgs.split(' ');
+    const [name, ..._argDefs] = nameAndArgs.split(' ');
     const command: CommandDefinition = {
       name,
       fullSignature: nameAndArgs, // Store full signature for optional arg detection
@@ -149,9 +149,9 @@ export class NativeCliParser {
 
     for (const part of parts) {
       if (part.startsWith('--')) {
-        longFlag = part.slice(2).split(/[\s<\[]/)[0];
+        longFlag = part.slice(2).split(/[\s<[]/)[0];
       } else if (part.startsWith('-')) {
-        shortFlag = part.slice(1).split(/[\s<\[]/)[0];
+        shortFlag = part.slice(1).split(/[\s<[]/)[0];
       }
     }
 
@@ -258,7 +258,7 @@ export class NativeCliParser {
               i + 1 < args.length &&
               !args[i + 1].startsWith('-')) {
             // Could be a value
-            const nextArg = args[i + 1];
+            const _nextArg = args[i + 1];
             // Simple heuristic: if the flag typically takes a value, consume it
             if (!this.isBooleanFlag(longFlag)) {
               result.options[longFlag] = this.parseValue(args[++i]);
@@ -383,11 +383,11 @@ export class NativeCliParser {
    * Helper to parse values (string, number, boolean)
    */
   private parseValue(value: string): any {
-    if (value === 'true') return true;
-    if (value === 'false') return false;
+    if (value === 'true') {return true;}
+    if (value === 'false') {return false;}
     // Handle negative numbers and positive numbers
-    if (/^-?\d+$/.test(value)) return parseInt(value, 10);
-    if (/^-?\d*\.\d+$/.test(value)) return parseFloat(value);
+    if (/^-?\d+$/.test(value)) {return parseInt(value, 10);}
+    if (/^-?\d*\.\d+$/.test(value)) {return parseFloat(value);}
     return value;
   }
 
@@ -492,7 +492,7 @@ class CommandBuilder {
     return this;
   }
 
-  addHelpText(position: 'before' | 'after', text: string): this {
+  addHelpText(_position: 'before' | 'after', _text: string): this {
     // Commander compatibility - store but don't display for now
     return this;
   }

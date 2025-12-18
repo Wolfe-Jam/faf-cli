@@ -5,7 +5,7 @@
 
 import { chalk } from "../fix-once/colors";
 import { promises as fs } from "fs";
-import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
+import { parse as parseYAML } from '../fix-once/yaml';
 import path from "path";
 import { findFafFile, findPackageJson } from "../utils/file-utils";
 import { FAF_COLORS } from "../utils/championship-style";
@@ -47,9 +47,10 @@ export async function syncFafFile(file?: string, options: SyncOptions = {}) {
         console.log(chalk.dim(`   📁 Backup saved: ${backupPath}`));
 
         // Convert markdown to YAML
-        fafData = await convertMarkdownFafToYaml(content, fafPath);
+        fafData = await convertMarkdownFafToYaml(content);
 
         // Write new YAML format
+        const { stringify: stringifyYAML } = require('../fix-once/yaml');
         const yamlContent = stringifyYAML(fafData);
         await fs.writeFile(fafPath, yamlContent, 'utf-8');
 
@@ -129,6 +130,7 @@ export async function syncFafFile(file?: string, options: SyncOptions = {}) {
     fafData.generated = new Date().toISOString();
 
     // Write updated .faf file
+    const { stringify: stringifyYAML } = require('../fix-once/yaml');
     const updatedContent = stringifyYAML(fafData);
     await fs.writeFile(fafPath, updatedContent, "utf-8");
 
@@ -379,7 +381,7 @@ function setNestedValue(obj: any, path: string, value: any): void {
 /**
  * Convert legacy markdown-style .faf to proper YAML format
  */
-async function convertMarkdownFafToYaml(content: string, fafPath: string): Promise<any> {
+async function convertMarkdownFafToYaml(content: string): Promise<any> {
   // Extract key info from markdown format
   const lines = content.split('\n');
   const projectLine = lines.find(l => l.startsWith('project:'));
@@ -400,7 +402,7 @@ async function convertMarkdownFafToYaml(content: string, fafPath: string): Promi
       inContext = false;
     }
     if (inContext && line.trim()) {
-      contextText += line.trim() + ' ';
+      contextText += `${line.trim()  } `;
     }
   }
 
@@ -425,14 +427,14 @@ async function convertMarkdownFafToYaml(content: string, fafPath: string): Promi
   let language = 'TypeScript';
   const stackStr = stackLines.join(' ').toLowerCase();
 
-  if (stackStr.includes('svelte')) framework = 'SvelteKit';
-  else if (stackStr.includes('react')) framework = 'React';
-  else if (stackStr.includes('vue')) framework = 'Vue';
-  else if (stackStr.includes('angular')) framework = 'Angular';
+  if (stackStr.includes('svelte')) {framework = 'SvelteKit';}
+  else if (stackStr.includes('react')) {framework = 'React';}
+  else if (stackStr.includes('vue')) {framework = 'Vue';}
+  else if (stackStr.includes('angular')) {framework = 'Angular';}
 
-  if (stackStr.includes('typescript')) language = 'TypeScript';
-  else if (stackStr.includes('javascript')) language = 'JavaScript';
-  else if (stackStr.includes('python')) language = 'Python';
+  if (stackStr.includes('typescript')) {language = 'TypeScript';}
+  else if (stackStr.includes('javascript')) {language = 'JavaScript';}
+  else if (stackStr.includes('python')) {language = 'Python';}
 
   // Build proper YAML structure
   return {

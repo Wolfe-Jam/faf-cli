@@ -256,19 +256,19 @@ export class ArtRenderer {
    */
   button(text: string, selected: boolean = false): string {
     const padding = 2;
-    const width = text.length + (padding * 2);
+    const _width = text.length + (padding * 2);
 
     if (selected) {
       return (
-        ART_ANSI.bgBlue + ART_ANSI.brightWhite + ART_ANSI.bold +
-        '[' + ' '.repeat(padding) + text + ' '.repeat(padding) + ']' +
-        ART_ANSI.reset
+        `${ART_ANSI.bgBlue + ART_ANSI.brightWhite + ART_ANSI.bold 
+        }[${  ' '.repeat(padding)  }${text  }${' '.repeat(padding)  }]${ 
+        ART_ANSI.reset}`
       );
     } else {
       return (
-        this.theme.primary +
-        '[' + ' '.repeat(padding) + text + ' '.repeat(padding) + ']' +
-        ART_ANSI.reset
+        `${this.theme.primary 
+        }[${  ' '.repeat(padding)  }${text  }${' '.repeat(padding)  }]${ 
+        ART_ANSI.reset}`
       );
     }
   }

@@ -40,7 +40,7 @@ export async function convertCommand(fafPath?: string, options: ConvertOptions =
       // Show preview
       const content = fs.readFileSync(outputPath, 'utf-8');
       console.log(chalk.gray('\n--- Preview ---'));
-      console.log(content.substring(0, 500) + '...');
+      console.log(`${content.substring(0, 500)  }...`);
     } else {
       // Output to console
       const converted = convertFaf(resolvedPath, options);
@@ -55,8 +55,8 @@ export async function convertCommand(fafPath?: string, options: ConvertOptions =
       console.log(chalk.gray('💡 Use --save to write to file'));
     }
 
-  } catch (error: any) {
-    console.error(chalk.red(`❌ Conversion failed: ${error.message}`));
+  } catch (error) {
+    console.error(chalk.red(`❌ Conversion failed: ${error instanceof Error ? error.message : String(error)}`));
     process.exit(1);
   }
 }

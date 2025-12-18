@@ -5,7 +5,7 @@
 
 // Helper function to restore markdown formatting from escaped YAML
 export function unescapeFromYaml(value: string): string {
-  if (!value) return value;
+  if (!value) {return value;}
 
   // Remove surrounding quotes if present
   let unquoted = value;

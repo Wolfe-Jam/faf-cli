@@ -7,9 +7,7 @@
 
 import { chalk } from "../fix-once/colors";
 import { promises as fs } from "fs";
-import * as path from "path";
-import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
-import { findFafFile } from "../utils/file-utils";
+import { stringify as stringifyYAML } from '../fix-once/yaml';
 // Removed unused imports
 
 export interface EnhanceOptions {
@@ -23,8 +21,8 @@ export interface EnhanceOptions {
  * Claude-First, Big-3 Compatible AI Enhancement
  */
 export async function enhanceFafWithAI(
-  file?: string,
-  options: EnhanceOptions = {},
+  _file?: string,
+  _options: EnhanceOptions = {},
 ): Promise<void> {
   // MAINTENANCE MODE - Temporarily disabled for improvements
   console.log();
@@ -113,7 +111,7 @@ function getModelDisplay(model: string): string {
 /**
  * Detect enhancement focus based on .faf analysis
  */
-function detectEnhancementFocus(fafData: any): string {
+function _detectEnhancementFocus(fafData: any): string {
   const score = parseInt(fafData.ai_score?.replace('%', '')) || fafData.scores?.faf_score || 0;
   
   // Claude-first analysis priorities
@@ -136,7 +134,7 @@ function detectEnhancementFocus(fafData: any): string {
 /**
  * Generate Claude-first, model-specific enhancement prompt
  */
-function generateEnhancementPrompt(fafData: any, focus: string, model: string): string {
+function _generateEnhancementPrompt(fafData: any, focus: string, model: string): string {
   const modelInstructions = {
     'claude': 'You are Claude, the championship AI. Focus on F1-inspired engineering excellence and revolutionary content.',
     'chatgpt': 'You are ChatGPT. Focus on clear communication and practical improvements.',
@@ -181,7 +179,7 @@ Provide the enhanced .faf file as clean YAML (no markdown backticks needed).`;
 /**
  * Execute Big-3 Compatible AI Enhancement (Claude-first architecture)
  */
-async function executeBig3Enhancement(
+async function _executeBig3Enhancement(
   fafPath: string,
   fafData: any,
   focus: string,

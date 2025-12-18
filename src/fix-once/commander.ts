@@ -6,7 +6,7 @@
  */
 
 // Toggle this to switch between commander and native
-const USE_NATIVE = true;
+const _USE_NATIVE = true;
 
 // 🏎️ NATIVE PARSER - ZERO DEPENDENCIES!
 export { program, Command } from '../utils/native-cli-parser';

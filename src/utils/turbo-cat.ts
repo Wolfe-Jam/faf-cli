@@ -231,30 +231,30 @@ export class TurboCat {
       const detectedFrameworks: string[] = [];
 
       // TIER 1: Essential metadata (30 points)
-      if (pkg.name) score += 10;
-      if (pkg.description) score += 10;
-      if (pkg.version) score += 5;
-      if (pkg.author || pkg.license) score += 5;
+      if (pkg.name) {score += 10;}
+      if (pkg.description) {score += 10;}
+      if (pkg.version) {score += 5;}
+      if (pkg.author || pkg.license) {score += 5;}
 
       // TIER 2: Scripts showing development maturity (30 points)
       const scripts = pkg.scripts || {};
-      if (scripts.dev || scripts.start) score += 10;
-      if (scripts.build) score += 10;
-      if (scripts.test || scripts.check) score += 10;
+      if (scripts.dev || scripts.start) {score += 10;}
+      if (scripts.build) {score += 10;}
+      if (scripts.test || scripts.check) {score += 10;}
 
       // TIER 3: Dependencies showing tech stack (40 points)
       const depCount = Object.keys(allDeps).length;
-      if (depCount >= 15) score += 20;
-      else if (depCount >= 8) score += 15;
-      else if (depCount >= 3) score += 10;
-      else if (depCount >= 1) score += 5;
+      if (depCount >= 15) {score += 20;}
+      else if (depCount >= 8) {score += 15;}
+      else if (depCount >= 3) {score += 10;}
+      else if (depCount >= 1) {score += 5;}
 
       // TIER 4: Modern toolchain detection (50 points)
-      if (allDeps['typescript'] || allDeps['@types/node']) score += 10;
-      if (allDeps['vite'] || allDeps['webpack'] || allDeps['rollup']) score += 10;
-      if (allDeps['vitest'] || allDeps['jest'] || allDeps['playwright']) score += 10;
-      if (allDeps['eslint'] || allDeps['prettier']) score += 10;
-      if (allDeps['tailwindcss'] || allDeps['@emotion/styled']) score += 10;
+      if (allDeps['typescript'] || allDeps['@types/node']) {score += 10;}
+      if (allDeps['vite'] || allDeps['webpack'] || allDeps['rollup']) {score += 10;}
+      if (allDeps['vitest'] || allDeps['jest'] || allDeps['playwright']) {score += 10;}
+      if (allDeps['eslint'] || allDeps['prettier']) {score += 10;}
+      if (allDeps['tailwindcss'] || allDeps['@emotion/styled']) {score += 10;}
 
       // TIER 5: Framework detection (MASSIVE BONUS: 50 points)
       if (allDeps['svelte'] || allDeps['@sveltejs/kit']) {
@@ -333,24 +333,33 @@ export class TurboCat {
 
       // 🏎️ F1-OPTIMIZATION: Fast validation with early exit
       switch (format.formatType) {
-        case 'requirements.txt':
+        case 'requirements.txt': {
           return content.split('\n').some(line => line.trim() && !line.startsWith('#'));
-        case 'svelte.config.js':
+        }
+        case 'svelte.config.js': {
           return content.includes('svelte') || content.includes('@sveltejs');
-        case 'tsconfig.json':
+        }
+        case 'tsconfig.json': {
           return content.includes('compilerOptions');
-        case 'Dockerfile':
+        }
+        case 'Dockerfile': {
           return content.includes('FROM');
-        case '.py':
+        }
+        case '.py': {
           return content.length > 10; // Quick length check
-        case '.ts':
+        }
+        case '.ts': {
           return content.includes('import') || content.includes('export') || content.includes('interface');
-        case '.svelte':
+        }
+        case '.svelte': {
           return content.includes('<script') || content.includes('<template');
-        case '.js':
+        }
+        case '.js': {
           return content.includes('function') || content.includes('const') || content.includes('import');
-        default:
+        }
+        default: {
           return content.length > 0;
+        }
       }
     } catch {
       return false; // File issues = not confirmed

@@ -156,7 +156,7 @@ async function generateShareableVersion(sanitizedData: any, options: ShareComman
         size: sanitizedData ? JSON.stringify(sanitizedData).length : 0
       };
       
-    default: // yaml
+    default: { // yaml
       const yamlContent = stringifyYAML(sanitizedData, { indent: 2 });
       return {
         format: 'yaml',
@@ -164,6 +164,7 @@ async function generateShareableVersion(sanitizedData: any, options: ShareComman
         filename: `shared-context-${generateShareId()}.faf`,
         size: yamlContent.length
       };
+    }
   }
 }
 

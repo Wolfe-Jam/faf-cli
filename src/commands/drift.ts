@@ -9,7 +9,7 @@ import { execSync } from 'child_process';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { chalk } from '../fix-once/colors';
-import { FAF_COLORS, FAF_ICONS } from '../utils/championship-style';
+import { FAF_COLORS } from '../utils/championship-style';
 import { findFafFile } from '../utils/file-utils';
 import { FafCompiler } from '../compiler/faf-compiler';
 
@@ -130,7 +130,7 @@ function getGitLog(projectDir: string, since?: string): string {
     const sinceFlag = since ? `--since="${since}"` : '--all';
     const cmd = `git log ${sinceFlag} --numstat --date=short --pretty=format:"%H|%ad|%s"`;
     return execSync(cmd, { cwd: projectDir, encoding: 'utf-8', maxBuffer: 10 * 1024 * 1024 });
-  } catch (error) {
+  } catch {
     return '';
   }
 }
@@ -476,18 +476,18 @@ function displayDriftAnalysis(analysis: DriftAnalysis): void {
     const typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
     const changeSuffix = typeEvents.length > 1 ? 's' : '';
 
-    console.log(`${emoji} ${FAF_COLORS.fafOrange(typeLabel + ' (' + typeEvents.length + ' change' + changeSuffix + ')')}`);
+    console.log(`${emoji} ${FAF_COLORS.fafOrange(`${typeLabel} (${typeEvents.length} change${changeSuffix})`)}`);
 
     for (let i = 0; i < typeEvents.length; i++) {
       const event = typeEvents[i];
       const prefix = i === typeEvents.length - 1 ? '└─' : '├─';
-      console.log('   ' + FAF_COLORS.fafCyan(prefix) + ' ' + event.description);
+      console.log(`   ${FAF_COLORS.fafCyan(prefix)} ${event.description}`);
       if (event.filesChanged > 0) {
-        console.log('      ' + event.filesChanged + ' files changed');
+        console.log(`      ${event.filesChanged} files changed`);
       }
     }
 
-    console.log('   Drift Cost: ' + FAF_COLORS.fafOrange(typeEvents[0].estimatedCost));
+    console.log(`   Drift Cost: ${FAF_COLORS.fafOrange(typeEvents[0].estimatedCost)}`);
     console.log();
   }
 
@@ -495,10 +495,10 @@ function displayDriftAnalysis(analysis: DriftAnalysis): void {
   console.log();
   console.log(FAF_COLORS.fafOrange('DRIFT SUMMARY:'));
   console.log();
-  console.log('Total Drift Events: ' + FAF_COLORS.fafOrange(summary.totalEvents.toString()));
-  console.log('Files Rewritten: ' + FAF_COLORS.fafOrange(summary.filesRewritten.toString()));
-  console.log('Cascade-Fix Commits: ' + FAF_COLORS.fafOrange(summary.cascadeFixCommits.toString()));
-  console.log('Estimated Time Lost: ' + FAF_COLORS.fafOrange(summary.estimatedTimeLost));
+  console.log(`Total Drift Events: ${FAF_COLORS.fafOrange(summary.totalEvents.toString())}`);
+  console.log(`Files Rewritten: ${FAF_COLORS.fafOrange(summary.filesRewritten.toString())}`);
+  console.log(`Cascade-Fix Commits: ${FAF_COLORS.fafOrange(summary.cascadeFixCommits.toString())}`);
+  console.log(`Estimated Time Lost: ${FAF_COLORS.fafOrange(summary.estimatedTimeLost)}`);
   console.log();
   console.log(FAF_COLORS.fafCyan('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'));
   console.log();
@@ -515,8 +515,8 @@ function displayDriftAnalysis(analysis: DriftAnalysis): void {
 
   const riskEmoji = futureRisk.level === 'high' ? '🔴' : futureRisk.level === 'medium' ? '🟡' : '🟢';
   const riskLabel = futureRisk.level.toUpperCase();
-  console.log('Risk Level: ' + riskEmoji + ' ' + FAF_COLORS.fafOrange(riskLabel));
-  console.log('Next drift event likely within: ' + futureRisk.nextEventLikely);
+  console.log(`Risk Level: ${riskEmoji} ${FAF_COLORS.fafOrange(riskLabel)}`);
+  console.log(`Next drift event likely within: ${futureRisk.nextEventLikely}`);
   console.log();
   console.log(FAF_COLORS.fafCyan('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'));
   console.log();
@@ -534,10 +534,10 @@ function displayDriftAnalysis(analysis: DriftAnalysis): void {
 
   console.log();
   console.log('You would have:');
-  console.log('✓ Zero rewrites (saved ' + FAF_COLORS.fafGreen(prevention.weeksSaved) + ')');
+  console.log(`✓ Zero rewrites (saved ${FAF_COLORS.fafGreen(prevention.weeksSaved)})`);
   console.log('✓ Consistent architecture from start');
-  console.log('✓ ' + summary.filesRewritten + ' files never rewritten');
-  console.log('✓ Project ' + summary.estimatedTimeLost + ' ahead');
+  console.log(`✓ ${summary.filesRewritten} files never rewritten`);
+  console.log(`✓ Project ${summary.estimatedTimeLost} ahead`);
   console.log();
   console.log(FAF_COLORS.fafCyan('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'));
   console.log();
@@ -556,13 +556,13 @@ function displayDriftAnalysis(analysis: DriftAnalysis): void {
  * Get emoji for .faf score
  */
 function getFafEmoji(score: number): string {
-  if (score >= 85) return '🏆';
-  if (score >= 70) return '🥇';
-  if (score >= 55) return '🥈';
-  if (score >= 40) return '🥉';
-  if (score >= 35) return '🟢';
-  if (score >= 20) return '🟡';
-  if (score >= 10) return '🔴';
+  if (score >= 85) {return '🏆';}
+  if (score >= 70) {return '🥇';}
+  if (score >= 55) {return '🥈';}
+  if (score >= 40) {return '🥉';}
+  if (score >= 35) {return '🟢';}
+  if (score >= 20) {return '🟡';}
+  if (score >= 10) {return '🔴';}
   return '🤍';
 }
 

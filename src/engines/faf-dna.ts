@@ -173,7 +173,7 @@ export class FafDNAManager {
    * Authenticate the DNA (Birth Certificate)
    */
   async authenticate(): Promise<string> {
-    if (!this.dna) throw new Error('DNA not initialized');
+    if (!this.dna) {throw new Error('DNA not initialized');}
     
     this.dna.birthCertificate.authenticated = true;
     this.dna.birthCertificate.authDate = new Date();
@@ -186,7 +186,7 @@ export class FafDNAManager {
    * Record growth (Auto Evolution)
    */
   async recordGrowth(newScore: number, changes: string[]): Promise<VersionEntry> {
-    if (!this.dna) throw new Error('DNA not initialized');
+    if (!this.dna) {throw new Error('DNA not initialized');}
 
     // Calculate growth metrics
     const growth = newScore - this.dna.birthCertificate.birthDNA;
@@ -234,7 +234,7 @@ export class FafDNAManager {
    * Approve current version (User satisfaction)
    */
   async approve(): Promise<void> {
-    if (!this.dna) throw new Error('DNA not initialized');
+    if (!this.dna) {throw new Error('DNA not initialized');}
 
     const currentVersion = this.dna.versions.find(v => v.version === this.dna!.current.version);
     if (currentVersion) {
@@ -279,7 +279,7 @@ export class FafDNAManager {
    * Get journey display (for UI)
    */
   getJourney(format: 'compact' | 'detailed' = 'compact'): string | Milestone[] {
-    if (!this.dna) return format === 'compact' ? '' : [];
+    if (!this.dna) {return format === 'compact' ? '' : [];}
 
     const milestones = this.dna.growth.milestones;
 
@@ -333,7 +333,7 @@ export class FafDNAManager {
    * Get version log (Complete history)
    */
   getLog(): string[] {
-    if (!this.dna) return [];
+    if (!this.dna) {return [];}
 
     return this.dna.versions.map(v => {
       const growth = v.growth || 0;
@@ -375,9 +375,9 @@ export class FafDNAManager {
         
         this.dna.lastModified = new Date(this.dna.lastModified);
       }
-      
+
       return this.dna;
-    } catch (err) {
+    } catch {
       return null;
     }
   }
@@ -386,7 +386,7 @@ export class FafDNAManager {
    * Save DNA to disk
    */
   private async save(): Promise<void> {
-    if (!this.dna) return;
+    if (!this.dna) {return;}
 
     this.dna.lastModified = new Date();
     await fs.writeFile(
@@ -447,7 +447,7 @@ export class FafDNAManager {
    * Update milestones based on score
    */
   private updateMilestones(score: number, version: string): void {
-    if (!this.dna) return;
+    if (!this.dna) {return;}
 
     const milestones = this.dna.growth.milestones;
     const birthDNA = this.dna.birthCertificate.birthDNA;
@@ -539,7 +539,7 @@ export class FafDNAManager {
    * Update growth analytics
    */
   private updateAnalytics(score: number): void {
-    if (!this.dna) return;
+    if (!this.dna) {return;}
 
     const growth = score - this.dna.birthCertificate.birthDNA;
     const daysSinceBirth = this.getDaysSince(this.dna.birthCertificate.born);
@@ -572,7 +572,7 @@ export class FafDNAManager {
    * Calculate growth rate
    */
   private calculateGrowthRate(): number {
-    if (!this.dna) return 0;
+    if (!this.dna) {return 0;}
 
     const growth = this.dna.current.score - this.dna.birthCertificate.birthDNA;
     const days = this.getDaysSince(this.dna.birthCertificate.born);
@@ -595,13 +595,13 @@ export function displayScoreWithBirthDNA(
   current: number,
   birthDNA: number,
   birthDate: Date,
-  options: { showGrowth?: boolean; showJourney?: boolean } = {}
+  _options: { showGrowth?: boolean; showJourney?: boolean } = {}
 ): void {
   // Import championship medal system
   const { getScoreMedal, getTierInfo } = require('../utils/championship-core');
 
   // Get medal for current score
-  const { medal, status} = getScoreMedal(current);
+  const { medal, status } = getScoreMedal(current);
   const tierInfo = getTierInfo(current);
   const growth = current - birthDNA;
 
@@ -655,14 +655,3 @@ export function displayScoreWithBirthDNA(
   console.log('');
 }
 
-/**
- * Get emoji for score
- */
-function getScoreEmoji(score: number): string {
-  if (score >= 100) return '💎';
-  if (score >= 90) return '🏆';
-  if (score >= 85) return '⭐';
-  if (score >= 70) return '🎯';
-  if (score >= 50) return '📈';
-  return '🌱';
-}

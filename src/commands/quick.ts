@@ -122,7 +122,7 @@ export async function quickCommand(input?: string, options: QuickOptions = {}) {
     console.log(FAF_COLORS.fafWhite('Quick Summary:'));
     console.log(chalk.gray(`   📦 Project: ${projectData.projectName}`));
     console.log(chalk.gray(`   🎯 Purpose: ${projectData.projectGoal}`));
-    console.log(chalk.gray(`   💻 Stack: ${projectData.mainLanguage}${projectData.framework !== 'none' ? ' + ' + projectData.framework : ''}`));
+    console.log(chalk.gray(`   💻 Stack: ${projectData.mainLanguage}${projectData.framework !== 'none' ? ` + ${  projectData.framework}` : ''}`));
 
     console.log();
     console.log(FAF_COLORS.fafCyan('Next steps:'));
@@ -145,25 +145,25 @@ function detectProjectTypeFromQuick(data: any): string {
   const goal = data.projectGoal?.toLowerCase() || '';
 
   // Framework-based detection
-  if (framework.includes('react') || framework.includes('next')) return 'react';
-  if (framework.includes('vue') || framework.includes('nuxt')) return 'vue';
-  if (framework.includes('svelte') || framework.includes('kit')) return 'svelte';
-  if (framework.includes('angular')) return 'angular';
-  if (framework.includes('fastapi')) return 'python-fastapi';
-  if (framework.includes('django')) return 'python-django';
-  if (framework.includes('flask')) return 'python-flask';
-  if (framework.includes('express')) return 'node-api';
+  if (framework.includes('react') || framework.includes('next')) {return 'react';}
+  if (framework.includes('vue') || framework.includes('nuxt')) {return 'vue';}
+  if (framework.includes('svelte') || framework.includes('kit')) {return 'svelte';}
+  if (framework.includes('angular')) {return 'angular';}
+  if (framework.includes('fastapi')) {return 'python-fastapi';}
+  if (framework.includes('django')) {return 'python-django';}
+  if (framework.includes('flask')) {return 'python-flask';}
+  if (framework.includes('express')) {return 'node-api';}
 
   // Goal-based detection
-  if (goal.includes('chrome extension') || goal.includes('browser extension')) return 'chrome-extension';
-  if (goal.includes('api') || goal.includes('backend')) return 'node-api';
-  if (goal.includes('cli') || goal.includes('command')) return 'cli-tool';
-  if (goal.includes('library') || goal.includes('package')) return 'library';
+  if (goal.includes('chrome extension') || goal.includes('browser extension')) {return 'chrome-extension';}
+  if (goal.includes('api') || goal.includes('backend')) {return 'node-api';}
+  if (goal.includes('cli') || goal.includes('command')) {return 'cli-tool';}
+  if (goal.includes('library') || goal.includes('package')) {return 'library';}
 
   // Language-based fallback
-  if (language.includes('python')) return 'python';
-  if (language.includes('go')) return 'golang';
-  if (language.includes('rust')) return 'rust';
+  if (language.includes('python')) {return 'python';}
+  if (language.includes('go')) {return 'golang';}
+  if (language.includes('rust')) {return 'rust';}
 
   return 'latest-idea';
 }

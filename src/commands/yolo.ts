@@ -8,9 +8,8 @@
 import { chalk } from "../fix-once/colors";
 import * as fs from "fs/promises";
 import * as path from "path";
-import { findFafFile, fileExists } from "../utils/file-utils";
+import { detectProjectType, fileExists } from "../utils/file-utils";
 import { generateFafFromProject } from "../generators/faf-generator-championship";
-import { detectProjectType } from "../utils/file-utils";
 import yamlUtils from "../fix-once/yaml";
 import { FafCompiler } from "../compiler/faf-compiler";
 import { TurboCat } from "../utils/turbo-cat";
@@ -67,7 +66,7 @@ export async function yoloCommand(directory?: string, options: YoloOptions = {})
         const fafData = await fs.readFile(outputPath, 'utf-8');
         const parsed = yamlUtils.parse(fafData);
 
-        if (!parsed.stack) parsed.stack = {};
+        if (!parsed.stack) {parsed.stack = {};}
 
         // Apply all TURBO-CAT discoveries
         if (analysis.slotFillRecommendations) {
@@ -93,7 +92,7 @@ export async function yoloCommand(directory?: string, options: YoloOptions = {})
           console.log(chalk.green(`✅ TURBO-CAT: ${analysis.discoveredFormats.length} formats, ${Object.keys(analysis.slotFillRecommendations).length} slots`));
         }
       }
-    } catch (e) {
+    } catch {
       // Silent fail - non-critical
     }
 
@@ -105,7 +104,7 @@ export async function yoloCommand(directory?: string, options: YoloOptions = {})
       const fafData = await fs.readFile(outputPath, 'utf-8');
       const parsed = yamlUtils.parse(fafData);
 
-      if (!parsed.human_context) parsed.human_context = {};
+      if (!parsed.human_context) {parsed.human_context = {};}
 
       let filledCount = 0;
       const wFields = ['who', 'what', 'why', 'where', 'when', 'how'] as const;
@@ -134,14 +133,14 @@ export async function yoloCommand(directory?: string, options: YoloOptions = {})
           console.log(chalk.green(`✅ Extracted ${filledCount} human context fields (YOLO mode)`));
         }
       }
-    } catch (e) {
+    } catch {
       // Silent fail
     }
 
     // Step 5: Bi-sync CLAUDE.md (silent)
     try {
       await biSyncCommand({ auto: true, force: true });
-    } catch (e) {
+    } catch {
       // Silent fail
     }
 
@@ -151,7 +150,7 @@ export async function yoloCommand(directory?: string, options: YoloOptions = {})
       const compiler = new FafCompiler();
       const scoreResult = await compiler.compile(outputPath);
       finalScore = Math.round(scoreResult.score || 0);
-    } catch (e) {
+    } catch {
       // Fallback
     }
 
@@ -163,11 +162,11 @@ export async function yoloCommand(directory?: string, options: YoloOptions = {})
 
     // Medal display
     let medal = '🔴';
-    if (finalScore >= 99) medal = '🏆';
-    else if (finalScore >= 95) medal = '🥇';
-    else if (finalScore >= 85) medal = '🥈';
-    else if (finalScore >= 70) medal = '🥉';
-    else if (finalScore >= 55) medal = '🟡';
+    if (finalScore >= 99) {medal = '🏆';}
+    else if (finalScore >= 95) {medal = '🥇';}
+    else if (finalScore >= 85) {medal = '🥈';}
+    else if (finalScore >= 70) {medal = '🥉';}
+    else if (finalScore >= 55) {medal = '🟡';}
 
     console.log(chalk.white(`${medal} ${targetDir.split('/').pop()}`));
 

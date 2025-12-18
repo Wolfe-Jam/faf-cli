@@ -4,7 +4,7 @@
  * The 50/50 eternal truth: AI detects tech (50%), humans provide meaning (50%)
  */
 
-import { colors, bars, formatScore } from '../fix-once/colors';
+import { colors, bars } from '../fix-once/colors';
 
 export interface BalanceData {
   aiPercentage: number;
@@ -103,16 +103,9 @@ export class BalanceVisualizer {
 
     // Calculate proportional split (matching fafdev.tools logic)
     const totalContext = aiPercentage + humanPercentage;
-    let aiProportion: number;
-    let humanProportion: number;
-
-    if (totalContext === 0) {
-      aiProportion = 50;
-      humanProportion = 50;
-    } else {
-      aiProportion = Math.round((aiPercentage / totalContext) * 100);
-      humanProportion = 100 - aiProportion;
-    }
+    const aiProportion = totalContext === 0
+      ? 50
+      : Math.round((aiPercentage / totalContext) * 100);
 
     // Build the visual bar
     const lines: string[] = [];

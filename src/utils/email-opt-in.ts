@@ -74,7 +74,7 @@ async function subscribeEmail(email: string): Promise<boolean> {
         });
 
         return true;
-    } catch (error) {
+    } catch {
         return false;
     }
 }
@@ -129,8 +129,8 @@ export async function promptEmailOptIn(options: { quiet?: boolean } = {}): Promi
                 name: 'email',
                 message: 'Your email:',
                 validate: (input: string) => {
-                    if (!input) return 'Email is required';
-                    if (!input.includes('@')) return 'Please enter a valid email';
+                    if (!input) {return 'Email is required';}
+                    if (!input.includes('@')) {return 'Please enter a valid email';}
                     return true;
                 }
             }

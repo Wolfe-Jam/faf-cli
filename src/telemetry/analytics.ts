@@ -6,11 +6,11 @@
 import * as os from 'os';
 import * as path from 'path';
 import * as fs from 'fs/promises';
-import { FAF_COLORS, FAF_ICONS } from '../utils/championship-style';
+import { FAF_COLORS } from '../utils/championship-style';
 
 // Telemetry configuration
 const TELEMETRY_ENABLED = process.env.FAF_TELEMETRY !== 'false';
-const TELEMETRY_ENDPOINT = 'https://telemetry.faf.one/v1/events';
+const _TELEMETRY_ENDPOINT = 'https://telemetry.faf.one/v1/events'; // Reserved for future use
 const SESSION_ID = generateSessionId();
 
 interface TelemetryEvent {

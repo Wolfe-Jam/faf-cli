@@ -1,12 +1,13 @@
+/* eslint-env jest */
 /**
  * 🔍 FAF Edge Case Audit Test Suite
  * Critical tests to prevent "faf" vs ".faf" confusion from ever returning
- * 
+ *
  * CONTEXT: We discovered critical edge cases where:
  * - Directories like "faf-engine/" were mistaken for .faf files
  * - Backup files like ".faf.backup-123" could be picked up
  * - Cache directories could conflict with user .faf files
- * 
+ *
  * This test suite ensures these issues NEVER return.
  */
 

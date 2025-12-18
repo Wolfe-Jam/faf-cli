@@ -31,27 +31,27 @@ export async function selectFromMultiple(
   const choices = repos.map((repo, index) => {
     const meta = metadata?.get(`${repo.owner}/${repo.repo}`);
 
-    let displayName = `[${index + 1}] ${repo.owner}/${repo.repo}`;
+    const displayName = `[${index + 1}] ${repo.owner}/${repo.repo}`;
     let description = '';
 
     if (meta) {
       // Add description
       if (meta.description) {
         description += chalk.gray(meta.description.substring(0, 60));
-        if (meta.description.length > 60) description += chalk.gray('...');
+        if (meta.description.length > 60) {description += chalk.gray('...');}
       }
 
       // Add stats
       const stats: string[] = [];
-      if (meta.stars) stats.push(`⭐ ${meta.stars}`);
-      if (meta.license) stats.push(`📄 ${meta.license}`);
+      if (meta.stars) {stats.push(`⭐ ${meta.stars}`);}
+      if (meta.license) {stats.push(`📄 ${meta.license}`);}
       if (meta.languages && meta.languages.length > 0) {
         const mainLang = meta.languages[0].split(' ')[0];
         stats.push(`🔧 ${mainLang}`);
       }
 
       if (stats.length > 0) {
-        description += '\n       ' + chalk.gray(stats.join('  '));
+        description += `\n       ${  chalk.gray(stats.join('  '))}`;
       }
     } else {
       // Fallback to registry data
@@ -104,7 +104,7 @@ export async function selectFromMultiple(
       selected: [answer.selection],
       cancelled: false
     };
-  } catch (error) {
+  } catch {
     // User cancelled (Ctrl+C)
     return {
       selected: [],
@@ -136,7 +136,7 @@ export async function confirmTypoCorrection(
     ]);
 
     return answer.confirmed;
-  } catch (error) {
+  } catch {
     // User cancelled
     return false;
   }
@@ -255,13 +255,13 @@ export function showExtractionSuccess(
 
   // Show score with podium emoji
   let emoji = '🤍';
-  if (score >= 85) emoji = '🏆';
-  else if (score >= 70) emoji = '🥇';
-  else if (score >= 55) emoji = '🥈';
-  else if (score >= 40) emoji = '🥉';
-  else if (score >= 35) emoji = '🟢';
-  else if (score >= 20) emoji = '🟡';
-  else if (score >= 10) emoji = '🔴';
+  if (score >= 85) {emoji = '🏆';}
+  else if (score >= 70) {emoji = '🥇';}
+  else if (score >= 55) {emoji = '🥈';}
+  else if (score >= 40) {emoji = '🥉';}
+  else if (score >= 35) {emoji = '🟢';}
+  else if (score >= 20) {emoji = '🟡';}
+  else if (score >= 10) {emoji = '🔴';}
 
   console.log(FAF_COLORS.fafOrange(`${emoji} Quality Score: ${score}%`));
   console.log();

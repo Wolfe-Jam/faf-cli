@@ -13,7 +13,7 @@ import {
 } from '../utils/championship-style';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
+import { parse as parseYAML } from '../fix-once/yaml';
 
 export interface TodoCommandOptions {
   show?: boolean;    // Show current todo list
@@ -107,7 +107,7 @@ async function generateImprovementPlan(fafPath: string): Promise<void> {
  */
 function displayTodoList(todoList: TodoList): void {
   const engine = createClaudeTodoEngine();
-  const progress = engine.getProgress(todoList);
+  const _progress = engine.getProgress(todoList);
   
   console.log();
   console.log(`┌─────────────────────────────────────────┐`);

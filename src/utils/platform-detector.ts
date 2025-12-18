@@ -5,7 +5,6 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import * as os from 'os';
 
 export interface PlatformInfo {
   platform: string;
@@ -102,7 +101,9 @@ export class PlatformDetector {
               if (fs.existsSync(filePath)) {
                 foundIndicators.push(indicator);
               }
-            } catch {}
+            } catch {
+              // File doesn't exist or not accessible - continue checking other indicators
+            }
           } else {
             // Check environment variables
             const envVar = indicator.replace('process.env.', '');

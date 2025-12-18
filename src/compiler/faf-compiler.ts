@@ -6,7 +6,7 @@
  * Result: Pure, traceable, reproducible scores
  */
 
-import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
+import { parse as parseYAML } from '../fix-once/yaml';
 import * as crypto from 'crypto';
 import { ChromeExtensionDetector } from '../utils/chrome-extension-detector';
 import { FabFormatsProcessor } from '../engines/fab-formats-processor';
@@ -601,7 +601,7 @@ function getSlotsForType(projectType: string): string[] {
  */
 function parseSlotIgnore(ast: any): string[] {
   const slotIgnore = ast.slot_ignore || ast.slotIgnore || ast.ignore_slots;
-  if (!slotIgnore) return [];
+  if (!slotIgnore) {return [];}
 
   // Handle array format
   if (Array.isArray(slotIgnore)) {
@@ -622,12 +622,12 @@ function parseSlotIgnore(ast: any): string[] {
  */
 function normalizeSlotName(slot: string): string {
   // Already has prefix
-  if (slot.includes('.')) return slot;
+  if (slot.includes('.')) {return slot;}
 
   // Check each category for the slot
-  for (const [category, slots] of Object.entries(ALL_SLOTS)) {
+  for (const [_category, slots] of Object.entries(ALL_SLOTS)) {
     const fullSlot = slots.find(s => s.endsWith(`.${slot}`));
-    if (fullSlot) return fullSlot;
+    if (fullSlot) {return fullSlot;}
   }
 
   // Return as-is if not found (will be ignored)
@@ -932,13 +932,13 @@ export class FafCompiler {
       const ctx = analysis.context;
 
       // Map discovered items (WITHOUT modifying original)
-      if (ctx.projectName) discovered.projectName = ctx.projectName;
-      if (ctx.mainLanguage) discovered.mainLanguage = ctx.mainLanguage;
-      if (ctx.framework) discovered.framework = ctx.framework;
-      if (ctx.database) discovered.database = ctx.database;
-      if (ctx.backend) discovered.backend = ctx.backend;
-      if (ctx.hosting) discovered.hosting = ctx.hosting;
-      if (ctx.buildTool) discovered.buildTool = ctx.buildTool;
+      if (ctx.projectName) {discovered.projectName = ctx.projectName;}
+      if (ctx.mainLanguage) {discovered.mainLanguage = ctx.mainLanguage;}
+      if (ctx.framework) {discovered.framework = ctx.framework;}
+      if (ctx.database) {discovered.database = ctx.database;}
+      if (ctx.backend) {discovered.backend = ctx.backend;}
+      if (ctx.hosting) {discovered.hosting = ctx.hosting;}
+      if (ctx.buildTool) {discovered.buildTool = ctx.buildTool;}
     }
 
     return discovered;
@@ -1046,12 +1046,12 @@ export class FafCompiler {
     // Special handling for certain project types (auto-fill missing values)
     // Chrome Extension: auto-fill technical context
     if (projectType === 'chrome-extension') {
-      if (!ast.stack) ast.stack = {};
-      if (!ast.stack.runtime) ast.stack.runtime = 'Chrome/Browser';
-      if (!ast.stack.hosting) ast.stack.hosting = 'Chrome Web Store';
-      if (!ast.stack.api_type) ast.stack.api_type = 'Chrome Extension APIs';
-      if (!ast.stack.backend) ast.stack.backend = 'Service Worker';
-      if (!ast.stack.database) ast.stack.database = 'chrome.storage API';
+      if (!ast.stack) {ast.stack = {};}
+      if (!ast.stack.runtime) {ast.stack.runtime = 'Chrome/Browser';}
+      if (!ast.stack.hosting) {ast.stack.hosting = 'Chrome Web Store';}
+      if (!ast.stack.api_type) {ast.stack.api_type = 'Chrome Extension APIs';}
+      if (!ast.stack.backend) {ast.stack.backend = 'Service Worker';}
+      if (!ast.stack.database) {ast.stack.database = 'chrome.storage API';}
 
       // Add auto-filled slots (only if they're in the active slots list)
       const chromeSlots = ['stack.runtime', 'stack.hosting', 'stack.api_type', 'stack.backend', 'stack.database'];
@@ -1064,26 +1064,26 @@ export class FafCompiler {
 
     // Static HTML: auto-fill technical context
     if (projectType === 'static-html' || projectType === 'landing-page') {
-      if (!ast.stack) ast.stack = {};
-      if (!ast.stack.frontend) ast.stack.frontend = 'HTML/CSS/JavaScript';
-      if (!ast.stack.runtime) ast.stack.runtime = 'Browser';
-      if (!ast.stack.hosting) ast.stack.hosting = 'Static Hosting';
-      if (!ast.stack.build) ast.stack.build = 'Direct HTML (no build step)';
+      if (!ast.stack) {ast.stack = {};}
+      if (!ast.stack.frontend) {ast.stack.frontend = 'HTML/CSS/JavaScript';}
+      if (!ast.stack.runtime) {ast.stack.runtime = 'Browser';}
+      if (!ast.stack.hosting) {ast.stack.hosting = 'Static Hosting';}
+      if (!ast.stack.build) {ast.stack.build = 'Direct HTML (no build step)';}
     }
 
     // n8n Workflow: auto-fill technical context
     if (projectType === 'n8n-workflow') {
-      if (!ast.project) ast.project = {};
+      if (!ast.project) {ast.project = {};}
       if (!ast.project.main_language) {
         ast.project.main_language = ast.tech_stack?.primary_language || 'JSON (workflow definition)';
       }
-      if (!ast.stack) ast.stack = {};
-      if (!ast.stack.runtime) ast.stack.runtime = ast.tech_stack?.workflow_engine || 'n8n';
-      if (!ast.stack.backend) ast.stack.backend = 'Node.js (n8n server)';
-      if (!ast.stack.api_type) ast.stack.api_type = 'Webhooks + HTTP';
-      if (!ast.stack.database) ast.stack.database = ast.tech_stack?.infrastructure?.vector_db || 'Workflow State';
-      if (!ast.stack.hosting) ast.stack.hosting = 'n8n Cloud';
-      if (!ast.stack.build) ast.stack.build = 'n8n Visual Editor';
+      if (!ast.stack) {ast.stack = {};}
+      if (!ast.stack.runtime) {ast.stack.runtime = ast.tech_stack?.workflow_engine || 'n8n';}
+      if (!ast.stack.backend) {ast.stack.backend = 'Node.js (n8n server)';}
+      if (!ast.stack.api_type) {ast.stack.api_type = 'Webhooks + HTTP';}
+      if (!ast.stack.database) {ast.stack.database = ast.tech_stack?.infrastructure?.vector_db || 'Workflow State';}
+      if (!ast.stack.hosting) {ast.stack.hosting = 'n8n Cloud';}
+      if (!ast.stack.build) {ast.stack.build = 'n8n Visual Editor';}
     }
 
     // Discovered slots (if any) - only add if slot is active and not already filled
@@ -1147,7 +1147,7 @@ export class FafCompiler {
 
   private isSlotFilled(value: any): boolean {
     // Handle null, undefined, false explicitly
-    if (value === null || value === undefined || value === false) return false;
+    if (value === null || value === undefined || value === false) {return false;}
 
     if (typeof value === 'string') {
       // Also treat string representations of null/undefined as empty
@@ -1174,7 +1174,7 @@ export class FafCompiler {
 
     if (typeof value === 'object') {
       // Arrays and objects need content
-      if (Array.isArray(value)) return value.length > 0;
+      if (Array.isArray(value)) {return value.length > 0;}
       return Object.keys(value).length > 0;
     }
 
@@ -1186,7 +1186,7 @@ export class FafCompiler {
     let current = ast;
 
     for (const part of parts) {
-      if (!current || !current[part]) return false;
+      if (!current || !current[part]) {return false;}
       current = current[part];
     }
 
@@ -1257,7 +1257,7 @@ export class FafCompiler {
 
     // Language-based defaults
     if (mainLanguage === 'python') {
-      if (ast.stack?.frontend) return 'fullstack';
+      if (ast.stack?.frontend) {return 'fullstack';}
       return 'python-app'; // Could be CLI, API, or data science
     }
 
@@ -1296,7 +1296,7 @@ export class FafCompiler {
 
       const sec = sections[sectionKey];
       sec.total++;
-      if (slot.filled) sec.filled++;
+      if (slot.filled) {sec.filled++;}
 
       sec.slots.push({
         id: slot.id,
@@ -1342,7 +1342,7 @@ export class FafCompiler {
   }
 
   private calculateScore(slots: { filled: number; total: number }): number {
-    if (slots.total === 0) return 0;
+    if (slots.total === 0) {return 0;}
     return (slots.filled / slots.total) * 100;
   }
 
@@ -1436,7 +1436,7 @@ export class FafCompiler {
       console.log(`\n❌ ${byType.error.length} Errors:`);
       byType.error.forEach(d => {
         console.log(`  ${d.message}`);
-        if (d.suggestion) console.log(`    → ${d.suggestion}`);
+        if (d.suggestion) {console.log(`    → ${d.suggestion}`);}
       });
     }
 
@@ -1444,7 +1444,7 @@ export class FafCompiler {
       console.log(`\n⚠️ ${byType.warning.length} Warnings:`);
       byType.warning.forEach(d => {
         console.log(`  ${d.message}`);
-        if (d.suggestion) console.log(`    → ${d.suggestion}`);
+        if (d.suggestion) {console.log(`    → ${d.suggestion}`);}
       });
     }
 

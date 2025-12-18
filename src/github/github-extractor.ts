@@ -43,12 +43,12 @@ export function parseGitHubUrl(url: string): { owner: string; repo: string } | n
     // owner/repo
 
     // Strip query parameters and hash fragments first
-    let cleanedUrl = url.split('?')[0].split('#')[0];
+    const cleanedUrl = url.split('?')[0].split('#')[0];
 
     // First, check if it's actually a GitHub URL (if it contains a domain)
     if (cleanedUrl.includes('://') || cleanedUrl.includes('.com')) {
       // Extract domain to validate it's GitHub
-      const domainMatch = cleanedUrl.match(/^(?:https?:\/\/)?(?:www\.)?([^\/]+)/);
+      const domainMatch = cleanedUrl.match(/^(?:https?:\/\/)?(?:www\.)?([^/]+)/);
       if (domainMatch && domainMatch[1] !== 'github.com') {
         return null; // Not a GitHub URL
       }
@@ -80,7 +80,7 @@ export function parseGitHubUrl(url: string): { owner: string; repo: string } | n
     }
 
     return null;
-  } catch (error) {
+  } catch {
     return null;
   }
 }
@@ -106,6 +106,7 @@ export async function fetchGitHubMetadata(
 
     if (!response.ok) {
       if (response.status === 404) {
+        // File does not exist
         throw new Error(`Repository ${owner}/${repo} not found`);
       }
       if (response.status === 403) {
@@ -203,6 +204,7 @@ async function checkFileExists(
 
     return response.ok;
   } catch {
+    // File does not exist or error occurred
     return false;
   }
 }
@@ -301,13 +303,13 @@ export function detectStackFromMetadata(metadata: GitHubMetadata): string[] {
 
   // From file presence
   if (metadata.hasPackageJson) {
-    if (!stacks.includes('Node.js')) stacks.push('Node.js');
+    if (!stacks.includes('Node.js')) {stacks.push('Node.js');}
   }
   if (metadata.hasTsConfig) {
-    if (!stacks.includes('TypeScript')) stacks.push('TypeScript');
+    if (!stacks.includes('TypeScript')) {stacks.push('TypeScript');}
   }
   if (metadata.hasDockerfile) {
-    if (!stacks.includes('Docker')) stacks.push('Docker');
+    if (!stacks.includes('Docker')) {stacks.push('Docker');}
   }
 
   return stacks;
@@ -321,24 +323,24 @@ export function calculateRepoQualityScore(metadata: GitHubMetadata): number {
 
   // Stars (max 30 points)
   const stars = parseStars(metadata.stars);
-  if (stars >= 10000) score += 30;
-  else if (stars >= 5000) score += 25;
-  else if (stars >= 1000) score += 20;
-  else if (stars >= 500) score += 15;
-  else if (stars >= 100) score += 10;
-  else if (stars >= 10) score += 5;
+  if (stars >= 10000) {score += 30;}
+  else if (stars >= 5000) {score += 25;}
+  else if (stars >= 1000) {score += 20;}
+  else if (stars >= 500) {score += 15;}
+  else if (stars >= 100) {score += 10;}
+  else if (stars >= 10) {score += 5;}
 
   // Has description (10 points)
-  if (metadata.description && metadata.description.length > 10) score += 10;
+  if (metadata.description && metadata.description.length > 10) {score += 10;}
 
   // Has topics (10 points)
-  if (metadata.topics && metadata.topics.length > 0) score += 10;
+  if (metadata.topics && metadata.topics.length > 0) {score += 10;}
 
   // Has license (10 points)
-  if (metadata.license) score += 10;
+  if (metadata.license) {score += 10;}
 
   // Has README (10 points)
-  if (metadata.readme) score += 10;
+  if (metadata.readme) {score += 10;}
 
   // Recent activity (10 points)
   if (metadata.lastUpdated) {
@@ -346,22 +348,22 @@ export function calculateRepoQualityScore(metadata: GitHubMetadata): number {
     const now = new Date();
     const daysSinceUpdate = (now.getTime() - lastUpdate.getTime()) / (1000 * 60 * 60 * 24);
 
-    if (daysSinceUpdate < 30) score += 10;
-    else if (daysSinceUpdate < 90) score += 7;
-    else if (daysSinceUpdate < 180) score += 5;
-    else if (daysSinceUpdate < 365) score += 3;
+    if (daysSinceUpdate < 30) {score += 10;}
+    else if (daysSinceUpdate < 90) {score += 7;}
+    else if (daysSinceUpdate < 180) {score += 5;}
+    else if (daysSinceUpdate < 365) {score += 3;}
   }
 
   // Has package.json (5 points)
-  if (metadata.hasPackageJson) score += 5;
+  if (metadata.hasPackageJson) {score += 5;}
 
   // Has TypeScript (5 points)
-  if (metadata.hasTsConfig) score += 5;
+  if (metadata.hasTsConfig) {score += 5;}
 
   // Language diversity (10 points)
   if (metadata.languages) {
-    if (metadata.languages.length >= 3) score += 10;
-    else if (metadata.languages.length >= 2) score += 5;
+    if (metadata.languages.length >= 3) {score += 10;}
+    else if (metadata.languages.length >= 2) {score += 5;}
   }
 
   return Math.min(100, score);
@@ -371,15 +373,15 @@ export function calculateRepoQualityScore(metadata: GitHubMetadata): number {
  * Parse star count string to number
  */
 function parseStars(stars?: string): number {
-  if (!stars) return 0;
+  if (!stars) {return 0;}
 
   const match = stars.match(/^([\d.]+)([KM]?)$/);
-  if (!match) return 0;
+  if (!match) {return 0;}
 
   const num = parseFloat(match[1]);
   const suffix = match[2];
 
-  if (suffix === 'K') return num * 1000;
-  if (suffix === 'M') return num * 1_000_000;
+  if (suffix === 'K') {return num * 1000;}
+  if (suffix === 'M') {return num * 1_000_000;}
   return num;
 }

@@ -88,7 +88,7 @@ export function calculateStats(taf: TAFFile): TAFStats {
  * MCP-portable: pure function
  */
 export function calculateScoreContribution(taf: TAFFile): TAFScoreContribution {
-  let taf_present = 5; // File exists
+  const taf_present = 5; // File exists
   let taf_validated = 0;
   let pass_rate_bonus = 0;
 
@@ -119,10 +119,10 @@ export function calculateScoreContribution(taf: TAFFile): TAFScoreContribution {
  * MCP-portable: pure function
  */
 function getHealthScore(pass_rate: number): string {
-  if (pass_rate >= 0.95) return '🏆'; // Trophy: 95%+
-  if (pass_rate >= 0.85) return '🥇'; // Gold: 85%+
-  if (pass_rate >= 0.70) return '🥈'; // Silver: 70%+
-  if (pass_rate >= 0.50) return '🥉'; // Bronze: 50%+
+  if (pass_rate >= 0.95) {return '🏆';} // Trophy: 95%+
+  if (pass_rate >= 0.85) {return '🥇';} // Gold: 85%+
+  if (pass_rate >= 0.70) {return '🥈';} // Silver: 70%+
+  if (pass_rate >= 0.50) {return '🥉';} // Bronze: 50%+
   return '🤍'; // White heart: <50%
 }
 
@@ -132,20 +132,20 @@ function getHealthScore(pass_rate: number): string {
  */
 export function getPassRateTrend(taf: TAFFile, window: number = 10): string {
   const runs = taf.test_history;
-  if (runs.length < 2) return 'stable';
+  if (runs.length < 2) {return 'stable';}
 
   const recent = runs.slice(-window);
   const older = runs.slice(-window * 2, -window);
 
-  if (older.length === 0) return 'stable';
+  if (older.length === 0) {return 'stable';}
 
   const recentPassRate = recent.filter(r => r.result === 'PASSED').length / recent.length;
   const olderPassRate = older.filter(r => r.result === 'PASSED').length / older.length;
 
   const diff = recentPassRate - olderPassRate;
 
-  if (diff > 0.1) return 'improving';
-  if (diff < -0.1) return 'declining';
+  if (diff > 0.1) {return 'improving';}
+  if (diff < -0.1) {return 'declining';}
   return 'stable';
 }
 

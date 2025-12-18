@@ -10,8 +10,6 @@ import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml
 import {
   FAF_ICONS,
   FAF_COLORS,
-  BRAND_MESSAGES,
-  formatPerformance,
   generateFAFHeader
 } from "../utils/championship-style";
 import { autoAwardCredit } from "../utils/technical-credit";
@@ -24,7 +22,6 @@ import { FafCompiler } from "../compiler/faf-compiler";
 import { createDefaultFafIgnore } from "../utils/fafignore-parser";
 import { BalanceVisualizer } from "../utils/balance-visualizer";
 import { FafDNAManager, displayScoreWithBirthDNA } from "../engines/faf-dna";
-import { fabFormatsProcessor } from "../engines/fab-formats-processor";
 import { PlatformDetector } from "../utils/platform-detector";
 import { promptEmailOptIn } from "../utils/email-opt-in";
 
@@ -128,7 +125,7 @@ export async function initFafFile(
             packageJson.files.push(fafFileName);
             await fs.writeFile(
               packageJsonPath,
-              JSON.stringify(packageJson, null, 2) + '\n',
+              `${JSON.stringify(packageJson, null, 2)  }\n`,
               'utf-8'
             );
             console.log(chalk.green(`   ☑️ Updated package.json to include ${fafFileName} in published files`));
@@ -139,7 +136,7 @@ export async function initFafFile(
           // "files" exists but is not an array - warn user
           console.log(chalk.yellow(`   ⚠️  package.json "files" field is not an array - please add "${path.basename(outputPath)}" manually`));
         }
-      } catch (error) {
+      } catch {
         // Silent fail - not critical if package.json update fails
         // Could be malformed JSON, permission issue, etc.
         console.log(chalk.gray('   ℹ️  Could not auto-update package.json (manual edit may be needed)'));
@@ -169,7 +166,8 @@ export async function initFafFile(
     const fafData = parseYAML(fafContent);
     const compiler = new FafCompiler();
     const scoreResult = await compiler.compile(outputPath);
-    const birthDNA = fafData.faf_score ? parseInt(fafData.faf_score.replace('%', '')) : Math.round(scoreResult.score || 0);
+    const _birthDNA = fafData.faf_score ? parseInt(fafData.faf_score.replace('%', '')) : Math.round(scoreResult.score || 0);
+    const birthDNA = _birthDNA;
     const currentScore = birthDNA; // At init, current = birth
 
     // Check if CLAUDE.md exists for tracking purposes

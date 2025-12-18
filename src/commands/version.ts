@@ -3,7 +3,7 @@
  */
 
 import { chalk } from "../fix-once/colors";
-import { FAF_COLORS, generateFAFHeader } from "../utils/championship-style";
+import { FAF_COLORS } from "../utils/championship-style";
 
 export async function versionCommand() {
   // FAF banner is now shown by cli.ts - removed duplicate

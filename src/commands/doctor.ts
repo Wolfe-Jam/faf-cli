@@ -6,7 +6,7 @@
 import { chalk } from '../fix-once/colors';
 import { promises as fs } from 'fs';
 import * as path from 'path';
-import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
+import { parse as parseYAML } from '../fix-once/yaml';
 import { findFafFile, fileExists } from '../utils/file-utils';
 import { FAF_COLORS, FAF_ICONS } from '../utils/championship-style';
 import { FafCompiler } from '../compiler/faf-compiler';
@@ -65,8 +65,8 @@ export async function doctorCommand(): Promise<void> {
       } else {
         // Check for required fields
         const missingFields = [];
-        if (!fafData.project?.name) missingFields.push('project.name');
-        if (!fafData.project?.goal) missingFields.push('project.goal');
+        if (!fafData.project?.name) {missingFields.push('project.name');}
+        if (!fafData.project?.goal) {missingFields.push('project.goal');}
 
         if (missingFields.length > 0) {
           results.push({
@@ -105,7 +105,7 @@ export async function doctorCommand(): Promise<void> {
           });
         }
       }
-    } catch (error) {
+    } catch {
       results.push({
         status: 'error',
         message: '.faf file is corrupted or invalid YAML',
@@ -182,8 +182,8 @@ export async function doctorCommand(): Promise<void> {
       console.log(chalk.gray(`   💡 ${result.fix}`));
     }
 
-    if (result.status === 'error') hasErrors = true;
-    if (result.status === 'warning') hasWarnings = true;
+    if (result.status === 'error') {hasErrors = true;}
+    if (result.status === 'warning') {hasWarnings = true;}
   }
 
   // Summary

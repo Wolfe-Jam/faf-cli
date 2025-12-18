@@ -8,7 +8,7 @@
 
 import { promises as fs } from 'fs';
 import * as path from 'path';
-import { KNOWLEDGE_BASE, FormatKnowledge } from './turbo-cat-knowledge';
+import { KNOWLEDGE_BASE } from './turbo-cat-knowledge';
 
 export interface FabFormatsResult {
   fileName: string;
@@ -45,8 +45,6 @@ export class FabFormatsEngine {
    * STAGE 1: DISCOVER - Find all formats in directory (FAST)
    */
   async discoverFormats(projectDir: string): Promise<FabFormatsAnalysis> {
-    const startTime = Date.now();
-
     // Reset for new scan
     this.processedCategories.clear();
 
@@ -98,9 +96,10 @@ export class FabFormatsEngine {
         }
 
         const parentDir = path.dirname(currentDir);
-        if (parentDir === currentDir) break;
+        if (parentDir === currentDir) {break;}
         currentDir = parentDir;
       } catch {
+        // Skip unreadable directories
         break;
       }
     }
@@ -150,48 +149,48 @@ export class FabFormatsEngine {
    */
   private categorizeFile(fileName: string): string {
     // Chrome Extension Files (highest priority for extensions)
-    if (fileName === 'manifest.json') return 'chrome-extension';
+    if (fileName === 'manifest.json') {return 'chrome-extension';}
 
     // Package Management Files (only one per project)
-    if (fileName === 'package.json') return 'package-manager';
-    if (fileName === 'Cargo.toml') return 'package-manager';
-    if (fileName === 'requirements.txt' || fileName === 'requirements.in') return 'package-manager';
-    if (fileName === 'pyproject.toml') return 'package-manager';
-    if (fileName === 'pom.xml') return 'package-manager';
-    if (fileName === 'build.gradle' || fileName === 'build.gradle.kts') return 'package-manager';
-    if (fileName === 'Pipfile') return 'package-manager';
-    if (fileName === 'composer.json') return 'package-manager';
+    if (fileName === 'package.json') {return 'package-manager';}
+    if (fileName === 'Cargo.toml') {return 'package-manager';}
+    if (fileName === 'requirements.txt' || fileName === 'requirements.in') {return 'package-manager';}
+    if (fileName === 'pyproject.toml') {return 'package-manager';}
+    if (fileName === 'pom.xml') {return 'package-manager';}
+    if (fileName === 'build.gradle' || fileName === 'build.gradle.kts') {return 'package-manager';}
+    if (fileName === 'Pipfile') {return 'package-manager';}
+    if (fileName === 'composer.json') {return 'package-manager';}
 
     // Documentation Files (one main README/REQUIREMENTS)
-    if (fileName === 'README.md' || fileName === 'README.rst' || fileName === 'README.txt') return 'documentation';
-    if (fileName === 'REQUIREMENTS.md' || fileName === 'REQUIREMENTS.rst' || fileName === 'REQUIREMENTS.txt') return 'requirements';
+    if (fileName === 'README.md' || fileName === 'README.rst' || fileName === 'README.txt') {return 'documentation';}
+    if (fileName === 'REQUIREMENTS.md' || fileName === 'REQUIREMENTS.rst' || fileName === 'REQUIREMENTS.txt') {return 'requirements';}
 
     // Configuration Files (one per type)
-    if (fileName === 'tsconfig.json') return 'typescript-config';
-    if (fileName === 'svelte.config.js' || fileName === 'svelte.config.ts') return 'svelte-config';
-    if (fileName === 'vite.config.js' || fileName === 'vite.config.ts') return 'vite-config';
-    if (fileName === 'next.config.js' || fileName === 'next.config.mjs') return 'next-config';
-    if (fileName === 'nuxt.config.js' || fileName === 'nuxt.config.ts') return 'nuxt-config';
-    if (fileName === 'astro.config.mjs' || fileName === 'astro.config.js') return 'astro-config';
+    if (fileName === 'tsconfig.json') {return 'typescript-config';}
+    if (fileName === 'svelte.config.js' || fileName === 'svelte.config.ts') {return 'svelte-config';}
+    if (fileName === 'vite.config.js' || fileName === 'vite.config.ts') {return 'vite-config';}
+    if (fileName === 'next.config.js' || fileName === 'next.config.mjs') {return 'next-config';}
+    if (fileName === 'nuxt.config.js' || fileName === 'nuxt.config.ts') {return 'nuxt-config';}
+    if (fileName === 'astro.config.mjs' || fileName === 'astro.config.js') {return 'astro-config';}
 
     // Testing Configuration
-    if (fileName === 'vitest.config.ts' || fileName === 'vitest.config.js') return 'test-config';
-    if (fileName === 'jest.config.js' || fileName === 'jest.config.ts') return 'test-config';
-    if (fileName === 'playwright.config.js' || fileName === 'playwright.config.ts') return 'test-config';
+    if (fileName === 'vitest.config.ts' || fileName === 'vitest.config.js') {return 'test-config';}
+    if (fileName === 'jest.config.js' || fileName === 'jest.config.ts') {return 'test-config';}
+    if (fileName === 'playwright.config.js' || fileName === 'playwright.config.ts') {return 'test-config';}
 
     // Linting Configuration
-    if (fileName.startsWith('.eslintrc') || fileName === 'eslint.config.js') return 'lint-config';
-    if (fileName === '.prettierrc' || fileName === 'prettier.config.js') return 'lint-config';
+    if (fileName.startsWith('.eslintrc') || fileName === 'eslint.config.js') {return 'lint-config';}
+    if (fileName === '.prettierrc' || fileName === 'prettier.config.js') {return 'lint-config';}
 
     // Deployment Configuration
-    if (fileName === 'Dockerfile' || fileName.startsWith('Dockerfile.')) return 'docker-config';
-    if (fileName === 'docker-compose.yml' || fileName === 'docker-compose.yaml') return 'docker-compose-config';
-    if (fileName === 'vercel.json') return 'vercel-config';
-    if (fileName === 'netlify.toml') return 'netlify-config';
+    if (fileName === 'Dockerfile' || fileName.startsWith('Dockerfile.')) {return 'docker-config';}
+    if (fileName === 'docker-compose.yml' || fileName === 'docker-compose.yaml') {return 'docker-compose-config';}
+    if (fileName === 'vercel.json') {return 'vercel-config';}
+    if (fileName === 'netlify.toml') {return 'netlify-config';}
 
     // FAF Files - HIGHEST PRIORITY!
-    if (fileName === '.faf') return 'faf-context';
-    if (fileName === 'CLAUDE.md') return 'claude-context';
+    if (fileName === '.faf') {return 'faf-context';}
+    if (fileName === 'CLAUDE.md') {return 'claude-context';}
 
     // Default: use file extension as category
     const ext = fileName.substring(fileName.lastIndexOf('.'));
@@ -229,7 +228,7 @@ export class FabFormatsEngine {
     // Process remaining files
     for (const [category, filePath] of categorizedFiles) {
       const result = await this.processFile(filePath, category);
-      if (result) results.push(result);
+      if (result) {results.push(result);}
     }
 
     return results;
@@ -275,11 +274,11 @@ export class FabFormatsEngine {
 
     // Detect frameworks
     const frameworks: string[] = [];
-    if (allDeps['svelte'] || allDeps['@sveltejs/kit']) frameworks.push('Svelte');
-    if (allDeps['react'] || allDeps['next']) frameworks.push('React');
-    if (allDeps['vue'] || allDeps['nuxt']) frameworks.push('Vue');
-    if (allDeps['@angular/core']) frameworks.push('Angular');
-    if (allDeps['astro']) frameworks.push('Astro');
+    if (allDeps['svelte'] || allDeps['@sveltejs/kit']) {frameworks.push('Svelte');}
+    if (allDeps['react'] || allDeps['next']) {frameworks.push('React');}
+    if (allDeps['vue'] || allDeps['nuxt']) {frameworks.push('Vue');}
+    if (allDeps['@angular/core']) {frameworks.push('Angular');}
+    if (allDeps['astro']) {frameworks.push('Astro');}
 
     return {
       fileName: 'package.json',
@@ -336,10 +335,10 @@ export class FabFormatsEngine {
 
     const allDeps = { ...packageData.dependencies, ...packageData.devDependencies };
     let modernTools = 0;
-    if (allDeps['typescript'] || allDeps['@types/node']) modernTools++;
-    if (allDeps['vite'] || allDeps['webpack'] || allDeps['rollup']) modernTools++;
-    if (allDeps['jest'] || allDeps['vitest'] || allDeps['playwright']) modernTools++;
-    if (allDeps['eslint'] || allDeps['prettier']) modernTools++;
+    if (allDeps['typescript'] || allDeps['@types/node']) {modernTools++;}
+    if (allDeps['vite'] || allDeps['webpack'] || allDeps['rollup']) {modernTools++;}
+    if (allDeps['jest'] || allDeps['vitest'] || allDeps['playwright']) {modernTools++;}
+    if (allDeps['eslint'] || allDeps['prettier']) {modernTools++;}
 
     if (modernTools >= 3) {
       exceptionalCount++; criteria.push('Modern development toolchain');
@@ -347,9 +346,9 @@ export class FabFormatsEngine {
 
     // Framework sophistication
     let frameworkSophistication = 0;
-    if (allDeps['svelte'] || allDeps['react'] || allDeps['vue'] || allDeps['next'] || allDeps['nuxt']) frameworkSophistication++;
-    if (allDeps['@sveltejs/kit'] || allDeps['next'] || allDeps['nuxt']) frameworkSophistication++;
-    if (allDeps['tailwindcss'] || allDeps['styled-components']) frameworkSophistication++;
+    if (allDeps['svelte'] || allDeps['react'] || allDeps['vue'] || allDeps['next'] || allDeps['nuxt']) {frameworkSophistication++;}
+    if (allDeps['@sveltejs/kit'] || allDeps['next'] || allDeps['nuxt']) {frameworkSophistication++;}
+    if (allDeps['tailwindcss'] || allDeps['styled-components']) {frameworkSophistication++;}
 
     if (frameworkSophistication >= 2) {
       exceptionalCount++; criteria.push('Sophisticated framework stack');
@@ -365,10 +364,10 @@ export class FabFormatsEngine {
     }
 
     let professionalCount = 0;
-    if (packageData.name && packageData.description) professionalCount++;
-    if (totalDeps >= 8) professionalCount++;
-    if (modernTools >= 2) professionalCount++;
-    if (scriptKeys.length >= 3) professionalCount++;
+    if (packageData.name && packageData.description) {professionalCount++;}
+    if (totalDeps >= 8) {professionalCount++;}
+    if (modernTools >= 2) {professionalCount++;}
+    if (scriptKeys.length >= 3) {professionalCount++;}
 
     if (professionalCount >= 3 || exceptionalCount >= 3) {
       return { grade: 'PROFESSIONAL', baseScore: 85, criteria };
@@ -393,9 +392,9 @@ export class FabFormatsEngine {
   private detectFrameworks(fileName: string, content: string): string[] {
     const frameworks: string[] = [];
 
-    if (content.includes('svelte') || content.includes('@sveltejs')) frameworks.push('Svelte');
-    if (content.includes('react') || content.includes('React')) frameworks.push('React');
-    if (content.includes('vue') || content.includes('Vue')) frameworks.push('Vue');
+    if (content.includes('svelte') || content.includes('@sveltejs')) {frameworks.push('Svelte');}
+    if (content.includes('react') || content.includes('React')) {frameworks.push('React');}
+    if (content.includes('vue') || content.includes('Vue')) {frameworks.push('Vue');}
 
     return frameworks;
   }
@@ -422,6 +421,7 @@ export class FabFormatsEngine {
       extractedContext.hasTypeScript = packageJson.intelligence.hasTypeScript;
 
       // Generate slot recommendations
+      const _confidence = packageJson.intelligence.hasTypeScript ? 'HIGH' : 'LOW';
       if (packageJson.intelligence.hasTypeScript) {
         slotFillRecommendations.mainLanguage = 'TypeScript';
       }
@@ -432,8 +432,9 @@ export class FabFormatsEngine {
 
     // Generate stack signature
     const stackParts: string[] = [];
-    if (extractedContext.hasTypeScript) stackParts.push('typescript');
-    else if (packageJson) stackParts.push('javascript');
+    const _stack = extractedContext.frameworks || []; // Internal stack reference
+    if (extractedContext.hasTypeScript) {stackParts.push('typescript');}
+    else if (packageJson) {stackParts.push('javascript');}
     if (extractedContext.frameworks?.length > 0) {
       stackParts.push(extractedContext.frameworks[0].toLowerCase());
     }

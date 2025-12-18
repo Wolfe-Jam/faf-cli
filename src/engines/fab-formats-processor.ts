@@ -89,7 +89,6 @@ export class FabFormatsProcessor {
     // Stage 2: Process - Extract intelligence with deduplication
     const results: ProcessedFileResult[] = [];
     let totalBonus = 0;
-    let highestGrade = 'MINIMAL';
 
     for (const filePath of files) {
       const result = await this.processFile(filePath);
@@ -104,7 +103,7 @@ export class FabFormatsProcessor {
 
     // Stage 3: Analysis - Generate quality metrics
     const qualityMetrics = {
-      highestGrade,
+      highestGrade: 'MINIMAL',
       averageScore: results.length > 0 ? totalBonus / results.length : 0,
       filesCovered: results.length,
       intelligenceDepth: this.calculateDepth()
@@ -148,7 +147,7 @@ export class FabFormatsProcessor {
     // Check project directory and up to 3 levels up (unless in monorepo)
     let currentDir = projectDir;
     for (let level = 0; level < 4; level++) {
-      if (visited.has(currentDir)) break;
+      if (visited.has(currentDir)) {break;}
       visited.add(currentDir);
 
       try {
@@ -174,9 +173,9 @@ export class FabFormatsProcessor {
 
         // Move up one directory
         const parentDir = path.dirname(currentDir);
-        if (parentDir === currentDir) break;
+        if (parentDir === currentDir) {break;}
         currentDir = parentDir;
-      } catch (err) {
+      } catch {
         // Directory not accessible, continue
         break;
       }
@@ -307,7 +306,7 @@ export class FabFormatsProcessor {
       } else {
         return this.processGenericFile(fileName, content);
       }
-    } catch (err) {
+    } catch {
       return null;
     }
   }
@@ -317,41 +316,41 @@ export class FabFormatsProcessor {
    */
   private categorizeFile(fileName: string): string {
     // Package managers (only one per project)
-    if (fileName === 'package.json') return 'package-manager';
-    if (fileName === 'Cargo.toml') return 'package-manager-rust';
-    if (fileName === 'requirements.txt') return 'package-manager-python';
-    if (fileName === 'pyproject.toml') return 'package-manager-python-modern';
-    if (fileName === 'go.mod') return 'package-manager-go';
-    if (fileName === 'build.zig') return 'package-manager-zig';
-    if (fileName === 'pom.xml') return 'package-manager-java';
-    if (fileName === 'build.gradle') return 'package-manager-gradle';
-    if (fileName === 'Gemfile') return 'package-manager-ruby';
-    if (fileName === 'composer.json') return 'package-manager-php';
+    if (fileName === 'package.json') {return 'package-manager';}
+    if (fileName === 'Cargo.toml') {return 'package-manager-rust';}
+    if (fileName === 'requirements.txt') {return 'package-manager-python';}
+    if (fileName === 'pyproject.toml') {return 'package-manager-python-modern';}
+    if (fileName === 'go.mod') {return 'package-manager-go';}
+    if (fileName === 'build.zig') {return 'package-manager-zig';}
+    if (fileName === 'pom.xml') {return 'package-manager-java';}
+    if (fileName === 'build.gradle') {return 'package-manager-gradle';}
+    if (fileName === 'Gemfile') {return 'package-manager-ruby';}
+    if (fileName === 'composer.json') {return 'package-manager-php';}
 
     // Config files (one per type)
-    if (fileName === 'tsconfig.json') return 'typescript-config';
-    if (fileName.includes('vite.config')) return 'vite-config';
-    if (fileName.includes('webpack.config')) return 'webpack-config';
-    if (fileName.includes('jest.config')) return 'test-config';
-    if (fileName.includes('vitest.config')) return 'test-config-vite';
-    if (fileName.includes('eslint')) return 'lint-config';
-    if (fileName.includes('prettier')) return 'format-config';
+    if (fileName === 'tsconfig.json') {return 'typescript-config';}
+    if (fileName.includes('vite.config')) {return 'vite-config';}
+    if (fileName.includes('webpack.config')) {return 'webpack-config';}
+    if (fileName.includes('jest.config')) {return 'test-config';}
+    if (fileName.includes('vitest.config')) {return 'test-config-vite';}
+    if (fileName.includes('eslint')) {return 'lint-config';}
+    if (fileName.includes('prettier')) {return 'format-config';}
 
     // Docker (one of each)
-    if (fileName === 'Dockerfile') return 'docker-config';
-    if (fileName.includes('docker-compose')) return 'docker-compose-config';
+    if (fileName === 'Dockerfile') {return 'docker-config';}
+    if (fileName.includes('docker-compose')) {return 'docker-compose-config';}
 
     // Documentation (one main)
-    if (fileName === 'README.md') return 'documentation';
-    if (fileName.includes('REQUIREMENTS')) return 'requirements-doc';
-    if (fileName.includes('LICENSE')) return 'license';
+    if (fileName === 'README.md') {return 'documentation';}
+    if (fileName.includes('REQUIREMENTS')) {return 'requirements-doc';}
+    if (fileName.includes('LICENSE')) {return 'license';}
 
     // Cloud configs
-    if (fileName === 'vercel.json') return 'vercel-config';
-    if (fileName === 'netlify.toml') return 'netlify-config';
+    if (fileName === 'vercel.json') {return 'vercel-config';}
+    if (fileName === 'netlify.toml') {return 'netlify-config';}
 
     // FAF
-    if (fileName === '.faf') return 'faf-context';
+    if (fileName === '.faf') {return 'faf-context';}
 
     // Default
     const ext = path.extname(fileName);
@@ -514,7 +513,7 @@ export class FabFormatsProcessor {
       metadata.hasTests = !!(packageData.scripts?.test);
       metadata.hasBuild = !!(packageData.scripts?.build);
 
-    } catch (err) {
+    } catch {
       // Invalid JSON
       intelligenceBonus = 10;
       metadata.error = 'Invalid JSON';
@@ -535,7 +534,7 @@ export class FabFormatsProcessor {
   /**
    * QUALITY GRADING SYSTEM - The secret sauce!
    */
-  private gradePackageJsonQuality(packageData: any, content: string): QualityGrade {
+  private gradePackageJsonQuality(packageData: any, _content: string): QualityGrade {
     const criteria: string[] = [];
 
     // TIER 1: EXCEPTIONAL (90%+ score) - 90-150 points
@@ -567,10 +566,10 @@ export class FabFormatsProcessor {
     // Modern toolchain
     const allDeps = { ...packageData.dependencies, ...packageData.devDependencies };
     let modernTools = 0;
-    if (allDeps['typescript'] || allDeps['@types/node']) modernTools++;
-    if (allDeps['vite'] || allDeps['webpack'] || allDeps['rollup']) modernTools++;
-    if (allDeps['jest'] || allDeps['vitest'] || allDeps['playwright']) modernTools++;
-    if (allDeps['eslint'] || allDeps['prettier']) modernTools++;
+    if (allDeps['typescript'] || allDeps['@types/node']) {modernTools++;}
+    if (allDeps['vite'] || allDeps['webpack'] || allDeps['rollup']) {modernTools++;}
+    if (allDeps['jest'] || allDeps['vitest'] || allDeps['playwright']) {modernTools++;}
+    if (allDeps['eslint'] || allDeps['prettier']) {modernTools++;}
 
     if (modernTools >= 3) {
       exceptionalCount++;
@@ -643,7 +642,7 @@ export class FabFormatsProcessor {
       metadata.module = tsConfig.compilerOptions?.module;
       metadata.target = tsConfig.compilerOptions?.target;
 
-    } catch (err) {
+    } catch {
       intelligenceBonus = 30;
       metadata.error = 'Invalid JSON';
     }
@@ -1145,7 +1144,7 @@ export class FabFormatsProcessor {
         intelligenceBonus += 10;
       }
 
-    } catch (err) {
+    } catch {
       // Invalid JSON
     }
 
@@ -1204,7 +1203,7 @@ export class FabFormatsProcessor {
       metadata.hasFafContext = true;
       metadata.version = fafData.version;
 
-    } catch (err) {
+    } catch {
       intelligenceBonus = 50;
       metadata.error = 'Invalid FAF JSON';
     }
@@ -1312,23 +1311,23 @@ export class FabFormatsProcessor {
     if (content.includes('DATABASE_URL') || content.includes('DB_')) {
       intelligenceBonus += 20;
       if (content.includes('postgresql://') || content.includes('postgres://')) {
-        if (!this.context.database) this.context.database = 'PostgreSQL';
+        if (!this.context.database) {this.context.database = 'PostgreSQL';}
       } else if (content.includes('mysql://')) {
-        if (!this.context.database) this.context.database = 'MySQL';
+        if (!this.context.database) {this.context.database = 'MySQL';}
       } else if (content.includes('mongodb://')) {
-        if (!this.context.database) this.context.database = 'MongoDB';
+        if (!this.context.database) {this.context.database = 'MongoDB';}
       }
     }
 
     // Hosting detection
     if (content.includes('VERCEL_')) {
-      if (!this.context.hosting) this.context.hosting = 'Vercel';
+      if (!this.context.hosting) {this.context.hosting = 'Vercel';}
       intelligenceBonus += 10;
     } else if (content.includes('NETLIFY_')) {
-      if (!this.context.hosting) this.context.hosting = 'Netlify';
+      if (!this.context.hosting) {this.context.hosting = 'Netlify';}
       intelligenceBonus += 10;
     } else if (content.includes('RAILWAY_')) {
-      if (!this.context.hosting) this.context.hosting = 'Railway';
+      if (!this.context.hosting) {this.context.hosting = 'Railway';}
       intelligenceBonus += 10;
     }
 
@@ -1361,7 +1360,7 @@ export class FabFormatsProcessor {
    * Generic file processor (fallback)
    */
   private async processGenericFile(fileName: string, content: string): Promise<ProcessedFileResult> {
-    let intelligenceBonus = 10;
+    const intelligenceBonus = 10;
     const metadata: Record<string, any> = {};
 
     metadata.fileSize = content.length;
@@ -1408,7 +1407,7 @@ export class FabFormatsProcessor {
     ];
 
     technicalFields.forEach(field => {
-      if ((this.context as any)[field]) depth++;
+      if ((this.context as any)[field]) {depth++;}
     });
 
     // Human context (6 possible)
@@ -1418,7 +1417,7 @@ export class FabFormatsProcessor {
     ];
 
     humanFields.forEach(field => {
-      if ((this.context as any)[field]) depth++;
+      if ((this.context as any)[field]) {depth++;}
     });
 
     // Return percentage (21 total slots)

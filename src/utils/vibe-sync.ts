@@ -80,39 +80,44 @@ export class VibeSync {
     projectPath: string
   ): Promise<boolean> {
     const target = this.getSyncTarget(platform);
-    
+
     try {
       switch(target.method) {
-        case 'file':
+        case 'file': {
           const filePath = path.join(projectPath, target.target);
           await fs.promises.writeFile(filePath, content);
           return true;
-          
-        case 'env':
+        }
+
+        case 'env': {
           // For .env files, add as multiline string
           const envPath = path.join(projectPath, '.env');
           const envContent = `\n# FAF Context for AI\nFAF_CONTEXT="${content.replace(/"/g, '\\"')}"\n`;
           await fs.promises.appendFile(envPath, envContent);
           return true;
-          
-        case 'clipboard':
+        }
+
+        case 'clipboard': {
           // Use clipboardy or similar
           console.log('📋 Context ready for clipboard (install clipboardy for auto-copy)');
           console.log('\n--- COPY BELOW FOR AI ---\n');
           console.log(content);
           console.log('\n--- END CONTEXT ---\n');
           return true;
-          
-        case 'api':
+        }
+
+        case 'api': {
           // Future: POST to FAF cloud service
           console.log(chalk.gray('API sync not available - use clipboard mode'));
           return false;
-          
-        default:
+        }
+
+        default: {
           return false;
+        }
       }
-    } catch (error) {
-      console.error('Sync failed:', error);
+    } catch {
+      // Sync failed
       return false;
     }
   }

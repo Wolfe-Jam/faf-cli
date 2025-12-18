@@ -3,7 +3,7 @@
 import { Command } from '../fix-once/commander';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
+import { parse as parseYAML } from '../fix-once/yaml';
 import { chalk } from '../fix-once/colors';
 
 // Simple color utilities
@@ -22,7 +22,7 @@ const colors = {
 const logger = {
   error: (message: string, error?: any) => {
     console.error(colors.error(message));
-    if (error) console.error(error);
+    if (error) {console.error(error);}
   }
 };
 
@@ -39,7 +39,7 @@ interface RecoveryReport {
   autoFixed: boolean;
 }
 
-async function fileExists(filePath: string): Promise<boolean> {
+async function _fileExists(filePath: string): Promise<boolean> {
   try {
     await fs.access(filePath);
     return true;
@@ -61,12 +61,12 @@ async function checkFafHealth(projectRoot: string): Promise<RecoveryReport> {
   const backupPath = path.join(projectRoot, '.faf.backup');
 
   // Check .faf file
-  const fafExists = await fileExists(fafPath);
+  const fafExists = await _fileExists(fafPath);
   if (!fafExists) {
     report.status = 'missing';
     report.issues.push('.faf file is missing');
 
-    if (await fileExists(backupPath)) {
+    if (await _fileExists(backupPath)) {
       report.status = 'recoverable';
       report.fixes.push('Found .faf.backup - can restore');
     } else {
@@ -77,11 +77,11 @@ async function checkFafHealth(projectRoot: string): Promise<RecoveryReport> {
     try {
       const content = await fs.readFile(fafPath, 'utf-8');
       parseYAML(content);
-    } catch (error) {
+    } catch {
       report.status = 'corrupted';
       report.issues.push('.faf file is corrupted (invalid YAML)');
 
-      if (await fileExists(backupPath)) {
+      if (await _fileExists(backupPath)) {
         report.status = 'recoverable';
         report.fixes.push('Found .faf.backup - can restore');
       } else {
@@ -92,7 +92,7 @@ async function checkFafHealth(projectRoot: string): Promise<RecoveryReport> {
   }
 
   // Check DNA file
-  const dnaExists = await fileExists(dnaPath);
+  const dnaExists = await _fileExists(dnaPath);
   if (!dnaExists) {
     report.issues.push('.faf-dna.json is missing (journey history lost)');
     report.fixes.push('Run: faf auth to start new journey');
@@ -136,7 +136,7 @@ async function autoRecover(projectRoot: string, report: RecoveryReport): Promise
   const fafPath = path.join(projectRoot, '.faf');
   const backupPath = path.join(projectRoot, '.faf.backup');
 
-  if (report.status === 'recoverable' && await fileExists(backupPath)) {
+  if (report.status === 'recoverable' && await _fileExists(backupPath)) {
     try {
       // Validate backup first
       const backupContent = await fs.readFile(backupPath, 'utf-8');
@@ -147,7 +147,7 @@ async function autoRecover(projectRoot: string, report: RecoveryReport): Promise
 
       console.log(colors.success(`\n✅ Restored .faf from backup`));
       return true;
-    } catch (error) {
+    } catch {
       console.log(colors.error(`\n❌ Backup is also corrupted`));
       return false;
     }
@@ -157,7 +157,7 @@ async function autoRecover(projectRoot: string, report: RecoveryReport): Promise
 }
 
 async function showRecoveryPlan(report: RecoveryReport): Promise<void> {
-  console.log('\n' + colors.header('🚨 FAF DISASTER RECOVERY'));
+  console.log(`\n${colors.header('🚨 FAF DISASTER RECOVERY')}`);
   console.log('═'.repeat(50));
 
   // Status
@@ -172,7 +172,7 @@ async function showRecoveryPlan(report: RecoveryReport): Promise<void> {
 
   // Issues
   if (report.issues.length > 0) {
-    console.log('\n' + colors.error('Issues Detected:'));
+    console.log(`\n${colors.error('Issues Detected:')}`);
     report.issues.forEach(issue => {
       console.log(`  • ${issue}`);
     });
@@ -180,29 +180,29 @@ async function showRecoveryPlan(report: RecoveryReport): Promise<void> {
 
   // Recovery options
   if (report.fixes.length > 0) {
-    console.log('\n' + colors.success('Recovery Options:'));
+    console.log(`\n${colors.success('Recovery Options:')}`);
     report.fixes.forEach((fix, index) => {
       console.log(`  ${index + 1}. ${fix}`);
     });
   }
 
   // Emergency commands
-  console.log('\n' + colors.header('EMERGENCY COMMANDS:'));
+  console.log(`\n${colors.header('EMERGENCY COMMANDS:')}`);
   console.log('─'.repeat(50));
-  console.log(colors.command('  faf recover --auto     ') + '# Try automatic recovery');
-  console.log(colors.command('  faf recover --backup   ') + '# List all backups');
-  console.log(colors.command('  faf init --force       ') + '# Start fresh (loses history)');
-  console.log(colors.command('  faf help disaster      ') + '# Full recovery guide');
+  console.log(`${colors.command('  faf recover --auto     ')}# Try automatic recovery`);
+  console.log(`${colors.command('  faf recover --backup   ')}# List all backups`);
+  console.log(`${colors.command('  faf init --force       ')}# Start fresh (loses history)`);
+  console.log(`${colors.command('  faf help disaster      ')}# Full recovery guide`);
 
   // Git recovery
-  console.log('\n' + colors.header('GIT RECOVERY:'));
+  console.log(`\n${colors.header('GIT RECOVERY:')}`);
   console.log('─'.repeat(50));
-  console.log(colors.command('  git status             ') + '# Check git state');
-  console.log(colors.command('  git checkout HEAD -- .faf') + '# Restore from git');
-  console.log(colors.command('  git log -p .faf        ') + '# View .faf history');
+  console.log(`${colors.command('  git status             ')}# Check git state`);
+  console.log(`${colors.command('  git checkout HEAD -- .faf')}# Restore from git`);
+  console.log(`${colors.command('  git log -p .faf        ')}# View .faf history`);
 
   // Support
-  console.log('\n' + colors.header('GET HELP:'));
+  console.log(`\n${colors.header('GET HELP:')}`);
   console.log('─'.repeat(50));
   console.log(`  📚 Docs: ${colors.url('https://faf.dev/disaster-recovery')}`);
   console.log(`  💬 Discord: ${colors.url('https://discord.gg/faf')}`);
@@ -225,7 +225,7 @@ program
 
       if (options.backup) {
         const backups = await findBackups(projectRoot);
-        console.log('\n' + colors.header('📦 AVAILABLE BACKUPS'));
+        console.log(`\n${colors.header('📦 AVAILABLE BACKUPS')}`);
         console.log('═'.repeat(50));
 
         if (backups.length === 0) {
@@ -238,7 +238,7 @@ program
             console.log(`    Modified: ${stats.mtime.toLocaleString()}`);
             console.log(`    Size: ${stats.size} bytes`);
           }
-          console.log('\n' + colors.success('To restore a backup:'));
+          console.log(`\n${colors.success('To restore a backup:')}`);
           console.log(colors.command(`  cp ${backups[0]} .faf`));
         }
         return;
@@ -255,7 +255,7 @@ program
 
       // Auto-recover if requested
       if (options.auto && report.status === 'recoverable') {
-        console.log('\n' + colors.warning('Attempting automatic recovery...'));
+        console.log(`\n${colors.warning('Attempting automatic recovery...')}`);
         const recovered = await autoRecover(projectRoot, report);
 
         if (recovered) {
@@ -273,7 +273,7 @@ program
 
       // Show prevention tips
       if (report.issues.length > 0) {
-        console.log('\n' + colors.header('💡 PREVENTION TIPS:'));
+        console.log(`\n${colors.header('💡 PREVENTION TIPS:')}`);
         console.log('─'.repeat(50));
         console.log('  • Commit .faf to git regularly');
         console.log('  • Use "faf update" to save checkpoints');

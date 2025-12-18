@@ -3,10 +3,9 @@
  * Claude Code consistency: Similar to /edit command
  */
 
-import { 
-  FAF_ICONS, 
-  FAF_COLORS,
-  BRAND_MESSAGES 
+import {
+  FAF_ICONS,
+  FAF_COLORS
 } from '../utils/championship-style';
 import { findFafFile } from '../utils/file-utils';
 import { validateSchema } from '../schema/faf-schema';
@@ -28,9 +27,9 @@ export interface EditCommandOptions {
 export async function editCommand(options: EditCommandOptions = {}): Promise<void> {
   try {
     const startTime = Date.now();
-    
+
     console.log(FAF_COLORS.fafCyan(`${FAF_ICONS.pencil} Interactive .faf Editor`));
-    console.log(`${FAF_COLORS.fafCyan('├─ ')}${BRAND_MESSAGES.optimization}`);
+    console.log(`${FAF_COLORS.fafCyan('├─ ')}Championship .faf Editor`);
     
     const fafPath = await findFafFile();
     if (!fafPath) {

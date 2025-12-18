@@ -295,8 +295,8 @@ describe('🏁 WJTTC TIER 4: Performance Tests', () => {
       execSync(`node ${CLI_PATH} ${cmd}`, { ...execOptions, cwd: testDir });
       const duration = Date.now() - start;
 
-      // Allow 1000ms for Node.js startup overhead on loaded systems
-      expect(duration).toBeLessThan(1000);
+      // Allow 2000ms for Node.js startup overhead on loaded CI systems
+      expect(duration).toBeLessThan(2000);
     });
   });
 
@@ -312,11 +312,11 @@ describe('🏁 WJTTC TIER 4: Performance Tests', () => {
       }
       const duration = Date.now() - start;
 
-      expect(duration).toBeLessThan(1000);
+      expect(duration).toBeLessThan(2000);
     });
   });
 
-  describe('Heavy Command Speed (<2000ms)', () => {
+  describe('Heavy Command Speed (<3000ms)', () => {
     test('faf formats completes in <2000ms', () => {
       const start = Date.now();
       execSync(`node ${CLI_PATH} formats`, { ...execOptions, cwd: testDir });

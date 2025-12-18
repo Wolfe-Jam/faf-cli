@@ -11,7 +11,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { findSourceFiles } from '../utils/native-file-finder';
-import { execSync } from 'child_process';
 
 export interface DependencyInspection {
   package: string;
@@ -261,7 +260,7 @@ export class DependencyTSA {
       if (group.includes(pkg)) {
         const deps = Object.keys(this.packageJson.dependencies || {});
         const count = group.filter(p => deps.includes(p)).length;
-        if (count > 1) return true;
+        if (count > 1) {return true;}
       }
     }
 
@@ -272,9 +271,9 @@ export class DependencyTSA {
    * 📊 Get usage pattern description
    */
   private getUsagePattern(usage: DependencyInspection['usage']): string {
-    if (usage.fileCount > 10) return 'widely distributed';
-    if (usage.fileCount > 5) return 'moderately distributed';
-    if (usage.fileCount > 1) return 'limited distribution';
+    if (usage.fileCount > 10) {return 'widely distributed';}
+    if (usage.fileCount > 5) {return 'moderately distributed';}
+    if (usage.fileCount > 1) {return 'limited distribution';}
     return 'single location';
   }
 

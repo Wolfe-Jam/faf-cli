@@ -227,7 +227,7 @@ export async function checkCommand(options: CheckCommandOptions = {}): Promise<v
       const indicator = getQualityIndicator(fq.quality);
       const lockIcon = getProtectionIndicator(fq.protected);
       const displayValue = fq.value
-        ? (fq.value.length > 50 ? fq.value.substring(0, 47) + '...' : fq.value)
+        ? (fq.value.length > 50 ? `${fq.value.substring(0, 47)}...` : fq.value)
         : '(empty)';
 
       if (!options.quiet) {

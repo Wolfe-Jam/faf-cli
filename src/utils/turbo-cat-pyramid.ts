@@ -396,7 +396,7 @@ export function visualizePyramid(): string {
   const remaining = '○'.repeat((20 - level20Count) * 2);
   pyramid += `${spaces20}${stones20}${remaining} (20: 8/20)\n`;
 
-  pyramid += '═'.repeat(41) + '\n';
+  pyramid += `${'═'.repeat(41)  }\n`;
   pyramid += '198 formats + 😽 TURBO-CAT = CHAMPIONSHIP GRADE!\n';
   pyramid += 'Row 20 IN PROGRESS - Need 12 more for 211 target';
 

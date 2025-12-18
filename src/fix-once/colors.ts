@@ -102,8 +102,8 @@ export const colors = {
     const match = text.match(/(\d+)%/);
     if (match) {
       const score = parseInt(match[1]);
-      if (score >= 85) return ansi(text, ANSI.green);
-      if (score >= 70) return ansi(text, ANSI.yellow);
+      if (score >= 85) {return ansi(text, ANSI.green);}
+      if (score >= 70) {return ansi(text, ANSI.yellow);}
       return ansi(text, ANSI.red);
     }
     return text;
@@ -130,6 +130,7 @@ export const colors = {
 
   // NO_COLOR support (accessibility)
   strip: (text: string): string => {
+    // eslint-disable-next-line no-control-regex
     return text.replace(/\x1b\[[0-9;]*m/g, '');
   }
 };
@@ -158,9 +159,9 @@ export const bars = {
  * Centralizes all score-based coloring logic
  */
 export function getScoreColor(score: number): (text: string) => string {
-  if (score >= 85) return colors.success;
-  if (score >= 70) return colors.warning;
-  if (score >= 50) return colors.secondary;
+  if (score >= 85) {return colors.success;}
+  if (score >= 70) {return colors.warning;}
+  if (score >= 50) {return colors.secondary;}
   return colors.error;
 }
 
@@ -178,9 +179,9 @@ export function formatScore(score: number, prefix: string = 'Score'): string {
  * Centralizes trust dashboard colors
  */
 export function getTrustColor(trustLevel: number): (text: string) => string {
-  if (trustLevel >= 85) return colors.trust;
-  if (trustLevel >= 70) return colors.warning;
-  if (trustLevel >= 50) return colors.secondary;
+  if (trustLevel >= 85) {return colors.trust;}
+  if (trustLevel >= 70) {return colors.warning;}
+  if (trustLevel >= 50) {return colors.secondary;}
   return colors.error;
 }
 
@@ -189,9 +190,9 @@ export function getTrustColor(trustLevel: number): (text: string) => string {
  * Single source for trust indicators
  */
 export function getTrustEmoji(trustLevel: number): string {
-  if (trustLevel >= 85) return '🧡';
-  if (trustLevel >= 70) return '🟡';
-  if (trustLevel >= 50) return '🟠';
+  if (trustLevel >= 85) {return '🧡';}
+  if (trustLevel >= 70) {return '🟡';}
+  if (trustLevel >= 50) {return '🟠';}
   return '🔴';
 }
 

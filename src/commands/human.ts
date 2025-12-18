@@ -5,13 +5,12 @@
 
 import { chalk } from "../fix-once/colors";
 import { promises as fs } from "fs";
-import path from "path";
 import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
 import {
   FAF_ICONS,
   FAF_COLORS,
 } from "../utils/championship-style";
-import { findFafFile, fileExists } from "../utils/file-utils";
+import { findFafFile } from "../utils/file-utils";
 import * as readline from 'readline';
 
 interface HumanOptions {
@@ -157,9 +156,8 @@ export async function humanCommand(
 
     console.log();
 
-  } catch (error) {
-    console.log(chalk.red(`\n${FAF_ICONS.fire} Human context collection failed:`));
-    console.log(chalk.red(error instanceof Error ? error.message : String(error)));
+  } catch {
+    console.log(chalk.red(`\n${FAF_ICONS.fire} Human context collection failed`));
     process.exit(1);
   }
 }

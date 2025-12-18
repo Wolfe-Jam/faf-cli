@@ -4,7 +4,7 @@
  */
 
 import { DependencyTSA } from '../engines/dependency-tsa';
-import { FAF_COLORS, FAF_ICONS } from '../utils/championship-style';
+import { FAF_COLORS } from '../utils/championship-style';
 
 export async function tsaCommand(options: { detailed?: boolean }): Promise<void> {
   try {

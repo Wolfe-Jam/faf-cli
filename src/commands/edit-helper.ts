@@ -4,11 +4,10 @@
  */
 
 import { chalk } from '../fix-once/colors';
-import { promises as fs } from 'fs';
 import { spawn } from 'child_process';
 import { findFafFile } from '../utils/file-utils';
 
-export async function editFafFile(file?: string, options: any = {}) {
+export async function editFafFile(file?: string, options: Record<string, unknown> = {}) {
   try {
     const fafPath = file || await findFafFile();
 

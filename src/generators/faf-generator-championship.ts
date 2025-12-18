@@ -65,7 +65,7 @@ export async function generateFafFromProject(
 
   // Read pyproject.toml if available (Python projects)
   const pyprojectPath = await findPyprojectToml(projectRoot);
-  let pyprojectData: any = {};
+  const pyprojectData: any = {};
 
   if (pyprojectPath) {
     try {
@@ -89,7 +89,7 @@ export async function generateFafFromProject(
 
   // Read requirements.txt if available (Python projects)
   const requirementsPath = await findRequirementsTxt(projectRoot);
-  let requirementsData: any = {};
+  const requirementsData: any = {};
 
   if (requirementsPath) {
     try {
@@ -169,28 +169,28 @@ export async function generateFafFromProject(
     const ctx = fabAnalysis.context;
 
     // Technical slots (15) - only fill if not already set by quick mode
-    if (ctx.projectName && !contextSlotsFilled['project_name']) contextSlotsFilled['project_name'] = ctx.projectName;
-    if (ctx.projectGoal && !contextSlotsFilled['project_goal']) contextSlotsFilled['project_goal'] = ctx.projectGoal;
-    if (ctx.mainLanguage) contextSlotsFilled['main_language'] = ctx.mainLanguage;
-    if (ctx.framework) contextSlotsFilled['framework'] = ctx.framework;
-    if (ctx.backend) contextSlotsFilled['backend'] = ctx.backend;
-    if (ctx.server) contextSlotsFilled['server'] = ctx.server;
-    if (ctx.apiType) contextSlotsFilled['api_type'] = ctx.apiType;
-    if (ctx.database) contextSlotsFilled['database'] = ctx.database;
-    if (ctx.hosting) contextSlotsFilled['hosting'] = ctx.hosting;
-    if (ctx.cicd) contextSlotsFilled['cicd'] = ctx.cicd;
-    if (ctx.buildTool) contextSlotsFilled['build_tool'] = ctx.buildTool;
-    if (ctx.packageManager) contextSlotsFilled['package_manager'] = ctx.packageManager;
-    if (ctx.testFramework) contextSlotsFilled['test_framework'] = ctx.testFramework;
-    if (ctx.linter) contextSlotsFilled['linter'] = ctx.linter;
+    if (ctx.projectName && !contextSlotsFilled['project_name']) {contextSlotsFilled['project_name'] = ctx.projectName;}
+    if (ctx.projectGoal && !contextSlotsFilled['project_goal']) {contextSlotsFilled['project_goal'] = ctx.projectGoal;}
+    if (ctx.mainLanguage) {contextSlotsFilled['main_language'] = ctx.mainLanguage;}
+    if (ctx.framework) {contextSlotsFilled['framework'] = ctx.framework;}
+    if (ctx.backend) {contextSlotsFilled['backend'] = ctx.backend;}
+    if (ctx.server) {contextSlotsFilled['server'] = ctx.server;}
+    if (ctx.apiType) {contextSlotsFilled['api_type'] = ctx.apiType;}
+    if (ctx.database) {contextSlotsFilled['database'] = ctx.database;}
+    if (ctx.hosting) {contextSlotsFilled['hosting'] = ctx.hosting;}
+    if (ctx.cicd) {contextSlotsFilled['cicd'] = ctx.cicd;}
+    if (ctx.buildTool) {contextSlotsFilled['build_tool'] = ctx.buildTool;}
+    if (ctx.packageManager) {contextSlotsFilled['package_manager'] = ctx.packageManager;}
+    if (ctx.testFramework) {contextSlotsFilled['test_framework'] = ctx.testFramework;}
+    if (ctx.linter) {contextSlotsFilled['linter'] = ctx.linter;}
 
     // Human context slots (6 W's)
-    if (ctx.targetUser) contextSlotsFilled['who'] = ctx.targetUser;
-    if (ctx.coreProblem) contextSlotsFilled['what'] = ctx.coreProblem;
-    if (ctx.missionPurpose) contextSlotsFilled['why'] = ctx.missionPurpose;
-    if (ctx.deploymentMarket) contextSlotsFilled['where'] = ctx.deploymentMarket;
-    if (ctx.timeline) contextSlotsFilled['when'] = ctx.timeline;
-    if (ctx.approach) contextSlotsFilled['how'] = ctx.approach;
+    if (ctx.targetUser) {contextSlotsFilled['who'] = ctx.targetUser;}
+    if (ctx.coreProblem) {contextSlotsFilled['what'] = ctx.coreProblem;}
+    if (ctx.missionPurpose) {contextSlotsFilled['why'] = ctx.missionPurpose;}
+    if (ctx.deploymentMarket) {contextSlotsFilled['where'] = ctx.deploymentMarket;}
+    if (ctx.timeline) {contextSlotsFilled['when'] = ctx.timeline;}
+    if (ctx.approach) {contextSlotsFilled['how'] = ctx.approach;}
   }
 
   // Apply RELENTLESS human context extraction (overrides if higher confidence)
@@ -221,22 +221,22 @@ export async function generateFafFromProject(
     ...packageData.devDependencies
   };
 
-  // 🦀 RUST CLI DETECTION: Check Cargo.toml for [[bin]] section
+  // 🦀 RUST CLI DETECTION: Check Cargo.toml for [bin] section
   let isRustCLI = false;
-  let cargoTomlData: any = {};
+  const cargoTomlData: any = {};
   const cargoTomlPath = path.join(projectRoot, 'Cargo.toml');
   try {
     const cargoContent = await fs.readFile(cargoTomlPath, 'utf-8');
-    // Detect CLI: [[bin]] section or clap/structopt dependencies
-    isRustCLI = cargoContent.includes('[[bin]]') ||
+    // Detect CLI: [bin] section or clap/structopt dependencies
+    isRustCLI = cargoContent.includes('[bin]') ||
                 cargoContent.includes('clap') ||
                 cargoContent.includes('structopt') ||
                 cargoContent.includes('argh');
     // Extract name from Cargo.toml
     const nameMatch = cargoContent.match(/^name\s*=\s*"([^"]+)"/m);
-    if (nameMatch) cargoTomlData.name = nameMatch[1];
+    if (nameMatch) {cargoTomlData.name = nameMatch[1];}
     const descMatch = cargoContent.match(/^description\s*=\s*"([^"]+)"/m);
-    if (descMatch) cargoTomlData.description = descMatch[1];
+    if (descMatch) {cargoTomlData.description = descMatch[1];}
   } catch {
     // No Cargo.toml or can't read it
   }
@@ -250,8 +250,6 @@ export async function generateFafFromProject(
                 deps?.yargs ||
                 deps?.oclif ||
                 deps?.inquirer;
-
-  const isCLI = isNodeCLI || isRustCLI;
 
   // 🦀 RUST CLI: Smart slot assignment
   if (isRustCLI) {
@@ -285,19 +283,19 @@ export async function generateFafFromProject(
     contextSlotsFilled['backend'] = 'Node.js';
 
     // Detect terminal UI framework
-    if (deps?.chalk) contextSlotsFilled['css_framework'] = 'chalk (terminal colors)';
-    else if (deps?.colors) contextSlotsFilled['css_framework'] = 'colors';
-    else if (deps?.ora) contextSlotsFilled['css_framework'] = 'ora';
+    if (deps?.chalk) {contextSlotsFilled['css_framework'] = 'chalk (terminal colors)';}
+    else if (deps?.colors) {contextSlotsFilled['css_framework'] = 'colors';}
+    else if (deps?.ora) {contextSlotsFilled['css_framework'] = 'ora';}
 
     // Detect interactive framework
-    if (deps?.inquirer) contextSlotsFilled['ui_library'] = 'inquirer (interactive prompts)';
-    else if (deps?.prompts) contextSlotsFilled['ui_library'] = 'prompts';
-    else if (deps?.enquirer) contextSlotsFilled['ui_library'] = 'enquirer';
+    if (deps?.inquirer) {contextSlotsFilled['ui_library'] = 'inquirer (interactive prompts)';}
+    else if (deps?.prompts) {contextSlotsFilled['ui_library'] = 'prompts';}
+    else if (deps?.enquirer) {contextSlotsFilled['ui_library'] = 'enquirer';}
 
     // Detect CLI framework
-    if (deps?.commander) contextSlotsFilled['cli_framework'] = 'commander';
-    else if (deps?.yargs) contextSlotsFilled['cli_framework'] = 'yargs';
-    else if (deps?.oclif) contextSlotsFilled['cli_framework'] = 'oclif';
+    if (deps?.commander) {contextSlotsFilled['cli_framework'] = 'commander';}
+    else if (deps?.yargs) {contextSlotsFilled['cli_framework'] = 'yargs';}
+    else if (deps?.oclif) {contextSlotsFilled['cli_framework'] = 'oclif';}
 
     // Detect runtime
     if (packageData.engines?.node) {
@@ -312,9 +310,9 @@ export async function generateFafFromProject(
     }
 
     // Detect testing
-    if (deps?.jest) contextSlotsFilled['test_framework'] = 'Jest';
-    else if (deps?.mocha) contextSlotsFilled['test_framework'] = 'Mocha';
-    else if (deps?.vitest) contextSlotsFilled['test_framework'] = 'Vitest';
+    if (deps?.jest) {contextSlotsFilled['test_framework'] = 'Jest';}
+    else if (deps?.mocha) {contextSlotsFilled['test_framework'] = 'Mocha';}
+    else if (deps?.vitest) {contextSlotsFilled['test_framework'] = 'Vitest';}
 
     // Detect CI/CD - check for .github/workflows directory
     try {
@@ -415,10 +413,10 @@ export async function generateFafFromProject(
   const fafScore = Math.min(Math.round(enhancedScore), 99);
 
   // Build confidence level
-  let confidence = 'LOW';
-  if (fafScore >= 85) confidence = 'HIGH';
-  else if (fafScore >= 70) confidence = 'GOOD';
-  else if (fafScore >= 50) confidence = 'MODERATE';
+  let _confidence = 'LOW';
+  if (fafScore >= 85) {_confidence = 'HIGH';}
+  else if (fafScore >= 70) {_confidence = 'GOOD';}
+  else if (fafScore >= 50) {_confidence = 'MODERATE';}
 
   // Build quality indicators
   const qualityIndicators = [];
@@ -440,7 +438,7 @@ export async function generateFafFromProject(
 
   // Extract the stack for display
   // HONEST SCORING: No fake defaults - 0% is a valid score!
-  const stack = {
+  const _stack = {
     frontend: contextSlotsFilled['framework'] || (packageData.dependencies?.react ? 'React' : undefined),
     backend: contextSlotsFilled['backend'],
     database: contextSlotsFilled['database'],

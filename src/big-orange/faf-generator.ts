@@ -16,7 +16,7 @@ import type { FafInstance } from './types';
  */
 export async function generateFafInstance(
   score: number,
-  projectPath?: string
+  _projectPath?: string
 ): Promise<FafInstance> {
   
   if (score === 0) {
@@ -223,7 +223,7 @@ export async function generateFafInstance(
  * @param projectPath - Path to project
  * @returns Birth score (0-100)
  */
-export async function calculateBirthScore(projectPath: string): Promise<number> {
+export async function calculateBirthScore(_projectPath: string): Promise<number> {
   // TODO: Implement actual .faf file analysis
   // This would:
   // 1. Check if .faf exists

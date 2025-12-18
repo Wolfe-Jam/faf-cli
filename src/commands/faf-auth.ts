@@ -9,9 +9,8 @@
 
 import { Command } from '../fix-once/commander';
 import * as path from 'path';
-import { FafDNAManager, displayScoreWithBirthDNA } from '../engines/faf-dna';
+import { FafDNAManager } from '../engines/faf-dna';
 import { colors } from '../fix-once/colors';
-import { promises as fs } from 'fs';
 
 const program = new Command();
 
@@ -27,7 +26,7 @@ program
 
       // Load existing DNA or error
       const dna = await dnaManager.load();
-      
+
       if (options.verify) {
         // Verify mode
         if (!dna) {
@@ -47,7 +46,7 @@ program
         }
         process.exit(isValid ? 0 : 1);
       }
-      
+
       if (options.show) {
         // Show status mode
         if (!dna) {

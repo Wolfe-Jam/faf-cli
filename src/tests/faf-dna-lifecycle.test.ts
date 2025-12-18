@@ -1,10 +1,11 @@
+/* eslint-env jest */
 /**
  * FAF DNA LIFECYCLE TEST SUITE
- * 
+ *
  * PROVE IT WORKS! Test 7 popular stacks through complete DNA lifecycle.
  * Simulate real developer journeys with score fluctuations.
  * Verify AI context remains solid even when scores change.
- * 
+ *
  * THIS REMOVES ALL DOUBT!
  */
 
@@ -120,11 +121,11 @@ describe('🧬 FAF DNA Lifecycle - PROOF IT WORKS', () => {
 
         // Initialize DNA
         const dnaManager = new FafDNAManager(tempDir);
-        const dna = await dnaManager.birth(stack.expectedBirthWeight, true);
+        const _dna = await dnaManager.birth(stack.expectedBirthWeight, true);
 
-        expect(dna.birthCertificate.birthDNA).toBe(stack.expectedBirthWeight);
-        expect(dna.birthCertificate.birthDNASource).toBe('CLAUDE.md');
-        expect(dna.birthCertificate.certificate).toMatch(/^FAF-\d{4}-[A-Z0-9]+-[A-Z0-9]{4}$/);
+        expect(_dna.birthCertificate.birthDNA).toBe(stack.expectedBirthWeight);
+        expect(_dna.birthCertificate.birthDNASource).toBe('CLAUDE.md');
+        expect(_dna.birthCertificate.certificate).toMatch(/^FAF-\d{4}-[A-Z0-9]+-[A-Z0-9]{4}$/);
       });
     });
   });
@@ -140,7 +141,7 @@ describe('🧬 FAF DNA Lifecycle - PROOF IT WORKS', () => {
         );
 
         const dnaManager = new FafDNAManager(tempDir);
-        const dna = await dnaManager.birth(stack.expectedBirthWeight, true);
+        const _dna = await dnaManager.birth(stack.expectedBirthWeight, true);
 
         // Simulate growth through improvements
         for (let i = 0; i < stack.expectedGrowth.length; i++) {
@@ -495,8 +496,8 @@ describe('🏁 Integration: Complete Developer Journey', () => {
     );
 
     const dnaManager = new FafDNAManager(tempDir);
-    const day1 = await dnaManager.birth(8, true);
-    expect(day1.birthCertificate.birthDNA).toBe(8);
+    const _day1 = await dnaManager.birth(8, true);
+    expect(_day1.birthCertificate.birthDNA).toBe(8);
 
     // Day 2: Add package.json
     await fs.writeFile(

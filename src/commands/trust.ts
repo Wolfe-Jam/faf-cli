@@ -6,13 +6,11 @@
  */
 
 import { promises as fs } from 'fs';
-import path from 'path';
 import { chalk } from '../fix-once/colors';
 import { findFafFile } from '../utils/file-utils';
 import { FafCompiler } from '../compiler/faf-compiler';
 import { getTrustCache } from '../utils/trust-cache';
-import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
-import { dropCoach } from '../engines/drop-coach';
+import { parse as parseYAML } from '../fix-once/yaml';
 
 export interface TrustScore {
   overall: number;           // 0-100% overall trust
@@ -312,22 +310,23 @@ export async function trustCommand(options: TrustDashboardOptions = {}): Promise
       await showConfidenceMode(fafPath);
       return;
     }
-    
+
     if (options.garage) {
       await showGarageMode(fafPath);
       return;
     }
-    
+
     if (options.panic) {
       await showPanicMode(fafPath);
       return;
     }
-    
+
     if (options.quality) {
       await showQualityMode(fafPath);
       return;
     }
-    
+
+    const path = require('path');
     console.log(chalk.dim(`🧡 Calculating trust for: ${path.relative(process.cwd(), fafPath)}`));
     
     const startTime = Date.now();

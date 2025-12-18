@@ -9,18 +9,15 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { chalk } from '../fix-once/colors';
 import { findFafFile } from '../utils/file-utils';
-import { calculateTrustScore } from './trust';
 import {
   FAF_ICONS,
   FAF_COLORS,
-  formatTrustLevel,
   formatPerformance,
-  // formatAIHappiness, // unused for now
   formatTechnicalCredit,
   PERFORMANCE_STANDARDS
 } from '../utils/championship-style';
 import { getScoreEmoji } from '../utils/color-utils';
-import { getTierInfo as getChampionshipTierInfo, getScoreMedal } from '../utils/championship-core';
+import { getTierInfo as getChampionshipTierInfo } from '../utils/championship-core';
 import { FafCompiler } from '../compiler/faf-compiler';
 
 export interface StatusOptions {
@@ -116,8 +113,8 @@ function displayStatus(
   const { trustScore, lines, lastSyncText } = status;
 
   // Championship performance check
-  const performanceGrade = duration <= PERFORMANCE_STANDARDS.status_command ? 'CHAMPION' : 'GOOD';
-  const speedEmoji = duration <= PERFORMANCE_STANDARDS.status_command ? FAF_ICONS.trophy : FAF_ICONS.lightning;
+  const _performanceGrade = duration <= PERFORMANCE_STANDARDS.status_command ? 'CHAMPION' : 'GOOD';
+  const _speedEmoji = duration <= PERFORMANCE_STANDARDS.status_command ? FAF_ICONS.trophy : FAF_ICONS.lightning;
 
   // Calculate Technical Credit (mock for now)
   const technicalCredit = Math.floor((trustScore - 50) / 10) * 5;

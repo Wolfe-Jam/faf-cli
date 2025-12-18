@@ -10,7 +10,7 @@ import {
 import { findFafFile } from '../utils/file-utils';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
+import { parse as parseYAML } from '../fix-once/yaml';
 
 export interface SearchCommandOptions {
   section?: string;     // Search in specific section only
@@ -97,8 +97,8 @@ async function searchFafData(data: any, query: string, options: SearchCommandOpt
     if (typeof obj === 'object' && obj !== null) {
       for (const [key, value] of Object.entries(obj)) {
         const newPath = currentPath ? `${currentPath}.${key}` : key;
-        const newSection = currentPath === '' ? key : section;
-        
+        const _newSection = currentPath === '' ? key : section;
+
         // Search in keys (if not disabled)
         if (!options.values) {
           const searchKey = caseSensitive ? key : key.toLowerCase();
@@ -107,7 +107,7 @@ async function searchFafData(data: any, query: string, options: SearchCommandOpt
               path: newPath,
               key,
               value: String(value),
-              section: newSection
+              section: _newSection
             });
           }
         }
@@ -120,14 +120,14 @@ async function searchFafData(data: any, query: string, options: SearchCommandOpt
               path: newPath,
               key,
               value,
-              section: newSection
+              section: _newSection
             });
           }
         }
-        
+
         // Recurse into objects/arrays
         if (typeof value === 'object' && value !== null) {
-          searchRecursive(value, newPath, newSection);
+          searchRecursive(value, newPath, _newSection);
         }
       }
     }

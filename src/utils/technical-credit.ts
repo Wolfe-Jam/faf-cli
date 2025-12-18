@@ -171,7 +171,7 @@ export async function awardCredit(
     }
 
     return points;
-  } catch (error) {
+  } catch {
     // Silently fail - technical credit is optional
     return 0;
   }
@@ -199,7 +199,7 @@ async function saveTechnicalCredit(credit: TechnicalCredit, fafPath?: string): P
     
     // Save updated cache
     await fs.writeFile(cachePath, JSON.stringify(allCredits, null, 2));
-  } catch (error) {
+  } catch {
     // Silently fail - technical credit is optional and shouldn't scare newbies
     // The error is usually just permission issues in sandboxed environments
   }

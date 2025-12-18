@@ -35,7 +35,7 @@ interface ExtractedContext {
 /**
  * Extract the 6 Ws from README content using intelligent pattern matching
  */
-function extractSixWs(content: string, projectName?: string): ExtractedContext {
+function extractSixWs(content: string, _projectName?: string): ExtractedContext {
   const result: ExtractedContext = {
     who: null,
     what: null,
@@ -182,11 +182,11 @@ function extractSixWs(content: string, projectName?: string): ExtractedContext {
   // Pattern 2: Infer from technology mentions
   if (!result.who) {
     const techTargets: string[] = [];
-    if (content.includes('Grok') || content.includes('xAI')) techTargets.push('xAI/Grok users');
-    if (content.includes('Claude')) techTargets.push('Claude users');
-    if (content.includes('MCP') || content.includes('Model Context Protocol')) techTargets.push('MCP developers');
-    if (content.includes('WASM') || content.includes('WebAssembly')) techTargets.push('WASM/Edge developers');
-    if (content.includes('browser') || content.includes('Browser')) techTargets.push('browser apps');
+    if (content.includes('Grok') || content.includes('xAI')) {techTargets.push('xAI/Grok users');}
+    if (content.includes('Claude')) {techTargets.push('Claude users');}
+    if (content.includes('MCP') || content.includes('Model Context Protocol')) {techTargets.push('MCP developers');}
+    if (content.includes('WASM') || content.includes('WebAssembly')) {techTargets.push('WASM/Edge developers');}
+    if (content.includes('browser') || content.includes('Browser')) {techTargets.push('browser apps');}
 
     if (techTargets.length > 0) {
       result.who = techTargets.slice(0, 3).join(', ');
@@ -199,14 +199,14 @@ function extractSixWs(content: string, projectName?: string): ExtractedContext {
   const platforms: string[] = [];
 
   // Explicit platform patterns
-  if (content.includes('Rust') || content.includes('cargo')) platforms.push('Rust/Cargo');
-  if (content.includes('WASM') || content.includes('WebAssembly') || content.match(/\.wasm/)) platforms.push('WASM');
-  if (content.includes('browser') || content.includes('Browser')) platforms.push('Browser');
-  if (content.includes('npm install') || content.includes('package.json')) platforms.push('npm');
-  if (content.includes('Homebrew') || content.includes('brew install')) platforms.push('Homebrew');
-  if (content.includes('Zig')) platforms.push('Zig');
-  if (content.includes('edge function') || content.includes('Edge')) platforms.push('Edge');
-  if (content.includes('MCP')) platforms.push('MCP');
+  if (content.includes('Rust') || content.includes('cargo')) {platforms.push('Rust/Cargo');}
+  if (content.includes('WASM') || content.includes('WebAssembly') || content.match(/\.wasm/)) {platforms.push('WASM');}
+  if (content.includes('browser') || content.includes('Browser')) {platforms.push('Browser');}
+  if (content.includes('npm install') || content.includes('package.json')) {platforms.push('npm');}
+  if (content.includes('Homebrew') || content.includes('brew install')) {platforms.push('Homebrew');}
+  if (content.includes('Zig')) {platforms.push('Zig');}
+  if (content.includes('edge function') || content.includes('Edge')) {platforms.push('Edge');}
+  if (content.includes('MCP')) {platforms.push('MCP');}
 
   if (platforms.length > 0) {
     result.where = platforms.slice(0, 4).join(', ');

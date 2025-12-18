@@ -83,9 +83,8 @@ export async function saveTrustCache(fafPath: string, results: any[]): Promise<v
     // Save updated cache
     await fs.writeFile(getTrustCachePath(), JSON.stringify(cache, null, 2));
     
-  } catch (error) {
+  } catch {
     // Fail silently - don't break the verification if cache fails
-    console.error('Failed to save trust cache:', error);
   }
 }
 

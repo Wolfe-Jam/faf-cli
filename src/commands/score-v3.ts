@@ -28,19 +28,19 @@ export async function scoreCommandV3(
 
   try {
     // Find .faf file
-    let fafPath: string | null;
+    let _fafPath: string | null;
     if (file) {
       // Check if file is a direct path to a .faf file
       if (file.endsWith('.faf') || file.endsWith('.faf.fixed')) {
-        fafPath = file;
+        _fafPath = file;
       } else {
-        fafPath = await findFafFile(file);
+        _fafPath = await findFafFile(file);
       }
     } else {
-      fafPath = await findFafFile();
+      _fafPath = await findFafFile();
     }
 
-    if (!fafPath) {
+    if (!_fafPath) {
       if (file) {
         console.error(chalk.red(`❌ No .faf file found at: ${file}`));
         console.log(chalk.yellow(`💡 Check the path or run "faf init" in that directory`));
@@ -54,7 +54,7 @@ export async function scoreCommandV3(
     // Verify mode
     if (options.verify) {
       const compiler = new FafCompiler();
-      const isValid = await compiler.verify(fafPath, options.verify);
+      const isValid = await compiler.verify(_fafPath, options.verify);
 
       if (isValid) {
         console.log(chalk.green(`✅ Checksum ${options.verify} verified`));
@@ -70,8 +70,8 @@ export async function scoreCommandV3(
 
     // Compile with or without trace
     const result = options.trace
-      ? await compiler.compileWithTrace(fafPath)
-      : await compiler.compile(fafPath);
+      ? await compiler.compileWithTrace(_fafPath)
+      : await compiler.compile(_fafPath);
 
     // Show IR if requested
     if (options.ir) {
@@ -116,7 +116,7 @@ export async function scoreCommandV3(
     }
 
     // Try to show with DNA (birth weight)
-    const projectPath = path.dirname(fafPath);
+    const projectPath = path.dirname(_fafPath);
     const dnaManager = new FafDNAManager(projectPath);
     const dna = await dnaManager.load();
 
@@ -130,7 +130,7 @@ export async function scoreCommandV3(
     }
 
     // Main score display
-    console.log(chalk.cyan(`Scoring: ${fafPath}`));
+    console.log(chalk.cyan(`Scoring: ${_fafPath}`));
 
     if (dna) {
       displayScoreWithBirthDNA(
@@ -181,20 +181,20 @@ export async function scoreCommandV3(
 
 // Utility functions
 function getScoreColor(percentage: number) {
-  if (percentage >= 85) return chalk.green;
-  if (percentage >= 70) return chalk.yellow;
-  if (percentage >= 50) return chalk.blue;
+  if (percentage >= 85) {return chalk.green;}
+  if (percentage >= 70) {return chalk.yellow;}
+  if (percentage >= 50) {return chalk.blue;}
   return chalk.red;
 }
 
 function getScoreEmoji(percentage: number): string {
-  if (percentage >= 90) return "🏆";
-  if (percentage >= 80) return "🎯";
-  if (percentage >= 70) return "✨";
-  if (percentage >= 60) return "📈";
-  if (percentage >= 50) return "🎯";
-  if (percentage >= 40) return "🌱";
-  if (percentage >= 30) return "🔧";
-  if (percentage >= 20) return "⚠️";
+  if (percentage >= 90) {return "🏆";}
+  if (percentage >= 80) {return "🎯";}
+  if (percentage >= 70) {return "✨";}
+  if (percentage >= 60) {return "📈";}
+  if (percentage >= 50) {return "🎯";}
+  if (percentage >= 40) {return "🌱";}
+  if (percentage >= 30) {return "🔧";}
+  if (percentage >= 20) {return "⚠️";}
   return "🚨";
 }

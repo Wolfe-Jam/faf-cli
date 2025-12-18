@@ -8,7 +8,7 @@ import { PlatformDetector } from '../utils/platform-detector';
 import { FAF_COLORS, FAF_ICONS } from '../utils/championship-style';
 import { TurboCat } from '../utils/turbo-cat';
 
-export async function vibeCommand(options: any = {}) {
+export async function vibeCommand(_options: any = {}) {
   console.log();
   console.log(FAF_COLORS.fafOrange('⚡️ FAF VIBE - No-Code Builder Edition 😽'));
   console.log(FAF_COLORS.fafCyan('━'.repeat(45)));
@@ -57,7 +57,7 @@ export async function vibeCommand(options: any = {}) {
   }
   
   // Show quick TURBO-CAT discovery preview
-  if (options.preview) {
+  if (_options.preview) {
     console.log();
     console.log(FAF_COLORS.fafCyan('━'.repeat(45)));
     console.log(FAF_COLORS.fafOrange(`${FAF_ICONS.turbo_cat} TURBO-CAT Format Discovery:`));

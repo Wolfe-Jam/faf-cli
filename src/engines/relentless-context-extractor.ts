@@ -81,7 +81,7 @@ export class RelentlessContextExtractor {
     const readmePath = path.join(projectPath, 'README.md');
     try {
       this.readmeContent = await fs.readFile(readmePath, 'utf-8');
-      this.fileContent += this.readmeContent + '\n';
+      this.fileContent += `${this.readmeContent  }\n`;
     } catch {
       // No README
     }
@@ -91,7 +91,7 @@ export class RelentlessContextExtractor {
     try {
       const pkgContent = await fs.readFile(packagePath, 'utf-8');
       this.packageJson = JSON.parse(pkgContent);
-      this.fileContent += pkgContent + '\n';
+      this.fileContent += `${pkgContent  }\n`;
 
       // Extract tech stack from dependencies
       if (this.packageJson.dependencies) {
@@ -112,7 +112,7 @@ export class RelentlessContextExtractor {
     const requirementsPath = path.join(projectPath, 'requirements.txt');
     try {
       const reqContent = await fs.readFile(requirementsPath, 'utf-8');
-      this.fileContent += reqContent + '\n';
+      this.fileContent += `${reqContent  }\n`;
 
       // Extract Python packages
       reqContent.split('\n').forEach(line => {
@@ -314,7 +314,7 @@ export class RelentlessContextExtractor {
       for (const match of matches) {
         if (match[1] && match[1].length > 15) {
           return {
-            value: 'To ' + this.cleanExtractedText(match[1]),
+            value: `To ${  this.cleanExtractedText(match[1])}`,
             confidence: 'PROBABLE',
             source: 'Benefit statement',
             needsUserInput: true
@@ -339,10 +339,10 @@ export class RelentlessContextExtractor {
     // Check package.json homepage
     if (this.packageJson?.homepage) {
       const url = this.packageJson.homepage;
-      if (url.includes('vercel')) return this.createContext('Vercel platform', 'CERTAIN');
-      if (url.includes('netlify')) return this.createContext('Netlify platform', 'CERTAIN');
-      if (url.includes('github.io')) return this.createContext('GitHub Pages', 'CERTAIN');
-      if (url.includes('heroku')) return this.createContext('Heroku platform', 'CERTAIN');
+      if (url.includes('vercel')) {return this.createContext('Vercel platform', 'CERTAIN');}
+      if (url.includes('netlify')) {return this.createContext('Netlify platform', 'CERTAIN');}
+      if (url.includes('github.io')) {return this.createContext('GitHub Pages', 'CERTAIN');}
+      if (url.includes('heroku')) {return this.createContext('Heroku platform', 'CERTAIN');}
 
       return {
         value: 'Web platform',
@@ -353,9 +353,9 @@ export class RelentlessContextExtractor {
     }
 
     // Check for cloud indicators
-    if (this.techStack.has('aws-sdk')) return this.createContext('AWS Cloud', 'CERTAIN');
-    if (this.techStack.has('@google-cloud/storage')) return this.createContext('Google Cloud', 'CERTAIN');
-    if (this.techStack.has('@azure/storage-blob')) return this.createContext('Azure Cloud', 'CERTAIN');
+    if (this.techStack.has('aws-sdk')) {return this.createContext('AWS Cloud', 'CERTAIN');}
+    if (this.techStack.has('@google-cloud/storage')) {return this.createContext('Google Cloud', 'CERTAIN');}
+    if (this.techStack.has('@azure/storage-blob')) {return this.createContext('Azure Cloud', 'CERTAIN');}
 
     // Check for deployment configs
     const deploymentPatterns = [

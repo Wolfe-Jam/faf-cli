@@ -10,15 +10,15 @@ import {
 } from '../utils/championship-style';
 
 // Claude Code industry standard width
-const MAX_WIDTH = 80;
+const _MAX_WIDTH = 80;
 const DESCRIPTION_WIDTH = 60; // Leave room for prefixes and formatting
 
 /**
  * Truncate text to fit within width limit
  */
 function truncateText(text: string, maxLength: number): string {
-  if (text.length <= maxLength) return text;
-  return text.substring(0, maxLength - 3) + '...';
+  if (text.length <= maxLength) {return text;}
+  return `${text.substring(0, maxLength - 3)  }...`;
 }
 
 export interface IndexCommandOptions {
@@ -33,23 +33,24 @@ export interface IndexCommandOptions {
 export async function indexCommand(query?: string, options: IndexCommandOptions = {}): Promise<void> {
   try {
     const startTime = Date.now();
-    
+
     console.log(FAF_COLORS.fafCyan(`${FAF_ICONS.magnifying_glass} FAF Universal Index`));
     console.log(`${FAF_COLORS.fafCyan('├─ ')}The everything catalog - commands, concepts, features A-Z`);
-    
+
     if (query) {
       await showSpecificEntry(query);
     } else {
       await showFullIndex(options);
     }
-    
+
     const duration = Date.now() - startTime;
     console.log();
     console.log(FAF_COLORS.fafGreen(`${FAF_ICONS.trophy} Index ready in ${duration}ms!`));
     console.log(`${FAF_COLORS.fafCyan(`${FAF_ICONS.magic_wand} Try: `)}faf index <term>${FAF_COLORS.fafCyan(' - Get detailed info on anything')}`);
-    
-  } catch (error) {
-    console.error(FAF_COLORS.fafOrange(`${FAF_ICONS.shield} Index failed: ${error instanceof Error ? error.message : String(error)}`));
+
+  } catch (_error) {
+    const error = _error as Error;
+    console.error(FAF_COLORS.fafOrange(`${FAF_ICONS.shield} Index failed: ${error.message || String(error)}`));
     process.exit(1);
   }
 }
@@ -454,7 +455,7 @@ async function showSpecificEntry(query: string): Promise<void> {
 
   // Show detailed entry - clean and readable
   console.log();
-  console.log(chalk.bold(FAF_COLORS.fafGreen(query)) + ` (${entry.type})`);
+  console.log(`${chalk.bold(FAF_COLORS.fafGreen(query))  } (${entry.type})`);
   console.log('-'.repeat(40));
   
   console.log(`Description: ${entry.description}`);

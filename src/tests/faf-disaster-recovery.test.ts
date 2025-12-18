@@ -1,13 +1,9 @@
-import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
+/* eslint-env jest */
+import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as os from 'os';
 import { FafDNAManager } from '../engines/faf-dna';
-import { findFafFile } from '../utils/file-utils';
-import { exec } from 'child_process';
-import { promisify } from 'util';
-
-const execAsync = promisify(exec);
 
 describe('🚨 FAF DISASTER RECOVERY - WHAT HAPPENS WHEN THINGS GO WRONG?', () => {
   let tempDir: string;
@@ -70,7 +66,7 @@ stack:
 
           expect(recovery.recovery_steps).toHaveLength(4);
         }
-      } catch (error) {
+      } catch {
         // This is expected for corrupted YAML
       }
     });
@@ -84,9 +80,6 @@ project:
       await fs.writeFile(path.join(tempDir, '.faf'), originalFaf, 'utf-8');
 
       // Simulate risky operation (like enhance)
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const backupPath = path.join(tempDir, `.faf.backup-${timestamp}`);
-
       // Before enhance, create backup
       await fs.copyFile(
         path.join(tempDir, '.faf'),

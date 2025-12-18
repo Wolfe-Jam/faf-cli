@@ -59,9 +59,10 @@ async function findAllFafFiles(
         fafFiles.push(fullPath);
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     // Skip directories we can't read (permission errors, etc.)
-    if (error.code !== 'EACCES' && error.code !== 'EPERM') {
+    if (error && typeof error === 'object' && 'code' in error &&
+        error.code !== 'EACCES' && error.code !== 'EPERM') {
       // Log other errors but continue
       console.error(chalk.gray(`   Warning: Could not read ${searchPath}`));
     }
@@ -99,11 +100,11 @@ async function migrateSingleFile(
       path: fafPath,
       success: true
     };
-  } catch (error: any) {
+  } catch (error) {
     return {
       path: fafPath,
       success: false,
-      reason: error.message
+      reason: error instanceof Error ? error.message : String(error)
     };
   }
 }
@@ -131,7 +132,7 @@ export async function renameCommand(
       console.log();
       return;
     }
-  } catch (error: any) {
+  } catch {
     console.log(chalk.red(`❌ Path not found: ${rootPath}`));
     console.log();
     return;

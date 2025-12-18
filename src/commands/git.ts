@@ -14,7 +14,6 @@
 
 import { chalk } from '../fix-once/colors';
 import { promises as fs } from 'fs';
-import path from 'path';
 import { stringify as stringifyYAML } from '../fix-once/yaml';
 import { FAF_COLORS } from '../utils/championship-style';
 
@@ -374,13 +373,13 @@ function generateFafFromGitHub(
  * Get score tier emoji
  */
 function getScoreTier(score: number): string {
-  if (score >= 85) return '🏆 Trophy';
-  if (score >= 70) return '🥇 Gold';
-  if (score >= 55) return '🥈 Silver';
-  if (score >= 40) return '🥉 Bronze';
-  if (score >= 35) return '🟢 Green';
-  if (score >= 20) return '🟡 Yellow';
-  if (score >= 10) return '🔴 Red';
+  if (score >= 85) {return '🏆 Trophy';}
+  if (score >= 70) {return '🥇 Gold';}
+  if (score >= 55) {return '🥈 Silver';}
+  if (score >= 40) {return '🥉 Bronze';}
+  if (score >= 35) {return '🟢 Green';}
+  if (score >= 20) {return '🟡 Yellow';}
+  if (score >= 10) {return '🔴 Red';}
   return '🤍 White';
 }
 
@@ -388,7 +387,7 @@ function getScoreTier(score: number): string {
  * Check if repository was updated recently (within 90 days)
  */
 function isRecentlyUpdated(lastUpdated?: string): boolean {
-  if (!lastUpdated) return false;
+  if (!lastUpdated) {return false;}
 
   const lastUpdate = new Date(lastUpdated);
   const now = new Date();

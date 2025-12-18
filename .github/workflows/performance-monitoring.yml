@@ -83,7 +83,7 @@ jobs:
           fi
       
       - name: 📊 Upload performance report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: performance-report-${{ matrix.platform }}
@@ -112,7 +112,7 @@ jobs:
         uses: actions/checkout@v4
       
       - name: 💾 Download all performance reports
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: performance-reports
       

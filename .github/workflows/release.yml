@@ -152,7 +152,7 @@ jobs:
           tar -tzf *.tgz | head -20
       
       - name: 💾 Upload package artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: npm-package
           path: '*.tgz'
@@ -254,75 +254,66 @@ jobs:
         uses: actions/checkout@v4
       
       - name: 💾 Download package artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: npm-package
       
       - name: 🏷️ Create GitHub Release
-        uses: actions/create-release@v1
-        id: create_release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.validate.outputs.version }}
-          release_name: FAF CLI ${{ needs.validate.outputs.version }}
+          name: FAF CLI ${{ needs.validate.outputs.version }}
           body: |
             # 🏎️ FAF CLI ${{ needs.validate.outputs.version }}
-            
+
             **F1-Inspired Software Engineering** - Making AI development better for everyone! 🏁
-            
+
             ## 🚀 Installation
-            
+
             ```bash
             npm install -g @faf/cli@${{ needs.validate.outputs.version }}
             ```
-            
+
             ## 📋 Changes
-            
+
             ${{ needs.changelog.outputs.changelog }}
-            
+
             ## 🎯 Quick Start
-            
+
             ```bash
             # Create .faf file for your project
             faf init
-            
+
             # Check your AI context score
             faf score --details
-            
+
             # Build trust with AI
             faf trust
             ```
-            
+
             ## 📊 Performance Metrics
-            
+
             - ⚡ Status command: <40ms (F1-inspired speed)
             - 🎯 Trust calculation: <200ms
             - 💎 Technical credit system active
             - 🏆 Championship-grade engineering
-            
+
             ## 🔗 Links
-            
+
             - 📦 [NPM Package](https://www.npmjs.com/package/@faf/cli)
             - 📚 [Documentation](https://docs.faf.one)
             - 🐛 [Report Issues](https://github.com/faf-org/cli/issues)
             - 💬 [Discussions](https://github.com/faf-org/cli/discussions)
-            
+
             ---
-            
+
             **🏁 Trust-driven development starts here!**
           draft: false
           prerelease: ${{ needs.validate.outputs.is-prerelease == 'true' }}
-      
-      - name: 📎 Upload release asset
-        uses: actions/upload-release-asset@v1
+          files: |
+            *.tgz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./*.tgz
-          asset_name: faf-cli-${{ needs.validate.outputs.version }}.tgz
-          asset_content_type: application/gzip
 
   # Performance benchmarks
   performance-benchmark:

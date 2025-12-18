@@ -13,8 +13,14 @@ module.exports = {
     es2022: true,
   },
   rules: {
+    // Disable base rule as it conflicts with TypeScript version
+    'no-unused-vars': 'off',
+
     // TypeScript-specific rules
-    '@typescript-eslint/no-unused-vars': 'error',
+    '@typescript-eslint/no-unused-vars': ['error', {
+      argsIgnorePattern: '^_',
+      varsIgnorePattern: '^_',
+    }],
     '@typescript-eslint/no-explicit-any': 'warn',
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/no-non-null-assertion': 'warn',

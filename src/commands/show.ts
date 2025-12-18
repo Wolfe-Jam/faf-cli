@@ -5,7 +5,7 @@
 
 import { chalk } from "../fix-once/colors";
 import { promises as fs } from "fs";
-import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
+import { parse as parseYAML } from '../fix-once/yaml';
 import { FafCompiler } from "../compiler/faf-compiler";
 import { findFafFile } from "../utils/file-utils";
 import { getScoreColor, getScoreEmoji } from "../utils/color-utils";

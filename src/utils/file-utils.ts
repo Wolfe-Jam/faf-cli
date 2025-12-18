@@ -502,7 +502,7 @@ export async function detectProjectType(
         }
 
         // If TSA worked but found nothing definitive, continue to fallback
-      } catch (tsaError) {
+      } catch {
         // TSA failed or not available, continue to fallback detection
       }
     }

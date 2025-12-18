@@ -3,7 +3,6 @@
  * Checks once per day, non-intrusive, respects quiet mode
  */
 
-import { chalk } from '../fix-once/colors';
 import { promises as fs } from 'fs';
 import * as path from 'path';
 import * as os from 'os';
@@ -82,11 +81,11 @@ function isNewerVersion(latest: string, current: string): boolean {
   const latestVer = parseVersion(latest);
   const currentVer = parseVersion(current);
 
-  if (latestVer.major > currentVer.major) return true;
-  if (latestVer.major < currentVer.major) return false;
+  if (latestVer.major > currentVer.major) {return true;}
+  if (latestVer.major < currentVer.major) {return false;}
 
-  if (latestVer.minor > currentVer.minor) return true;
-  if (latestVer.minor < currentVer.minor) return false;
+  if (latestVer.minor > currentVer.minor) {return true;}
+  if (latestVer.minor < currentVer.minor) {return false;}
 
   return latestVer.patch > currentVer.patch;
 }
@@ -96,10 +95,10 @@ function isNewerVersion(latest: string, current: string): boolean {
  */
 export async function checkForUpdates(options?: { quiet?: boolean }): Promise<void> {
   // Don't check in quiet mode
-  if (options?.quiet) return;
+  if (options?.quiet) {return;}
 
   // Don't check in CI/CD environments
-  if (process.env.CI || process.env.CONTINUOUS_INTEGRATION) return;
+  if (process.env.CI || process.env.CONTINUOUS_INTEGRATION) {return;}
 
   try {
     const packageJson = require('../../package.json');
@@ -122,7 +121,7 @@ export async function checkForUpdates(options?: { quiet?: boolean }): Promise<vo
 
     // Fetch latest version
     const latestVersion = await fetchLatestVersion();
-    if (!latestVersion) return;
+    if (!latestVersion) {return;}
 
     // Update cache
     await writeCache({
@@ -157,7 +156,7 @@ export async function forceUpdateCheck(): Promise<void> {
 
   const latestVersion = await fetchLatestVersion();
   if (!latestVersion) {
-    console.log(chalk.red('Failed to check for updates'));
+    console.log('Failed to check for updates');
     return;
   }
 

@@ -9,7 +9,6 @@
 import { Command } from '../fix-once/commander';
 import { FafDNAManager, displayScoreWithBirthDNA } from '../engines/faf-dna';
 import { colors } from '../fix-once/colors';
-import * as path from 'path';
 
 const program = new Command();
 

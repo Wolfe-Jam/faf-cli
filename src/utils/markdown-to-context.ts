@@ -60,7 +60,7 @@ export function markdownToContext(markdown: string): ExtractedContext {
     // Extract lists
     if (line.match(/^[\s]*[-*]\s+/)) {
       const item = escapeForYaml(line.replace(/^[\s]*[-*]\s+/, ''));
-      if (item) currentList.push(item);
+      if (item) {currentList.push(item);}
       continue;
     }
 
@@ -144,20 +144,20 @@ export function contextToFafData(context: ExtractedContext): Partial<any> {
 
 function detectMainLanguage(techStack: string[]): string {
   const langs = techStack.map(t => t.toLowerCase());
-  if (langs.includes('typescript')) return 'TypeScript';
-  if (langs.includes('javascript')) return 'JavaScript';
-  if (langs.includes('python')) return 'Python';
-  if (langs.includes('node')) return 'JavaScript';
+  if (langs.includes('typescript')) {return 'TypeScript';}
+  if (langs.includes('javascript')) {return 'JavaScript';}
+  if (langs.includes('python')) {return 'Python';}
+  if (langs.includes('node')) {return 'JavaScript';}
   return 'Unknown';
 }
 
 function detectFramework(techStack: string[]): string {
   const techs = techStack.map(t => t.toLowerCase());
-  if (techs.includes('react')) return 'React';
-  if (techs.includes('vue')) return 'Vue';
-  if (techs.includes('svelte')) return 'Svelte';
-  if (techs.includes('angular')) return 'Angular';
-  if (techs.includes('express')) return 'Express';
+  if (techs.includes('react')) {return 'React';}
+  if (techs.includes('vue')) {return 'Vue';}
+  if (techs.includes('svelte')) {return 'Svelte';}
+  if (techs.includes('angular')) {return 'Angular';}
+  if (techs.includes('express')) {return 'Express';}
   return 'None';
 }
 

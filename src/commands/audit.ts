@@ -5,7 +5,7 @@
 
 import { chalk } from "../fix-once/colors";
 import { promises as fs } from "fs";
-import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
+import { parse as parseYAML } from '../fix-once/yaml';
 import {
   findFafFile,
   getFileModTime,

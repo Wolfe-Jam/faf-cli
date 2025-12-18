@@ -7,7 +7,7 @@
 
 import { chalk } from "../fix-once/colors";
 import { promises as fs } from "fs";
-import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
+import { parse as parseYAML } from '../fix-once/yaml';
 import { findFafFile } from "../utils/file-utils";
 import { FafCompiler } from "../compiler/faf-compiler";
 import { getTrustCache } from '../utils/trust-cache';
@@ -94,7 +94,7 @@ function getModelDisplay(model: string): string {
 /**
  * Display current analysis with championship formatting
  */
-function displayCurrentAnalysis(scoreResult: any, trustCache: any, verbose?: boolean): void {
+function displayCurrentAnalysis(scoreResult: any, trustCache: any, _verbose?: boolean): void {
   console.log(chalk.cyan("\n📊 Current Analysis:"));
   console.log(chalk.cyan("  Score:"), chalk.bold(`${Math.round(scoreResult.score || 0)}%`));
 
@@ -210,15 +210,13 @@ function displayAnalysisResults(insights: any): void {
   });
 }
 
-/**
- * Display automated suggestions
- */
-function displayAutomatedSuggestions(suggestions: string[]): void {
-  console.log(chalk.yellow("\n💡 Automated Suggestions:"));
-  suggestions.slice(0, 5).forEach((suggestion, i) => {
-    console.log(chalk.yellow(`  ${i + 1}. ${suggestion}`));
-  });
-}
+// Automated suggestions function - reserved for future use when compiler supports suggestions
+// function displayAutomatedSuggestions(suggestions: string[]): void {
+//   console.log(chalk.yellow("\n💡 Automated Suggestions:"));
+//   suggestions.slice(0, 5).forEach((suggestion, i) => {
+//     console.log(chalk.yellow(`  ${i + 1}. ${suggestion}`));
+//   });
+// }
 
 /**
  * Display comparative insights for Big-3 analysis

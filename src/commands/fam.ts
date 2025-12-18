@@ -62,7 +62,7 @@ export async function famCommand(subcommand?: string, arg?: string, options?: Fa
 /**
  * List all integrations with status
  */
-async function listIntegrations(options?: FamOptions) {
+async function listIntegrations(_options?: FamOptions) {
   console.log();
   console.log(FAF_COLORS.fafCyan('🏆 FAF Family - Championship Integrations'));
   console.log(FAF_COLORS.fafCyan('═'.repeat(50)));
@@ -83,7 +83,7 @@ async function listIntegrations(options?: FamOptions) {
         const emoji = getTierEmoji(integration.tier);
         console.log(`  ${chalk.green('✅')} ${chalk.bold(integration.displayName)}`);
         console.log(`     ${emoji} ${chalk.cyan(integration.tier)} tier`);
-        console.log(`     ${chalk.gray(formatNumber(integration.weeklyAdoption) + ' weekly developers')}`);
+        console.log(`     ${chalk.gray(`${formatNumber(integration.weeklyAdoption)  } weekly developers`)}`);
         console.log();
       });
 
@@ -129,8 +129,8 @@ async function listIntegrations(options?: FamOptions) {
           : '';
 
         console.log(`  ${emoji} ${chalk.bold(integration.displayName)}${turboTag}`);
-        console.log(`     ${chalk.gray(integration.tier + ' tier • ' + formatNumber(integration.weeklyAdoption) + ' weekly developers')}`);
-        console.log(`     ${chalk.gray(integration.mcpServers.length + ' MCP server(s) • ' + integration.contextContribution.length + ' context slots')}`);
+        console.log(`     ${chalk.gray(`${integration.tier} tier • ${formatNumber(integration.weeklyAdoption)} weekly developers`)}`);
+        console.log(`     ${chalk.gray(`${integration.mcpServers.length} MCP server(s) • ${integration.contextContribution.length} context slots`)}`);
         console.log();
       });
     }
@@ -196,7 +196,7 @@ async function showIntegration(name: string) {
 
   console.log(FAF_COLORS.fafOrange('OVERVIEW:'));
   console.log(`  Tier: ${chalk.cyan(integration.tier)}`);
-  console.log(`  Quality Score: ${chalk.cyan(integration.qualityScore + '/100')}`);
+  console.log(`  Quality Score: ${chalk.cyan(`${integration.qualityScore}/100`)}`);
   console.log(`  Weekly Adoption: ${chalk.cyan(formatNumber(integration.weeklyAdoption))} developers`);
   console.log();
 
@@ -297,7 +297,6 @@ async function detectCommand() {
     const projectPath = process.cwd();
     const detected = await integrationRegistry.detectAll(projectPath);
     const allIntegrations = Array.from(integrationRegistry.integrations.values());
-    const stats = integrationRegistry.getStats();
 
     if (detected.length === 0) {
       console.log(chalk.gray('❌ No FAF integrations detected in current project'));
@@ -325,7 +324,7 @@ async function detectCommand() {
         : '';
 
       console.log(`  ${chalk.green('✅')} ${chalk.bold(integration.displayName)}${turboTag}`);
-      console.log(`     ${emoji} ${chalk.cyan(integration.tier)} tier • ${chalk.gray(formatNumber(integration.weeklyAdoption) + ' weekly devs')}`);
+      console.log(`     ${emoji} ${chalk.cyan(integration.tier)} tier • ${chalk.gray(`${formatNumber(integration.weeklyAdoption)} weekly devs`)}`);
 
       // Show MCP servers
       if (integration.mcpServers.length > 0) {
@@ -345,13 +344,13 @@ async function detectCommand() {
     // Determine stack quality
     const avgScore = detected.reduce((sum, d) => sum + d.qualityScore, 0) / detected.length;
     let qualityTier = '🤍 Unrated';
-    if (avgScore >= 99) qualityTier = '🏆 Trophy Tier';
-    else if (avgScore >= 95) qualityTier = '🥇 Gold Tier';
-    else if (avgScore >= 90) qualityTier = '🥈 Silver Tier';
-    else if (avgScore >= 85) qualityTier = '🥉 Bronze Tier';
+    if (avgScore >= 99) {qualityTier = '🏆 Trophy Tier';}
+    else if (avgScore >= 95) {qualityTier = '🥇 Gold Tier';}
+    else if (avgScore >= 90) {qualityTier = '🥈 Silver Tier';}
+    else if (avgScore >= 85) {qualityTier = '🥉 Bronze Tier';}
 
     // Show summary
-    console.log(FAF_COLORS.fafOrange('📊 STACK QUALITY:') + ` ${qualityTier}`);
+    console.log(`${FAF_COLORS.fafOrange('📊 STACK QUALITY:')} ${qualityTier}`);
     console.log(`📈 Total ecosystem reach: ${chalk.cyan(formatNumber(totalReach))} developers`);
     console.log(`🔧 ${chalk.cyan(uniqueMcpServers.length.toString())} unique MCP servers recommended`);
     console.log(`✨ ${chalk.cyan(detected.reduce((sum, d) => sum + d.contextContribution.length, 0).toString())} .faf context slots filled`);

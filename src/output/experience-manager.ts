@@ -6,7 +6,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { FAF_COLORS, FAF_ICONS } from '../utils/championship-style';
+import { FAF_COLORS } from '../utils/championship-style';
 
 export interface ExperienceContent {
   type: 'banner' | 'achievement' | 'score' | 'personality' | 'error';
@@ -54,9 +54,9 @@ export class ExperienceManager {
         .toString()
         .trim();
 
-      if (parentCmd.includes('codex')) return 'codex';
-      if (parentCmd.includes('claude')) return 'claude';
-      if (parentCmd.includes('gemini')) return 'gemini';
+      if (parentCmd.includes('codex')) {return 'codex';}
+      if (parentCmd.includes('claude')) {return 'claude';}
+      if (parentCmd.includes('gemini')) {return 'gemini';}
     } catch {
       // Fallback to checking TTY
     }

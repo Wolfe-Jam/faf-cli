@@ -161,7 +161,6 @@ export async function syncBiDirectional(): Promise<SyncResult> {
     const claudeMdPath = path.join(projectDir, 'claude.md');
     
     // Check what exists
-    // const fafExists = true; // We found it above (unused)
     const claudeMdExists = await fs.access(claudeMdPath).then(() => true).catch(() => false);
     
     // Show score FIRST - top line

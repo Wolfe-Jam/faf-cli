@@ -57,7 +57,7 @@ export async function fetchSession(sessionId: string): Promise<ComparisonResults
     const { readFile } = await import('fs/promises');
     const data = await readFile(sessionFile, 'utf-8');
     return JSON.parse(data);
-  } catch (error) {
+  } catch {
     console.error(`Session not found: ${sessionId}`);
     return null;
   }

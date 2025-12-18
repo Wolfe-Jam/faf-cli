@@ -5,7 +5,6 @@
 
 import { chalk } from "../fix-once/colors";
 import * as fs from "fs/promises";
-import * as path from "path";
 import { findFafFile } from "../utils/file-utils";
 import { initFafFile } from "./init";
 import { syncFafFile } from "./sync";
@@ -170,7 +169,7 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
         const compiler = new FafCompiler();
         const scoreResult = await compiler.compile(fafPath);
         currentScore = Math.round(scoreResult.score || 0);
-      } catch (e) {
+      } catch {
         // Ignore score errors, will show 0%
       }
     }
@@ -272,12 +271,13 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
       for (const field of wFields) {
         const extraction = humanContext[field];
         const currentValue = parsed.human_context[field];
+        const confidenceStr = typeof extraction.confidence === 'string' ? extraction.confidence : '';
 
         // Only fill if: current is empty AND extraction is confident
         if ((!currentValue || currentValue === 'null' || currentValue === null) &&
             extraction.value &&
             !extraction.needsUserInput &&
-            (extraction.confidence === 'CERTAIN' || extraction.confidence === 'PROBABLE')) {
+            (confidenceStr === 'CERTAIN' || confidenceStr === 'PROBABLE')) {
           parsed.human_context[field] = extraction.value;
           filledCount++;
         }
@@ -297,7 +297,7 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
           console.log(chalk.cyan(`   💡 ${highPriorityTodos.length} human context fields can boost your score`));
         }
       }
-    } catch (error) {
+    } catch {
       console.log(chalk.gray("   Human context extraction skipped (non-critical)"));
     }
 
@@ -317,7 +317,7 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
         try {
           await enhanceFafWithAI(fafPath || undefined);
           console.log(chalk.green("✅ AI enhancement complete!"));
-        } catch (error) {
+        } catch {
           console.log(chalk.yellow("⚠️  AI enhancement skipped (API issue)"));
         }
       } else {
@@ -340,7 +340,7 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
         const compiler = new FafCompiler();
         const scoreResult = await compiler.compile(fafPath);
         newScore = Math.round(scoreResult.score || 0);
-      } catch (e) {
+      } catch {
         newScore = currentScore; // fallback to current if error
       }
     }
@@ -385,7 +385,7 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
 
           await fs.writeFile(fafPath, yamlUtils.stringify(parsed), 'utf-8');
         }
-      } catch (e) {
+      } catch {
         // Ignore errors, record tracking is non-critical
       }
     }

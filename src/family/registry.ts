@@ -59,8 +59,8 @@ export class FafIntegrationRegistry implements IntegrationRegistry {
         if (isPresent) {
           detected.push(detector);
         }
-      } catch (error) {
-        console.error(`Error detecting ${detector.name}:`, error);
+      } catch {
+        console.error(`Error detecting ${detector.name}`);
       }
     }
 
@@ -74,7 +74,7 @@ export class FafIntegrationRegistry implements IntegrationRegistry {
     const detected = await this.detectAll(projectPath);
 
     // Merge contexts from all detected integrations
-    let combinedContext: Partial<FafFile> = {
+    const combinedContext: Partial<FafFile> = {
       stack: {},
       project: {},
       integration: {
@@ -110,8 +110,8 @@ export class FafIntegrationRegistry implements IntegrationRegistry {
           combinedContext.integration!.mcp_servers!.push(...(context.integration.mcp_servers || []));
           combinedContext.integration!.recommended_tools!.push(...(context.integration.recommended_tools || []));
         }
-      } catch (error) {
-        console.error(`Error generating context for ${detector.name}:`, error);
+      } catch {
+        console.error(`Error generating context for ${detector.name}`);
       }
     }
 
@@ -129,7 +129,9 @@ export class FafIntegrationRegistry implements IntegrationRegistry {
       return 'No FAF integrations detected';
     }
 
-    const tiers = detected.map((d) => `${d.displayName} (${d.tier})`);
+    // Build tier info for potential future use
+    const _tierInfo = detected.map((d) => `${d.displayName} (${d.tier})`);
+    void _tierInfo; // Placeholder for future tier display
     const frameworks = detected.map((d) => d.displayName).join(', ');
 
     return `Fully integrated with: ${frameworks} | ${detected.length} championship-grade integration${

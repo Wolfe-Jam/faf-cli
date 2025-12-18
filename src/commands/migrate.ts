@@ -79,14 +79,14 @@ export async function migrateCommand(
       console.log(chalk.gray('  • Easier to discover and share'));
       console.log(chalk.gray('  • Universal like package.json'));
       console.log();
-    } catch (error: any) {
+    } catch (error) {
       console.error(chalk.red('❌ Migration failed'));
-      console.error(chalk.gray(`   ${error.message}`));
+      console.error(chalk.gray(`   ${error instanceof Error ? error.message : String(error)}`));
       console.log();
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error(chalk.red('❌ Error during migration'));
-    console.error(chalk.gray(`   ${error.message}`));
+    console.error(chalk.gray(`   ${error instanceof Error ? error.message : String(error)}`));
     console.log();
   }
 }

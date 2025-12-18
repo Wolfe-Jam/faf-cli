@@ -380,11 +380,11 @@ export class UniversalFuzzyDetector {
    * Guess project type from context
    */
   private static guessProjectType(text: string): string | null {
-    if (text.includes('web') || text.includes('site')) return 'react';
-    if (text.includes('app') && !text.includes('web')) return 'mobile';
-    if (text.includes('server') || text.includes('backend')) return 'api';
-    if (text.includes('script') || text.includes('tool')) return 'cli';
-    if (text.includes('package') || text.includes('library')) return 'library';
+    if (text.includes('web') || text.includes('site')) {return 'react';}
+    if (text.includes('app') && !text.includes('web')) {return 'mobile';}
+    if (text.includes('server') || text.includes('backend')) {return 'api';}
+    if (text.includes('script') || text.includes('tool')) {return 'cli';}
+    if (text.includes('package') || text.includes('library')) {return 'library';}
     return null;
   }
 

@@ -72,7 +72,12 @@ export async function realEnhanceFaf(
       console.log(chalk.cyan(`\n🔄 Enhancement Round ${iteration}...`));
 
       // Analyze project for REAL improvements
-      const improvements = await analyzeProjectForRealImprovements(projectPath, fafData, currentScore);
+      let improvements: any = {};
+      try {
+        improvements = await analyzeProjectForRealImprovements(projectPath, fafData, currentScore);
+      } catch {
+        console.log(chalk.yellow('   Could not analyze project automatically'));
+      }
 
       if (options.verbose) {
         console.log(chalk.gray(`Found ${Object.keys(improvements).length} automatic improvements`));
@@ -115,43 +120,47 @@ export async function realEnhanceFaf(
         continue;
       }
 
-      // Apply REAL improvements
-      fafData = applyRealEnhancements(fafData, improvements);
+      try {
+        // Apply REAL improvements
+        fafData = applyRealEnhancements(fafData, improvements);
 
-      // CRITICAL: Preserve essential fields that should never be removed
-      if (!fafData.project) fafData.project = {};
-      if (!fafData.project.generated && fafData.generated) {
-        fafData.project.generated = fafData.generated;
-      }
-
-      // Add meta tracking for enhancement
-      fafData.meta = fafData.meta || {};
-      fafData.meta.last_enhanced = new Date().toISOString();
-      fafData.meta.enhanced_by = 'faf-real-enhance';
-
-      // Save enhanced file
-      const enhancedYaml = stringifyYAML(fafData);
-      await fs.writeFile(fafPath, enhancedYaml);
-
-      // Calculate new score
-      const newScore = await compiler.compile(fafPath);
-      const improvement = newScore.score - currentScore.score;
-
-      if (improvement > 0) {
-        console.log(chalk.green(`✅ Improvement: +${improvement}% (${currentScore.score}% → ${newScore.score}%)`));
-
-        // Show what was actually added
-        if (options.verbose) {
-          console.log(chalk.cyan("📝 Changes Made:"));
-          displayImprovements(improvements);
+        // CRITICAL: Preserve essential fields that should never be removed
+        if (!fafData.project) {fafData.project = {};}
+        if (!fafData.project.generated && fafData.generated) {
+          fafData.project.generated = fafData.generated;
         }
-      }
 
-      currentScore = newScore;
+        // Add meta tracking for enhancement
+        fafData.meta = fafData.meta || {};
+        fafData.meta.last_enhanced = new Date().toISOString();
+        fafData.meta.enhanced_by = 'faf-real-enhance';
+
+        // Save enhanced file
+        const enhancedYaml = stringifyYAML(fafData);
+        await fs.writeFile(fafPath, enhancedYaml);
+
+        // Calculate new score
+        const newScore = await compiler.compile(fafPath);
+        const improvement = newScore.score - currentScore.score;
+
+        if (improvement > 0) {
+          console.log(chalk.green(`✅ Improvement: +${improvement}% (${currentScore.score}% → ${newScore.score}%)`));
+
+          // Show what was actually added
+          if (options.verbose) {
+            console.log(chalk.cyan("📝 Changes Made:"));
+            displayImprovements(improvements);
+          }
+        }
+
+        currentScore = newScore;
+      } catch {
+        console.log(chalk.yellow("\n⚠️ Enhancement iteration failed, continuing..."));
+      }
     }
 
     // Final results
-    console.log(chalk.cyan("\n" + "=".repeat(60)));
+    console.log(chalk.cyan(`\n${"=".repeat(60)}`));
     if (currentScore.score >= targetScore) {
       console.log(chalk.green(`🎯 TARGET ACHIEVED! Score: ${currentScore.score}%`));
     } else {
@@ -216,7 +225,7 @@ function displayMissingSlots(score: any): void {
  * Ask human for missing critical data via inquirer
  * RELENTLESS 1-6 questionnaire for the 6 W's of Human Context
  */
-async function askHumanForMissingData(currentFaf: any, score: any): Promise<any> {
+async function askHumanForMissingData(currentFaf: any, _score: any): Promise<any> {
   // Check if we're in an interactive terminal
   if (!process.stdin.isTTY) {
     console.log(chalk.yellow('\n⚠️  Interactive questions require a terminal (TTY)'));
@@ -264,9 +273,9 @@ async function askHumanForMissingData(currentFaf: any, score: any): Promise<any>
       default: getSmartDefault('who', currentFaf),
       transformer: (input: string) => chalk.green(input),
       validate: (input: string) => {
-        if (input.trim().length < 3) return 'Please specify your target users';
+        if (input.trim().length < 3) {return 'Please specify your target users';}
         if (genericAnswers.who.includes(input.toLowerCase())) {
-          return 'Please be more specific than "' + input + '"';
+          return `Please be more specific than "${  input  }"`;
         }
         return true;
       }
@@ -282,7 +291,7 @@ async function askHumanForMissingData(currentFaf: any, score: any): Promise<any>
       default: getSmartDefault('what', currentFaf),
       transformer: (input: string) => chalk.green(input),
       validate: (input: string) => {
-        if (input.trim().length < 10) return 'Please describe the specific problem';
+        if (input.trim().length < 10) {return 'Please describe the specific problem';}
         if (genericAnswers.what.includes(input.toLowerCase())) {
           return 'Please be more specific about the problem';
         }
@@ -300,7 +309,7 @@ async function askHumanForMissingData(currentFaf: any, score: any): Promise<any>
       default: getSmartDefault('why', currentFaf),
       transformer: (input: string) => chalk.green(input),
       validate: (input: string) => {
-        if (input.trim().length < 10) return 'Please explain why this matters';
+        if (input.trim().length < 10) {return 'Please explain why this matters';}
         if (genericAnswers.why.includes(input.toLowerCase())) {
           return 'Please be more specific about the value/impact';
         }
@@ -318,7 +327,7 @@ async function askHumanForMissingData(currentFaf: any, score: any): Promise<any>
       default: getSmartDefault('where', currentFaf),
       transformer: (input: string) => chalk.green(input),
       validate: (input: string) => {
-        if (input.trim().length < 3) return 'Please specify the deployment context';
+        if (input.trim().length < 3) {return 'Please specify the deployment context';}
         return true;
       }
     });
@@ -333,7 +342,7 @@ async function askHumanForMissingData(currentFaf: any, score: any): Promise<any>
       default: getSmartDefault('when', currentFaf),
       transformer: (input: string) => chalk.green(input),
       validate: (input: string) => {
-        if (input.trim().length < 3) return 'Please specify the timeline';
+        if (input.trim().length < 3) {return 'Please specify the timeline';}
         return true;
       }
     });
@@ -348,7 +357,7 @@ async function askHumanForMissingData(currentFaf: any, score: any): Promise<any>
       default: getSmartDefault('how', currentFaf),
       transformer: (input: string) => chalk.green(input),
       validate: (input: string) => {
-        if (input.trim().length < 5) return 'Please describe your approach';
+        if (input.trim().length < 5) {return 'Please describe your approach';}
         if (genericAnswers.how.includes(input.toLowerCase())) {
           return 'Please be more specific about your methodology';
         }
@@ -436,7 +445,7 @@ const genericAnswers = {
 // Smart defaults based on project type
 function getSmartDefault(field: string, currentFaf: any): string {
   const projectType = currentFaf.project?.type || '';
-  const projectName = currentFaf.project?.name || '';
+  const _projectName = currentFaf.project?.name || '';
   const language = currentFaf.project?.main_language || '';
 
   const defaults: Record<string, Record<string, string>> = {
@@ -485,7 +494,7 @@ function getSmartDefault(field: string, currentFaf: any): string {
   };
 
   const typeDefaults = defaults[field];
-  if (!typeDefaults) return '';
+  if (!typeDefaults) {return '';}
 
   return typeDefaults[projectType] || typeDefaults['default'] || '';
 }
@@ -496,7 +505,7 @@ function getSmartDefault(field: string, currentFaf: any): string {
 async function analyzeProjectForRealImprovements(
   projectPath: string,
   currentFaf: any,
-  currentScore: any
+  _currentScore: any
 ): Promise<any> {
   const improvements: any = {};
 
@@ -562,7 +571,7 @@ async function analyzeProjectForRealImprovements(
         improvements.buildTool = detectBuildTool(deps);
       }
     }
-  } catch (e) {
+  } catch {
     // No package.json, try other files
   }
 
@@ -665,7 +674,7 @@ async function analyzeProjectForRealImprovements(
     if (readmeInfo.what && !currentFaf.human_context?.what) {
       improvements.what = readmeInfo.what;
     }
-  } catch (e) {
+  } catch {
     // No README or can't parse
   }
 
@@ -694,7 +703,7 @@ async function analyzeProjectForRealImprovements(
         improvements.when = `Active development since ${lastCommit}`;
       }
     }
-  } catch (e) {
+  } catch {
     // No git or git commands failed
   }
 
@@ -708,34 +717,34 @@ async function analyzeProjectForRealImprovements(
 
   // 6. Analyze file patterns for more intelligent stack detection
   if (!currentFaf.stack?.hosting) {
-    if (files.includes('vercel.json')) improvements.hosting = 'Vercel';
-    else if (files.includes('netlify.toml')) improvements.hosting = 'Netlify';
-    else if (files.includes('app.yaml')) improvements.hosting = 'Google App Engine';
-    else if (files.includes('Procfile')) improvements.hosting = 'Heroku';
-    else if (files.includes('.elasticbeanstalk')) improvements.hosting = 'AWS Elastic Beanstalk';
+    if (files.includes('vercel.json')) {improvements.hosting = 'Vercel';}
+    else if (files.includes('netlify.toml')) {improvements.hosting = 'Netlify';}
+    else if (files.includes('app.yaml')) {improvements.hosting = 'Google App Engine';}
+    else if (files.includes('Procfile')) {improvements.hosting = 'Heroku';}
+    else if (files.includes('.elasticbeanstalk')) {improvements.hosting = 'AWS Elastic Beanstalk';}
   }
 
   // 7. Intelligent project type detection from structure
   if (!currentFaf.project?.type) {
     const hasPublicDir = files.includes('public');
-    const hasSrcDir = files.includes('src');
+    const _hasSrcDir = files.includes('src');
     const hasApiDir = files.includes('api');
     const hasServerFile = files.some(f => f.includes('server'));
     const hasIndexHtml = files.includes('index.html');
 
-    if (hasApiDir && hasPublicDir) improvements.projectType = 'fullstack';
-    else if (hasServerFile && !hasIndexHtml) improvements.projectType = 'backend-api';
-    else if (hasPublicDir && hasIndexHtml) improvements.projectType = 'frontend';
-    else if (files.includes('cli.js') || files.includes('cli.ts')) improvements.projectType = 'cli-tool';
+    if (hasApiDir && hasPublicDir) {improvements.projectType = 'fullstack';}
+    else if (hasServerFile && !hasIndexHtml) {improvements.projectType = 'backend-api';}
+    else if (hasPublicDir && hasIndexHtml) {improvements.projectType = 'frontend';}
+    else if (files.includes('cli.js') || files.includes('cli.ts')) {improvements.projectType = 'cli-tool';}
   }
 
   // 8. Extract runtime from files
   if (!currentFaf.stack?.runtime) {
-    if (files.includes('package.json')) improvements.runtime = 'Node.js';
-    else if (files.includes('requirements.txt')) improvements.runtime = 'Python';
-    else if (files.includes('Gemfile')) improvements.runtime = 'Ruby';
-    else if (files.includes('go.mod')) improvements.runtime = 'Go';
-    else if (files.includes('Cargo.toml')) improvements.runtime = 'Rust';
+    if (files.includes('package.json')) {improvements.runtime = 'Node.js';}
+    else if (files.includes('requirements.txt')) {improvements.runtime = 'Python';}
+    else if (files.includes('Gemfile')) {improvements.runtime = 'Ruby';}
+    else if (files.includes('go.mod')) {improvements.runtime = 'Go';}
+    else if (files.includes('Cargo.toml')) {improvements.runtime = 'Rust';}
   }
 
   // 9. Fill API type if we have a backend
@@ -747,11 +756,11 @@ async function analyzeProjectForRealImprovements(
       const pkg = JSON.parse(pkgContent);
       const allDeps = { ...pkg.dependencies, ...pkg.devDependencies };
 
-      if (allDeps['graphql']) improvements.api_type = 'GraphQL';
-      else if (allDeps['@trpc/server']) improvements.api_type = 'tRPC';
-      else if (allDeps['socket.io']) improvements.api_type = 'WebSocket';
-      else improvements.api_type = 'REST';
-    } catch (e) {
+      if (allDeps['graphql']) {improvements.api_type = 'GraphQL';}
+      else if (allDeps['@trpc/server']) {improvements.api_type = 'tRPC';}
+      else if (allDeps['socket.io']) {improvements.api_type = 'WebSocket';}
+      else {improvements.api_type = 'REST';}
+    } catch {
       improvements.api_type = 'REST'; // Default to REST if can't read package.json
     }
   }
@@ -866,30 +875,30 @@ function applyRealEnhancements(fafData: any, improvements: any): any {
 function detectFrameworks(deps: Record<string, string>): string[] {
   const frameworks = [];
   // Frontend frameworks
-  if (deps['react']) frameworks.push('React');
-  if (deps['vue']) frameworks.push('Vue');
-  if (deps['@angular/core']) frameworks.push('Angular');
-  if (deps['svelte']) frameworks.push('Svelte');
-  if (deps['solid-js']) frameworks.push('SolidJS');
-  if (deps['preact']) frameworks.push('Preact');
-  if (deps['@ember/core']) frameworks.push('Ember');
+  if (deps['react']) {frameworks.push('React');}
+  if (deps['vue']) {frameworks.push('Vue');}
+  if (deps['@angular/core']) {frameworks.push('Angular');}
+  if (deps['svelte']) {frameworks.push('Svelte');}
+  if (deps['solid-js']) {frameworks.push('SolidJS');}
+  if (deps['preact']) {frameworks.push('Preact');}
+  if (deps['@ember/core']) {frameworks.push('Ember');}
 
   // Meta-frameworks
-  if (deps['next']) frameworks.push('Next.js');
-  if (deps['nuxt']) frameworks.push('Nuxt');
-  if (deps['gatsby']) frameworks.push('Gatsby');
-  if (deps['@remix-run/react']) frameworks.push('Remix');
-  if (deps['astro']) frameworks.push('Astro');
-  if (deps['@sveltekit/adapter-auto']) frameworks.push('SvelteKit');
+  if (deps['next']) {frameworks.push('Next.js');}
+  if (deps['nuxt']) {frameworks.push('Nuxt');}
+  if (deps['gatsby']) {frameworks.push('Gatsby');}
+  if (deps['@remix-run/react']) {frameworks.push('Remix');}
+  if (deps['astro']) {frameworks.push('Astro');}
+  if (deps['@sveltekit/adapter-auto']) {frameworks.push('SvelteKit');}
 
   // Backend frameworks
-  if (deps['express']) frameworks.push('Express');
-  if (deps['fastify']) frameworks.push('Fastify');
-  if (deps['@nestjs/core']) frameworks.push('NestJS');
-  if (deps['koa']) frameworks.push('Koa');
-  if (deps['@hapi/hapi']) frameworks.push('Hapi');
-  if (deps['@feathersjs/feathers']) frameworks.push('Feathers');
-  if (deps['@adonisjs/core']) frameworks.push('AdonisJS');
+  if (deps['express']) {frameworks.push('Express');}
+  if (deps['fastify']) {frameworks.push('Fastify');}
+  if (deps['@nestjs/core']) {frameworks.push('NestJS');}
+  if (deps['koa']) {frameworks.push('Koa');}
+  if (deps['@hapi/hapi']) {frameworks.push('Hapi');}
+  if (deps['@feathersjs/feathers']) {frameworks.push('Feathers');}
+  if (deps['@adonisjs/core']) {frameworks.push('AdonisJS');}
 
   return frameworks;
 }
@@ -906,39 +915,39 @@ function isBackendFramework(framework: string): boolean {
 }
 
 function detectBuildTool(deps: Record<string, string>): string {
-  if (deps['vite']) return 'Vite';
-  if (deps['webpack']) return 'Webpack';
-  if (deps['@parcel/core'] || deps['parcel']) return 'Parcel';
-  if (deps['esbuild']) return 'ESBuild';
-  if (deps['rollup']) return 'Rollup';
-  if (deps['@swc/core']) return 'SWC';
-  if (deps['turbopack']) return 'Turbopack';
-  if (deps['snowpack']) return 'Snowpack';
-  if (deps['@rspack/core']) return 'Rspack';
+  if (deps['vite']) {return 'Vite';}
+  if (deps['webpack']) {return 'Webpack';}
+  if (deps['@parcel/core'] || deps['parcel']) {return 'Parcel';}
+  if (deps['esbuild']) {return 'ESBuild';}
+  if (deps['rollup']) {return 'Rollup';}
+  if (deps['@swc/core']) {return 'SWC';}
+  if (deps['turbopack']) {return 'Turbopack';}
+  if (deps['snowpack']) {return 'Snowpack';}
+  if (deps['@rspack/core']) {return 'Rspack';}
   return 'npm';
 }
 
 function detectProjectType(files: string[]): string {
   if (files.includes('package.json')) {
-    if (files.includes('tsconfig.json')) return 'typescript-node';
+    if (files.includes('tsconfig.json')) {return 'typescript-node';}
     return 'javascript-node';
   }
   if (files.includes('requirements.txt') || files.includes('setup.py')) {
     return 'python';
   }
-  if (files.includes('Cargo.toml')) return 'rust';
-  if (files.includes('go.mod')) return 'go';
+  if (files.includes('Cargo.toml')) {return 'rust';}
+  if (files.includes('go.mod')) {return 'go';}
   return 'unknown';
 }
 
 function detectLanguage(files: string[]): string {
   const extensions = files.map(f => path.extname(f));
-  if (extensions.includes('.ts') || extensions.includes('.tsx')) return 'TypeScript';
-  if (extensions.includes('.js') || extensions.includes('.jsx')) return 'JavaScript';
-  if (extensions.includes('.py')) return 'Python';
-  if (extensions.includes('.rs')) return 'Rust';
-  if (extensions.includes('.go')) return 'Go';
-  if (extensions.includes('.java')) return 'Java';
+  if (extensions.includes('.ts') || extensions.includes('.tsx')) {return 'TypeScript';}
+  if (extensions.includes('.js') || extensions.includes('.jsx')) {return 'JavaScript';}
+  if (extensions.includes('.py')) {return 'Python';}
+  if (extensions.includes('.rs')) {return 'Rust';}
+  if (extensions.includes('.go')) {return 'Go';}
+  if (extensions.includes('.java')) {return 'Java';}
   return 'Unknown';
 }
 
@@ -984,25 +993,25 @@ function extractFromReadme(content: string): any {
  */
 function detectTestingFramework(deps: Record<string, string>): string | null {
   // Unit testing
-  if (deps['vitest']) return 'Vitest';
-  if (deps['jest']) return 'Jest';
-  if (deps['mocha']) return 'Mocha';
-  if (deps['jasmine']) return 'Jasmine';
-  if (deps['ava']) return 'AVA';
-  if (deps['tape']) return 'Tape';
-  if (deps['uvu']) return 'uvu';
+  if (deps['vitest']) {return 'Vitest';}
+  if (deps['jest']) {return 'Jest';}
+  if (deps['mocha']) {return 'Mocha';}
+  if (deps['jasmine']) {return 'Jasmine';}
+  if (deps['ava']) {return 'AVA';}
+  if (deps['tape']) {return 'Tape';}
+  if (deps['uvu']) {return 'uvu';}
 
   // E2E testing
-  if (deps['@playwright/test'] || deps['playwright']) return 'Playwright';
-  if (deps['cypress']) return 'Cypress';
-  if (deps['puppeteer']) return 'Puppeteer';
-  if (deps['webdriverio']) return 'WebdriverIO';
-  if (deps['nightwatch']) return 'Nightwatch';
+  if (deps['@playwright/test'] || deps['playwright']) {return 'Playwright';}
+  if (deps['cypress']) {return 'Cypress';}
+  if (deps['puppeteer']) {return 'Puppeteer';}
+  if (deps['webdriverio']) {return 'WebdriverIO';}
+  if (deps['nightwatch']) {return 'Nightwatch';}
 
   // Testing utilities
-  if (deps['@testing-library/react']) return 'React Testing Library';
-  if (deps['@testing-library/vue']) return 'Vue Testing Library';
-  if (deps['enzyme']) return 'Enzyme';
+  if (deps['@testing-library/react']) {return 'React Testing Library';}
+  if (deps['@testing-library/vue']) {return 'Vue Testing Library';}
+  if (deps['enzyme']) {return 'Enzyme';}
 
   return null;
 }
@@ -1012,23 +1021,23 @@ function detectTestingFramework(deps: Record<string, string>): string | null {
  */
 function detectDatabase(deps: Record<string, string>): string | null {
   // ORMs that support multiple databases
-  if (deps['@prisma/client']) return 'Prisma';
-  if (deps['typeorm']) return 'TypeORM';
-  if (deps['sequelize']) return 'Sequelize';
-  if (deps['drizzle-orm']) return 'Drizzle';
-  if (deps['kysely']) return 'Kysely';
+  if (deps['@prisma/client']) {return 'Prisma';}
+  if (deps['typeorm']) {return 'TypeORM';}
+  if (deps['sequelize']) {return 'Sequelize';}
+  if (deps['drizzle-orm']) {return 'Drizzle';}
+  if (deps['kysely']) {return 'Kysely';}
 
   // Specific databases
-  if (deps['pg'] || deps['postgres']) return 'PostgreSQL';
-  if (deps['mysql'] || deps['mysql2']) return 'MySQL';
-  if (deps['mongodb'] || deps['mongoose']) return 'MongoDB';
-  if (deps['sqlite3'] || deps['better-sqlite3']) return 'SQLite';
-  if (deps['redis'] || deps['ioredis']) return 'Redis';
-  if (deps['@supabase/supabase-js']) return 'Supabase';
-  if (deps['firebase']) return 'Firebase';
-  if (deps['@planetscale/database']) return 'PlanetScale';
-  if (deps['@neondatabase/serverless']) return 'Neon';
-  if (deps['@vercel/postgres']) return 'Vercel Postgres';
+  if (deps['pg'] || deps['postgres']) {return 'PostgreSQL';}
+  if (deps['mysql'] || deps['mysql2']) {return 'MySQL';}
+  if (deps['mongodb'] || deps['mongoose']) {return 'MongoDB';}
+  if (deps['sqlite3'] || deps['better-sqlite3']) {return 'SQLite';}
+  if (deps['redis'] || deps['ioredis']) {return 'Redis';}
+  if (deps['@supabase/supabase-js']) {return 'Supabase';}
+  if (deps['firebase']) {return 'Firebase';}
+  if (deps['@planetscale/database']) {return 'PlanetScale';}
+  if (deps['@neondatabase/serverless']) {return 'Neon';}
+  if (deps['@vercel/postgres']) {return 'Vercel Postgres';}
 
   return null;
 }

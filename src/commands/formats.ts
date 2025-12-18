@@ -4,7 +4,7 @@
  */
 
 import { chalk } from "../fix-once/colors";
-import { FAF_COLORS, FAF_ICONS, generateFAFHeader } from "../utils/championship-style";
+import { FAF_COLORS, FAF_ICONS } from "../utils/championship-style";
 import { FabFormatsEngine } from "../utils/fab-formats-engine";
 
 interface FormatOptions {
@@ -12,6 +12,9 @@ interface FormatOptions {
   json?: boolean;
   category?: boolean;
 }
+
+// Constants
+const _MAX_WIDTH = 80;
 
 export async function formatsCommand(projectPath?: string, options: FormatOptions = {}) {
   // FAF banner is now shown by cli.ts - removed duplicate

@@ -10,6 +10,7 @@ export type ColorScheme = 'normal' | 'deuteranopia' | 'protanopia' | 'tritanopia
 // Global color settings
 let globalColorEnabled = true;
 let globalColorScheme: ColorScheme = 'normal';
+const _USE_NATIVE = false; // Reserved for future native color support
 
 export function setColorOptions(enabled: boolean, scheme: ColorScheme = 'normal') {
   globalColorEnabled = enabled;
