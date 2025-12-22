@@ -39,6 +39,8 @@
     "build:protected": "npm run build:engine && npm run obfuscate:engine",
     "build:all": "npm run build:protected && npm run build",
     "prepare": "npm run build && npm run test:audit",
+    "sync-version": "node scripts/sync-version.js",
+    "version": "npm run sync-version && git add project.faf",
     "prepublishOnly": "npm run build:verify && npm run version:truth",
     "docs:generate": "ts-node scripts/generate-docs.ts",
     "docs:build": "cd docs-site && npm run build",
