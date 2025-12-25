@@ -162,12 +162,40 @@ export async function initFafFile(
     console.log();
     console.log(FAF_COLORS.fafCyan(`${FAF_ICONS.magic_wand} Calculating Birth DNA (first score)...`));
 
-    // Calculate ACTUAL score from the generated .faf - this IS the birth DNA
+    // =========================================================================
+    // BIRTH DNA - THE RAW TRUTH (DO NOT "OPTIMIZE" THIS TO BE HIGHER!)
+    // =========================================================================
+    // Birth DNA = raw slot count ONLY. Not the compiler score. Not enhanced.
+    //
+    // WHY THIS MUST STAY LOW:
+    // - Birth DNA is the "before" picture - what exists BEFORE FAF works
+    // - It's intentionally the raw slot_based_percentage (slots filled / 21)
+    // - The compiler score is FAF at work (project-type-aware, bonuses, etc.)
+    // - Birth DNA just COUNTS SLOTS - no intelligence, no bonuses
+    //
+    // ZERO IS ZERO. 0% is a valid score. Show it. It is what it is.
+    // An empty project has 0 slots filled. That's the truth. Display 0%.
+    //
+    // DO NOT:
+    // - Use compiler.score (that's FAF-enhanced, not raw)
+    // - Use ai_score (that includes quality bonuses)
+    // - Add any "minimum" or "base" points
+    // - Try to make it higher to "look better"
+    //
+    // The growth from Birth DNA to current score shows FAF's VALUE.
+    // If Birth DNA is artificially high, we can't show improvement.
+    // =========================================================================
     const fafData = parseYAML(fafContent);
     const compiler = new FafCompiler();
     const scoreResult = await compiler.compile(outputPath);
-    const _birthDNA = fafData.faf_score ? parseInt(fafData.faf_score.replace('%', '')) : Math.round(scoreResult.score || 0);
-    const birthDNA = _birthDNA;
+
+    // Birth DNA = raw slot percentage ONLY (not compiler score!)
+    const slotBasedScore = fafData.ai_scoring_details?.slot_based_percentage
+      || fafData.context_quality?.slots_filled?.match(/\((\d+)%\)/)?.[1]
+      || null;
+    const birthDNA = slotBasedScore
+      ? parseInt(String(slotBasedScore))
+      : Math.round(scoreResult.score || 0); // Fallback only if slot data missing
     const currentScore = birthDNA; // At init, current = birth
 
     // Check if CLAUDE.md exists for tracking purposes

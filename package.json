@@ -1,6 +1,6 @@
 {
   "name": "faf-cli",
-  "version": "3.2.6",
+  "version": "3.2.7",
   "description": "Anthropic-Approved codebase that powers claude-faf-mcp • Persistent project context, on-demand • Format-driven CLI • Open Source Universal Standard • MIT License",
   "icon": "https://faf.one/orange-smiley.svg",
   "logo": "https://faf.one/orange-smiley.svg",

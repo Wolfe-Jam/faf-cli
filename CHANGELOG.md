@@ -5,6 +5,20 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.7] - 2025-12-25
+
+### Fixed
+
+- **Birth DNA now uses raw slot count** - Birth DNA correctly reflects reality
+  - Uses `slot_based_percentage` (raw slots filled / 21)
+  - NOT the compiler score (which includes FAF intelligence)
+  - 0% is a valid score - empty projects show 0%
+  - Added extensive documentation to prevent future "optimization"
+
+### Philosophy
+
+Birth DNA = the "before" picture. The growth from Birth DNA to current score shows FAF's value. If Birth DNA is artificially high, we can't show improvement.
+
 ## [3.2.4] - 2025-12-17
 
 ### TYPE_DEFINITIONS - Project Type-Aware Scoring
