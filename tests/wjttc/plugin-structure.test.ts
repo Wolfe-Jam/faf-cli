@@ -176,6 +176,13 @@ describe('🏎️ WJTTC Plugin Structure Tests', () => {
       expect(pluginJson.repository).toBeDefined();
       expect(pluginJson.repository).toMatch(/github\.com/);
     });
+
+    test('plugin.json repository is a STRING not object (Issue #9297 fix)', () => {
+      const pluginJson = JSON.parse(
+        fs.readFileSync(path.join(PLUGIN_ROOT, '.claude-plugin', 'plugin.json'), 'utf-8')
+      );
+      expect(typeof pluginJson.repository).toBe('string');
+    });
   });
 
   // =========================================================================
