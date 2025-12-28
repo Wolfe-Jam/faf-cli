@@ -89,6 +89,8 @@ test-*.faf
 !SECURITY.md
 !SUPPORT.md
 !.github/**/*.md
+!commands/**/*.md
+!skills/**/*.md
 
 # Temporary files
 *.tmp
