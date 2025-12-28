@@ -244,6 +244,8 @@ export function generateFafContent(projectData: {
   const fafData = {
     // FAF schema version (not CLI version)
     faf_version: '2.5.0',
+    // Generated timestamp (required by schema)
+    generated: new Date().toISOString(),
     // 🤖 AI-FIRST SCORING SYSTEM - Championship Engine with FAB-FORMATS
     ai_scoring_system: '2025-09-20',  // faf-engine-mk3 compiler live date
     ai_score: `${projectData.fafScore}%`,  // MY evaluation
@@ -285,9 +287,8 @@ export function generateFafContent(projectData: {
     project: {
       name: projectData.projectName || 'Untitled Project',
       goal: projectData.projectGoal ? escapeForYaml(projectData.projectGoal) : null,
-      main_language: projectData.mainLanguage || null,
+      main_language: projectData.mainLanguage || 'Unknown',
       type: projectData.projectType || null,  // Project type for compiler slot-filling patterns
-      generated: new Date().toISOString(),
       mission: '🚀 Make Your AI Happy! 🧡 Trust-Driven 🤖',
       revolution: '30 seconds replaces 20 minutes of questions',
       brand: 'F1-Inspired Software Engineering - Championship AI Context'
@@ -352,7 +353,15 @@ export function generateFafContent(projectData: {
       next_milestone: 'npm_publication',
       blockers: []
     },
-    
+
+    // 📊 Scores (required by schema)
+    scores: {
+      faf_score: projectData.fafScore || 0,
+      slot_based_percentage: projectData.slotBasedPercentage || 0,
+      total_slots: totalSlotsCount,
+      scoring_philosophy: 'F1-Inspired Championship Scoring'
+    },
+
     // 🏷️ Search & Discovery Tags
     tags: generateProjectTags(projectData),
     
