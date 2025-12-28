@@ -136,8 +136,8 @@ function verifyPluginStructure(installDir: string): void {
     const fullPath = path.join(installDir, check.path);
     const exists = fs.existsSync(fullPath);
 
-    if (check.path === 'commands') hasCommands = exists;
-    if (check.path === 'skills') hasSkills = exists;
+    if (check.path === 'commands') { hasCommands = exists; }
+    if (check.path === 'skills') { hasSkills = exists; }
 
     if (exists) {
       console.log(chalk.green(`   ✓ ${check.name}`));
