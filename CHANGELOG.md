@@ -5,6 +5,32 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.0] - 2025-12-28
+
+### Added
+
+- **`faf plugin-install`** - Install Claude Code plugins via HTTPS (workaround for SSH bug)
+  - Fixes marketplace SSH clone issue (GitHub #9297, #9719, #9730, #9740)
+  - Accepts: `owner/repo`, HTTPS URL, or SSH URL
+  - Verifies plugin structure after install
+  - Use `--force` to reinstall
+
+- **Claude Code Plugin Structure** - Full plugin support at repo root
+  - `commands/` directory with 6 slash commands
+  - `skills/` directory with faf-expert skill
+  - `.claude-plugin/plugin.json` for metadata
+
+- **WJTTC Plugin Test Suite** - 31 tests for plugin validation
+  - Brake Systems: Critical plugin structure
+  - Engine Systems: Command discovery
+  - Aerodynamics: Skill accessibility
+  - Pit Lane: Metadata quality
+  - Championship: Full integration
+
+### Philosophy
+
+Claude Code marketplace uses HTTPS (works). Third-party `/plugin marketplace add` uses SSH (hangs). We fixed it with `faf plugin-install` - uses HTTPS like the official marketplace.
+
 ## [3.2.7] - 2025-12-25
 
 ### Fixed

@@ -589,6 +589,30 @@ export async function detectProjectType(
     }
   }
 
+  // PHASE 2.5: COOKBOOK/EXAMPLES DETECTION
+  // ============================================================================
+  // Cookbooks are examples/tutorials repos - detect by name or structure
+  const dirName = path.basename(projectDir).toLowerCase();
+  const cookbookPatterns = ['cookbook', 'examples', 'tutorials', 'demos', 'samples'];
+
+  if (cookbookPatterns.some(pattern => dirName.includes(pattern))) {
+    return "cookbook";
+  }
+
+  // Check for examples/ directory with notebooks
+  const examplesDir = path.join(projectDir, "examples");
+  if (await fileExists(examplesDir)) {
+    try {
+      const examplesFiles = await fs.readdir(examplesDir);
+      const hasNotebooks = examplesFiles.some(f => f.endsWith('.ipynb'));
+      if (hasNotebooks) {
+        return "cookbook";
+      }
+    } catch {
+      // Continue with other detection
+    }
+  }
+
   // PHASE 3: PYTHON DETECTION (check for Python-specific files)
   // ============================================================================
   const pythonType = await detectPythonProjectType(projectDir);

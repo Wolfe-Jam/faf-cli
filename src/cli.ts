@@ -47,6 +47,7 @@ import { migrateCommand } from './commands/migrate';
 import { renameCommand } from './commands/rename';
 import { readmeCommand } from './commands/readme';
 import { humanCommand, humanSetCommand } from './commands/human';
+import { registerPluginInstallCommand } from './commands/plugin-install';
 import { setColorOptions, type ColorScheme } from './utils/color-utils';
 import { generateFAFHeader, generateHelpHeader, FAF_COLORS } from './utils/championship-style';
 import { analytics, trackCommand, trackError, withPerformanceTracking } from './telemetry/analytics';
@@ -1308,6 +1309,9 @@ program
 
 🚀 NO EXTERNAL DEPENDENCIES - Uses our own Big-3 verification engine!`)
   .action(analyzeFafWithAI);
+
+// 🔌 faf plugin-install - Workaround for Claude Code SSH bug
+registerPluginInstallCommand(program);
 
 // Handle unknown commands with helpful suggestions
 program

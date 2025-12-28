@@ -16,6 +16,22 @@
 
 ---
 
+## What's New in v3.3.0
+
+**Claude Code Plugin Support** - Install and validate Claude Code plugins with ease.
+
+```bash
+# Fix for Claude Code marketplace SSH bug
+faf plugin-install owner/repo
+
+# Installs via HTTPS (works) instead of SSH (hangs)
+# Verifies plugin structure automatically
+```
+
+Also: Full plugin structure at repo root (`commands/`, `skills/`), WJTTC test suite for plugin validation (31 tests).
+
+---
+
 ## TL;DR
 
 **Problem:** AI needs persistent project context to work at its best.

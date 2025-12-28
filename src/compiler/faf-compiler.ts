@@ -402,6 +402,11 @@ const TYPE_DEFINITIONS: Record<string, {
     description: 'MkDocs documentation site',
     categories: ['project', 'human']
   },
+  'cookbook': {
+    description: 'Example-driven developer onboarding hub with notebooks, scripts, configs, and progressive demos',
+    categories: ['project', 'human'],
+    aliases: ['examples', 'tutorials', 'demos', 'samples']
+  },
   'vitepress': {
     description: 'VitePress documentation site',
     categories: ['project', 'frontend', 'human']
@@ -576,7 +581,7 @@ const TYPE_DEFINITIONS: Record<string, {
 /**
  * Get applicable slots for a project type
  */
-function getSlotsForType(projectType: string): string[] {
+export function getSlotsForType(projectType: string): string[] {
   // Check for aliases first
   for (const [type, def] of Object.entries(TYPE_DEFINITIONS)) {
     if (def.aliases?.includes(projectType)) {
@@ -593,6 +598,14 @@ function getSlotsForType(projectType: string): string[] {
   }
 
   return slots;
+}
+
+/**
+ * Get the number of applicable slots for a project type
+ * Used by yaml-generator to calculate correct slot_based_percentage
+ */
+export function getSlotCountForType(projectType: string): number {
+  return getSlotsForType(projectType).length;
 }
 
 /**
