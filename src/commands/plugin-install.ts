@@ -14,7 +14,7 @@
 import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
-import chalk from 'chalk';
+import { chalk } from '../fix-once/colors';
 
 const CLAUDE_PLUGINS_DIR = path.join(
   process.env.HOME || '',
