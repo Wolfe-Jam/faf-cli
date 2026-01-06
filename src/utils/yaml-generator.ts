@@ -230,6 +230,15 @@ export function generateFafContent(projectData: {
   additionalHow?: string[];
   projectDetailsScore?: number;
   projectSuccessRate?: number;
+  // Claude Code detection
+  claudeCode?: {
+    detected: boolean;
+    subagents: string[];
+    commands: string[];
+    permissions: string[];
+    hasClaudeMd: boolean;
+    mcpServers: string[];
+  } | null;
 }): string {
   // Calculate filled vs total slots for missing context
   const totalSlotsCount = 21; // Base slots
@@ -395,7 +404,17 @@ export function generateFafContent(projectData: {
       filled_slots: filledSlotsCount,
       scoring_method: 'Honest percentage - no fake minimums',
       trust_embedded: 'COUNT ONCE architecture - trust MY embedded scores'
-    }
+    },
+
+    // 🤖 Claude Code Integration (Boris-friendly detection)
+    claude_code: projectData.claudeCode?.detected ? {
+      detected: true,
+      has_claude_md: projectData.claudeCode.hasClaudeMd,
+      subagents: projectData.claudeCode.subagents.length > 0 ? projectData.claudeCode.subagents : undefined,
+      commands: projectData.claudeCode.commands.length > 0 ? projectData.claudeCode.commands : undefined,
+      permissions: projectData.claudeCode.permissions.length > 0 ? projectData.claudeCode.permissions : undefined,
+      mcp_servers: projectData.claudeCode.mcpServers.length > 0 ? projectData.claudeCode.mcpServers : undefined
+    } : undefined
   };
 
   // Use native YAML library and fix any !CI placeholder issues

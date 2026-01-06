@@ -532,7 +532,87 @@ export const CONFIG_INDICATORS = {
 };
 
 /**
- * TIER 5: Package Manager Indicators
+ * TIER 5: Claude Code Detection
+ * Detects Claude Code specific structures (.claude/ folder)
+ */
+export interface ClaudeCodeResult {
+  detected: boolean;
+  subagents: string[];
+  commands: string[];
+  permissions: string[];
+  hasClaudeMd: boolean;
+  mcpServers: string[];
+}
+
+export async function detectClaudeCode(projectPath: string): Promise<ClaudeCodeResult> {
+  const fs = await import('fs/promises');
+  const path = await import('path');
+
+  const result: ClaudeCodeResult = {
+    detected: false,
+    subagents: [],
+    commands: [],
+    permissions: [],
+    hasClaudeMd: false,
+    mcpServers: []
+  };
+
+  // Check for CLAUDE.md
+  try {
+    await fs.access(path.join(projectPath, 'CLAUDE.md'));
+    result.hasClaudeMd = true;
+    result.detected = true;
+  } catch {}
+
+  // Check for .claude/agents/
+  try {
+    const agentsPath = path.join(projectPath, '.claude', 'agents');
+    const files = await fs.readdir(agentsPath);
+    result.subagents = files
+      .filter(f => f.endsWith('.md'))
+      .map(f => f.replace('.md', ''));
+    if (result.subagents.length > 0) result.detected = true;
+  } catch {}
+
+  // Check for .claude/commands/
+  try {
+    const commandsPath = path.join(projectPath, '.claude', 'commands');
+    const files = await fs.readdir(commandsPath);
+    result.commands = files
+      .filter(f => f.endsWith('.md'))
+      .map(f => f.replace('.md', ''));
+    if (result.commands.length > 0) result.detected = true;
+  } catch {}
+
+  // Check for .claude/settings.json permissions
+  try {
+    const settingsPath = path.join(projectPath, '.claude', 'settings.json');
+    const content = await fs.readFile(settingsPath, 'utf-8');
+    const settings = JSON.parse(content);
+    if (settings.permissions?.allow) {
+      result.permissions = settings.permissions.allow
+        .slice(0, 10)
+        .map((p: string) => p.split('(')[0]); // Extract tool name
+    }
+    if (result.permissions.length > 0) result.detected = true;
+  } catch {}
+
+  // Check for .mcp.json (project-scoped MCP servers)
+  try {
+    const mcpPath = path.join(projectPath, '.mcp.json');
+    const content = await fs.readFile(mcpPath, 'utf-8');
+    const mcpConfig = JSON.parse(content);
+    if (mcpConfig.mcpServers) {
+      result.mcpServers = Object.keys(mcpConfig.mcpServers).slice(0, 10);
+    }
+    if (result.mcpServers.length > 0) result.detected = true;
+  } catch {}
+
+  return result;
+}
+
+/**
+ * TIER 6: Package Manager Indicators
  * Lock files that indicate the package manager being used
  */
 export const PACKAGE_MANAGERS = {

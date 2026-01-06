@@ -5,6 +5,35 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.0] - 2026-01-06
+
+### Added
+
+- **Claude Code Detection** - Automatic detection of Claude Code structures
+  - Detects `.claude/agents/` subagents (extracts names)
+  - Detects `.claude/commands/` slash commands (extracts names)
+  - Detects `.claude/settings.json` permissions
+  - Detects `CLAUDE.md` presence
+  - Detects `.mcp.json` MCP server configuration
+  - All data captured in `claude_code:` section of .faf output
+
+- **Bun Detection** - Detects `bun.lockb` for Bun runtime projects
+  - Sets runtime and package_manager to Bun
+
+- **WJTTC Claude Code Test Suite** - 29 comprehensive tests
+  - CLAUDE.md detection
+  - Subagent discovery
+  - Command discovery
+  - Permissions extraction
+  - MCP server detection
+  - Edge cases (malformed JSON, empty dirs)
+  - Performance tests (<10ms requirement)
+  - Full Boris setup integration test
+
+### Technical
+
+Based on Boris Cherny's (Claude Code creator) workflow - 5 subagents, always bun, MCP servers for external services. FAF now captures this metadata for complete AI context handoff.
+
 ## [3.3.0] - 2025-12-28
 
 ### Added

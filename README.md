@@ -9,26 +9,23 @@
 > Universal CLI for FAF (Foundational AI-context Format) - Terminal-based tooling for creating, scoring, and improving project.faf files that provide persistent AI context
 
 [![NPM Downloads](https://img.shields.io/npm/dt/faf-cli?label=total%20downloads&color=00CCFF)](https://www.npmjs.com/package/faf-cli)
-[![Discord](https://img.shields.io/badge/Discord-Join%20Community-5865F2?logo=discord&logoColor=white)](https://discord.com/invite/56fPBUJKfk)
 [![Homebrew](https://img.shields.io/badge/Homebrew-faf--cli-orange)](https://github.com/Wolfe-Jam/homebrew-faf)
 [![Website](https://img.shields.io/badge/Website-faf.one-orange)](https://faf.one)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ---
 
-## What's New in v3.3.0
+## What's New in v3.4.0
 
-**Claude Code Plugin Support** - Install and validate Claude Code plugins with ease.
+**Claude Code Detection** - FAF now detects and captures Claude Code structures for complete AI context handoff.
 
 ```bash
-# Fix for Claude Code marketplace SSH bug
-faf plugin-install owner/repo
-
-# Installs via HTTPS (works) instead of SSH (hangs)
-# Verifies plugin structure automatically
+faf init
+# Detects: .claude/agents/, .claude/commands/, CLAUDE.md, .mcp.json
+# Output includes claude_code: section with subagents, commands, permissions, mcp_servers
 ```
 
-Also: Full plugin structure at repo root (`commands/`, `skills/`), WJTTC test suite for plugin validation (31 tests).
+Also: Bun runtime detection (`bun.lockb`), WJTTC test suite with 29 Claude Code tests.
 
 ---
 

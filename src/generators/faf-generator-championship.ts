@@ -16,6 +16,7 @@ import {
 import { generateFafContent } from "../utils/yaml-generator";
 import { FabFormatsProcessor, FabFormatsAnalysis } from "../engines/fab-formats-processor";
 import { relentlessExtractor } from "../engines/relentless-context-extractor";
+import { detectClaudeCode, type ClaudeCodeResult } from "../framework-detector";
 
 export interface GenerateOptions {
   projectType?: string;
@@ -138,6 +139,23 @@ export async function generateFafFromProject(
     if (result) {
       tsContext = result;
     }
+  }
+
+  // 🏎️ Claude Code Detection - Detect .claude/agents, .claude/commands, CLAUDE.md
+  let claudeCodeResult: ClaudeCodeResult | null = null;
+  try {
+    claudeCodeResult = await detectClaudeCode(projectRoot);
+  } catch {
+    // Continue without Claude Code detection
+  }
+
+  // 🦊 Bun Detection - Check for bun.lockb
+  let isBunProject = false;
+  try {
+    await fs.access(path.join(projectRoot, 'bun.lockb'));
+    isBunProject = true;
+  } catch {
+    // Not a Bun project
   }
 
   // START ENHANCED SCORING - Championship grade with FAB-FORMATS!
@@ -297,8 +315,11 @@ export async function generateFafFromProject(
     else if (deps?.yargs) {contextSlotsFilled['cli_framework'] = 'yargs';}
     else if (deps?.oclif) {contextSlotsFilled['cli_framework'] = 'oclif';}
 
-    // Detect runtime
-    if (packageData.engines?.node) {
+    // Detect runtime (Bun takes priority if bun.lockb exists)
+    if (isBunProject) {
+      contextSlotsFilled['runtime'] = 'Bun';
+      contextSlotsFilled['package_manager'] = 'Bun';
+    } else if (packageData.engines?.node) {
       contextSlotsFilled['runtime'] = `Node.js ${packageData.engines.node}`;
     } else {
       contextSlotsFilled['runtime'] = 'Node.js v16+';
@@ -324,6 +345,12 @@ export async function generateFafFromProject(
     } catch {
       // Continue without CI/CD detection
     }
+  }
+
+  // 🦊 Bun Detection - applies to ALL JavaScript/Node.js projects
+  if (isBunProject) {
+    contextSlotsFilled['runtime'] = 'Bun';
+    contextSlotsFilled['package_manager'] = 'Bun';
   }
 
   // Override with package.json if more specific
@@ -483,7 +510,9 @@ export async function generateFafFromProject(
       totalIntelligence: fabAnalysis.totalBonus,
       highestGrade: fabAnalysis.qualityMetrics.highestGrade,
       depth: fabAnalysis.qualityMetrics.intelligenceDepth
-    }
+    },
+    // Claude Code detection results
+    claudeCode: claudeCodeResult
   };
 
   // Generate YAML content
