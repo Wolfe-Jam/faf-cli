@@ -1,21 +1,22 @@
 faf_version: 2.5.0
+generated: 2026-01-07T00:07:32.667Z
 ai_scoring_system: 2025-09-20
-ai_score: 89%
-ai_confidence: HIGH
+ai_score: 74%
+ai_confidence: GOOD
 ai_value: 30_seconds_replaces_20_minutes_of_questions
 ai_tldr:
-  project: faf-cli v2.5.4 - When Claude Forgot FAF | Birth DNA Edition - "🩵⚡️ CLI
-    for .faf | Project DNA ✨ for true AI context for ANY AI (incl. Claude,
-    Gemini, Codex, Cursor et al.) • Join 3000+ developers • 100% FREE • Open
-    Source • If helpful, a ⭐ is appreciated!"
+  project: 'Detects: .claude/agents/, .claude/commands/, CLAUDE.md, .mcp.json -
+    "Anthropic-Approved codebase that powers claude-faf-mcp • Persistent project
+    context, on-demand • Format-driven CLI • Open Source Universal Standard •
+    MIT License"'
   stack: CLI/TypeScript/TypeScript (tsc)/npm registry/Node.js
   quality_bar: ZERO_ERRORS_F1_STANDARDS
   current_focus: Production deployment preparation
   your_role: Build features with perfect context
 instant_context:
-  what_building: 🩵⚡️ CLI for .faf | Project DNA ✨ for true AI context for ANY AI
-    (incl. Claude, Gemini, Codex, Cursor et al.) • Join 3000+ developers • 100%
-    FREE • Open Source • If helpful, a ⭐ is appreciated!
+  what_building: Anthropic-Approved codebase that powers claude-faf-mcp •
+    Persistent project context, on-demand • Format-driven CLI • Open Source
+    Universal Standard • MIT License
   tech_stack: CLI/TypeScript/TypeScript (tsc)/npm registry/Node.js
   main_language: TypeScript
   deployment: npm registry
@@ -23,25 +24,21 @@ instant_context:
     - package.json
     - tsconfig.json
 context_quality:
-  slots_filled: 17/21 (81%)
-  ai_confidence: HIGH
+  slots_filled: 16/21 (76%)
+  ai_confidence: GOOD
   handoff_ready: true
   missing_context:
     - Database
 project:
-  name: faf-cli v2.5.4 - When Claude Forgot FAF | Birth DNA Edition
-  goal: 🩵⚡️ CLI for .faf | Project DNA ✨ for true AI context for ANY AI (incl.
-    Claude, Gemini, Codex, Cursor et al.) • Join 3000+ developers • 100% FREE •
-    Open Source • If helpful, a ⭐ is appreciated!
+  name: "Detects: .claude/agents/, .claude/commands/, CLAUDE.md, .mcp.json"
+  goal: Anthropic-Approved codebase that powers claude-faf-mcp • Persistent
+    project context, on-demand • Format-driven CLI • Open Source Universal
+    Standard • MIT License
   main_language: TypeScript
-  generated: 2025-10-07T04:39:04.835Z
+  type: cli-ts
   mission: 🚀 Make Your AI Happy! 🧡 Trust-Driven 🤖
   revolution: 30 seconds replaces 20 minutes of questions
   brand: F1-Inspired Software Engineering - Championship AI Context
-  version: 3.4.1
-  author: 🏎️⚡️_wolfejam.dev
-  license: MIT
-  type: typescript-node
 ai_instructions:
   priority_order:
     - 1. Read THIS .faf file first
@@ -58,32 +55,14 @@ ai_instructions:
     - Test coverage required for new features
 stack:
   frontend: CLI
-  css_framework: None
   ui_library: inquirer (interactive prompts)
-  state_management: None
   backend: Node.js
   runtime: Node.js >=14.0.0
-  database: None
   build: TypeScript (tsc)
   package_manager: npm
   api_type: CLI
   hosting: npm registry
   cicd: GitHub Actions
-  testing: jest
-  language: TypeScript
-  targetUser: developers
-  coreProblem: understanding project
-  missionPurpose: project documentation
-  packageManager: npm/yarn/pnpm
-  mainLanguage: JavaScript/TypeScript
-testing:
-  framework: jest
-  total_tests: 173
-  test_history: .taf
-  taf_validated: true
-  last_run: 2025-10-27T14:32:00Z
-  pass_rate: 100%
-  health_score: 🏆
 preferences:
   quality_bar: zero_errors
   commit_style: conventional_emoji
@@ -94,14 +73,19 @@ preferences:
   documentation: as_needed
 state:
   phase: development
-  version: 1.0.0
+  version: 3.4.2
   focus: production_deployment
   status: green_flag
   next_milestone: npm_publication
   blockers: null
+scores:
+  faf_score: 74
+  slot_based_percentage: 76
+  total_slots: 21
+  scoring_philosophy: F1-Inspired Championship Scoring
 tags:
   auto_generated:
-    - faf-cli-v254---when-claude-for
+    - detects-claudeagents-claudecom
     - cli
     - typescript
     - typescript-(tsc)
@@ -110,57 +94,35 @@ tags:
   smart_defaults:
     - .faf
     - ai-ready
-    - "2025"
+    - "2026"
     - software
     - open-source
   user_defined: null
 human_context:
-  who: Developers using AI assistants (Claude, Gemini, Cursor, etc.)
-  what: Universal CLI for FAF (Foundational AI-context Format) - Terminal-based
-    tooling for creating, scoring, and improving project.faf files that provide
-    persistent AI context
-  why: AI needs persistent project context to work at its best.
-  where: npm, Homebrew, macOS, Linux
-  when: IANA-registered standard (production ready)
-  how: npm install -g faf-cli
+  who: scripts
+  what: Anthropic-Approved codebase that powers claude-faf-mcp • Persistent
+    project context, on-demand • Format-driven CLI • Open Source Universal
+    Standard • MIT License
+  where: Web platform
+  when: 'release": "ts-node scripts/prepare-release'
+  how: "Use intuitive names - FAF maps them automatically:"
   additional_context: null
   context_score: 0
-  total_prd_score: 89
+  total_prd_score: 74
   success_rate: 50%
 ai_scoring_details:
   system_date: 2025-09-20
-  slot_based_percentage: 81
-  ai_score: 89
+  slot_based_percentage: 76
+  ai_score: 74
   total_slots: 21
-  filled_slots: 17
+  filled_slots: 16
   scoring_method: Honest percentage - no fake minimums
   trust_embedded: COUNT ONCE architecture - trust MY embedded scores
+claude_code:
+  detected: true
+  has_claude_md: true
 faf_dna:
-  birth_dna: 22
-  birth_certificate: FAF-2025-CLIX-O6XE
-  birth_date: 2025-10-07T04:39:04.877Z
-  current_score: 88
-skills:
-  - faf
-  - mcp-builder
-  - skill-creator
-meta:
-  last_enhanced: 2025-10-22T02:29:34.634Z
-  enhanced_by: faf-real-enhance
-projectName: faf-cli
-projectGoal: Anthropic-Approved codebase that powers claude-faf-mcp • Persistent
-  project context, on-demand • Format-driven CLI • Open Source Universal
-  Standard • MIT License
-generated: 2025-12-30T02:27:36.413Z
-stack_signature: typescript-nodejs-javascript
-detected_frameworks:
-  - ESLint
-  - Jest
-  - Node.js
-  - JavaScript
-  - TypeScript
-turbo_cat_intelligence: 245
-stats:
-  best_auto_time: 0.5
-  last_auto_time: 0.5
-  times_run: 1
+  birth_dna: 76
+  birth_certificate: FAF-2026-CLIX-55E5
+  birth_date: 2026-01-07T00:07:32.820Z
+  current_score: 76

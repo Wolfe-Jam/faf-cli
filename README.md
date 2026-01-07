@@ -15,7 +15,7 @@
 
 ---
 
-## What's New in v3.4.1
+## What's New in v3.4.2
 
 **Claude Code Detection** - FAF now detects and captures Claude Code structures for complete AI context handoff.
 
@@ -25,7 +25,7 @@ faf init
 # Output includes claude_code: section with subagents, commands, permissions, mcp_servers
 ```
 
-Also: Bun runtime detection (`bun.lockb`), WJTTC test suite with 29 Claude Code tests.
+Also: Bun runtime detection (`bun.lockb`), WJTTC test suite with 29 Claude Code tests, `faf enhance` non-TTY fix.
 
 ---
 

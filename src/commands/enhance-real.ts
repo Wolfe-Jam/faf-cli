@@ -31,6 +31,18 @@ export async function realEnhanceFaf(
   options: RealEnhanceOptions = {},
 ): Promise<void> {
   try {
+    // EARLY EXIT: Check for TTY before doing ANYTHING
+    // This prevents file corruption in non-TTY environments (Claude Code, CI/CD)
+    if (!process.stdin.isTTY && options.interactive !== false) {
+      console.log(chalk.yellow('\n⚠️  faf enhance requires a terminal (TTY)'));
+      console.log(chalk.gray('   This command needs interactive input to work properly.'));
+      console.log(chalk.cyan('\n💡 Alternatives:'));
+      console.log(chalk.gray('   faf auto      - Works in any environment'));
+      console.log(chalk.gray('   faf enhance   - Run in Terminal.app or iTerm2'));
+      console.log(chalk.yellow('\n   Exiting without changes.\n'));
+      return;
+    }
+
     const fafPath = file || (await findFafFile());
 
     if (!fafPath) {
