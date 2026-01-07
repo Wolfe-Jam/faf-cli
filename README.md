@@ -15,7 +15,7 @@
 
 ---
 
-## What's New in v3.4.0
+## What's New in v3.4.1
 
 **Claude Code Detection** - FAF now detects and captures Claude Code structures for complete AI context handoff.
 
