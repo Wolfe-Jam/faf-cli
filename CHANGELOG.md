@@ -5,6 +5,23 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.3] - 2026-01-07
+
+### Added
+
+- **Boris-Flow Integration Tests** - 12-test suite for publish readiness validation
+  - Version check, init, auto, score, non-TTY safety
+  - Full Claude Code structure detection
+  - `./tests/boris-flow.test.sh` - run before any publish
+- **boris-ready.sh** - Quick pre-publish verification script
+- **Turbo-cat Improvements** - Enhanced format discovery and tests
+
+### Changed
+
+- Sync command improvements for better reliability
+- Compiler updates for more accurate scoring
+- Removed deprecated Discord release workflow
+
 ## [3.4.2] - 2026-01-07
 
 ### Fixed

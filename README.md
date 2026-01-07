@@ -15,17 +15,17 @@
 
 ---
 
-## What's New in v3.4.2
+## What's New in v3.4.3
 
-**Claude Code Detection** - FAF now detects and captures Claude Code structures for complete AI context handoff.
+**Boris-Flow Integration Tests** - Championship-grade publish validation with 12-test suite.
 
 ```bash
-faf init
-# Detects: .claude/agents/, .claude/commands/, CLAUDE.md, .mcp.json
-# Output includes claude_code: section with subagents, commands, permissions, mcp_servers
+./tests/boris-flow.test.sh
+# Validates: version, init, auto, score, Claude Code detection, non-TTY safety
+# Must pass before any npm publish
 ```
 
-Also: Bun runtime detection (`bun.lockb`), WJTTC test suite with 29 Claude Code tests, `faf enhance` non-TTY fix.
+Also: Turbo-cat format discovery improvements, sync command reliability, compiler scoring updates.
 
 ---
 
