@@ -204,9 +204,8 @@ async function showRecoveryPlan(report: RecoveryReport): Promise<void> {
   // Support
   console.log(`\n${colors.header('GET HELP:')}`);
   console.log('─'.repeat(50));
-  console.log(`  📚 Docs: ${colors.url('https://faf.dev/disaster-recovery')}`);
-  console.log(`  💬 Discord: ${colors.url('https://discord.gg/faf')}`);
-  console.log(`  📧 Email: ${colors.url('help@faf.dev')}`);
+  console.log(`  📚 Docs: ${colors.url('https://faf.one/docs')}`);
+  console.log(`  🐛 Issues: ${colors.url('https://github.com/Wolfe-Jam/faf-cli/issues')}`);
 }
 
 program
@@ -288,7 +287,7 @@ program
       console.log('  1. Delete everything and start fresh:');
       console.log('     rm -f .faf .faf-dna.json');
       console.log('     faf init --force');
-      console.log('  2. Contact support: help@faf.dev');
+      console.log('  2. Get help: https://github.com/Wolfe-Jam/faf-cli/discussions');
     }
   });
 

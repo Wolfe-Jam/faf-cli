@@ -18,15 +18,14 @@
 [
   {
     "version": "v3.1.3",
-    "name": "Discord Community Launch",
+    "name": "Stability Release",
     "date": "2025-11-07",
     "timestamp": "2025-11-07T23:30:00.000Z",
     "prerelease": false,
-    "changelog": "- Added Discord community...",
+    "changelog": "- Bug fixes and improvements",
     "urls": {
       "github": "https://github.com/Wolfe-Jam/faf-cli/releases/tag/v3.1.3",
-      "npm": "https://www.npmjs.com/package/faf-cli/v/v3.1.3",
-      "discord": "https://discord.com/invite/56fPBUJKfk"
+      "npm": "https://www.npmjs.com/package/faf-cli/v/v3.1.3"
     },
     "install": {
       "npm": "npm install -g faf-cli@v3.1.3",
@@ -89,13 +88,12 @@ Open it in a browser to preview how faf.one could display releases.
 ## Automation
 
 This file is updated automatically by:
-`.github/workflows/discord-release-announcement.yml`
+`.github/workflows/release.yml`
 
 **Workflow:**
 1. GitHub Release published
-2. Discord announcement sent
-3. releases.json prepended with new release
-4. Committed and pushed by `github-actions[bot]`
+2. releases.json prepended with new release
+3. Committed and pushed by `github-actions[bot]`
 
 ## CORS
 

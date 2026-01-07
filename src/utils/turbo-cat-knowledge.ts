@@ -1,7 +1,7 @@
 /**
- * 🔺 TURBO-CAT™ FORMAT PYRAMID v3.1.0
+ * 🔺 TURBO-CAT™ FORMAT PYRAMID v3.1.1
  *
- * ROW 20 IN PROGRESS - 198 FORMATS CATALOGUED!
+ * ROW 20 IN PROGRESS - 199 FORMATS CATALOGUED!
  *
  * Like precious metals in a catalytic converter - each format triggers
  * a specific intelligence reaction. We CAN catalyze ANY format, but only
@@ -11,7 +11,7 @@
  * ├── Row 17: Sum(1..17) + 1 = 154 (THE SACRED - ACHIEVED 2024)
  * ├── Row 18: Sum(1..18) + 1 = 172 (BEYOND SACRED - ACHIEVED)
  * ├── Row 19: Sum(1..19) + 1 = 190 (ACHIEVED 2025-12-17)
- * └── Row 20: Sum(1..20) + 1 = 211 (IN PROGRESS - 8/21 added)
+ * └── Row 20: Sum(1..20) + 1 = 211 (IN PROGRESS - 9/21 added)
  *
  * Row 20 Tier 1 Added (2025-12-17):
  * - build.zig.zon (Zig packages)
@@ -21,11 +21,12 @@
  * - manifest.toml (Flox/Nix environments)
  * - justfile (Just command runner - 10k+ stars)
  * - .pre-commit-config.yaml (Git hooks framework)
+ * - CLAUDE.md (Claude Code AI context)
  *
  * THE DOCTRINE: To add a new format, PROVE it's better than existing ones!
  *
  * 😽 We are the FORMAT FREAKS - Quality over Quantity!
- * 🏆 198 formats - CHAMPIONSHIP GRADE FORMAT DETECTION
+ * 🏆 199 formats - CHAMPIONSHIP GRADE FORMAT DETECTION
  */
 
 export interface FormatKnowledge {
@@ -2137,6 +2138,15 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
     },
     priority: 25,
     intelligence: 'high'
+  },
+
+  // Claude Code - AI Context (Anthropic Claude Code projects)
+  'CLAUDE.md': {
+    frameworks: ['Claude Code'],
+    slots: {},
+    priority: 30,  // High priority - AI context is valuable
+    intelligence: 'high',
+    confirmWith: ['.claude']
   }
 };
 

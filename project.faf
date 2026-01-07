@@ -1,5 +1,5 @@
 faf_version: 2.5.0
-generated: 2026-01-07T00:07:32.667Z
+generated: 2026-01-07T06:32:04.514Z
 ai_scoring_system: 2025-09-20
 ai_score: 74%
 ai_confidence: GOOD
@@ -30,7 +30,7 @@ context_quality:
   missing_context:
     - Database
 project:
-  name: "Detects: .claude/agents/, .claude/commands/, CLAUDE.md, .mcp.json"
+  name: faf-cli
   goal: Anthropic-Approved codebase that powers claude-faf-mcp • Persistent
     project context, on-demand • Format-driven CLI • Open Source Universal
     Standard • MIT License
@@ -63,6 +63,11 @@ stack:
   api_type: CLI
   hosting: npm registry
   cicd: GitHub Actions
+  targetUser: developers
+  coreProblem: understanding project
+  missionPurpose: project documentation
+  packageManager: npm/yarn/pnpm
+  mainLanguage: JavaScript/TypeScript
 preferences:
   quality_bar: zero_errors
   commit_style: conventional_emoji
@@ -73,7 +78,7 @@ preferences:
   documentation: as_needed
 state:
   phase: development
-  version: 3.4.2
+  version: 1.0.0
   focus: production_deployment
   status: green_flag
   next_milestone: npm_publication
@@ -99,17 +104,16 @@ tags:
     - open-source
   user_defined: null
 human_context:
-  who: scripts
-  what: Anthropic-Approved codebase that powers claude-faf-mcp • Persistent
-    project context, on-demand • Format-driven CLI • Open Source Universal
-    Standard • MIT License
-  where: Web platform
-  when: 'release": "ts-node scripts/prepare-release'
-  how: "Use intuitive names - FAF maps them automatically:"
+  who: wolfejam
+  what: FAF CLI - Universal AI Context Format
+  where: npm registry
+  when: Active development
+  how: TypeScript CLI
   additional_context: null
   context_score: 0
   total_prd_score: 74
   success_rate: 50%
+  why: 100% AI Context = Gold Code. Bi-sync = Zero drift, eternal project sync.
 ai_scoring_details:
   system_date: 2025-09-20
   slot_based_percentage: 76
@@ -121,8 +125,25 @@ ai_scoring_details:
 claude_code:
   detected: true
   has_claude_md: true
+  subagents:
+    - pub-protocol
+  commands:
+    - publish
 faf_dna:
   birth_dna: 76
-  birth_certificate: FAF-2026-CLIX-55E5
-  birth_date: 2026-01-07T00:07:32.820Z
+  birth_certificate: FAF-2026-CLIX-7HXI
+  birth_date: 2026-01-07T06:14:00.913Z
   current_score: 76
+stack_signature: typescript-nodejs-javascript
+detected_frameworks:
+  - ESLint
+  - Claude Code
+  - Jest
+  - Node.js
+  - JavaScript
+  - TypeScript
+turbo_cat_intelligence: 275
+stats:
+  best_auto_time: 0.4
+  last_auto_time: 0.4
+  times_run: 1

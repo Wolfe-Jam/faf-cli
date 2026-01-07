@@ -55,7 +55,7 @@ const TYPE_DEFINITIONS: Record<string, {
   'cli': {
     description: 'Command-line interface tool',
     categories: ['project', 'human'],
-    aliases: ['cli-tool', 'command-line']
+    aliases: ['cli-tool', 'command-line', 'cli-ts', 'cli-js']
   },
   'cli-tool': {
     description: 'Command-line interface tool',
@@ -68,7 +68,7 @@ const TYPE_DEFINITIONS: Record<string, {
   'library': {
     description: 'Reusable code library/package',
     categories: ['project', 'human'],
-    aliases: ['lib', 'package']
+    aliases: ['lib', 'package', 'typescript', 'pure_typescript']
   },
   'npm-package': {
     description: 'NPM package',
@@ -82,7 +82,7 @@ const TYPE_DEFINITIONS: Record<string, {
   'crate': {
     description: 'Rust crate',
     categories: ['project', 'human'],
-    aliases: ['rust-crate']
+    aliases: ['rust-crate', 'zig']
   },
   'gem': {
     description: 'Ruby gem',
@@ -129,26 +129,27 @@ const TYPE_DEFINITIONS: Record<string, {
   'node-api': {
     description: 'Node.js API service',
     categories: ['project', 'backend', 'universal', 'human'],
-    aliases: ['express', 'fastify', 'nest']
+    aliases: ['express', 'fastify', 'nest', 'nodejs_native', 'nodejs_esm_native']
   },
   'python-api': {
     description: 'Python API service',
     categories: ['project', 'backend', 'universal', 'human'],
-    aliases: ['flask', 'fastapi', 'django-api']
+    aliases: ['flask', 'fastapi', 'django-api', 'python-flask', 'python-fastapi', 'python-starlette']
   },
   'python-app': {
     description: 'Python application',
-    categories: ['project', 'backend', 'human']
+    categories: ['project', 'backend', 'human'],
+    aliases: ['python-generic']
   },
   'go-api': {
     description: 'Go API service',
     categories: ['project', 'backend', 'universal', 'human'],
-    aliases: ['golang', 'gin', 'fiber']
+    aliases: ['golang', 'gin', 'fiber', 'go']
   },
   'rust-api': {
     description: 'Rust API service',
     categories: ['project', 'backend', 'universal', 'human'],
-    aliases: ['actix', 'axum', 'rocket']
+    aliases: ['actix', 'axum', 'rocket', 'rust']
   },
   'graphql': {
     description: 'GraphQL API service',
@@ -171,17 +172,17 @@ const TYPE_DEFINITIONS: Record<string, {
   'svelte': {
     description: 'Svelte web application',
     categories: ['project', 'frontend', 'universal', 'human'],
-    aliases: ['sveltekit']
+    aliases: ['sveltekit', 'svelte_native', 'svelte_5_runes_native']
   },
   'react': {
     description: 'React web application',
     categories: ['project', 'frontend', 'universal', 'human'],
-    aliases: ['reactjs']
+    aliases: ['reactjs', 'react_native', 'react_17_native']
   },
   'vue': {
     description: 'Vue.js web application',
     categories: ['project', 'frontend', 'universal', 'human'],
-    aliases: ['vuejs', 'nuxt']
+    aliases: ['vuejs', 'nuxt', 'vue_native']
   },
   'angular': {
     description: 'Angular web application',
@@ -190,7 +191,7 @@ const TYPE_DEFINITIONS: Record<string, {
   'nextjs': {
     description: 'Next.js application',
     categories: ['project', 'frontend', 'backend', 'universal', 'human'],
-    aliases: ['next']
+    aliases: ['next', 'nextjs_native']
   },
   'remix': {
     description: 'Remix application',
@@ -236,7 +237,8 @@ const TYPE_DEFINITIONS: Record<string, {
   },
   'django': {
     description: 'Django web application',
-    categories: ['project', 'frontend', 'backend', 'universal', 'human']
+    categories: ['project', 'frontend', 'backend', 'universal', 'human'],
+    aliases: ['python-django']
   },
   'rails': {
     description: 'Ruby on Rails application',
@@ -574,7 +576,8 @@ const TYPE_DEFINITIONS: Record<string, {
   // ============================================================================
   'generic': {
     description: 'Generic project (fallback)',
-    categories: ['project', 'universal', 'human']
+    categories: ['project', 'universal', 'human'],
+    aliases: ['latest-idea']
   }
 };
 
@@ -1038,10 +1041,17 @@ export class FafCompiler {
     }
 
     // Helper to get value from ast based on slot path
+    // Checks both nested structure (project.goal) AND flat structure (projectGoal)
+    // to handle inconsistency between init (nested) and sync (flat)
     const getSlotValue = (slotPath: string): any => {
       const parts = slotPath.split('.');
       if (parts[0] === 'project') {
-        return ast.project?.[parts[1]];
+        // Check nested first, then flat fallback
+        const nested = ast.project?.[parts[1]];
+        if (nested !== undefined && nested !== null) return nested;
+        // Flat fallback: project.goal -> projectGoal, project.name -> projectName
+        const flatKey = 'project' + parts[1].charAt(0).toUpperCase() + parts[1].slice(1);
+        return ast[flatKey];
       } else if (parts[0] === 'stack') {
         return ast.stack?.[parts[1]];
       } else if (parts[0] === 'human') {

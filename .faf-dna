@@ -1,119 +1,60 @@
 {
   "birthCertificate": {
-    "born": "2025-11-01T12:41:52.928Z",
-    "birthDNA": 22,
+    "born": "2026-01-07T06:14:00.913Z",
+    "birthDNA": 76,
     "birthDNASource": "CLAUDE.md",
-    "projectDNA": "74ac37673f52bac9",
+    "projectDNA": "7157cf4e847afc61",
     "authenticated": false,
-    "certificate": "FAF-2025-CLIX-2FH5"
+    "certificate": "FAF-2026-CLIX-7HXI"
   },
   "versions": [
     {
       "version": "v1.0.0",
-      "timestamp": "2025-11-01T12:41:52.929Z",
-      "score": 22,
+      "timestamp": "2026-01-07T06:14:00.913Z",
+      "score": 76,
       "changes": [
         "Initial context from CLAUDE.md"
       ],
       "approved": false,
       "growth": 0,
       "growthRate": 0
-    },
-    {
-      "version": "v1.0.1",
-      "timestamp": "2025-11-01T12:41:52.953Z",
-      "score": 100,
-      "changes": [
-        "Initial .faf generation from project"
-      ],
-      "approved": false,
-      "growth": 78,
-      "growthRate": 78
     }
   ],
   "current": {
-    "version": "v1.0.1",
-    "score": 100,
+    "version": "v1.0.0",
+    "score": 76,
     "approved": false,
-    "lastSync": "2025-11-01T12:41:52.953Z"
+    "lastSync": "2026-01-07T06:14:00.913Z"
   },
   "recovery": {
     "claudeMD": "/Users/wolfejam/FAF/cli/CLAUDE.md",
-    "lastBackup": "2025-11-01T12:41:52.929Z",
+    "lastBackup": "2026-01-07T06:14:00.913Z",
     "syncStatus": "active",
     "autoRecover": true
   },
   "growth": {
-    "totalGrowth": 78,
+    "totalGrowth": 0,
     "daysActive": 0,
-    "averageDailyGrowth": 78,
+    "averageDailyGrowth": 0,
     "bestDay": {
-      "date": "2025-11-01T12:41:52.953Z",
-      "growth": 78
+      "date": "2026-01-07T06:14:00.913Z",
+      "growth": 0
     },
     "bestWeek": {
-      "start": "2025-11-01T12:41:52.929Z",
+      "start": "2026-01-07T06:14:00.913Z",
       "growth": 0
     },
     "milestones": [
       {
         "type": "birth",
-        "score": 22,
-        "date": "2025-11-01T12:41:52.929Z",
+        "score": 76,
+        "date": "2026-01-07T06:14:00.913Z",
         "version": "v1.0.0",
         "label": "Birth",
         "emoji": "🐣"
-      },
-      {
-        "type": "doubled",
-        "score": 100,
-        "date": "2025-11-01T12:41:52.953Z",
-        "version": "v1.0.1",
-        "label": "Doubled",
-        "emoji": "2️⃣"
-      },
-      {
-        "type": "championship",
-        "score": 100,
-        "date": "2025-11-01T12:41:52.953Z",
-        "version": "v1.0.1",
-        "label": "Championship",
-        "emoji": "🏆"
-      },
-      {
-        "type": "elite",
-        "score": 100,
-        "date": "2025-11-01T12:41:52.953Z",
-        "version": "v1.0.1",
-        "label": "Elite",
-        "emoji": "⭐"
-      },
-      {
-        "type": "perfect",
-        "score": 100,
-        "date": "2025-11-01T12:41:52.953Z",
-        "version": "v1.0.1",
-        "label": "Perfect",
-        "emoji": "💎"
-      },
-      {
-        "type": "peak",
-        "score": 100,
-        "date": "2025-11-01T12:41:52.953Z",
-        "version": "v1.0.1",
-        "label": "Peak",
-        "emoji": "🏔️"
-      },
-      {
-        "type": "current",
-        "score": 100,
-        "date": "2025-11-01T12:41:52.953Z",
-        "version": "v1.0.1",
-        "label": "Current",
-        "emoji": "📍"
       }
     ]
   },
-  "lastModified": "2025-11-01T12:41:52.953Z",
+  "lastModified": "2026-01-07T06:14:00.913Z",
   "format": "faf-dna-v1"
 }

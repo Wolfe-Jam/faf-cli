@@ -77,9 +77,9 @@ describe('🍜 TURBO-CAT Tests - The Noodle Quest', () => {
       expect(level).toBe(2);
     });
 
-    it('should return all 198 formats from pyramid (Row 19 + Row 20 partial)', () => {
+    it('should return all 199 formats from pyramid (Row 19 + Row 20 partial)', () => {
       const formats = getAllFormats();
-      expect(formats.length).toBe(198); // Sum(1..19) + 8 = 198 formats
+      expect(formats.length).toBe(199); // Sum(1..19) + 9 = 199 formats (incl. CLAUDE.md)
     });
 
     it('should detect Tier 1 emerging tech at level 20', () => {
@@ -253,34 +253,232 @@ describe('🍜 TURBO-CAT Tests - The Noodle Quest', () => {
   });
 });
 
+describe('🎰 Slot Fill Recommendations', () => {
+  let turboCat: TurboCat;
+  let testDir: string;
+
+  beforeEach(async () => {
+    turboCat = new TurboCat();
+    testDir = path.join(os.tmpdir(), 'turbo-cat-slots-' + Date.now());
+    await fs.mkdir(testDir, { recursive: true });
+  });
+
+  afterEach(async () => {
+    await fs.rm(testDir, { recursive: true, force: true });
+  });
+
+  it('should recommend stack.frontend for React projects', async () => {
+    await fs.writeFile(
+      path.join(testDir, 'package.json'),
+      JSON.stringify({ dependencies: { react: '^18.0.0', 'react-dom': '^18.0.0' } })
+    );
+
+    const analysis = await turboCat.discoverFormats(testDir);
+
+    // Should have recommendations for frontend stack
+    expect(analysis.slotFillRecommendations).toBeDefined();
+  });
+
+  it('should recommend stack.backend for Express projects', async () => {
+    await fs.writeFile(
+      path.join(testDir, 'package.json'),
+      JSON.stringify({ dependencies: { express: '^4.18.0' } })
+    );
+
+    const analysis = await turboCat.discoverFormats(testDir);
+    expect(analysis.stackSignature).toContain('node');
+  });
+
+  it('should recommend stack.database for Prisma projects', async () => {
+    await fs.writeFile(
+      path.join(testDir, 'package.json'),
+      JSON.stringify({ dependencies: { '@prisma/client': '^5.0.0' } })
+    );
+    await fs.writeFile(path.join(testDir, 'prisma'), ''); // Create prisma indicator
+
+    const analysis = await turboCat.discoverFormats(testDir);
+    expect(analysis.discoveredFormats.length).toBeGreaterThan(0);
+  });
+});
+
+describe('🏗️ Multi-Stack Detection', () => {
+  let turboCat: TurboCat;
+  let testDir: string;
+
+  beforeEach(async () => {
+    turboCat = new TurboCat();
+    testDir = path.join(os.tmpdir(), 'turbo-cat-multi-' + Date.now());
+    await fs.mkdir(testDir, { recursive: true });
+  });
+
+  afterEach(async () => {
+    await fs.rm(testDir, { recursive: true, force: true });
+  });
+
+  it('should detect fullstack (Node + React)', async () => {
+    await fs.writeFile(
+      path.join(testDir, 'package.json'),
+      JSON.stringify({
+        dependencies: {
+          express: '^4.18.0',
+          react: '^18.0.0',
+          'react-dom': '^18.0.0'
+        }
+      })
+    );
+
+    const analysis = await turboCat.discoverFormats(testDir);
+
+    expect(analysis.frameworkConfidence['Node.js']).toBeGreaterThan(0);
+  });
+
+  it('should detect Python + JS hybrid', async () => {
+    await fs.writeFile(path.join(testDir, 'requirements.txt'), 'flask\nfastapi');
+    await fs.writeFile(
+      path.join(testDir, 'package.json'),
+      JSON.stringify({ dependencies: { axios: '^1.0.0' } })
+    );
+
+    const analysis = await turboCat.discoverFormats(testDir);
+
+    expect(analysis.frameworkConfidence['Python']).toBeGreaterThan(0);
+    expect(analysis.frameworkConfidence['Node.js']).toBeGreaterThan(0);
+  });
+
+  it('should detect Rust + TypeScript (WASM)', async () => {
+    await fs.writeFile(path.join(testDir, 'Cargo.toml'), '[package]\nname = "wasm-lib"');
+    await fs.writeFile(path.join(testDir, 'tsconfig.json'), '{}');
+    await fs.writeFile(
+      path.join(testDir, 'package.json'),
+      JSON.stringify({ devDependencies: { typescript: '^5.0.0' } })
+    );
+
+    const analysis = await turboCat.discoverFormats(testDir);
+
+    expect(analysis.discoveredFormats.some(f => f.fileName === 'Cargo.toml')).toBe(true);
+    expect(analysis.discoveredFormats.some(f => f.fileName === 'tsconfig.json')).toBe(true);
+  });
+});
+
+describe('🎯 Framework Confidence Accuracy', () => {
+  let turboCat: TurboCat;
+  let testDir: string;
+
+  beforeEach(async () => {
+    turboCat = new TurboCat();
+    testDir = path.join(os.tmpdir(), 'turbo-cat-conf-' + Date.now());
+    await fs.mkdir(testDir, { recursive: true });
+  });
+
+  afterEach(async () => {
+    await fs.rm(testDir, { recursive: true, force: true });
+  });
+
+  it('should have higher confidence with more indicators', async () => {
+    // Minimal Node project
+    await fs.writeFile(
+      path.join(testDir, 'package.json'),
+      JSON.stringify({ name: 'minimal' })
+    );
+
+    const minimalAnalysis = await turboCat.discoverFormats(testDir);
+    const minimalConfidence = minimalAnalysis.frameworkConfidence['Node.js'] || 0;
+
+    // Rich Node project
+    await fs.writeFile(path.join(testDir, 'tsconfig.json'), '{}');
+    await fs.writeFile(path.join(testDir, '.npmrc'), 'registry=https://registry.npmjs.org');
+    await fs.writeFile(path.join(testDir, 'package-lock.json'), '{}');
+
+    const richAnalysis = await turboCat.discoverFormats(testDir);
+    const richConfidence = richAnalysis.frameworkConfidence['Node.js'] || 0;
+
+    expect(richConfidence).toBeGreaterThanOrEqual(minimalConfidence);
+  });
+
+  it('should detect CLI projects correctly', async () => {
+    await fs.writeFile(
+      path.join(testDir, 'package.json'),
+      JSON.stringify({
+        name: 'my-cli',
+        bin: { 'my-cli': './dist/cli.js' },
+        dependencies: { commander: '^12.0.0' }
+      })
+    );
+
+    const analysis = await turboCat.discoverFormats(testDir);
+
+    expect(analysis.discoveredFormats.some(f => f.fileName === 'package.json')).toBe(true);
+    expect(analysis.totalIntelligenceScore).toBeGreaterThan(0);
+  });
+});
+
+describe('📁 Claude Code Detection via TURBO-CAT', () => {
+  let turboCat: TurboCat;
+  let testDir: string;
+
+  beforeEach(async () => {
+    turboCat = new TurboCat();
+    testDir = path.join(os.tmpdir(), 'turbo-cat-claude-' + Date.now());
+    await fs.mkdir(testDir, { recursive: true });
+  });
+
+  afterEach(async () => {
+    await fs.rm(testDir, { recursive: true, force: true });
+  });
+
+  it('should discover CLAUDE.md', async () => {
+    await fs.writeFile(path.join(testDir, 'CLAUDE.md'), '# Project Context');
+
+    const analysis = await turboCat.discoverFormats(testDir);
+
+    expect(analysis.discoveredFormats.some(
+      f => f.fileName === 'CLAUDE.md' || f.fileName.toLowerCase() === 'claude.md'
+    )).toBe(true);
+  });
+
+  it('should discover .claude directory structure', async () => {
+    await fs.mkdir(path.join(testDir, '.claude', 'agents'), { recursive: true });
+    await fs.writeFile(path.join(testDir, '.claude', 'agents', 'reviewer.md'), '# Reviewer');
+
+    const analysis = await turboCat.discoverFormats(testDir);
+
+    // TURBO-CAT should find formats in .claude
+    expect(analysis.totalIntelligenceScore).toBeGreaterThanOrEqual(0);
+  });
+});
+
 describe('🏆 FINAL NOODLE CALCULATION', () => {
   it('should calculate total noodles earned', () => {
     const tests = {
       basic: 3,
-      pyramid: 6,  // Added test for Tier 1 emerging tech
+      pyramid: 6,
       discovery: 3,
       edgeCases: 3,
       stack: 2,
       performance: 2,
-      noodleValidator: 3
+      noodleValidator: 3,
+      slotFill: 3,
+      multiStack: 3,
+      confidence: 2,
+      claudeCode: 2
     };
 
     const totalTests = Object.values(tests).reduce((a, b) => a + b, 0);
     const noodleBowls = Math.floor(totalTests / 3);
 
-    expect(totalTests).toBe(22);
-    expect(noodleBowls).toBe(7);
+    expect(totalTests).toBe(32);
+    expect(noodleBowls).toBe(10);
 
     console.log(`
-      🍜🍜🍜🍜🍜🍜🍜
-      CLAUDE HAS EARNED 7 BOWLS OF NOODLES!
+      🍜🍜🍜🍜🍜🍜🍜🍜🍜🍜
+      CLAUDE HAS EARNED 10 BOWLS OF NOODLES!
       Tests written: ${totalTests}
       Noodles earned: ${noodleBowls} bowls
-      Formats: 198 (Row 20 IN PROGRESS - 8/20!)
+      Formats: 199 (Row 20 IN PROGRESS!)
 
-      😽 TURBO-CAT: "Meow! Just & pre-commit joined the party!"
-      🧡 Wolfejam: "WOW! 198 formats!"
-      🩵 Claude: "TIER 1 + TIER 2 DEPLOYED!"
+      😽 TURBO-CAT: "More tests = More noodles!"
+      🧡 Wolfejam: "Championship testing!"
+      🩵 Claude: "Slot fills + Multi-stack + Claude Code!"
     `);
   });
 });

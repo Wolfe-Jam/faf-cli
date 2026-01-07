@@ -52,8 +52,8 @@ export const CHAMPIONSHIP_MEDALS: readonly ChampionshipMedal[] = Object.freeze([
  */
 export function getScoreMedal(score: number): { medal: string; status: string } {
   if (score === 0) {return { medal: '🤍', status: 'Good luck!' };}
-  if (score >= 100) {return { medal: '🏆', status: 'Trophy - Championship' };}
-  if (score >= 99) {return { medal: '🥇', status: 'Gold' };}
+  if (score >= 100) {return { medal: '🏆', status: 'Trophy - Championship | GOLD CODE' };}
+  if (score >= 99) {return { medal: '🥇', status: 'Gold | GOLD CODE' };}
   if (score >= 95) {return { medal: '🥈', status: 'Target 2 - Silver' };}
   if (score >= 85) {return { medal: '🥉', status: 'Target 1 - Bronze' };}
   if (score >= 70) {return { medal: '🟢', status: 'GO! - Ready for Target 1' };}
@@ -68,7 +68,7 @@ export function getScoreMedal(score: number): { medal: string; status: string } 
 export function getTierInfo(score: number): TierInfo {
   if (score >= 100) {
     return {
-      current: 'Trophy - Championship',
+      current: 'Trophy - Championship | GOLD CODE',
       next: null,
       nextTarget: null,
       nextMedal: null,
@@ -76,8 +76,8 @@ export function getTierInfo(score: number): TierInfo {
   }
   if (score >= 99) {
     return {
-      current: 'Gold',
-      next: 'Trophy - Championship',
+      current: 'Gold | GOLD CODE',
+      next: 'Trophy - Championship | GOLD CODE',
       nextTarget: 100,
       nextMedal: '🏆',
     };
@@ -85,7 +85,7 @@ export function getTierInfo(score: number): TierInfo {
   if (score >= 95) {
     return {
       current: 'Target 2 - Silver',
-      next: 'Gold',
+      next: 'Gold | GOLD CODE',
       nextTarget: 99,
       nextMedal: '🥇',
     };

@@ -47,9 +47,9 @@ git commit -m "chore: bump version to X.X.X
 npm publish
 ```
 
-**This publishes to npm only.** It does NOT trigger GitHub or Discord.
+**This publishes to npm only.**
 
-### 5. Create GitHub Release (TRIGGERS DISCORD)
+### 5. Create GitHub Release
 
 **Option A: GitHub CLI (recommended)**
 ```bash
@@ -58,20 +58,18 @@ VERSION=$(node -p "require('./package.json').version")
 
 # Create release with CHANGELOG notes
 gh release create v$VERSION \
-  --title "v$VERSION - Discord Community Launch" \
+  --title "v$VERSION" \
   --notes "$(sed -n '/## \['$VERSION'\]/,/## \[/p' CHANGELOG.md | head -n -2)"
 ```
 
 **Option B: GitHub Web UI**
 1. Go to https://github.com/Wolfe-Jam/faf-cli/releases/new
 2. Tag: `v3.1.2`
-3. Title: `v3.1.2 - Discord Community Launch`
+3. Title: `v3.1.2`
 4. Description: Copy from CHANGELOG.md
 5. Click "Publish release"
 
 **Creating the GitHub Release:**
-- ✅ Triggers `.github/workflows/discord-release-announcement.yml`
-- ✅ Posts to Discord #announcements channel
 - ✅ Creates git tag
 - ✅ Archives source code
 
@@ -95,9 +93,6 @@ npm view faf-cli version
 # Check GitHub release
 gh release view v$VERSION
 
-# Check Discord #announcements
-# Visit: https://discord.com/channels/YOUR_SERVER_ID/YOUR_CHANNEL_ID
-
 # Check Homebrew (after formula update)
 brew info faf-cli
 ```
@@ -116,7 +111,7 @@ gh release create v$VERSION \
 ## What Triggers What
 
 - `npm publish` → npm package updated only
-- `gh release create` → GitHub release + Discord announcement
+- `gh release create` → GitHub release + git tag
 - Homebrew formula → Manual update required
 
 ## Night Shift Testing

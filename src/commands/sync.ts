@@ -163,26 +163,28 @@ async function detectProjectChanges(fafData: any): Promise<ProjectChange[]> {
       const packageContent = await fs.readFile(packageJsonPath, "utf-8");
       const packageData = JSON.parse(packageContent);
 
-      // Project name change (flat structure)
-      if (packageData.name && packageData.name !== fafData.projectName) {
+      // Project name change (nested structure - check both nested and flat for compatibility)
+      const currentName = fafData.project?.name || fafData.projectName;
+      if (packageData.name && packageData.name !== currentName) {
         changes.push({
-          path: "projectName",
+          path: "project.name",
           description: "Project name changed in package.json",
-          oldValue: fafData.projectName || "undefined",
+          oldValue: currentName || "undefined",
           newValue: packageData.name,
           confidence: "high",
         });
       }
 
-      // Description/goal change (flat structure)
+      // Description/goal change (nested structure - check both nested and flat for compatibility)
+      const currentGoal = fafData.project?.goal || fafData.projectGoal;
       if (
         packageData.description &&
-        packageData.description !== fafData.projectGoal
+        packageData.description !== currentGoal
       ) {
         changes.push({
-          path: "projectGoal",
+          path: "project.goal",
           description: "Project description changed in package.json",
-          oldValue: fafData.projectGoal || "undefined",
+          oldValue: currentGoal || "undefined",
           newValue: packageData.description,
           confidence: "medium",
         });
@@ -194,146 +196,151 @@ async function detectProjectChanges(fafData: any): Promise<ProjectChange[]> {
         ...packageData.devDependencies,
       };
 
-      // Check for framework changes
-      if (deps.svelte && !fafData.framework?.includes("Svelte")) {
+      // Check for framework changes (nested structure - check both for compatibility)
+      const currentFramework = fafData.stack?.frontend || fafData.framework || "";
+      if (deps.svelte && !currentFramework.includes("Svelte")) {
         changes.push({
-          path: "framework",
+          path: "stack.frontend",
           description: "Svelte dependency detected",
-          oldValue: fafData.framework || "",
+          oldValue: currentFramework,
           newValue: "Svelte",
           confidence: "high",
         });
       }
 
-      if (deps.react && !fafData.framework?.includes("React")) {
+      if (deps.react && !currentFramework.includes("React")) {
         changes.push({
-          path: "framework",
+          path: "stack.frontend",
           description: "React dependency detected",
-          oldValue: fafData.framework || "",
+          oldValue: currentFramework,
           newValue: "React",
           confidence: "high",
         });
       }
-      
-      if (deps.vue && !fafData.framework?.includes("Vue")) {
+
+      if (deps.vue && !currentFramework.includes("Vue")) {
         changes.push({
-          path: "framework",
+          path: "stack.frontend",
           description: "Vue dependency detected",
-          oldValue: fafData.framework || "",
+          oldValue: currentFramework,
           newValue: "Vue",
           confidence: "high",
         });
       }
 
-      if (deps["@angular/core"] && !fafData.framework?.includes("Angular")) {
+      if (deps["@angular/core"] && !currentFramework.includes("Angular")) {
         changes.push({
-          path: "framework",
+          path: "stack.frontend",
           description: "Angular dependency detected",
-          oldValue: fafData.framework || "",
+          oldValue: currentFramework,
           newValue: "Angular",
           confidence: "high",
         });
       }
 
-      // Check for CSS frameworks
-      if (deps.tailwindcss && !fafData.cssFramework?.includes("Tailwind")) {
+      // Check for CSS frameworks (nested structure)
+      const currentCss = fafData.stack?.css_framework || fafData.cssFramework || "";
+      if (deps.tailwindcss && !currentCss.includes("Tailwind")) {
         changes.push({
-          path: "cssFramework",
+          path: "stack.css_framework",
           description: "Tailwind CSS dependency detected",
-          oldValue: fafData.cssFramework || "",
+          oldValue: currentCss,
           newValue: "Tailwind CSS",
           confidence: "high",
         });
       }
 
-      if (deps.bootstrap && !fafData.cssFramework?.includes("Bootstrap")) {
+      if (deps.bootstrap && !currentCss.includes("Bootstrap")) {
         changes.push({
-          path: "cssFramework",
+          path: "stack.css_framework",
           description: "Bootstrap dependency detected",
-          oldValue: fafData.cssFramework || "",
+          oldValue: currentCss,
           newValue: "Bootstrap",
           confidence: "high",
         });
       }
 
-      // Check for UI libraries
-      if (deps["@mui/material"] && !fafData.uiLibrary?.includes("MUI")) {
+      // Check for UI libraries (nested structure)
+      const currentUi = fafData.stack?.ui_library || fafData.uiLibrary || "";
+      if (deps["@mui/material"] && !currentUi.includes("MUI")) {
         changes.push({
-          path: "uiLibrary",
+          path: "stack.ui_library",
           description: "Material-UI (MUI) dependency detected",
-          oldValue: fafData.uiLibrary || "",
+          oldValue: currentUi,
           newValue: "Material-UI (MUI)",
           confidence: "high",
         });
       }
 
-      if (deps.antd && !fafData.uiLibrary?.includes("Ant Design")) {
+      if (deps.antd && !currentUi.includes("Ant Design")) {
         changes.push({
-          path: "uiLibrary",
+          path: "stack.ui_library",
           description: "Ant Design dependency detected",
-          oldValue: fafData.uiLibrary || "",
+          oldValue: currentUi,
           newValue: "Ant Design",
           confidence: "high",
         });
       }
 
-      if (deps["@chakra-ui/react"] && !fafData.uiLibrary?.includes("Chakra")) {
+      if (deps["@chakra-ui/react"] && !currentUi.includes("Chakra")) {
         changes.push({
-          path: "uiLibrary",
+          path: "stack.ui_library",
           description: "Chakra UI dependency detected",
-          oldValue: fafData.uiLibrary || "",
+          oldValue: currentUi,
           newValue: "Chakra UI",
           confidence: "high",
         });
       }
 
-      // Check for state management
-      if ((deps.redux || deps["@reduxjs/toolkit"]) && !fafData.stateManagement?.includes("Redux")) {
+      // Check for state management (nested structure)
+      const currentState = fafData.stack?.state_management || fafData.stateManagement || "";
+      if ((deps.redux || deps["@reduxjs/toolkit"]) && !currentState.includes("Redux")) {
         changes.push({
-          path: "stateManagement",
+          path: "stack.state_management",
           description: "Redux dependency detected",
-          oldValue: fafData.stateManagement || "",
+          oldValue: currentState,
           newValue: "Redux Toolkit",
           confidence: "high",
         });
       }
 
-      if (deps.zustand && !fafData.stateManagement?.includes("Zustand")) {
+      if (deps.zustand && !currentState.includes("Zustand")) {
         changes.push({
-          path: "stateManagement",
+          path: "stack.state_management",
           description: "Zustand dependency detected",
-          oldValue: fafData.stateManagement || "",
+          oldValue: currentState,
           newValue: "Zustand",
           confidence: "high",
         });
       }
 
-      if (deps.jotai && !fafData.stateManagement?.includes("Jotai")) {
+      if (deps.jotai && !currentState.includes("Jotai")) {
         changes.push({
-          path: "stateManagement",
+          path: "stack.state_management",
           description: "Jotai dependency detected",
-          oldValue: fafData.stateManagement || "",
+          oldValue: currentState,
           newValue: "Jotai",
           confidence: "high",
         });
       }
 
-      // Check for build tools
-      if (deps.vite && !fafData.buildTool?.includes("Vite")) {
+      // Check for build tools (nested structure)
+      const currentBuild = fafData.stack?.build || fafData.buildTool || "";
+      if (deps.vite && !currentBuild.includes("Vite")) {
         changes.push({
-          path: "buildTool",
+          path: "stack.build",
           description: "Vite build tool detected",
-          oldValue: fafData.buildTool || "",
+          oldValue: currentBuild,
           newValue: "Vite",
           confidence: "high",
         });
       }
 
-      if (deps.webpack && !fafData.buildTool?.includes("Webpack")) {
+      if (deps.webpack && !currentBuild.includes("Webpack")) {
         changes.push({
-          path: "buildTool",
+          path: "stack.build",
           description: "Webpack build tool detected",
-          oldValue: fafData.buildTool || "",
+          oldValue: currentBuild,
           newValue: "Webpack",
           confidence: "high",
         });
@@ -374,8 +381,22 @@ function applyChanges(fafData: any, changes: ProjectChange[]): void {
 }
 
 function setNestedValue(obj: any, path: string, value: any): void {
-  // For flat .faf structure, path is just the direct property name
-  obj[path] = value;
+  // Handle nested paths like "project.goal" or "project.name"
+  const parts = path.split('.');
+  if (parts.length === 1) {
+    // Flat path - direct property
+    obj[path] = value;
+  } else {
+    // Nested path - create parent objects if needed
+    let current = obj;
+    for (let i = 0; i < parts.length - 1; i++) {
+      if (!current[parts[i]]) {
+        current[parts[i]] = {};
+      }
+      current = current[parts[i]];
+    }
+    current[parts[parts.length - 1]] = value;
+  }
 }
 
 /**
