@@ -5,6 +5,17 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.4] - 2026-01-07
+
+### Added
+
+- **`faf demo sync`** - Live bi-sync demonstration command
+  - Shows real-time .faf <-> CLAUDE.md synchronization
+  - Timestamps, direction, and speed (ms) displayed
+  - `--speed fast|normal|slow` for presentation pacing
+  - Demo completes with no files changed
+  - Built-in evangelism: every user can demo bi-sync to their team
+
 ## [3.4.3] - 2026-01-07
 
 ### Added

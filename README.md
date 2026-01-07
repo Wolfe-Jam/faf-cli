@@ -15,17 +15,17 @@
 
 ---
 
-## What's New in v3.4.3
+## What's New in v3.4.4
 
-**Boris-Flow Integration Tests** - Championship-grade publish validation with 12-test suite.
+**`faf demo sync`** - Live bi-sync demonstration. Show your team how .faf <-> CLAUDE.md sync works in real-time.
 
 ```bash
-./tests/boris-flow.test.sh
-# Validates: version, init, auto, score, Claude Code detection, non-TTY safety
-# Must pass before any npm publish
+faf demo sync           # Run the demo
+faf demo sync --fast    # Speed run
+faf demo sync --slow    # Presentation mode
 ```
 
-Also: Turbo-cat format discovery improvements, sync command reliability, compiler scoring updates.
+Demo completes with no files changed. Built-in evangelism.
 
 ---
 

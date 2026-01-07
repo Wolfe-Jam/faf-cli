@@ -40,6 +40,7 @@ import { chatCommand } from './commands/chat';
 import { convertCommand, toMarkdown, toText } from './commands/convert';
 import { notificationsCommand } from './commands/notifications';
 import { skillsCommand } from './commands/skills';
+import { demoCommand } from './commands/demo';
 import { driftCommand } from './commands/drift';
 import { gitCommand } from './commands/git';
 import { tafCommand } from './commands/taf';
@@ -1093,6 +1094,24 @@ Claude Code Consistency:
   • Fresh start for .faf system
   • Removes temporary files and cached data`)
   .action((options) => clearCommand(options));
+
+// 🎬 faf demo - Live Demonstrations
+program
+  .command('demo [subcommand]')
+  .description('Live demonstrations of FAF capabilities')
+  .option('--speed <speed>', 'Demo pacing: fast, normal, slow (default: normal)')
+  .option('--no-cleanup', 'Keep demo changes in files')
+  .addHelpText('after', `
+Examples:
+  $ faf demo              # Show available demos
+  $ faf demo sync         # Live bi-sync demonstration
+  $ faf demo sync --fast  # Speed up the demo
+  $ faf demo sync --slow  # Slow down for presentations
+
+Available demos:
+  sync    Live .faf <-> CLAUDE.md synchronization
+          Shows real-time bidirectional sync with timestamps`)
+  .action(withAnalyticsTracking('demo', (subcommand, options) => demoCommand(subcommand, options)));
 
 // 🍊 faf drift - Context-Drift Analyzer
 program
