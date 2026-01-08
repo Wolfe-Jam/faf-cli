@@ -191,7 +191,6 @@ Same .faf format. Same scoring. Same Gold Code. Different execution layer.
 
 - **[CHANGELOG](./CHANGELOG.md)** — Version history
 - **[Website](https://faf.one)** — Complete guide
-- **[Discord](https://discord.com/invite/56fPBUJKfk)** — Community
 
 ---
 
