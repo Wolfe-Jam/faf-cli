@@ -6,7 +6,7 @@
   </div>
 </div>
 
-> Universal CLI for FAF (Foundational AI-context Format) - Terminal-based tooling for creating, scoring, and improving project.faf files that provide persistent AI context
+> **.FAF optimizes AI for your codebase.** At 100% (Gold Code), AI stops guessing and starts knowing. Live bi-sync between `.faf` ↔ `CLAUDE.md` means zero context-drift — your project DNA stays aligned with AI, forever.
 
 [![NPM Downloads](https://img.shields.io/npm/dt/faf-cli?label=total%20downloads&color=00CCFF)](https://www.npmjs.com/package/faf-cli)
 [![Homebrew](https://img.shields.io/badge/Homebrew-faf--cli-orange)](https://github.com/Wolfe-Jam/homebrew-faf)
@@ -15,16 +15,82 @@
 
 ---
 
-## What's New in v3.4.4
+## The Problem: Context-Drift
 
-**Boris-Flow** - 12/12 integration tests for publish readiness. Championship-grade validation.
+AI assistants forget. They misunderstand. They drift.
+
+Every new session, every new file, every new developer — AI starts guessing again. Your codebase context leaks away. Yesterday's perfect assistant becomes today's confused intern.
+
+**.FAF fixes this permanently.**
+
+---
+
+## The Solution: Gold Code
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏆  FAF AI-READINESS SCORE: 100/100 — GOLD CODE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+At 100%, AI is optimized. No more guessing.
+Peak AI performance activated.
+
+├─ Project DNA locked in        ├─ Zero context-drift
+├─ Architecture understood      ├─ Eternal bi-sync active
+├─ Domain model captured        ├─ Team alignment permanent
+└─ Every session starts smart   └─ AI works WITH you, not around you
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+---
+
+## 💎 Lifecycle Value
+
+Setup savings get you started. Lifecycle optimization keeps you ahead.
+
+| When | Without FAF | With FAF |
+|------|-------------|----------|
+| **Day 1** | 20 min setup per dev | 0 min — instant context |
+| **Month 1** | AI forgets between sessions | AI remembers everything |
+| **Year 1** | New devs re-explain everything | New devs inherit full context |
+| **Year 3+** | Institutional knowledge lost | Project DNA preserved forever |
+
+**Setup savings: 20 minutes. Lifecycle savings: Infinite.**
+
+---
+
+## ⚡ Quick Start
+
+```bash
+# Install
+npm install -g faf-cli    # or: brew install faf-cli
+
+# Initialize
+cd your-project
+faf init                  # Creates project.faf
+
+# Check your score
+faf score                 # 0-100% AI-readiness
+
+# Reach Gold Code
+faf auto                  # Auto-enhance to 100%
+```
+
+---
+
+## What's New in v3.4.5
+
+**Claude Code 2.1.0 Support** — Now detects `.claude/skills/`, `.claude/commands/`, and YAML-style `allowed-tools`.
+
+**Boris-Flow 14/14** — Integration tests updated for Claude Code 2.1.0 validation.
 
 ```bash
 ./tests/boris-flow.test.sh
-# Validates: version, init, auto, score, Claude Code detection, non-TTY safety
+# Validates: version, init, auto, score, skills, commands, subagents
 ```
 
-**`faf demo sync`** - Live bi-sync demonstration. Show your team how .faf <-> CLAUDE.md sync works.
+**`faf demo sync`** — Live bi-sync demonstration.
 
 ```bash
 faf demo sync           # Run the demo
@@ -33,310 +99,108 @@ faf demo sync --fast    # Speed run
 
 ---
 
-## TL;DR
+## 🔄 Eternal Bi-Sync
 
-**Problem:** AI needs persistent project context to work at its best.
+The magic: `.faf` ↔ `CLAUDE.md` stay synchronized in milliseconds.
 
-**Solution:** The .faf format provides that context. This CLI creates, scores, and improves .faf files from your codebase in the IANA-registered format.
-
-**How it works:** Run `faf init` to create your .faf file. Get a score (0-100%) showing context quality. Higher scores = AI more in-tune with your project. Use `faf auto` and other commands to improve your score quickly.
-
-**Install:**
-```bash
-# npm (works everywhere)
-npm install -g faf-cli
-
-# Homebrew (macOS/Linux)
-brew install faf-cli
+```
+project.faf  ←──── 8ms ────→  CLAUDE.md
+     │                            │
+     └── Single source of truth ──┘
 ```
 
-**Quick start:**
 ```bash
-cd your-project
-faf init        # Creates project.faf file
-faf score       # Check AI-readiness (0-100%)
+faf bi-sync              # Sync once
+faf bi-sync --watch      # Continuous sync
 ```
-
-**CLI vs MCP clarity:**
-- **faf-cli** (this): Terminal-based tool for scripts, automation, and local development
-- **claude-faf-mcp** ([npm](https://www.npmjs.com/package/claude-faf-mcp)): MCP server for Claude Desktop via protocol integration
-
-Same .faf format, different execution layers. Same Project DNA and scoring. Same capabilities (create, score, improve). Choose based on your workflow.
-
-[Website](https://faf.one) | [GitHub](https://github.com/Wolfe-Jam/faf-cli) | [Discussions](https://github.com/Wolfe-Jam/faf-cli/discussions)
 
 ---
 
-## Project DNA Positioning
+## Tier System: From Blind to Optimized
 
-<div align="center">
-  <img src="https://raw.githubusercontent.com/Wolfe-Jam/faf/main/assets/Project-faf-pckg-json-README.png" alt="project.faf file positioning" width="600" />
-  <p><em>project.faf lives at the project root, between package.json and README.md</em></p>
-</div>
+| Tier | Score | Status |
+|------|-------|--------|
+| 🏆 **Trophy** | 100% | **AI Optimized** — Gold Code |
+| 🥇 **Gold** | 99%+ | Near-perfect context |
+| 🥈 **Silver** | 95%+ | Excellent |
+| 🥉 **Bronze** | 85%+ | Production ready |
+| 🟢 **Green** | 70%+ | Solid foundation |
+| 🟡 **Yellow** | 55%+ | AI flipping coins |
+| 🔴 **Red** | <55% | AI working blind |
+| 🤍 **White** | 0% | No context at all |
 
-At 55% you are building your project with half a blueprint and basically flipping a coin with AI. .FAF defines, and AI becomes optimized for Context with the project.faf file.
+**At 55%, AI is guessing half the time.** At 100%, AI is optimized.
 
 ---
 
-## Quick Start
+## Core Commands
 
-### Installation
+| Command | Purpose |
+|---------|---------|
+| `faf init` | Create project.faf from your codebase |
+| `faf score` | Check AI-readiness (0-100%) |
+| `faf auto` | Auto-enhance to Gold Code |
+| `faf bi-sync` | Sync .faf ↔ CLAUDE.md (8ms) |
+| `faf readme` | Extract 6 Ws from README (+25-35% boost) |
+| `faf human` | Interactive human context entry |
+| `faf human-set` | Non-interactive field setting |
+| `faf formats` | Show 153 detected formats |
+| `faf demo sync` | Live bi-sync demonstration |
 
-```bash
-# npm (works everywhere)
-npm install -g faf-cli
-
-# Homebrew (macOS/Linux)
-brew install faf-cli
-```
-
-### Generate Your First .faf File
-
-```bash
-# Initialize with IANA-registered format
-faf init
-
-# Output: project.faf with official media type
-# Content-Type: application/vnd.faf+yaml
-```
-
-**What just happened:**
-- Created project.faf file (IANA-registered format)
-- Generated project DNA (architecture, dependencies, quality score)
-- Ready for any AI (Claude Code, Gemini, Cursor, Codex, Warp, etc.)
-- Official Internet standard format
-
-### More Commands
-
-```bash
-# Auto-detect and enhance
-faf auto
-
-# Check your AI readiness
-faf score
-
-# Discover your stack's formats
-faf formats
-
-# Sync with CLAUDE.md
-faf bi-sync
-```
-
-**That's it!** Your AI now has perfect context.
+Run `faf --help` for all 44 commands.
 
 ---
 
 ## Human Context (The 6 Ws)
 
-Boost your score by 25-35% with human context - the information only YOU know about your project.
-
-### Auto-Extract from README
+Boost your score by 25-35% with human context — the information only YOU know.
 
 ```bash
-# Preview what can be extracted
-faf readme
-
-# Apply extracted content to empty slots
+# Auto-extract from README
 faf readme --apply
 
-# Overwrite all slots (even filled ones)
-faf readme --apply --force
-```
-
-### Manual Entry
-
-```bash
-# Non-interactive (works in Claude Code)
+# Manual entry
 faf human-set who "Frontend team at Acme Corp"
 faf human-set what "Customer dashboard with real-time analytics"
 faf human-set why "10x faster than previous solution"
-
-# Interactive mode (terminal only)
-faf human
-```
-
-### Quality Check & Protection
-
-```bash
-# Inspect quality of human_context fields
-faf check
-
-# Output shows quality levels:
-#   empty     - Not filled
-#   generic   - Placeholder or too short
-#   good      - Quality content
-#   excellent - High-value content
-
-# Lock good content from being overwritten
-faf check --protect
-
-# Remove all protections
-faf check --unlock
-```
-
-Protected fields are skipped by `faf readme` and `faf auto`, preventing accidental overwrites of quality content.
-
----
-
-## Core Features
-
-### 44 Championship Commands
-- **faf auto** - Zero to Podium in one command
-- **faf init** - Create project.faf from your project
-- **faf readme** - Smart 6 Ws extraction from README.md
-- **faf human** - Interactive human context entry
-- **faf human-set** - Non-interactive field setting (Claude Code compatible)
-- **faf check** - Quality inspection + field protection
-- **faf enhance** - Real AI analysis and improvements
-- **faf score** - AI-readiness scoring (0-100%)
-- **faf formats** - 153 formats across 17-level pyramid
-- **faf bi-sync** - Bidirectional .faf ↔ CLAUDE.md (8ms!)
-- **faf dna** - Evolution journey tracking
-
-Run `faf --help` for complete command reference
-
-### IANA-Registered Standard
-- Official MIME type: `application/vnd.faf+yaml`
-- Recognized at Internet scale (same as PDF, JSON, XML)
-- Proper HTTP Content-Type headers
-- Browser and email client support
-- Universal format for AI context
-
-### Championship Performance
-- **<50ms** all commands target
-- **18ms** average execution
-- **8ms** bi-sync achieved
-- **0ms** operations possible (unmeasurable speed!)
-- F1-grade engineering
-
-### Universal AI Support
-Works with Claude Code, OpenAI Codex CLI, Gemini CLI, Cursor, Warp, Copilot, Windsurf, and all AI coding assistants.
-
-**PLUS:** AI-Automation platforms (n8n, OpenAI Builder, Google Opal, Make.com)
-
----
-
-## Project Types (94 Supported)
-
-FAF now understands your project type and scores accordingly. CLI projects don't need frontend slots. Fullstack projects need everything.
-
-### How It Works
-
-Set your project type in `.faf`:
-```yaml
-project:
-  type: cli          # 9 slots (project + human)
-  type: frontend     # 16 slots (+ frontend + universal)
-  type: backend-api  # 17 slots (+ backend + universal)
-  type: fullstack    # 21 slots (all categories)
-```
-
-### Supported Types
-
-**9-Slot Types** (Project + Human):
-`cli` `library` `npm-package` `pip-package` `crate` `gem` `chrome-extension` `firefox-extension` `safari-extension` `terraform` `kubernetes` `docker` `ansible` `github-action` `embedded` `arduino` `wasm` `jupyter` `smart-contract` `e2e-tests`
-
-**13-Slot Types** (+ Frontend):
-`mobile` `react-native` `flutter` `ios` `android` `desktop` `electron` `tauri` `game` `unity` `dapp`
-
-**14-Slot Types** (+ Backend):
-`mcp-server` `data-science` `ml-model` `data-pipeline` `n8n-workflow` `python-app`
-
-**16-Slot Types** (+ Frontend + Universal):
-`frontend` `svelte` `react` `vue` `angular` `astro`
-
-**17-Slot Types** (+ Backend + Universal):
-`backend-api` `node-api` `python-api` `go-api` `rust-api` `graphql` `microservice` `strapi`
-
-**21-Slot Types** (All Categories):
-`fullstack` `nextjs` `remix` `t3` `mern` `mean` `django` `rails` `laravel` `wordpress` `monorepo` `turborepo` `nx` `lerna` `pnpm-workspace` `yarn-workspace`
-
-### Type Aliases (38 shortcuts)
-
-Use intuitive names - FAF maps them automatically:
-
-| Alias | Maps To | Alias | Maps To |
-|-------|---------|-------|---------|
-| `api` | backend-api | `k8s` | kubernetes |
-| `cli-tool` | cli | `rn` | react-native |
-| `flask` | python-api | `expo` | react-native |
-| `fastapi` | python-api | `turbo` | turborepo |
-| `express` | node-api | `next` | nextjs |
-| `tf` | terraform | `gha` | github-action |
-
-### slot_ignore Escape Hatch
-
-Override type defaults for your specific project:
-
-```yaml
-project:
-  type: cli
-slot_ignore: [stack.hosting, stack.cicd]  # These won't count
-```
-
-Formats: array `[a, b]`, string `"a, b"`, or shorthand `hosting` → `stack.hosting`
-
----
-
-## Documentation
-
-- **[CHANGELOG](./CHANGELOG.md)** - Version history and release notes
-- **[FAQ](./docs/FAQ.md)** - Common questions
-- **[Commands Reference](https://faf.one/docs/commands)** - All 41 commands
-- **[Website](https://faf.one)** - Complete guide and documentation
-- **[Discord Community](https://discord.com/invite/56fPBUJKfk)** - Join the discussion
-
----
-
-## Why FAF CLI?
-
-> "README for the AI era" — Gemini CLI
-
-**Persistent Context** - Your project's DNA lives in `project.faf`, readable by any AI or human
-
-**Universal Format** - IANA-registered standard works across Claude, Gemini, Codex, any LLM
-
-**Terminal-Native** - Built for scripts, automation, and developer workflows
-
-**Championship Engineering** - F1-inspired performance with strict TypeScript, zero runtime errors
-
----
-
-## Ecosystem
-
-- **[FAF Format Spec](https://github.com/Wolfe-Jam/faf)** - Official IANA specification
-- **[claude-faf-mcp](https://npmjs.com/package/claude-faf-mcp)** - MCP server for Claude Desktop
-- **[Chrome Extension](https://chromewebstore.google.com/detail/lnecebepmpjpilldfmndnaofbfjkjlkm)** - Browser integration
-- **[faf.one](https://faf.one)** - Official website and documentation
-
----
-
-## Development
-
-```bash
-# Clone
-git clone https://github.com/Wolfe-Jam/faf-cli.git
-cd faf-cli
-
-# Install & Build
-npm install
-npm run build
-
-# Test
-npm test
-
-# Link locally
-npm link
 ```
 
 ---
 
-## License
+## CLI vs MCP
 
-MIT License - Free and open source
+| Tool | Use Case |
+|------|----------|
+| **faf-cli** (this) | Terminal, scripts, CI/CD, automation |
+| **claude-faf-mcp** | Claude Desktop via MCP protocol |
+
+Same .faf format. Same scoring. Same Gold Code. Different execution layer.
 
 ---
 
-**Built with F1-inspired engineering principles**
+## 📦 Ecosystem
+
+- **[claude-faf-mcp](https://npmjs.com/package/claude-faf-mcp)** — MCP server (52 tools)
+- **[faf-wasm](https://www.npmjs.com/package/faf-wasm)** — WASM SDK (<5ms scoring)
+- **[Chrome Extension](https://chromewebstore.google.com/detail/lnecebepmpjpilldfmndnaofbfjkjlkm)** — Browser integration
+- **[faf.one](https://faf.one)** — Official website
+
+---
+
+## 📚 Documentation
+
+- **[CHANGELOG](./CHANGELOG.md)** — Version history
+- **[Website](https://faf.one)** — Complete guide
+- **[Discord](https://discord.com/invite/56fPBUJKfk)** — Community
+
+---
+
+## 📄 License
+
+MIT License — Free and open source
+
+---
+
+**Zero drift. Eternal sync. AI optimized.** 🏆
 
 *"It's so logical if it didn't exist, AI would have built it itself" — Claude*
