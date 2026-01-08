@@ -23,7 +23,7 @@ Must pass ALL tests (not just Boris-Flow).
 ```bash
 ./tests/boris-flow.test.sh
 ```
-Must show: `BORIS-FLOW: ALL 12 TESTS PASSED`
+Must show: `BORIS-FLOW: ALL 14 TESTS PASSED`
 
 ### 4. FAF Score
 ```bash
@@ -77,7 +77,7 @@ npm run build
 Show checklist results:
 ```
 ✅ Tests: XXX/XXX passing
-✅ Boris-Flow: 12/12
+✅ Boris-Flow: 14/14
 ✅ Score: XX%
 ✅ Build: Clean
 ✅ README: Updated
