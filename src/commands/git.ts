@@ -370,17 +370,17 @@ function generateFafFromGitHub(
 }
 
 /**
- * Get score tier emoji
+ * Get score tier emoji - correct tier system
  */
 function getScoreTier(score: number): string {
-  if (score >= 85) {return '🏆 Trophy';}
-  if (score >= 70) {return '🥇 Gold';}
-  if (score >= 55) {return '🥈 Silver';}
-  if (score >= 40) {return '🥉 Bronze';}
-  if (score >= 35) {return '🟢 Green';}
-  if (score >= 20) {return '🟡 Yellow';}
-  if (score >= 10) {return '🔴 Red';}
-  return '🤍 White';
+  if (score >= 100) {return '🏆 Trophy';}   // 100%
+  if (score >= 99) {return '🥇 Gold';}      // 99%+
+  if (score >= 95) {return '🥈 Silver';}    // 95%+
+  if (score >= 85) {return '🥉 Bronze';}    // 85%+
+  if (score >= 70) {return '🟢 Green';}     // 70%+
+  if (score >= 55) {return '🟡 Yellow';}    // 55%+
+  if (score > 0) {return '🔴 Red';}         // <55%
+  return '🤍 White';                        // 0%
 }
 
 /**

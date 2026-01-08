@@ -159,13 +159,13 @@ async function scoreFafContent(
  */
 function getChampionshipEmoji(score: number): string {
   if (score >= 100) { return '🏆'; } // Trophy (championship)
-  if (score >= 99) { return '🥇'; } // Gold
-  if (score >= 95) { return '🥈'; } // Silver (Target 2)
-  if (score >= 85) { return '🥉'; } // Bronze (Target 1)
-  if (score >= 70) { return '🟢'; } // Green (GO!)
-  if (score >= 55) { return '🟡'; } // Yellow (Caution)
-  if (score >= 10) { return '🔴'; } // Red (Pit Stop)
-  return '🤍'; // White (empty)
+  if (score >= 99) { return '🥇'; }  // Gold
+  if (score >= 95) { return '🥈'; }  // Silver (Target 2)
+  if (score >= 85) { return '🥉'; }  // Bronze (Target 1)
+  if (score >= 70) { return '🟢'; }  // Green (GO!)
+  if (score >= 55) { return '🟡'; }  // Yellow (Caution)
+  if (score > 0) { return '🔴'; }    // Red <55%
+  return '🤍';                       // White 0%
 }
 
 

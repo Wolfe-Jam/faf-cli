@@ -253,15 +253,14 @@ export function showExtractionSuccess(
   console.log();
   console.log(FAF_COLORS.fafGreen(`☑️  Generated ${outputPath}`));
 
-  // Show score with podium emoji
-  let emoji = '🤍';
-  if (score >= 85) {emoji = '🏆';}
-  else if (score >= 70) {emoji = '🥇';}
-  else if (score >= 55) {emoji = '🥈';}
-  else if (score >= 40) {emoji = '🥉';}
-  else if (score >= 35) {emoji = '🟢';}
-  else if (score >= 20) {emoji = '🟡';}
-  else if (score >= 10) {emoji = '🔴';}
+  // Show score with podium emoji - correct tier system
+  let emoji = '🔴';
+  if (score >= 100) {emoji = '🏆';}      // Trophy 100%
+  else if (score >= 99) {emoji = '🥇';}  // Gold 99%+
+  else if (score >= 95) {emoji = '🥈';}  // Silver 95%+
+  else if (score >= 85) {emoji = '🥉';}  // Bronze 85%+
+  else if (score >= 70) {emoji = '🟢';}  // Green 70%+
+  else if (score >= 55) {emoji = '🟡';} // Yellow 55%+
 
   console.log(FAF_COLORS.fafOrange(`${emoji} Quality Score: ${score}%`));
   console.log();

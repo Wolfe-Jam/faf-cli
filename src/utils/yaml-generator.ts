@@ -230,11 +230,12 @@ export function generateFafContent(projectData: {
   additionalHow?: string[];
   projectDetailsScore?: number;
   projectSuccessRate?: number;
-  // Claude Code detection
+  // Claude Code detection (2.1.0+)
   claudeCode?: {
     detected: boolean;
     subagents: string[];
     commands: string[];
+    skills: string[];  // Claude Code 2.1.0+
     permissions: string[];
     hasClaudeMd: boolean;
     mcpServers: string[];
@@ -406,12 +407,13 @@ export function generateFafContent(projectData: {
       trust_embedded: 'COUNT ONCE architecture - trust MY embedded scores'
     },
 
-    // 🤖 Claude Code Integration (Boris-friendly detection)
+    // 🤖 Claude Code Integration (Boris-friendly detection, 2.1.0+)
     claude_code: projectData.claudeCode?.detected ? {
       detected: true,
       has_claude_md: projectData.claudeCode.hasClaudeMd,
       subagents: projectData.claudeCode.subagents.length > 0 ? projectData.claudeCode.subagents : undefined,
       commands: projectData.claudeCode.commands.length > 0 ? projectData.claudeCode.commands : undefined,
+      skills: projectData.claudeCode.skills?.length > 0 ? projectData.claudeCode.skills : undefined,
       permissions: projectData.claudeCode.permissions.length > 0 ? projectData.claudeCode.permissions : undefined,
       mcp_servers: projectData.claudeCode.mcpServers.length > 0 ? projectData.claudeCode.mcpServers : undefined
     } : undefined

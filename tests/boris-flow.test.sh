@@ -60,10 +60,10 @@ VERSION=$($FAF_CLI --version 2>&1)
 echo "$VERSION" | grep -qE "^[0-9]+\.[0-9]+\.[0-9]+"
 check "faf --version (got: $VERSION)"
 
-# Test 2: Create project structure
+# Test 2: Create project structure (Claude Code 2.1.0+)
 echo ""
-echo "2️⃣  Creating Claude Code project..."
-mkdir -p "$TEST_DIR/.claude/agents" "$TEST_DIR/src"
+echo "2️⃣  Creating Claude Code 2.1.0 project..."
+mkdir -p "$TEST_DIR/.claude/agents" "$TEST_DIR/.claude/skills" "$TEST_DIR/.claude/commands" "$TEST_DIR/src"
 
 cat > "$TEST_DIR/package.json" << 'EOF'
 {
@@ -82,7 +82,29 @@ echo "# Project" > "$TEST_DIR/CLAUDE.md"
 echo "# Reviewer" > "$TEST_DIR/.claude/agents/reviewer.md"
 echo "# Runner" > "$TEST_DIR/.claude/agents/test-runner.md"
 
-check "Created Claude Code structure"
+# Claude Code 2.1.0: Skills with YAML-style allowed-tools
+cat > "$TEST_DIR/.claude/skills/deploy.md" << 'EOF'
+---
+description: Deploy to production
+allowed-tools:
+  - Bash(npm *)
+  - Bash(git *)
+  - Read
+---
+# Deploy Skill
+Handles deployment workflows.
+EOF
+
+# Claude Code 2.1.0: Commands
+cat > "$TEST_DIR/.claude/commands/publish.md" << 'EOF'
+---
+description: Publish to npm
+---
+# Publish Command
+Run tests then publish.
+EOF
+
+check "Created Claude Code 2.1.0 structure"
 
 # Test 3: faf init
 echo ""
@@ -105,9 +127,9 @@ LANG=$(grep "main_language:" "$TEST_DIR/project.faf" | head -1 | awk '{print $2}
 test "$LANG" = "TypeScript" -o "$LANG" = "JavaScript"
 check "Language detected (got: $LANG)"
 
-# Test 6: Claude Code detection
+# Test 6: Claude Code 2.1.0 detection
 echo ""
-echo "6️⃣  Checking Claude Code detection..."
+echo "6️⃣  Checking Claude Code 2.1.0 detection..."
 grep -q "claude_code:" "$TEST_DIR/project.faf"
 check "claude_code section exists"
 
@@ -117,6 +139,16 @@ check "Claude Code detected: true"
 SUBAGENTS=$(grep -A 10 "subagents:" "$TEST_DIR/project.faf" | grep "    -" | wc -l | tr -d ' ')
 test "$SUBAGENTS" -ge 2
 check "Subagents detected (got: $SUBAGENTS)"
+
+# Claude Code 2.1.0: Skills detection
+SKILLS=$(grep -A 10 "skills:" "$TEST_DIR/project.faf" | grep "    -" | wc -l | tr -d ' ')
+test "$SKILLS" -ge 1
+check "Skills detected (got: $SKILLS)"
+
+# Claude Code 2.1.0: Commands detection
+COMMANDS=$(grep -A 10 "commands:" "$TEST_DIR/project.faf" | grep "    -" | wc -l | tr -d ' ')
+test "$COMMANDS" -ge 1
+check "Commands detected (got: $COMMANDS)"
 
 # Test 7: faf auto
 echo ""

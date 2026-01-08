@@ -553,17 +553,17 @@ function displayDriftAnalysis(analysis: DriftAnalysis): void {
 }
 
 /**
- * Get emoji for .faf score
+ * Get emoji for .faf score - correct tier system
  */
 function getFafEmoji(score: number): string {
-  if (score >= 85) {return '🏆';}
-  if (score >= 70) {return '🥇';}
-  if (score >= 55) {return '🥈';}
-  if (score >= 40) {return '🥉';}
-  if (score >= 35) {return '🟢';}
-  if (score >= 20) {return '🟡';}
-  if (score >= 10) {return '🔴';}
-  return '🤍';
+  if (score >= 100) {return '🏆';}  // Trophy 100%
+  if (score >= 99) {return '🥇';}   // Gold 99%+
+  if (score >= 95) {return '🥈';}   // Silver 95%+
+  if (score >= 85) {return '🥉';}   // Bronze 85%+
+  if (score >= 70) {return '🟢';}   // Green 70%+
+  if (score >= 55) {return '🟡';}   // Yellow 55%+
+  if (score > 0) {return '🔴';}     // Red <55%
+  return '🤍';                      // White 0%
 }
 
 /**

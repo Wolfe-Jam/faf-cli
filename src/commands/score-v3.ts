@@ -188,13 +188,13 @@ function getScoreColor(percentage: number) {
 }
 
 function getScoreEmoji(percentage: number): string {
-  if (percentage >= 90) {return "🏆";}
-  if (percentage >= 80) {return "🎯";}
-  if (percentage >= 70) {return "✨";}
-  if (percentage >= 60) {return "📈";}
-  if (percentage >= 50) {return "🎯";}
-  if (percentage >= 40) {return "🌱";}
-  if (percentage >= 30) {return "🔧";}
-  if (percentage >= 20) {return "⚠️";}
-  return "🚨";
+  // Standard tier system
+  if (percentage >= 100) {return "🏆";}  // Trophy 100%
+  if (percentage >= 99) {return "🥇";}   // Gold 99%+
+  if (percentage >= 95) {return "🥈";}   // Silver 95%+
+  if (percentage >= 85) {return "🥉";}   // Bronze 85%+
+  if (percentage >= 70) {return "🟢";}   // Green 70%+
+  if (percentage >= 55) {return "🟡";}   // Yellow 55%+
+  if (percentage > 0) {return "🔴";}     // Red <55%
+  return "🤍";                           // White 0%
 }

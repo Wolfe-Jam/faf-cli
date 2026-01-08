@@ -160,13 +160,15 @@ export async function yoloCommand(directory?: string, options: YoloOptions = {})
     // Compact output - just what matters
     console.log(chalk.bold.cyan(`⚡ ${finalScore}% in ${lapTime}s`));
 
-    // Medal display
-    let medal = '🔴';
-    if (finalScore >= 99) {medal = '🏆';}
-    else if (finalScore >= 95) {medal = '🥇';}
-    else if (finalScore >= 85) {medal = '🥈';}
-    else if (finalScore >= 70) {medal = '🥉';}
-    else if (finalScore >= 55) {medal = '🟡';}
+    // Medal display - correct tier system
+    let medal = '🤍';                           // White 0%
+    if (finalScore >= 100) {medal = '🏆';}      // Trophy 100%
+    else if (finalScore >= 99) {medal = '🥇';}  // Gold 99%+
+    else if (finalScore >= 95) {medal = '🥈';}  // Silver 95%+
+    else if (finalScore >= 85) {medal = '🥉';}  // Bronze 85%+
+    else if (finalScore >= 70) {medal = '🟢';}  // Green 70%+
+    else if (finalScore >= 55) {medal = '🟡';} // Yellow 55%+
+    else if (finalScore > 0) {medal = '🔴';}   // Red <55%
 
     console.log(chalk.white(`${medal} ${targetDir.split('/').pop()}`));
 

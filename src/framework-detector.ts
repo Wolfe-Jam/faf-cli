@@ -539,6 +539,7 @@ export interface ClaudeCodeResult {
   detected: boolean;
   subagents: string[];
   commands: string[];
+  skills: string[];  // Claude Code 2.1.0+
   permissions: string[];
   hasClaudeMd: boolean;
   mcpServers: string[];
@@ -552,6 +553,7 @@ export async function detectClaudeCode(projectPath: string): Promise<ClaudeCodeR
     detected: false,
     subagents: [],
     commands: [],
+    skills: [],
     permissions: [],
     hasClaudeMd: false,
     mcpServers: []
@@ -582,6 +584,16 @@ export async function detectClaudeCode(projectPath: string): Promise<ClaudeCodeR
       .filter(f => f.endsWith('.md'))
       .map(f => f.replace('.md', ''));
     if (result.commands.length > 0) result.detected = true;
+  } catch {}
+
+  // Check for .claude/skills/ (Claude Code 2.1.0+)
+  try {
+    const skillsPath = path.join(projectPath, '.claude', 'skills');
+    const files = await fs.readdir(skillsPath);
+    result.skills = files
+      .filter(f => f.endsWith('.md'))
+      .map(f => f.replace('.md', ''));
+    if (result.skills.length > 0) result.detected = true;
   } catch {}
 
   // Check for .claude/settings.json permissions
