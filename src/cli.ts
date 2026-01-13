@@ -44,6 +44,8 @@ import { demoCommand } from './commands/demo';
 import { driftCommand } from './commands/drift';
 import { gitCommand } from './commands/git';
 import { tafCommand } from './commands/taf';
+import { conductorCommand } from './commands/conductor';
+import { geminiCommand } from './commands/gemini';
 import { migrateCommand } from './commands/migrate';
 import { renameCommand } from './commands/rename';
 import { readmeCommand } from './commands/readme';
@@ -652,6 +654,58 @@ Features:
     const tafIndex = process.argv.indexOf('taf');
     const args = tafIndex >= 0 ? process.argv.slice(tafIndex + 1) : [];
     return tafCommand(args);
+  }));
+
+// 🔄 faf conductor - Google Conductor Interop
+program
+  .command('conductor')
+  .description('🔄 Google Conductor interop - Import/export between FAF and Conductor')
+  .addHelpText('after', `
+Subcommands:
+  import            Import conductor/ directory to project.faf
+  export            Export project.faf to conductor/ directory
+  sync              Bidirectional sync between formats
+
+Examples:
+  $ faf conductor import                     # Import ./conductor to project.faf
+  $ faf conductor import --merge             # Merge with existing .faf
+  $ faf conductor export                     # Export to ./conductor
+  $ faf conductor sync                       # Sync (FAF is source of truth)
+  $ faf conductor sync --source conductor    # Sync (Conductor is source)
+
+About:
+  FAF supports Google Gemini CLI Conductor extension format.
+  Position FAF as the universal AI-context interchange format.`)
+  .action(withAnalyticsTracking('conductor', () => {
+    const conductorIndex = process.argv.indexOf('conductor');
+    const args = conductorIndex >= 0 ? process.argv.slice(conductorIndex + 1) : [];
+    return conductorCommand(args);
+  }));
+
+// 🔷 faf gemini - Gemini CLI / Antigravity Interop
+program
+  .command('gemini')
+  .description('🔷 Gemini CLI / Antigravity interop - Import/export GEMINI.md')
+  .addHelpText('after', `
+Subcommands:
+  import            Import GEMINI.md to project.faf
+  export            Export project.faf to GEMINI.md
+  sync              Bidirectional sync between formats
+
+Examples:
+  $ faf gemini import                     # Import ./GEMINI.md
+  $ faf gemini import --global            # Import ~/.gemini/GEMINI.md
+  $ faf gemini export                     # Export to ./GEMINI.md
+  $ faf gemini export --global            # Export to ~/.gemini/GEMINI.md
+  $ faf gemini sync                       # Sync (FAF is source of truth)
+
+About:
+  FAF supports Gemini CLI and Google Antigravity GEMINI.md files.
+  Position FAF as the universal AI-context interchange format.`)
+  .action(withAnalyticsTracking('gemini', () => {
+    const geminiIndex = process.argv.indexOf('gemini');
+    const args = geminiIndex >= 0 ? process.argv.slice(geminiIndex + 1) : [];
+    return geminiCommand(args);
   }));
 
 // 📚 faf index - Universal A-Z Reference (The Everything Catalog)

@@ -5,6 +5,32 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.7] - 2026-01-13
+
+### Added
+
+- **`faf conductor`** - Google Conductor format interop
+  - `faf conductor import` - Import conductor/ directory → .faf
+  - `faf conductor export` - Export .faf → conductor/ format
+  - `faf conductor sync` - Bidirectional synchronization
+  - Supports product.md, tech-stack.md, workflow.md, product-guidelines.md
+  - Code styleguide extraction from code_styleguides/ directory
+
+- **`faf gemini`** - Gemini CLI / Antigravity IDE interop
+  - `faf gemini import` - Import GEMINI.md → .faf
+  - `faf gemini export` - Export .faf → GEMINI.md
+  - `faf gemini sync` - Bidirectional synchronization
+  - `--global` flag for ~/.gemini/GEMINI.md
+  - Supports section-based markdown parsing
+
+### Technical
+
+FAF now provides universal AI context portability across:
+- Claude (CLAUDE.md, MCP)
+- Gemini CLI (GEMINI.md)
+- Antigravity IDE (~/.gemini/GEMINI.md)
+- Conductor extensions (conductor/ directory)
+
 ## [3.4.4] - 2026-01-07
 
 ### Added

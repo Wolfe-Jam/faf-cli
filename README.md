@@ -1,5 +1,5 @@
 <div style="display: flex; align-items: center; gap: 12px;">
-  <img src="https://raw.githubusercontent.com/Wolfe-Jam/faf/main/assets/logos/orange-smiley.svg" alt="FAF" width="40" />
+  <img src="https://www.faf.one/orange-smiley.svg" alt="FAF" width="40" />
   <div>
     <h1 style="margin: 0; color: #000000;">faf-cli</h1>
     <p style="margin: 4px 0 0 0;"><strong>IANA-Registered Format for AI Context</strong> · <code>application/vnd.faf+yaml</code></p>
@@ -79,23 +79,25 @@ faf auto                  # Auto-enhance to 100%
 
 ---
 
-## What's New in v3.4.5
+## What's New in v3.4.7
 
-**Claude Code 2.1.0 Support** — Now detects `.claude/skills/`, `.claude/commands/`, and YAML-style `allowed-tools`.
-
-**Boris-Flow 14/14** — Integration tests updated for Claude Code 2.1.0 validation.
+**Google Conductor Interop** — Bidirectional FAF ↔ Conductor format conversion.
 
 ```bash
-./tests/boris-flow.test.sh
-# Validates: version, init, auto, score, skills, commands, subagents
+faf conductor import    # Import conductor/ directory → .faf
+faf conductor export    # Export .faf → conductor/ format
+faf conductor sync      # Bidirectional sync
 ```
 
-**`faf demo sync`** — Live bi-sync demonstration.
+**Gemini CLI / Antigravity Interop** — Bidirectional FAF ↔ GEMINI.md conversion.
 
 ```bash
-faf demo sync           # Run the demo
-faf demo sync --fast    # Speed run
+faf gemini import       # Import GEMINI.md → .faf
+faf gemini export       # Export .faf → GEMINI.md
+faf gemini --global     # Use ~/.gemini/GEMINI.md
 ```
+
+**Universal AI Context** — One `.faf` file, works with Claude, Gemini CLI, Antigravity IDE, and Conductor extensions.
 
 ---
 
@@ -145,9 +147,11 @@ faf bi-sync --watch      # Continuous sync
 | `faf human` | Interactive human context entry |
 | `faf human-set` | Non-interactive field setting |
 | `faf formats` | Show 153 detected formats |
+| `faf conductor` | Google Conductor interop (import/export/sync) |
+| `faf gemini` | Gemini CLI / Antigravity interop |
 | `faf demo sync` | Live bi-sync demonstration |
 
-Run `faf --help` for all 44 commands.
+Run `faf --help` for all 46 commands.
 
 ---
 
