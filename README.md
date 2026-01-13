@@ -79,25 +79,31 @@ faf auto                  # Auto-enhance to 100%
 
 ---
 
-## What's New in v3.4.7
+## What's New in v3.4.7 — Google Gemini Edition
 
-**Google Conductor Interop** — Bidirectional FAF ↔ Conductor format conversion.
+Full interoperability with the Google Gemini ecosystem. One `.faf` file now works everywhere.
+
+| Platform | Format | FAF Command |
+|----------|--------|-------------|
+| **Gemini CLI** | `GEMINI.md` | `faf gemini` |
+| **Antigravity IDE** | `~/.gemini/GEMINI.md` | `faf gemini --global` |
+| **Conductor Extension** | `conductor/` directory | `faf conductor` |
+| **Claude Code** | `CLAUDE.md` | `faf bi-sync` |
 
 ```bash
-faf conductor import    # Import conductor/ directory → .faf
-faf conductor export    # Export .faf → conductor/ format
-faf conductor sync      # Bidirectional sync
+# Import from Google formats
+faf gemini import       # GEMINI.md → .faf
+faf conductor import    # conductor/ → .faf
+
+# Export to Google formats
+faf gemini export       # .faf → GEMINI.md
+faf conductor export    # .faf → conductor/
+
+# Global Antigravity config
+faf gemini --global     # ~/.gemini/GEMINI.md
 ```
 
-**Gemini CLI / Antigravity Interop** — Bidirectional FAF ↔ GEMINI.md conversion.
-
-```bash
-faf gemini import       # Import GEMINI.md → .faf
-faf gemini export       # Export .faf → GEMINI.md
-faf gemini --global     # Use ~/.gemini/GEMINI.md
-```
-
-**Universal AI Context** — One `.faf` file, works with Claude, Gemini CLI, Antigravity IDE, and Conductor extensions.
+**Universal AI Context** — Write once, use with Claude, Gemini CLI, Antigravity IDE, and Conductor.
 
 ---
 
