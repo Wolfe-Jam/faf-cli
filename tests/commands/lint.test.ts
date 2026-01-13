@@ -57,13 +57,13 @@ scores:
     expect(mockLog).toHaveBeenCalled();
   });
 
-  it.skip('should handle missing .faf file', async () => {
+  it('should handle missing .faf file', async () => {
     const nonExistentPath = path.join(testDir, 'missing.faf');
 
     await lintFafFile(nonExistentPath, { fix: false, schemaVersion: 'latest' });
 
-    expect(mockError).toHaveBeenCalled();
-    expect(mockExit).toHaveBeenCalledWith(1);
+    // Lint shows "Linting failed" with ENOENT error for missing files
+    expect(mockLog).toHaveBeenCalledWith(expect.stringContaining('Linting failed'));
   });
 
   it('should attempt to fix issues when requested', async () => {

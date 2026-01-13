@@ -116,9 +116,9 @@ project:
     expect(mockLog).toHaveBeenCalledWith(expect.stringContaining('Created'));
   });
 
-  it.skip('should refuse to overwrite existing .faf file without force', async () => {
+  it('should show friendly message when .faf file exists without force', async () => {
     await fs.mkdir(testDir, { recursive: true });
-    
+
     // Create existing .faf file
     const existingFaf = `faf_version: 2.0.0
 project:
@@ -129,26 +129,32 @@ project:
 
     await initFafFile(testDir, { force: false, template: 'auto' });
 
-    expect(mockError).toHaveBeenCalledWith(expect.stringContaining('❌ .faf file already exists'));
-    expect(mockExit).toHaveBeenCalledWith(1);
+    // v1.2.0: init shows friendly message instead of error
+    expect(mockLog).toHaveBeenCalledWith(expect.stringContaining('found a project.faf'));
+    // Should NOT exit with error
+    expect(mockExit).not.toHaveBeenCalledWith(1);
   });
 
-  it.skip('should use specific template when requested', async () => {
+  it('should use specific template when requested', async () => {
     await fs.mkdir(testDir, { recursive: true });
-    
-    // Create basic package.json
+
+    // Create basic package.json with react
     await fs.writeFile(
       path.join(testDir, 'package.json'),
-      JSON.stringify({ name: "react-test", version: "1.0.0" })
+      JSON.stringify({
+        name: "react-test",
+        version: "1.0.0",
+        dependencies: { "react": "^18.0.0" }
+      })
     );
 
-    await initFafFile(testDir, { force: false, template: 'react' });
+    await initFafFile(testDir, { force: true, template: 'react' });
 
     const fafPath = path.join(testDir, 'project.faf');
     const fafContent = await fs.readFile(fafPath, 'utf-8');
-    
+
     expect(fafContent).toContain('React');
-    expect(mockLog).toHaveBeenCalledWith(expect.stringContaining('✅ Created .faf file'));
+    expect(mockLog).toHaveBeenCalledWith(expect.stringContaining('Created'));
   });
 
   it('should handle custom output path', async () => {
@@ -169,9 +175,9 @@ project:
     expect(fafContent).toContain('name: Custom Output Test');
   });
 
-  it.skip('should detect and handle Svelte projects', async () => {
+  it('should detect and handle Svelte projects', async () => {
     await fs.mkdir(testDir, { recursive: true });
-    
+
     // Create Svelte project structure
     const packageJson = {
       name: "svelte-test-project",
@@ -184,7 +190,7 @@ project:
         "vite": "^5.0.0"
       }
     };
-    
+
     await fs.writeFile(
       path.join(testDir, 'package.json'),
       JSON.stringify(packageJson, null, 2)
@@ -199,12 +205,13 @@ project:
       };`
     );
 
-    await initFafFile(testDir, { force: false, template: 'auto' });
+    await initFafFile(testDir, { force: true, template: 'auto' });
 
     const fafPath = path.join(testDir, 'project.faf');
     const fafContent = await fs.readFile(fafPath, 'utf-8');
-    
-    expect(fafContent).toContain('Svelte');
-    expect(fafContent).toContain('svelte-test-project');
+
+    // Should detect Svelte/SvelteKit
+    expect(fafContent.toLowerCase()).toMatch(/svelte/i);
+    expect(fafContent).toContain('Svelte Test Project');
   });
 });

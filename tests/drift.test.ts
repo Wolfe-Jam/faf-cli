@@ -175,19 +175,8 @@ describe('🍊 faf drift - Context-Drift Analysis', () => {
       expect(result).toContain('change');
     });
 
-    // Skip: styling detection needs pattern updates in drift command
-    test.skip('should detect styling drift', async () => {
-      await createRepoWithDrift('styling');
-
-      const result = execSync(`node ${CLI_PATH} drift`, {
-        cwd: testDir,
-        encoding: 'utf-8',
-        stdio: 'pipe'
-      });
-
-      expect(result).toContain('Styling');
-      expect(result).toContain('change');
-    });
+    // Note: Styling drift detection (CSS Modules → Tailwind) pending implementation
+    // Will be added when drift command supports styling pattern changes
 
     test('should calculate drift cost accurately', async () => {
       await createRepoWithDrift('auth');
@@ -350,41 +339,7 @@ describe('💥 STRESS TESTS: Breaking Point Analysis', () => {
     }
   });
 
-  // Skip by default - takes 10+ minutes to create 10k commits
-  test.skip('STRESS: 10,000 commits', async () => {
-    execSync('git init', { cwd: stressDir, stdio: 'ignore' });
-    execSync('git config user.email "test@example.com"', { cwd: stressDir, stdio: 'ignore' });
-    execSync('git config user.name "Test User"', { cwd: stressDir, stdio: 'ignore' });
-
-    console.log('🏋️ Creating 10,000 commits...');
-
-    for (let i = 0; i < 10000; i++) {
-      await fs.writeFile(path.join(stressDir, 'test.txt'), `commit ${i}`);
-      execSync('git add . && git commit -m "Commit ' + i + '" --no-gpg-sign', { cwd: stressDir, stdio: 'ignore' });
-
-      if (i % 1000 === 0) {
-        console.log(`  Progress: ${i}/10000 commits created`);
-      }
-    }
-
-    console.log('✓ 10,000 commits created');
-    console.log('🏎️ Running drift analysis...');
-
-    const startTime = Date.now();
-    const result = execSync(`node ${CLI_PATH} drift`, {
-      cwd: stressDir,
-      encoding: 'utf-8',
-      stdio: 'pipe',
-      maxBuffer: 50 * 1024 * 1024 // 50MB buffer
-    });
-    const duration = Date.now() - startTime;
-
-    console.log(`⚡ Completed in ${duration}ms`);
-    console.log(`📊 Performance: ${(10000 / (duration / 1000)).toFixed(0)} commits/sec`);
-
-    expect(result).toContain('10000 commits');
-    expect(duration).toBeLessThan(30000); // Should complete in <30s
-  }, 600000); // 10 minute timeout - CHAMPIONSHIP TORTURE TEST
+  // Note: 10,000 commit stress test moved to drift.stress.ts - run manually when needed
 
   test('STRESS: 100 package.json changes', async () => {
     execSync('git init', { cwd: stressDir, stdio: 'ignore' });

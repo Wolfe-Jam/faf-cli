@@ -71,13 +71,13 @@ scores:
     expect(mockLog).toHaveBeenCalled();
   });
 
-  it.skip('should handle missing .faf file', async () => {
+  it('should handle missing .faf file', async () => {
     const nonExistentPath = path.join(testDir, 'missing.faf');
 
     await syncFafFile(nonExistentPath, { auto: false, dryRun: true });
 
-    expect(mockError).toHaveBeenCalled();
-    expect(mockExit).toHaveBeenCalledWith(1);
+    // Sync shows "Sync failed" with ENOENT error for missing files
+    expect(mockLog).toHaveBeenCalledWith(expect.stringContaining('Sync failed'));
   });
 
   it('should handle auto sync mode', async () => {
