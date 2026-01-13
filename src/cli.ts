@@ -46,6 +46,7 @@ import { gitCommand } from './commands/git';
 import { tafCommand } from './commands/taf';
 import { conductorCommand } from './commands/conductor';
 import { geminiCommand } from './commands/gemini';
+import { antigravityCommand } from './commands/antigravity';
 import { migrateCommand } from './commands/migrate';
 import { renameCommand } from './commands/rename';
 import { readmeCommand } from './commands/readme';
@@ -706,6 +707,35 @@ About:
     const geminiIndex = process.argv.indexOf('gemini');
     const args = geminiIndex >= 0 ? process.argv.slice(geminiIndex + 1) : [];
     return geminiCommand(args);
+  }));
+
+// 🚀 faf antigravity - Google Antigravity IDE Global Context
+program
+  .command('antigravity')
+  .description('🚀 Antigravity IDE integration - Global AI context for every project')
+  .addHelpText('after', `
+Subcommands:
+  import            Import global ~/.gemini/GEMINI.md to project.faf
+  export            Export project.faf to global ~/.gemini/GEMINI.md
+  sync              Bidirectional sync with global config
+  status            Show current global config status
+
+Examples:
+  $ faf antigravity status             # Check global config
+  $ faf antigravity export             # Push .faf to global config
+  $ faf antigravity import             # Pull global config to .faf
+  $ faf antigravity sync               # Sync FAF with global config
+
+About:
+  Antigravity is Google's AI-powered IDE built on Gemini.
+  Your coding standards defined once, applied everywhere.
+  Global config: ~/.gemini/GEMINI.md`)
+  .action(withAnalyticsTracking('antigravity', () => {
+    const agIndex = process.argv.indexOf('antigravity');
+    const agShortIndex = process.argv.indexOf('ag');
+    const cmdIndex = agIndex >= 0 ? agIndex : agShortIndex;
+    const args = cmdIndex >= 0 ? process.argv.slice(cmdIndex + 1) : [];
+    return antigravityCommand(args);
   }));
 
 // 📚 faf index - Universal A-Z Reference (The Everything Catalog)
