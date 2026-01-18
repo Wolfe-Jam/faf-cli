@@ -117,6 +117,11 @@ const TYPE_DEFINITIONS: Record<string, {
     categories: ['project', 'backend', 'human'],
     aliases: ['etl', 'pipeline']
   },
+  'voice-ai-agent': {
+    description: 'Voice AI agent (LiveKit/xAI/WebRTC)',
+    categories: ['project', 'backend', 'human'],
+    aliases: ['voice-agent', 'livekit-agent', 'realtime-voice', 'grok-voice']
+  },
 
   // ============================================================================
   // API/Backend Types
