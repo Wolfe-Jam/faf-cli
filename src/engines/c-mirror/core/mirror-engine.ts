@@ -224,8 +224,8 @@ export class MirrorEngine {
         existingContent.includes('| Endpoint |') ||
         existingContent.includes('```bash');                       // Code blocks
 
-      // If existing is significantly richer OR has custom markers, preserve it
-      if (hasCustomMarkers && (existingLines > generatedLines * 1.5 || existingLength > generatedLength * 1.5)) {
+      // If existing has custom markers, preserve it (RULE: score can only improve)
+      if (hasCustomMarkers) {
         // Only update the sync footer, preserve custom content
         const syncFooter = `\n---\n\n**STATUS: BI-SYNC ACTIVE 🔗 - Synchronized with .faf context!**\n\n*Last Sync: ${new Date().toISOString()}*\n*Sync Engine: F1-Inspired Software Engineering*\n*🏎️⚡️_championship_sync*\n`;
 
