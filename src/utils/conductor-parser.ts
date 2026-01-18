@@ -363,7 +363,7 @@ export async function detectConductor(basePath: string): Promise<boolean> {
 
   try {
     const stat = await fs.stat(conductorPath);
-    if (!stat.isDirectory()) return false;
+    if (!stat.isDirectory()) {return false;}
   } catch {
     return false;
   }

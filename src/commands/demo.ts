@@ -47,7 +47,7 @@ export async function demoSyncCommand(options: DemoOptions = {}): Promise<void> 
   console.log();
   console.log(FAF_COLORS.fafOrange('╭─────────────────────────────────────────────────────╮'));
   console.log(FAF_COLORS.fafOrange('│') + FAF_COLORS.fafCyan('  FAF BI-SYNC DEMO                                   ') + FAF_COLORS.fafOrange('│'));
-  console.log(FAF_COLORS.fafOrange('│') + '  Live demonstration of .faf <-> CLAUDE.md sync      ' + FAF_COLORS.fafOrange('│'));
+  console.log(`${FAF_COLORS.fafOrange('│')  }  Live demonstration of .faf <-> CLAUDE.md sync      ${  FAF_COLORS.fafOrange('│')}`);
   console.log(FAF_COLORS.fafOrange('╰─────────────────────────────────────────────────────╯'));
   console.log();
 
@@ -170,7 +170,7 @@ export async function demoSyncCommand(options: DemoOptions = {}): Promise<void> 
     }
 
     console.log();
-    console.log(FAF_COLORS.fafCyan(`${FAF_ICONS.magic_wand} Try: `) + 'faf bi-sync' + FAF_COLORS.fafCyan(' - Set up real bi-sync for your project'));
+    console.log(`${FAF_COLORS.fafCyan(`${FAF_ICONS.magic_wand} Try: `)  }faf bi-sync${  FAF_COLORS.fafCyan(' - Set up real bi-sync for your project')}`);
     console.log();
 
   } catch (error) {

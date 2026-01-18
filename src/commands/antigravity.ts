@@ -17,7 +17,7 @@ import { chalk } from '../fix-once/colors';
 import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';
-import { FAF_COLORS, FAF_ICONS } from '../utils/championship-style';
+import { FAF_ICONS } from '../utils/championship-style';
 import { findFafFile, fileExists } from '../utils/file-utils';
 import { parse as parseYAML } from '../fix-once/yaml';
 import {
@@ -403,7 +403,7 @@ async function runAntigravityStatus(): Promise<void> {
 
 function showAntigravityHelp(): void {
   console.log();
-  console.log(ANTIGRAVITY_COLORS.primary('faf antigravity') + ' - Google Antigravity IDE Integration');
+  console.log(`${ANTIGRAVITY_COLORS.primary('faf antigravity')} - Google Antigravity IDE Integration`);
   console.log();
   console.log(chalk.cyan('Commands:'));
   console.log('  faf antigravity import     Import global config to project.faf');

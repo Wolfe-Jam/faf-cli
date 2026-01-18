@@ -1053,9 +1053,9 @@ export class FafCompiler {
       if (parts[0] === 'project') {
         // Check nested first, then flat fallback
         const nested = ast.project?.[parts[1]];
-        if (nested !== undefined && nested !== null) return nested;
+        if (nested !== undefined && nested !== null) {return nested;}
         // Flat fallback: project.goal -> projectGoal, project.name -> projectName
-        const flatKey = 'project' + parts[1].charAt(0).toUpperCase() + parts[1].slice(1);
+        const flatKey = `project${  parts[1].charAt(0).toUpperCase()  }${parts[1].slice(1)}`;
         return ast[flatKey];
       } else if (parts[0] === 'stack') {
         return ast.stack?.[parts[1]];

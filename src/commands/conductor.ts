@@ -362,7 +362,7 @@ async function runConductorSync(args: string[]): Promise<void> {
 
 function showConductorHelp(): void {
   console.log();
-  console.log(FAF_COLORS.fafOrange('faf conductor') + ' - Google Conductor Interop');
+  console.log(`${FAF_COLORS.fafOrange('faf conductor')} - Google Conductor Interop`);
   console.log();
   console.log(chalk.cyan('Commands:'));
   console.log('  faf conductor import     Import conductor/ directory to project.faf');

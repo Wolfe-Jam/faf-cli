@@ -188,10 +188,12 @@ program
   .option('-c, --choose', 'Interactive choice when .faf exists')
   .option('-t, --template <type>', 'Use specific template (svelte, react, vue, node)', 'auto')
   .option('-o, --output <file>', 'Output file path')
+  .option('--xai', 'Generate xAI/Grok-optimized .faf with voice config')
   .addHelpText('after', `
 Examples:
   $ faf init                     # Detect project type automatically
   $ faf init --new               # Create a fresh .faf file
+  $ faf init --xai               # xAI/Grok-optimized with voice config
   $ faf init --choose            # Interactive choice when .faf exists
   $ faf init my-app              # Create .faf for different directory
   $ faf init -t react            # Force React template`)

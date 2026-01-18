@@ -33,6 +33,7 @@ interface InitOptions {
   output?: string;
   quiet?: boolean;
   subscribe?: string;
+  xai?: boolean;
 }
 
 export async function initFafFile(
@@ -96,11 +97,35 @@ export async function initFafFile(
     console.log(chalk.gray(`   Detected project type: ${projectType}`));
 
     // Generate .faf content
-    const fafContent = await generateFafFromProject({
+    let fafContent = await generateFafFromProject({
       projectType,
       outputPath,
       projectRoot: projectRoot,
     });
+
+    // --xai: Add Grok voice configuration for xAI Collections
+    if (options.xai) {
+      console.log(chalk.magenta('🍊 xAI mode: Adding Grok voice configuration...'));
+      const fafData = parseYAML(fafContent);
+      fafData.grok = {
+        voice: 'Leo',
+        tone: 'Polite, dry British wit, technically precise',
+        persona: `You are the voice of this project's eternal memory.
+Base every response on the files in this collection.
+Never override with general knowledge unless asked.
+Stay mission-focused. Zero drift.`,
+        retrieval_mode: 'hybrid',
+        escape_phrase: 'outside collection'
+      };
+      fafData.xai_collections = {
+        ready: true,
+        upload_order: ['project.faf', 'architecture.md', 'skills.md', 'grok.md'],
+        notes: 'Upload to xAI Collections for eternal Grok memory'
+      };
+      fafContent = stringifyYAML(fafData);
+      console.log(chalk.magenta('   ☑️ Grok voice config added (Leo, hybrid retrieval)'));
+      console.log(chalk.magenta('   ☑️ Ready for xAI Collections upload'));
+    }
 
     // Write .faf file
     await fs.writeFile(outputPath, fafContent, "utf-8");

@@ -368,7 +368,7 @@ async function runGeminiSync(args: string[]): Promise<void> {
 
 function showGeminiHelp(): void {
   console.log();
-  console.log(FAF_COLORS.fafOrange('faf gemini') + ' - Gemini CLI / Antigravity Interop');
+  console.log(`${FAF_COLORS.fafOrange('faf gemini')  } - Gemini CLI / Antigravity Interop`);
   console.log();
   console.log(chalk.cyan('Commands:'));
   console.log('  faf gemini import     Import GEMINI.md to project.faf');
