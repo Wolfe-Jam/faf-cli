@@ -5,6 +5,45 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.8] - 2026-01-18 — BI-SYNC 2.0: Context Intelligence
+
+### ✨ Smart Sync - "Knows what matters"
+
+Bi-sync now **detects custom content** and preserves it. Your hand-crafted
+CLAUDE.md with tables, code blocks, and custom sections stays intact.
+
+**Custom markers detected:**
+- `## TOOLS`, `## ENDPOINTS`, `## AUTH`, `## COMMANDS`
+- `| Tool |`, `| Endpoint |` (markdown tables)
+- ` ```bash ` (code blocks)
+
+### 🛡️ Preservation Engine - "Zero content drift"
+
+**RULE: Score can only improve - never downgrade.**
+
+When bi-sync detects custom content, it:
+1. Preserves your entire CLAUDE.md
+2. Updates only the sync footer
+3. Never overwrites rich content with generic templates
+
+### 🔧 Fixes
+
+- `FAFMirror` now uses `findFafFile()` to locate `project.faf` correctly
+- Fixed hardcoded `.faf` path that ignored `project.faf` (the standard)
+
+### 🧪 WJTTC Certified
+
+**12 new tests** in `tests/wjttc/bi-sync-preserve-custom.test.ts`:
+- Custom content detection (4 tests)
+- findFafFile priority (3 tests)
+- Preserve custom content during sync (3 tests)
+- Score can only improve rule (1 test)
+- FAFMirror initialization (1 test)
+
+**Certification: GOLD 🥇** - Your content is protected forever.
+
+---
+
 ## [3.4.7] - 2026-01-13 — Google Gemini Edition
 
 Full interoperability with the Google Gemini ecosystem.
