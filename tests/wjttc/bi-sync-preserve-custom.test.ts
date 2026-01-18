@@ -1,5 +1,7 @@
 /**
- * 🛡️ Bi-Sync Preserve Custom Content Tests
+ * 🏎️ WJTTC: Bi-Sync Preserve Custom Content
+ * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ * Wolfe James Test-To-Certification Suite
  *
  * RULE: Score can only improve - never downgrade rich custom content
  *
@@ -7,7 +9,12 @@
  * content with a generic template. This was a critical bug that
  * undermined user trust in the bi-sync feature.
  *
- * Created: 2026-01-18 after discovering the bug
+ * CERTIFICATION: GOLD 🥇
+ * - 12 tests covering all preservation scenarios
+ * - Prevents regression of 2026-01-18 bug
+ * - Protects user content forever
+ *
+ * Created: 2026-01-18
  */
 
 // Jest is the test framework for faf-cli
@@ -16,9 +23,9 @@ import * as path from 'path';
 import * as os from 'os';
 
 // Import the modules we're testing
-import { MirrorEngine } from '../engines/c-mirror/core/mirror-engine';
-import { FAFMirror } from '../engines/c-mirror/faf-extensions/faf-mirror';
-import { findFafFile } from '../utils/file-utils';
+import { MirrorEngine } from '../../src/engines/c-mirror/core/mirror-engine';
+import { FAFMirror } from '../../src/engines/c-mirror/faf-extensions/faf-mirror';
+import { findFafFile } from '../../src/utils/file-utils';
 
 describe('Bi-Sync Preserve Custom Content', () => {
   let tempDir: string;
