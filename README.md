@@ -190,6 +190,7 @@ Same .faf format. Same scoring. Same Gold Code. Different execution layer.
 
 ## 📦 Ecosystem
 
+- **[MCPaaS](https://mcpaas.live)** — MCP as a Service (The Endpoint for Context)
 - **[claude-faf-mcp](https://npmjs.com/package/claude-faf-mcp)** — MCP server (52 tools)
 - **[faf-wasm](https://www.npmjs.com/package/faf-wasm)** — WASM SDK (<5ms scoring)
 - **[Chrome Extension](https://chromewebstore.google.com/detail/lnecebepmpjpilldfmndnaofbfjkjlkm)** — Browser integration
