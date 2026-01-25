@@ -122,7 +122,7 @@ jobs:
     
     steps:
       - name: 🌐 Lighthouse CI
-        uses: treosh/lighthouse-ci-action@v10
+        uses: treosh/lighthouse-ci-action@v12
         with:
           urls: |
             https://docs.faf.one
