@@ -14,25 +14,20 @@
 
 import { chalk } from '../fix-once/colors';
 import { promises as fs } from 'fs';
-import path from 'path';
 import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
 import { FAF_COLORS, FAF_ICONS, generateFAFHeader } from '../utils/championship-style';
-import { findFafFile, fileExists } from '../utils/file-utils';
+import { findFafFile } from '../utils/file-utils';
 import { FafCompiler } from '../compiler/faf-compiler';
 import { displayScoreWithBirthDNA, FafDNAManager } from '../engines/faf-dna';
 import {
   detectExecutionContext,
   canPromptInteractively,
   shouldReturnStructuredQuestions,
-  getContextDescription,
 } from '../engines/execution-context';
 import {
-  FafQuestion,
   QUESTION_REGISTRY,
-  buildQuestion,
   buildQuestionsForFields,
   askQuestions,
-  formatForClaudeCode,
   outputForClaudeCode,
 } from '../systems/question-system';
 
@@ -107,8 +102,12 @@ function prioritizeFields(fields: string[]): string[] {
     const aIndex = priorityOrder.indexOf(a);
     const bIndex = priorityOrder.indexOf(b);
     // Unknown fields go to the end
-    if (aIndex === -1) return 1;
-    if (bIndex === -1) return -1;
+    if (aIndex === -1) {
+      return 1;
+    }
+    if (bIndex === -1) {
+      return -1;
+    }
     return aIndex - bIndex;
   });
 }
@@ -124,7 +123,9 @@ async function applyAnswers(
   const fafData = parseYAML(content);
 
   for (const [fieldPath, value] of Object.entries(answers)) {
-    if (!value || (Array.isArray(value) && value.length === 0)) continue;
+    if (!value || (Array.isArray(value) && value.length === 0)) {
+      continue;
+    }
 
     const parts = fieldPath.split('.');
     let current = fafData;
