@@ -2,17 +2,29 @@
  * Smart FAF Command Logic
  * Contextually aware command that adapts based on project state
  *
+ * Updated for 2026 Claude Code alignment:
+ * - Detects execution context (terminal, Claude Code, MCP)
+ * - In Claude Code: returns structured JSON for AskUserQuestion
+ * - In terminal: interactive prompts
+ * - Recommends `faf go` as guided path to Gold Code (100%)
+ *
  * Flow:
- * 1. No .faf → auto (create)
- * 2. Score < 99 → enhance (boost)
- * 3. Still < 99 → chat (interactive)
- * 4. Score 99-100 → bi-sync (maintain)
- * 5. Already perfect → status/commit
+ * 1. No .faf → suggest init or auto
+ * 2. Score < 100 → suggest faf go (guided interview)
+ * 3. Score 100 → celebrate and suggest maintenance
+ *
+ * @since v3.5.0 - Added execution context awareness
  */
 
 import * as fs from 'fs';
 import * as path from 'path';
 import { execSync } from 'child_process';
+import {
+  detectExecutionContext,
+  shouldReturnStructuredQuestions,
+  canPromptInteractively,
+  getContextDescription,
+} from './engines/execution-context';
 
 interface FafState {
   exists: boolean;
@@ -29,20 +41,37 @@ class SmartFaf {
 
   /**
    * Main entry point - smart contextual command
+   * Updated for 2026 Claude Code alignment
    */
   async execute(): Promise<void> {
-    // CRITICAL: Check if we're in home or root directory
+    const ctx = detectExecutionContext();
     const currentDir = process.cwd();
     const homeDir = require('os').homedir();
 
+    // CRITICAL: Check if we're in home or root directory
     if (currentDir === homeDir || currentDir === '/') {
+      if (shouldReturnStructuredQuestions(ctx)) {
+        // Claude Code / MCP: return JSON guidance
+        console.log(JSON.stringify({
+          status: 'no_project',
+          message: 'FAF requires a project directory. Navigate to a project folder first.',
+          suggestions: [
+            'cd /path/to/your/project && faf',
+            'faf init /path/to/project',
+          ],
+          context: getContextDescription(ctx),
+        }, null, 2));
+        return;
+      }
+
+      // Terminal: show welcome message
       console.log('\n🧡⚡️ FAF - AI Context, On-Demand\n');
       console.log('DROP | PASTE | CREATE - Click & Go!\n');
       console.log('🎯 What is FAF?');
       console.log('Persistent Project Context - makes your project AI-readable in <50ms\n');
       console.log('📂 How to start:');
       console.log('• DROP: Navigate to your project: cd my-project && faf');
-      console.log('• PASTE: Provide path: faf --dir /path/to/project');
+      console.log('• PASTE: Provide path: faf init /path/to/project');
       console.log('• CREATE: New project: faf quick "ProjectName, description, language"\n');
       console.log('💡 Examples:');
       console.log('  cd ~/my-app && faf');
@@ -53,66 +82,119 @@ class SmartFaf {
 
     const state = this.getState();
 
+    // === CLAUDE CODE / MCP CONTEXT ===
+    // Return structured JSON for AI to parse and use with AskUserQuestion
+    if (shouldReturnStructuredQuestions(ctx)) {
+      this.outputStructuredStatus(state);
+      return;
+    }
+
+    // === TERMINAL CONTEXT ===
     console.log('🏎️ FAF Smart Mode Engaged...\n');
 
-    // Decision tree based on current state
+    // No .faf file - suggest creation
     if (!state.exists) {
-      this.runCommand('auto', 'Creating your .faf file...');
+      console.log('📁 No .faf file found.\n');
+      console.log('🎯 Quick Start:');
+      console.log('  faf auto  → Full setup in one command (recommended)');
+      console.log('  faf init  → Create minimal .faf file');
+      console.log('  faf go    → Guided interview to Gold Code\n');
       return;
     }
 
-    // Check current score
-    if (state.score >= 99) {
-      if (!state.synced) {
-        this.runCommand('bi-sync', '🏆 Perfect score! Syncing with CLAUDE.md...');
-        this.updateState({ synced: true });
+    // Show current status + next action
+    console.log(`📊 Current Score: ${state.score}%`);
 
-        // After bi-sync, suggest commit
-        this.displayChampionshipScore(99);
-        console.log('→ Run: faf commit');
-        console.log('   Lock in this excellence forever\n');
-        return;
-      } else if (!state.locked) {
-        // They've synced but haven't committed - remind them
-        this.suggestCommit(state);
-        return;
-      } else {
-        this.showStatus(state);
-      }
+    // Perfect score - celebrate
+    if (state.score >= 100) {
+      this.displayChampionshipScore(state.score);
+      console.log('🏆 GOLD CODE ACHIEVED! Your AI has complete context.\n');
+      console.log('Maintenance:');
+      console.log('  faf bi-sync  → Keep CLAUDE.md synchronized');
+      console.log('  faf trust    → Verify integrity');
+      console.log('  faf status   → Check current state');
       return;
     }
 
-    // Score < 99 - Progressive enhancement
-    if (!state.lastEnhanced) {
-      this.runCommand('enhance', `📈 Boosting from ${state.score}%...`);
-      this.updateState({ lastEnhanced: true });
+    // Score < 100 - suggest faf go
+    const toGold = 100 - state.score;
+    console.log(`🎯 Target: 100% Gold Code (+${toGold}% to go)\n`);
 
-      // Re-check score after enhance
-      const newScore = this.getCurrentScore();
-      if (newScore >= 99) {
-        console.log(`\n🎯 Achieved ${newScore}%! You're done!`);
-        this.updateState({ score: newScore });
-      } else {
-        console.log(`\n📊 Now at ${newScore}%. Run 'faf' again or 'faf chat' for help.`);
-        this.updateState({ score: newScore });
-      }
+    // Primary recommendation: faf go
+    console.log('🚀 Next Step:');
+    console.log('  faf go      → Guided interview to 100% (recommended)');
+    console.log('              Claude asks questions till you\'re done!\n');
+
+    // Alternative options
+    console.log('Other Options:');
+    console.log('  faf auto    → Auto-fill what we can detect');
+    console.log('  faf score --breakdown → See what\'s missing');
+    console.log('  faf edit    → Manual edit .faf file\n');
+
+    // Growth hint
+    if (state.score < 70) {
+      console.log('💡 Tip: Run "faf auto" first to boost to ~80%, then "faf go" to finish.');
+    } else if (state.score < 85) {
+      console.log('💡 Tip: You\'re close! Run "faf go" to answer a few questions and hit Gold.');
+    } else {
+      console.log('💡 Tip: Almost there! "faf go" will ask just a few more questions.');
+    }
+  }
+
+  /**
+   * Output structured JSON for Claude Code / MCP contexts
+   */
+  private outputStructuredStatus(state: FafState): void {
+    if (!state.exists) {
+      console.log(JSON.stringify({
+        status: 'no_faf_file',
+        score: 0,
+        message: 'No .faf file found in this directory.',
+        nextAction: {
+          command: 'faf auto',
+          description: 'Create .faf file and auto-fill what we can detect',
+        },
+        alternativeActions: [
+          { command: 'faf init', description: 'Create minimal .faf file' },
+          { command: 'faf go', description: 'Guided interview to Gold Code' },
+        ],
+      }, null, 2));
       return;
     }
 
-    if (!state.lastChatted) {
-      console.log(`📊 Current score: ${state.score}%`);
-      console.log('\n🎯 Getting to 99% requires some human context.');
-      console.log('\nOptions:');
-      console.log('  1. faf chat    → Let me ask you questions (recommended)');
-      console.log('  2. faf index   → See all commands and drive yourself');
-      console.log('  3. faf score --details → See what\'s missing\n');
-
-      this.updateState({ lastChatted: true });
+    if (state.score >= 100) {
+      console.log(JSON.stringify({
+        status: 'gold_code',
+        score: state.score,
+        message: 'Gold Code achieved! AI has complete context.',
+        nextAction: {
+          command: 'faf bi-sync',
+          description: 'Keep CLAUDE.md synchronized',
+        },
+        maintenanceActions: [
+          { command: 'faf trust', description: 'Verify integrity' },
+          { command: 'faf status', description: 'Check current state' },
+        ],
+      }, null, 2));
       return;
     }
 
-    // User has tried everything, show escape routes
-    this.showEscapeRoutes(state);
+    // Score < 100 - recommend faf go
+    console.log(JSON.stringify({
+      status: 'needs_improvement',
+      score: state.score,
+      target: 100,
+      toGold: 100 - state.score,
+      message: `Score is ${state.score}%. Use 'faf go' for guided interview to Gold Code.`,
+      nextAction: {
+        command: 'faf go',
+        description: 'Guided interview to 100% - Claude asks questions till done',
+      },
+      alternativeActions: [
+        { command: 'faf auto', description: 'Auto-fill detectable fields' },
+        { command: 'faf score --breakdown', description: 'See what\'s missing' },
+      ],
+    }, null, 2));
   }
 
   /**

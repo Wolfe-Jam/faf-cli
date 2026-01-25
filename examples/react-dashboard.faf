@@ -1,0 +1,36 @@
+# React Dashboard Example
+# A real-time metrics dashboard for engineering teams
+
+faf_version: 4.0.0
+generated: 2025-01-24
+
+project:
+  name: "team-metrics"
+  goal: "Real-time dashboard showing engineering team velocity and sprint progress"
+  main_language: typescript
+
+stack:
+  frontend: react
+  state_management: zustand
+  css_framework: tailwind
+  build: vite
+  backend: node
+  database: postgres
+  orm: prisma
+  hosting: vercel
+  auth: clerk
+
+human_context:
+  who: "Engineering team at a B2B SaaS startup (12 developers)"
+  what: "Internal dashboard replacing spreadsheet-based sprint tracking"
+  why: "Manual reporting takes 10+ hours/week. Need real-time visibility."
+  where: "Vercel (frontend) + Railway (database)"
+  when: "MVP in 2 weeks, v1.0 in 6 weeks"
+  how: "GitHub Issues integration, JIRA sync, automated daily snapshots"
+
+preferences:
+  quality_bar: strict_typescript
+  commit_style: conventional
+  testing: vitest
+
+# Score: 100% - All slots filled

@@ -21,7 +21,7 @@ import { getTierInfo as getChampionshipTierInfo } from '../utils/championship-co
 import { FafCompiler } from '../compiler/faf-compiler';
 
 export interface StatusOptions {
-  // Minimal options for speed
+  oneline?: boolean;  // Single line output for hooks
 }
 
 /**
@@ -167,37 +167,75 @@ function displayStatus(
 }
 
 /**
+ * Display single-line status for hooks (predev, prebuild, etc.)
+ * Message: "Your foundation is optimized. Build with confidence."
+ */
+function displayOneline(
+  status: { trustScore: number; isHealthy: boolean },
+  hasClaudeMd: boolean
+): void {
+  const { trustScore } = status;
+  const medal = getScoreEmoji(trustScore);
+  const biSync = hasClaudeMd ? 'bi-sync ✓' : 'run: faf bi-sync';
+
+  if (trustScore >= 95) {
+    // Optimized - build with confidence
+    console.log(`${medal} project.faf ${trustScore}% | ${biSync} | foundation optimized`);
+  } else if (trustScore >= 85) {
+    // Solid foundation
+    console.log(`${medal} project.faf ${trustScore}% | ${biSync} | solid foundation`);
+  } else {
+    // Needs work
+    console.log(`${medal} project.faf ${trustScore}% | ${biSync} | run: faf auto`);
+  }
+}
+
+/**
  * Main status command handler
  */
-export async function statusCommand(): Promise<void> {
+export async function statusCommand(options: StatusOptions = {}): Promise<void> {
   const startTime = Date.now();
-  
+
   try {
     const fafPath = await findFafFile();
-    
+
     if (!fafPath) {
+      if (options.oneline) {
+        console.log('⚠️ FAF: no project.faf found');
+        return;
+      }
       console.log(chalk.red('❌ No .faf file found'));
       console.log(chalk.dim('💡 Run `faf init` to get started'));
       process.exit(1);
     }
-    
+
     const projectDir = path.dirname(fafPath);
     const [status, hasClaudeMd] = await Promise.all([
       getQuickStatus(fafPath),
       checkClaudeMd(projectDir)
     ]);
-    
+
     const duration = Date.now() - startTime;
-    
+
+    // Oneline mode for hooks
+    if (options.oneline) {
+      displayOneline(status, hasClaudeMd);
+      return;
+    }
+
     displayStatus(fafPath, status, hasClaudeMd, duration);
-    
+
     // Return instead of exit so footer can show
     if (!status.isHealthy) {
       // Let analytics wrapper handle footer display
       return;
     }
-    
+
   } catch (error) {
+    if (options.oneline) {
+      console.log('⚠️ FAF: error checking status');
+      return;
+    }
     console.error(chalk.red('❌ Error checking status:'), error);
     process.exit(1);
   }

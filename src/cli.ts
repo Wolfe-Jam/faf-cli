@@ -13,6 +13,7 @@ import { scoreFafFile } from './commands/score';
 import { showFafScoreCard } from './commands/show';
 import { editFafFile } from './commands/edit-helper';
 import { autoCommand } from './commands/auto';
+import { goCommand } from './commands/go';
 import { yoloCommand } from './commands/yolo';
 import { formatsCommand } from './commands/formats';
 import { versionCommand } from './commands/version';
@@ -157,6 +158,27 @@ Examples:
 
 From 0% to 99% in one command. No faffing about!`)
   .action(withAnalyticsTracking('auto', autoCommand));
+
+// 🎯 faf go - Guided Path to Gold Code (Claude Code friendly!)
+program
+  .command('go [directory]')
+  .description('🎯 Guided interview to Gold Code - Claude asks questions till you hit 100%!')
+  .option('-q, --quiet', 'Minimal output')
+  .option('-f, --force', 'Force even if already at 100%')
+  .addHelpText('after', `
+Examples:
+  $ faf go                        # Start guided interview in current directory
+  $ faf go ./my-project           # Start interview for specific project
+
+🎯 How FAF GO Works:
+  - In Terminal: Interactive prompts (inquirer)
+  - In Claude Code: Returns structured questions for AskUserQuestion
+  - Prioritizes most impactful questions first
+  - Saves answers to .faf automatically
+  - Run again to continue where you left off
+
+Just type 'faf go' and answer questions till you're done. 100% target!`)
+  .action(withAnalyticsTracking('go', goCommand));
 
 // 🚀 faf yolo - Claude Power User Mode
 program
@@ -508,17 +530,22 @@ Examples:
 program
   .command('status')
   .description('Show quick .faf context health status (<200ms)')
+  .option('--oneline', 'Single line output for npm hooks (predev, prebuild)')
   .addHelpText('after', `
 Examples:
   $ faf status                       # Quick health check
-  
+  $ faf status --oneline             # Single line for hooks
+
 Shows:
   • Context health score (0-100%)
   • Files tracked and last sync time
   • AI readiness status
   • Performance metrics
-  • Bi-sync (claude.md) status`)
-  .action(withAnalyticsTracking('status', () => statusCommand()));
+  • Bi-sync (claude.md) status
+
+Hook usage (package.json):
+  "predev": "faf status --oneline"`)
+  .action(withAnalyticsTracking('status', (options) => statusCommand(options)));
 
 // 💎 faf credit - Technical Credit Dashboard (Revolutionary Psychology)
 program

@@ -1,0 +1,35 @@
+# CLI Tool Example
+# Database migration management tool
+
+faf_version: 4.0.0
+generated: 2025-01-24
+
+project:
+  name: "migrator"
+  goal: "Zero-downtime database migrations with rollback support"
+  main_language: go
+
+stack:
+  build: go_modules
+  distribution: homebrew
+  ci: github_actions
+  supported_dbs:
+    - postgres
+    - mysql
+    - sqlite
+  config_format: yaml
+
+human_context:
+  who: "Platform engineering team at mid-size company"
+  what: "CLI tool for managing database schema changes across environments"
+  why: "Existing tools don't support our multi-region, multi-tenant setup"
+  where: "Distributed via Homebrew and direct binary downloads"
+  when: "Internal use for 2 years, now open-sourcing"
+  how: "Version-controlled migrations, dry-run mode, automatic rollback on failure"
+
+preferences:
+  quality_bar: zero_data_loss
+  testing: table_driven
+  release: semantic_versioning
+
+# Score: 100% - All slots filled

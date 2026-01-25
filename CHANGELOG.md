@@ -5,6 +5,58 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0] - 2026-01-24 — Foundation Layer
+
+### 🏛️ The Format That Became a Standard
+
+FAF v4.0.0 marks the transition from tool to standard. This release crystallizes
+everything FAF has learned about persistent AI context.
+
+### 🎯 Philosophy: Foundation First
+
+**The DAAFT Problem:**
+- **D**iscover - AI reads 50 files to understand your project
+- **A**ssume - Guesses your stack (often wrong)
+- **A**sk - Fills gaps with questions
+- **F**orget - Session ends, context lost
+- **T**ime + Tokens LOST - 91% wasted on rediscovery
+
+**The FAF Solution:**
+- 150 tokens once vs 1,750 tokens per session
+- Zero assumptions - foundation is explicit
+- Drift impossible - truth doesn't change
+
+### ✨ What's New
+
+- **Foundation Layer Architecture** - project.faf as single source of truth
+- **DAAFT Documentation** - The problem FAF solves, explained
+- **MCPaaS Integration** - Ecosystem links for eternal memory tools
+- **Execution Context Engine** - New `faf go` guided interview system
+
+### 🔧 Includes All 3.4.x Features
+
+- **Bi-Sync 2.0** - Smart content detection and preservation
+- **Google Gemini Edition** - Full Conductor & Antigravity interop
+- **Demo Commands** - Live bi-sync demonstrations
+- **Boris-Flow Tests** - 663 tests, WJTTC certified
+
+### 📊 Credentials
+
+- **IANA Registered:** application/vnd.faf+yaml
+- **Anthropic MCP:** Official steward (PR #2759 merged)
+- **Downloads:** 20,000+ across CLI + MCP
+
+### 🏁 Getting Started
+
+```bash
+npm install -g faf-cli@4.0.0
+faf auto
+faf status --oneline
+# 🏆 project.faf 100% | bi-sync ✓ | foundation optimized
+```
+
+---
+
 ## [3.4.8] - 2026-01-18 — BI-SYNC 2.0: Context Intelligence
 
 ### ✨ Smart Sync - "Knows what matters"

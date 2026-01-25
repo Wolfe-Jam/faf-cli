@@ -2,11 +2,22 @@
   <img src="https://www.faf.one/orange-smiley.svg" alt="FAF" width="40" />
   <div>
     <h1 style="margin: 0; color: #000000;">faf-cli</h1>
-    <p style="margin: 4px 0 0 0;"><strong>IANA-Registered Format for AI Context</strong> · <code>application/vnd.faf+yaml</code></p>
+    <p style="margin: 4px 0 0 0;"><strong>The package.json for AI Context</strong></p>
   </div>
 </div>
 
-> **.FAF optimizes AI for your codebase.** At 100% (Gold Code), AI stops guessing and starts knowing. Live bi-sync between `.faf` ↔ `CLAUDE.md` means zero context-drift — your project DNA stays aligned with AI, forever.
+```
+project/
+├── package.json     ← npm reads this
+├── project.faf      ← AI reads this
+└── src/
+```
+
+> **Every building requires a foundation. `project.faf` is AI's foundation.**
+>
+> You have a `package.json`. Add a `project.faf`. Done.
+
+At 100% AI Readiness, AI stops guessing and starts knowing. Live bi-sync between `project.faf` ↔ `CLAUDE.md` means zero context-drift — your project DNA stays aligned with AI, forever.
 
 [![NPM Downloads](https://img.shields.io/npm/dt/faf-cli?label=total%20downloads&color=00CCFF)](https://www.npmjs.com/package/faf-cli)
 [![Homebrew](https://img.shields.io/badge/Homebrew-faf--cli-orange)](https://github.com/Wolfe-Jam/homebrew-faf)
@@ -15,66 +26,72 @@
 
 ---
 
-## The Problem: Context-Drift
+## The Problem: AI Guesses. You Pay.
 
-AI assistants forget. They misunderstand. They drift.
+Without `project.faf`, every session:
+- AI re-discovers your project (costs tokens)
+- AI asks questions you've answered before (costs time)
+- AI makes wrong assumptions (costs rework)
+- Context drifts session to session (costs trust)
 
-Every new session, every new file, every new developer — AI starts guessing again. Your codebase context leaks away. Yesterday's perfect assistant becomes today's confused intern.
-
-**.FAF fixes this permanently.**
-
----
-
-## The Solution: Gold Code
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🏆  FAF AI-READINESS SCORE: 100/100 — GOLD CODE
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-At 100%, AI is optimized. No more guessing.
-Peak AI performance activated.
-
-├─ Project DNA locked in        ├─ Zero context-drift
-├─ Architecture understood      ├─ Eternal bi-sync active
-├─ Domain model captured        ├─ Team alignment permanent
-└─ Every session starts smart   └─ AI works WITH you, not around you
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
+**`project.faf` fixes this permanently.**
 
 ---
 
-## 💎 Lifecycle Value
+## The Solution: Add `project.faf`
 
-Setup savings get you started. Lifecycle optimization keeps you ahead.
+```
+🏆 Congrats, your project is optimized for AI.
 
-| When | Without FAF | With FAF |
-|------|-------------|----------|
-| **Day 1** | 20 min setup per dev | 0 min — instant context |
-| **Month 1** | AI forgets between sessions | AI remembers everything |
-| **Year 1** | New devs re-explain everything | New devs inherit full context |
-| **Year 3+** | Institutional knowledge lost | Project DNA preserved forever |
+Over to you. Build something that resonates.
+```
 
-**Setup savings: 20 minutes. Lifecycle savings: Infinite.**
+At 100% AI Readiness:
+- AI knows your stack, goals, and conventions
+- Zero clarifying questions needed
+- Context persists across sessions
+- Drift is impossible — the foundation doesn't move
+
+---
+
+## 💎 The Math
+
+| Without `project.faf` | With `project.faf` |
+|-----------------------|-------------------|
+| ~1,750 tokens/session verifying context | ~150 tokens once |
+| Risk: wrong guess = 7,500+ tokens rework | Zero risk |
+| Context drift accumulates | Drift impossible |
+| Hope | Trust |
+
+**91% fewer tokens. Zero risk. No drift.**
 
 ---
 
 ## ⚡ Quick Start
 
+**FAF first. The earlier AI knows your project, the more tokens you save.**
+
 ```bash
 # Install
 npm install -g faf-cli    # or: brew install faf-cli
 
-# Initialize
+# Initialize (do this FIRST on any project)
 cd your-project
-faf init                  # Creates project.faf
+faf auto                  # Creates project.faf at 100%
 
-# Check your score
-faf score                 # 0-100% AI-readiness
+# Verify
+faf status --oneline      # 🏆 project.faf 100% | bi-sync ✓ | foundation optimized
 
-# Reach Gold Code
-faf auto                  # Auto-enhance to 100%
+# Now plan. Now build.
+```
+
+**Add to package.json** (see FAF status every dev session):
+```json
+{
+  "scripts": {
+    "predev": "faf status --oneline"
+  }
+}
 ```
 
 ---
@@ -107,9 +124,9 @@ faf gemini --global     # ~/.gemini/GEMINI.md
 
 ---
 
-## 🔄 Eternal Bi-Sync
+## 🔄 Bi-Sync: `project.faf` ↔ `CLAUDE.md`
 
-The magic: `.faf` ↔ `CLAUDE.md` stay synchronized in milliseconds.
+Your `project.faf` stays synchronized with `CLAUDE.md` in milliseconds.
 
 ```
 project.faf  ←──── 8ms ────→  CLAUDE.md
@@ -184,7 +201,7 @@ faf human-set why "10x faster than previous solution"
 | **faf-cli** (this) | Terminal, scripts, CI/CD, automation |
 | **claude-faf-mcp** | Claude Desktop via MCP protocol |
 
-Same .faf format. Same scoring. Same Gold Code. Different execution layer.
+Same `project.faf`. Same scoring. Same result. Different execution layer.
 
 ---
 
@@ -211,6 +228,6 @@ MIT License — Free and open source
 
 ---
 
-**Zero drift. Eternal sync. AI optimized.** 🏆
+> **.faf is the format. `project.faf` is the file. 100% 🏆 AI Readiness is the result.**
 
-*"It's so logical if it didn't exist, AI would have built it itself" — Claude*
+*"package.json gives me a list of dependencies, project.faf shows me how to use them" — Claude*

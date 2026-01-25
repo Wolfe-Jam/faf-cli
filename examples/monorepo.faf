@@ -1,0 +1,45 @@
+# Monorepo Example
+# Full-stack e-commerce platform
+
+faf_version: 4.0.0
+generated: 2025-01-24
+
+project:
+  name: "shopfront"
+  goal: "Modern e-commerce platform with headless architecture"
+  main_language: typescript
+
+stack:
+  monorepo_tool: turborepo
+  package_manager: pnpm
+  workspaces:
+    - apps/web (nextjs storefront)
+    - apps/admin (react admin panel)
+    - apps/api (fastify backend)
+    - packages/ui (shared components)
+    - packages/db (prisma schema)
+    - packages/config (shared configs)
+  frontend: nextjs
+  admin: react
+  backend: fastify
+  database: postgres
+  cache: redis
+  search: meilisearch
+  storage: cloudflare_r2
+  hosting: vercel
+  ci: github_actions
+
+human_context:
+  who: "E-commerce agency building platforms for fashion brands"
+  what: "Headless commerce with custom storefronts for each client"
+  why: "Shopify too limiting, custom builds too expensive to maintain"
+  where: "Vercel (apps), Railway (services), Cloudflare (assets)"
+  when: "3 clients live, 2 in development, targeting 10 by EOY"
+  how: "Shared core, client-specific themes, white-label admin"
+
+preferences:
+  quality_bar: production_grade
+  commit_style: conventional
+  testing: required_for_core
+
+# Score: 100% - All slots filled

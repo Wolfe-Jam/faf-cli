@@ -1,0 +1,36 @@
+# Node.js REST API Example
+# Payment processing service with Stripe integration
+
+faf_version: 4.0.0
+generated: 2025-01-24
+
+project:
+  name: "payments-api"
+  goal: "Handle subscription billing, invoices, and payment processing"
+  main_language: typescript
+
+stack:
+  runtime: node
+  framework: fastify
+  database: postgres
+  cache: redis
+  queue: bullmq
+  hosting: aws_lambda
+  api_type: rest
+  documentation: swagger
+
+human_context:
+  who: "Backend team at fintech startup (3 developers)"
+  what: "Payment service handling $2M+ monthly recurring revenue"
+  why: "Outgrew Stripe-only setup. Need custom billing logic and multi-currency support."
+  where: "AWS (us-east-1, eu-west-1)"
+  when: "Production since Q2 2024, processing 50k+ transactions/month"
+  how: "Stripe for payments, custom logic for invoicing, webhooks for real-time sync"
+
+preferences:
+  quality_bar: zero_runtime_errors
+  testing: required
+  logging: structured_json
+  security: pci_compliant
+
+# Score: 100% - All slots filled

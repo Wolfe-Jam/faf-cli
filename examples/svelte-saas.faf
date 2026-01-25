@@ -1,0 +1,36 @@
+# SvelteKit SaaS Example
+# Multi-tenant project management application
+
+faf_version: 4.0.0
+generated: 2025-01-24
+
+project:
+  name: "projecthub"
+  goal: "Lightweight project management tool for small teams"
+  main_language: typescript
+
+stack:
+  frontend: sveltekit
+  css_framework: tailwind
+  ui_library: shadcn-svelte
+  backend: sveltekit_server
+  database: postgres
+  orm: drizzle
+  auth: lucia
+  hosting: cloudflare_pages
+  edge: cloudflare_workers
+
+human_context:
+  who: "Solo founder building for small creative agencies (5-20 people)"
+  what: "Kanban boards, time tracking, client portals, invoicing"
+  why: "Existing tools are too complex or too expensive for small teams"
+  where: "Cloudflare (global edge)"
+  when: "Launched 6 months ago, 200 paying customers, $8k MRR"
+  how: "Freemium model, self-serve onboarding, Stripe for billing"
+
+preferences:
+  quality_bar: fast_first
+  commit_style: conventional
+  deploy: continuous
+
+# Score: 100% - All slots filled

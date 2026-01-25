@@ -1,0 +1,36 @@
+# Python ML Project Example
+# Document classification and extraction pipeline
+
+faf_version: 4.0.0
+generated: 2025-01-24
+
+project:
+  name: "doc-classifier"
+  goal: "Classify and extract structured data from uploaded documents"
+  main_language: python
+
+stack:
+  framework: fastapi
+  ml_framework: pytorch
+  embeddings: sentence_transformers
+  vector_db: qdrant
+  task_queue: celery
+  broker: redis
+  storage: s3
+  hosting: modal
+
+human_context:
+  who: "ML engineering team at legal tech company (2 ML engineers, 1 backend)"
+  what: "Classify legal documents (contracts, NDAs, amendments) and extract key clauses"
+  why: "Lawyers spend 40% of time on document review. Automate the obvious parts."
+  where: "Modal for inference, S3 for storage, on-prem for training"
+  when: "Beta with 5 law firms, targeting GA in Q2"
+  how: "Fine-tuned BERT for classification, GPT-4 for extraction, human review for edge cases"
+
+preferences:
+  quality_bar: reproducible_results
+  testing: pytest
+  environment: conda
+  gpu: a100
+
+# Score: 100% - All slots filled
