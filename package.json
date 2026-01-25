@@ -119,7 +119,7 @@
     "url": "https://github.com/Wolfe-Jam/faf-cli/issues"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.67.0",
+    "@anthropic-ai/sdk": "^0.71.2",
     "commander": "^14.0.1",
     "inquirer": "^12.9.4",
     "open": "^10.2.0",
