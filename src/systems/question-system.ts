@@ -311,7 +311,9 @@ export const QUESTION_REGISTRY: Record<string, Omit<FafQuestion, 'id' | 'field'>
  */
 export function buildQuestion(field: string): FafQuestion | null {
   const template = QUESTION_REGISTRY[field];
-  if (!template) return null;
+  if (!template) {
+    return null;
+  }
 
   return {
     id: field.replace(/\./g, '_'),
@@ -413,8 +415,9 @@ function toInquirerQuestion(q: FafQuestion): Record<string, unknown> {
 
 /**
  * Convert FafQuestion to Claude Code AskUserQuestion format
+ * @internal Reserved for future Claude Code integration
  */
-function toClaudeCodeQuestion(q: FafQuestion): object {
+function _toClaudeCodeQuestion(q: FafQuestion): object {
   return {
     question: q.question,
     header: q.header,
@@ -450,7 +453,7 @@ export async function askQuestions(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const answers = await (inquirer.prompt as any)(inquirerQuestions);
       return { mode: 'interactive', answers };
-    } catch (error) {
+    } catch (_error) {
       // User cancelled (Ctrl+C)
       return { mode: 'interactive', cancelled: true };
     }
