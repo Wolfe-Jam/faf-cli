@@ -69,6 +69,7 @@ jobs:
       
       - name: 🏎️ Run performance validation
         id: performance
+        shell: bash
         run: |
           echo "🚀 Running F1-inspired performance tests on ${{ matrix.platform }}..."
           
@@ -92,6 +93,7 @@ jobs:
       
       - name: 🎯 Performance regression check
         if: github.event_name == 'pull_request'
+        shell: bash
         run: |
           echo "🔍 Checking for performance regressions..."
           
