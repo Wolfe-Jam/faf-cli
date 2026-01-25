@@ -453,7 +453,7 @@ export async function askQuestions(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const answers = await (inquirer.prompt as any)(inquirerQuestions);
       return { mode: 'interactive', answers };
-    } catch (_error) {
+    } catch {
       // User cancelled (Ctrl+C)
       return { mode: 'interactive', cancelled: true };
     }
