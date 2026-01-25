@@ -121,7 +121,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.67.0",
     "commander": "^14.0.1",
-    "inquirer": "^12.9.4",
+    "inquirer": "^13.2.1",
     "open": "^10.2.0",
     "yaml": "^2.4.1"
   },
