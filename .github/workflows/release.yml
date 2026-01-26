@@ -152,7 +152,7 @@ jobs:
           tar -tzf *.tgz | head -20
       
       - name: 💾 Upload package artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: npm-package
           path: '*.tgz'
