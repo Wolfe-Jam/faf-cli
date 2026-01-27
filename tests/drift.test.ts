@@ -302,8 +302,9 @@ metadata:
   describe('🏆 CHAMPIONSHIP: Real FAF CLI Analysis', () => {
     test('should analyze FAF CLI itself', () => {
       const cliDir = path.resolve(__dirname, '..');
+      const exportPath = path.join(os.tmpdir(), 'faf-cli-drift.json');
 
-      const result = execSync(`node ${CLI_PATH} drift --export /tmp/faf-cli-drift.json`, {
+      const result = execSync(`node ${CLI_PATH} drift --export ${exportPath}`, {
         cwd: cliDir,
         encoding: 'utf-8',
         stdio: 'pipe'
@@ -314,7 +315,7 @@ metadata:
 
       console.log('\n🏆 REAL DRIFT REPORT - FAF CLI:\n');
       console.log(result);
-      console.log('\n📊 Report saved to: /tmp/faf-cli-drift.json');
+      console.log(`\n📊 Report saved to: ${exportPath}`);
       console.log('✅ Ready for social media sharing!\n');
     });
   });

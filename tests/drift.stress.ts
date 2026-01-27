@@ -114,8 +114,9 @@ describe('🏎️ 10,000 COMMIT STRESS TEST - Run Occasionally', () => {
     console.log('🔍 Running drift analysis on 10,000 commits...\n');
 
     const analysisStart = Date.now();
+    const exportPath = path.join(os.tmpdir(), 'faf-10k-stress.json');
 
-    const result = execSync(`node ${CLI_PATH} drift --export /tmp/faf-10k-stress.json`, {
+    const result = execSync(`node ${CLI_PATH} drift --export ${exportPath}`, {
       cwd: stressDir,
       encoding: 'utf-8',
       stdio: 'pipe',
@@ -130,7 +131,7 @@ describe('🏎️ 10,000 COMMIT STRESS TEST - Run Occasionally', () => {
     console.log(result);
     console.log('='.repeat(60));
     console.log(`\n⚡ Analysis completed in ${analysisTime}s`);
-    console.log('📁 Full report saved to: /tmp/faf-10k-stress.json\n');
+    console.log(`📁 Full report saved to: ${exportPath}\n`);
 
     // Assertions
     expect(result).toContain('FAF DRIFT ANALYSIS');
