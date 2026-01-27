@@ -105,7 +105,8 @@ describe('🏎️ WJTTC Plugin Structure Tests', () => {
 
       commands.forEach(cmd => {
         const content = fs.readFileSync(path.join(commandsDir, cmd), 'utf-8');
-        const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
+        // Use \r?\n to handle both Unix (\n) and Windows (\r\n) line endings
+        const frontmatterMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
         expect(frontmatterMatch).not.toBeNull();
       });
     });

@@ -18,6 +18,29 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 
+/**
+ * Cross-platform helper to find test files
+ * Replaces Unix `find` command with Node.js fs
+ */
+function findTestFiles(dir: string, pattern: RegExp): string[] {
+  const results: string[] = [];
+
+  function walk(currentDir: string) {
+    const entries = fs.readdirSync(currentDir, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(currentDir, entry.name);
+      if (entry.isDirectory() && entry.name !== 'node_modules' && entry.name !== '__mocks__') {
+        walk(fullPath);
+      } else if (entry.isFile() && pattern.test(entry.name)) {
+        results.push(fullPath);
+      }
+    }
+  }
+
+  walk(dir);
+  return results;
+}
+
 describe('🏁 YOLO: Meta-Test Infrastructure Validation', () => {
   const originalCwd = process.cwd();
 
@@ -151,16 +174,13 @@ describe('🏁 YOLO: Meta-Test Infrastructure Validation', () => {
 
   describe('⚡ TIER 2: Template Literal Syntax Detection', () => {
     it('should detect template literal bugs in test files', async () => {
-      // Find all test files
-      const testFiles = execSync('find tests -name "*.test.ts" -type f', {
-        cwd: path.resolve(__dirname, '..'),
-        encoding: 'utf8'
-      }).trim().split('\n').filter(f => f);
+      // Find all test files (cross-platform)
+      const testsDir = path.resolve(__dirname, '..', 'tests');
+      const testFiles = findTestFiles(testsDir, /\.test\.ts$/);
 
       const bugsFound: string[] = [];
 
-      for (const testFile of testFiles) {
-        const fullPath = path.resolve(__dirname, '..', testFile);
+      for (const fullPath of testFiles) {
         const content = await fs.promises.readFile(fullPath, 'utf8');
 
         // Detect: execSync('.*${
@@ -182,7 +202,7 @@ describe('🏁 YOLO: Meta-Test Infrastructure Validation', () => {
         });
 
         if (bugCount > 0) {
-          bugsFound.push(`${testFile}: Found ${bugCount} template literal bugs`);
+          bugsFound.push(`${path.basename(fullPath)}: Found ${bugCount} template literal bugs`);
         }
       }
 
@@ -202,25 +222,23 @@ describe('🏁 YOLO: Meta-Test Infrastructure Validation', () => {
 
   describe('⚡ TIER 2: Test File Quality Gates', () => {
     it('should have proper beforeEach/afterEach in tests that modify state', async () => {
-      const testFiles = execSync('find tests -name "*.test.ts" -type f', {
-        cwd: path.resolve(__dirname, '..'),
-        encoding: 'utf8'
-      }).trim().split('\n').filter(f => f);
+      // Find all test files (cross-platform)
+      const testsDir = path.resolve(__dirname, '..', 'tests');
+      const testFiles = findTestFiles(testsDir, /\.test\.ts$/);
 
       const missingCleanup: string[] = [];
 
-      for (const testFile of testFiles) {
-        const fullPath = path.resolve(__dirname, '..', testFile);
+      for (const fullPath of testFiles) {
         const content = await fs.promises.readFile(fullPath, 'utf8');
 
         // If test uses process.chdir(), MUST have afterEach
         if (content.includes('process.chdir(') && !content.includes('afterEach')) {
-          missingCleanup.push(`${testFile}: Uses process.chdir() but no afterEach cleanup`);
+          missingCleanup.push(`${path.basename(fullPath)}: Uses process.chdir() but no afterEach cleanup`);
         }
 
         // If test creates temp dirs, MUST have cleanup
         if (content.includes('mkdtemp') && !content.includes('afterEach')) {
-          missingCleanup.push(`${testFile}: Creates temp dirs but no afterEach cleanup`);
+          missingCleanup.push(`${path.basename(fullPath)}: Creates temp dirs but no afterEach cleanup`);
         }
       }
 
@@ -236,15 +254,13 @@ describe('🏁 YOLO: Meta-Test Infrastructure Validation', () => {
     });
 
     it('should not have undefined function calls in tests', async () => {
-      const testFiles = execSync('find tests -name "*.test.ts" -type f', {
-        cwd: path.resolve(__dirname, '..'),
-        encoding: 'utf8'
-      }).trim().split('\n').filter(f => f);
+      // Find all test files (cross-platform)
+      const testsDir = path.resolve(__dirname, '..', 'tests');
+      const testFiles = findTestFiles(testsDir, /\.test\.ts$/);
 
       const suspiciousCalls: string[] = [];
 
-      for (const testFile of testFiles) {
-        const fullPath = path.resolve(__dirname, '..', testFile);
+      for (const fullPath of testFiles) {
         const content = await fs.promises.readFile(fullPath, 'utf8');
 
         // Check for common undefined helper patterns
@@ -259,7 +275,7 @@ describe('🏁 YOLO: Meta-Test Infrastructure Validation', () => {
             // Check if function is actually defined
             const functionName = pattern.source.match(/(\w+)\(/)?.[1];
             if (functionName && !content.includes(`function ${functionName}`) && !content.includes(`const ${functionName}`)) {
-              suspiciousCalls.push(`${testFile}: Calls ${functionName}() but it's not defined`);
+              suspiciousCalls.push(`${path.basename(fullPath)}: Calls ${functionName}() but it's not defined`);
             }
           }
         }
