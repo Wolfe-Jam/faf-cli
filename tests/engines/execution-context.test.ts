@@ -191,6 +191,12 @@ describe('Execution Context Engine', () => {
     // These tests verify the detection reports TTY status
 
     it('includes tty status in detectedVia', () => {
+      // Clear CI markers so detection reaches the TTY check (step 7)
+      delete process.env.CI;
+      delete process.env.GITHUB_ACTIONS;
+      delete process.env.GITLAB_CI;
+      delete process.env.CIRCLECI;
+
       const ctx = detectExecutionContext();
       const hasTtyMarker = ctx.detectedVia.some(
         (v) => v === 'tty:true' || v === 'tty:false'
