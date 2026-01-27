@@ -72,6 +72,8 @@ describe('Execution Context Engine', () => {
     });
 
     it('should detect GitHub Actions', () => {
+      // Clear CI marker that takes priority in the detection order
+      delete process.env.CI;
       process.env.GITHUB_ACTIONS = 'true';
       const ctx = detectExecutionContext();
 
