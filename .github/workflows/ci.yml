@@ -176,7 +176,7 @@ jobs:
         run: npm run build
 
       - name: Update TAF Receipt
-        uses: Wolfe-Jam/faf-taf-git@v1.0.2
+        uses: Wolfe-Jam/faf-taf-git@v1.0.3
         with:
           test-command: 'npm test'
           auto-commit: 'true'
