@@ -72,6 +72,7 @@ jobs:
           node dist/cli.js --version
 
       - name: Test project detection
+        shell: bash
         run: |
           node dist/cli.js init --force --output test.faf
           ls -la test.faf
