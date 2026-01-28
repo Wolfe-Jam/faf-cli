@@ -24,6 +24,7 @@ import { BalanceVisualizer } from "../utils/balance-visualizer";
 import { FafDNAManager, displayScoreWithBirthDNA } from "../engines/faf-dna";
 import { PlatformDetector } from "../utils/platform-detector";
 import { promptEmailOptIn } from "../utils/email-opt-in";
+import { tafInit } from "./taf-init";
 
 interface InitOptions {
   force?: boolean;
@@ -34,6 +35,7 @@ interface InitOptions {
   quiet?: boolean;
   subscribe?: string;
   xai?: boolean;
+  taf?: boolean;
 }
 
 export async function initFafFile(
@@ -41,6 +43,15 @@ export async function initFafFile(
   options: InitOptions = {},
 ) {
   const startTime = Date.now();
+
+  // Handle --taf flag: Create .taf (Testing Activity Feed) instead of .faf
+  if (options.taf) {
+    if (projectPath) {
+      process.chdir(projectPath);
+    }
+    await tafInit({ force: options.force });
+    return;
+  }
 
   // FAF banner is now shown by cli.ts - removed duplicate
   // (The main cli.ts handles showing the banner for 'init' command)
