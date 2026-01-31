@@ -211,12 +211,14 @@ program
   .option('-t, --template <type>', 'Use specific template (svelte, react, vue, node)', 'auto')
   .option('-o, --output <file>', 'Output file path')
   .option('--xai', 'Generate xAI/Grok-optimized .faf with voice config')
+  .option('--gemini', 'Configure Gemini CLI integration (auto-detects if installed)')
   .option('--taf', 'Create .taf file (Testing Activity Feed) instead of .faf')
   .addHelpText('after', `
 Examples:
   $ faf init                     # Detect project type automatically
   $ faf init --new               # Create a fresh .faf file
   $ faf init --xai               # xAI/Grok-optimized with voice config
+  $ faf init --gemini            # Gemini CLI native handshake
   $ faf init --taf               # Create .taf (Testing Activity Feed)
   $ faf init --choose            # Interactive choice when .faf exists
   $ faf init my-app              # Create .faf for different directory
