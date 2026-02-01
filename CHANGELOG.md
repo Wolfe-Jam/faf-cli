@@ -5,6 +5,33 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.1.0] - 2026-01-31 — Gemini Native Handshake
+
+### 🔷 Zero-Config Google AI Integration
+
+FAF now auto-detects Gemini CLI and creates native bridges automatically.
+
+### ✨ What's New
+
+- **`--gemini` flag** - Explicit Gemini CLI integration
+- **Auto-detection** - Detects Gemini CLI even without flag
+  - Checks: `gemini` command, `~/.gemini`, `GEMINI_API_KEY`, `gcloud`
+- **Native bridge** - Creates `.gemini/context.yaml` pointing to `project.faf`
+- **Symlink** - `.gemini/project.faf → project.faf` for direct access
+- **gemini: section** - Added to project.faf with integration config
+
+### 🎯 The Native Handshake
+
+Every `faf init` is now Gemini-aware. If Gemini CLI is installed, FAF automatically:
+1. Detects the installation
+2. Creates `.gemini/` directory
+3. Writes context bridge config
+4. Links to project.faf
+
+Zero config. Native integration. Just works.
+
+---
+
 ## [4.0.0] - 2026-01-24 — Foundation Layer
 
 ### 🏛️ The Format That Became a Standard
