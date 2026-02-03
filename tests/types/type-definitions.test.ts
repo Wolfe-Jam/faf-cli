@@ -528,7 +528,7 @@ human_context:
   // ============================================================================
   describe('TIER 6: Performance', () => {
 
-    test('type resolution under 5ms', async () => {
+    test('type resolution under 50ms average', async () => {
       const start = Date.now();
       for (let i = 0; i < 100; i++) {
         await compileTestFaf(`
@@ -544,7 +544,7 @@ project:
 
       console.log(`Average compile time: ${avgPerCompile.toFixed(2)}ms`);
       expect(avgPerCompile).toBeLessThan(50); // 50ms per compile is reasonable
-    });
+    }, 60000); // 60 second timeout for 100 iterations
 
     test('all 88 types can be compiled', async () => {
       const types = [
