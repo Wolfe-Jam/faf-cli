@@ -5,6 +5,41 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.2.0] - 2026-02-03 — Voice-API Edition 🚀👻
+
+### 🍊 xAI/Grok Voice Configuration
+
+**Save Our Souls** - Eternal voice memory for Grok Collections.
+
+### ✨ What's New
+
+- **`faf init --xai`** - Adds Grok voice configuration to project.faf
+  - Voice: Leo (polite, dry British wit, technically precise)
+  - Persona: Project eternal memory (zero drift)
+  - Retrieval mode: Hybrid (context-first, fallback to general)
+  - Escape phrase detection
+- **xai_collections section** - Upload order and readiness flags
+  - Ready for xAI Collections integration
+  - Structured upload order for optimal RAG
+- **Voice persistence** - Grok remembers your voice forever
+  - No re-explaining project context
+  - Mission-focused responses
+  - Collection-first retrieval
+
+### 🎯 The Voice-API Integration
+
+Every `faf init --xai` now includes:
+1. Grok voice personality (Leo)
+2. Custom persona for project memory
+3. Collections upload configuration
+4. Hybrid retrieval strategy
+
+### 📚 Documentation
+
+- Boris-Flow blog post updated (workflow recommendations)
+- WJTTC v1.2.0 TAF-Aware Edition published
+- Cross-reference network complete
+
 ## [4.1.0] - 2026-01-31 — Gemini Native Handshake
 
 ### 🔷 Zero-Config Google AI Integration
