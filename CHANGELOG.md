@@ -5,6 +5,22 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.2.1] - 2026-02-07
+
+### Added
+- **ml-research type support** - Added as alias to `ml-model` type
+  - Recognizes `type: ml-research` in project.faf files
+  - Maps to ml-model scoring (14 slots: project + backend + human)
+  - Semantically accurate for ML research projects (papers, experiments, model releases like Grok-1)
+
+### Fixed
+- Type detection now correctly scores ml-research projects with 14 slots instead of falling back to generic (12 slots)
+- Ensures consistency between faf-cli and builder.faf.one WASM generator
+
+### Technical
+- Updated TYPE_DEFINITIONS: `'ml-model'` aliases now include `'ml-research'`
+- Discovered via builder.faf.one WASM testing - the test improved the standard!
+
 ## [4.2.0] - 2026-02-03 — Voice-API Edition 🚀👻
 
 ### 🍊 xAI/Grok Voice Configuration

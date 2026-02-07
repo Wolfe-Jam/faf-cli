@@ -105,7 +105,7 @@ const TYPE_DEFINITIONS: Record<string, {
   'ml-model': {
     description: 'Machine learning model',
     categories: ['project', 'backend', 'human'],
-    aliases: ['ai-model', 'ml', 'machine-learning']
+    aliases: ['ai-model', 'ml', 'machine-learning', 'ml-research']
   },
   'jupyter': {
     description: 'Jupyter notebook project',
