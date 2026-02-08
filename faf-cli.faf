@@ -1,109 +1,241 @@
-faf_version: "2.5.0"
-ai_scoring_system: "2025-09-20"
-ai_score: "89%"
-ai_confidence: HIGH
-ai_value: "30_seconds_replaces_20_minutes_of_questions"
-ai_tldr:
-  project: "FAF CLI - \".faf cli scoring for AI-Context\""
-  stack: CLI/TypeScript/TypeScript (tsc)/npm registry/Node.js
-  quality_bar: ZERO_ERRORS_F1_STANDARDS
-  current_focus: Production deployment preparation
-  your_role: Build features with perfect context
-instant_context:
-  what_building: ".faf cli scoring for AI-Context"
-  tech_stack: CLI/TypeScript/TypeScript (tsc)/npm registry/Node.js
-  main_language: TypeScript
-  deployment: npm registry
-  key_files:
-    - package.json
-    - tsconfig.json
-context_quality:
-  slots_filled: "17/21 (81%)"
-  ai_confidence: HIGH
-  handoff_ready: true
-  missing_context:
-    - Database
-project:
-  name: FAF CLI
-  goal: ".faf cli scoring for AI-Context"
-  main_language: TypeScript
-  generated: "2025-10-22T02:27:46.232Z"
-  mission: "🚀 Make Your AI Happy! 🧡 Trust-Driven 🤖"
-  revolution: "30 seconds replaces 20 minutes of questions"
-  brand: "F1-Inspired Software Engineering - Championship AI Context"
-ai_instructions:
-  priority_order:
-    - "1. Read THIS .faf file first"
-    - "2. Check CLAUDE.md for session context"
-    - "3. Review package.json for dependencies"
-  working_style:
-    code_first: true
-    explanations: minimal
-    quality_bar: zero_errors
-    testing: required
-  warnings:
-    - Never modify dial components without approval
-    - All TypeScript must pass strict mode
-    - Test coverage required for new features
-stack:
-  frontend: CLI
-  css_framework: None
-  ui_library: inquirer (interactive prompts)
-  state_management: None
-  backend: Node.js
-  runtime: "Node.js >=14.0.0"
-  database: None
-  build: TypeScript (tsc)
-  package_manager: npm
-  api_type: CLI
-  hosting: npm registry
-  cicd: GitHub Actions
-preferences:
-  quality_bar: zero_errors
-  commit_style: conventional_emoji
-  response_style: concise_code_first
-  explanation_level: minimal
-  communication: direct
-  testing: required
-  documentation: as_needed
-state:
-  phase: development
-  version: "1.0.0"
-  focus: production_deployment
-  status: green_flag
-  next_milestone: npm_publication
-  blockers:
-tags:
-  auto_generated:
-    - "faf-cli"
+# ========================================
+# GITHUB REPOSITORY SUMMARY
+# ========================================
+#
+# Repository: Wolfe-Jam/faf-cli
+# URL: https://github.com/Wolfe-Jam/faf-cli
+# Description:  CLI repo (faf-cli):   CLI for IANA-registered AI Context format   (application/vnd.faf+yaml)
+# Stars: 7 | Forks: 1
+# License: MIT
+# Stack: TypeScript, JavaScript, Shell, HTML, Ruby, Node.js
+#
+# Quality Score: 70% 🟢 Green
+#
+# Generated: 2026-02-08T03:24:10.819Z
+# Command: faf git Wolfe-Jam/faf-cli
+#
+# ========================================
+# FULL EXTRACTION DATA (AI-Ready)
+# ========================================
+
+version: "3.0"
+name: faf-cli
+source: github
+generated_at: 2026-02-08T03:24:10.819Z
+metadata:
+  url: https://github.com/Wolfe-Jam/faf-cli
+  owner: Wolfe-Jam
+  repository: faf-cli
+  description: " CLI repo (faf-cli):   CLI for IANA-registered AI Context
+    format   (application/vnd.faf+yaml)"
+  stars: "7"
+  forks: "1"
+  license: MIT
+  topics:
+    - ai
+    - ai-context
+    - claude
+    - claude-code
+    - claude-code-plugin
+    - claude-plugin
     - cli
+    - context
+    - context-api
+    - context-engineering
+    - faf
+    - file-format
+    - free-for-developers
+    - free-forever
+    - mcp
+    - project
+    - project-dna
+    - turbo-cat
     - typescript
-    - "typescript-(tsc)"
-    - "npm-registry"
-    - node.js
-  smart_defaults:
-    - .faf
-    - "ai-ready"
-    - "2025"
-    - software
-    - "open-source"
-  user_defined:
-human_context:
-  who: AI assistants! ⚡
-  what: "Anthropic-Approved codebase that powers claude-faf-mcp • Persistent project context, on-demand • Format-driven CLI • Open Source Universal Standard • MIT License"
-  why: To at optimal levels—trusted decisions
-  where: Web platform
-  when: "Launch The Rapid Catalytic Converter - Now Purring at Full Power"
-  how: "Powered by Anthropic-Approved MCP Claude Desktop code** - The same championship TypeScript that powers [claude-faf-mcp](https://www"
-  additional_context:
-  context_score: 0
-  total_prd_score: 89
-  success_rate: "50%"
-ai_scoring_details:
-  system_date: "2025-09-20"
-  slot_based_percentage: 81
-  ai_score: 89
-  total_slots: 21
-  filled_slots: 17
-  scoring_method: "Honest percentage - no fake minimums"
-  trust_embedded: "COUNT ONCE architecture - trust MY embedded scores"
+    - yaml
+  languages:
+    - TypeScript (87.5%)
+    - JavaScript (7.2%)
+    - Shell (3.6%)
+    - HTML (1.6%)
+    - Ruby (0.0%)
+  last_updated: 2026-02-01T00:07:21Z
+  default_branch: main
+stack:
+  detected:
+    - TypeScript
+    - JavaScript
+    - Shell
+    - HTML
+    - Ruby
+    - Node.js
+  primary_language: TypeScript
+  has_package_json: true
+  has_typescript: true
+  has_docker: false
+structure:
+  total_files: 80
+  files:
+    - path: .claude-plugin
+      type: dir
+      size: 0
+    - path: .eslintrc.js
+      type: file
+      size: 1531
+    - path: .faf
+      type: file
+      size: 137
+    - path: .faf-dna
+      type: file
+      size: 1337
+    - path: .faf-state.json
+      type: file
+      size: 82
+    - path: .faf.bak
+      type: file
+      size: 3119
+    - path: .fafignore
+      type: file
+      size: 537
+    - path: .githooks
+      type: dir
+      size: 0
+    - path: .github
+      type: dir
+      size: 0
+    - path: .gitignore
+      type: file
+      size: 1486
+    - path: .husky
+      type: dir
+      size: 0
+    - path: .lighthouserc.json
+      type: file
+      size: 920
+    - path: .npmignore
+      type: file
+      size: 835
+    - path: .taf
+      type: file
+      size: 7884
+    - path: CHANGELOG.md
+      type: file
+      size: 20352
+    - path: CODE_OF_CONDUCT.md
+      type: file
+      size: 5446
+    - path: CONTRIBUTING.md
+      type: file
+      size: 9127
+    - path: LICENSE
+      type: file
+      size: 1068
+    - path: README.md
+      type: file
+      size: 6953
+    - path: SECURITY.md
+      type: file
+      size: 7319
+    - path: SUPPORT.md
+      type: file
+      size: 7996
+    - path: TURBO-CAT-NUMBERS-PYRAMID.txt
+      type: file
+      size: 2262
+    - path: TURBO-CAT-PYRAMID-ART.txt
+      type: file
+      size: 8121
+    - path: TURBO-CAT-PYRAMID-VISUAL.txt
+      type: file
+      size: 3473
+    - path: WJTC-REPORT-FORMAT.yaml
+      type: file
+      size: 3094
+    - path: WJTC-REPORT-PROCESSOR.ts
+      type: file
+      size: 8672
+    - path: archive
+      type: dir
+      size: 0
+    - path: awesome-mcp-servers.faf
+      type: file
+      size: 1920
+    - path: build-protected-engine.sh
+      type: file
+      size: 9541
+    - path: commands
+      type: dir
+      size: 0
+    - path: demos
+      type: dir
+      size: 0
+    - path: engines
+      type: dir
+      size: 0
+    - path: examples
+      type: dir
+      size: 0
+    - path: faf-banner-backup.png
+      type: file
+      size: 88644
+    - path: faf-banner.png
+      type: file
+      size: 85295
+    - path: faf-cli-1.0.0.tgz
+      type: file
+      size: 38140
+    - path: faf-cli.faf
+      type: file
+      size: 3278
+    - path: faf-engine-mk3
+      type: dir
+      size: 0
+    - path: faf-engine
+      type: dir
+      size: 0
+    - path: homebrew-formula.rb
+      type: file
+      size: 499
+    - path: jest.config.js
+      type: file
+      size: 1558
+    - path: marketplace.json
+      type: file
+      size: 1174
+    - path: migrate-to-private-engine.sh
+      type: file
+      size: 4402
+    - path: package-lock.json
+      type: file
+      size: 151333
+    - path: package.json
+      type: file
+      size: 5238
+    - path: project.faf
+      type: file
+      size: 4204
+    - path: public
+      type: dir
+      size: 0
+    - path: robots.txt
+      type: file
+      size: 715
+    - path: scripts
+      type: dir
+      size: 0
+    - path: sitemap.xml
+      type: file
+      size: 1912
+quality:
+  score: 70
+  tier: 🟢 Green
+  factors:
+    has_stars: true
+    has_description: true
+    has_topics: true
+    has_license: true
+    has_readme: true
+    recently_updated: true
+generated_by:
+  tool: faf-cli
+  command: faf git
+  version: 3.0.6

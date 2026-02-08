@@ -42,7 +42,7 @@ Every README should answer these questions. Here's ours:
 
 | Question | Answer |
 |----------|--------|
-| **👥 WHO** is this for? | Developers using AI coding assistants (Claude, Cursor, Gemini, ChatGPT) |
+| **👥 WHO** is this for? | Developers using AI coding assistants (Claude, Gemini, Cursor, Grok, ChatGPT) |
 | **📦 WHAT** is it? | The package.json for AI context - IANA-registered format |
 | **🌍 WHERE** does it work? | Everywhere AI needs context (Claude Code, Gemini CLI, Cursor, etc.) |
 | **🎯 WHY** do you need it? | 100% context (AI-scored), persists forever, bi-syncs automatically - saves $1000s/developer |

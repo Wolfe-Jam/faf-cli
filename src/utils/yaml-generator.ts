@@ -275,7 +275,7 @@ export function generateFafContent(projectData: {
         ? `${projectData.projectName} - ${escapeForYaml(projectData.projectGoal)}`
         : projectData.projectName,
       stack: generateStackString(projectData),
-      quality_bar: 'ZERO_ERRORS_F1_STANDARDS',
+      quality_bar: 'production_ready',
       current_focus: projectData.projectGoal ? 'Production deployment preparation' : 'Project initialization',
       your_role: 'Build features with perfect context'
     },
@@ -304,10 +304,7 @@ export function generateFafContent(projectData: {
       name: projectData.projectName || 'Untitled Project',
       goal: projectData.projectGoal ? escapeForYaml(projectData.projectGoal) : null,
       main_language: projectData.mainLanguage || 'Unknown',
-      type: projectData.projectType || null,  // Project type for compiler slot-filling patterns
-      mission: '🚀 Make Your AI Happy! 🧡 Trust-Driven 🤖',
-      revolution: '30 seconds replaces 20 minutes of questions',
-      brand: 'F1-Inspired Software Engineering - Championship AI Context'
+      type: projectData.projectType || null  // Project type for compiler slot-filling patterns
     },
     
     // 🧠 AI OPERATING INSTRUCTIONS
@@ -374,8 +371,7 @@ export function generateFafContent(projectData: {
     scores: {
       faf_score: projectData.fafScore || 0,
       slot_based_percentage: projectData.slotBasedPercentage || 0,
-      total_slots: totalSlotsCount,
-      scoring_philosophy: 'F1-Inspired Championship Scoring'
+      total_slots: totalSlotsCount
     },
 
     // 🏷️ Search & Discovery Tags
