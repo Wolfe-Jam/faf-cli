@@ -45,7 +45,7 @@ Every README should answer these questions. Here's ours:
 | **👥 WHO** is this for? | Developers using AI coding assistants (Claude, Cursor, Gemini, ChatGPT) |
 | **📦 WHAT** is it? | The package.json for AI context - IANA-registered format |
 | **🌍 WHERE** does it work? | Everywhere AI needs context (Claude Code, Gemini CLI, Cursor, etc.) |
-| **🎯 WHY** do you need it? | 91% fewer tokens, zero drift, AI knows instead of guesses |
+| **🎯 WHY** do you need it? | 91% fewer tokens compounding to 100% (no tokens), persistent context, zero drift |
 | **⏰ WHEN** should you use it? | New projects (day one), existing projects (now), exploring repos (instantly) |
 | **🚀 HOW** does it work? | `npx faf-cli git <url>` - No install, no clone, 2 seconds |
 
