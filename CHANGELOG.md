@@ -5,6 +5,59 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.2.2] - 2026-02-08 — Context Quality Edition 🎯
+
+### 🎯 Slot-Ignore System (Documentation)
+
+**The perfect way to handle app-types** - Now properly documented.
+
+### ✨ What's New
+
+- **Slot-ignore mechanism** - Comprehensive documentation added
+  - Full specification in `docs/SLOT-IGNORE.md`
+  - Quick reference in `docs/SLOT-IGNORE-QUICK-REF.md`
+  - Like `.gitignore` for files, `slot-ignore` for context slots
+  - Formula: `(Filled + Ignored) / 21 = 100%`
+
+### 🐛 Fixes
+
+- **6 Ws extraction** - Fixed all broken human context extraction
+  - WHO: Checks package.json author first (TIER 1 authoritative)
+  - WHAT: package.json description now TIER 1 (was TIER 2)
+  - WHY: Targets Mission sections, uses keywords as fallback
+  - WHERE: npm packages → "npm registry + GitHub" (authoritative)
+  - WHEN: Version number is TIER 1 (0.x = beta, ≥1.0 = production)
+  - HOW: Tech stack analysis is TIER 1 (inferred from dependencies)
+  - Added `getCleanedReadme()` helper to strip HTML/badges/noise
+
+- **Slot-ignore mechanism** - Fixed broken implementation
+  - Standardized to `'None'` (was inconsistent: 'N/A (CLI)', 'None', etc.)
+  - Added `database: 'None'` for Node.js CLI projects
+  - Fixed yaml-generator logic: `if (!database && database !== 'None')` (was OR, not AND)
+  - CLI projects now correctly exclude non-applicable slots from missing_context
+
+- **README** - Added WHO section for better target audience extraction
+
+### 📈 Results
+
+- Score improvement: 74% → 86% → 100% (after faf auto)
+- All dogfooding tests passing (7/7)
+- missing_context: None - fully specified!
+- 673/687 tests passing (97.9%)
+
+### 🎨 Code Comments
+
+- Added `🎯 SLOT-IGNORE:` markers throughout codebase
+- Links to `docs/SLOT-IGNORE.md` for specification
+- Clear explanations of slot-ignore pattern
+
+### 📚 Documentation
+
+- `docs/SLOT-IGNORE.md` - Full specification (391 lines)
+- `docs/SLOT-IGNORE-QUICK-REF.md` - Quick reference (69 lines)
+- README section explaining slot-ignore
+- Proper terminology throughout codebase
+
 ## [4.2.1] - 2026-02-07
 
 ### Added
