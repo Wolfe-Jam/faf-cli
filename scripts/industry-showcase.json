@@ -1,0 +1,122 @@
+{
+  "title": "FAF Industry Showcase",
+  "description": "Proof that FAF works across every language, framework, and project type",
+  "updated": "2026-02-08",
+  "categories": [
+    {
+      "name": "JavaScript/TypeScript",
+      "repos": [
+        "facebook/react",
+        "vuejs/core",
+        "angular/angular",
+        "sveltejs/svelte",
+        "vercel/next.js",
+        "nuxt/nuxt",
+        "microsoft/TypeScript",
+        "nodejs/node",
+        "denoland/deno",
+        "oven-sh/bun",
+        "expressjs/express",
+        "nestjs/nest"
+      ]
+    },
+    {
+      "name": "Python",
+      "repos": [
+        "python/cpython",
+        "django/django",
+        "pallets/flask",
+        "tiangolo/fastapi",
+        "huggingface/transformers",
+        "openai/whisper",
+        "pytorch/pytorch",
+        "tensorflow/tensorflow",
+        "scikit-learn/scikit-learn",
+        "jupyter/notebook"
+      ]
+    },
+    {
+      "name": "Systems/Low-level",
+      "repos": [
+        "ggml-org/whisper.cpp",
+        "rust-lang/rust",
+        "golang/go",
+        "ziglang/zig",
+        "redis/redis",
+        "nginx/nginx",
+        "curl/curl",
+        "git/git"
+      ]
+    },
+    {
+      "name": "Mobile",
+      "repos": [
+        "facebook/react-native",
+        "flutter/flutter",
+        "ionic-team/ionic-framework",
+        "expo/expo",
+        "realm/realm-swift",
+        "square/okhttp"
+      ]
+    },
+    {
+      "name": "Databases",
+      "repos": [
+        "postgres/postgres",
+        "mongodb/mongo",
+        "elastic/elasticsearch",
+        "clickhouse/clickhouse",
+        "cockroachdb/cockroach",
+        "supabase/supabase"
+      ]
+    },
+    {
+      "name": "DevOps/Cloud",
+      "repos": [
+        "kubernetes/kubernetes",
+        "docker/cli",
+        "hashicorp/terraform",
+        "ansible/ansible",
+        "prometheus/prometheus",
+        "grafana/grafana",
+        "vercel/vercel",
+        "netlify/cli"
+      ]
+    },
+    {
+      "name": "Web Frameworks",
+      "repos": [
+        "rails/rails",
+        "laravel/laravel",
+        "spring-projects/spring-boot",
+        "phoenixframework/phoenix",
+        "gin-gonic/gin",
+        "actix/actix-web"
+      ]
+    },
+    {
+      "name": "Developer Tools",
+      "repos": [
+        "neovim/neovim",
+        "prettier/prettier",
+        "eslint/eslint",
+        "webpack/webpack",
+        "vitejs/vite",
+        "vercel/turborepo",
+        "changesets/changesets",
+        "jestjs/jest"
+      ]
+    },
+    {
+      "name": "AI/ML Infrastructure",
+      "repos": [
+        "openai/openai-python",
+        "anthropics/anthropic-sdk-python",
+        "langchain-ai/langchain",
+        "run-llama/llama_index",
+        "chroma-core/chroma",
+        "pinecone-io/pinecone-python-client"
+      ]
+    }
+  ]
+}

@@ -13,6 +13,8 @@
 
 import type { GitHubMetadata } from './github-extractor';
 import { fetchGitHubFileContent } from './github-extractor';
+import { countSlots } from '../utils/slot-counter';
+import { getSlotsForType } from '../compiler/faf-compiler';
 
 export interface Enhanced6Ws {
   who: string;
@@ -119,7 +121,71 @@ export interface StackAnalysis {
   buildTool?: string;
   runtime?: string;
   language?: string;
+  hosting?: string;
   frameworks: string[];
+}
+
+/**
+ * Extract stack from GH API languages array
+ * This is the SOURCE OF TRUTH from GitHub - trust it!
+ */
+export function extractFromLanguages(metadata: GitHubMetadata): StackAnalysis {
+  const analysis: StackAnalysis = {
+    frameworks: []
+  };
+
+  if (!metadata.languages || metadata.languages.length === 0) {
+    return analysis;
+  }
+
+  // Convert to lowercase for easier matching
+  const langs = metadata.languages.map(l => l.toLowerCase());
+
+  // Runtime detection (from primary language)
+  const primaryLang = metadata.languages[0]?.split(' ')[0];
+  if (langs.some(l => l.startsWith('c++'))) {
+    analysis.language = 'C++';
+    analysis.runtime = 'C++';
+  } else if (langs.some(l => l.startsWith('rust'))) {
+    analysis.language = 'Rust';
+    analysis.runtime = 'Rust';
+  } else if (langs.some(l => l.startsWith('go'))) {
+    analysis.language = 'Go';
+    analysis.runtime = 'Go';
+  } else if (langs.some(l => l.startsWith('python'))) {
+    analysis.language = 'Python';
+    analysis.runtime = 'Python';
+  } else if (langs.some(l => l.startsWith('java'))) {
+    analysis.language = 'Java';
+    analysis.runtime = 'JVM';
+  } else if (langs.some(l => l.startsWith('c ('))) {
+    analysis.language = 'C';
+    analysis.runtime = 'C';
+  } else if (langs.some(l => l.startsWith('typescript'))) {
+    analysis.language = 'TypeScript';
+    analysis.runtime = 'Node.js';
+  } else if (langs.some(l => l.startsWith('javascript'))) {
+    analysis.language = 'JavaScript';
+    analysis.runtime = 'Node.js';
+  }
+
+  // Build system detection
+  if (langs.some(l => l.startsWith('cmake'))) {
+    analysis.buildTool = 'CMake';
+  } else if (langs.some(l => l.startsWith('makefile'))) {
+    analysis.buildTool = 'Make';
+  } else if (langs.some(l => l.startsWith('gradle'))) {
+    analysis.buildTool = 'Gradle';
+  } else if (langs.some(l => l.startsWith('maven'))) {
+    analysis.buildTool = 'Maven';
+  }
+
+  // Hosting detection (from Dockerfile)
+  if (langs.some(l => l.startsWith('dockerfile'))) {
+    analysis.hosting = 'Docker';
+  }
+
+  return analysis;
 }
 
 export function analyzePackageJson(packageJson: any, metadata: GitHubMetadata): StackAnalysis {
@@ -157,13 +223,13 @@ export function analyzePackageJson(packageJson: any, metadata: GitHubMetadata): 
   else if (deps.vitest) analysis.testing = 'Vitest';
   else if (deps.mocha) analysis.testing = 'Mocha';
 
-  // Build tools
+  // Build tools (npm ecosystem)
   if (deps.vite) analysis.buildTool = 'Vite';
   else if (deps.webpack) analysis.buildTool = 'Webpack';
   else if (deps.rollup) analysis.buildTool = 'Rollup';
   else if (deps.esbuild) analysis.buildTool = 'esbuild';
 
-  // Runtime
+  // Runtime (npm ecosystem - override if detected from GH languages)
   if (metadata.languages?.some(l => l.startsWith('TypeScript'))) {
     analysis.language = 'TypeScript';
     analysis.runtime = 'Node.js';
@@ -274,21 +340,50 @@ export async function generateEnhancedFaf(
         confidence: 25
       };
 
-  // Analyze stack from package.json
-  const stackAnalysis = packageJsonContent
+  // Extract stack from GH API languages (SOURCE OF TRUTH)
+  const langStack = extractFromLanguages(metadata);
+
+  // Analyze stack from package.json (if exists - adds npm-specific detail)
+  const npmStack = packageJsonContent
     ? analyzePackageJson(packageJsonContent, metadata)
     : { frameworks: [] };
 
-  // Calculate enhanced score
-  const score = calculateEnhancedScore(
-    metadata,
-    !!readme,
-    !!packageJsonContent,
-    !!readme
-  );
+  // Merge: npm takes priority for fields it detects (more specific)
+  const stackAnalysis = { ...langStack, ...npmStack, frameworks: npmStack.frameworks || [] };
 
   // Determine project type
   const projectType = determineProjectType(metadata, stackAnalysis, packageJsonContent);
+
+  // Calculate REAL score using slot-counting (not hardcoded formula)
+  // IMPORTANT: Values must match what's written to .faf file (apply same defaults)
+  const slotCount = countSlots({
+    // Project (4)
+    projectName: metadata.repo,
+    projectGoal: metadata.description || null,
+    mainLanguage: stackAnalysis.language || metadata.languages?.[0]?.split(' ')[0] || 'Unknown',
+    projectType: projectType,
+    // Human context (6)
+    who: sixWs.who,
+    what: sixWs.what,
+    why: sixWs.why,
+    where: sixWs.where,
+    when: sixWs.when,
+    how: sixWs.how,
+    // Stack (11) - Apply same defaults as written to .faf (MUST MATCH!)
+    frontend: stackAnalysis.frontend || 'slotignored',
+    uiLibrary: 'slotignored',
+    backend: stackAnalysis.backend || 'slotignored',
+    runtime: stackAnalysis.runtime || 'slotignored',
+    database: stackAnalysis.database || 'slotignored',
+    build: stackAnalysis.buildTool || 'slotignored',
+    packageManager: packageJsonContent ? 'npm' : 'slotignored',
+    apiType: 'slotignored',
+    hosting: stackAnalysis.hosting || (metadata.topics?.includes('vercel') || metadata.topics?.includes('netlify') ? 'Cloud' : 'slotignored'),
+    cicd: 'slotignored',
+    cssFramework: 'slotignored'
+  });
+
+  const score = slotCount.score;
 
   // Generate full FAF structure
   const fafData: any = {
@@ -302,7 +397,7 @@ export async function generateEnhancedFaf(
     ai_tldr: {
       project: metadata.repo,
       stack: stackAnalysis.frameworks.join('/') || 'See stack section',
-      quality_bar: 'ZERO_ERRORS_F1_STANDARDS',
+      quality_bar: 'production_ready',
       current_focus: 'See README for details',
       your_role: 'Build features with perfect context'
     },
@@ -314,19 +409,17 @@ export async function generateEnhancedFaf(
     },
 
     context_quality: {
-      slots_filled: `${Math.floor(score / 100 * 21)}/21 (${score}%)`,
+      slots_filled: `${slotCount.filled + slotCount.ignored}/21 (${score}%)`,
       ai_confidence: score >= 80 ? 'HIGH' : score >= 60 ? 'MEDIUM' : 'LOW',
       handoff_ready: score >= 85,
-      missing_context: getMissingContext(stackAnalysis, score)
+      missing_context: slotCount.missingSlots.length > 0 ? slotCount.missingSlots : ['None - fully specified!']
     },
 
     project: {
       name: metadata.repo,
+      goal: metadata.description || null,
       main_language: stackAnalysis.language || metadata.languages?.[0]?.split(' ')[0] || 'Unknown',
-      type: projectType,
-      mission: '🚀 Make Your AI Happy! 🧡 Trust-Driven 🤖',
-      revolution: '30 seconds replaces 20 minutes of questions',
-      brand: 'F1-Inspired Software Engineering - Championship AI Context'
+      type: projectType
     },
 
     ai_instructions: {
@@ -348,14 +441,17 @@ export async function generateEnhancedFaf(
     },
 
     stack: {
-      frontend: stackAnalysis.frontend || 'None',
-      backend: stackAnalysis.backend || 'None',
-      database: stackAnalysis.database || 'None',
-      testing: stackAnalysis.testing || 'None',
-      build_tool: stackAnalysis.buildTool || 'None',
-      runtime: stackAnalysis.runtime || 'None',
-      language: stackAnalysis.language || 'None',
-      package_manager: packageJsonContent ? 'npm' : 'None'
+      frontend: stackAnalysis.frontend || 'slotignored',
+      ui_library: 'slotignored', // TODO: Detect from package.json
+      backend: stackAnalysis.backend || 'slotignored',
+      runtime: stackAnalysis.runtime || 'slotignored',
+      database: stackAnalysis.database || 'slotignored',
+      build: stackAnalysis.buildTool || 'slotignored',
+      package_manager: packageJsonContent ? 'npm' : 'slotignored',
+      api_type: 'slotignored', // TODO: Detect API type
+      hosting: stackAnalysis.hosting || (metadata.topics?.includes('vercel') || metadata.topics?.includes('netlify') ? 'Cloud' : 'slotignored'),
+      cicd: 'slotignored', // TODO: Detect from .github/workflows
+      css_framework: 'slotignored' // TODO: Detect from package.json
     },
 
     metadata: {
@@ -388,8 +484,7 @@ export async function generateEnhancedFaf(
     scores: {
       faf_score: score,
       slot_based_percentage: score,
-      total_slots: 21,
-      scoring_philosophy: 'F1-Inspired Championship Scoring'
+      total_slots: 21
     },
 
     tags: {

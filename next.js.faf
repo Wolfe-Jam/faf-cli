@@ -2,17 +2,17 @@
 # 🏎️ FAF GIT - ENHANCED GENERATION
 # ========================================
 #
-# Repository: facebook/react
-# URL: https://github.com/facebook/react
-# Description: The library for web and native user interfaces.
-# Stars: 242.9K | Forks: 50.5K
+# Repository: vercel/next.js
+# URL: https://github.com/vercel/next.js
+# Description: The React Framework
+# Stars: 137.6K | Forks: 30.4K
 # License: MIT
 #
 # Quality Score: 100% 🏆 Trophy
-# 6 Ws Confidence: 65%
+# 6 Ws Confidence: 25%
 #
-# Generated: 2026-02-08T22:43:12.982Z
-# Command: npx faf-cli git facebook/react
+# Generated: 2026-02-08T21:57:27.455Z
+# Command: npx faf-cli git vercel/next.js
 # Strategy: README extraction + package.json analysis + smart defaults
 #
 # ========================================
@@ -20,23 +20,23 @@
 # ========================================
 
 faf_version: 2.5.0
-generated: 2026-02-08T22:43:12.982Z
+generated: 2026-02-08T21:57:27.455Z
 ai_scoring_system: 2025-09-20
 ai_score: 100%
 ai_confidence: HIGH
 ai_value: 30_seconds_replaces_20_minutes_of_questions
 ai_tldr:
-  project: react
-  stack: See stack section
+  project: next.js
+  stack: React/Express
   quality_bar: production_ready
   current_focus: See README for details
   your_role: Build features with perfect context
 instant_context:
-  tech_stack: See metadata
+  tech_stack: React/Express
   main_language: TypeScript
   key_files:
-    - README.md
     - package.json
+    - tsconfig.json
 context_quality:
   slots_filled: 21/21 (100%)
   ai_confidence: HIGH
@@ -44,10 +44,10 @@ context_quality:
   missing_context:
     - None - fully specified!
 project:
-  name: react
-  goal: The library for web and native user interfaces.
+  name: next.js
+  goal: The React Framework
   main_language: TypeScript
-  type: application
+  type: full-stack
 ai_instructions:
   priority_order:
     - 1. Read THIS .faf file first
@@ -62,65 +62,79 @@ ai_instructions:
     - Check README for project-specific guidelines
     - Review existing code style before modifying
 stack:
-  frontend: slotignored
+  frontend: React
   ui_library: slotignored
-  backend: slotignored
+  backend: Express
   runtime: Node.js
   database: slotignored
-  build: Rollup
+  build: Webpack
   package_manager: npm
   api_type: slotignored
-  hosting: slotignored
+  hosting: Cloud
   cicd: slotignored
   css_framework: slotignored
 metadata:
-  url: https://github.com/facebook/react
-  owner: facebook
-  repository: react
-  description: The library for web and native user interfaces.
-  stars: 242.9K
-  forks: 50.5K
+  url: https://github.com/vercel/next.js
+  owner: vercel
+  repository: next.js
+  description: The React Framework
+  stars: 137.6K
+  forks: 30.4K
   license: MIT
   topics:
-    - declarative
-    - frontend
-    - javascript
-    - library
+    - blog
+    - browser
+    - compiler
+    - components
+    - hybrid
+    - nextjs
+    - node
     - react
-    - ui
+    - server-rendering
+    - ssg
+    - static
+    - static-site-generator
+    - universal
+    - vercel
   languages:
-    - JavaScript (66.8%)
-    - TypeScript (30.3%)
-    - HTML (1.4%)
-    - CSS (1.1%)
-    - CoffeeScript (0.2%)
-    - Shell (0.1%)
-  last_updated: 2026-02-08T22:33:09Z
-  default_branch: main
+    - JavaScript (55.9%)
+    - TypeScript (29.7%)
+    - Rust (13.1%)
+    - CSS (0.8%)
+    - MDX (0.5%)
+    - Shell (0.0%)
+    - SCSS (0.0%)
+    - Python (0.0%)
+    - HTML (0.0%)
+    - Batchfile (0.0%)
+    - WebAssembly (0.0%)
+    - Sass (0.0%)
+    - Pug (0.0%)
+  last_updated: 2026-02-08T21:15:42Z
+  default_branch: canary
 human_context:
-  who: "gradual adoption from the start, and you can use as little or as much
-    React as you need:"
-  what: React is a JavaScript library for building user interfaces.
+  who: Open source contributors
+  what: The React Framework
   why: Solve problems with code
-  where: GitHub + npm registry
-  when: Production/Stable
-  how: npm install + usage guide in README
-  additional_context: See README.md for full details
-  context_score: 65
+  where: GitHub
+  when: Production
+  how: See repository
+  additional_context: null
+  context_score: 25
   total_prd_score: 100
-  success_rate: 65%
+  success_rate: 25%
 scores:
   faf_score: 100
   slot_based_percentage: 100
   total_slots: 21
 tags:
   auto_generated:
-    - react
-    - declarative
-    - frontend
-    - javascript
-    - library
-    - react
+    - next.js
+    - blog
+    - browser
+    - compiler
+    - components
+    - hybrid
   smart_defaults:
     - .faf
     - ai-ready
@@ -129,6 +143,6 @@ tags:
     - open-source
 generated_by:
   tool: faf-cli
-  command: faf git facebook/react
+  command: faf git vercel/next.js
   version: 4.3.0
   source: github-api

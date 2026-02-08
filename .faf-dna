@@ -1,16 +1,16 @@
 {
   "birthCertificate": {
-    "born": "2026-02-08T20:54:17.902Z",
+    "born": "2026-02-08T22:46:12.721Z",
     "birthDNA": 86,
     "birthDNASource": "CLAUDE.md",
-    "projectDNA": "283f444fec4636a7",
+    "projectDNA": "07e29f5aaba684ba",
     "authenticated": false,
-    "certificate": "FAF-2026-CLIX-SA74"
+    "certificate": "FAF-2026-CLIX-D6UQ"
   },
   "versions": [
     {
       "version": "v1.0.0",
-      "timestamp": "2026-02-08T20:54:17.902Z",
+      "timestamp": "2026-02-08T22:46:12.721Z",
       "score": 86,
       "changes": [
         "Initial context from CLAUDE.md"
@@ -24,11 +24,11 @@
     "version": "v1.0.0",
     "score": 86,
     "approved": false,
-    "lastSync": "2026-02-08T20:54:17.902Z"
+    "lastSync": "2026-02-08T22:46:12.721Z"
   },
   "recovery": {
     "claudeMD": "/Users/wolfejam/FAF/cli/CLAUDE.md",
-    "lastBackup": "2026-02-08T20:54:17.902Z",
+    "lastBackup": "2026-02-08T22:46:12.721Z",
     "syncStatus": "active",
     "autoRecover": true
   },
@@ -37,24 +37,24 @@
     "daysActive": 0,
     "averageDailyGrowth": 0,
     "bestDay": {
-      "date": "2026-02-08T20:54:17.902Z",
+      "date": "2026-02-08T22:46:12.721Z",
       "growth": 0
     },
     "bestWeek": {
-      "start": "2026-02-08T20:54:17.902Z",
+      "start": "2026-02-08T22:46:12.721Z",
       "growth": 0
     },
     "milestones": [
       {
         "type": "birth",
         "score": 86,
-        "date": "2026-02-08T20:54:17.902Z",
+        "date": "2026-02-08T22:46:12.721Z",
         "version": "v1.0.0",
         "label": "Birth",
         "emoji": "🐣"
       }
     ]
   },
-  "lastModified": "2026-02-08T20:54:17.902Z",
+  "lastModified": "2026-02-08T22:46:12.721Z",
   "format": "faf-dna-v1"
 }

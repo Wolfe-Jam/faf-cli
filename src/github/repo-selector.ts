@@ -268,28 +268,17 @@ export function showExtractionSuccess(
   console.log(FAF_COLORS.fafCyan('📊 AI-Readiness Analysis'));
   console.log();
 
-  // Current score (repo as-is)
-  const currentTier = getScoreTier(currentScore);
-  console.log(
-    `   Current (from repo): ${chalk.bold(currentScore + '%')} ${currentTier.emoji} ${chalk.gray(currentTier.name)}`
-  );
+  // Status without FAF
+  console.log(`   Current:  ${chalk.yellow('No .faf file')} ⚠️`);
 
-  // New score (with FAF)
+  // Enhanced score with FAF
   const newTier = getScoreTier(newScore);
   console.log(
-    `   New (with FAF):      ${chalk.bold(newScore + '%')} ${newTier.emoji} ${chalk.gray(newTier.name)}`
+    `   With FAF: ${chalk.bold(newScore + '%')} ${newTier.emoji} ${chalk.gray(newTier.name)}`
   );
 
-  // Show improvement
-  const improvement = newScore - currentScore;
-  const percentIncrease = currentScore > 0 ? Math.round((improvement / currentScore) * 100) : 0;
-
-  if (improvement > 0) {
-    console.log();
-    console.log(
-      FAF_COLORS.fafOrange(`   ✨ Improvement: +${improvement} points${percentIncrease > 0 ? ` (${percentIncrease}% increase)` : ''}`)
-    );
-  }
+  console.log();
+  console.log(FAF_COLORS.fafOrange('   ✨ Now AI-ready with complete project context'));
 
   console.log();
   console.log(FAF_COLORS.fafGreen(`☑️  Generated ${outputPath}`));
