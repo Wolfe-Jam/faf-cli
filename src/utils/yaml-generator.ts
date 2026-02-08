@@ -196,6 +196,7 @@ function objectToYaml(obj: Record<string, any>, indent = 0): string {
 // HONEST SCORING: All fields optional - 0% is a valid score!
 export function generateFafContent(projectData: {
   projectName: string;
+  version?: string;
   projectGoal?: string;
   mainLanguage?: string;
   framework?: string;
@@ -357,7 +358,7 @@ export function generateFafContent(projectData: {
     // 🚀 Project State
     state: {
       phase: 'development',
-      version: '1.0.0',
+      version: projectData.version || '1.0.0',
       focus: 'production_deployment',
       status: 'green_flag',
       next_milestone: 'npm_publication',

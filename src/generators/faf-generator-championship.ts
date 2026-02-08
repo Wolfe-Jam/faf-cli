@@ -83,6 +83,10 @@ export async function generateFafFromProject(
       if (descMatch) {
         pyprojectData.description = descMatch[1];
       }
+      const versionMatch = content.match(/version\s*=\s*"([^"]+)"/);
+      if (versionMatch) {
+        pyprojectData.version = versionMatch[1];
+      }
     } catch {
       // Continue without pyproject.toml data
     }
@@ -255,6 +259,8 @@ export async function generateFafFromProject(
     if (nameMatch) {cargoTomlData.name = nameMatch[1];}
     const descMatch = cargoContent.match(/^description\s*=\s*"([^"]+)"/m);
     if (descMatch) {cargoTomlData.description = descMatch[1];}
+    const versionMatch = cargoContent.match(/^version\s*=\s*"([^"]+)"/m);
+    if (versionMatch) {cargoTomlData.version = versionMatch[1];}
   } catch {
     // No Cargo.toml or can't read it
   }
@@ -284,12 +290,15 @@ export async function generateFafFromProject(
     contextSlotsFilled['ui_library'] = 'N/A (CLI)';
     contextSlotsFilled['database'] = 'N/A (CLI)';
     contextSlotsFilled['frontend'] = 'N/A (CLI)';
-    // Cargo.toml overrides
-    if (cargoTomlData.name && !contextSlotsFilled['project_name']) {
+    // Cargo.toml is AUTHORITATIVE for Rust - always override FAB/README guesses
+    if (cargoTomlData.name) {
       contextSlotsFilled['project_name'] = cargoTomlData.name;
     }
-    if (cargoTomlData.description && !contextSlotsFilled['project_goal']) {
+    if (cargoTomlData.description) {
       contextSlotsFilled['project_goal'] = cargoTomlData.description;
+    }
+    if (cargoTomlData.version) {
+      contextSlotsFilled['version'] = cargoTomlData.version;
     }
   }
 
@@ -353,27 +362,36 @@ export async function generateFafFromProject(
     contextSlotsFilled['package_manager'] = 'Bun';
   }
 
-  // Override with package.json if more specific
-  if (packageData.name && !contextSlotsFilled['project_name']) {
+  // package.json is AUTHORITATIVE - always override FAB/README guesses
+  if (packageData.name) {
     contextSlotsFilled['project_name'] = packageData.name;
   }
-  if (packageData.description && !contextSlotsFilled['project_goal']) {
+  if (packageData.description) {
     contextSlotsFilled['project_goal'] = packageData.description;
   }
+  if (packageData.version) {
+    contextSlotsFilled['version'] = packageData.version;
+  }
 
-  // Override with pyproject.toml for Python projects
-  if (pyprojectData.name && !contextSlotsFilled['project_name']) {
+  // pyproject.toml is AUTHORITATIVE for Python - always override FAB/README guesses
+  if (pyprojectData.name) {
     contextSlotsFilled['project_name'] = pyprojectData.name;
   }
-  if (pyprojectData.description && !contextSlotsFilled['project_goal']) {
+  if (pyprojectData.description) {
     contextSlotsFilled['project_goal'] = pyprojectData.description;
   }
+  if (pyprojectData.version) {
+    contextSlotsFilled['version'] = pyprojectData.version;
+  }
 
-  // Apply README data (human context priority)
-  if (readmeData.projectName && !contextSlotsFilled['project_name']) {
+  // Apply README data ONLY if package.json/pyproject.toml/Cargo.toml don't have it
+  // package.json/Cargo.toml/pyproject.toml are AUTHORITATIVE for name/description
+  if (readmeData.projectName && !contextSlotsFilled['project_name'] &&
+      !packageData.name && !pyprojectData.name && !cargoTomlData.name) {
     contextSlotsFilled['project_name'] = readmeData.projectName;
   }
-  if (readmeData.description && !contextSlotsFilled['project_goal']) {
+  if (readmeData.description && !contextSlotsFilled['project_goal'] &&
+      !packageData.description && !pyprojectData.description && !cargoTomlData.description) {
     contextSlotsFilled['project_goal'] = readmeData.description;
   }
   if (readmeData.targetUser && !contextSlotsFilled['who']) {
@@ -478,6 +496,7 @@ export async function generateFafFromProject(
   // HONEST SCORING: No fake defaults - 0% is a valid score!
   const fafData = {
     projectName: contextSlotsFilled['project_name'] || path.basename(projectRoot),
+    version: contextSlotsFilled['version'] || undefined,
     projectGoal: contextSlotsFilled['project_goal'] || undefined,
     mainLanguage: contextSlotsFilled['main_language'] || undefined,
     framework: contextSlotsFilled['framework'] || undefined,
