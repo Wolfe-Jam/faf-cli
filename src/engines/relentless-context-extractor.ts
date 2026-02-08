@@ -130,29 +130,39 @@ export class RelentlessContextExtractor {
    * 🎯 RELENTLESS WHO EXTRACTION - Fight for user context!
    */
   private extractWHO(): ExtractedContext {
-    // TIER 1: CERTAIN - High confidence patterns
+    // TIER 1: AUTHORITATIVE - package.json author
+    if (this.packageJson?.author) {
+      const author = typeof this.packageJson.author === 'string'
+        ? this.packageJson.author
+        : this.packageJson.author.name || this.packageJson.author.email || '';
+
+      if (author.length > 0) {
+        return {
+          value: `${author} team`,
+          confidence: 'CERTAIN',
+          source: 'Package author (authoritative)',
+          needsUserInput: false
+        };
+      }
+    }
+
+    // TIER 2: README - Specific "for X" patterns with minimum length
+    const cleanedReadme = this.getCleanedReadme();
     const certainPatterns = [
-      /for\s+([\w\s]+(?:developers?|engineers?|teams?|companies?|organizations?))/gi,
-      /built\s+(?:specifically\s+)?for\s+([^.,\n]+)/gi,
-      /designed\s+for\s+([^.,\n]+)/gi,
-      /perfect\s+for\s+([^.,\n]+)/gi,
-      /target(?:ing|ed|s)?\s+(?:at|to|for)?\s*([^.,\n]+)/gi,
-      /helps?\s+([^.,\n]+(?:developers?|engineers?|teams?))/gi,
-      /enables?\s+([^.,\n]+)\s+to/gi,
-      /empowers?\s+([^.,\n]+)/gi
+      /(?:built|designed|created)\s+(?:specifically\s+)?for\s+([\w\s]+(?:developers?|engineers?|teams?|companies?|organizations?))/gi,
+      /target\s+(?:audience|users?)(?:\s+is)?\s*:?\s*([\w\s]+)/gi,
+      /perfect\s+for\s+([\w\s]+(?:developers?|engineers?|teams?))/gi
     ];
 
     for (const pattern of certainPatterns) {
-      const matches = this.fileContent.matchAll(pattern);
-      for (const match of matches) {
-        if (match[1] && match[1].length > 5) {
-          return {
-            value: this.cleanExtractedText(match[1]),
-            confidence: 'CERTAIN',
-            source: 'Direct statement',
-            needsUserInput: false
-          };
-        }
+      const match = cleanedReadme.match(pattern);
+      if (match && match[1] && match[1].length > 5) {
+        return {
+          value: this.cleanExtractedText(match[1]),
+          confidence: 'CERTAIN',
+          source: 'README target audience',
+          needsUserInput: false
+        };
       }
     }
 
@@ -205,45 +215,35 @@ export class RelentlessContextExtractor {
    * 🎯 RELENTLESS WHAT EXTRACTION - Core problem/purpose
    */
   private extractWHAT(): ExtractedContext {
-    // TIER 1: CERTAIN - Direct problem statements
-    const certainPatterns = [
-      /solves?\s+(?:the\s+)?(?:problem\s+of\s+)?([^.,\n]+)/gi,
-      /addresses?\s+(?:the\s+)?(?:issue\s+of\s+)?([^.,\n]+)/gi,
-      /fixes?\s+([^.,\n]+)/gi,
-      /eliminates?\s+([^.,\n]+)/gi,
-      /prevents?\s+([^.,\n]+)/gi,
-      /(?:core|main|primary)\s+(?:problem|issue|challenge)(?:\s+is)?\s*:?\s*([^.,\n]+)/gi,
-      /pain\s+points?\s*:?\s*([^.,\n]+)/gi
-    ];
-
-    for (const pattern of certainPatterns) {
-      const matches = this.fileContent.matchAll(pattern);
-      for (const match of matches) {
-        if (match[1] && match[1].length > 10) {
-          return {
-            value: this.cleanExtractedText(match[1]),
-            confidence: 'CERTAIN',
-            source: 'Problem statement',
-            needsUserInput: false
-          };
-        }
-      }
-    }
-
-    // TIER 2: PROBABLE - Feature descriptions
+    // TIER 1: AUTHORITATIVE - package.json description
+    // Manifest files are the source of truth, ALWAYS prioritize them
     const description = this.packageJson?.description || '';
     if (description.length > 20) {
       return {
         value: description,
+        confidence: 'CERTAIN',
+        source: 'Package description (authoritative)',
+        needsUserInput: false
+      };
+    }
+
+    // TIER 2: README - But skip HTML/badges and extract carefully
+    const cleanedReadme = this.getCleanedReadme();
+
+    // Try to extract from specific sections first
+    const purposeSection = cleanedReadme.match(/##?\s+(?:Purpose|What|About|Overview)\s*\n+(.+?)(?:\n\n|\n##?|$)/is);
+    if (purposeSection && purposeSection[1] && purposeSection[1].length > 20) {
+      return {
+        value: this.cleanExtractedText(purposeSection[1]),
         confidence: 'PROBABLE',
-        source: 'Package description',
+        source: 'README Purpose section',
         needsUserInput: true
       };
     }
 
-    // Extract from README first paragraph
-    const firstPara = this.readmeContent.match(/^#\s+.+\n+(.+?)(?:\n\n|\n#|$)/ms);
-    if (firstPara && firstPara[1]) {
+    // Try first paragraph after skipping HTML/badges
+    const firstPara = cleanedReadme.match(/^(.+?)(?:\n\n|\n##?|$)/s);
+    if (firstPara && firstPara[1] && firstPara[1].length > 30) {
       return {
         value: this.cleanExtractedText(firstPara[1]),
         confidence: 'PROBABLE',
@@ -252,7 +252,27 @@ export class RelentlessContextExtractor {
       };
     }
 
-    // TIER 3: INFERRED - From project name
+    // TIER 3: Problem statement patterns - More specific, minimum length 30 chars
+    const certainPatterns = [
+      /(?:core|main|primary)\s+(?:problem|issue|challenge)(?:\s+is)?\s*:?\s*([^.\n]{30,})/gi,
+      /pain\s+points?\s*:?\s*([^.\n]{30,})/gi,
+      /solves?\s+(?:the\s+)?(?:problem\s+of\s+)?([^.\n]{30,})/gi,
+      /(?:purpose|mission)(?:\s+is)?\s*:?\s*([^.\n]{30,})/gi
+    ];
+
+    for (const pattern of certainPatterns) {
+      const match = cleanedReadme.match(pattern);
+      if (match && match[1]) {
+        return {
+          value: this.cleanExtractedText(match[1]),
+          confidence: 'PROBABLE',
+          source: 'Problem statement',
+          needsUserInput: true
+        };
+      }
+    }
+
+    // TIER 4: INFERRED - From project name
     if (this.packageJson?.name) {
       const inferredPurpose = this.inferPurposeFromName(this.packageJson.name);
       return {
@@ -276,50 +296,48 @@ export class RelentlessContextExtractor {
    * 🎯 RELENTLESS WHY EXTRACTION - Mission/purpose
    */
   private extractWHY(): ExtractedContext {
-    // TIER 1: CERTAIN - Mission statements
+    const cleanedReadme = this.getCleanedReadme();
+
+    // TIER 1: CERTAIN - Explicit mission/purpose sections
+    const missionSection = cleanedReadme.match(/##?\s+(?:Mission|Purpose|Why|Vision)\s*\n+(.+?)(?:\n\n|\n##?|$)/is);
+    if (missionSection && missionSection[1] && missionSection[1].length > 20) {
+      return {
+        value: this.cleanExtractedText(missionSection[1]),
+        confidence: 'CERTAIN',
+        source: 'README Mission section',
+        needsUserInput: false
+      };
+    }
+
+    // TIER 2: PROBABLE - Specific mission/goal patterns with minimum length
     const certainPatterns = [
-      /(?:our\s+)?mission(?:\s+is)?\s*:?\s*([^.,\n]+)/gi,
-      /(?:our\s+)?purpose(?:\s+is)?\s*:?\s*([^.,\n]+)/gi,
-      /(?:our\s+)?goal(?:\s+is)?\s*:?\s*([^.,\n]+)/gi,
-      /(?:we\s+)?aim(?:\s+to)?\s+([^.,\n]+)/gi,
-      /(?:we\s+)?strive(?:\s+to)?\s+([^.,\n]+)/gi,
-      /because\s+([^.,\n]+)/gi,
-      /so\s+that\s+([^.,\n]+)/gi
+      /(?:our\s+)?(?:mission|purpose|goal)(?:\s+is)?\s*:?\s*([^.\n]{30,})/gi,
+      /(?:we\s+)?(?:aim|strive)(?:\s+to)?\s+([^.\n]{30,})/gi,
+      /(?:built|created|designed)\s+(?:because|to)\s+([^.\n]{30,})/gi
     ];
 
     for (const pattern of certainPatterns) {
-      const matches = this.fileContent.matchAll(pattern);
-      for (const match of matches) {
-        if (match[1] && match[1].length > 15) {
-          return {
-            value: this.cleanExtractedText(match[1]),
-            confidence: 'CERTAIN',
-            source: 'Mission statement',
-            needsUserInput: false
-          };
-        }
+      const match = cleanedReadme.match(pattern);
+      if (match && match[1]) {
+        return {
+          value: this.cleanExtractedText(match[1]),
+          confidence: 'PROBABLE',
+          source: 'Mission statement',
+          needsUserInput: true
+        };
       }
     }
 
-    // TIER 2: PROBABLE - Benefits/outcomes
-    const benefitPatterns = [
-      /enables?\s+(?:you\s+to\s+)?([^.,\n]+)/gi,
-      /allows?\s+(?:you\s+to\s+)?([^.,\n]+)/gi,
-      /helps?\s+(?:you\s+)?([^.,\n]+)/gi,
-      /makes?\s+(?:it\s+)?([^.,\n]+)/gi
-    ];
-
-    for (const pattern of benefitPatterns) {
-      const matches = this.fileContent.matchAll(pattern);
-      for (const match of matches) {
-        if (match[1] && match[1].length > 15) {
-          return {
-            value: `To ${  this.cleanExtractedText(match[1])}`,
-            confidence: 'PROBABLE',
-            source: 'Benefit statement',
-            needsUserInput: true
-          };
-        }
+    // TIER 3: Check package.json keywords for mission clues
+    if (this.packageJson?.keywords && Array.isArray(this.packageJson.keywords)) {
+      const keywords = this.packageJson.keywords.join(', ');
+      if (keywords.length > 20) {
+        return {
+          value: `To enable ${keywords}`,
+          confidence: 'INFERRED',
+          source: 'Package keywords',
+          needsUserInput: true
+        };
       }
     }
 
@@ -336,7 +354,18 @@ export class RelentlessContextExtractor {
    * 🎯 RELENTLESS WHERE EXTRACTION - Deployment/market
    */
   private extractWHERE(): ExtractedContext {
-    // Check package.json homepage
+    // TIER 1: AUTHORITATIVE - Check package.json repository and npm registry
+    if (this.packageJson?.name) {
+      // If it's an npm package, it's on npm registry
+      return {
+        value: 'npm registry + GitHub',
+        confidence: 'CERTAIN',
+        source: 'Package registry (authoritative)',
+        needsUserInput: false
+      };
+    }
+
+    // TIER 2: Check package.json homepage
     if (this.packageJson?.homepage) {
       const url = this.packageJson.homepage;
       if (url.includes('vercel')) {return this.createContext('Vercel platform', 'CERTAIN');}
@@ -352,20 +381,20 @@ export class RelentlessContextExtractor {
       };
     }
 
-    // Check for cloud indicators
-    if (this.techStack.has('aws-sdk')) {return this.createContext('AWS Cloud', 'CERTAIN');}
-    if (this.techStack.has('@google-cloud/storage')) {return this.createContext('Google Cloud', 'CERTAIN');}
-    if (this.techStack.has('@azure/storage-blob')) {return this.createContext('Azure Cloud', 'CERTAIN');}
+    // TIER 3: Check for cloud indicators
+    if (this.techStack.has('aws-sdk')) {return this.createContext('AWS Cloud', 'PROBABLE', true);}
+    if (this.techStack.has('@google-cloud/storage')) {return this.createContext('Google Cloud', 'PROBABLE', true);}
+    if (this.techStack.has('@azure/storage-blob')) {return this.createContext('Azure Cloud', 'PROBABLE', true);}
 
-    // Check for deployment configs
+    // TIER 4: Check README for deployment mentions
+    const cleanedReadme = this.getCleanedReadme();
     const deploymentPatterns = [
-      /deploy(?:ed|ing|ment)?\s+(?:to|on|at)\s+([^.,\n]+)/gi,
-      /hosted?\s+(?:on|at)\s+([^.,\n]+)/gi,
-      /runs?\s+(?:on|in)\s+([^.,\n]+)/gi
+      /deploy(?:ed|ing|ment)?\s+(?:to|on|at)\s+([^.,\n]{10,})/gi,
+      /hosted?\s+(?:on|at)\s+([^.,\n]{10,})/gi
     ];
 
     for (const pattern of deploymentPatterns) {
-      const match = this.fileContent.match(pattern);
+      const match = cleanedReadme.match(pattern);
       if (match && match[1]) {
         return {
           value: this.cleanExtractedText(match[1]),
@@ -389,16 +418,37 @@ export class RelentlessContextExtractor {
    * 🎯 RELENTLESS WHEN EXTRACTION - Timeline/schedule
    */
   private extractWHEN(): ExtractedContext {
-    // Look for timeline indicators
+    // TIER 1: Check version for stage inference (AUTHORITATIVE)
+    const version = this.packageJson?.version;
+    if (version) {
+      if (version.startsWith('0.')) {
+        return this.createContext('Pre-release/Beta phase', 'CERTAIN', false);
+      } else if (parseFloat(version) >= 1.0) {
+        return this.createContext('Production/Stable', 'CERTAIN', false);
+      }
+    }
+
+    // TIER 2: Look for specific timeline sections in README
+    const cleanedReadme = this.getCleanedReadme();
+    const roadmapSection = cleanedReadme.match(/##?\s+(?:Roadmap|Timeline|Schedule)\s*\n+(.+?)(?:\n\n|\n##?|$)/is);
+    if (roadmapSection && roadmapSection[1] && roadmapSection[1].length > 15) {
+      return {
+        value: this.cleanExtractedText(roadmapSection[1]),
+        confidence: 'PROBABLE',
+        source: 'README Roadmap section',
+        needsUserInput: true
+      };
+    }
+
+    // TIER 3: Look for timeline indicators (minimum length to avoid fragments)
     const timelinePatterns = [
-      /(?:timeline|schedule|deadline|launch|release)(?:\s+is)?\s*:?\s*([^.,\n]+)/gi,
-      /(?:launching|releasing|deploying|shipping)\s+(?:in|on|by)\s+([^.,\n]+)/gi,
-      /(?:expected|planned|scheduled)\s+(?:for|by|on)\s+([^.,\n]+)/gi,
-      /(?:MVP|beta|alpha|v1)\s+(?:by|in|on)\s+([^.,\n]+)/gi
+      /(?:launch|release)(?:\s+date)?(?:\s+is)?\s*:?\s*([^.,\n]{15,})/gi,
+      /(?:launching|releasing|shipping)\s+(?:in|on|by)\s+([^.,\n]{10,})/gi,
+      /(?:expected|planned|scheduled)\s+(?:for|by|on)\s+([^.,\n]{10,})/gi
     ];
 
     for (const pattern of timelinePatterns) {
-      const match = this.fileContent.match(pattern);
+      const match = cleanedReadme.match(pattern);
       if (match && match[1]) {
         return {
           value: this.cleanExtractedText(match[1]),
@@ -406,16 +456,6 @@ export class RelentlessContextExtractor {
           source: 'Timeline mention',
           needsUserInput: true
         };
-      }
-    }
-
-    // Check version for stage inference
-    const version = this.packageJson?.version;
-    if (version) {
-      if (version.startsWith('0.')) {
-        return this.createContext('Pre-release/Beta phase', 'INFERRED', true);
-      } else if (version.startsWith('1.')) {
-        return this.createContext('Production/Stable', 'INFERRED', true);
       }
     }
 
@@ -432,18 +472,38 @@ export class RelentlessContextExtractor {
    * 🎯 RELENTLESS HOW EXTRACTION - Approach/methodology
    */
   private extractHOW(): ExtractedContext {
-    // Look for methodology patterns
+    // TIER 1: Infer from tech stack (AUTHORITATIVE for technical approach)
+    const approach = this.inferApproachFromTech();
+    if (approach) {
+      return {
+        value: approach,
+        confidence: 'CERTAIN',
+        source: 'Tech stack analysis (authoritative)',
+        needsUserInput: false
+      };
+    }
+
+    // TIER 2: Look for methodology sections in README
+    const cleanedReadme = this.getCleanedReadme();
+    const methodSection = cleanedReadme.match(/##?\s+(?:Approach|Methodology|How|Architecture)\s*\n+(.+?)(?:\n\n|\n##?|$)/is);
+    if (methodSection && methodSection[1] && methodSection[1].length > 20) {
+      return {
+        value: this.cleanExtractedText(methodSection[1]),
+        confidence: 'PROBABLE',
+        source: 'README Methodology section',
+        needsUserInput: true
+      };
+    }
+
+    // TIER 3: Look for methodology patterns (minimum length to avoid fragments)
     const methodPatterns = [
-      /(?:built|created|developed)\s+(?:using|with)\s+([^.,\n]+)/gi,
-      /(?:powered|driven)\s+by\s+([^.,\n]+)/gi,
-      /(?:based|built)\s+on\s+([^.,\n]+)/gi,
-      /(?:uses?|utilizes?|leverages?)\s+([^.,\n]+)/gi,
-      /approach(?:\s+is)?\s*:?\s*([^.,\n]+)/gi,
-      /methodology(?:\s+is)?\s*:?\s*([^.,\n]+)/gi
+      /(?:approach|methodology)(?:\s+is)?\s*:?\s*([^.\n]{20,})/gi,
+      /(?:built|created|developed)\s+(?:using|with)\s+([^.\n]{20,})/gi,
+      /(?:powered|driven)\s+by\s+([^.\n]{15,})/gi
     ];
 
     for (const pattern of methodPatterns) {
-      const match = this.fileContent.match(pattern);
+      const match = cleanedReadme.match(pattern);
       if (match && match[1]) {
         return {
           value: this.cleanExtractedText(match[1]),
@@ -452,17 +512,6 @@ export class RelentlessContextExtractor {
           needsUserInput: true
         };
       }
-    }
-
-    // Infer from tech stack
-    const approach = this.inferApproachFromTech();
-    if (approach) {
-      return {
-        value: approach,
-        confidence: 'INFERRED',
-        source: 'Tech stack analysis',
-        needsUserInput: true
-      };
     }
 
     // HONEST SCORING: 0% is a valid score - no fake placeholders
@@ -589,6 +638,33 @@ export class RelentlessContextExtractor {
     }
 
     return todos;
+  }
+
+  /**
+   * Helper: Get cleaned README with HTML/badges removed
+   */
+  private getCleanedReadme(): string {
+    let cleaned = this.readmeContent;
+
+    // Remove HTML tags and badge images
+    cleaned = cleaned.replace(/<[^>]+>/g, '');
+    cleaned = cleaned.replace(/!\[.*?\]\(.*?\)/g, '');
+    cleaned = cleaned.replace(/\[!\[.*?\]\(.*?\)\]\(.*?\)/g, '');
+
+    // Remove badge URLs
+    cleaned = cleaned.replace(/https?:\/\/img\.shields\.io\/[^\s)]+/g, '');
+    cleaned = cleaned.replace(/https?:\/\/badge[^\s)]+/g, '');
+
+    // Remove excessive newlines
+    cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
+
+    // Skip to first markdown heading or content
+    const contentStart = cleaned.search(/^#{1,2}\s+\w+|\n\n[A-Z]/m);
+    if (contentStart > 0) {
+      cleaned = cleaned.substring(contentStart);
+    }
+
+    return cleaned.trim();
   }
 
   /**
