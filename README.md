@@ -136,21 +136,25 @@ When your project evolves, `project.faf` ↔ `CLAUDE.md` stays synchronized in 8
 
 ### What That Actually Costs (Or Saves)
 
-**Without `project.faf`:**
-- ❌ AI re-discovers your project every session (10-15 minutes)
-- ❌ AI asks questions you've answered before (5-10 minutes)
-- ❌ AI makes wrong assumptions → rework (hours to days)
+**The DAAFT Tax** (Discover, Assume, Ask, Forget, Time+Tokens)
+
+Without `project.faf`, every AI session cycles through rediscovery:
+- ❌ AI re-discovers your project (wastes tokens)
+- ❌ AI asks questions you've answered before (wastes time)
+- ❌ AI makes wrong assumptions → rework (wastes developer hours)
 - ❌ Context drifts → compounding errors → project delays
 
-**At $65/hour per developer:**
-- Lost time: ~20 min/session × 5 sessions/day = 100 min/day
-- **Cost per developer: ~$108/day = $2,160/month = $25,920/year**
-- **For a 5-person team: $129,600/year in lost productivity**
+**The Economics:**
+- **Per developer:** $5,460/year + 84 hours lost productivity
+- **50-developer team:** $273,000–$507,630 annually
+- **91% of tokens** wasted on rediscovery instead of building
 
 **The Real Cost:**
-- Token waste (measurable: 91% reduction)
-- Time waste (expensive: $1000s per developer)
-- **Project under-performance and failure** (catastrophic: missed deadlines, scope creep, team frustration)
+- Token waste (measurable: 91% wasted)
+- Time waste (expensive: $5,460/year per developer)
+- **Project failure** (catastrophic: 70% of projects fail, with 39% citing poor requirements and 57% citing communication breakdowns — both rooted in context loss)
+
+**Full analysis:** [faf.one/daaft](https://faf.one/daaft)
 
 ---
 
