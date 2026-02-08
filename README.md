@@ -56,6 +56,39 @@ At 100% AI Readiness:
 
 ---
 
+## 🚀 1-Click Context: The Game Changer
+
+**Generate 90%+ AI context for ANY GitHub repo WITHOUT cloning:**
+
+```bash
+npx faf-cli git https://github.com/facebook/react
+```
+
+**What just happened?**
+- ✅ No install required (`npx` runs latest version)
+- ✅ No cloning required (uses GitHub API)
+- ✅ 2 seconds → 95% AI-ready context
+- ✅ Works on ANY public GitHub repo
+
+**Traditional approach:**
+```bash
+git clone https://github.com/facebook/react  # 10-30 seconds
+cd react
+npm install -g faf-cli                       # 10 seconds
+faf init                                      # 5 seconds
+# Total: ~45 seconds + local files
+```
+
+**1-Click Context:**
+```bash
+npx faf-cli git https://github.com/facebook/react
+# Total: 2 seconds + ZERO local files
+```
+
+**This changes everything.** You can now generate AI context for repos you don't even own. 🏎️
+
+---
+
 ## 💎 The Math
 
 | Without `project.faf` | With `project.faf` |
@@ -82,22 +115,40 @@ If you use AI to code, `project.faf` saves you time and tokens. Every project. E
 
 ---
 
-## ⚡ Quick Start
+## ⚡ 1-Click Context - The KILLER Way
 
-**FAF first. The earlier AI knows your project, the more tokens you save.**
+**Generate 90%+ AI context for ANY GitHub repo. No install. No clone. 2 seconds.**
 
 ```bash
-# Install
+# The revolutionary way - zero install required
+npx faf-cli git https://github.com/facebook/react
+# ⏱️ 2 seconds → 95% 🥈 Silver score
+
+npx faf-cli git https://github.com/sveltejs/svelte
+# ⏱️ 2 seconds → 95% 🥈 Silver score
+
+npx faf-cli git https://github.com/your-org/your-repo
+# ⏱️ 2 seconds → 90%+ context, ready for AI
+```
+
+**That's it. No install. No clone. Just instant AI-ready context.** 🏎️
+
+---
+
+### For Pros: Install Globally (Daily Use)
+
+Once you're hooked, install globally for the full power:
+
+```bash
+# Install once
 npm install -g faf-cli    # or: brew install faf-cli
 
-# Initialize (do this FIRST on any project)
-cd your-project
-faf auto                  # Creates project.faf at 100%
-
-# Verify
-faf status --oneline      # 🏆 project.faf 100% | bi-sync ✓ | foundation optimized
-
-# Now plan. Now build.
+# Then use short commands forever
+faf git <repo-url>        # 1-Click Context (90%+)
+faf go                    # Interactive to 100%
+faf auto                  # Full automation
+faf bi-sync               # Keep synced
+# + 56 more commands
 ```
 
 **Add to package.json** (see FAF status every dev session):
@@ -214,9 +265,11 @@ Score: (15 + 6) / 21 = 100%
 
 | Command | Purpose |
 |---------|---------|
+| **`faf git <url>`** | **🚀 1-Click Context - 90%+ for ANY GitHub repo (no cloning!)** |
+| `faf go` | 🎯 Guided interview to 100% (completes the 6 Ws) |
 | `faf init` | Create project.faf from your codebase |
-| `faf score` | Check AI-readiness (0-100%) |
 | `faf auto` | Auto-enhance to Gold Code |
+| `faf score` | Check AI-readiness (0-100%) |
 | `faf bi-sync` | Sync .faf ↔ CLAUDE.md (8ms) |
 | `faf readme` | Extract 6 Ws from README (+25-35% boost) |
 | `faf human` | Interactive human context entry |
@@ -226,7 +279,13 @@ Score: (15 + 6) / 21 = 100%
 | `faf gemini` | Gemini CLI / Antigravity interop |
 | `faf demo sync` | Live bi-sync demonstration |
 
-Run `faf --help` for all 46 commands.
+**The killer combo:**
+```bash
+npx faf-cli git <repo-url>   # 90%+ context, no install, no clone
+npx faf-cli go               # Interactive polish to 100%
+```
+
+Run `faf --help` for all 60 commands.
 
 ---
 

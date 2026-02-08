@@ -46,6 +46,8 @@ import {
   showBatchSummary
 } from '../github/repo-selector';
 
+import { generateEnhancedFaf } from '../github/faf-git-generator';
+
 export interface GitOptions {
   output?: string;
   list?: boolean;
@@ -125,14 +127,8 @@ export async function gitCommand(query?: string, options: any = {}) {
           files = await fetchGitHubFileTree(repo.owner, repo.repo, metadata.defaultBranch);
         }
 
-        // Detect stack
-        const stacks = detectStackFromMetadata(metadata);
-
-        // Calculate quality score
-        const score = calculateRepoQualityScore(metadata);
-
-        // Generate .faf content
-        const fafContent = generateFafFromGitHub(metadata, stacks, files, score);
+        // Generate enhanced .faf content (90%+ target)
+        const { content: fafContent, score } = await generateEnhancedFaf(metadata, files);
 
         // Determine output path
         // For single repo: respect -o flag if provided
