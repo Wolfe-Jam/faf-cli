@@ -45,7 +45,7 @@ Every README should answer these questions. Here's ours:
 | **👥 WHO** is this for? | Developers using AI coding assistants (Claude, Cursor, Gemini, ChatGPT) |
 | **📦 WHAT** is it? | The package.json for AI context - IANA-registered format |
 | **🌍 WHERE** does it work? | Everywhere AI needs context (Claude Code, Gemini CLI, Cursor, etc.) |
-| **🎯 WHY** do you need it? | 91% fewer tokens compounding to 100% (no tokens), persistent context, zero drift |
+| **🎯 WHY** do you need it? | 100% context (AI-scored), persists forever, bi-syncs automatically - saves $1000s/developer |
 | **⏰ WHEN** should you use it? | New projects (day one), existing projects (now), exploring repos (instantly) |
 | **🚀 HOW** does it work? | `npx faf-cli git <url>` - No install, no clone, 2 seconds |
 
@@ -121,29 +121,52 @@ Like `package.json` tells npm about dependencies, `project.faf` tells AI about y
 
 ## 🎯 WHY do you need it?
 
-### The Problem: AI Guesses. You Pay.
+### What FAF Actually Does
 
-Without `project.faf`, every session:
-- AI re-discovers your project (costs tokens)
-- AI asks questions you've answered before (costs time)
-- AI makes wrong assumptions (costs rework)
-- Context drifts session to session (costs trust)
+**1. 100% Context Quality** — AI-scored with facts, not guesswork
+Every field in your `project.faf` is validated and scored. No more "I think this is a React app" — AI **knows** it is.
 
-### The Solution: Add `project.faf`
+**2. Context Persists Forever** — Never lost, never re-explained
+Your project DNA is written once, read forever. No context drift across sessions, team members, or AI tools.
 
-```
-🏆 Congrats, your project is optimized for AI.
+**3. Bi-Sync Keeps It Current** — Responds to changes automatically
+When your project evolves, `project.faf` ↔ `CLAUDE.md` stays synchronized in 8ms. Always current, never stale.
 
-Over to you. Build something that resonates.
-```
+---
 
-At 100% AI Readiness:
-- AI knows your stack, goals, and conventions
-- Zero clarifying questions needed
-- Context persists across sessions
-- Drift is impossible — the foundation doesn't move
+### What That Actually Costs (Or Saves)
+
+**Without `project.faf`:**
+- ❌ AI re-discovers your project every session (10-15 minutes)
+- ❌ AI asks questions you've answered before (5-10 minutes)
+- ❌ AI makes wrong assumptions → rework (hours to days)
+- ❌ Context drifts → compounding errors → project delays
+
+**At $65/hour per developer:**
+- Lost time: ~20 min/session × 5 sessions/day = 100 min/day
+- **Cost per developer: ~$108/day = $2,160/month = $25,920/year**
+- **For a 5-person team: $129,600/year in lost productivity**
+
+**The Real Cost:**
+- Token waste (measurable: 91% reduction)
+- Time waste (expensive: $1000s per developer)
+- **Project under-performance and failure** (catastrophic: missed deadlines, scope creep, team frustration)
+
+---
+
+### The Truth People Gloss Over
+
+Bad context → wrong assumptions → rework → delays → project failure.
+
+Good context isn't a "nice to have" — it's the foundation of AI-augmented development.
 
 **`project.faf` fixes this permanently.**
+
+At 100% AI Readiness:
+- AI knows your stack, goals, and conventions (scored with facts)
+- Zero clarifying questions needed (context persists)
+- Drift is impossible (bi-sync keeps it current)
+- Your project ships on time, within budget, with fewer surprises
 
 ---
 
