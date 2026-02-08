@@ -83,7 +83,7 @@ Popular repo scores (achieved):
 - Score improvement: 74% → 86% → 100% (after faf auto)
 - All dogfooding tests passing (7/7)
 - missing_context: None - fully specified!
-- 673/687 tests passing (97.9%)
+- 673/687 tests passing (97.9%) - 14 dev-only tests
 
 ### 🎨 Code Comments
 
