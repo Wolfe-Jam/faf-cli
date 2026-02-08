@@ -28,19 +28,82 @@ At 100% AI Readiness, AI stops guessing and starts knowing. Live bi-sync between
 
 ---
 
-## What is `project.faf`?
-
-**It's just another file in your project.** Like `package.json` for npm, `project.faf` is for AI.
-
 <p align="center">
   <img src="https://raw.githubusercontent.com/Wolfe-Jam/faf-cli/main/assets/project-faf-screenshot.png" alt="project.faf in file listing" width="600" />
 </p>
 
-Once you get used to it, it's just another file helping you code.
+<p align="center"><em>Just another file helping you code.</em></p>
 
 ---
 
-## The Problem: AI Guesses. You Pay.
+## 👥 WHO is this for?
+
+**Built for developers working with AI coding assistants:**
+
+- Full-stack developers using Claude, Cursor, Gemini CLI, or ChatGPT
+- Engineering teams collaborating on AI-augmented projects
+- Solo developers tired of re-explaining context every session
+- Open source maintainers wanting contributors to onboard instantly
+- Anyone building with TypeScript, React, Python, Node.js, or modern frameworks
+
+If you use AI to code, `project.faf` saves you time and tokens. Every project. Every session.
+
+---
+
+## 📦 WHAT is project.faf?
+
+**The package.json for AI context.** Just another file in your project.
+
+Like `package.json` tells npm about dependencies, `project.faf` tells AI about your project DNA:
+- **Your stack:** React + TypeScript + Vite
+- **Your goals:** What you're building and why
+- **Your conventions:** How your team works
+- **Your context:** The information only YOU know
+
+**IANA-registered format:** `application/vnd.faf+yaml` — An official standard, not just another .md file.
+
+### 💎 The Math
+
+| Without `project.faf` | With `project.faf` |
+|-----------------------|-------------------|
+| ~1,750 tokens/session verifying context | ~150 tokens once |
+| Risk: wrong guess = 7,500+ tokens rework | Zero risk |
+| Context drift accumulates | Drift impossible |
+| Hope | Trust |
+
+**91% fewer tokens. Zero risk. No drift.**
+
+---
+
+## 🌍 WHERE does it work?
+
+**Everywhere AI needs context:**
+
+### Official Integrations
+- **[Claude Code](https://claude.ai/download)** (Anthropic) — Bi-sync with CLAUDE.md
+- **[Gemini CLI](https://github.com/google/generative-ai-cli)** (Google) — Import/export GEMINI.md
+- **[Antigravity IDE](https://antigravityide.com)** (Google) — Global config support
+- **[Conductor Extension](https://chromewebstore.google.com/detail/conductor)** (Google) — conductor/ directory sync
+
+### Works With
+- Cursor, Cline, Windsurf, any AI coding assistant
+- ChatGPT, Claude Desktop, Gemini chat interfaces
+- CI/CD pipelines, automation scripts, build tools
+
+### Ecosystem
+- **[MCPaaS](https://mcpaas.live)** — MCP as a Service (The Endpoint for Context)
+- **[claude-faf-mcp](https://npmjs.com/package/claude-faf-mcp)** — MCP server (52 tools)
+- **[faf-wasm](https://www.npmjs.com/package/faf-wasm)** — WASM SDK (<5ms scoring)
+- **[Chrome Extension](https://chromewebstore.google.com/detail/lnecebepmpjpilldfmndnaofbfjkjlkm)** — Browser integration
+- **[faf.one](https://faf.one)** — Official website
+
+**Universal format. Works everywhere. Write once, use with any AI.**
+
+---
+
+## 🎯 WHY do you need it?
+
+### The Problem: AI Guesses. You Pay.
 
 Without `project.faf`, every session:
 - AI re-discovers your project (costs tokens)
@@ -48,11 +111,7 @@ Without `project.faf`, every session:
 - AI makes wrong assumptions (costs rework)
 - Context drifts session to session (costs trust)
 
-**`project.faf` fixes this permanently.**
-
----
-
-## The Solution: Add `project.faf`
+### The Solution: Add `project.faf`
 
 ```
 🏆 Congrats, your project is optimized for AI.
@@ -66,14 +125,69 @@ At 100% AI Readiness:
 - Context persists across sessions
 - Drift is impossible — the foundation doesn't move
 
+**`project.faf` fixes this permanently.**
+
 ---
 
-## 🚀 1-Click Context: The Game Changer
+## ⏰ WHEN should you use it?
 
-**Generate 90%+ AI context for ANY GitHub repo WITHOUT cloning:**
+### New Projects
+**Day one.** Initialize with context from the start:
+```bash
+npm init -y
+faf init
+# Your project now has AI-ready context
+```
 
+### Existing Projects
+**Right now.** Add context to projects already in progress:
+```bash
+faf init                    # Start from your codebase
+faf go                      # Interview to 100%
+faf auto                    # Auto-enhance to Gold Code
+```
+
+### Exploring Repos
+**Instantly.** Generate context for ANY GitHub repo WITHOUT cloning:
 ```bash
 npx faf-cli git https://github.com/facebook/react
+# 2 seconds → 95% 🥈 Silver score
+# No install. No clone. Just instant context.
+```
+
+### Daily Workflow
+**Always synced.** Keep context fresh automatically:
+```bash
+faf bi-sync --watch         # Continuous sync with CLAUDE.md
+```
+
+Add to package.json to see FAF status every dev session:
+```json
+{
+  "scripts": {
+    "predev": "faf status --oneline"
+  }
+}
+```
+
+---
+
+## 🚀 HOW does it work?
+
+### Quick Start (No Install Required)
+
+**The revolutionary way — zero install, zero clone:**
+
+```bash
+# Generate AI context for ANY GitHub repo
+npx faf-cli git https://github.com/facebook/react
+# ⏱️ 2 seconds → 95% 🥈 Silver score
+
+npx faf-cli git https://github.com/sveltejs/svelte
+# ⏱️ 2 seconds → 95% 🥈 Silver score
+
+npx faf-cli git https://github.com/your-org/your-repo
+# ⏱️ 2 seconds → 90%+ context, ready for AI
 ```
 
 **What just happened?**
@@ -81,6 +195,43 @@ npx faf-cli git https://github.com/facebook/react
 - ✅ No cloning required (uses GitHub API)
 - ✅ 2 seconds → 95% AI-ready context
 - ✅ Works on ANY public GitHub repo
+
+**This changes everything.** You can now generate AI context for repos you don't even own. 🏎️
+
+### For Your Own Projects
+
+```bash
+# Start with your codebase
+npx faf-cli init
+
+# Or go interactive (completes the 6 Ws)
+npx faf-cli go
+```
+
+### For Pros: Install Globally (Daily Use)
+
+Once you're hooked, install globally for full power:
+
+```bash
+# Install once
+npm install -g faf-cli    # or: brew install faf-cli
+
+# Then use short commands forever
+faf git <repo-url>        # 1-Click Context (90%+)
+faf go                    # Interactive to 100%
+faf auto                  # Full automation
+faf bi-sync               # Keep synced
+# + 56 more commands
+```
+
+### The Killer Combo
+
+```bash
+npx faf-cli git <repo-url>   # 90%+ context, no install, no clone
+npx faf-cli go               # Interactive polish to 100%
+```
+
+### Comparison: Traditional vs 1-Click Context
 
 **Traditional approach:**
 ```bash
@@ -97,129 +248,9 @@ npx faf-cli git https://github.com/facebook/react
 # Total: 2 seconds + ZERO local files
 ```
 
-**This changes everything.** You can now generate AI context for repos you don't even own. 🏎️
-
 ---
 
-## 💎 The Math
-
-| Without `project.faf` | With `project.faf` |
-|-----------------------|-------------------|
-| ~1,750 tokens/session verifying context | ~150 tokens once |
-| Risk: wrong guess = 7,500+ tokens rework | Zero risk |
-| Context drift accumulates | Drift impossible |
-| Hope | Trust |
-
-**91% fewer tokens. Zero risk. No drift.**
-
----
-
-## 👥 Who is this for?
-
-**Built for developers working with AI coding assistants:**
-- Full-stack developers using Claude, Cursor, Gemini CLI, or ChatGPT
-- Engineering teams collaborating on AI-augmented projects
-- Solo developers tired of re-explaining context every session
-- Open source maintainers wanting contributors to onboard instantly
-- Anyone building with TypeScript, React, Python, Node.js, or modern frameworks
-
-If you use AI to code, `project.faf` saves you time and tokens. Every project. Every session.
-
----
-
-## ⚡ 1-Click Context - The KILLER Way
-
-**Generate 90%+ AI context for ANY GitHub repo. No install. No clone. 2 seconds.**
-
-```bash
-# The revolutionary way - zero install required
-npx faf-cli git https://github.com/facebook/react
-# ⏱️ 2 seconds → 95% 🥈 Silver score
-
-npx faf-cli git https://github.com/sveltejs/svelte
-# ⏱️ 2 seconds → 95% 🥈 Silver score
-
-npx faf-cli git https://github.com/your-org/your-repo
-# ⏱️ 2 seconds → 90%+ context, ready for AI
-```
-
-**That's it. No install. No clone. Just instant AI-ready context.** 🏎️
-
----
-
-### For Pros: Install Globally (Daily Use)
-
-Once you're hooked, install globally for the full power:
-
-```bash
-# Install once
-npm install -g faf-cli    # or: brew install faf-cli
-
-# Then use short commands forever
-faf git <repo-url>        # 1-Click Context (90%+)
-faf go                    # Interactive to 100%
-faf auto                  # Full automation
-faf bi-sync               # Keep synced
-# + 56 more commands
-```
-
-**Add to package.json** (see FAF status every dev session):
-```json
-{
-  "scripts": {
-    "predev": "faf status --oneline"
-  }
-}
-```
-
----
-
-## What's New in v3.4.7 — Google Gemini Edition
-
-Full interoperability with the Google Gemini ecosystem. One `.faf` file now works everywhere.
-
-| Platform | Format | FAF Command |
-|----------|--------|-------------|
-| **Gemini CLI** | `GEMINI.md` | `faf gemini` |
-| **Antigravity IDE** | `~/.gemini/GEMINI.md` | `faf gemini --global` |
-| **Conductor Extension** | `conductor/` directory | `faf conductor` |
-| **Claude Code** | `CLAUDE.md` | `faf bi-sync` |
-
-```bash
-# Import from Google formats
-faf gemini import       # GEMINI.md → .faf
-faf conductor import    # conductor/ → .faf
-
-# Export to Google formats
-faf gemini export       # .faf → GEMINI.md
-faf conductor export    # .faf → conductor/
-
-# Global Antigravity config
-faf gemini --global     # ~/.gemini/GEMINI.md
-```
-
-**Universal AI Context** — Write once, use with Claude, Gemini CLI, Antigravity IDE, and Conductor.
-
----
-
-## 🔄 Bi-Sync: `project.faf` ↔ `CLAUDE.md`
-
-Your `project.faf` stays synchronized with `CLAUDE.md` in milliseconds.
-
-```
-project.faf  ←──── 8ms ────→  CLAUDE.md
-     │                            │
-     └── Single source of truth ──┘
-```
-
-```bash
-faf bi-sync              # Sync once
-faf bi-sync --watch      # Continuous sync
-```
-
----
-
-## Tier System: From Blind to Optimized
+## 🎖️ Tier System: From Blind to Optimized
 
 | Tier | Score | Status |
 |------|-------|--------|
@@ -273,7 +304,7 @@ Score: (15 + 6) / 21 = 100%
 
 ---
 
-## Core Commands
+## 🔧 Core Commands
 
 | Command | Purpose |
 |---------|---------|
@@ -291,17 +322,44 @@ Score: (15 + 6) / 21 = 100%
 | `faf gemini` | Gemini CLI / Antigravity interop |
 | `faf demo sync` | Live bi-sync demonstration |
 
-**The killer combo:**
-```bash
-npx faf-cli git <repo-url>   # 90%+ context, no install, no clone
-npx faf-cli go               # Interactive polish to 100%
-```
-
 Run `faf --help` for all 60 commands.
 
 ---
 
-## Boris-Flow Integration Tests
+## 🔄 Bi-Sync: `project.faf` ↔ `CLAUDE.md`
+
+Your `project.faf` stays synchronized with `CLAUDE.md` in milliseconds.
+
+```
+project.faf  ←──── 8ms ────→  CLAUDE.md
+     │                            │
+     └── Single source of truth ──┘
+```
+
+```bash
+faf bi-sync              # Sync once
+faf bi-sync --watch      # Continuous sync
+```
+
+---
+
+## 🧠 Human Context (The 6 Ws)
+
+Boost your score by 25-35% with human context — the information only YOU know.
+
+```bash
+# Auto-extract from README
+faf readme --apply
+
+# Manual entry
+faf human-set who "Frontend team at Acme Corp"
+faf human-set what "Customer dashboard with real-time analytics"
+faf human-set why "10x faster than previous solution"
+```
+
+---
+
+## 🧪 Boris-Flow Integration Tests
 
 **Boris-Flow** is a 12-test validation suite that ensures faf-cli is demo-ready and safe to publish.
 
@@ -359,23 +417,7 @@ Boris-Flow validates the FAF file structure that WJTTC Tier 8 tests. Running it 
 
 ---
 
-## Human Context (The 6 Ws)
-
-Boost your score by 25-35% with human context — the information only YOU know.
-
-```bash
-# Auto-extract from README
-faf readme --apply
-
-# Manual entry
-faf human-set who "Frontend team at Acme Corp"
-faf human-set what "Customer dashboard with real-time analytics"
-faf human-set why "10x faster than previous solution"
-```
-
----
-
-## CLI vs MCP
+## 🤝 CLI vs MCP
 
 | Tool | Use Case |
 |------|----------|
@@ -386,13 +428,31 @@ Same `project.faf`. Same scoring. Same result. Different execution layer.
 
 ---
 
-## 📦 Ecosystem
+## 🌐 What's New in v3.4.7 — Google Gemini Edition
 
-- **[MCPaaS](https://mcpaas.live)** — MCP as a Service (The Endpoint for Context)
-- **[claude-faf-mcp](https://npmjs.com/package/claude-faf-mcp)** — MCP server (52 tools)
-- **[faf-wasm](https://www.npmjs.com/package/faf-wasm)** — WASM SDK (<5ms scoring)
-- **[Chrome Extension](https://chromewebstore.google.com/detail/lnecebepmpjpilldfmndnaofbfjkjlkm)** — Browser integration
-- **[faf.one](https://faf.one)** — Official website
+Full interoperability with the Google Gemini ecosystem. One `.faf` file now works everywhere.
+
+| Platform | Format | FAF Command |
+|----------|--------|-------------|
+| **Gemini CLI** | `GEMINI.md` | `faf gemini` |
+| **Antigravity IDE** | `~/.gemini/GEMINI.md` | `faf gemini --global` |
+| **Conductor Extension** | `conductor/` directory | `faf conductor` |
+| **Claude Code** | `CLAUDE.md` | `faf bi-sync` |
+
+```bash
+# Import from Google formats
+faf gemini import       # GEMINI.md → .faf
+faf conductor import    # conductor/ → .faf
+
+# Export to Google formats
+faf gemini export       # .faf → GEMINI.md
+faf conductor export    # .faf → conductor/
+
+# Global Antigravity config
+faf gemini --global     # ~/.gemini/GEMINI.md
+```
+
+**Universal AI Context** — Write once, use with Claude, Gemini CLI, Antigravity IDE, and Conductor.
 
 ---
 
