@@ -17,6 +17,10 @@ import os from 'os';
 
 const TEST_TIMEOUT = 30000; // 30 seconds per test
 
+// Use the local faf-cli binary, not whatever 'faf' is in PATH
+const FAF_CLI = path.resolve(__dirname, '../../dist/cli.js');
+const FAF_COMMAND = `node ${FAF_CLI}`;
+
 /**
  * Test fixture: Known repository data
  */
@@ -62,8 +66,8 @@ function runFafInit(repoPath: string): any {
     unlinkSync(fafPath);
   }
 
-  // Run faf init
-  execSync('faf init --force --quiet', {
+  // Run faf init (using local binary)
+  execSync(`${FAF_COMMAND} init --force --quiet`, {
     cwd: repoPath,
     stdio: 'pipe',
     encoding: 'utf-8'
@@ -82,8 +86,8 @@ function runFafGit(githubSlug: string): any {
   mkdirSync(tempDir, { recursive: true });
 
   try {
-    // Run faf git
-    const output = execSync(`faf git ${githubSlug}`, {
+    // Run faf git (using local binary)
+    const output = execSync(`${FAF_COMMAND} git ${githubSlug}`, {
       cwd: tempDir,
       encoding: 'utf-8'
     });
@@ -162,7 +166,8 @@ describe('🔴 TIER 1: BRAKE - Critical Dogfooding Validation', () => {
       expect(data.project.type).toBe(fixture.expectedType);
     }, TEST_TIMEOUT);
 
-    test('faf git: extracts correct name from GitHub', () => {
+    // SKIP: Network-dependent tests (GitHub API rate limits in CI)
+    test.skip('faf git: extracts correct name from GitHub', () => {
       const fixture = FIXTURES[0];
       if (!fixture.github) return;
 
@@ -172,7 +177,8 @@ describe('🔴 TIER 1: BRAKE - Critical Dogfooding Validation', () => {
       expect(data.name).not.toBe('Install');
     }, TEST_TIMEOUT);
 
-    test('faf init vs faf git: name consistency', () => {
+    // SKIP: Network-dependent tests (GitHub API rate limits in CI)
+    test.skip('faf init vs faf git: name consistency', () => {
       const fixture = FIXTURES[0];
       if (!fixture.path || !fixture.github) return;
 
@@ -214,7 +220,8 @@ describe('🔴 TIER 1: BRAKE - Critical Dogfooding Validation', () => {
  */
 describe('🟡 TIER 2: ENGINE - Multi-Language Support', () => {
   describe('C++ projects (whisper.cpp)', () => {
-    test('faf git: correctly detects C++ as primary language', () => {
+    // SKIP: Network-dependent tests (GitHub API rate limits in CI)
+    test.skip('faf git: correctly detects C++ as primary language', () => {
       const fixture = FIXTURES[1]; // whisper.cpp
       if (!fixture.github) return;
 
@@ -224,7 +231,8 @@ describe('🟡 TIER 2: ENGINE - Multi-Language Support', () => {
       expect(data.stack.primary_language).not.toBe('Python'); // Regression check!
     }, TEST_TIMEOUT);
 
-    test('faf git: extracts correct name for C++ project', () => {
+    // SKIP: Network-dependent tests (GitHub API rate limits in CI)
+    test.skip('faf git: extracts correct name for C++ project', () => {
       const fixture = FIXTURES[1];
       if (!fixture.github) return;
 
@@ -233,7 +241,8 @@ describe('🟡 TIER 2: ENGINE - Multi-Language Support', () => {
       expect(data.name).toBe(fixture.expectedName);
     }, TEST_TIMEOUT);
 
-    test('faf git: detects multiple languages with correct weighting', () => {
+    // SKIP: Network-dependent tests (GitHub API rate limits in CI)
+    test.skip('faf git: detects multiple languages with correct weighting', () => {
       const fixture = FIXTURES[1];
       if (!fixture.github) return;
 
@@ -284,7 +293,8 @@ describe('🟢 TIER 3: AERO - Edge Cases', () => {
     }
   }, TEST_TIMEOUT);
 
-  test('faf git handles repos without topics gracefully', () => {
+  // SKIP: Network-dependent tests (GitHub API rate limits in CI)
+  test.skip('faf git handles repos without topics gracefully', () => {
     // Test with a minimal repo (if we have one)
     // Skip for now - add when we have a suitable fixture
   });
@@ -294,7 +304,8 @@ describe('🟢 TIER 3: AERO - Edge Cases', () => {
  * TIER 4: COMPARISON MATRIX - faf init vs faf git
  */
 describe('🔵 TIER 4: COMPARISON - Init vs Git Consistency', () => {
-  test('both methods produce valid .faf files', () => {
+  // SKIP: Network-dependent tests (GitHub API rate limits in CI)
+  test.skip('both methods produce valid .faf files', () => {
     const fixture = FIXTURES[0];
     if (!fixture.path || !fixture.github) return;
 
@@ -309,7 +320,8 @@ describe('🔵 TIER 4: COMPARISON - Init vs Git Consistency', () => {
     expect(gitData.metadata).toBeDefined();
   }, TEST_TIMEOUT * 2);
 
-  test('both methods agree on project name', () => {
+  // SKIP: Network-dependent tests (GitHub API rate limits in CI)
+  test.skip('both methods agree on project name', () => {
     const fixture = FIXTURES[0];
     if (!fixture.path || !fixture.github) return;
 
@@ -319,7 +331,8 @@ describe('🔵 TIER 4: COMPARISON - Init vs Git Consistency', () => {
     expect(initData.project.name).toBe(gitData.name);
   }, TEST_TIMEOUT * 2);
 
-  test('both methods detect primary language correctly', () => {
+  // SKIP: Network-dependent tests (GitHub API rate limits in CI)
+  test.skip('both methods detect primary language correctly', () => {
     const fixture = FIXTURES[0];
     if (!fixture.path || !fixture.github) return;
 
