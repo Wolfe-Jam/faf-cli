@@ -245,6 +245,10 @@ export function generateFafContent(projectData: {
   // Calculate filled vs total slots for missing context
   const totalSlotsCount = 21; // Base slots
   const filledSlotsCount = Math.round((projectData.slotBasedPercentage / 100) * totalSlotsCount);
+  // 🎯 SLOT-IGNORE: Check which slots are truly missing vs. ignored
+  // Slots set to 'None' are IGNORED (not applicable), not MISSING
+  // Like .gitignore: "We checked. Doesn't apply. That's correct."
+  // See docs/SLOT-IGNORE.md for specification
   const missingSlots = [];
   if (!projectData.targetUser) {missingSlots.push('Target users');}
   if (!projectData.coreProblem) {missingSlots.push('Core problem');}

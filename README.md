@@ -173,6 +173,43 @@ faf bi-sync --watch      # Continuous sync
 
 ---
 
+## 🎯 Slot-Ignore: The Perfect Way to Handle App Types
+
+**Like `.gitignore` for files, slot-ignore for context slots.**
+
+FAF has 21 slots. Some don't apply to your project type. **Slot-ignore** handles this elegantly:
+
+```yaml
+# CLI Tool - 21 slots total
+stack:
+  database: None           # ✅ Ignored (CLI doesn't need database)
+  css_framework: None      # ✅ Ignored (no web UI)
+  backend: Node.js         # ✅ Filled (has value)
+  # ... other slots
+
+Score: (Filled + Ignored) / 21 = 100% 🏆
+```
+
+**The formula:**
+```
+Total Slots: 21 (constant)
+├── Filled: 15 (has values)
+├── Ignored: 6 (set to 'None' - not applicable)
+└── Missing: 0 (undefined - needs attention)
+
+Score: (15 + 6) / 21 = 100%
+```
+
+**Common patterns:**
+- **CLI Tools:** Ignore `database`, `css_framework`, `frontend`
+- **Backend APIs:** Ignore `css_framework`, `frontend`, `ui_library`
+- **Static Sites:** Ignore `backend`, `database`, `api_type`
+- **Libraries:** Ignore `hosting`, `cicd`, `database`
+
+**Full spec:** [docs/SLOT-IGNORE.md](./docs/SLOT-IGNORE.md)
+
+---
+
 ## Core Commands
 
 | Command | Purpose |

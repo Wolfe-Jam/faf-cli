@@ -285,7 +285,10 @@ export async function generateFafFromProject(
     contextSlotsFilled['build_tool'] = 'Cargo';
     contextSlotsFilled['package_manager'] = 'Cargo';
     contextSlotsFilled['runtime'] = 'Native binary';
-    // Set 'None' for non-applicable slots (standardized - matches yaml-generator check)
+    // 🎯 SLOT-IGNORE: Rust CLI tools don't need web frontend or databases
+    // Setting to 'None' = slot-ignore (like .gitignore, .fafignore)
+    // Score: (Filled + Ignored) / 21 = allows 100% without inapplicable slots
+    // See docs/SLOT-IGNORE.md for specification
     contextSlotsFilled['css_framework'] = 'None';
     contextSlotsFilled['ui_library'] = 'None';
     contextSlotsFilled['database'] = 'None';
@@ -324,7 +327,10 @@ export async function generateFafFromProject(
     else if (deps?.yargs) {contextSlotsFilled['cli_framework'] = 'yargs';}
     else if (deps?.oclif) {contextSlotsFilled['cli_framework'] = 'oclif';}
 
-    // Set 'None' for non-applicable slots (CLI tools don't have databases/frontend)
+    // 🎯 SLOT-IGNORE: CLI tools don't need database/frontend/css
+    // Like .gitignore for files, slot-ignore marks slots as "not applicable"
+    // Setting to 'None' tells scoring: "We checked. Doesn't apply. That's correct."
+    // See docs/SLOT-IGNORE.md for full specification
     contextSlotsFilled['database'] = 'None';
     if (!contextSlotsFilled['frontend']) {
       contextSlotsFilled['frontend'] = 'None';  // Unless already set

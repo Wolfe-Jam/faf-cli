@@ -965,7 +965,21 @@ export class FafCompiler {
     return discovered;
   }
 
+  /**
+   * 🎯 SLOT-IGNORE: Remove slot-ignore values during optimization
+   *
+   * Slot-ignore values like 'None' are kept in the .faf file for scoring,
+   * but removed during compilation for cleaner output.
+   *
+   * Like .gitignore: These values mark slots as "not applicable"
+   * - During generation: Set to 'None' (slot-ignore)
+   * - During scoring: Counted as filled (not missing)
+   * - During compilation: Removed (optimization)
+   *
+   * See docs/SLOT-IGNORE.md for specification
+   */
   private removeDefaults(data: any, changes: string[]): void {
+    // Slot-ignore values: Mark slots as "not applicable"
     const defaults = ['None', 'Unknown', 'Not specified', 'N/A'];
 
     const removeFromObject = (obj: any, path: string) => {
@@ -975,7 +989,7 @@ export class FafCompiler {
 
         if (defaults.includes(value)) {
           delete obj[key];
-          changes.push(`Removed default value at ${fullPath}`);
+          changes.push(`Removed slot-ignore value at ${fullPath}`);
         } else if (typeof value === 'object' && value !== null) {
           removeFromObject(value, fullPath);
         }
