@@ -19,9 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Like `.gitignore` for files, `slot-ignore` for context slots
   - Formula: `(Filled + Ignored) / 21 = 100%`
 
-### 🐛 Fixes
+### ✨ Improvements
 
-- **6 Ws extraction** - Fixed all broken human context extraction
+- **6 Ws extraction** - Transformed human context extraction
   - WHO: Checks package.json author first (TIER 1 authoritative)
   - WHAT: package.json description now TIER 1 (was TIER 2)
   - WHY: Targets Mission sections, uses keywords as fallback
@@ -30,10 +30,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - HOW: Tech stack analysis is TIER 1 (inferred from dependencies)
   - Added `getCleanedReadme()` helper to strip HTML/badges/noise
 
-- **Slot-ignore mechanism** - Fixed broken implementation
+- **Slot-ignore mechanism** - Overhauled implementation
   - Standardized to `'None'` (was inconsistent: 'N/A (CLI)', 'None', etc.)
   - Added `database: 'None'` for Node.js CLI projects
-  - Fixed yaml-generator logic: `if (!database && database !== 'None')` (was OR, not AND)
+  - Improved yaml-generator logic: `if (!database && database !== 'None')` (was OR, not AND)
   - CLI projects now correctly exclude non-applicable slots from missing_context
 
 - **README** - Added WHO section for better target audience extraction
