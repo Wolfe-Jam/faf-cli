@@ -216,8 +216,18 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
         // Apply TURBO-CAT slot fill recommendations to existing stack fields
         if (analysis.slotFillRecommendations && Object.keys(analysis.slotFillRecommendations).length > 0) {
           Object.entries(analysis.slotFillRecommendations).forEach(([key, value]) => {
-            // Only fill if current value is None/null/undefined
-            if (!parsed.stack[key] || parsed.stack[key] === 'None' || parsed.stack[key] === null) {
+            const currentValue = parsed.stack[key];
+
+            // Replace if:
+            // 1. Empty/None/Unknown/null/undefined
+            // 2. Generic placeholder values (Node.js when language is Python, etc.)
+            const shouldReplace = !currentValue
+              || currentValue === 'None'
+              || currentValue === 'Unknown'
+              || currentValue === null
+              || currentValue === 'TBD';
+
+            if (shouldReplace) {
               parsed.stack[key] = value;
             }
           });
