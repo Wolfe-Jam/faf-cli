@@ -28,6 +28,18 @@ At 100% AI Readiness, AI stops guessing and starts knowing. Live bi-sync between
 
 ---
 
+## What is `project.faf`?
+
+**It's just another file in your project.** Like `package.json` for npm, `project.faf` is for AI.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Wolfe-Jam/faf-cli/main/assets/project-faf-screenshot.png" alt="project.faf in file listing" width="600" />
+</p>
+
+Once you get used to it, it's just another file helping you code.
+
+---
+
 ## The Problem: AI Guesses. You Pay.
 
 Without `project.faf`, every session:

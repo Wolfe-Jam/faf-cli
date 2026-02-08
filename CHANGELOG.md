@@ -5,6 +5,46 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.3.0] - 2026-02-10 — FAF GIT Edition 🚀
+
+### 🚀 Enhanced FAF GIT
+
+**No install. No clone. Instant context. ANY repo.**
+
+### ✨ What's New
+
+- **Enhanced faf git** - Transformed to achieve 90-95% AI context scores
+  - README.md extraction via GitHub API (no cloning required)
+  - 6 Ws extraction with pattern matching (WHO/WHAT/WHY/WHERE/WHEN/HOW)
+  - Deep package.json stack analysis (frameworks, testing, build tools)
+  - Full FAF schema generation matching `faf init` quality
+  - Enhanced scoring algorithm targeting 90%+ results
+  - New file: `src/github/faf-git-generator.ts` (625 lines)
+
+### 📈 Results
+
+Popular repo scores (achieved):
+- React: 95% 🥈 Silver
+- Svelte: 95% 🥈 Silver
+- Vite: 95% 🥈 Silver
+- Average: 85-90% on well-documented repos
+
+### 📚 Documentation
+
+- **README** - Added project.faf screenshot showing file in context
+  - Visual explainer: "just another file helping you code"
+  - Positioned near top for immediate understanding
+  - Shows project.faf alongside package.json and README.md
+
+### 🎯 Positioning
+
+**FAF GIT is the killer feature:**
+- Primary workflow: `npx faf-cli git <url>` (no install needed)
+- Pro workflow: `npm install -g faf-cli` then `faf git <url>`
+- Works on ANY public GitHub repo
+- 2 seconds to AI-ready context
+- No cloning, no setup, just instant results
+
 ## [4.2.2] - 2026-02-08 — Context Quality Edition 🎯
 
 ### 🎯 Slot-Ignore System (Documentation)
