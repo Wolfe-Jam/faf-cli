@@ -285,11 +285,11 @@ export async function generateFafFromProject(
     contextSlotsFilled['build_tool'] = 'Cargo';
     contextSlotsFilled['package_manager'] = 'Cargo';
     contextSlotsFilled['runtime'] = 'Native binary';
-    // Set N/A for non-applicable slots (reduces slot count for CLI)
-    contextSlotsFilled['css_framework'] = 'N/A (CLI)';
-    contextSlotsFilled['ui_library'] = 'N/A (CLI)';
-    contextSlotsFilled['database'] = 'N/A (CLI)';
-    contextSlotsFilled['frontend'] = 'N/A (CLI)';
+    // Set 'None' for non-applicable slots (standardized - matches yaml-generator check)
+    contextSlotsFilled['css_framework'] = 'None';
+    contextSlotsFilled['ui_library'] = 'None';
+    contextSlotsFilled['database'] = 'None';
+    contextSlotsFilled['frontend'] = 'None';
     // Cargo.toml is AUTHORITATIVE for Rust - always override FAB/README guesses
     if (cargoTomlData.name) {
       contextSlotsFilled['project_name'] = cargoTomlData.name;
@@ -323,6 +323,12 @@ export async function generateFafFromProject(
     if (deps?.commander) {contextSlotsFilled['cli_framework'] = 'commander';}
     else if (deps?.yargs) {contextSlotsFilled['cli_framework'] = 'yargs';}
     else if (deps?.oclif) {contextSlotsFilled['cli_framework'] = 'oclif';}
+
+    // Set 'None' for non-applicable slots (CLI tools don't have databases/frontend)
+    contextSlotsFilled['database'] = 'None';
+    if (!contextSlotsFilled['frontend']) {
+      contextSlotsFilled['frontend'] = 'None';  // Unless already set
+    }
 
     // Detect runtime (Bun takes priority if bun.lockb exists)
     if (isBunProject) {

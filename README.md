@@ -69,6 +69,19 @@ At 100% AI Readiness:
 
 ---
 
+## 👥 Who is this for?
+
+**Built for developers working with AI coding assistants:**
+- Full-stack developers using Claude, Cursor, Gemini CLI, or ChatGPT
+- Engineering teams collaborating on AI-augmented projects
+- Solo developers tired of re-explaining context every session
+- Open source maintainers wanting contributors to onboard instantly
+- Anyone building with TypeScript, React, Python, Node.js, or modern frameworks
+
+If you use AI to code, `project.faf` saves you time and tokens. Every project. Every session.
+
+---
+
 ## ⚡ Quick Start
 
 **FAF first. The earlier AI knows your project, the more tokens you save.**

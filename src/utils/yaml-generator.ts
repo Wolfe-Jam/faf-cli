@@ -249,8 +249,9 @@ export function generateFafContent(projectData: {
   if (!projectData.targetUser) {missingSlots.push('Target users');}
   if (!projectData.coreProblem) {missingSlots.push('Core problem');}
   if (!projectData.timeline) {missingSlots.push('Timeline');}
-  if (!projectData.cicd || projectData.cicd === 'None') {missingSlots.push('CI/CD pipeline');}
-  if (!projectData.database || projectData.database === 'None') {missingSlots.push('Database');}
+  // Only mark as missing if NOT set to 'None' (which means "not applicable")
+  if (!projectData.cicd && projectData.cicd !== 'None') {missingSlots.push('CI/CD pipeline');}
+  if (!projectData.database && projectData.database !== 'None') {missingSlots.push('Database');}
 
   const fafData = {
     // FAF schema version (not CLI version)
