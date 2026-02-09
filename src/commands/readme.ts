@@ -489,37 +489,47 @@ export async function readmeCommand(
       process.exit(0);
     }
 
-    // Step 3: Update project.faf
-    const fafPath = await findFafFile(projectRoot);
+    // Step 3: Update project.faf (always use standard filename)
+    const foundFafPath = await findFafFile(projectRoot);
+    const projectFafPath = path.join(projectRoot, 'project.faf');
 
-    if (fafPath) {
-      const fafContent = await fs.readFile(fafPath, 'utf-8');
-      const fafData = parseYAML(fafContent) || {};
+    let fafData: any = {};
 
-      if (!fafData.human_context) {
-        fafData.human_context = {};
+    if (foundFafPath) {
+      // Read existing .faf file
+      const fafContent = await fs.readFile(foundFafPath, 'utf-8');
+      fafData = parseYAML(fafContent) || {};
+
+      // If we found .faf (legacy), migrate to project.faf
+      if (path.basename(foundFafPath) === '.faf' && foundFafPath !== projectFafPath) {
+        console.log();
+        console.log(chalk.yellow(`   🔄 Migrating .faf → project.faf`));
       }
-
-      // Update with user-provided answers
-      fafData.human_context.who = answers.who;
-      fafData.human_context.what = answers.what;
-      fafData.human_context.where = answers.where;
-      fafData.human_context.why = answers.why;
-      fafData.human_context.when = answers.when;
-      fafData.human_context.how = answers.how;
-      fafData.human_context.context_score = 100; // User-provided = 100%
-      fafData.human_context.success_rate = '100%';
-
-      await fs.writeFile(fafPath, stringifyYAML(fafData), 'utf-8');
-
-      console.log();
-      console.log(FAF_COLORS.fafGreen(`☑️ Updated ${path.basename(fafPath)}`));
-      console.log(chalk.cyan(`   Context Quality: 100% (user-provided)`));
     } else {
       console.log();
-      console.log(chalk.yellow(`   ⚠️  No .faf file found`));
-      console.log(chalk.gray(`   💡 Run "faf init" first to create one`));
+      console.log(chalk.yellow(`   ⚠️  No .faf file found - creating project.faf`));
     }
+
+    if (!fafData.human_context) {
+      fafData.human_context = {};
+    }
+
+    // Update with user-provided answers
+    fafData.human_context.who = answers.who;
+    fafData.human_context.what = answers.what;
+    fafData.human_context.where = answers.where;
+    fafData.human_context.why = answers.why;
+    fafData.human_context.when = answers.when;
+    fafData.human_context.how = answers.how;
+    fafData.human_context.context_score = 100; // User-provided = 100%
+    fafData.human_context.success_rate = '100%';
+
+    // Always write to project.faf (standard filename)
+    await fs.writeFile(projectFafPath, stringifyYAML(fafData), 'utf-8');
+
+    console.log();
+    console.log(FAF_COLORS.fafGreen(`☑️ Updated project.faf`));
+    console.log(chalk.cyan(`   Context Quality: 100% (user-provided)`));
 
     // Step 4: Generate README section
     const readmeSection = generateReadmeSection(answers);
