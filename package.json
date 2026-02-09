@@ -64,6 +64,7 @@
     "precommit": "npm run version:check",
     "showcase": "ts-node scripts/run-industry-showcase.ts",
     "showcase:build": "npm run build && npm run showcase",
+    "showcase:test": "ts-node scripts/run-test-showcase.ts",
     "postinstall": "echo '\n🏎️ Welcome to FAF!\n\n⚡ Getting started:\n   1. Run \"faf init\" in your project\n   2. Get AI-ready context in <50ms\n   3. Share .faf files with Claude/Gemini/OpenAI-Codex\n\n📚 Docs: faf.one/docs\n💨 Want TURBO? faf.one/pricing\n\n⭐ Love it? Star us: github.com/Wolfe-Jam/faf-cli\n💬 Questions? github.com/Wolfe-Jam/faf-cli/discussions\n\n☑️ FREE FOREVER • 10,000+ developers • Podium Edition\n'"
   },
   "keywords": [
@@ -132,6 +133,7 @@
     "@types/jest": "^29.5.14",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^20.11.17",
+    "@types/prompts": "^2.4.9",
     "@typescript-eslint/eslint-plugin": "^8.41.0",
     "@typescript-eslint/parser": "^8.41.0",
     "eslint": "^9.39.2",

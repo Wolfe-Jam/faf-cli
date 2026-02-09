@@ -250,32 +250,32 @@ Examples:
 // 📖 faf readme - Extract 6 Ws from README intelligently
 program
   .command('readme [directory]')
-  .description('📖 Extract 6 Ws (Who/What/Why/Where/When/How) from README into human_context')
-  .option('-a, --apply', 'Apply extracted context to .faf file')
-  .option('--force', 'Overwrite existing human_context values')
-  .option('-f, --file <path>', 'Specify README file path')
-  .option('-q, --quiet', 'Minimal output, no source annotations')
+  .description('📋 6Ws README Builder - Interactive questionnaire with smart defaults')
+  .option('-q, --quiet', 'Minimal output')
+  .option('-o, --output <file>', 'Output file for README section (default: README-6ws.md)')
   .addHelpText('after', `
 Examples:
-  $ faf readme                   # Extract and preview 6 Ws from README
-  $ faf readme --apply           # Extract and apply to .faf human_context
-  $ faf readme --apply --force   # Replace existing human_context values
-  $ faf readme --file ABOUT.md   # Use a different file
-  $ faf readme ./my-project      # Analyze different directory
+  $ faf readme                   # Interactive 6Ws (auto-extracts from README)
+  $ faf readme ./my-project      # Run in different directory
+  $ faf readme --output CONTEXT.md # Save to custom file
 
-📖 What faf readme does:
-  1. Reads your README.md intelligently
-  2. Extracts the 6 Ws for human_context:
-     - WHO: Target audience, users
-     - WHAT: Project description, purpose
-     - WHY: Problem solved, motivation
-     - WHERE: Platform, environment
-     - WHEN: Version, release status
-     - HOW: Installation, getting started
-  3. Shows confidence score for each extraction
-  4. Optionally applies to .faf (--apply)
+📋 What faf readme does (v4.4.0):
+  1. Auto-extracts 6 Ws from README.md (if exists)
+  2. Interactive questionnaire with smart defaults
+  3. Updates project.faf (context_score: 100%)
+  4. Generates README section (copy/paste ready)
 
-💡 Tip: Run 'faf init' first, then 'faf readme --apply' to boost your score!`)
+The 6 Ws (1W-6W notation):
+  - 1W (WHO): Who is this for?
+  - 2W (WHAT): What does it do?
+  - 3W (WHERE): Where does it run?
+  - 4W (WHY): Why does it exist?
+  - 5W (WHEN): When to use it?
+  - 6W (HOW): How to get started?
+
+💡 User-provided answers = 100% context quality!
+
+Replaces: 'faf human' (deprecated)`)
   .action(withAnalyticsTracking('readme', (directory, options) => readmeCommand(directory, options)));
 
 // 🧡 faf human - Interactive Human Context Collection
