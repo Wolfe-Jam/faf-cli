@@ -1,0 +1,9 @@
+
+[31m❌ No repositories found for 'django/django'[0m
+
+[90mSuggestions:[0m
+[90m  • Check spelling[0m
+[90m  • Use full URL: faf git https://github.com/owner/repo[0m
+[90m  • Use owner/repo: faf git owner/repo[0m
+[90m  • Browse popular repos: faf git --list[0m
+

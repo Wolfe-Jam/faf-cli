@@ -1,9 +1,7 @@
 #!/usr/bin/env node
 /**
- * Industry Showcase Runner
- *
- * Runs faf git on all famous repos and collects results
- * Output: industry-showcase-results.json
+ * Test Showcase Runner (5 repos)
+ * Tests the showcase runner on a small sample before running full 70 repos
  */
 
 import { execSync } from 'child_process';
@@ -58,12 +56,16 @@ interface ShowcaseResults {
 }
 
 function parseFafGitOutput(output: string): { currentScore: number; newScore: number; improvement: number; tier: string } | null {
-  // v4.3.0 format:
+  // Strip ANSI color codes first
+  // eslint-disable-next-line no-control-regex
+  const cleanOutput = output.replace(/\x1b\[[0-9;]*m/g, '');
+
+  // v4.3.0 format (after stripping colors):
   // Current:  No .faf file ⚠️
   // With FAF: 100% 🏆 Trophy
 
-  const currentMatch = output.match(/Current:\s+No \.faf file/);
-  const withFafMatch = output.match(/With FAF:\s+(\d+)%\s+([🏆🥇🥈🥉🟢🟡🔴🤍⚠️]+)\s*(\w+)?/);
+  const currentMatch = cleanOutput.match(/Current:\s+No \.faf file/);
+  const withFafMatch = cleanOutput.match(/With FAF:\s+(\d+)%\s+([🏆🥇🥈🥉🟢🟡🔴🤍⚠️]+)\s*(\w+)?/);
 
   if (!withFafMatch) {
     return null;
@@ -110,12 +112,12 @@ function extractStackFromFaf(fafPath: string): any {
   }
 }
 
-async function runShowcase() {
-  console.log('🏎️  FAF Industry Showcase Runner\n');
+async function runTestShowcase() {
+  console.log('🏎️  FAF Test Showcase Runner (5 repos)\n');
 
-  // Read showcase data
+  // Read test showcase data
   const showcaseData: ShowcaseData = JSON.parse(
-    readFileSync(join(__dirname, 'industry-showcase.json'), 'utf-8')
+    readFileSync(join(__dirname, 'test-showcase.json'), 'utf-8')
   );
 
   const results: ShowcaseResults = {
@@ -142,7 +144,7 @@ async function runShowcase() {
       process.stdout.write(`   ⚡ ${repo}... `);
 
       try {
-        // Run faf git
+        // Run faf git (use local build to avoid bin name collision with bun-sticky)
         const output = execSync(
           `node ${join(__dirname, '../dist/cli.js')} git ${repo}`,
           {
@@ -156,7 +158,10 @@ async function runShowcase() {
         const scores = parseFafGitOutput(output);
 
         if (!scores) {
-          throw new Error('Failed to parse output');
+          // Debug: save output to file
+          const debugPath = join(__dirname, `debug-${name}.txt`);
+          writeFileSync(debugPath, output);
+          throw new Error(`Failed to parse output (saved to ${debugPath})`);
         }
 
         // Extract stack from generated .faf file
@@ -209,7 +214,7 @@ async function runShowcase() {
         console.log(`❌ ${error.message.split('\n')[0]}`);
       }
 
-      // Rate limit protection
+      // Rate limit protection (1 second between requests)
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
@@ -220,13 +225,15 @@ async function runShowcase() {
   }
 
   // Calculate average improvement
-  results.avgImprovement = Math.round(totalImprovement / results.successCount);
+  results.avgImprovement = results.successCount > 0
+    ? Math.round(totalImprovement / results.successCount)
+    : 0;
 
   // Save results
-  const outputPath = join(__dirname, 'industry-showcase-results.json');
+  const outputPath = join(__dirname, 'test-showcase-results.json');
   writeFileSync(outputPath, JSON.stringify(results, null, 2));
 
-  console.log(`\n\n🏆 Showcase Complete!\n`);
+  console.log(`\n\n🏆 Test Showcase Complete!\n`);
   console.log(`   Total Repos: ${results.totalRepos}`);
   console.log(`   ✅ Success: ${results.successCount}`);
   console.log(`   ❌ Failed: ${results.failedCount}`);
@@ -234,4 +241,4 @@ async function runShowcase() {
   console.log(`📄 Results saved to: ${outputPath}\n`);
 }
 
-runShowcase().catch(console.error);
+runTestShowcase().catch(console.error);

@@ -329,6 +329,25 @@ function cleanExtract(text: string): string {
 }
 
 /**
+ * Make extracted text suitable for interactive prompts
+ * - Max 70 chars (readable in terminal)
+ * - Skip if contains confusing patterns
+ * - Empty string if not useful
+ */
+function makeInteractiveFriendly(text: string | null): string {
+  if (!text) return '';
+
+  // Skip long or confusing defaults
+  if (text.length > 70) return '';
+  if (text.includes('**')) return '';  // Still has markdown
+  if (text.includes('Read the detailed')) return '';  // Verbose meta text
+  if (text.includes('See below')) return '';  // Pointer text
+  if (text.startsWith('AI:')) return '';  // Meta commentary
+
+  return text;
+}
+
+/**
  * Find README file in project
  */
 async function findReadme(projectRoot: string): Promise<string | null> {
@@ -430,43 +449,37 @@ export async function readmeCommand(
         type: 'text',
         name: 'who',
         message: chalk.cyan('1W (WHO): Who is this for?'),
-        initial: extracted?.who || '',
-        format: (val: string) => val || extracted?.who || ''
+        initial: makeInteractiveFriendly(extracted?.who || null)
       },
       {
         type: 'text',
         name: 'what',
         message: chalk.cyan('2W (WHAT): What does it do?'),
-        initial: extracted?.what || '',
-        format: (val: string) => val || extracted?.what || ''
+        initial: makeInteractiveFriendly(extracted?.what || null)
       },
       {
         type: 'text',
         name: 'where',
         message: chalk.cyan('3W (WHERE): Where does it run?'),
-        initial: extracted?.where || '',
-        format: (val: string) => val || extracted?.where || ''
+        initial: makeInteractiveFriendly(extracted?.where || null)
       },
       {
         type: 'text',
         name: 'why',
         message: chalk.cyan('4W (WHY): Why does it exist?'),
-        initial: extracted?.why || '',
-        format: (val: string) => val || extracted?.why || ''
+        initial: makeInteractiveFriendly(extracted?.why || null)
       },
       {
         type: 'text',
         name: 'when',
         message: chalk.cyan('5W (WHEN): When to use it?'),
-        initial: extracted?.when || '',
-        format: (val: string) => val || extracted?.when || ''
+        initial: makeInteractiveFriendly(extracted?.when || null)
       },
       {
         type: 'text',
         name: 'how',
         message: chalk.cyan('6W (HOW): How to get started?'),
-        initial: extracted?.how || '',
-        format: (val: string) => val || extracted?.how || ''
+        initial: makeInteractiveFriendly(extracted?.how || null)
       }
     ]);
 

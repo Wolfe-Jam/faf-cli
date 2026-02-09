@@ -16,15 +16,28 @@ interface ShowOptions {
 
 export async function showFafScoreCard(directory?: string, options: ShowOptions = {}) {
   try {
-    const targetDir = directory || process.cwd();
+    let fafPath: string | null = null;
 
-    // Find .faf file in directory
-    const fafPath = await findFafFile(targetDir);
+    // Check if argument is a direct file path
+    if (directory && (directory.endsWith('.faf') || directory.endsWith('.yaml') || directory.endsWith('.yml'))) {
+      // Treat as direct file path
+      try {
+        await fs.access(directory);
+        fafPath = directory;
+      } catch {
+        console.log(chalk.red(`❌ File not found: ${directory}`));
+        process.exit(1);
+      }
+    } else {
+      // Treat as directory and search for .faf file
+      const targetDir = directory || process.cwd();
+      fafPath = await findFafFile(targetDir);
 
-    if (!fafPath) {
-      console.log(chalk.red("❌ No .faf file found"));
-      console.log(chalk.yellow('💡 Run "faf init" to create one'));
-      process.exit(1);
+      if (!fafPath) {
+        console.log(chalk.red("❌ No .faf file found"));
+        console.log(chalk.yellow('💡 Run "faf init" to create one'));
+        process.exit(1);
+      }
     }
 
     // Read and parse .faf file
