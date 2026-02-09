@@ -12,6 +12,7 @@
   "files": [
     "dist/**/*",
     "assets/**/*",
+    "scripts/**/*",
     "faf-banner.png",
     "README.md",
     "LICENSE",
