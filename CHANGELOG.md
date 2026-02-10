@@ -5,6 +5,19 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.3.1] - 2026-02-09
+
+### Added
+- ✨ New `faf 6ws` command - Opens web interface for interactive 6Ws builder
+- Paste-back workflow: fill form at faf.one/6ws → copy YAML → paste to CLI
+- Best of both worlds: Web UX + CLI automation
+- Supports README Evolution Edition workflow
+
+### Fixed
+- Fixed npm install hang that prompted for user input
+- Postinstall script now uses /dev/tty for direct terminal output
+- Install completes smoothly without user interaction required
+
 ## [4.3.0] - 2026-02-10 — FAF GIT Edition 🚀
 
 ### 🚀 Enhanced FAF GIT

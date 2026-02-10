@@ -52,6 +52,7 @@ import { migrateCommand } from './commands/migrate';
 import { renameCommand } from './commands/rename';
 import { readmeCommand } from './commands/readme';
 import { humanCommand, humanSetCommand } from './commands/human';
+import { sixwsCommand } from './commands/sixws';
 import { registerPluginInstallCommand } from './commands/plugin-install';
 import { setColorOptions, type ColorScheme } from './utils/color-utils';
 import { generateFAFHeader, generateHelpHeader, FAF_COLORS } from './utils/championship-style';
@@ -277,6 +278,24 @@ The 6 Ws (1W-6W notation):
 
 Replaces: 'faf human' (deprecated)`)
   .action(withAnalyticsTracking('readme', (directory, options) => readmeCommand(directory, options)));
+
+// ✨ faf 6ws - Web-based 6Ws Builder
+program
+  .command('6ws')
+  .description('✨ Open web interface for 6Ws - paste back to CLI')
+  .addHelpText('after', `
+Examples:
+  $ faf 6ws                     # Open browser, paste results back
+
+✨ Interactive paste-back workflow:
+  1. Opens faf.one/6ws in your browser
+  2. Fill out 6 questions (nice web UI)
+  3. Copy the generated human_context YAML
+  4. Paste back into CLI
+  5. CLI validates and writes to project.faf
+
+💡 Best of both worlds: Web UX + CLI automation!`)
+  .action(withAnalyticsTracking('6ws', sixwsCommand));
 
 // 🧡 faf human - Interactive Human Context Collection
 program
