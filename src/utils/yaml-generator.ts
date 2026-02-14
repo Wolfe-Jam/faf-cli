@@ -241,6 +241,17 @@ export function generateFafContent(projectData: {
     hasClaudeMd: boolean;
     mcpServers: string[];
   } | null;
+  // FAFb ecosystem detection (4.3.2+)
+  fafbInfo?: {
+    isFAFbProject: boolean;
+    projectType: string;
+    subtype?: string;
+    ecosystem: string;
+    confidence: number;
+    features: string[];
+    language?: string;
+  } | null;
+  fafbMetadata?: Record<string, any>;
 }): string {
   // Calculate filled vs total slots for missing context
   const totalSlotsCount = 21; // Base slots
@@ -304,7 +315,13 @@ export function generateFafContent(projectData: {
       name: projectData.projectName || 'Untitled Project',
       goal: projectData.projectGoal ? escapeForYaml(projectData.projectGoal) : null,
       main_language: projectData.mainLanguage || 'Unknown',
-      type: projectData.projectType || null  // Project type for compiler slot-filling patterns
+      type: projectData.fafbInfo?.isFAFbProject ? projectData.fafbInfo.projectType : (projectData.projectType || null),
+      ...(projectData.fafbInfo?.isFAFbProject && {
+        subtype: projectData.fafbInfo.subtype || null,
+        ecosystem: projectData.fafbInfo.ecosystem || null,
+        fafb_support: projectData.fafbMetadata?.fafb_support || true,
+        broadcasts: projectData.fafbMetadata?.broadcasts || null
+      })
     },
     
     // 🧠 AI OPERATING INSTRUCTIONS
@@ -418,6 +435,17 @@ export function generateFafContent(projectData: {
       skills: projectData.claudeCode.skills?.length > 0 ? projectData.claudeCode.skills : undefined,
       permissions: projectData.claudeCode.permissions.length > 0 ? projectData.claudeCode.permissions : undefined,
       mcp_servers: projectData.claudeCode.mcpServers.length > 0 ? projectData.claudeCode.mcpServers : undefined
+    } : undefined,
+
+    // 🏎️ FAFb Ecosystem Integration (4.3.2+)
+    fafb_ecosystem: projectData.fafbInfo?.isFAFbProject ? {
+      detected: true,
+      project_type: projectData.fafbInfo.projectType,
+      ecosystem: projectData.fafbInfo.ecosystem,
+      language: projectData.fafbInfo.language || null,
+      confidence: projectData.fafbInfo.confidence,
+      features: projectData.fafbInfo.features.length > 0 ? projectData.fafbInfo.features : undefined,
+      ...(projectData.fafbMetadata || {})
     } : undefined
   };
 

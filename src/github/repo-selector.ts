@@ -245,12 +245,12 @@ export function showExtractionProgress(owner: string, repo: string): void {
  * Get tier emoji and name for score
  */
 function getScoreTier(score: number): { emoji: string; name: string } {
-  if (score >= 100) return { emoji: '🏆', name: 'Trophy' };
-  if (score >= 99) return { emoji: '🥇', name: 'Gold' };
-  if (score >= 95) return { emoji: '🥈', name: 'Silver' };
-  if (score >= 85) return { emoji: '🥉', name: 'Bronze' };
-  if (score >= 70) return { emoji: '🟢', name: 'Green' };
-  if (score >= 55) return { emoji: '🟡', name: 'Yellow' };
+  if (score >= 100) {return { emoji: '🏆', name: 'Trophy' };}
+  if (score >= 99) {return { emoji: '🥇', name: 'Gold' };}
+  if (score >= 95) {return { emoji: '🥈', name: 'Silver' };}
+  if (score >= 85) {return { emoji: '🥉', name: 'Bronze' };}
+  if (score >= 70) {return { emoji: '🟢', name: 'Green' };}
+  if (score >= 55) {return { emoji: '🟡', name: 'Yellow' };}
   return { emoji: '🔴', name: 'Red' };
 }
 
@@ -274,7 +274,7 @@ export function showExtractionSuccess(
   // Enhanced score with FAF
   const newTier = getScoreTier(newScore);
   console.log(
-    `   With FAF: ${chalk.bold(newScore + '%')} ${newTier.emoji} ${chalk.gray(newTier.name)}`
+    `   With FAF: ${chalk.bold(`${newScore  }%`)} ${newTier.emoji} ${chalk.gray(newTier.name)}`
   );
 
   console.log();

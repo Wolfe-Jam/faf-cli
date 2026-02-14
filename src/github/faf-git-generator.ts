@@ -199,35 +199,35 @@ export function analyzePackageJson(packageJson: any, metadata: GitHubMetadata): 
   };
 
   // Frontend
-  if (deps.react) analysis.frontend = 'React';
-  else if (deps.vue) analysis.frontend = 'Vue';
-  else if (deps.svelte) analysis.frontend = 'Svelte';
-  else if (deps['@angular/core']) analysis.frontend = 'Angular';
-  else if (deps.next) analysis.frontend = 'Next.js';
+  if (deps.react) {analysis.frontend = 'React';}
+  else if (deps.vue) {analysis.frontend = 'Vue';}
+  else if (deps.svelte) {analysis.frontend = 'Svelte';}
+  else if (deps['@angular/core']) {analysis.frontend = 'Angular';}
+  else if (deps.next) {analysis.frontend = 'Next.js';}
 
   // Backend
-  if (deps.express) analysis.backend = 'Express';
-  else if (deps.fastify) analysis.backend = 'Fastify';
-  else if (deps.koa) analysis.backend = 'Koa';
-  else if (deps['@nestjs/core']) analysis.backend = 'NestJS';
+  if (deps.express) {analysis.backend = 'Express';}
+  else if (deps.fastify) {analysis.backend = 'Fastify';}
+  else if (deps.koa) {analysis.backend = 'Koa';}
+  else if (deps['@nestjs/core']) {analysis.backend = 'NestJS';}
 
   // Database
-  if (deps.mongoose) analysis.database = 'MongoDB';
-  else if (deps.pg || deps.postgres) analysis.database = 'PostgreSQL';
-  else if (deps.mysql || deps.mysql2) analysis.database = 'MySQL';
-  else if (deps.sqlite3 || deps['better-sqlite3']) analysis.database = 'SQLite';
-  else if (deps.redis) analysis.database = 'Redis';
+  if (deps.mongoose) {analysis.database = 'MongoDB';}
+  else if (deps.pg || deps.postgres) {analysis.database = 'PostgreSQL';}
+  else if (deps.mysql || deps.mysql2) {analysis.database = 'MySQL';}
+  else if (deps.sqlite3 || deps['better-sqlite3']) {analysis.database = 'SQLite';}
+  else if (deps.redis) {analysis.database = 'Redis';}
 
   // Testing
-  if (deps.jest) analysis.testing = 'Jest';
-  else if (deps.vitest) analysis.testing = 'Vitest';
-  else if (deps.mocha) analysis.testing = 'Mocha';
+  if (deps.jest) {analysis.testing = 'Jest';}
+  else if (deps.vitest) {analysis.testing = 'Vitest';}
+  else if (deps.mocha) {analysis.testing = 'Mocha';}
 
   // Build tools (npm ecosystem)
-  if (deps.vite) analysis.buildTool = 'Vite';
-  else if (deps.webpack) analysis.buildTool = 'Webpack';
-  else if (deps.rollup) analysis.buildTool = 'Rollup';
-  else if (deps.esbuild) analysis.buildTool = 'esbuild';
+  if (deps.vite) {analysis.buildTool = 'Vite';}
+  else if (deps.webpack) {analysis.buildTool = 'Webpack';}
+  else if (deps.rollup) {analysis.buildTool = 'Rollup';}
+  else if (deps.esbuild) {analysis.buildTool = 'esbuild';}
 
   // Runtime (npm ecosystem - override if detected from GH languages)
   if (metadata.languages?.some(l => l.startsWith('TypeScript'))) {
@@ -239,8 +239,8 @@ export function analyzePackageJson(packageJson: any, metadata: GitHubMetadata): 
   }
 
   // Collect frameworks
-  if (analysis.frontend) analysis.frameworks.push(analysis.frontend);
-  if (analysis.backend) analysis.frameworks.push(analysis.backend);
+  if (analysis.frontend) {analysis.frameworks.push(analysis.frontend);}
+  if (analysis.backend) {analysis.frameworks.push(analysis.backend);}
 
   return analysis;
 }
@@ -257,16 +257,16 @@ export function calculateEnhancedScore(
   let score = 0;
 
   // Base metadata (25%)
-  if (metadata.description) score += 5;
-  if (metadata.stars && parseInt(metadata.stars.replace(/[KM]/g, '')) > 0) score += 5;
-  if (metadata.license) score += 5;
-  if (metadata.topics && metadata.topics.length > 0) score += 5;
-  if (metadata.languages && metadata.languages.length > 0) score += 5;
+  if (metadata.description) {score += 5;}
+  if (metadata.stars && parseInt(metadata.stars.replace(/[KM]/g, '')) > 0) {score += 5;}
+  if (metadata.license) {score += 5;}
+  if (metadata.topics && metadata.topics.length > 0) {score += 5;}
+  if (metadata.languages && metadata.languages.length > 0) {score += 5;}
 
   // README extraction (30%)
   if (hasReadme) {
     score += 10; // Has README
-    if (has6Ws) score += 20; // Extracted 6 Ws
+    if (has6Ws) {score += 20;} // Extracted 6 Ws
   }
 
   // package.json analysis (15%)
@@ -275,14 +275,14 @@ export function calculateEnhancedScore(
   }
 
   // Stack detection (10%)
-  if (metadata.hasPackageJson || metadata.hasTsConfig) score += 5;
-  if (metadata.hasDockerfile) score += 5;
+  if (metadata.hasPackageJson || metadata.hasTsConfig) {score += 5;}
+  if (metadata.hasDockerfile) {score += 5;}
 
   // Recent activity (10%)
   if (metadata.lastUpdated) {
     const daysSince = (Date.now() - new Date(metadata.lastUpdated).getTime()) / (1000 * 60 * 60 * 24);
-    if (daysSince < 90) score += 10;
-    else if (daysSince < 180) score += 5;
+    if (daysSince < 90) {score += 10;}
+    else if (daysSince < 180) {score += 5;}
   }
 
   // File structure (5%)
@@ -554,13 +554,13 @@ function cleanText(text: string): string {
 }
 
 function getScoreTier(score: number): string {
-  if (score >= 100) return '🏆 Trophy';
-  if (score >= 99) return '🥇 Gold';
-  if (score >= 95) return '🥈 Silver';
-  if (score >= 85) return '🥉 Bronze';
-  if (score >= 70) return '🟢 Green';
-  if (score >= 55) return '🟡 Yellow';
-  if (score > 0) return '🔴 Red';
+  if (score >= 100) {return '🏆 Trophy';}
+  if (score >= 99) {return '🥇 Gold';}
+  if (score >= 95) {return '🥈 Silver';}
+  if (score >= 85) {return '🥉 Bronze';}
+  if (score >= 70) {return '🟢 Green';}
+  if (score >= 55) {return '🟡 Yellow';}
+  if (score > 0) {return '🔴 Red';}
   return '🤍 White';
 }
 
@@ -569,12 +569,12 @@ function determineProjectType(
   stack: StackAnalysis,
   packageJson: any
 ): string {
-  if (packageJson?.bin) return 'cli';
-  if (stack.frontend && stack.backend) return 'full-stack';
-  if (stack.frontend) return 'frontend';
-  if (stack.backend) return 'backend';
-  if (stack.database) return 'database';
-  if (packageJson?.name?.includes('lib')) return 'library';
+  if (packageJson?.bin) {return 'cli';}
+  if (stack.frontend && stack.backend) {return 'full-stack';}
+  if (stack.frontend) {return 'frontend';}
+  if (stack.backend) {return 'backend';}
+  if (stack.database) {return 'database';}
+  if (packageJson?.name?.includes('lib')) {return 'library';}
   return 'application';
 }
 
@@ -599,11 +599,11 @@ function getKeyFiles(files: any[]): string[] {
 function getMissingContext(stack: StackAnalysis, score: number): string[] {
   const missing: string[] = [];
 
-  if (!stack.database && score < 90) missing.push('Database');
-  if (!stack.testing && score < 90) missing.push('Testing framework');
-  if (!stack.buildTool && score < 85) missing.push('Build tool');
-  if (score < 80) missing.push('Deployment info');
-  if (score < 75) missing.push('CI/CD pipeline');
+  if (!stack.database && score < 90) {missing.push('Database');}
+  if (!stack.testing && score < 90) {missing.push('Testing framework');}
+  if (!stack.buildTool && score < 85) {missing.push('Build tool');}
+  if (score < 80) {missing.push('Deployment info');}
+  if (score < 75) {missing.push('CI/CD pipeline');}
 
   return missing;
 }

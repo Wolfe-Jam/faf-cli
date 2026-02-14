@@ -26,6 +26,7 @@ import { FafDNAManager, displayScoreWithBirthDNA } from "../engines/faf-dna";
 import { PlatformDetector } from "../utils/platform-detector";
 import { promptEmailOptIn } from "../utils/email-opt-in";
 import { tafInit } from "./taf-init";
+import { autoCompile } from "../utils/fafb-compiler";
 
 /**
  * Detect if Gemini CLI is installed
@@ -289,6 +290,11 @@ auto_sync: true
     const elapsedTime = Date.now() - startTime;
     console.log(chalk.green(`☑️ Created ${outputPath}`));
     console.log();
+
+    // 🏎️ Auto-compile to .fafb binary format
+    await autoCompile(outputPath, options.quiet || false);
+    console.log();
+
     console.log(FAF_COLORS.fafOrange('🤖 .faf = Foundational AI-context Format = Project DNA for AI✨ 🧡⚡️'));
     console.log(FAF_COLORS.fafOrange('🧡 Trust: Context verified'));
     console.log(FAF_COLORS.fafCyan(`⚡️ Speed: Generated in ${elapsedTime}ms`));

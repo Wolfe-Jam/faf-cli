@@ -36,12 +36,12 @@ export class MirrorEventEmitter extends EventEmitter {
    * Get event category for grouped listening
    */
   private getEventCategory(type: MirrorEventType): string | null {
-    if (type.startsWith('mirror:sync:')) return 'mirror:sync';
-    if (type.startsWith('mirror:validation:')) return 'mirror:validation';
-    if (type.startsWith('mirror:integrity:')) return 'mirror:integrity';
-    if (type.startsWith('mirror:score:')) return 'mirror:score';
-    if (type.startsWith('mirror:dna:')) return 'mirror:dna';
-    if (type.startsWith('mirror:file:')) return 'mirror:file';
+    if (type.startsWith('mirror:sync:')) {return 'mirror:sync';}
+    if (type.startsWith('mirror:validation:')) {return 'mirror:validation';}
+    if (type.startsWith('mirror:integrity:')) {return 'mirror:integrity';}
+    if (type.startsWith('mirror:score:')) {return 'mirror:score';}
+    if (type.startsWith('mirror:dna:')) {return 'mirror:dna';}
+    if (type.startsWith('mirror:file:')) {return 'mirror:file';}
     return null;
   }
 

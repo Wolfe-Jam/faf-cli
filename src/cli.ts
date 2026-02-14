@@ -49,6 +49,8 @@ import { conductorCommand } from './commands/conductor';
 import { geminiCommand } from './commands/gemini';
 import { antigravityCommand } from './commands/antigravity';
 import { migrateCommand } from './commands/migrate';
+import { compileCommand } from './commands/compile';
+import { decompileCommand } from './commands/decompile';
 import { renameCommand } from './commands/rename';
 import { readmeCommand } from './commands/readme';
 import { humanCommand, humanSetCommand } from './commands/human';
@@ -474,10 +476,10 @@ Examples:
     const recoverPath = require('path').join(__dirname, 'commands', 'faf-recover.js');
     const args = [recoverPath];
 
-    if (options.auto) args.push('--auto');
-    if (options.backup) args.push('--backup');
-    if (options.check) args.push('--check');
-    if (options.force) args.push('--force');
+    if (options.auto) {args.push('--auto');}
+    if (options.backup) {args.push('--backup');}
+    if (options.check) {args.push('--check');}
+    if (options.force) {args.push('--force');}
 
     const child = spawn('node', args, { stdio: 'inherit' });
     child.on('exit', (code: number | null) => {
@@ -1345,6 +1347,51 @@ Claude Code Skills:
   • See: https://github.com/anthropics/skills`)
   .action(withAnalyticsTracking('skills', (options) => skillsCommand(options)));
 
+// 🏎️ FAFb Binary Format Commands
+program
+  .command('compile [input]')
+  .description('📦 Compile .faf to .fafb binary format (faster parsing, smaller size)')
+  .option('-o, --output <path>', 'Output .fafb file path')
+  .option('-w, --watch', 'Watch for changes and auto-recompile')
+  .option('-b, --benchmark', 'Benchmark .faf vs .fafb parse speed')
+  .option('-v, --verbose', 'Verbose output')
+  .addHelpText('after', `
+Examples:
+  $ faf compile                    # Compile project.faf → project.fafb
+  $ faf compile input.faf          # Compile specific file
+  $ faf compile -o output.fafb     # Custom output path
+  $ faf compile --watch            # Watch and auto-recompile
+  $ faf compile --benchmark        # Compare parse speeds
+
+Why FAFb?
+  • O(1) section lookup (vs O(n) YAML parsing)
+  • Priority truncation (smart context window management)
+  • 91% smaller (736 bytes vs 8KB typical)
+  • Faster AI onboarding (instant context loading)
+`)
+  .action(withAnalyticsTracking('compile', async (input, options) => {
+    await compileCommand(input, options);
+  }));
+
+program
+  .command('decompile [input]')
+  .description('📤 Decompile .fafb binary back to .faf YAML (for debugging)')
+  .option('-o, --output <path>', 'Output .faf file path')
+  .addHelpText('after', `
+Examples:
+  $ faf decompile project.fafb           # Decompile to project.faf
+  $ faf decompile input.fafb -o out.faf  # Custom output
+
+Use cases:
+  • Verify binary format correctness
+  • Compare with original .faf
+  • Troubleshoot compilation issues
+  • Recover from corrupted .faf
+`)
+  .action(withAnalyticsTracking('decompile', async (input, options) => {
+    await decompileCommand(input, options);
+  }));
+
 // 📊 faf analytics - Analytics & Telemetry Management
 program
   .command('analytics')
@@ -1475,9 +1522,9 @@ program
     console.log(chalk.red(`❌ Unknown command: ${cmd}`));
     console.log('');
     console.log(FAF_COLORS.fafOrange('💡 Did you mean:'));
-    console.log('  ' + chalk.cyan('faf init') + '     # Create .faf file');
-    console.log('  ' + chalk.cyan('faf score') + '    # Check completeness');
-    console.log('  ' + chalk.cyan('faf --help') + '   # See all commands');
+    console.log(`  ${  chalk.cyan('faf init')  }     # Create .faf file`);
+    console.log(`  ${  chalk.cyan('faf score')  }    # Check completeness`);
+    console.log(`  ${  chalk.cyan('faf --help')  }   # See all commands`);
     process.exit(1);
   });
 
@@ -1564,7 +1611,7 @@ async function showInteractiveWelcome() {
               if (key === ' ' && inputBuffer === '') {
                 process.stdin.setRawMode(false);
                 process.stdin.removeListener('data', keyHandler);
-                console.log('\n' + chalk.dim('🎯 Switching to menu...'));
+                console.log(`\n${  chalk.dim('🎯 Switching to menu...')}`);
                 resolve({ command: 'menu' });
                 return;
               }

@@ -335,14 +335,14 @@ function cleanExtract(text: string): string {
  * - Empty string if not useful
  */
 function makeInteractiveFriendly(text: string | null): string {
-  if (!text) return '';
+  if (!text) {return '';}
 
   // Skip long or confusing defaults
-  if (text.length > 70) return '';
-  if (text.includes('**')) return '';  // Still has markdown
-  if (text.includes('Read the detailed')) return '';  // Verbose meta text
-  if (text.includes('See below')) return '';  // Pointer text
-  if (text.startsWith('AI:')) return '';  // Meta commentary
+  if (text.length > 70) {return '';}
+  if (text.includes('**')) {return '';}  // Still has markdown
+  if (text.includes('Read the detailed')) {return '';}  // Verbose meta text
+  if (text.includes('See below')) {return '';}  // Pointer text
+  if (text.startsWith('AI:')) {return '';}  // Meta commentary
 
   return text;
 }

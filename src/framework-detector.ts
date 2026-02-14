@@ -211,6 +211,15 @@ export const UNIQUE_SIGNATURES: Record<string, FrameworkSignature> = {
     ecosystem: 'zig package manager',
     language: 'Zig'
   },
+
+  // FAFb Binary Format Projects
+  'BINARY-FORMAT.md': {
+    framework: 'FAFb Compiler',
+    confidence: 95,
+    ecosystem: 'fafb-ecosystem',
+    language: 'Rust/Zig/TypeScript',
+    additionalCheck: 'contains:FAFb|FAFB|.fafb'
+  },
   
   // Phoenix/Elixir
   'mix.exs': {
@@ -573,7 +582,7 @@ export async function detectClaudeCode(projectPath: string): Promise<ClaudeCodeR
     result.subagents = files
       .filter(f => f.endsWith('.md'))
       .map(f => f.replace('.md', ''));
-    if (result.subagents.length > 0) result.detected = true;
+    if (result.subagents.length > 0) {result.detected = true;}
   } catch {}
 
   // Check for .claude/commands/
@@ -583,7 +592,7 @@ export async function detectClaudeCode(projectPath: string): Promise<ClaudeCodeR
     result.commands = files
       .filter(f => f.endsWith('.md'))
       .map(f => f.replace('.md', ''));
-    if (result.commands.length > 0) result.detected = true;
+    if (result.commands.length > 0) {result.detected = true;}
   } catch {}
 
   // Check for .claude/skills/ (Claude Code 2.1.0+)
@@ -593,7 +602,7 @@ export async function detectClaudeCode(projectPath: string): Promise<ClaudeCodeR
     result.skills = files
       .filter(f => f.endsWith('.md'))
       .map(f => f.replace('.md', ''));
-    if (result.skills.length > 0) result.detected = true;
+    if (result.skills.length > 0) {result.detected = true;}
   } catch {}
 
   // Check for .claude/settings.json permissions
@@ -606,7 +615,7 @@ export async function detectClaudeCode(projectPath: string): Promise<ClaudeCodeR
         .slice(0, 10)
         .map((p: string) => p.split('(')[0]); // Extract tool name
     }
-    if (result.permissions.length > 0) result.detected = true;
+    if (result.permissions.length > 0) {result.detected = true;}
   } catch {}
 
   // Check for .mcp.json (project-scoped MCP servers)
@@ -617,7 +626,7 @@ export async function detectClaudeCode(projectPath: string): Promise<ClaudeCodeR
     if (mcpConfig.mcpServers) {
       result.mcpServers = Object.keys(mcpConfig.mcpServers).slice(0, 10);
     }
-    if (result.mcpServers.length > 0) result.detected = true;
+    if (result.mcpServers.length > 0) {result.detected = true;}
   } catch {}
 
   return result;
@@ -880,10 +889,10 @@ export class FrameworkDetector {
    */
   private async getVersionFromPackageJson(check: string): Promise<string | undefined> {
     const [file, dep] = check.split(':');
-    if (file !== 'package.json') return undefined;
+    if (file !== 'package.json') {return undefined;}
     
     const packageJson = await this.readPackageJson();
-    if (!packageJson) return undefined;
+    if (!packageJson) {return undefined;}
     
     return packageJson.dependencies?.[dep] || 
            packageJson.devDependencies?.[dep];

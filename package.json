@@ -32,6 +32,8 @@
     "test:coverage": "jest --coverage",
     "test:audit": "jest src/tests/faf-edge-case-audit.test.ts --verbose",
     "test:audit-watch": "jest src/tests/faf-edge-case-audit.test.ts --watch --verbose",
+    "test:fafb": "jest src/tests/wjttc-fafb-cli.test.ts --verbose",
+    "test:fafb-watch": "jest src/tests/wjttc-fafb-cli.test.ts --watch --verbose",
     "lint": "eslint src/**/*.ts",
     "format": "prettier --write src/**/*.ts",
     "emoji:check": "bash .githooks/pre-commit-emoji-check.sh",
@@ -131,6 +133,7 @@
     "yaml": "^2.4.1"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.2",
     "@types/inquirer": "^9.0.9",
     "@types/jest": "^29.5.14",
     "@types/js-yaml": "^4.0.9",
@@ -143,7 +146,8 @@
     "prettier": "^3.2.5",
     "ts-jest": "^29.4.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "typescript-eslint": "^8.55.0"
   },
   "engines": {
     "node": ">=14.0.0"

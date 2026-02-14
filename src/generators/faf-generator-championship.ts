@@ -17,6 +17,7 @@ import { generateFafContent } from "../utils/yaml-generator";
 import { FabFormatsProcessor, FabFormatsAnalysis } from "../engines/fab-formats-processor";
 import { relentlessExtractor } from "../engines/relentless-context-extractor";
 import { detectClaudeCode, type ClaudeCodeResult } from "../framework-detector";
+import { detectFAFbProject, getFAFbMetadata } from "../utils/fafb-detector";
 
 export interface GenerateOptions {
   projectType?: string;
@@ -160,6 +161,18 @@ export async function generateFafFromProject(
     isBunProject = true;
   } catch {
     // Not a Bun project
+  }
+
+  // 🏎️ FAFb Ecosystem Detection - Check for binary format projects
+  let fafbInfo = null;
+  let fafbMetadata: Record<string, any> = {};
+  try {
+    fafbInfo = await detectFAFbProject(projectRoot);
+    if (fafbInfo.isFAFbProject) {
+      fafbMetadata = await getFAFbMetadata(projectRoot);
+    }
+  } catch {
+    // Continue without FAFb detection
   }
 
   // START ENHANCED SCORING - Championship grade with FAB-FORMATS!
@@ -543,7 +556,10 @@ export async function generateFafFromProject(
       depth: fabAnalysis.qualityMetrics.intelligenceDepth
     },
     // Claude Code detection results
-    claudeCode: claudeCodeResult
+    claudeCode: claudeCodeResult,
+    // FAFb ecosystem detection results
+    fafbInfo,
+    fafbMetadata
   };
 
   // Generate YAML content

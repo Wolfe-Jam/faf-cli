@@ -165,7 +165,7 @@ export async function runGeminiExtraction(
   }
 
   // Dynamic import to avoid bundling Google AI SDK when not needed
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+   
   let GoogleGenerativeAI: any;
   try {
     const genaiModule = await import('@google/generative-ai' as string);
