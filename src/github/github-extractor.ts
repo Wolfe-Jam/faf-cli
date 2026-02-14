@@ -263,6 +263,42 @@ function formatNumber(num: number): string {
 }
 
 /**
+ * Fetch file content from GitHub repository
+ */
+export async function fetchGitHubFileContent(
+  owner: string,
+  repo: string,
+  path: string,
+  branch: string = 'main'
+): Promise<string | null> {
+  const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`;
+
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'faf-cli'
+      }
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = await response.json();
+
+    // GitHub API returns base64-encoded content
+    if (data.content && data.encoding === 'base64') {
+      return Buffer.from(data.content, 'base64').toString('utf-8');
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Detect framework/stack from repository metadata
  */
 export function detectStackFromMetadata(metadata: GitHubMetadata): string[] {

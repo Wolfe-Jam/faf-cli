@@ -38,7 +38,7 @@ export interface FormatKnowledge {
 }
 
 export interface ContextSlots {
-  // Technical slots (1-15)
+  // Technical slots (1-15) - camelCase versions
   framework: string;
   mainLanguage: string;
   buildTool: string;
@@ -57,7 +57,16 @@ export interface ContextSlots {
   // Display slots (for stack display compatibility)
   frontend: string;
   build: string;
-  
+
+  // snake_case versions (for YAML compatibility)
+  main_language: string;
+  build_tool: string;
+  package_manager: string;
+  api_type: string;
+  css_framework: string;
+  ui_library: string;
+  state_management: string;
+
   // Human context slots (16-21)
   targetUser: string;
   coreProblem: string;
@@ -125,10 +134,19 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   
   'pyproject.toml': {
     frameworks: ['Python'],
-    slots: { 
+    slots: {
       packageManager: 'poetry',
+      package_manager: 'poetry',
       mainLanguage: 'Python',
-      buildTool: 'poetry'
+      main_language: 'Python',
+      buildTool: 'poetry',
+      build: 'poetry',
+      runtime: 'Python',
+      backend: 'Python',
+      database: 'File-based',
+      apiType: 'None',
+      api_type: 'None',
+      connection: 'File I/O'
     },
     priority: 35,
     intelligence: 'ultra-high'

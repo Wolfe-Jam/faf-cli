@@ -1,0 +1,109 @@
+{
+  "generated": "2026-02-09T01:39:39.488Z",
+  "totalRepos": 5,
+  "successCount": 0,
+  "failedCount": 5,
+  "avgImprovement": 0,
+  "categories": [
+    {
+      "name": "JavaScript/TypeScript",
+      "repos": [
+        {
+          "repo": "facebook/react",
+          "owner": "facebook",
+          "name": "react",
+          "category": "JavaScript/TypeScript",
+          "currentScore": 0,
+          "newScore": 0,
+          "improvement": 0,
+          "tier": "Failed",
+          "stack": {},
+          "projectType": "unknown",
+          "mainLanguage": "unknown",
+          "description": "",
+          "status": "failed",
+          "error": "Failed to parse output (saved to /Users/wolfejam/FAF/cli/scripts/debug-react.txt)"
+        }
+      ]
+    },
+    {
+      "name": "Python",
+      "repos": [
+        {
+          "repo": "django/django",
+          "owner": "django",
+          "name": "django",
+          "category": "Python",
+          "currentScore": 0,
+          "newScore": 0,
+          "improvement": 0,
+          "tier": "Failed",
+          "stack": {},
+          "projectType": "unknown",
+          "mainLanguage": "unknown",
+          "description": "",
+          "status": "failed",
+          "error": "Failed to parse output (saved to /Users/wolfejam/FAF/cli/scripts/debug-django.txt)"
+        }
+      ]
+    },
+    {
+      "name": "Systems/Low-level",
+      "repos": [
+        {
+          "repo": "ggml-org/whisper.cpp",
+          "owner": "ggml-org",
+          "name": "whisper.cpp",
+          "category": "Systems/Low-level",
+          "currentScore": 0,
+          "newScore": 0,
+          "improvement": 0,
+          "tier": "Failed",
+          "stack": {},
+          "projectType": "unknown",
+          "mainLanguage": "unknown",
+          "description": "",
+          "status": "failed",
+          "error": "Failed to parse output (saved to /Users/wolfejam/FAF/cli/scripts/debug-whisper.cpp.txt)"
+        },
+        {
+          "repo": "rust-lang/rust",
+          "owner": "rust-lang",
+          "name": "rust",
+          "category": "Systems/Low-level",
+          "currentScore": 0,
+          "newScore": 0,
+          "improvement": 0,
+          "tier": "Failed",
+          "stack": {},
+          "projectType": "unknown",
+          "mainLanguage": "unknown",
+          "description": "",
+          "status": "failed",
+          "error": "Failed to parse output (saved to /Users/wolfejam/FAF/cli/scripts/debug-rust.txt)"
+        }
+      ]
+    },
+    {
+      "name": "Databases",
+      "repos": [
+        {
+          "repo": "mongodb/mongo",
+          "owner": "mongodb",
+          "name": "mongo",
+          "category": "Databases",
+          "currentScore": 0,
+          "newScore": 0,
+          "improvement": 0,
+          "tier": "Failed",
+          "stack": {},
+          "projectType": "unknown",
+          "mainLanguage": "unknown",
+          "description": "",
+          "status": "failed",
+          "error": "Failed to parse output (saved to /Users/wolfejam/FAF/cli/scripts/debug-mongo.txt)"
+        }
+      ]
+    }
+  ]
+}

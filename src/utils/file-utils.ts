@@ -54,10 +54,7 @@ export async function findFafFile(
           try {
             const stats = await fs.stat(fafPath);
             if (stats.isFile() && await fileExists(fafPath)) {
-              // v1.2.0: Show deprecation warning for legacy .faf files
-              if (fafFile === '.faf') {
-                console.warn('\n⚠️  Found .faf (legacy). Run "faf migrate" to upgrade to project.faf\n');
-              }
+              // v1.2.0: Prioritize project.faf, silently support .faf for compatibility
               return fafPath;
             }
           } catch {

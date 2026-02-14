@@ -242,27 +242,46 @@ export function showExtractionProgress(owner: string, repo: string): void {
 }
 
 /**
- * Show extraction success
+ * Get tier emoji and name for score
+ */
+function getScoreTier(score: number): { emoji: string; name: string } {
+  if (score >= 100) return { emoji: '🏆', name: 'Trophy' };
+  if (score >= 99) return { emoji: '🥇', name: 'Gold' };
+  if (score >= 95) return { emoji: '🥈', name: 'Silver' };
+  if (score >= 85) return { emoji: '🥉', name: 'Bronze' };
+  if (score >= 70) return { emoji: '🟢', name: 'Green' };
+  if (score >= 55) return { emoji: '🟡', name: 'Yellow' };
+  return { emoji: '🔴', name: 'Red' };
+}
+
+/**
+ * Show extraction success with before/after scoring
  */
 export function showExtractionSuccess(
   owner: string,
   repo: string,
   outputPath: string,
-  score: number
+  currentScore: number,
+  newScore: number
 ): void {
   console.log();
+  console.log(FAF_COLORS.fafCyan('📊 AI-Readiness Analysis'));
+  console.log();
+
+  // Status without FAF
+  console.log(`   Current:  ${chalk.yellow('No .faf file')} ⚠️`);
+
+  // Enhanced score with FAF
+  const newTier = getScoreTier(newScore);
+  console.log(
+    `   With FAF: ${chalk.bold(newScore + '%')} ${newTier.emoji} ${chalk.gray(newTier.name)}`
+  );
+
+  console.log();
+  console.log(FAF_COLORS.fafOrange('   ✨ Now AI-ready with complete project context'));
+
+  console.log();
   console.log(FAF_COLORS.fafGreen(`☑️  Generated ${outputPath}`));
-
-  // Show score with podium emoji - correct tier system
-  let emoji = '🔴';
-  if (score >= 100) {emoji = '🏆';}      // Trophy 100%
-  else if (score >= 99) {emoji = '🥇';}  // Gold 99%+
-  else if (score >= 95) {emoji = '🥈';}  // Silver 95%+
-  else if (score >= 85) {emoji = '🥉';}  // Bronze 85%+
-  else if (score >= 70) {emoji = '🟢';}  // Green 70%+
-  else if (score >= 55) {emoji = '🟡';} // Yellow 55%+
-
-  console.log(FAF_COLORS.fafOrange(`${emoji} Quality Score: ${score}%`));
   console.log();
   console.log(chalk.gray('Next steps:'));
   console.log(chalk.gray(`  • Attach to AI: Share ${outputPath} with Claude/Gemini/Codex`));

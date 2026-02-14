@@ -1,0 +1,32 @@
+{
+  "title": "FAF Industry Showcase - Test Run",
+  "description": "Small test of 5 diverse repos before full showcase",
+  "updated": "2026-02-08",
+  "categories": [
+    {
+      "name": "JavaScript/TypeScript",
+      "repos": [
+        "facebook/react"
+      ]
+    },
+    {
+      "name": "Python",
+      "repos": [
+        "django/django"
+      ]
+    },
+    {
+      "name": "Systems/Low-level",
+      "repos": [
+        "ggml-org/whisper.cpp",
+        "rust-lang/rust"
+      ]
+    },
+    {
+      "name": "Databases",
+      "repos": [
+        "mongodb/mongo"
+      ]
+    }
+  ]
+}

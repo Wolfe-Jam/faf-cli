@@ -46,6 +46,9 @@ import {
   showBatchSummary
 } from '../github/repo-selector';
 
+import { generateEnhancedFaf } from '../github/faf-git-generator';
+import { calculateCurrentScore } from '../github/current-score-calculator';
+
 export interface GitOptions {
   output?: string;
   list?: boolean;
@@ -125,14 +128,13 @@ export async function gitCommand(query?: string, options: any = {}) {
           files = await fetchGitHubFileTree(repo.owner, repo.repo, metadata.defaultBranch);
         }
 
-        // Detect stack
-        const stacks = detectStackFromMetadata(metadata);
+        // Calculate CURRENT score (repo as-is, before FAF)
+        console.log(chalk.gray('   ⚙️  Scoring current state...'));
+        const currentScore = await calculateCurrentScore(metadata, files);
 
-        // Calculate quality score
-        const score = calculateRepoQualityScore(metadata);
-
-        // Generate .faf content
-        const fafContent = generateFafFromGitHub(metadata, stacks, files, score);
+        // Generate enhanced .faf content (90%+ target)
+        console.log(chalk.gray('   ⚙️  Generating enhanced FAF...'));
+        const { content: fafContent, score: newScore } = await generateEnhancedFaf(metadata, files);
 
         // Determine output path
         // For single repo: respect -o flag if provided
@@ -144,7 +146,7 @@ export async function gitCommand(query?: string, options: any = {}) {
         // Write .faf file
         await fs.writeFile(outputPath, fafContent, 'utf-8');
 
-        showExtractionSuccess(repo.owner, repo.repo, outputPath, score);
+        showExtractionSuccess(repo.owner, repo.repo, outputPath, currentScore, newScore);
 
         results.push({
           repo: `${repo.owner}/${repo.repo}`,

@@ -5,3 +5,12 @@ instant_context:
 metadata:
   last_claude_sync: 2026-01-07T14:59:11.733Z
   bi_sync: active
+human_context:
+  who: developers
+  what: creates AI Context for AI assistants like Claude
+  where: Terminal, IDEs
+  why: AI needs context to perform well
+  when: on new projects and add to older ones
+  how: npm or homebrew
+  context_score: 100
+  success_rate: 100%

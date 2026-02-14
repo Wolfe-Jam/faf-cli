@@ -1,6 +1,6 @@
 {
   "name": "faf-cli",
-  "version": "4.1.0",
+  "version": "4.3.3",
   "description": "The Persistent AI Context Standard • Foundation Layer for AI • IANA-Registered • Anthropic-Approved • project.faf = AI's foundation",
   "icon": "https://faf.one/orange-smiley.svg",
   "logo": "https://faf.one/orange-smiley.svg",
@@ -127,6 +127,7 @@
     "commander": "^14.0.1",
     "inquirer": "^12.9.4",
     "open": "^10.2.0",
+    "prompts": "^2.4.2",
     "yaml": "^2.4.1"
   },
   "devDependencies": {
@@ -134,9 +135,10 @@
     "@types/jest": "^29.5.14",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^20.11.17",
+    "@types/prompts": "^2.4.9",
     "@typescript-eslint/eslint-plugin": "^8.41.0",
     "@typescript-eslint/parser": "^8.41.0",
-    "eslint": "^8.56.0",
+    "eslint": "^9.39.2",
     "jest": "^29.7.0",
     "prettier": "^3.2.5",
     "ts-jest": "^29.4.1",

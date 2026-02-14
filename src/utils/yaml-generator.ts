@@ -196,6 +196,7 @@ function objectToYaml(obj: Record<string, any>, indent = 0): string {
 // HONEST SCORING: All fields optional - 0% is a valid score!
 export function generateFafContent(projectData: {
   projectName: string;
+  version?: string;
   projectGoal?: string;
   mainLanguage?: string;
   framework?: string;
@@ -244,12 +245,17 @@ export function generateFafContent(projectData: {
   // Calculate filled vs total slots for missing context
   const totalSlotsCount = 21; // Base slots
   const filledSlotsCount = Math.round((projectData.slotBasedPercentage / 100) * totalSlotsCount);
+  // 🎯 SLOT-IGNORE: Check which slots are truly missing vs. ignored
+  // Slots set to 'None' are IGNORED (not applicable), not MISSING
+  // Like .gitignore: "We checked. Doesn't apply. That's correct."
+  // See docs/SLOT-IGNORE.md for specification
   const missingSlots = [];
   if (!projectData.targetUser) {missingSlots.push('Target users');}
   if (!projectData.coreProblem) {missingSlots.push('Core problem');}
   if (!projectData.timeline) {missingSlots.push('Timeline');}
-  if (!projectData.cicd || projectData.cicd === 'None') {missingSlots.push('CI/CD pipeline');}
-  if (!projectData.database || projectData.database === 'None') {missingSlots.push('Database');}
+  // Only mark as missing if NOT set to 'None' (which means "not applicable")
+  if (!projectData.cicd && projectData.cicd !== 'None') {missingSlots.push('CI/CD pipeline');}
+  if (!projectData.database && projectData.database !== 'None') {missingSlots.push('Database');}
 
   const fafData = {
     // FAF schema version (not CLI version)
@@ -269,7 +275,7 @@ export function generateFafContent(projectData: {
         ? `${projectData.projectName} - ${escapeForYaml(projectData.projectGoal)}`
         : projectData.projectName,
       stack: generateStackString(projectData),
-      quality_bar: 'ZERO_ERRORS_F1_STANDARDS',
+      quality_bar: 'production_ready',
       current_focus: projectData.projectGoal ? 'Production deployment preparation' : 'Project initialization',
       your_role: 'Build features with perfect context'
     },
@@ -298,10 +304,7 @@ export function generateFafContent(projectData: {
       name: projectData.projectName || 'Untitled Project',
       goal: projectData.projectGoal ? escapeForYaml(projectData.projectGoal) : null,
       main_language: projectData.mainLanguage || 'Unknown',
-      type: projectData.projectType || null,  // Project type for compiler slot-filling patterns
-      mission: '🚀 Make Your AI Happy! 🧡 Trust-Driven 🤖',
-      revolution: '30 seconds replaces 20 minutes of questions',
-      brand: 'F1-Inspired Software Engineering - Championship AI Context'
+      type: projectData.projectType || null  // Project type for compiler slot-filling patterns
     },
     
     // 🧠 AI OPERATING INSTRUCTIONS
@@ -357,7 +360,7 @@ export function generateFafContent(projectData: {
     // 🚀 Project State
     state: {
       phase: 'development',
-      version: '1.0.0',
+      version: projectData.version || '1.0.0',
       focus: 'production_deployment',
       status: 'green_flag',
       next_milestone: 'npm_publication',
@@ -368,8 +371,7 @@ export function generateFafContent(projectData: {
     scores: {
       faf_score: projectData.fafScore || 0,
       slot_based_percentage: projectData.slotBasedPercentage || 0,
-      total_slots: totalSlotsCount,
-      scoring_philosophy: 'F1-Inspired Championship Scoring'
+      total_slots: totalSlotsCount
     },
 
     // 🏷️ Search & Discovery Tags

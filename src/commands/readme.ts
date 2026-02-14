@@ -1,24 +1,29 @@
 /**
- * 📖 faf readme - Extract 6 Ws from README intelligently
- * Reads README.md and fills human_context slots smartly
+ * 📋 faf readme - 6Ws README Builder (v4.4.0)
+ *
+ * One command that does everything:
+ * 1. Auto-extracts from README.md (if exists)
+ * 2. Interactive questionnaire (with smart defaults)
+ * 3. Updates project.faf (100% quality)
+ * 4. Generates README section
+ *
+ * No flags. No modes. Just works.
  */
 
 import { chalk } from "../fix-once/colors";
 import { promises as fs } from "fs";
 import path from "path";
+import prompts from 'prompts';
 import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
 import {
   FAF_ICONS,
   FAF_COLORS,
 } from "../utils/championship-style";
 import { findFafFile, fileExists } from "../utils/file-utils";
-import { isFieldProtected } from "./check";
 
 interface ReadmeOptions {
-  apply?: boolean;
-  force?: boolean;
-  file?: string;
   quiet?: boolean;
+  output?: string;
 }
 
 interface ExtractedContext {
@@ -324,6 +329,25 @@ function cleanExtract(text: string): string {
 }
 
 /**
+ * Make extracted text suitable for interactive prompts
+ * - Max 70 chars (readable in terminal)
+ * - Skip if contains confusing patterns
+ * - Empty string if not useful
+ */
+function makeInteractiveFriendly(text: string | null): string {
+  if (!text) return '';
+
+  // Skip long or confusing defaults
+  if (text.length > 70) return '';
+  if (text.includes('**')) return '';  // Still has markdown
+  if (text.includes('Read the detailed')) return '';  // Verbose meta text
+  if (text.includes('See below')) return '';  // Pointer text
+  if (text.startsWith('AI:')) return '';  // Meta commentary
+
+  return text;
+}
+
+/**
  * Find README file in project
  */
 async function findReadme(projectRoot: string): Promise<string | null> {
@@ -349,163 +373,184 @@ async function findReadme(projectRoot: string): Promise<string | null> {
 }
 
 /**
- * Main readme command
+ * Generate README markdown section from 6Ws
+ */
+function generateReadmeSection(answers: Record<string, string>): string {
+  return `## 📋 Project Context
+
+**1W (WHO):** ${answers.who}
+
+**2W (WHAT):** ${answers.what}
+
+**3W (WHERE):** ${answers.where}
+
+**4W (WHY):** ${answers.why}
+
+**5W (WHEN):** ${answers.when}
+
+**6W (HOW):** ${answers.how}
+
+---
+*Generated with [FAF](https://faf.one) - AI-ready project context*`;
+}
+
+/**
+ * Main readme command - v4.4.0 simplified
  */
 export async function readmeCommand(
   projectPath?: string,
   options: ReadmeOptions = {}
 ) {
-  const startTime = Date.now();
   const projectRoot = projectPath || process.cwd();
 
   try {
     console.log();
-    console.log(FAF_COLORS.fafCyan(`${FAF_ICONS.turbo_cat} faf readme - Smart 6 Ws Extraction`));
+    console.log(FAF_COLORS.fafCyan(`📋 6Ws README Builder`));
     console.log(chalk.gray('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'));
-
-    // Find README
-    const readmePath = options.file
-      ? path.resolve(projectRoot, options.file)
-      : await findReadme(projectRoot);
-
-    if (!readmePath || !(await fileExists(readmePath))) {
-      console.log(chalk.red(`\n❌ No README found in ${projectRoot}`));
-      console.log(chalk.yellow('  Create a README.md first, or specify with --file'));
-      return;
-    }
-
-    console.log(chalk.gray(`\n   Reading: ${path.basename(readmePath)}`));
-
-    // Read README content
-    const readmeContent = await fs.readFile(readmePath, 'utf-8');
-
-    // Get project name from package.json if available
-    let projectName: string | undefined;
-    const packageJsonPath = path.join(projectRoot, 'package.json');
-    if (await fileExists(packageJsonPath)) {
-      try {
-        const pkg = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-        projectName = pkg.name;
-      } catch { /* ignore */ }
-    }
-
-    // Extract 6 Ws
-    const extracted = extractSixWs(readmeContent, projectName);
-    const elapsedTime = Date.now() - startTime;
-
-    // Display results
     console.log();
-    console.log(FAF_COLORS.fafOrange(`${FAF_ICONS.precision} Extracted Human Context (6 Ws):`));
-    console.log(chalk.gray('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'));
 
-    const displayField = (name: string, value: string | null, source?: string) => {
-      const label = chalk.cyan(`   ${name.padEnd(6)}:`);
-      if (value) {
-        console.log(`${label} ${chalk.white(value)}`);
-        if (source && !options.quiet) {
-          console.log(chalk.gray(`           └─ ${source}`));
-        }
+    // Step 1: Try auto-extraction from README
+    let extracted: ExtractedContext | null = null;
+    const readmePath = await findReadme(projectRoot);
+
+    if (readmePath && await fileExists(readmePath)) {
+      console.log(chalk.gray(`   Found README.md: Extracting context...`));
+      const readmeContent = await fs.readFile(readmePath, 'utf-8');
+
+      // Get project name
+      let projectName: string | undefined;
+      const packageJsonPath = path.join(projectRoot, 'package.json');
+      if (await fileExists(packageJsonPath)) {
+        try {
+          const pkg = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+          projectName = pkg.name;
+        } catch { /* ignore */ }
+      }
+
+      extracted = extractSixWs(readmeContent, projectName);
+
+      const detectedCount = [extracted.who, extracted.what, extracted.why, extracted.where, extracted.when, extracted.how]
+        .filter(v => v !== null).length;
+
+      if (detectedCount > 0) {
+        console.log(chalk.green(`   ✓ Detected: ${detectedCount}/6 fields\n`));
       } else {
-        console.log(`${label} ${chalk.gray('(not found)')}`);
+        console.log(chalk.gray(`   ⚠️ Low confidence extraction\n`));
       }
-    };
-
-    displayField('WHO', extracted.who, extracted.sources.who);
-    displayField('WHAT', extracted.what, extracted.sources.what);
-    displayField('WHY', extracted.why, extracted.sources.why);
-    displayField('WHERE', extracted.where, extracted.sources.where);
-    displayField('WHEN', extracted.when, extracted.sources.when);
-    displayField('HOW', extracted.how, extracted.sources.how);
-
-    // Show confidence
-    const filledCount = [extracted.who, extracted.what, extracted.why, extracted.where, extracted.when, extracted.how]
-      .filter(v => v !== null).length;
-
-    console.log();
-    console.log(chalk.gray('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'));
-    console.log(FAF_COLORS.fafCyan(`   Filled: ${filledCount}/6 slots`));
-    console.log(FAF_COLORS.fafCyan(`   Confidence: ${extracted.confidence}%`));
-    console.log(chalk.gray(`   Time: ${elapsedTime}ms`));
-
-    // Apply to .faf if requested
-    if (options.apply) {
-      const fafPath = await findFafFile(projectRoot);
-
-      if (!fafPath) {
-        console.log();
-        console.log(chalk.yellow(`⚠️ No .faf file found. Run 'faf init' first.`));
-        console.log(chalk.gray('   Then run: faf readme --apply'));
-        return;
-      }
-
-      console.log();
-      console.log(FAF_COLORS.fafOrange(`${FAF_ICONS.rocket} Applying to ${path.basename(fafPath)}...`));
-
-      // Read existing .faf
-      const fafContent = await fs.readFile(fafPath, 'utf-8');
-      const fafData = parseYAML(fafContent) || {};
-
-      // Merge human_context (only fill empty slots)
-      if (!fafData.human_context) {
-        fafData.human_context = {};
-      }
-
-      let appliedCount = 0;
-      let skippedProtected = 0;
-      const fields: (keyof ExtractedContext)[] = ['who', 'what', 'why', 'where', 'when', 'how'];
-
-      for (const field of fields) {
-        const value = extracted[field];
-        const existingValue = fafData.human_context[field];
-        const isEmpty = !existingValue || existingValue === null || existingValue === '';
-
-        // Check if field is protected
-        if (isFieldProtected(fafData, field)) {
-          skippedProtected++;
-          console.log(chalk.gray(`   🔒 Skipped ${field} (protected)`));
-          continue;
-        }
-
-        if (value && (isEmpty || options.force)) {
-          fafData.human_context[field] = value;
-          appliedCount++;
-          if (options.force && !isEmpty) {
-            console.log(chalk.yellow(`   ↻ Replaced ${field}`));
-          } else {
-            console.log(chalk.green(`   ☑️ Filled ${field}`));
-          }
-        }
-      }
-
-      if (appliedCount > 0) {
-        // Write updated .faf
-        await fs.writeFile(fafPath, stringifyYAML(fafData), 'utf-8');
-        console.log();
-        console.log(FAF_COLORS.fafGreen(`☑️ Applied ${appliedCount} fields to ${path.basename(fafPath)}`));
-        if (skippedProtected > 0) {
-          console.log(chalk.gray(`   (${skippedProtected} protected fields unchanged)`));
-        }
-        console.log(chalk.gray('   Run: faf score --details to see your new score'));
-      } else {
-        console.log();
-        if (skippedProtected > 0) {
-          console.log(chalk.gray(`   ${skippedProtected} protected fields unchanged`));
-          console.log(chalk.gray('   Use: faf check --unlock to remove protection'));
-        } else {
-          console.log(chalk.gray('   All slots already filled or no new data extracted'));
-        }
-      }
-    } else if (filledCount > 0) {
-      // Show hint to apply
-      console.log();
-      console.log(FAF_COLORS.fafOrange(`${FAF_ICONS.magic_wand} To apply these to your .faf:`));
-      console.log(chalk.white('   faf readme --apply'));
+    } else {
+      console.log(chalk.gray(`   No README.md found - starting fresh\n`));
     }
 
+    // Step 2: Interactive questionnaire (with smart defaults)
+    console.log(FAF_COLORS.fafOrange(`   Let's fill the 6 Ws (press Enter to keep detected value):\n`));
+
+    const answers = await prompts([
+      {
+        type: 'text',
+        name: 'who',
+        message: chalk.cyan('1W (WHO): Who is this for?'),
+        initial: makeInteractiveFriendly(extracted?.who || null)
+      },
+      {
+        type: 'text',
+        name: 'what',
+        message: chalk.cyan('2W (WHAT): What does it do?'),
+        initial: makeInteractiveFriendly(extracted?.what || null)
+      },
+      {
+        type: 'text',
+        name: 'where',
+        message: chalk.cyan('3W (WHERE): Where does it run?'),
+        initial: makeInteractiveFriendly(extracted?.where || null)
+      },
+      {
+        type: 'text',
+        name: 'why',
+        message: chalk.cyan('4W (WHY): Why does it exist?'),
+        initial: makeInteractiveFriendly(extracted?.why || null)
+      },
+      {
+        type: 'text',
+        name: 'when',
+        message: chalk.cyan('5W (WHEN): When to use it?'),
+        initial: makeInteractiveFriendly(extracted?.when || null)
+      },
+      {
+        type: 'text',
+        name: 'how',
+        message: chalk.cyan('6W (HOW): How to get started?'),
+        initial: makeInteractiveFriendly(extracted?.how || null)
+      }
+    ]);
+
+    // Check if user cancelled
+    if (!answers.who && !answers.what && !answers.where && !answers.why && !answers.when && !answers.how) {
+      console.log(chalk.yellow('\n⚠️  Cancelled'));
+      process.exit(0);
+    }
+
+    // Step 3: Update project.faf (always use standard filename)
+    const foundFafPath = await findFafFile(projectRoot);
+    const projectFafPath = path.join(projectRoot, 'project.faf');
+
+    let fafData: any = {};
+
+    if (foundFafPath) {
+      // Read existing .faf file
+      const fafContent = await fs.readFile(foundFafPath, 'utf-8');
+      fafData = parseYAML(fafContent) || {};
+
+      // If we found .faf (legacy), migrate to project.faf
+      if (path.basename(foundFafPath) === '.faf' && foundFafPath !== projectFafPath) {
+        console.log();
+        console.log(chalk.yellow(`   🔄 Migrating .faf → project.faf`));
+      }
+    } else {
+      console.log();
+      console.log(chalk.yellow(`   ⚠️  No .faf file found - creating project.faf`));
+    }
+
+    if (!fafData.human_context) {
+      fafData.human_context = {};
+    }
+
+    // Update with user-provided answers
+    fafData.human_context.who = answers.who;
+    fafData.human_context.what = answers.what;
+    fafData.human_context.where = answers.where;
+    fafData.human_context.why = answers.why;
+    fafData.human_context.when = answers.when;
+    fafData.human_context.how = answers.how;
+    fafData.human_context.context_score = 100; // User-provided = 100%
+    fafData.human_context.success_rate = '100%';
+
+    // Always write to project.faf (standard filename)
+    await fs.writeFile(projectFafPath, stringifyYAML(fafData), 'utf-8');
+
+    console.log();
+    console.log(FAF_COLORS.fafGreen(`☑️ Updated project.faf`));
+    console.log(chalk.cyan(`   Context Quality: 100% (user-provided)`));
+
+    // Step 4: Generate README section
+    const readmeSection = generateReadmeSection(answers);
+    const outputPath = options.output || path.join(projectRoot, 'README-6ws.md');
+
+    await fs.writeFile(outputPath, readmeSection);
+
+    console.log(FAF_COLORS.fafGreen(`☑️ Generated README section`));
+    console.log(chalk.gray(`   Saved to: ${path.basename(outputPath)}\n`));
+
+    // Show preview
+    console.log(chalk.gray('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'));
+    console.log(readmeSection);
+    console.log(chalk.gray('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'));
+
+    console.log();
+    console.log(FAF_COLORS.fafOrange(`💡 Copy this section to your README.md`));
     console.log();
 
   } catch (error) {
-    console.log(chalk.red(`\n❌ README extraction failed:`));
+    console.log(chalk.red('💥 README builder failed:'));
     console.log(chalk.red(error instanceof Error ? error.message : String(error)));
     process.exit(1);
   }

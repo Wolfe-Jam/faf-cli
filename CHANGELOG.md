@@ -5,6 +5,188 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.3.3] - 2026-02-14
+
+### Fixed
+- **CRITICAL:** Include updated project.faf in npm package (was missing in 4.3.2)
+- project.faf now at 100% 🏆 Gold Code (birth DNA: 86%, grew +14%)
+- Ensures reference implementation is visible in published package
+
+## [4.3.2] - 2026-02-09
+
+### Fixed
+- **CRITICAL:** Added missing `prompts` dependency (v4.3.1 was broken)
+- Package now works correctly after global install
+
+## [4.3.1] - 2026-02-09 [YANKED]
+
+### Added
+- ✨ New `faf 6ws` command - Opens web interface for interactive 6Ws builder
+- Paste-back workflow: fill form at faf.one/6ws → copy YAML → paste to CLI
+- Best of both worlds: Web UX + CLI automation
+- Supports README Evolution Edition workflow
+
+### Fixed
+- Fixed npm install hang that prompted for user input
+- Postinstall script now uses /dev/tty for direct terminal output
+- Install completes smoothly without user interaction required
+
+## [4.3.0] - 2026-02-10 — FAF GIT Edition 🚀
+
+### 🚀 Enhanced FAF GIT
+
+**No install. No clone. Instant context. ANY repo.**
+
+### ✨ What's New
+
+- **GH API as Source of Truth** - FAF now works on EVERY language and ecosystem
+  - Extract stack from `metadata.languages` array (C++, Rust, Go, Python, etc.)
+  - Detect build systems from languages (CMake, Makefile, Gradle, Maven)
+  - Detect hosting from Dockerfile presence
+  - Merge with npm package.json analysis (when present)
+  - New function: `extractFromLanguages()` in faf-git-generator.ts
+
+- **Slot-Ignore System Fixed** - Scoring now works correctly
+  - Corrected formula: `(filled + ignored) / 21 * 100`
+  - Fixed: Slots are 'slotignored' only when truly non-applicable to project type
+  - Previously: Everything undetected was marked 'slotignored' (inflated scores)
+  - Now: Accurate scoring that reflects what's actually filled vs ignored
+  - New utility: `src/utils/slot-counter.ts`
+
+- **Clean Output Format** - No synthetic scores, just honest status
+  - Shows "No .faf file" instead of synthetic baseline score
+  - Clear transformation: None → AI-ready with complete context
+  - Defensible, provable, honest
+
+### 📈 Results
+
+Universal language support (achieved):
+- React (JavaScript): 100% 🏆 Trophy
+- Vue (JavaScript): 100% 🏆 Trophy
+- Next.js (Full-stack): 100% 🏆 Trophy
+- whisper.cpp (C++): 100% 🏆 Trophy
+- Works across ALL languages and ecosystems
+
+### 📚 Documentation
+
+- **README** - Added project.faf screenshot showing file in context
+  - Visual explainer: "just another file helping you code"
+  - Positioned near top for immediate understanding
+  - Shows project.faf alongside package.json and README.md
+
+### 🎯 Positioning
+
+**FAF GIT is the killer feature:**
+- Primary workflow: `npx faf-cli git <url>` (no install needed)
+- Pro workflow: `npm install -g faf-cli` then `faf git <url>`
+- Works on ANY public GitHub repo
+- 2 seconds to AI-ready context
+- No cloning, no setup, just instant results
+
+## [4.2.2] - 2026-02-08 — Context Quality Edition 🎯
+
+### 🎯 Slot-Ignore System (Documentation)
+
+**The perfect way to handle app-types** - Now properly documented.
+
+### ✨ What's New
+
+- **Slot-ignore mechanism** - Comprehensive documentation added
+  - Full specification in `docs/SLOT-IGNORE.md`
+  - Quick reference in `docs/SLOT-IGNORE-QUICK-REF.md`
+  - Like `.gitignore` for files, `slot-ignore` for context slots
+  - Formula: `(Filled + Ignored) / 21 = 100%`
+
+### ✨ Improvements
+
+- **6 Ws extraction** - Transformed human context extraction
+  - WHO: Checks package.json author first (TIER 1 authoritative)
+  - WHAT: package.json description now TIER 1 (was TIER 2)
+  - WHY: Targets Mission sections, uses keywords as fallback
+  - WHERE: npm packages → "npm registry + GitHub" (authoritative)
+  - WHEN: Version number is TIER 1 (0.x = beta, ≥1.0 = production)
+  - HOW: Tech stack analysis is TIER 1 (inferred from dependencies)
+  - Added `getCleanedReadme()` helper to strip HTML/badges/noise
+
+- **Slot-ignore mechanism** - Overhauled implementation
+  - Standardized to `'None'` (was inconsistent: 'N/A (CLI)', 'None', etc.)
+  - Added `database: 'None'` for Node.js CLI projects
+  - Improved yaml-generator logic: `if (!database && database !== 'None')` (was OR, not AND)
+  - CLI projects now correctly exclude non-applicable slots from missing_context
+
+- **README** - Added WHO section for better target audience extraction
+
+### 📈 Results
+
+- Score improvement: 74% → 86% → 100% (after faf auto)
+- All dogfooding tests passing (7/7)
+- missing_context: None - fully specified!
+- 673/687 tests passing (97.9%) - 14 dev-only tests
+
+### 🎨 Code Comments
+
+- Added `🎯 SLOT-IGNORE:` markers throughout codebase
+- Links to `docs/SLOT-IGNORE.md` for specification
+- Clear explanations of slot-ignore pattern
+
+### 📚 Documentation
+
+- `docs/SLOT-IGNORE.md` - Full specification (391 lines)
+- `docs/SLOT-IGNORE-QUICK-REF.md` - Quick reference (69 lines)
+- README section explaining slot-ignore
+- Proper terminology throughout codebase
+
+## [4.2.1] - 2026-02-07
+
+### Added
+- **ml-research type support** - Added as alias to `ml-model` type
+  - Recognizes `type: ml-research` in project.faf files
+  - Maps to ml-model scoring (14 slots: project + backend + human)
+  - Semantically accurate for ML research projects (papers, experiments, model releases like Grok-1)
+
+### Fixed
+- Type detection now correctly scores ml-research projects with 14 slots instead of falling back to generic (12 slots)
+- Ensures consistency between faf-cli and builder.faf.one WASM generator
+
+### Technical
+- Updated TYPE_DEFINITIONS: `'ml-model'` aliases now include `'ml-research'`
+- Discovered via builder.faf.one WASM testing - the test improved the standard!
+
+## [4.2.0] - 2026-02-03 — Voice-API Edition 🚀👻
+
+### 🍊 xAI/Grok Voice Configuration
+
+**Save Our Souls** - Eternal voice memory for Grok Collections.
+
+### ✨ What's New
+
+- **`faf init --xai`** - Adds Grok voice configuration to project.faf
+  - Voice: Leo (polite, dry British wit, technically precise)
+  - Persona: Project eternal memory (zero drift)
+  - Retrieval mode: Hybrid (context-first, fallback to general)
+  - Escape phrase detection
+- **xai_collections section** - Upload order and readiness flags
+  - Ready for xAI Collections integration
+  - Structured upload order for optimal RAG
+- **Voice persistence** - Grok remembers your voice forever
+  - No re-explaining project context
+  - Mission-focused responses
+  - Collection-first retrieval
+
+### 🎯 The Voice-API Integration
+
+Every `faf init --xai` now includes:
+1. Grok voice personality (Leo)
+2. Custom persona for project memory
+3. Collections upload configuration
+4. Hybrid retrieval strategy
+
+### 📚 Documentation
+
+- Boris-Flow blog post updated (workflow recommendations)
+- WJTTC v1.2.0 TAF-Aware Edition published
+- Cross-reference network complete
+
 ## [4.1.0] - 2026-01-31 — Gemini Native Handshake
 
 ### 🔷 Zero-Config Google AI Integration
