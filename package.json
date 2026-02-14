@@ -134,7 +134,7 @@
     "@types/inquirer": "^9.0.9",
     "@types/jest": "^29.5.14",
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "^20.11.17",
+    "@types/node": "^25.2.3",
     "@types/prompts": "^2.4.9",
     "@typescript-eslint/eslint-plugin": "^8.41.0",
     "@typescript-eslint/parser": "^8.41.0",
