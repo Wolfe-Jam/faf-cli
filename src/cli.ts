@@ -54,6 +54,8 @@ import { readmeCommand } from './commands/readme';
 import { humanCommand, humanSetCommand } from './commands/human';
 import { sixwsCommand } from './commands/sixws';
 import { registerPluginInstallCommand } from './commands/plugin-install';
+import { compileCommand } from './commands/compile';
+import { decompileCommand } from './commands/decompile';
 import { setColorOptions, type ColorScheme } from './utils/color-utils';
 import { generateFAFHeader, generateHelpHeader, FAF_COLORS } from './utils/championship-style';
 import { analytics, trackCommand, trackError, withPerformanceTracking } from './telemetry/analytics';
@@ -497,6 +499,52 @@ Examples:
   $ faf formats --category       # Show by category
   $ faf formats --export         # Export as JSON`)
   .action(withAnalyticsTracking('formats', (directory, options) => formatsCommand(directory, options)));
+
+// 🔨 faf compile - Compile .faf to .fafb binary format
+program
+  .command('compile [input]')
+  .description('🔨 Compile .faf to .fafb binary format (O(1) lookup, priority truncation)')
+  .option('-o, --output <file>', 'Output .fafb file path')
+  .option('-w, --watch', 'Watch and auto-recompile on changes')
+  .option('-b, --benchmark', 'Compare .faf vs .fafb parse speeds')
+  .option('-v, --verbose', 'Verbose output')
+  .addHelpText('after', `
+Examples:
+  $ faf compile                  # Compile project.faf → project.fafb
+  $ faf compile custom.faf       # Compile specific file
+  $ faf compile -o output.fafb   # Custom output path
+  $ faf compile --watch          # Watch and auto-recompile
+  $ faf compile --benchmark      # Compare parse speeds
+
+📦 FAFb Binary Format Benefits:
+  • O(1) section lookup (vs YAML parsing)
+  • Priority truncation (keep what matters)
+  • Smaller size (10-50% compression)
+  • Edge/embedded ready (2.7KB Zig WASM)
+
+Requires: xai-faf-rust compiler
+Install: cargo install xai-faf`)
+  .action(withAnalyticsTracking('compile', (input, options) => compileCommand(input, options)));
+
+// 🔓 faf decompile - Decompile .fafb back to .faf YAML
+program
+  .command('decompile [input]')
+  .description('🔓 Decompile .fafb binary back to .faf YAML (debugging/inspection)')
+  .option('-o, --output <file>', 'Output .faf file path')
+  .addHelpText('after', `
+Examples:
+  $ faf decompile                # Decompile project.fafb → project.faf
+  $ faf decompile custom.fafb    # Decompile specific file
+  $ faf decompile -o output.faf  # Custom output path
+
+🔍 Use Cases:
+  • Inspect compiled .fafb files
+  • Debug binary format issues
+  • Recover from binary-only distributions
+
+Requires: xai-faf-rust compiler
+Install: cargo install xai-faf`)
+  .action(withAnalyticsTracking('decompile', (input, options) => decompileCommand(input, options)));
 
 // 🏆 faf version - Show version with MK3 status
 program
