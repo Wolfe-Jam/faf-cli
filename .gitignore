@@ -95,16 +95,12 @@ test-*.faf
 # Temporary files
 *.tmp
 *.log
-.DS_Store
 .vercel
 
 # Partnership & Business Docs (Planet FAF only)
 WARP-*.md
 *PARTNERSHIP*.md
 *-PITCH.md
-
-# System files
-.DS_Store
 
 # Backup files
 .faf.before-*
