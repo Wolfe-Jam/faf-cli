@@ -85,13 +85,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        node-version: ['16', '18', '20']
-        exclude:
-          # Reduce matrix size - test Node 16 only on Ubuntu
-          - os: windows-latest
-            node-version: '16'
-          - os: macos-latest
-            node-version: '16'
+        node-version: ['18', '20', '22']
     
     steps:
       - name: 📦 Checkout repository
