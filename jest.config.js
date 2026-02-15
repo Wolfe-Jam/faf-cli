@@ -28,8 +28,6 @@ module.exports = {
   restoreMocks: true,
   // Mock problematic ES modules for testing
   moduleNameMapper: {
-    '^chalk$': '<rootDir>/tests/__mocks__/chalk.js',
-    '^open$': '<rootDir>/tests/__mocks__/open.js',
     // Force TypeScript resolution over JavaScript
     '^(\\.{1,2}/.*)\\.js$': '$1'
   },

@@ -13,8 +13,7 @@ import os from 'os';
 import { parse as parseYAML, stringify as stringifyYAML } from '../../src/fix-once/yaml';
 
 // Mock dependencies
-// Note: 'open' is mocked via jest.config.js moduleNameMapper
-jest.mock('inquirer');
+// Note: 'open' and 'inquirer' are mocked via jest.config.js moduleNameMapper
 jest.mock('../../src/fix-once/colors', () => ({
   chalk: {
     cyan: (text: string) => text,

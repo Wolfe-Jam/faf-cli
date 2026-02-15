@@ -11,6 +11,12 @@ updates:
       - "automated"
     commit-message:
       prefix: "deps"
+    ignore:
+      # inquirer v9+ is ESM-only and breaks Jest (CommonJS test runner)
+      # Upgrading requires migrating to Jest 29+ with ESM support or different test runner
+      # Keep at v8.2.5 (last stable CommonJS version) until we migrate Jest
+      - dependency-name: "inquirer"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
