@@ -5,6 +5,13 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.1] - 2026-02-15
+
+### Fixed
+- Removed alarming "No .faf file ⚠️" warning from `git` command output
+- Changed to confidence-building "Analysis Complete" format
+- Output now shows only positive results without unnecessary warnings
+
 ## [4.4.0] - 2026-02-14 — Infrastructure & Testing Edition
 
 ### 🎉 The Best Release to Date
