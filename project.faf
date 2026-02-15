@@ -1,5 +1,5 @@
 faf_version: 2.5.0
-generated: 2026-02-15T02:55:13.518Z
+generated: 2026-02-15T03:33:35.969Z
 ai_scoring_system: 2025-09-20
 ai_score: 83%
 ai_confidence: HIGH
@@ -132,6 +132,6 @@ gemini:
   notes: Native Gemini CLI integration via FAF
 faf_dna:
   birth_dna: 86
-  birth_certificate: FAF-2026-CLIX-2HF5
-  birth_date: 2026-02-15T02:55:13.608Z
+  birth_certificate: FAF-2026-CLIX-6DY5
+  birth_date: 2026-02-15T03:33:36.060Z
   current_score: 86
