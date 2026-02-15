@@ -279,10 +279,12 @@ export function showExtractionSuccess(
 
   console.log();
   console.log(FAF_COLORS.fafGreen(`☑️  Generated ${outputPath}`));
+  console.log(chalk.gray(`   📁 Saved to: ${process.cwd()}/${outputPath}`));
   console.log();
   console.log(chalk.gray('Next steps:'));
-  console.log(chalk.gray(`  • Attach to AI: Share ${outputPath} with Claude/Gemini/Codex`));
-  console.log(chalk.gray(`  • View details: faf show ${outputPath}`));
+  console.log(chalk.gray(`  • View it: cat ${outputPath}`));
+  console.log(chalk.gray(`  • Attach to Claude/ChatGPT/Gemini (copy/paste or attach file)`));
+  console.log(chalk.gray(`  • Or try: faf show ${outputPath}`));
   console.log();
 }
 
