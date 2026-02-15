@@ -18,6 +18,11 @@ updates:
       - dependency-name: "inquirer"
         update-types: ["version-update:semver-major", "version-update:semver-minor"]
 
+      # open v9+ is ESM-only and breaks our CommonJS build pipeline
+      # Keep at v8.4.2 (last stable CommonJS version) until we migrate to full ESM
+      - dependency-name: "open"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
