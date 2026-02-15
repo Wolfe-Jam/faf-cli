@@ -265,20 +265,17 @@ export function showExtractionSuccess(
   newScore: number
 ): void {
   console.log();
-  console.log(FAF_COLORS.fafCyan('📊 AI-Readiness Analysis'));
+  console.log(FAF_COLORS.fafCyan('📊 Analysis Complete'));
   console.log();
 
-  // Status without FAF
-  console.log(`   Current:  ${chalk.yellow('No .faf file')} ⚠️`);
-
-  // Enhanced score with FAF
+  // AI-Readiness score
   const newTier = getScoreTier(newScore);
   console.log(
-    `   With FAF: ${chalk.bold(newScore + '%')} ${newTier.emoji} ${chalk.gray(newTier.name)}`
+    `   AI-Readiness: ${chalk.bold(newScore + '%')} ${newTier.emoji} ${chalk.gray(newTier.name)}`
   );
 
   console.log();
-  console.log(FAF_COLORS.fafOrange('   ✨ Now AI-ready with complete project context'));
+  console.log(FAF_COLORS.fafOrange('   ✨ Full project context extracted'));
 
   console.log();
   console.log(FAF_COLORS.fafGreen(`☑️  Generated ${outputPath}`));
