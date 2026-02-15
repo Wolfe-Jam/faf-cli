@@ -36,6 +36,11 @@ export function calculateScorePure(input: ScoreInput): number {
   // Pure calculation - no I/O, no console, no env
   let score = 0;
 
+  // Handle null/undefined input
+  if (!input || !input.fafData) {
+    return 0;
+  }
+
   if (input.fafData.version) score += 10;
   if (input.fafData.project?.name) score += 10;
   if (input.fafData.project?.description) score += 15;

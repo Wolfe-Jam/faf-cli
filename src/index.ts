@@ -25,3 +25,17 @@ export type { CompilationResult } from './compiler/faf-compiler';
 
 // Export types
 export type { FafSchema, ValidationResult } from './schema/faf-schema';
+export type { FafData, ProjectInfo, InstantContext, KeyFileInfo, ScoreInput } from './types';
+
+// Export core extraction fixes (for prevention tests)
+export {
+  calculateScorePure,
+  parseFafCore,
+  parseFafCLI,
+  FafContext,
+  PlainFormatter,
+  ChalkFormatter,
+  ScoreCache,
+  ScoreCommand,
+  validateFaf
+} from './core-extraction-fixes';
