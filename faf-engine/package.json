@@ -6,10 +6,12 @@
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
+      "import": "./dist/index.js",
       "require": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
     "./vercel": {
+      "import": "./dist/vercel/index.js",
       "require": "./dist/vercel/index.js",
       "types": "./dist/vercel/index.d.ts"
     }
