@@ -5,7 +5,7 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 3
     labels:
       - "dependencies"
       - "automated"
@@ -22,6 +22,20 @@ updates:
       # Keep at v8.4.2 (last stable CommonJS version) until we migrate to full ESM
       - dependency-name: "open"
         update-types: ["version-update:semver-major", "version-update:semver-minor"]
+
+      # Block major version bumps for TypeScript tooling (often breaking)
+      - dependency-name: "@typescript-eslint/*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
+
+      # Block major version bumps for core dependencies
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "jest"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/jest"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
