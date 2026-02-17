@@ -41,7 +41,7 @@ const FIXTURES: RepoFixture[] = [
     path: path.resolve(__dirname, '../..'), // /Users/wolfejam/FAF/cli
     github: 'Wolfe-Jam/faf-cli',
     expectedName: 'faf-cli',
-    expectedVersion: '4.4.1', // Current version
+    expectedVersion: '4.4.2', // Current version
     expectedLanguage: 'TypeScript',
     expectedType: 'cli-ts',
     manifest: 'package.json'
