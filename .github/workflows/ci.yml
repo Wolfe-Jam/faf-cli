@@ -179,7 +179,7 @@ jobs:
         run: npm run build
 
       - name: Update TAF Receipt
-        uses: Wolfe-Jam/faf-taf-git@v1.2.1
+        uses: Wolfe-Jam/faf-taf-git@v1.2.2
         with:
           test-command: 'npm test'
           auto-commit: 'true'
@@ -188,16 +188,29 @@ jobs:
       - name: ☢️ EXAMINE TAF CANARY
         if: always()  # Run even if previous step failed
         run: |
-          echo "Checking for canary file..."
-          ls -la
+          echo "Checking for canary file in MULTIPLE locations..."
+          echo "Current directory:"
+          pwd
+          ls -la | grep -i canary || echo "Not in current dir"
 
+          echo ""
+          echo "/tmp directory:"
+          ls -la /tmp/ | grep -i canary || echo "Not in /tmp"
+
+          echo ""
+          echo "Finding ALL canary files:"
+          find . -name "*CANARY*" 2>/dev/null || echo "find failed"
+
+          echo ""
           if [ -f TAF_DEBUG_CANARY.txt ]; then
-            echo "✅ CANARY FOUND. DUMPING CONTENTS:"
-            echo "----------------------------------------"
+            echo "✅ CANARY FOUND in current dir!"
             cat TAF_DEBUG_CANARY.txt
-            echo "----------------------------------------"
+          elif [ -f /tmp/TAF_DEBUG_CANARY.txt ]; then
+            echo "✅ CANARY FOUND in /tmp!"
+            cat /tmp/TAF_DEBUG_CANARY.txt
           else
-            echo "❌ CANARY MISSING. The code before getExecOutput never finished?"
+            echo "❌ CANARY MISSING from all checked locations!"
+            echo "This means fs.writeFileSync failed silently or was never called."
           fi
 
   # 🏆 Championship Status
