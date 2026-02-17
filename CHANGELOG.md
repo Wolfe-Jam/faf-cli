@@ -5,6 +5,23 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.2] - 2026-02-16
+
+### Security
+- Updated `inquirer` from 8.2.5 to 8.2.7 to resolve 3 low severity vulnerabilities (tmp symlink issue)
+- All dependencies now have zero known vulnerabilities
+
+### Fixed
+- Configured Dependabot to prevent major version bumps (blocks breaking changes)
+- Reduced Dependabot PR limit from 10 to 3 (prevents CI/CD spam)
+- Added protections for TypeScript tooling (@typescript-eslint/*, eslint)
+- Added protections for core dependencies (@types/node, jest, @types/jest)
+- Added ESM import exports to faf-engine package.json for better module resolution
+
+### Changed
+- CI/CD badge restored to GREEN after closing 4 failing Dependabot PRs
+- Improved Dependabot configuration for better CI/CD flow management
+
 ## [4.4.1] - 2026-02-15
 
 ### Fixed
