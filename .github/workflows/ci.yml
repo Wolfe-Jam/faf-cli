@@ -178,40 +178,15 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Update TAF Receipt
-        uses: Wolfe-Jam/faf-taf-git@v1.2.2
+      - name: Run Tests and Capture Output
+        run: npm test 2>&1 | tee test-output.txt
+
+      - name: Generate TAF Receipt
+        uses: Wolfe-Jam/faf-taf-git@v2.0.0
         with:
-          test-command: 'npm test'
+          test-output-file: test-output.txt
           auto-commit: 'true'
           commit-message: 'chore(taf): update .taf receipt [skip ci]'
-
-      - name: ☢️ EXAMINE TAF CANARY
-        if: always()  # Run even if previous step failed
-        run: |
-          echo "Checking for canary file in MULTIPLE locations..."
-          echo "Current directory:"
-          pwd
-          ls -la | grep -i canary || echo "Not in current dir"
-
-          echo ""
-          echo "/tmp directory:"
-          ls -la /tmp/ | grep -i canary || echo "Not in /tmp"
-
-          echo ""
-          echo "Finding ALL canary files:"
-          find . -name "*CANARY*" 2>/dev/null || echo "find failed"
-
-          echo ""
-          if [ -f TAF_DEBUG_CANARY.txt ]; then
-            echo "✅ CANARY FOUND in current dir!"
-            cat TAF_DEBUG_CANARY.txt
-          elif [ -f /tmp/TAF_DEBUG_CANARY.txt ]; then
-            echo "✅ CANARY FOUND in /tmp!"
-            cat /tmp/TAF_DEBUG_CANARY.txt
-          else
-            echo "❌ CANARY MISSING from all checked locations!"
-            echo "This means fs.writeFileSync failed silently or was never called."
-          fi
 
   # 🏆 Championship Status
   status:
