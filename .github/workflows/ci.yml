@@ -157,6 +157,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    continue-on-error: true  # Don't fail workflow if TAF receipt fails (debugging in progress)
     permissions:
       contents: write
 
