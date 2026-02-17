@@ -179,11 +179,26 @@ jobs:
         run: npm run build
 
       - name: Update TAF Receipt
-        uses: Wolfe-Jam/faf-taf-git@v1.2.0
+        uses: Wolfe-Jam/faf-taf-git@v1.2.1
         with:
           test-command: 'npm test'
           auto-commit: 'true'
           commit-message: 'chore(taf): update .taf receipt [skip ci]'
+
+      - name: ☢️ EXAMINE TAF CANARY
+        if: always()  # Run even if previous step failed
+        run: |
+          echo "Checking for canary file..."
+          ls -la
+
+          if [ -f TAF_DEBUG_CANARY.txt ]; then
+            echo "✅ CANARY FOUND. DUMPING CONTENTS:"
+            echo "----------------------------------------"
+            cat TAF_DEBUG_CANARY.txt
+            echo "----------------------------------------"
+          else
+            echo "❌ CANARY MISSING. The code before getExecOutput never finished?"
+          fi
 
   # 🏆 Championship Status
   status:
