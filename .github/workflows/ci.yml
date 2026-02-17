@@ -182,7 +182,7 @@ jobs:
         run: npm test 2>&1 | tee test-output.txt
 
       - name: Generate TAF Receipt
-        uses: Wolfe-Jam/faf-taf-git@v2.0.1
+        uses: Wolfe-Jam/faf-taf-git@v2.0.2
         with:
           test-output-file: test-output.txt
           auto-commit: 'true'
