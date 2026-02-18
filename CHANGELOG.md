@@ -5,6 +5,26 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.4] - 2026-02-18 — Enhanced Git Support
+
+### Changed
+- Complete rewrite of `faf git` output — compact, accurate, PR-ready (~35 lines vs 130)
+- Primary language detection from GitHub API (uses first entry in sorted language array)
+- Language-aware install detection (pip, cargo, go, npm, yarn, brew, docker)
+- `slotignored` fields no longer appear in output (engine directive only)
+- Languages capped at top 6 for clean output
+- Clean 4-line header format
+
+### Fixed
+- GitHub API language endpoint now uses auth token (was missing `githubHeaders()`)
+- React correctly detected as JavaScript (was showing TypeScript)
+- Garbage README extraction filtered out (trailing pipes, code blocks, markdown links)
+
+### Added
+- WJTTC test suite for faf-git-generator (86 tests across Brake/Engine/Aero tiers)
+- 17 language detection tests, build system detection, package.json analysis
+- The version that scored a Hundred Famous Repos
+
 ## [4.4.3] - 2026-02-17
 
 ### Changed
