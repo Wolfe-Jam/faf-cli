@@ -33,6 +33,21 @@ export interface GitHubFile {
 }
 
 /**
+ * Build GitHub API headers, with auth token if available
+ */
+function githubHeaders(): Record<string, string> {
+  const headers: Record<string, string> = {
+    'Accept': 'application/vnd.github.v3+json',
+    'User-Agent': 'faf-cli',
+  };
+  const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
+  if (token) {
+    headers['Authorization'] = `token ${token}`;
+  }
+  return headers;
+}
+
+/**
  * Parse GitHub URL to extract owner and repo
  */
 export function parseGitHubUrl(url: string): { owner: string; repo: string } | null {
@@ -98,10 +113,7 @@ export async function fetchGitHubMetadata(
 
   try {
     const response = await fetch(apiUrl, {
-      headers: {
-        'Accept': 'application/vnd.github.v3+json',
-        'User-Agent': 'faf-cli'
-      }
+      headers: githubHeaders()
     });
 
     if (!response.ok) {
@@ -196,10 +208,7 @@ async function checkFileExists(
 
   try {
     const response = await fetch(url, {
-      headers: {
-        'Accept': 'application/vnd.github.v3+json',
-        'User-Agent': 'faf-cli'
-      }
+      headers: githubHeaders()
     });
 
     return response.ok;
@@ -222,10 +231,7 @@ export async function fetchGitHubFileTree(
 
   try {
     const response = await fetch(url, {
-      headers: {
-        'Accept': 'application/vnd.github.v3+json',
-        'User-Agent': 'faf-cli'
-      }
+      headers: githubHeaders()
     });
 
     if (!response.ok) {
@@ -275,10 +281,7 @@ export async function fetchGitHubFileContent(
 
   try {
     const response = await fetch(url, {
-      headers: {
-        'Accept': 'application/vnd.github.v3+json',
-        'User-Agent': 'faf-cli'
-      }
+      headers: githubHeaders()
     });
 
     if (!response.ok) {
