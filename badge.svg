@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="236" height="20" role="img" aria-label="TAF: 808/808 passing (9 skipped)">
+  <title>TAF: 808/808 passing (9 skipped)</title>
+  <linearGradient id="s" x2="0" y2="100%">
+    <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
+    <stop offset="1" stop-opacity=".1"/>
+  </linearGradient>
+  <clipPath id="r">
+    <rect width="236" height="20" rx="3" fill="#fff"/>
+  </clipPath>
+  <g clip-path="url(#r)">
+    <rect width="40" height="20" fill="#555"/>
+    <rect x="40" width="196" height="20" fill="#00D4D4"/>
+    <rect width="236" height="20" fill="url(#s)"/>
+  </g>
+  <g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" text-rendering="geometricPrecision" font-size="11">
+    <text x="20" y="140" fill="#010101" fill-opacity=".3" transform="scale(.1)" textLength="300">TAF</text>
+    <text x="20" y="130" transform="scale(.1)" textLength="300">TAF</text>
+    <text x="138" y="140" fill="#010101" fill-opacity=".3" transform="scale(.1)" textLength="1860">808/808 passing (9 skipped)</text>
+    <text x="138" y="130" transform="scale(.1)" textLength="1860">808/808 passing (9 skipped)</text>
+  </g>
+</svg>
