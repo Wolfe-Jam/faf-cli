@@ -109,7 +109,7 @@ describe('TIER 1: CLI Commands', () => {
   });
 
   it('T1.01: faf compile creates valid .fafb file', async () => {
-    if (!(await compilerCheck())) return;
+    if (!(await compilerCheck())) {return;}
 
     const fafPath = await createTestFaf(testDir);
     const result = await compileFAF({ input: fafPath });
@@ -130,7 +130,7 @@ describe('TIER 1: CLI Commands', () => {
   });
 
   it('T1.02: faf compile respects custom output path', async () => {
-    if (!(await compilerCheck())) return;
+    if (!(await compilerCheck())) {return;}
 
     const fafPath = await createTestFaf(testDir);
     const customOutput = path.join(testDir, 'custom-output.fafb');
@@ -144,7 +144,7 @@ describe('TIER 1: CLI Commands', () => {
   });
 
   it('T1.03: faf compile fails gracefully with invalid input', async () => {
-    if (!(await compilerCheck())) return;
+    if (!(await compilerCheck())) {return;}
 
     const invalidPath = path.join(testDir, 'nonexistent.faf');
     const result = await compileFAF({ input: invalidPath });
@@ -154,7 +154,7 @@ describe('TIER 1: CLI Commands', () => {
   });
 
   it('T1.04: faf compile produces smaller file than .faf', async () => {
-    if (!(await compilerCheck())) return;
+    if (!(await compilerCheck())) {return;}
 
     const fafPath = await createTestFaf(testDir);
     const result = await compileFAF({ input: fafPath });
@@ -165,7 +165,7 @@ describe('TIER 1: CLI Commands', () => {
   });
 
   it('T1.05: faf compile completes in reasonable time', async () => {
-    if (!(await compilerCheck())) return;
+    if (!(await compilerCheck())) {return;}
 
     const fafPath = await createTestFaf(testDir);
     const result = await compileFAF({ input: fafPath });
@@ -175,7 +175,7 @@ describe('TIER 1: CLI Commands', () => {
   });
 
   it('T1.06: faf decompile (placeholder - needs xai-faf-rust implementation)', async () => {
-    if (!(await compilerCheck())) return;
+    if (!(await compilerCheck())) {return;}
 
     const fafPath = await createTestFaf(testDir);
     const compileResult = await compileFAF({ input: fafPath });
@@ -206,7 +206,7 @@ describe('TIER 1: CLI Commands', () => {
   });
 
   it('T1.08: faf compile with malformed YAML fails gracefully', async () => {
-    if (!(await compilerCheck())) return;
+    if (!(await compilerCheck())) {return;}
 
     const badFafPath = path.join(testDir, 'bad.faf');
     await fs.writeFile(badFafPath, 'this is not: [valid: yaml', 'utf-8');
@@ -218,7 +218,7 @@ describe('TIER 1: CLI Commands', () => {
   });
 
   it('T1.09: faf compile creates reproducible output', async () => {
-    if (!(await compilerCheck())) return;
+    if (!(await compilerCheck())) {return;}
 
     const fafPath = await createTestFaf(testDir);
 
@@ -237,7 +237,7 @@ describe('TIER 1: CLI Commands', () => {
   });
 
   it('T1.10: faf compile handles special characters in paths', async () => {
-    if (!(await compilerCheck())) return;
+    if (!(await compilerCheck())) {return;}
 
     const specialDir = path.join(testDir, 'special chars-@#$');
     await fs.mkdir(specialDir, { recursive: true });
@@ -265,7 +265,7 @@ describe('TIER 2: Auto-Compile Integration', () => {
   });
 
   it('T2.01: autoCompile creates .fafb alongside .faf', async () => {
-    if (!(await compilerCheck())) return;
+    if (!(await compilerCheck())) {return;}
 
     const fafPath = await createTestFaf(testDir);
     const success = await autoCompile(fafPath, true);
@@ -289,7 +289,7 @@ describe('TIER 2: Auto-Compile Integration', () => {
   });
 
   it('T2.03: autoCompile respects quiet flag', async () => {
-    if (!(await compilerCheck())) return;
+    if (!(await compilerCheck())) {return;}
 
     const fafPath = await createTestFaf(testDir);
 
@@ -299,7 +299,7 @@ describe('TIER 2: Auto-Compile Integration', () => {
   });
 
   it('T2.04: autoCompile handles existing .fafb (overwrites)', async () => {
-    if (!(await compilerCheck())) return;
+    if (!(await compilerCheck())) {return;}
 
     const fafPath = await createTestFaf(testDir);
     const fafbPath = fafPath.replace('.faf', '.fafb');
@@ -317,7 +317,7 @@ describe('TIER 2: Auto-Compile Integration', () => {
   });
 
   it('T2.05: autoCompile preserves .faf file', async () => {
-    if (!(await compilerCheck())) return;
+    if (!(await compilerCheck())) {return;}
 
     const fafPath = await createTestFaf(testDir);
     const originalContent = await fs.readFile(fafPath, 'utf-8');
@@ -352,7 +352,7 @@ describe('TIER 3: Format Detection', () => {
   });
 
   it('T3.02: detectFormat identifies .fafb files', async () => {
-    if (!(await compilerCheck())) return;
+    if (!(await compilerCheck())) {return;}
 
     const fafPath = await createTestFaf(testDir);
     const result = await compileFAF({ input: fafPath });
@@ -379,7 +379,7 @@ describe('TIER 3: Format Detection', () => {
   });
 
   it('T3.05: detectFormat detects FAFB magic bytes', async () => {
-    if (!(await compilerCheck())) return;
+    if (!(await compilerCheck())) {return;}
 
     const fafPath = await createTestFaf(testDir);
     const result = await compileFAF({ input: fafPath });
@@ -434,7 +434,7 @@ describe('TIER 4: Error Handling', () => {
   });
 
   it('T4.01: compileFAF handles missing input file', async () => {
-    if (!(await compilerCheck())) return;
+    if (!(await compilerCheck())) {return;}
 
     const result = await compileFAF({ input: '/nonexistent/path.faf' });
 
@@ -443,8 +443,8 @@ describe('TIER 4: Error Handling', () => {
   });
 
   it('T4.02: compileFAF handles read permission errors', async () => {
-    if (!(await compilerCheck())) return;
-    if (process.platform === 'win32') return; // Skip on Windows
+    if (!(await compilerCheck())) {return;}
+    if (process.platform === 'win32') {return;} // Skip on Windows
 
     const fafPath = await createTestFaf(testDir);
     await fs.chmod(fafPath, 0o000); // No permissions
@@ -459,7 +459,7 @@ describe('TIER 4: Error Handling', () => {
   });
 
   it('T4.03: compileFAF handles invalid YAML syntax', async () => {
-    if (!(await compilerCheck())) return;
+    if (!(await compilerCheck())) {return;}
 
     const badFafPath = path.join(testDir, 'bad-syntax.faf');
     await fs.writeFile(badFafPath, 'faf_version: 2.5.0\nproject: {invalid', 'utf-8');
@@ -480,7 +480,7 @@ describe('TIER 4: Error Handling', () => {
   });
 
   it('T4.05: compileFAF handles corrupted .faf files', async () => {
-    if (!(await compilerCheck())) return;
+    if (!(await compilerCheck())) {return;}
 
     const corruptPath = path.join(testDir, 'corrupt.faf');
     const randomBytes = Buffer.from([0xFF, 0xFE, 0xFD, 0xFC]);
@@ -505,7 +505,7 @@ describe('TIER 4: Error Handling', () => {
   });
 
   it('T4.08: compileFAF returns meaningful error messages', async () => {
-    if (!(await compilerCheck())) return;
+    if (!(await compilerCheck())) {return;}
 
     const badFafPath = path.join(testDir, 'bad.faf');
     await fs.writeFile(badFafPath, 'not valid yaml at all!', 'utf-8');
@@ -534,7 +534,7 @@ describe('TIER 5: End-to-End Workflows', () => {
   });
 
   it('T5.01: Complete workflow - create, compile, verify', async () => {
-    if (!(await compilerCheck())) return;
+    if (!(await compilerCheck())) {return;}
 
     // Create .faf
     const fafPath = await createTestFaf(testDir);
@@ -553,7 +553,7 @@ describe('TIER 5: End-to-End Workflows', () => {
   });
 
   it('T5.02: Workflow - edit .faf, recompile', async () => {
-    if (!(await compilerCheck())) return;
+    if (!(await compilerCheck())) {return;}
 
     const fafPath = await createTestFaf(testDir);
     const fafbPath = fafPath.replace('.faf', '.fafb');
@@ -564,7 +564,7 @@ describe('TIER 5: End-to-End Workflows', () => {
 
     // Edit .faf
     const newContent = await fs.readFile(fafPath, 'utf-8');
-    await fs.writeFile(fafPath, newContent + '\n# Comment', 'utf-8');
+    await fs.writeFile(fafPath, `${newContent  }\n# Comment`, 'utf-8');
 
     // Recompile
     const result2 = await compileFAF({ input: fafPath });
@@ -579,7 +579,7 @@ describe('TIER 5: End-to-End Workflows', () => {
   });
 
   it('T5.03: Workflow - multiple .faf files in same directory', async () => {
-    if (!(await compilerCheck())) return;
+    if (!(await compilerCheck())) {return;}
 
     const faf1 = await createTestFaf(testDir, 'project1.faf');
     const faf2 = await createTestFaf(testDir, 'project2.faf');
@@ -595,7 +595,7 @@ describe('TIER 5: End-to-End Workflows', () => {
   });
 
   it('T5.04: Workflow - nested directories', async () => {
-    if (!(await compilerCheck())) return;
+    if (!(await compilerCheck())) {return;}
 
     const nestedDir = path.join(testDir, 'level1', 'level2', 'level3');
     await fs.mkdir(nestedDir, { recursive: true });
@@ -608,7 +608,7 @@ describe('TIER 5: End-to-End Workflows', () => {
   });
 
   it('T5.05: Workflow - CI/CD simulation (fast compile)', async () => {
-    if (!(await compilerCheck())) return;
+    if (!(await compilerCheck())) {return;}
 
     const fafPath = await createTestFaf(testDir);
     const startTime = Date.now();
@@ -638,7 +638,7 @@ describe('TIER 6: Performance & Regression', () => {
   });
 
   it('T6.01: Compile time < 500ms for typical project', async () => {
-    if (!(await compilerCheck())) return;
+    if (!(await compilerCheck())) {return;}
 
     const fafPath = await createTestFaf(testDir);
     const result = await compileFAF({ input: fafPath });
@@ -648,7 +648,7 @@ describe('TIER 6: Performance & Regression', () => {
   });
 
   it('T6.02: .fafb size < 1KB for typical project', async () => {
-    if (!(await compilerCheck())) return;
+    if (!(await compilerCheck())) {return;}
 
     const fafPath = await createTestFaf(testDir);
     const result = await compileFAF({ input: fafPath });
@@ -658,7 +658,7 @@ describe('TIER 6: Performance & Regression', () => {
   });
 
   it('T6.03: Compression ratio > 10% for typical project', async () => {
-    if (!(await compilerCheck())) return;
+    if (!(await compilerCheck())) {return;}
 
     const fafPath = await createTestFaf(testDir);
     const result = await compileFAF({ input: fafPath });
@@ -668,7 +668,7 @@ describe('TIER 6: Performance & Regression', () => {
   });
 
   it('T6.04: Multiple compiles don\'t leak memory', async () => {
-    if (!(await compilerCheck())) return;
+    if (!(await compilerCheck())) {return;}
 
     const fafPath = await createTestFaf(testDir);
 
@@ -686,7 +686,7 @@ describe('TIER 6: Performance & Regression', () => {
   });
 
   it('T6.05: Large .faf file (10KB) compiles successfully', async () => {
-    if (!(await compilerCheck())) return;
+    if (!(await compilerCheck())) {return;}
 
     const largeFafPath = path.join(testDir, 'large.faf');
     let content = 'faf_version: 2.5.0\nproject:\n  name: large-project\n';

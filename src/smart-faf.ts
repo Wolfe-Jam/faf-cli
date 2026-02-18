@@ -247,7 +247,7 @@ class SmartFaf {
    * Get current FAF score by parsing .faf file
    */
   private getCurrentScore(): number {
-    if (!fs.existsSync(this.fafFile)) return 0;
+    if (!fs.existsSync(this.fafFile)) {return 0;}
 
     try {
       const content = fs.readFileSync(this.fafFile, 'utf-8');
@@ -298,7 +298,7 @@ class SmartFaf {
    */
   private runCommand(command: string, message: string): void {
     console.log(message);
-    console.log('━'.repeat(50) + '\n');
+    console.log(`${'━'.repeat(50)  }\n`);
 
     try {
       execSync(`faf ${command}`, { stdio: 'inherit' });

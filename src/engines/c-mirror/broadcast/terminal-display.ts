@@ -191,7 +191,7 @@ function handleIntegrityFailed(event: MirrorEvent): void {
  * Score update
  */
 function handleScoreUpdate(event: MirrorEvent): void {
-  if (!event.metadata.score) return;
+  if (!event.metadata.score) {return;}
 
   const { ai, human, total } = event.metadata.score;
 

@@ -130,7 +130,7 @@ describe('🔴 TIER 1: BRAKE - Critical Dogfooding Validation', () => {
   describe('faf-cli dogfooding (self-analysis)', () => {
     test('faf init: extracts correct name from package.json', () => {
       const fixture = FIXTURES[0]; // faf-cli
-      if (!fixture.path) return;
+      if (!fixture.path) {return;}
 
       const data = runFafInit(fixture.path);
 
@@ -140,7 +140,7 @@ describe('🔴 TIER 1: BRAKE - Critical Dogfooding Validation', () => {
 
     test('faf init: extracts correct version from package.json', () => {
       const fixture = FIXTURES[0];
-      if (!fixture.path) return;
+      if (!fixture.path) {return;}
 
       const data = runFafInit(fixture.path);
 
@@ -150,7 +150,7 @@ describe('🔴 TIER 1: BRAKE - Critical Dogfooding Validation', () => {
 
     test('faf init: detects TypeScript as main language', () => {
       const fixture = FIXTURES[0];
-      if (!fixture.path) return;
+      if (!fixture.path) {return;}
 
       const data = runFafInit(fixture.path);
 
@@ -159,7 +159,7 @@ describe('🔴 TIER 1: BRAKE - Critical Dogfooding Validation', () => {
 
     test('faf init: detects cli-ts as project type', () => {
       const fixture = FIXTURES[0];
-      if (!fixture.path) return;
+      if (!fixture.path) {return;}
 
       const data = runFafInit(fixture.path);
 
@@ -169,7 +169,7 @@ describe('🔴 TIER 1: BRAKE - Critical Dogfooding Validation', () => {
     // SKIP: Network-dependent tests (GitHub API rate limits in CI)
     test.skip('faf git: extracts correct name from GitHub', () => {
       const fixture = FIXTURES[0];
-      if (!fixture.github) return;
+      if (!fixture.github) {return;}
 
       const data = runFafGit(fixture.github);
 
@@ -180,7 +180,7 @@ describe('🔴 TIER 1: BRAKE - Critical Dogfooding Validation', () => {
     // SKIP: Network-dependent tests (GitHub API rate limits in CI)
     test.skip('faf init vs faf git: name consistency', () => {
       const fixture = FIXTURES[0];
-      if (!fixture.path || !fixture.github) return;
+      if (!fixture.path || !fixture.github) {return;}
 
       const initData = runFafInit(fixture.path);
       const gitData = runFafGit(fixture.github);
@@ -193,7 +193,7 @@ describe('🔴 TIER 1: BRAKE - Critical Dogfooding Validation', () => {
   describe('manifest file authority (package.json/pyproject.toml/Cargo.toml)', () => {
     test('package.json ALWAYS overrides FAB/README guesses', () => {
       const fixture = FIXTURES[0];
-      if (!fixture.path) return;
+      if (!fixture.path) {return;}
 
       const data = runFafInit(fixture.path);
 
@@ -204,7 +204,7 @@ describe('🔴 TIER 1: BRAKE - Critical Dogfooding Validation', () => {
 
     test('version field is populated when manifest exists', () => {
       const fixture = FIXTURES[0];
-      if (!fixture.path || !fixture.expectedVersion) return;
+      if (!fixture.path || !fixture.expectedVersion) {return;}
 
       const data = runFafInit(fixture.path);
 
@@ -223,7 +223,7 @@ describe('🟡 TIER 2: ENGINE - Multi-Language Support', () => {
     // SKIP: Network-dependent tests (GitHub API rate limits in CI)
     test.skip('faf git: correctly detects C++ as primary language', () => {
       const fixture = FIXTURES[1]; // whisper.cpp
-      if (!fixture.github) return;
+      if (!fixture.github) {return;}
 
       const data = runFafGit(fixture.github);
 
@@ -234,7 +234,7 @@ describe('🟡 TIER 2: ENGINE - Multi-Language Support', () => {
     // SKIP: Network-dependent tests (GitHub API rate limits in CI)
     test.skip('faf git: extracts correct name for C++ project', () => {
       const fixture = FIXTURES[1];
-      if (!fixture.github) return;
+      if (!fixture.github) {return;}
 
       const data = runFafGit(fixture.github);
 
@@ -244,7 +244,7 @@ describe('🟡 TIER 2: ENGINE - Multi-Language Support', () => {
     // SKIP: Network-dependent tests (GitHub API rate limits in CI)
     test.skip('faf git: detects multiple languages with correct weighting', () => {
       const fixture = FIXTURES[1];
-      if (!fixture.github) return;
+      if (!fixture.github) {return;}
 
       const data = runFafGit(fixture.github);
 
@@ -307,7 +307,7 @@ describe('🔵 TIER 4: COMPARISON - Init vs Git Consistency', () => {
   // SKIP: Network-dependent tests (GitHub API rate limits in CI)
   test.skip('both methods produce valid .faf files', () => {
     const fixture = FIXTURES[0];
-    if (!fixture.path || !fixture.github) return;
+    if (!fixture.path || !fixture.github) {return;}
 
     const initData = runFafInit(fixture.path);
     const gitData = runFafGit(fixture.github);
@@ -323,7 +323,7 @@ describe('🔵 TIER 4: COMPARISON - Init vs Git Consistency', () => {
   // SKIP: Network-dependent tests (GitHub API rate limits in CI)
   test.skip('both methods agree on project name', () => {
     const fixture = FIXTURES[0];
-    if (!fixture.path || !fixture.github) return;
+    if (!fixture.path || !fixture.github) {return;}
 
     const initData = runFafInit(fixture.path);
     const gitData = runFafGit(fixture.github);
@@ -334,7 +334,7 @@ describe('🔵 TIER 4: COMPARISON - Init vs Git Consistency', () => {
   // SKIP: Network-dependent tests (GitHub API rate limits in CI)
   test.skip('both methods detect primary language correctly', () => {
     const fixture = FIXTURES[0];
-    if (!fixture.path || !fixture.github) return;
+    if (!fixture.path || !fixture.github) {return;}
 
     const initData = runFafInit(fixture.path);
     const gitData = runFafGit(fixture.github);

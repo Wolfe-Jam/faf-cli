@@ -41,10 +41,10 @@ export function calculateScorePure(input: ScoreInput): number {
     return 0;
   }
 
-  if (input.fafData.version) score += 10;
-  if (input.fafData.project?.name) score += 10;
-  if (input.fafData.project?.description) score += 15;
-  if (input.projectStats?.hasTests) score += 20;
+  if (input.fafData.version) {score += 10;}
+  if (input.fafData.project?.name) {score += 10;}
+  if (input.fafData.project?.description) {score += 15;}
+  if (input.projectStats?.hasTests) {score += 20;}
 
   return Math.min(score, 100);
 }
@@ -298,7 +298,7 @@ export class ScoreCommand {
 // ===============================================
 
 // OLD (stateful):
-let cachedScore: number | null = null;
+const cachedScore: number | null = null;
 export function getCachedScore() {
   return cachedScore; // ❌ Global state
 }

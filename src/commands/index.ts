@@ -55,7 +55,7 @@ export async function indexCommand(query?: string, options: IndexCommandOptions 
   }
 }
 
-interface IndexEntry {
+export interface IndexEntry {
   type: string;
   description: string;
   usage?: string;
@@ -67,7 +67,7 @@ interface IndexEntry {
 /**
  * The Universal FAF Index - Everything A-Z
  */
-const FAF_INDEX: Record<string, IndexEntry> = {
+export const FAF_INDEX: Record<string, IndexEntry> = {
   // === A ===
   'analyze': {
     type: 'command',

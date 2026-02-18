@@ -69,33 +69,33 @@ export async function claudeMdToFaf(
 
     // Update project section (if changed in CLAUDE.md)
     if (extracted.projectName && extracted.projectName !== existingFafData.project?.name) {
-      if (!updatedFaf.project) updatedFaf.project = {};
+      if (!updatedFaf.project) {updatedFaf.project = {};}
       updatedFaf.project.name = extracted.projectName;
     }
 
     if (extracted.projectGoal) {
-      if (!updatedFaf.project) updatedFaf.project = {};
+      if (!updatedFaf.project) {updatedFaf.project = {};}
       updatedFaf.project.goal = extracted.projectGoal;
     }
 
     if (extracted.projectDescription) {
-      if (!updatedFaf.project) updatedFaf.project = {};
+      if (!updatedFaf.project) {updatedFaf.project = {};}
       updatedFaf.project.description = extracted.projectDescription;
     }
 
     // Update instant_context (if changed)
     if (extracted.techStack) {
-      if (!updatedFaf.instant_context) updatedFaf.instant_context = {};
+      if (!updatedFaf.instant_context) {updatedFaf.instant_context = {};}
       updatedFaf.instant_context.tech_stack = extracted.techStack;
     }
 
     if (extracted.mainLanguage) {
-      if (!updatedFaf.instant_context) updatedFaf.instant_context = {};
+      if (!updatedFaf.instant_context) {updatedFaf.instant_context = {};}
       updatedFaf.instant_context.main_language = extracted.mainLanguage;
     }
 
     if (extracted.whatBuilding) {
-      if (!updatedFaf.instant_context) updatedFaf.instant_context = {};
+      if (!updatedFaf.instant_context) {updatedFaf.instant_context = {};}
       updatedFaf.instant_context.what_building = extracted.whatBuilding;
     }
 

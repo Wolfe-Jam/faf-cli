@@ -477,10 +477,10 @@ Examples:
     const recoverPath = require('path').join(__dirname, 'commands', 'faf-recover.js');
     const args = [recoverPath];
 
-    if (options.auto) args.push('--auto');
-    if (options.backup) args.push('--backup');
-    if (options.check) args.push('--check');
-    if (options.force) args.push('--force');
+    if (options.auto) {args.push('--auto');}
+    if (options.backup) {args.push('--backup');}
+    if (options.check) {args.push('--check');}
+    if (options.force) {args.push('--force');}
 
     const child = spawn('node', args, { stdio: 'inherit' });
     child.on('exit', (code: number | null) => {
@@ -1501,9 +1501,9 @@ program
     console.log(chalk.red(`❌ Unknown command: ${cmd}`));
     console.log('');
     console.log(FAF_COLORS.fafOrange('💡 Did you mean:'));
-    console.log('  ' + chalk.cyan('faf init') + '     # Create .faf file');
-    console.log('  ' + chalk.cyan('faf score') + '    # Check completeness');
-    console.log('  ' + chalk.cyan('faf --help') + '   # See all commands');
+    console.log(`  ${  chalk.cyan('faf init')  }     # Create .faf file`);
+    console.log(`  ${  chalk.cyan('faf score')  }    # Check completeness`);
+    console.log(`  ${  chalk.cyan('faf --help')  }   # See all commands`);
     process.exit(1);
   });
 
@@ -1590,7 +1590,7 @@ async function showInteractiveWelcome() {
               if (key === ' ' && inputBuffer === '') {
                 process.stdin.setRawMode(false);
                 process.stdin.removeListener('data', keyHandler);
-                console.log('\n' + chalk.dim('🎯 Switching to menu...'));
+                console.log(`\n${  chalk.dim('🎯 Switching to menu...')}`);
                 resolve({ command: 'menu' });
                 return;
               }

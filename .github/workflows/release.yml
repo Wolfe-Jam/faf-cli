@@ -54,7 +54,6 @@ jobs:
       
       - name: 🔧 ESLint validation
         run: npm run lint
-        continue-on-error: true
       
       - name: 🎯 Extract version info
         id: version

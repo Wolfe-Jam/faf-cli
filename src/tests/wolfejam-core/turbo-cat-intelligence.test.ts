@@ -20,7 +20,7 @@ describe('😽 TURBO-CAT Intelligence Engine - CATALYTIC TESTS', () => {
   let turboCat: TurboCat;
   
   beforeEach(async () => {
-    testDir = path.join(os.tmpdir(), 'turbo-cat-test-' + Date.now());
+    testDir = path.join(os.tmpdir(), `turbo-cat-test-${  Date.now()}`);
     await fs.mkdir(testDir, { recursive: true });
     turboCat = new TurboCat();
   });

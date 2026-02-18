@@ -30,7 +30,7 @@ jobs:
         run: npm audit --audit-level=moderate --omit=dev
 
       - name: Check for secrets
-        uses: trufflesecurity/trufflehog@main
+        uses: trufflesecurity/trufflehog@c563a0692fa2017ff949d219cc9f586293d41e66
         with:
           path: ./
           base: ${{ github.event.repository.default_branch }}
@@ -58,7 +58,6 @@ jobs:
 
       - name: Lint code
         run: npm run lint
-        continue-on-error: true
 
       - name: Build TypeScript
         run: npm run build
@@ -113,7 +112,6 @@ jobs:
 
       - name: Lint
         run: npm run lint
-        continue-on-error: true
 
       - name: Format Check
         run: npm run format -- --check
@@ -142,14 +140,6 @@ jobs:
 
       - name: Run performance validation
         run: npm run performance:ci
-        continue-on-error: true
-
-      - name: Check performance benchmarks
-        run: |
-          echo "🏁 Performance Targets:"
-          echo "CLI startup: <50ms ✅"
-          echo "Score calculation: <30ms ✅"
-          echo "Init generation: <100ms ✅"
 
   # 🏎️ TAF - Testing Activity Feed
   taf:
@@ -191,17 +181,49 @@ jobs:
   status:
     name: 🏆 Championship Status
     runs-on: ubuntu-latest
-    needs: [security, test, quality, performance, taf]
+    needs: [security, test, quality, performance]
     if: always()
 
     steps:
-      - name: Check Status
+      - name: Check results
         run: |
-          echo "🏁 FAF CLI Championship CI/CD Complete!"
+          echo "🏁 FAF CLI Championship CI/CD"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "✅ Security: Passed"
-          echo "✅ Tests: All platforms"
-          echo "✅ Quality: Championship level"
-          echo "✅ Performance: F1-grade"
+
+          failed=0
+
+          if [ "${{ needs.security.result }}" != "success" ]; then
+            echo "❌ Security: ${{ needs.security.result }}"
+            failed=1
+          else
+            echo "✅ Security: passed"
+          fi
+
+          if [ "${{ needs.test.result }}" != "success" ]; then
+            echo "❌ Tests: ${{ needs.test.result }}"
+            failed=1
+          else
+            echo "✅ Tests: all platforms"
+          fi
+
+          if [ "${{ needs.quality.result }}" != "success" ]; then
+            echo "❌ Quality: ${{ needs.quality.result }}"
+            failed=1
+          else
+            echo "✅ Quality: passed"
+          fi
+
+          if [ "${{ needs.performance.result }}" != "success" ]; then
+            echo "⚠️  Performance: ${{ needs.performance.result }}"
+          else
+            echo "✅ Performance: passed"
+          fi
+
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+          if [ "$failed" -eq 1 ]; then
+            echo "🚨 CI FAILED — check above"
+            exit 1
+          fi
+
           echo "🏆 PODIUM READY!"
