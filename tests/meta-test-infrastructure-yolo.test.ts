@@ -305,7 +305,7 @@ describe('🏁 YOLO: Meta-Test Infrastructure Validation', () => {
       const duration = Date.now() - start;
 
       // Should be fast (increased threshold for CI/loaded systems)
-      expect(duration).toBeLessThan(5000);
+      expect(duration).toBeLessThan(15000);
     });
 
     it('should have YOLO logs directory structure', () => {

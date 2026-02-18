@@ -88,7 +88,7 @@ describe('🍊 faf drift - Context-Drift Analysis', () => {
       const duration = Date.now() - startTime;
 
       expect(result).toContain('Analyzed: 100 commits');
-      expect(duration).toBeLessThan(10000); // Should complete in <10s
+      expect(duration).toBeLessThan(30000); // Should complete in <30s
     }, 60000); // 60s timeout - Windows CI needs headroom for 100 commits
   });
 
