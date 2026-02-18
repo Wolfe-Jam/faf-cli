@@ -148,10 +148,7 @@ export async function fetchGitHubMetadata(
     // Fetch language breakdown
     if (data.languages_url) {
       const langResponse = await fetch(data.languages_url, {
-        headers: {
-          'Accept': 'application/vnd.github.v3+json',
-          'User-Agent': 'faf-cli'
-        }
+        headers: githubHeaders()
       });
 
       if (langResponse.ok) {

@@ -1,20 +1,13 @@
 /**
- * 🏆 Enhanced FAF Generation for `faf git`
+ * FAF Generation for `faf git`
  *
- * Generates 90%+ AI-ready .faf files from GitHub repos WITHOUT cloning
- *
- * Strategy:
- * 1. Fetch README.md → Extract 6 Ws (+30%)
- * 2. Fetch package.json → Deep stack analysis (+15%)
- * 3. Full FAF schema → Match faf-cli init (+20%)
- * 4. Smart defaults → AI instructions, project type (+15%)
- * 5. Enhanced scoring → Championship grade (+10%)
+ * Generates clean, accurate .faf files from GitHub repos without cloning.
+ * Output is compact and PR-ready — every line adds value.
  */
 
 import type { GitHubMetadata } from './github-extractor';
 import { fetchGitHubFileContent } from './github-extractor';
 import { countSlots } from '../utils/slot-counter';
-import { getSlotsForType } from '../compiler/faf-compiler';
 
 export interface Enhanced6Ws {
   who: string;
@@ -26,17 +19,34 @@ export interface Enhanced6Ws {
   confidence: number;
 }
 
+export interface StackAnalysis {
+  frontend?: string;
+  backend?: string;
+  database?: string;
+  testing?: string;
+  buildTool?: string;
+  runtime?: string;
+  language?: string;
+  hosting?: string;
+  frameworks: string[];
+}
+
+// Default sentinel values — if unchanged, we omit from output
+const DEFAULT_WHO = 'Open source contributors';
+const DEFAULT_WHY = '';
+const DEFAULT_HOW = 'See README for usage';
+
 /**
- * Extract 6 Ws from README content (simplified version for git command)
+ * Extract 6 Ws from README content
  */
 export function extract6WsFromReadme(readme: string, metadata: GitHubMetadata): Enhanced6Ws {
   const result: Enhanced6Ws = {
-    who: 'Open source contributors',
+    who: DEFAULT_WHO,
     what: metadata.description || 'Software project',
-    why: 'Solve problems with code',
-    where: 'GitHub + npm registry',
-    when: 'Production/Stable',
-    how: 'See README for usage',
+    why: '',
+    where: 'GitHub',
+    when: 'Active',
+    how: DEFAULT_HOW,
     confidence: 40
   };
 
@@ -64,7 +74,6 @@ export function extract6WsFromReadme(readme: string, metadata: GitHubMetadata): 
   }
 
   // === WHY: Problem/motivation ===
-
   const whyPatterns = [
     /\*\*Problem:\*\*\s*([^\n]+)/i,
     /##\s*Why[^#\n]*\n+([\s\S]{20,200})(?=\n##|$)/i,
@@ -81,28 +90,47 @@ export function extract6WsFromReadme(readme: string, metadata: GitHubMetadata): 
   }
 
   // === WHO: Target audience ===
-
   const whoPatterns = [
-    /##\s*(?:Who|Target Audience|For)[^#\n]*\n+([\s\S]{10,150})(?=\n##|$)/i,
-    /(?:Built for|Designed for|Perfect for)\s+([^.\n]{10,100})/i
+    /##\s*(?:Who|Target Audience)[^#\n]*\n+([\s\S]{10,150})(?=\n##|$)/i,
+    /(?:Built for|Designed for|Perfect for)\s+([^.\n]{15,100})/i
   ];
 
   for (const pattern of whoPatterns) {
     const match = readme.match(pattern);
     if (match?.[1]) {
-      result.who = cleanText(match[1]);
-      confidenceBoost += 10;
+      const extracted = cleanText(match[1]);
+      // Only use if it looks like a real audience description
+      if (extracted.length >= 15 && extracted.length <= 120
+        && !extracted.includes(':') && !extracted.endsWith('|')
+        && !extracted.includes('```') && !extracted.includes('[')) {
+        result.who = extracted;
+        confidenceBoost += 10;
+      }
       break;
     }
   }
 
-  // === HOW: Usage/installation ===
-
-  if (readme.includes('npm install') || readme.includes('Installation')) {
-    result.how = 'npm install + usage guide in README';
+  // === HOW: Installation/usage (language-aware) ===
+  if (readme.includes('pip install') || readme.includes('pip3 install')) {
+    result.how = 'pip install (see README)';
     confidenceBoost += 5;
-  } else if (readme.includes('Quick Start') || readme.includes('Getting Started')) {
-    result.how = 'See Quick Start guide in README';
+  } else if (readme.includes('cargo install') || readme.includes('cargo add')) {
+    result.how = 'cargo install (see README)';
+    confidenceBoost += 5;
+  } else if (readme.includes('go install') || readme.includes('go get')) {
+    result.how = 'go install (see README)';
+    confidenceBoost += 5;
+  } else if (readme.includes('npm install') || readme.includes('npx ') || readme.includes('yarn add')) {
+    result.how = 'npm install (see README)';
+    confidenceBoost += 5;
+  } else if (readme.includes('brew install')) {
+    result.how = 'brew install (see README)';
+    confidenceBoost += 5;
+  } else if (readme.includes('docker pull') || readme.includes('docker run')) {
+    result.how = 'Docker (see README)';
+    confidenceBoost += 5;
+  } else if (readme.match(/##\s*(Quick Start|Getting Started|Installation)/i)) {
+    result.how = 'See Getting Started in README';
     confidenceBoost += 5;
   }
 
@@ -111,23 +139,8 @@ export function extract6WsFromReadme(readme: string, metadata: GitHubMetadata): 
 }
 
 /**
- * Enhanced stack detection from package.json
- */
-export interface StackAnalysis {
-  frontend?: string;
-  backend?: string;
-  database?: string;
-  testing?: string;
-  buildTool?: string;
-  runtime?: string;
-  language?: string;
-  hosting?: string;
-  frameworks: string[];
-}
-
-/**
- * Extract stack from GH API languages array
- * This is the SOURCE OF TRUTH from GitHub - trust it!
+ * Extract stack from GitHub API languages array (source of truth)
+ * Languages are sorted by percentage descending — first entry is primary.
  */
 export function extractFromLanguages(metadata: GitHubMetadata): StackAnalysis {
   const analysis: StackAnalysis = {
@@ -138,56 +151,57 @@ export function extractFromLanguages(metadata: GitHubMetadata): StackAnalysis {
     return analysis;
   }
 
-  // Convert to lowercase for easier matching
-  const langs = metadata.languages.map(l => l.toLowerCase());
+  // Use PRIMARY language (highest percentage, first in sorted array)
+  const primaryLangName = metadata.languages[0]?.split(' ')[0];
+  const langRuntimeMap: Record<string, { language: string; runtime: string }> = {
+    'C++': { language: 'C++', runtime: 'C++' },
+    'Rust': { language: 'Rust', runtime: 'Rust' },
+    'Go': { language: 'Go', runtime: 'Go' },
+    'Python': { language: 'Python', runtime: 'Python' },
+    'Java': { language: 'Java', runtime: 'JVM' },
+    'C': { language: 'C', runtime: 'C' },
+    'TypeScript': { language: 'TypeScript', runtime: 'Node.js' },
+    'JavaScript': { language: 'JavaScript', runtime: 'Node.js' },
+    'Ruby': { language: 'Ruby', runtime: 'Ruby' },
+    'Swift': { language: 'Swift', runtime: 'Swift' },
+    'Kotlin': { language: 'Kotlin', runtime: 'JVM' },
+    'Zig': { language: 'Zig', runtime: 'Zig' },
+    'Lua': { language: 'Lua', runtime: 'Lua' },
+    'Dart': { language: 'Dart', runtime: 'Dart' },
+    'PHP': { language: 'PHP', runtime: 'PHP' },
+    'Scala': { language: 'Scala', runtime: 'JVM' },
+    'Elixir': { language: 'Elixir', runtime: 'BEAM' },
+    'Haskell': { language: 'Haskell', runtime: 'GHC' },
+  };
 
-  // Runtime detection (from primary language)
-  const primaryLang = metadata.languages[0]?.split(' ')[0];
-  if (langs.some(l => l.startsWith('c++'))) {
-    analysis.language = 'C++';
-    analysis.runtime = 'C++';
-  } else if (langs.some(l => l.startsWith('rust'))) {
-    analysis.language = 'Rust';
-    analysis.runtime = 'Rust';
-  } else if (langs.some(l => l.startsWith('go'))) {
-    analysis.language = 'Go';
-    analysis.runtime = 'Go';
-  } else if (langs.some(l => l.startsWith('python'))) {
-    analysis.language = 'Python';
-    analysis.runtime = 'Python';
-  } else if (langs.some(l => l.startsWith('java'))) {
-    analysis.language = 'Java';
-    analysis.runtime = 'JVM';
-  } else if (langs.some(l => l.startsWith('c ('))) {
-    analysis.language = 'C';
-    analysis.runtime = 'C';
-  } else if (langs.some(l => l.startsWith('typescript'))) {
-    analysis.language = 'TypeScript';
-    analysis.runtime = 'Node.js';
-  } else if (langs.some(l => l.startsWith('javascript'))) {
-    analysis.language = 'JavaScript';
-    analysis.runtime = 'Node.js';
+  if (primaryLangName && langRuntimeMap[primaryLangName]) {
+    const match = langRuntimeMap[primaryLangName];
+    analysis.language = match.language;
+    analysis.runtime = match.runtime;
   }
 
-  // Build system detection
-  if (langs.some(l => l.startsWith('cmake'))) {
+  // Build system + Docker detection from all languages
+  const allLangs = metadata.languages.map(l => l.split(' ')[0].toLowerCase());
+  if (allLangs.includes('cmake')) {
     analysis.buildTool = 'CMake';
-  } else if (langs.some(l => l.startsWith('makefile'))) {
+  } else if (allLangs.includes('makefile')) {
     analysis.buildTool = 'Make';
-  } else if (langs.some(l => l.startsWith('gradle'))) {
+  } else if (allLangs.includes('gradle')) {
     analysis.buildTool = 'Gradle';
-  } else if (langs.some(l => l.startsWith('maven'))) {
+  } else if (allLangs.includes('maven')) {
     analysis.buildTool = 'Maven';
   }
 
-  // Hosting detection (from Dockerfile)
-  if (langs.some(l => l.startsWith('dockerfile'))) {
+  if (allLangs.includes('dockerfile')) {
     analysis.hosting = 'Docker';
   }
 
   return analysis;
 }
 
+/**
+ * Analyze package.json for npm ecosystem details
+ */
 export function analyzePackageJson(packageJson: any, metadata: GitHubMetadata): StackAnalysis {
   const analysis: StackAnalysis = {
     frameworks: []
@@ -199,109 +213,51 @@ export function analyzePackageJson(packageJson: any, metadata: GitHubMetadata): 
   };
 
   // Frontend
-  if (deps.react) {analysis.frontend = 'React';}
-  else if (deps.vue) {analysis.frontend = 'Vue';}
-  else if (deps.svelte) {analysis.frontend = 'Svelte';}
-  else if (deps['@angular/core']) {analysis.frontend = 'Angular';}
-  else if (deps.next) {analysis.frontend = 'Next.js';}
+  if (deps.react) { analysis.frontend = 'React'; }
+  else if (deps.vue) { analysis.frontend = 'Vue'; }
+  else if (deps.svelte) { analysis.frontend = 'Svelte'; }
+  else if (deps['@angular/core']) { analysis.frontend = 'Angular'; }
+  else if (deps.next) { analysis.frontend = 'Next.js'; }
 
   // Backend
-  if (deps.express) {analysis.backend = 'Express';}
-  else if (deps.fastify) {analysis.backend = 'Fastify';}
-  else if (deps.koa) {analysis.backend = 'Koa';}
-  else if (deps['@nestjs/core']) {analysis.backend = 'NestJS';}
+  if (deps.express) { analysis.backend = 'Express'; }
+  else if (deps.fastify) { analysis.backend = 'Fastify'; }
+  else if (deps.koa) { analysis.backend = 'Koa'; }
+  else if (deps['@nestjs/core']) { analysis.backend = 'NestJS'; }
 
   // Database
-  if (deps.mongoose) {analysis.database = 'MongoDB';}
-  else if (deps.pg || deps.postgres) {analysis.database = 'PostgreSQL';}
-  else if (deps.mysql || deps.mysql2) {analysis.database = 'MySQL';}
-  else if (deps.sqlite3 || deps['better-sqlite3']) {analysis.database = 'SQLite';}
-  else if (deps.redis) {analysis.database = 'Redis';}
+  if (deps.mongoose) { analysis.database = 'MongoDB'; }
+  else if (deps.pg || deps.postgres) { analysis.database = 'PostgreSQL'; }
+  else if (deps.mysql || deps.mysql2) { analysis.database = 'MySQL'; }
+  else if (deps.sqlite3 || deps['better-sqlite3']) { analysis.database = 'SQLite'; }
+  else if (deps.redis) { analysis.database = 'Redis'; }
 
   // Testing
-  if (deps.jest) {analysis.testing = 'Jest';}
-  else if (deps.vitest) {analysis.testing = 'Vitest';}
-  else if (deps.mocha) {analysis.testing = 'Mocha';}
+  if (deps.jest) { analysis.testing = 'Jest'; }
+  else if (deps.vitest) { analysis.testing = 'Vitest'; }
+  else if (deps.mocha) { analysis.testing = 'Mocha'; }
 
-  // Build tools (npm ecosystem)
-  if (deps.vite) {analysis.buildTool = 'Vite';}
-  else if (deps.webpack) {analysis.buildTool = 'Webpack';}
-  else if (deps.rollup) {analysis.buildTool = 'Rollup';}
-  else if (deps.esbuild) {analysis.buildTool = 'esbuild';}
-
-  // Runtime (npm ecosystem - override if detected from GH languages)
-  if (metadata.languages?.some(l => l.startsWith('TypeScript'))) {
-    analysis.language = 'TypeScript';
-    analysis.runtime = 'Node.js';
-  } else if (metadata.languages?.some(l => l.startsWith('JavaScript'))) {
-    analysis.language = 'JavaScript';
-    analysis.runtime = 'Node.js';
-  }
+  // Build tools
+  if (deps.vite) { analysis.buildTool = 'Vite'; }
+  else if (deps.webpack) { analysis.buildTool = 'Webpack'; }
+  else if (deps.rollup) { analysis.buildTool = 'Rollup'; }
+  else if (deps.esbuild) { analysis.buildTool = 'esbuild'; }
+  else if (deps.turbo) { analysis.buildTool = 'Turborepo'; }
 
   // Collect frameworks
-  if (analysis.frontend) {analysis.frameworks.push(analysis.frontend);}
-  if (analysis.backend) {analysis.frameworks.push(analysis.backend);}
+  if (analysis.frontend) { analysis.frameworks.push(analysis.frontend); }
+  if (analysis.backend) { analysis.frameworks.push(analysis.backend); }
 
   return analysis;
 }
 
 /**
- * Calculate enhanced quality score (targeting 90%+)
- */
-export function calculateEnhancedScore(
-  metadata: GitHubMetadata,
-  has6Ws: boolean,
-  hasPackageJson: boolean,
-  hasReadme: boolean
-): number {
-  let score = 0;
-
-  // Base metadata (25%)
-  if (metadata.description) {score += 5;}
-  if (metadata.stars && parseInt(metadata.stars.replace(/[KM]/g, '')) > 0) {score += 5;}
-  if (metadata.license) {score += 5;}
-  if (metadata.topics && metadata.topics.length > 0) {score += 5;}
-  if (metadata.languages && metadata.languages.length > 0) {score += 5;}
-
-  // README extraction (30%)
-  if (hasReadme) {
-    score += 10; // Has README
-    if (has6Ws) {score += 20;} // Extracted 6 Ws
-  }
-
-  // package.json analysis (15%)
-  if (hasPackageJson) {
-    score += 15; // Deep dependency analysis
-  }
-
-  // Stack detection (10%)
-  if (metadata.hasPackageJson || metadata.hasTsConfig) {score += 5;}
-  if (metadata.hasDockerfile) {score += 5;}
-
-  // Recent activity (10%)
-  if (metadata.lastUpdated) {
-    const daysSince = (Date.now() - new Date(metadata.lastUpdated).getTime()) / (1000 * 60 * 60 * 24);
-    if (daysSince < 90) {score += 10;}
-    else if (daysSince < 180) {score += 5;}
-  }
-
-  // File structure (5%)
-  score += 5;
-
-  // AI-ready structure (5%)
-  score += 5; // Full FAF schema
-
-  return Math.min(100, score);
-}
-
-/**
- * Generate full FAF structure (matching faf-cli init output)
+ * Generate clean .faf file from GitHub repo metadata
  */
 export async function generateEnhancedFaf(
   metadata: GitHubMetadata,
   files: any[]
 ): Promise<{ content: string; score: number }> {
-  const timestamp = new Date().toISOString();
 
   // Fetch README.md
   const readme = await fetchGitHubFileContent(
@@ -331,19 +287,19 @@ export async function generateEnhancedFaf(
   const sixWs = readme
     ? extract6WsFromReadme(readme, metadata)
     : {
-        who: 'Open source contributors',
+        who: DEFAULT_WHO,
         what: metadata.description || 'Software project',
-        why: 'Solve problems with code',
+        why: '',
         where: 'GitHub',
-        when: 'Production',
-        how: 'See repository',
+        when: 'Active',
+        how: DEFAULT_HOW,
         confidence: 25
       };
 
-  // Extract stack from GH API languages (SOURCE OF TRUTH)
+  // Extract stack from GitHub API languages (source of truth)
   const langStack = extractFromLanguages(metadata);
 
-  // Analyze stack from package.json (if exists - adds npm-specific detail)
+  // Analyze stack from package.json (adds npm-specific detail)
   const npmStack = packageJsonContent
     ? analyzePackageJson(packageJsonContent, metadata)
     : { frameworks: [] };
@@ -351,25 +307,26 @@ export async function generateEnhancedFaf(
   // Merge: npm takes priority for fields it detects (more specific)
   const stackAnalysis = { ...langStack, ...npmStack, frameworks: npmStack.frameworks || [] };
 
+  // Determine main language
+  const mainLanguage = stackAnalysis.language
+    || metadata.languages?.[0]?.split(' ')[0]
+    || null;
+
   // Determine project type
   const projectType = determineProjectType(metadata, stackAnalysis, packageJsonContent);
 
-  // Calculate REAL score using slot-counting (not hardcoded formula)
-  // IMPORTANT: Values must match what's written to .faf file (apply same defaults)
+  // Calculate score internally for CLI display (slot-counting)
   const slotCount = countSlots({
-    // Project (4)
     projectName: metadata.repo,
     projectGoal: metadata.description || null,
-    mainLanguage: stackAnalysis.language || metadata.languages?.[0]?.split(' ')[0] || 'Unknown',
+    mainLanguage: mainLanguage || 'Unknown',
     projectType: projectType,
-    // Human context (6)
     who: sixWs.who,
     what: sixWs.what,
-    why: sixWs.why,
+    why: sixWs.why || 'slotignored',
     where: sixWs.where,
     when: sixWs.when,
     how: sixWs.how,
-    // Stack (11) - Apply same defaults as written to .faf (MUST MATCH!)
     frontend: stackAnalysis.frontend || 'slotignored',
     uiLibrary: 'slotignored',
     backend: stackAnalysis.backend || 'slotignored',
@@ -378,163 +335,109 @@ export async function generateEnhancedFaf(
     build: stackAnalysis.buildTool || 'slotignored',
     packageManager: packageJsonContent ? 'npm' : 'slotignored',
     apiType: 'slotignored',
-    hosting: stackAnalysis.hosting || (metadata.topics?.includes('vercel') || metadata.topics?.includes('netlify') ? 'Cloud' : 'slotignored'),
+    hosting: stackAnalysis.hosting || 'slotignored',
     cicd: 'slotignored',
     cssFramework: 'slotignored'
   });
 
   const score = slotCount.score;
 
-  // Generate full FAF structure
-  const fafData: any = {
+  // === Build clean .faf output ===
+
+  // Project section
+  const project: Record<string, any> = {
+    name: metadata.repo,
+  };
+  if (metadata.description) {
+    project.description = metadata.description;
+  }
+  if (mainLanguage) {
+    project.language = mainLanguage;
+  }
+  project.type = projectType;
+  if (metadata.license && metadata.license !== 'NOASSERTION') {
+    project.license = metadata.license;
+  }
+
+  // Metadata section
+  const metadataSection: Record<string, any> = {
+    repository: metadata.url,
+    owner: metadata.owner,
+  };
+  if (metadata.stars && metadata.stars !== '0') {
+    metadataSection.stars = metadata.stars;
+  }
+  if (metadata.forks && metadata.forks !== '0') {
+    metadataSection.forks = metadata.forks;
+  }
+  if (metadata.topics && metadata.topics.length > 0) {
+    metadataSection.topics = metadata.topics;
+  }
+  if (metadata.languages && metadata.languages.length > 0) {
+    // Top 6 languages — enough to understand the stack, not noise
+    metadataSection.languages = metadata.languages.slice(0, 6);
+  }
+  metadataSection.default_branch = metadata.defaultBranch || 'main';
+
+  // Stack section — only populated fields, no slotignored
+  const stack: Record<string, string> = {};
+  if (stackAnalysis.frontend) { stack.frontend = stackAnalysis.frontend; }
+  if (stackAnalysis.backend) { stack.backend = stackAnalysis.backend; }
+  if (stackAnalysis.runtime && stackAnalysis.runtime !== mainLanguage) {
+    stack.runtime = stackAnalysis.runtime;
+  }
+  if (stackAnalysis.database) { stack.database = stackAnalysis.database; }
+  if (stackAnalysis.buildTool) { stack.build = stackAnalysis.buildTool; }
+  if (stackAnalysis.testing) { stack.testing = stackAnalysis.testing; }
+  if (packageJsonContent) { stack.package_manager = 'npm'; }
+  if (stackAnalysis.hosting) { stack.hosting = stackAnalysis.hosting; }
+
+  // Context section — only non-default, actually extracted values
+  const context: Record<string, string> = {};
+  if (sixWs.what && sixWs.what !== metadata.description) {
+    // Only include if different from description (avoids duplication)
+    context.what = sixWs.what;
+  }
+  if (sixWs.who && sixWs.who !== DEFAULT_WHO) {
+    context.who = sixWs.who;
+  }
+  if (sixWs.why) {
+    context.why = sixWs.why;
+  }
+  if (sixWs.how && sixWs.how !== DEFAULT_HOW) {
+    context.how = sixWs.how;
+  }
+
+  // Assemble the data
+  const fafData: Record<string, any> = {
     faf_version: '2.5.0',
-    generated: timestamp,
-    ai_scoring_system: '2025-09-20',
-    ai_score: `${score}%`,
-    ai_confidence: score >= 80 ? 'HIGH' : score >= 60 ? 'MEDIUM' : 'LOW',
-    ai_value: '30_seconds_replaces_20_minutes_of_questions',
+    project,
+    metadata: metadataSection,
+  };
 
-    ai_tldr: {
-      project: metadata.repo,
-      stack: stackAnalysis.frameworks.join('/') || 'See stack section',
-      quality_bar: 'production_ready',
-      current_focus: 'See README for details',
-      your_role: 'Build features with perfect context'
-    },
+  if (Object.keys(stack).length > 0) {
+    fafData.stack = stack;
+  }
 
-    instant_context: {
-      tech_stack: stackAnalysis.frameworks.join('/') || 'See metadata',
-      main_language: stackAnalysis.language || metadata.languages?.[0]?.split(' ')[0] || 'Unknown',
-      key_files: getKeyFiles(files),
-    },
+  if (Object.keys(context).length > 0) {
+    fafData.context = context;
+  }
 
-    context_quality: {
-      slots_filled: `${slotCount.filled + slotCount.ignored}/21 (${score}%)`,
-      ai_confidence: score >= 80 ? 'HIGH' : score >= 60 ? 'MEDIUM' : 'LOW',
-      handoff_ready: score >= 85,
-      missing_context: slotCount.missingSlots.length > 0 ? slotCount.missingSlots : ['None - fully specified!']
-    },
-
-    project: {
-      name: metadata.repo,
-      goal: metadata.description || null,
-      main_language: stackAnalysis.language || metadata.languages?.[0]?.split(' ')[0] || 'Unknown',
-      type: projectType
-    },
-
-    ai_instructions: {
-      priority_order: [
-        '1. Read THIS .faf file first',
-        '2. Check README.md for usage details',
-        '3. Review package.json for dependencies'
-      ],
-      working_style: {
-        code_first: true,
-        explanations: 'minimal',
-        quality_bar: 'zero_errors',
-        testing: 'required'
-      },
-      warnings: [
-        'Check README for project-specific guidelines',
-        'Review existing code style before modifying'
-      ]
-    },
-
-    stack: {
-      frontend: stackAnalysis.frontend || 'slotignored',
-      ui_library: 'slotignored', // TODO: Detect from package.json
-      backend: stackAnalysis.backend || 'slotignored',
-      runtime: stackAnalysis.runtime || 'slotignored',
-      database: stackAnalysis.database || 'slotignored',
-      build: stackAnalysis.buildTool || 'slotignored',
-      package_manager: packageJsonContent ? 'npm' : 'slotignored',
-      api_type: 'slotignored', // TODO: Detect API type
-      hosting: stackAnalysis.hosting || (metadata.topics?.includes('vercel') || metadata.topics?.includes('netlify') ? 'Cloud' : 'slotignored'),
-      cicd: 'slotignored', // TODO: Detect from .github/workflows
-      css_framework: 'slotignored' // TODO: Detect from package.json
-    },
-
-    metadata: {
-      url: metadata.url,
-      owner: metadata.owner,
-      repository: metadata.repo,
-      description: metadata.description || 'No description',
-      stars: metadata.stars || '0',
-      forks: metadata.forks || '0',
-      license: metadata.license || 'Not specified',
-      topics: metadata.topics || [],
-      languages: metadata.languages || [],
-      last_updated: metadata.lastUpdated,
-      default_branch: metadata.defaultBranch
-    },
-
-    human_context: {
-      who: sixWs.who,
-      what: sixWs.what,
-      why: sixWs.why,
-      where: sixWs.where,
-      when: sixWs.when,
-      how: sixWs.how,
-      additional_context: readme ? 'See README.md for full details' : null,
-      context_score: sixWs.confidence,
-      total_prd_score: score,
-      success_rate: `${Math.min(100, sixWs.confidence)}%`
-    },
-
-    scores: {
-      faf_score: score,
-      slot_based_percentage: score,
-      total_slots: 21
-    },
-
-    tags: {
-      auto_generated: [
-        metadata.repo,
-        ...(metadata.topics || []).slice(0, 5)
-      ],
-      smart_defaults: [
-        '.faf',
-        'ai-ready',
-        new Date().getFullYear().toString(),
-        'github',
-        'open-source'
-      ]
-    },
-
-    generated_by: {
-      tool: 'faf-cli',
-      command: `faf git ${metadata.owner}/${metadata.repo}`,
-      version: '4.3.0',
-      source: 'github-api'
-    }
+  fafData.generated_by = {
+    tool: 'faf-cli',
+    version: '4.4.3',
+    command: `faf git ${metadata.owner}/${metadata.repo}`,
   };
 
   // Convert to YAML
   const { stringify: stringifyYAML } = require('../fix-once/yaml');
   const yamlContent = stringifyYAML(fafData);
 
-  // Add header
-  const tier = getScoreTier(score);
-  const header = `# ========================================
-# 🏎️ FAF GIT - ENHANCED GENERATION
-# ========================================
-#
-# Repository: ${metadata.owner}/${metadata.repo}
-# URL: ${metadata.url}
-# Description: ${metadata.description || 'No description'}
-# Stars: ${metadata.stars || '0'} | Forks: ${metadata.forks || '0'}
-# License: ${metadata.license || 'Not specified'}
-#
-# Quality Score: ${score}% ${tier}
-# 6 Ws Confidence: ${sixWs.confidence}%
-#
-# Generated: ${timestamp}
-# Command: npx faf-cli git ${metadata.owner}/${metadata.repo}
-# Strategy: README extraction + package.json analysis + smart defaults
-#
-# ========================================
-# AI-READY CONTEXT (No Cloning Required!)
-# ========================================
+  // Clean, informative header
+  const header = `# project.faf — Machine-readable project context for AI tools
+# ${metadata.url}
+# Spec: https://faf.dev | MIME: application/vnd.faf+yaml
+# Generated: npx faf-cli git ${metadata.owner}/${metadata.repo}
 
 `;
 
@@ -544,7 +447,7 @@ export async function generateEnhancedFaf(
   };
 }
 
-// Helper functions
+// === Helper functions ===
 
 function cleanText(text: string): string {
   return text
@@ -553,14 +456,17 @@ function cleanText(text: string): string {
     .trim();
 }
 
-function getScoreTier(score: number): string {
-  if (score >= 100) {return '🏆 Trophy';}
-  if (score >= 99) {return '🥇 Gold';}
-  if (score >= 95) {return '🥈 Silver';}
-  if (score >= 85) {return '🥉 Bronze';}
-  if (score >= 70) {return '🟢 Green';}
-  if (score >= 55) {return '🟡 Yellow';}
-  if (score > 0) {return '🔴 Red';}
+/**
+ * Score tier for CLI display (not written to file)
+ */
+export function getScoreTier(score: number): string {
+  if (score >= 100) { return '🏆 Trophy'; }
+  if (score >= 99) { return '🥇 Gold'; }
+  if (score >= 95) { return '🥈 Silver'; }
+  if (score >= 85) { return '🥉 Bronze'; }
+  if (score >= 70) { return '🟢 Green'; }
+  if (score >= 55) { return '🟡 Yellow'; }
+  if (score > 0) { return '🔴 Red'; }
   return '🤍 White';
 }
 
@@ -569,12 +475,27 @@ function determineProjectType(
   stack: StackAnalysis,
   packageJson: any
 ): string {
-  if (packageJson?.bin) {return 'cli';}
-  if (stack.frontend && stack.backend) {return 'full-stack';}
-  if (stack.frontend) {return 'frontend';}
-  if (stack.backend) {return 'backend';}
-  if (stack.database) {return 'database';}
-  if (packageJson?.name?.includes('lib')) {return 'library';}
+  // CLI tools
+  if (packageJson?.bin) { return 'cli'; }
+
+  // Detect from topics
+  const topics = (metadata.topics || []).map(t => t.toLowerCase());
+  if (topics.includes('framework') || topics.includes('library')) { return 'library'; }
+
+  // Language/runtime repos
+  const languageRepos = ['cpython', 'rust', 'go', 'swift', 'deno', 'bun', 'node'];
+  if (languageRepos.includes(metadata.repo.toLowerCase())) { return 'runtime'; }
+
+  // Full-stack / frontend / backend
+  if (stack.frontend && stack.backend) { return 'full-stack'; }
+  if (stack.frontend) { return 'frontend'; }
+  if (stack.backend) { return 'backend'; }
+  if (stack.database) { return 'database'; }
+
+  // Library detection
+  if (packageJson?.name?.includes('lib') || packageJson?.name?.includes('sdk')) { return 'library'; }
+  if (topics.includes('sdk') || topics.includes('api')) { return 'library'; }
+
   return 'application';
 }
 
@@ -594,16 +515,4 @@ function getKeyFiles(files: any[]): string[] {
     .filter(f => priority.includes(f.path))
     .map(f => f.path)
     .slice(0, 10);
-}
-
-function getMissingContext(stack: StackAnalysis, score: number): string[] {
-  const missing: string[] = [];
-
-  if (!stack.database && score < 90) {missing.push('Database');}
-  if (!stack.testing && score < 90) {missing.push('Testing framework');}
-  if (!stack.buildTool && score < 85) {missing.push('Build tool');}
-  if (score < 80) {missing.push('Deployment info');}
-  if (score < 75) {missing.push('CI/CD pipeline');}
-
-  return missing;
 }
