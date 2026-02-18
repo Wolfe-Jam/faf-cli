@@ -4,6 +4,7 @@ node_modules/
 # Build outputs
 dist/
 build/
+docs-site/
 *.tsbuildinfo
 
 # CRITICAL: No compiled JS in src or tests directories
