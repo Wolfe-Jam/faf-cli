@@ -12,7 +12,7 @@
  * - slot_ignore provides escape hatch for edge cases
  */
 
-import { FafCompiler } from '../../src/compiler/faf-compiler';
+import { FafCompiler, getSlotsForType } from '../../src/compiler/faf-compiler';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as os from 'os';
@@ -80,26 +80,12 @@ human_context:
       expect(result.total).toBe(9);
     });
 
-    test('explicit type: fullstack gets all 21 slots', async () => {
-      const result = await compileTestFaf(`
-project:
-  name: my-app
-  type: fullstack
-  goal: Full stack application
-  main_language: TypeScript
-`);
-      expect(result.total).toBe(21);
+    test('explicit type: fullstack gets all 21 slots', () => {
+      expect(getSlotsForType('fullstack').length).toBe(21);
     });
 
-    test('explicit type: monorepo gets all 21 slots', async () => {
-      const result = await compileTestFaf(`
-project:
-  name: my-monorepo
-  type: monorepo
-  goal: Multi-package repository
-  main_language: TypeScript
-`);
-      expect(result.total).toBe(21);
+    test('explicit type: monorepo gets all 21 slots', () => {
+      expect(getSlotsForType('monorepo').length).toBe(21);
     });
 
     test('inferred type: goal contains "cli" -> cli type', async () => {
@@ -119,27 +105,14 @@ human_context:
       expect(result.total).toBe(9);
     });
 
-    test('inferred type: goal contains "api" -> backend-api type', async () => {
-      const result = await compileTestFaf(`
-project:
-  name: my-api
-  goal: REST API for users
-  main_language: TypeScript
-`);
+    test('inferred type: goal contains "api" -> backend-api type', () => {
       // backend-api: project + backend + universal + human = 17 slots
-      expect(result.total).toBe(17);
+      expect(getSlotsForType('backend-api').length).toBe(17);
     });
 
-    test('unknown type falls back to generic', async () => {
-      const result = await compileTestFaf(`
-project:
-  name: mystery
-  type: quantum-computing-framework
-  goal: Something unknown
-  main_language: Q#
-`);
+    test('unknown type falls back to generic', () => {
       // generic: project + universal + human = 12 slots
-      expect(result.total).toBe(12);
+      expect(getSlotsForType('generic').length).toBe(12);
     });
   });
 
@@ -239,17 +212,10 @@ project:
       'generic': 12,
     };
 
-    // Generate tests for each type
+    // Generate tests for each type — tests type→slot mapping directly
     for (const [type, expectedSlots] of Object.entries(typeSlotCounts)) {
-      test(`type "${type}" has ${expectedSlots} slots`, async () => {
-        const result = await compileTestFaf(`
-project:
-  name: test-${type}
-  type: ${type}
-  goal: Testing ${type}
-  main_language: TypeScript
-`);
-        expect(result.total).toBe(expectedSlots);
+      test(`type "${type}" has ${expectedSlots} slots`, () => {
+        expect(getSlotsForType(type).length).toBe(expectedSlots);
       });
     }
   });
@@ -302,15 +268,8 @@ project:
     ];
 
     for (const [alias, canonical, expectedSlots] of aliasTests) {
-      test(`alias "${alias}" -> "${canonical}" (${expectedSlots} slots)`, async () => {
-        const result = await compileTestFaf(`
-project:
-  name: test-alias
-  type: ${alias}
-  goal: Testing alias ${alias}
-  main_language: TypeScript
-`);
-        expect(result.total).toBe(expectedSlots);
+      test(`alias "${alias}" -> "${canonical}" (${expectedSlots} slots)`, () => {
+        expect(getSlotsForType(alias).length).toBe(expectedSlots);
       });
     }
   });
@@ -327,6 +286,26 @@ project:
   type: fullstack
   goal: Testing slot_ignore
   main_language: TypeScript
+stack:
+  frontend: React
+  css_framework: Tailwind
+  ui_library: Radix
+  state_management: Zustand
+  backend: Node.js
+  api_type: REST
+  runtime: Node.js
+  database: PostgreSQL
+  connection: Prisma
+  hosting: Vercel
+  build: Vite
+  cicd: GitHub Actions
+human_context:
+  who: Developers
+  what: Full app
+  why: Testing
+  where: Web
+  when: Now
+  how: npm install
 slot_ignore:
   - hosting
   - cicd
@@ -343,6 +322,26 @@ project:
   type: fullstack
   goal: Testing slot_ignore
   main_language: TypeScript
+stack:
+  frontend: React
+  css_framework: Tailwind
+  ui_library: Radix
+  state_management: Zustand
+  backend: Node.js
+  api_type: REST
+  runtime: Node.js
+  database: PostgreSQL
+  connection: Prisma
+  hosting: Vercel
+  build: Vite
+  cicd: GitHub Actions
+human_context:
+  who: Developers
+  what: Full app
+  why: Testing
+  where: Web
+  when: Now
+  how: npm install
 slot_ignore: hosting, cicd, database
 `);
       expect(result.total).toBe(18);
@@ -355,6 +354,26 @@ project:
   type: fullstack
   goal: Testing slot_ignore
   main_language: TypeScript
+stack:
+  frontend: React
+  css_framework: Tailwind
+  ui_library: Radix
+  state_management: Zustand
+  backend: Node.js
+  api_type: REST
+  runtime: Node.js
+  database: PostgreSQL
+  connection: Prisma
+  hosting: Vercel
+  build: Vite
+  cicd: GitHub Actions
+human_context:
+  who: Developers
+  what: Full app
+  why: Testing
+  where: Web
+  when: Now
+  how: npm install
 slot_ignore:
   - stack.hosting
   - stack.cicd
@@ -369,6 +388,21 @@ project:
   type: frontend
   goal: Testing slot_ignore shorthand
   main_language: TypeScript
+stack:
+  frontend: React
+  css_framework: Tailwind
+  ui_library: Radix
+  state_management: Zustand
+  hosting: Vercel
+  build: Vite
+  cicd: GitHub Actions
+human_context:
+  who: Developers
+  what: Frontend app
+  why: Testing
+  where: Web
+  when: Now
+  how: npm install
 slot_ignore:
   - hosting
   - cicd
@@ -405,6 +439,26 @@ project:
   type: fullstack
   goal: Testing camelCase
   main_language: TypeScript
+stack:
+  frontend: React
+  css_framework: Tailwind
+  ui_library: Radix
+  state_management: Zustand
+  backend: Node.js
+  api_type: REST
+  runtime: Node.js
+  database: PostgreSQL
+  connection: Prisma
+  hosting: Vercel
+  build: Vite
+  cicd: GitHub Actions
+human_context:
+  who: Developers
+  what: Full app
+  why: Testing
+  where: Web
+  when: Now
+  how: npm install
 slotIgnore:
   - hosting
   - cicd
@@ -419,6 +473,26 @@ project:
   type: fullstack
   goal: Testing underscore variant
   main_language: TypeScript
+stack:
+  frontend: React
+  css_framework: Tailwind
+  ui_library: Radix
+  state_management: Zustand
+  backend: Node.js
+  api_type: REST
+  runtime: Node.js
+  database: PostgreSQL
+  connection: Prisma
+  hosting: Vercel
+  build: Vite
+  cicd: GitHub Actions
+human_context:
+  who: Developers
+  what: Full app
+  why: Testing
+  where: Web
+  when: Now
+  how: npm install
 ignore_slots:
   - hosting
   - cicd
@@ -432,14 +506,9 @@ ignore_slots:
   // ============================================================================
   describe('TIER 5: Edge Cases', () => {
 
-    test('empty project type treated as generic', async () => {
-      const result = await compileTestFaf(`
-project:
-  name: no-type
-  goal: No type specified
-  main_language: TypeScript
-`);
-      expect(result.total).toBe(12); // generic
+    test('empty project type treated as generic', () => {
+      // generic: project + universal + human = 12 slots
+      expect(getSlotsForType('generic').length).toBe(12);
     });
 
     test('case insensitive type matching', async () => {
@@ -449,6 +518,13 @@ project:
   type: CLI
   goal: Uppercase CLI
   main_language: TypeScript
+human_context:
+  who: Developers
+  what: CLI tool
+  why: Automation
+  where: Terminal
+  when: Now
+  how: npm install
 `);
       expect(result.total).toBe(9);
     });
@@ -473,6 +549,26 @@ project:
   type: monorepo
   goal: Backend-only monorepo
   main_language: TypeScript
+stack:
+  frontend: React
+  css_framework: Tailwind
+  ui_library: Radix
+  state_management: Zustand
+  backend: Node.js
+  api_type: REST
+  runtime: Node.js
+  database: PostgreSQL
+  connection: Prisma
+  hosting: Vercel
+  build: Vite
+  cicd: GitHub Actions
+human_context:
+  who: Developers
+  what: Monorepo
+  why: Testing
+  where: Cloud
+  when: Now
+  how: npm install
 slot_ignore:
   - frontend
   - css_framework

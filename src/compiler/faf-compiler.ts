@@ -1062,26 +1062,45 @@ export class FafCompiler {
     // Helper to get value from ast based on slot path
     // Checks both nested structure (project.goal) AND flat structure (projectGoal)
     // to handle inconsistency between init (nested) and sync (flat)
+    // Alternate field names: compact format uses different keys
+    const FIELD_ALIASES: Record<string, string[]> = {
+      'goal': ['description'],
+      'main_language': ['language'],
+    };
+
     const getSlotValue = (slotPath: string): any => {
       const parts = slotPath.split('.');
       if (parts[0] === 'project') {
-        // Check nested first, then flat fallback
+        // Check nested first
         const nested = ast.project?.[parts[1]];
         if (nested !== undefined && nested !== null) {return nested;}
+        // Check aliases (e.g. goal -> description, main_language -> language)
+        const aliases = FIELD_ALIASES[parts[1]];
+        if (aliases) {
+          for (const alias of aliases) {
+            const aliasVal = ast.project?.[alias];
+            if (aliasVal !== undefined && aliasVal !== null) {return aliasVal;}
+          }
+        }
         // Flat fallback: project.goal -> projectGoal, project.name -> projectName
         const flatKey = `project${  parts[1].charAt(0).toUpperCase()  }${parts[1].slice(1)}`;
         return ast[flatKey];
       } else if (parts[0] === 'stack') {
         return ast.stack?.[parts[1]];
       } else if (parts[0] === 'human') {
-        return ast.human_context?.[parts[1]];
+        // Check human_context first (old format), then context (compact format)
+        return ast.human_context?.[parts[1]] ?? ast.context?.[parts[1]];
       }
       return undefined;
     };
 
     // Add all active slots to the IR
+    // Compact format rule: absent fields = slotignored (not penalized)
     for (const slotPath of activeSlots) {
       const value = getSlotValue(slotPath);
+      // If value is completely absent (undefined), skip the slot entirely
+      // This implements "absent = ignored" for compact .faf files
+      if (value === undefined) {continue;}
       this.addSlot(slots, slotPath, value, 'string', 'original', 1);
     }
 

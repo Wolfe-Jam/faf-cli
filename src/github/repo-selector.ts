@@ -281,10 +281,10 @@ export function showExtractionSuccess(
   console.log(FAF_COLORS.fafGreen(`☑️  Generated ${outputPath}`));
   console.log(chalk.gray(`   📁 Saved to: ${process.cwd()}/${outputPath}`));
   console.log();
-  console.log(chalk.gray('Next steps:'));
-  console.log(chalk.gray(`  • View it: cat ${outputPath}`));
-  console.log(chalk.gray(`  • Attach to Claude/ChatGPT/Gemini (copy/paste or attach file)`));
-  console.log(chalk.gray(`  • Or try: faf show ${outputPath}`));
+  console.log(chalk.white('Next steps:'));
+  console.log(chalk.white(`  • View it: `) + FAF_COLORS.fafCyan(`cat ${outputPath}`));
+  console.log(chalk.white(`  • Attach to Claude/ChatGPT/Gemini (copy/paste or attach file)`));
+  console.log(chalk.white(`  • Or try: `) + FAF_COLORS.fafCyan(`faf show ${outputPath}`));
   console.log();
 }
 

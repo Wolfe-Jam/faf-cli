@@ -194,37 +194,40 @@ export async function goCommand(directory?: string, options: GoOptions = {}): Pr
   const scoreResult = await compiler.compile(fafPath);
   const currentScore = Math.round(scoreResult.score || 0);
 
-  // Already at 100%? Celebrate!
-  if (currentScore >= 100) {
-    if (shouldReturnStructuredQuestions(ctx)) {
-      console.log(
-        JSON.stringify(
-          {
-            complete: true,
-            score: currentScore,
-            message: 'Congratulations! You have achieved Gold Code (100%).',
-            context: 'faf go',
-          },
-          null,
-          2
-        )
-      );
-      return;
-    }
-
-    console.log(FAF_COLORS.fafGreen(`${FAF_ICONS.trophy} GOLD CODE ACHIEVED!`));
-    console.log();
-    console.log(chalk.green(`Your project has ${currentScore}% AI-Readiness!`));
-    console.log(chalk.gray('Your AI now has complete context for championship performance.'));
-    return;
-  }
-
-  // Find missing fields
+  // Find missing fields FIRST (independent of score)
+  // With "absent = ignored" scoring, sparse files can score 100%
+  // but faf go should still guide users to fill in all fields
   const missingFields = await analyzeMissingFields(fafPath);
   const prioritizedFields = prioritizeFields(missingFields);
 
-  // No missing fields but score < 100? Must be quality issues
+  // No missing fields? Celebrate or suggest enhancement
   if (prioritizedFields.length === 0) {
+    if (currentScore >= 100) {
+      // All fields filled AND score is 100% — true Gold Code
+      if (shouldReturnStructuredQuestions(ctx)) {
+        console.log(
+          JSON.stringify(
+            {
+              complete: true,
+              score: currentScore,
+              message: 'Congratulations! You have achieved Gold Code (100%).',
+              context: 'faf go',
+            },
+            null,
+            2
+          )
+        );
+        return;
+      }
+
+      console.log(FAF_COLORS.fafGreen(`${FAF_ICONS.trophy} GOLD CODE ACHIEVED!`));
+      console.log();
+      console.log(chalk.green(`Your project has ${currentScore}% AI-Readiness!`));
+      console.log(chalk.gray('Your AI now has complete context for championship performance.'));
+      return;
+    }
+
+    // All fields filled but score < 100% — quality issues
     if (shouldReturnStructuredQuestions(ctx)) {
       console.log(
         JSON.stringify(
