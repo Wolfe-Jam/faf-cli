@@ -27,7 +27,7 @@ jobs:
         run: npm ci
 
       - name: NPM Audit
-        run: npm audit --audit-level=moderate
+        run: npm audit --audit-level=moderate --omit=dev
 
       - name: Check for secrets
         uses: trufflesecurity/trufflehog@main

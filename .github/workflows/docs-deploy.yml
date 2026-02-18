@@ -1,16 +1,17 @@
 name: 📚 Deploy Documentation
 
 on:
-  push:
-    branches: [main]
-    paths: 
-      - 'docs/**'
-      - 'src/commands/**'
-      - 'src/utils/championship-style.ts'
-      - 'scripts/generate-docs.ts'
-      - '.github/workflows/docs-deploy.yml'
-  
-  # Allow manual deployment
+  # Auto-deploy disabled until docs pipeline is fixed (Phase 2)
+  # push:
+  #   branches: [main]
+  #   paths:
+  #     - 'docs/**'
+  #     - 'src/commands/**'
+  #     - 'src/utils/championship-style.ts'
+  #     - 'scripts/generate-docs.ts'
+  #     - '.github/workflows/docs-deploy.yml'
+
+  # Manual deployment only
   workflow_dispatch:
     inputs:
       environment:
