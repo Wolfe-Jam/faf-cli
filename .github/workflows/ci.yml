@@ -171,11 +171,12 @@ jobs:
         run: npm test 2>&1 | tee test-output.txt
 
       - name: Generate TAF Receipt
-        uses: Wolfe-Jam/faf-taf-git@v2.0.4
+        uses: Wolfe-Jam/faf-taf-git@v2.1.0
         with:
           test-output-file: test-output.txt
           auto-commit: 'true'
           commit-message: 'chore(taf): update .taf receipt [skip ci]'
+          target-branch: taf-receipts
 
   # 🏆 Championship Status
   status:
