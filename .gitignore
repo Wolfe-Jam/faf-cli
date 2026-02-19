@@ -80,6 +80,11 @@ temp/
 # Test files
 test-*.faf
 
+# Generated .faf files (from `faf git` etc) — only project.faf / project*.faf are valid for bi-sync
+*.faf
+!project.faf
+!project-*.faf
+
 # Internal documents - ALL .md files go to FAF-GOLD/PLANET-FAF
 *.md
 !README.md
