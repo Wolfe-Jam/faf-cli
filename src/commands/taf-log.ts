@@ -15,6 +15,7 @@ import {
   createMinimalRun,
   createDetailedRun,
   detectResult,
+  parseTestOutput,
   TestResult,
   EnvironmentInfo,
   VarianceType,
@@ -35,6 +36,25 @@ interface TAFLogOptions {
   environment?: EnvironmentInfo;
   env_variance?: VarianceType;
   env_notes?: string;
+  autoParsed?: boolean;
+}
+
+/**
+ * Read stdin with passthrough — echoes each chunk to stdout so
+ * the user sees test output live, returns accumulated buffer on EOF.
+ */
+function readStdinWithPassthrough(): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    process.stdin.on('data', (chunk: Buffer) => {
+      process.stdout.write(chunk);
+      chunks.push(chunk);
+    });
+    process.stdin.on('end', () => {
+      resolve(Buffer.concat(chunks).toString('utf-8'));
+    });
+    process.stdin.on('error', reject);
+  });
 }
 
 export async function tafLog(options: TAFLogOptions = {}): Promise<void> {
@@ -174,12 +194,16 @@ export async function tafLog(options: TAFLogOptions = {}): Promise<void> {
   fs.writeFileSync(tafPath, content, 'utf-8');
 
   // Success message
-  const resultEmoji = result === 'PASSED' ? '✅' :
-                      result === 'IMPROVED' ? '📈' :
-                      result === 'DEGRADED' ? '📉' : '❌';
+  if (options.autoParsed) {
+    console.log(`\n🏁 Receipt: ${options.passed}/${options.total} passed`);
+  } else {
+    const resultEmoji = result === 'PASSED' ? '✅' :
+                        result === 'IMPROVED' ? '📈' :
+                        result === 'DEGRADED' ? '📉' : '❌';
 
-  console.log(`${resultEmoji} Logged test run: ${result}`);
-  console.log(`\n   Tests: ${options.passed}/${options.total} passing`);
+    console.log(`${resultEmoji} Logged test run: ${result}`);
+    console.log(`\n   Tests: ${options.passed}/${options.total} passing`);
+  }
 
   // Show environment variance if flagged
   if (environment?.variance && environment.variance.length > 0) {
@@ -330,6 +354,35 @@ export async function runTAFLog(args: string[]): Promise<void> {
   const envNotesIndex = args.findIndex(arg => arg === '--env-notes');
   if (envNotesIndex !== -1 && args[envNotesIndex + 1]) {
     options.env_notes = args[envNotesIndex + 1];
+  }
+
+  // Stdin auto-parse: detect pipe and parse test output
+  const hasFlags = options.total !== undefined || options.passed !== undefined || options.failed !== undefined;
+
+  if (!process.stdin.isTTY && !hasFlags) {
+    const stdinContent = await readStdinWithPassthrough();
+
+    if (!stdinContent.trim()) {
+      console.error('❌ No input received from pipe');
+      process.exit(1);
+    }
+
+    const parsed = parseTestOutput(stdinContent);
+    if (!parsed) {
+      console.error('❌ Could not parse test output');
+      console.log('\nSupported formats:');
+      console.log('  Jest:   "Tests: 173 passed, 173 total"');
+      console.log('  Vitest: " Tests  8 passed (8)"');
+      console.log('\nOr provide counts manually:');
+      console.log('  faf taf log --total 173 --passed 173 --failed 0');
+      process.exit(1);
+    }
+
+    options.total = parsed.total;
+    options.passed = parsed.passed;
+    options.failed = parsed.failed;
+    options.skipped = parsed.skipped;
+    options.autoParsed = true;
   }
 
   await tafLog(options);

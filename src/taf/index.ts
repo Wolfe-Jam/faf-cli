@@ -46,3 +46,12 @@ export {
   getRunsInRange,
   updateFAFIntegration,
 } from './logger';
+
+// Test output parser (stdin auto-parse)
+export {
+  stripAnsi,
+  parseJestOutput,
+  parseVitestOutput,
+  parseTestOutput,
+  ParsedTestOutput,
+} from './test-output-parser';

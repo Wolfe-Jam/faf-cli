@@ -63,6 +63,7 @@ Commands:
 
 Examples:
   faf taf init                              # Create .taf file
+  npm test | faf taf log                    # Auto-parse Jest/Vitest output
   faf taf log --total 173 --passed 173 --failed 0
   faf taf log --minimal --total 10 --passed 10 --failed 0
   faf taf validate                          # Check format
