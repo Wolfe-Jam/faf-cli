@@ -47,6 +47,20 @@ export {
   updateFAFIntegration,
 } from './logger';
 
+// Star rating functions
+export {
+  calculateStarRating,
+  formatStarsDisplay,
+  calculateStarRatingFromTAF,
+} from './star-rating';
+export type { StarRating } from './star-rating';
+
+// Star badge functions
+export {
+  renderStarBadgeSvg,
+  generateStarBadge,
+} from './star-badge';
+
 // Test output parser (stdin auto-parse)
 export {
   stripAnsi,

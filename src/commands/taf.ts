@@ -8,12 +8,14 @@
  * - faf taf log        Log a test run
  * - faf taf validate   Validate .taf format
  * - faf taf stats      Show test statistics
+ * - faf taf stars      Star rating and badge
  */
 
 import { runTAFInit } from './taf-init';
 import { runTAFLog } from './taf-log';
 import { runTAFValidate } from './taf-validate';
 import { runTAFStats } from './taf-stats';
+import { runTAFStars } from './taf-stars';
 
 export async function tafCommand(args: string[]): Promise<void> {
   const subcommand = args[0];
@@ -34,6 +36,10 @@ export async function tafCommand(args: string[]): Promise<void> {
 
     case 'stats':
       await runTAFStats();
+      break;
+
+    case 'stars':
+      await runTAFStars(subcommandArgs);
       break;
 
     case undefined:
@@ -60,6 +66,7 @@ Commands:
   faf taf log               Log a test run
   faf taf validate          Validate .taf format
   faf taf stats             Show test statistics
+  faf taf stars             Star rating and badge
 
 Examples:
   faf taf init                              # Create .taf file
@@ -68,6 +75,8 @@ Examples:
   faf taf log --minimal --total 10 --passed 10 --failed 0
   faf taf validate                          # Check format
   faf taf stats                             # View statistics
+  faf taf stars                             # Star rating
+  faf taf stars --output stars.svg          # Generate badge
 
 Options:
   faf taf init:

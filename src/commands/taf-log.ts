@@ -16,6 +16,7 @@ import {
   createDetailedRun,
   detectResult,
   parseTestOutput,
+  calculateStarRating,
   TestResult,
   EnvironmentInfo,
   VarianceType,
@@ -195,7 +196,9 @@ export async function tafLog(options: TAFLogOptions = {}): Promise<void> {
 
   // Success message
   if (options.autoParsed) {
-    console.log(`\n🏁 Receipt: ${options.passed}/${options.total} passed`);
+    const passRate = options.total > 0 ? options.passed / options.total : 0;
+    const starRating = calculateStarRating(passRate);
+    console.log(`\n🏁 Receipt: ${options.passed}/${options.total} passed ${starRating.display}`);
   } else {
     const resultEmoji = result === 'PASSED' ? '✅' :
                         result === 'IMPROVED' ? '📈' :
