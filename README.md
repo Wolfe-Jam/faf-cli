@@ -369,11 +369,13 @@ Score: (15 + 6) / 21 = 100%
 | `faf human` | Interactive human context entry |
 | `faf human-set` | Non-interactive field setting |
 | `faf formats` | Show 153 detected formats |
+| `faf agents` | AGENTS.md interop (import/export/sync) |
+| `faf cursor` | .cursorrules interop (import/export/sync) |
 | `faf conductor` | Google Conductor interop (import/export/sync) |
 | `faf gemini` | Gemini CLI / Antigravity interop |
 | `faf demo sync` | Live bi-sync demonstration |
 
-Run `faf --help` for all 60 commands.
+Run `faf --help` for all 63 commands.
 
 ---
 
@@ -388,7 +390,10 @@ project.faf  ←──── 8ms ────→  CLAUDE.md
 ```
 
 ```bash
-faf bi-sync              # Sync once
+faf bi-sync              # Sync once (CLAUDE.md)
+faf bi-sync --agents     # Also generate AGENTS.md
+faf bi-sync --cursor     # Also generate .cursorrules
+faf bi-sync --all        # All formats at once
 faf bi-sync --watch      # Continuous sync
 ```
 
@@ -479,31 +484,36 @@ Same `project.faf`. Same scoring. Same result. Different execution layer.
 
 ---
 
-## 🌐 What's New in v3.4.7 — Google Gemini Edition
+## 🌐 What's New in v4.5.0 — The AGENTS.md Edition
 
-Full interoperability with the Google Gemini ecosystem. One `.faf` file now works everywhere.
+Define once in `.faf`, generate every AI context format. One file to rule them all.
 
 | Platform | Format | FAF Command |
 |----------|--------|-------------|
+| **OpenAI Codex / 20+ tools** | `AGENTS.md` | `faf agents` |
+| **Cursor IDE** | `.cursorrules` | `faf cursor` |
+| **Claude Code** | `CLAUDE.md` | `faf bi-sync` |
 | **Gemini CLI** | `GEMINI.md` | `faf gemini` |
 | **Antigravity IDE** | `~/.gemini/GEMINI.md` | `faf gemini --global` |
 | **Conductor Extension** | `conductor/` directory | `faf conductor` |
-| **Claude Code** | `CLAUDE.md` | `faf bi-sync` |
+| **All at once** | Everything above | `faf bi-sync --all` |
 
 ```bash
-# Import from Google formats
-faf gemini import       # GEMINI.md → .faf
-faf conductor import    # conductor/ → .faf
+# AGENTS.md (OpenAI Codex, Linux Foundation, 20+ tools)
+faf agents export       # .faf → AGENTS.md
+faf agents import       # AGENTS.md → .faf
+faf agents sync         # Bidirectional
 
-# Export to Google formats
-faf gemini export       # .faf → GEMINI.md
-faf conductor export    # .faf → conductor/
+# .cursorrules (Cursor IDE)
+faf cursor export       # .faf → .cursorrules
+faf cursor import       # .cursorrules → .faf
+faf cursor sync         # Bidirectional
 
-# Global Antigravity config
-faf gemini --global     # ~/.gemini/GEMINI.md
+# Generate ALL formats in one command
+faf bi-sync --all       # CLAUDE.md + AGENTS.md + .cursorrules + GEMINI.md
 ```
 
-**Universal AI Context** — Write once, use with Claude, Gemini CLI, Antigravity IDE, and Conductor.
+**Universal AI Context** — Write once, use with Claude, Codex, Cursor, Gemini, and every AI tool.
 
 ---
 
