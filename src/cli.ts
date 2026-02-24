@@ -48,6 +48,8 @@ import { tafCommand } from './commands/taf';
 import { conductorCommand } from './commands/conductor';
 import { geminiCommand } from './commands/gemini';
 import { antigravityCommand } from './commands/antigravity';
+import { agentsCommand } from './commands/agents';
+import { cursorCommand } from './commands/cursor';
 import { migrateCommand } from './commands/migrate';
 import { renameCommand } from './commands/rename';
 import { readmeCommand } from './commands/readme';
@@ -787,6 +789,58 @@ About:
     return geminiCommand(args);
   }));
 
+// 📋 faf agents - AGENTS.md Interop
+program
+  .command('agents')
+  .description('📋 AGENTS.md interop - Import/export AGENTS.md')
+  .addHelpText('after', `
+Subcommands:
+  import            Import AGENTS.md to project.faf
+  export            Export project.faf to AGENTS.md
+  sync              Bidirectional sync between formats
+
+Examples:
+  $ faf agents import                     # Import ./AGENTS.md
+  $ faf agents import --global            # Import ~/.codex/AGENTS.md
+  $ faf agents export                     # Export to ./AGENTS.md
+  $ faf agents export --force             # Overwrite existing
+  $ faf agents sync                       # Sync (FAF is source of truth)
+
+About:
+  FAF supports AGENTS.md files used by OpenAI Codex, Linux Foundation,
+  and 20+ tools. Define once in .faf, generate everywhere.`)
+  .action(withAnalyticsTracking('agents', () => {
+    const agentsIndex = process.argv.indexOf('agents');
+    const args = agentsIndex >= 0 ? process.argv.slice(agentsIndex + 1) : [];
+    return agentsCommand(args);
+  }));
+
+// 🖱️ faf cursor - Cursor IDE Interop
+program
+  .command('cursor')
+  .description('🖱️ Cursor IDE interop - Import/export .cursorrules')
+  .addHelpText('after', `
+Subcommands:
+  import            Import .cursorrules to project.faf
+  export            Export project.faf to .cursorrules
+  sync              Bidirectional sync between formats
+
+Examples:
+  $ faf cursor import                     # Import ./.cursorrules
+  $ faf cursor import --merge             # Merge with existing .faf
+  $ faf cursor export                     # Export to ./.cursorrules
+  $ faf cursor export --force             # Overwrite existing
+  $ faf cursor sync                       # Sync (FAF is source of truth)
+
+About:
+  FAF supports Cursor IDE .cursorrules files. Define once in .faf,
+  generate .cursorrules, AGENTS.md, CLAUDE.md, GEMINI.md, and more.`)
+  .action(withAnalyticsTracking('cursor', () => {
+    const cursorIndex = process.argv.indexOf('cursor');
+    const args = cursorIndex >= 0 ? process.argv.slice(cursorIndex + 1) : [];
+    return cursorCommand(args);
+  }));
+
 // 🚀 faf antigravity - Google Antigravity IDE Global Context
 program
   .command('antigravity')
@@ -1193,12 +1247,18 @@ program
   .option('-a, --auto', 'Automatic sync without prompts')
   .option('-w, --watch', 'Start real-time file watching')
   .option('-f, --force', 'Force overwrite conflicts')
+  .option('--agents', 'Also sync to AGENTS.md')
+  .option('--cursor', 'Also sync to .cursorrules')
+  .option('--all', 'Sync to all targets (CLAUDE.md + AGENTS.md + .cursorrules + GEMINI.md)')
   .addHelpText('after', `
 Examples:
   $ faf bi-sync                  # Create claude.md and sync
   $ faf bi-sync --auto           # Automatic conflict-free sync
   $ faf bi-sync --watch          # Continuous real-time monitoring
-  
+  $ faf bi-sync --agents         # Also generate AGENTS.md
+  $ faf bi-sync --cursor         # Also generate .cursorrules
+  $ faf bi-sync --all            # Sync to ALL formats at once
+
 Championship Bi-Sync Features:
   • ⚡ Sub-40ms sync time (faster than most file operations)
   • 🧠 Smart merge algorithms prevent conflicts and data corruption
@@ -1210,7 +1270,10 @@ Championship Bi-Sync Features:
     await biSyncCommand({
       auto: options.auto,
       watch: options.watch,
-      force: options.force || false
+      force: options.force || false,
+      agents: options.agents,
+      cursor: options.cursor,
+      all: options.all,
     });
   });
 

@@ -22,11 +22,17 @@ import { FAFMirror } from '../engines/c-mirror/faf-extensions/faf-mirror';
 import { findFafFile } from '../utils/file-utils';
 import { autoAwardCredit } from '../utils/technical-credit';
 import { FAF_COLORS, FAF_ICONS, BRAND_MESSAGES } from '../utils/championship-style';
+import { agentsExport } from '../utils/agents-parser';
+import { cursorExport } from '../utils/cursorrules-parser';
+import { geminiExport } from '../utils/gemini-parser';
 
 export interface BiSyncOptions {
   auto?: boolean;     // Automatic sync without prompts
   watch?: boolean;    // Start file watching for real-time sync
   force?: boolean;    // Force overwrite conflicts
+  agents?: boolean;   // Also sync to AGENTS.md
+  cursor?: boolean;   // Also sync to .cursorrules
+  all?: boolean;      // Sync to all supported targets
 }
 
 export interface SyncResult {
@@ -244,6 +250,46 @@ export async function biSyncCommand(options: BiSyncOptions = {}): Promise<void> 
 
     // Clean up
     mirror.stop();
+
+    // Sync to additional targets if requested
+    if (result.success && fafFile && (options.agents || options.cursor || options.all)) {
+      const fafContent = await fs.readFile(fafFile, 'utf-8');
+      const fafData = parseYAML(fafContent);
+      const projectDir = path.dirname(fafFile);
+      const additionalFiles: string[] = [];
+
+      if (options.agents || options.all) {
+        const agentsPath = path.join(projectDir, 'AGENTS.md');
+        const agentsResult = await agentsExport(fafData, agentsPath);
+        if (agentsResult.success) {
+          additionalFiles.push('AGENTS.md');
+        }
+      }
+
+      if (options.cursor || options.all) {
+        const cursorPath = path.join(projectDir, '.cursorrules');
+        const cursorResult = await cursorExport(fafData, cursorPath);
+        if (cursorResult.success) {
+          additionalFiles.push('.cursorrules');
+        }
+      }
+
+      if (options.all) {
+        const geminiPath = path.join(projectDir, 'GEMINI.md');
+        const geminiResult = await geminiExport(fafData, geminiPath);
+        if (geminiResult.success) {
+          additionalFiles.push('GEMINI.md');
+        }
+      }
+
+      if (additionalFiles.length > 0) {
+        console.log();
+        console.log(FAF_COLORS.fafCyan(`${FAF_ICONS.lightning} Additional targets synced:`));
+        for (const f of additionalFiles) {
+          console.log(`   ${FAF_ICONS.link} ${f}`);
+        }
+      }
+    }
 
     // Exit with appropriate code (unless called from auto command)
     if (!options.auto) {
