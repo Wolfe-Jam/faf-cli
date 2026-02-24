@@ -5,6 +5,26 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.5.0] - 2026-02-24 — The AGENTS.md Edition
+
+### Added
+- `faf agents import/export/sync` — AGENTS.md interop (OpenAI Codex, Linux Foundation, 20+ tools)
+- `faf cursor import/export/sync` — .cursorrules interop (Cursor IDE)
+- `faf bi-sync --agents` — also sync to AGENTS.md
+- `faf bi-sync --cursor` — also sync to .cursorrules
+- `faf bi-sync --all` — sync to all formats at once (CLAUDE.md + AGENTS.md + .cursorrules + GEMINI.md)
+- WJTTC championship test suite for interop formats (87 tests across 6 tiers)
+- Parsers: `agents-parser.ts`, `cursorrules-parser.ts` — full bidirectional mapping
+
+### Fixed
+- Windows `\r\n` line endings broke H1/H2 detection in all markdown parsers
+- UTF-8 BOM marker broke parsing for VS Code users
+- Old Mac `\r` line endings unhandled
+
+### Philosophy
+- Define once in `.faf`, generate AGENTS.md, .cursorrules, CLAUDE.md, GEMINI.md
+- FAF 4.5 is the version where `.faf` becomes the true interchange format
+
 ## [4.4.4] - 2026-02-18 — Enhanced Git Support
 
 ### Changed
