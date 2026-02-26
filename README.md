@@ -27,6 +27,7 @@ At 100% AI Readiness, AI stops guessing and starts knowing. Live bi-sync between
 [![Website](https://img.shields.io/badge/Website-faf.one-orange)](https://faf.one)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Claude Code](https://img.shields.io/badge/Claude_Code-enabled-00D4D4)](https://github.com/anthropics/claude-code-action)
+[![project.faf](https://img.shields.io/badge/project.faf-inside-00D4D4)](https://github.com/Wolfe-Jam/faf)
 
 <p align="center">
 <a href="#-how-does-it-work">Quick Start</a> · <a href="https://faf.one">Website</a> · <a href="https://faf.one/daaft">DAAFT Analysis</a> · <a href="https://www.npmjs.com/package/faf-cli">npm</a> · <a href="#-core-commands">Commands</a> · <a href="#%EF%B8%8F-tier-system-from-blind-to-optimized">Tiers</a> · <a href="https://www.npmjs.com/package/claude-faf-mcp">MCP Server</a> · <a href="./CHANGELOG.md">Changelog</a>
