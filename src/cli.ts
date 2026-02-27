@@ -51,6 +51,8 @@ import { antigravityCommand } from './commands/antigravity';
 import { agentsCommand } from './commands/agents';
 import { cursorCommand } from './commands/cursor';
 import { ramCommand } from './commands/ram';
+import { proCommand } from './commands/pro';
+import { gateProFeature } from './licensing/pro-gate';
 import { migrateCommand } from './commands/migrate';
 import { renameCommand } from './commands/rename';
 import { readmeCommand } from './commands/readme';
@@ -871,6 +873,30 @@ About:
     return ramCommand(args);
   }));
 
+// 🔑 faf pro - Manage FAF Pro license (tri-sync)
+program
+  .command('pro')
+  .description('🔑 Manage FAF Pro license (tri-sync)')
+  .addHelpText('after', `
+Subcommands:
+  faf pro                  Show Pro status
+  faf pro status           Show Pro status (alias)
+  faf pro activate <key>   Activate a license key
+
+Examples:
+  $ faf pro                          # Check your Pro status
+  $ faf pro activate FAF-PRO-XXXX-XXXX-XXXX  # Activate license
+
+About:
+  tri-sync Pro gates: faf ram, faf tri-sync, faf bi-sync --ram/--all
+  14-day free trial starts on first use. No signup, no credit card.
+  Purchase at faf.one/pro`)
+  .action(withAnalyticsTracking('pro', () => {
+    const proIndex = process.argv.indexOf('pro');
+    const args = proIndex >= 0 ? process.argv.slice(proIndex + 1) : [];
+    return proCommand(args);
+  }));
+
 // 🚀 faf antigravity - Google Antigravity IDE Global Context
 program
   .command('antigravity')
@@ -1329,6 +1355,9 @@ What tri-sync does:
 
   .faf is ROM. MEMORY.md is RAM. tri-sync is the bus.`)
   .action(async (options) => {
+    if (!gateProFeature()) {
+      process.exit(0);
+    }
     await biSyncCommand({
       auto: options.auto,
       force: options.force || false,

@@ -27,12 +27,18 @@ import {
   resolveMemoryPath,
   getGitRoot,
 } from '../utils/memory-parser';
+import { gateProFeature } from '../licensing/pro-gate';
 
 // ============================================================================
 // Main Command Router
 // ============================================================================
 
 export async function ramCommand(args: string[]): Promise<void> {
+  // Pro gate — ram is a Pro feature
+  if (!gateProFeature()) {
+    return;
+  }
+
   const subcommand = args[0];
   const subcommandArgs = args.slice(1);
 

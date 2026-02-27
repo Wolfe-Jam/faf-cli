@@ -26,6 +26,7 @@ import { agentsExport } from '../utils/agents-parser';
 import { cursorExport } from '../utils/cursorrules-parser';
 import { geminiExport } from '../utils/gemini-parser';
 import { memoryExport, resolveMemoryPath, getGitRoot } from '../utils/memory-parser';
+import { gateProFeature } from '../licensing/pro-gate';
 
 export interface BiSyncOptions {
   auto?: boolean;     // Automatic sync without prompts
@@ -285,11 +286,14 @@ export async function biSyncCommand(options: BiSyncOptions = {}): Promise<void> 
       }
 
       if (options.ram || options.all) {
-        const gitRoot = getGitRoot(projectDir) || projectDir;
-        const memPath = resolveMemoryPath(gitRoot);
-        const memResult = await memoryExport(fafData, memPath, { merge: true });
-        if (memResult.success) {
-          additionalFiles.push('MEMORY.md (tri-sync)');
+        // RAM sync is a Pro feature
+        if (gateProFeature()) {
+          const gitRoot = getGitRoot(projectDir) || projectDir;
+          const memPath = resolveMemoryPath(gitRoot);
+          const memResult = await memoryExport(fafData, memPath, { merge: true });
+          if (memResult.success) {
+            additionalFiles.push('MEMORY.md (tri-sync)');
+          }
         }
       }
 
