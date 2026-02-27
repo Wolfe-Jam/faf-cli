@@ -25,6 +25,7 @@ import { FAF_COLORS, FAF_ICONS, BRAND_MESSAGES } from '../utils/championship-sty
 import { agentsExport } from '../utils/agents-parser';
 import { cursorExport } from '../utils/cursorrules-parser';
 import { geminiExport } from '../utils/gemini-parser';
+import { memoryExport, resolveMemoryPath, getGitRoot } from '../utils/memory-parser';
 
 export interface BiSyncOptions {
   auto?: boolean;     // Automatic sync without prompts
@@ -32,6 +33,7 @@ export interface BiSyncOptions {
   force?: boolean;    // Force overwrite conflicts
   agents?: boolean;   // Also sync to AGENTS.md
   cursor?: boolean;   // Also sync to .cursorrules
+  ram?: boolean;      // Also sync to MEMORY.md (tri-sync — ROM↔RAM)
   all?: boolean;      // Sync to all supported targets
 }
 
@@ -252,7 +254,7 @@ export async function biSyncCommand(options: BiSyncOptions = {}): Promise<void> 
     mirror.stop();
 
     // Sync to additional targets if requested
-    if (result.success && fafFile && (options.agents || options.cursor || options.all)) {
+    if (result.success && fafFile && (options.agents || options.cursor || options.ram || options.all)) {
       const fafContent = await fs.readFile(fafFile, 'utf-8');
       const fafData = parseYAML(fafContent);
       const projectDir = path.dirname(fafFile);
@@ -279,6 +281,15 @@ export async function biSyncCommand(options: BiSyncOptions = {}): Promise<void> 
         const geminiResult = await geminiExport(fafData, geminiPath);
         if (geminiResult.success) {
           additionalFiles.push('GEMINI.md');
+        }
+      }
+
+      if (options.ram || options.all) {
+        const gitRoot = getGitRoot(projectDir) || projectDir;
+        const memPath = resolveMemoryPath(gitRoot);
+        const memResult = await memoryExport(fafData, memPath, { merge: true });
+        if (memResult.success) {
+          additionalFiles.push('MEMORY.md (tri-sync)');
         }
       }
 

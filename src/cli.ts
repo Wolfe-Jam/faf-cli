@@ -50,6 +50,7 @@ import { geminiCommand } from './commands/gemini';
 import { antigravityCommand } from './commands/antigravity';
 import { agentsCommand } from './commands/agents';
 import { cursorCommand } from './commands/cursor';
+import { ramCommand } from './commands/ram';
 import { migrateCommand } from './commands/migrate';
 import { renameCommand } from './commands/rename';
 import { readmeCommand } from './commands/readme';
@@ -841,6 +842,35 @@ About:
     return cursorCommand(args);
   }));
 
+// 🧠 faf ram - ROM ↔ RAM (tri-sync)
+program
+  .command('ram')
+  .description('🧠 ROM ↔ RAM — tri-sync .faf ↔ Claude Code MEMORY.md')
+  .addHelpText('after', `
+Subcommands:
+  export            ROM → RAM (seed MEMORY.md from .faf)
+  import            RAM → ROM (harvest Claude's notes into .faf)
+  sync              Bidirectional sync (ROM is source of truth)
+  status            Show RAM path, line count, breakdown
+
+Examples:
+  $ faf ram export                       # Seed RAM from ROM
+  $ faf ram export --force               # Overwrite (don't merge)
+  $ faf ram import                       # Harvest Claude's notes into ROM
+  $ faf ram status                       # Check RAM path and line count
+
+About:
+  .faf is ROM — persistent, structured, portable.
+  MEMORY.md is RAM — session-loaded, personal, Claude's workspace.
+  tri-sync bridges ROM ↔ RAM.
+  RAM lives at ~/.claude/projects/<id>/memory/MEMORY.md
+  First 200 lines auto-loaded into every Claude Code session.`)
+  .action(withAnalyticsTracking('ram', () => {
+    const ramIndex = process.argv.indexOf('ram');
+    const args = ramIndex >= 0 ? process.argv.slice(ramIndex + 1) : [];
+    return ramCommand(args);
+  }));
+
 // 🚀 faf antigravity - Google Antigravity IDE Global Context
 program
   .command('antigravity')
@@ -1249,7 +1279,8 @@ program
   .option('-f, --force', 'Force overwrite conflicts')
   .option('--agents', 'Also sync to AGENTS.md')
   .option('--cursor', 'Also sync to .cursorrules')
-  .option('--all', 'Sync to all targets (CLAUDE.md + AGENTS.md + .cursorrules + GEMINI.md)')
+  .option('--ram', 'Also sync to MEMORY.md (tri-sync — ROM↔RAM)')
+  .option('--all', 'Sync to all targets (CLAUDE.md + AGENTS.md + .cursorrules + GEMINI.md + MEMORY.md)')
   .addHelpText('after', `
 Examples:
   $ faf bi-sync                  # Create claude.md and sync
@@ -1257,7 +1288,8 @@ Examples:
   $ faf bi-sync --watch          # Continuous real-time monitoring
   $ faf bi-sync --agents         # Also generate AGENTS.md
   $ faf bi-sync --cursor         # Also generate .cursorrules
-  $ faf bi-sync --all            # Sync to ALL formats at once
+  $ faf bi-sync --ram             # tri-sync: also seed RAM from ROM
+  $ faf bi-sync --all            # Sync to ALL targets including RAM
 
 Championship Bi-Sync Features:
   • ⚡ Sub-40ms sync time (faster than most file operations)
@@ -1273,7 +1305,35 @@ Championship Bi-Sync Features:
       force: options.force || false,
       agents: options.agents,
       cursor: options.cursor,
+      ram: options.ram,
       all: options.all,
+    });
+  });
+
+// 🧠 faf tri-sync - bi-sync + RAM (the third leg)
+program
+  .command('tri-sync')
+  .description('🧠 tri-sync — bi-sync + RAM (.faf ↔ CLAUDE.md ↔ MEMORY.md)')
+  .option('-a, --auto', 'Automatic sync without prompts')
+  .option('-f, --force', 'Force overwrite conflicts')
+  .option('--all', 'Also sync AGENTS.md, .cursorrules, GEMINI.md')
+  .addHelpText('after', `
+Examples:
+  $ faf tri-sync                   # bi-sync + RAM
+  $ faf tri-sync --force           # Force overwrite
+  $ faf tri-sync --all             # All targets (tip: you don't need --all)
+
+What tri-sync does:
+  bi-sync = .faf ↔ CLAUDE.md (the pair)
+  tri-sync = bi-sync + RAM (the triangle)
+
+  .faf is ROM. MEMORY.md is RAM. tri-sync is the bus.`)
+  .action(async (options) => {
+    await biSyncCommand({
+      auto: options.auto,
+      force: options.force || false,
+      ram: true,
+      all: options.all || false,
     });
   });
 
