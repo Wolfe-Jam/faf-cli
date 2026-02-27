@@ -13,7 +13,6 @@ import {
   activateLicense,
   getProStatus,
 } from '../licensing/pro-gate';
-import { MESSAGES } from '../licensing/license-messages';
 
 // ============================================================================
 // Main Command Router
@@ -107,9 +106,9 @@ function showProStatus(): void {
         );
       }
       console.log();
-      console.log(
-        FAF_COLORS.fafOrange(`   ${FAF_ICONS.trophy} ${MESSAGES.upgradePrompt}`)
-      );
+      console.log(chalk.white('   bi-sync is free — and always will be. tri-sync Pro adds RAM.'));
+      console.log(chalk.gray('   $3/mo (a dime a day) · $29/yr (a nickel a day)'));
+      console.log(FAF_COLORS.fafOrange(`   ${FAF_ICONS.trophy} faf.one/pro`));
       console.log(chalk.gray('   Activate: faf pro activate <key>'));
       break;
 

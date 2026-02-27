@@ -60,6 +60,7 @@ export interface ProStatus {
   allowed: boolean;
   reason: ProReason;
   daysLeft?: number;
+  justStarted?: boolean;
 }
 
 export interface ActivationResult {
@@ -229,7 +230,7 @@ export function checkProAccess(): ProStatus {
 
   // 4. No trial yet — start one automatically
   startTrial();
-  return { allowed: true, reason: 'trial', daysLeft: 14 };
+  return { allowed: true, reason: 'trial', daysLeft: 14, justStarted: true };
 }
 
 // ---------------------------------------------------------------------------
@@ -247,7 +248,7 @@ export function gateProFeature(): boolean {
   }
 
   // Show contextual messages
-  if (status.reason === 'trial' && status.daysLeft === 14) {
+  if (status.reason === 'trial' && status.justStarted) {
     showTrialStarted();
   } else if (status.reason === 'trial') {
     showTrialReminder(status.daysLeft!);
