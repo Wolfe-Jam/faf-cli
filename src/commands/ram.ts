@@ -18,7 +18,7 @@ import { chalk } from '../fix-once/colors';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { FAF_COLORS, FAF_ICONS } from '../utils/championship-style';
-import { findFafFile, fileExists } from '../utils/file-utils';
+import { findFafFile } from '../utils/file-utils';
 import { parse as parseYAML, stringify as stringifyYAML } from '../fix-once/yaml';
 import {
   memoryExport,
@@ -26,7 +26,6 @@ import {
   getMemoryStatus,
   resolveMemoryPath,
   getGitRoot,
-  detectMemoryMd,
 } from '../utils/memory-parser';
 
 // ============================================================================
@@ -100,7 +99,7 @@ function parseRamArgs(args: string[]): RamOptions {
  * Resolve the project root — git root or cwd.
  */
 function resolveProjectRoot(override?: string): string {
-  if (override) return path.resolve(override);
+  if (override) { return path.resolve(override); }
   return getGitRoot() || process.cwd();
 }
 

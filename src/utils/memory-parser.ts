@@ -171,10 +171,10 @@ function generateFafSection(fafData: any): string {
 
   lines.push('## Quick Reference');
   lines.push(`- **Name:** ${projectName}`);
-  if (projectGoal) lines.push(`- **Goal:** ${projectGoal}`);
-  if (projectType) lines.push(`- **App Type:** ${projectType}`);
-  if (techStack) lines.push(`- **Stack:** ${techStack}`);
-  if (mainLang) lines.push(`- **Main Language:** ${mainLang}`);
+  if (projectGoal) { lines.push(`- **Goal:** ${projectGoal}`); }
+  if (projectType) { lines.push(`- **App Type:** ${projectType}`); }
+  if (techStack) { lines.push(`- **Stack:** ${techStack}`); }
+  if (mainLang) { lines.push(`- **Main Language:** ${mainLang}`); }
   lines.push('');
 
   // Tech Stack details
@@ -182,12 +182,12 @@ function generateFafSection(fafData: any): string {
   const hasStack = stack.frontend || stack.backend || stack.build || stack.runtime;
   if (hasStack) {
     lines.push('## Tech Stack');
-    if (stack.frontend) lines.push(`- Frontend: ${stack.frontend}`);
-    if (stack.backend) lines.push(`- Backend: ${stack.backend}`);
-    if (stack.build) lines.push(`- Build: ${stack.build}`);
-    if (stack.runtime) lines.push(`- Runtime: ${stack.runtime}`);
-    if (stack.package_manager) lines.push(`- Package Manager: ${stack.package_manager}`);
-    if (stack.database && stack.database !== 'None') lines.push(`- Database: ${stack.database}`);
+    if (stack.frontend) { lines.push(`- Frontend: ${stack.frontend}`); }
+    if (stack.backend) { lines.push(`- Backend: ${stack.backend}`); }
+    if (stack.build) { lines.push(`- Build: ${stack.build}`); }
+    if (stack.runtime) { lines.push(`- Runtime: ${stack.runtime}`); }
+    if (stack.package_manager) { lines.push(`- Package Manager: ${stack.package_manager}`); }
+    if (stack.database && stack.database !== 'None') { lines.push(`- Database: ${stack.database}`); }
     lines.push('');
   }
 
@@ -196,7 +196,7 @@ function generateFafSection(fafData: any): string {
   const architecture = fafData.project?.architecture || [];
   if (whatBuilding || architecture.length > 0) {
     lines.push('## Key Architecture');
-    if (whatBuilding) lines.push(`- ${whatBuilding}`);
+    if (whatBuilding) { lines.push(`- ${whatBuilding}`); }
     for (const item of architecture) {
       lines.push(`- ${item}`);
     }
@@ -208,9 +208,9 @@ function generateFafSection(fafData: any): string {
   const codingStyle = fafData.project?.codingStyle || [];
   const preferences = fafData.preferences || {};
   const conventionItems: string[] = [...warnings, ...codingStyle];
-  if (preferences.quality_bar) conventionItems.push(`Quality bar: ${preferences.quality_bar}`);
-  if (preferences.testing) conventionItems.push(`Testing: ${preferences.testing}`);
-  if (preferences.commit_style) conventionItems.push(`Commit style: ${preferences.commit_style}`);
+  if (preferences.quality_bar) { conventionItems.push(`Quality bar: ${preferences.quality_bar}`); }
+  if (preferences.testing) { conventionItems.push(`Testing: ${preferences.testing}`); }
+  if (preferences.commit_style) { conventionItems.push(`Commit style: ${preferences.commit_style}`); }
 
   if (conventionItems.length > 0) {
     lines.push('## Conventions');
@@ -225,7 +225,7 @@ function generateFafSection(fafData: any): string {
   const buildCommands = fafData.project?.buildCommands || [];
   if (howContext || buildCommands.length > 0) {
     lines.push('## Build Commands');
-    if (howContext) lines.push(`- ${howContext}`);
+    if (howContext) { lines.push(`- ${howContext}`); }
     for (const cmd of buildCommands) {
       lines.push(`- ${cmd}`);
     }
@@ -292,10 +292,10 @@ export async function memoryExport(
 
         const before = existing.substring(0, startIdx);
         const after = existing.substring(endOfSection);
-        merged = before + fafSection + '\n' + after;
+        merged = `${before}${fafSection}\n${after}`;
       } else {
         // Our section doesn't exist yet — prepend it
-        merged = fafSection + '\n\n' + existing;
+        merged = `${fafSection}\n\n${existing}`;
       }
 
       const totalLines = merged.split('\n').length;
@@ -307,12 +307,12 @@ export async function memoryExport(
       return { success: true, filePath: outputPath, linesWritten: totalLines, warnings, merged: true };
     } catch {
       // File doesn't exist — write fresh
-      await fs.writeFile(outputPath, fafSection + '\n');
+      await fs.writeFile(outputPath, `${fafSection}\n`);
       return { success: true, filePath: outputPath, linesWritten: fafLines, warnings, merged: false };
     }
   } else {
     // Force mode — overwrite entirely
-    await fs.writeFile(outputPath, fafSection + '\n');
+    await fs.writeFile(outputPath, `${fafSection}\n`);
     return { success: true, filePath: outputPath, linesWritten: fafLines, warnings, merged: false };
   }
 }
