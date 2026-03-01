@@ -277,8 +277,8 @@ Examples:
 The 6 Ws (1W-6W notation):
   - 1W (WHO): Who is this for?
   - 2W (WHAT): What does it do?
-  - 3W (WHERE): Where does it run?
-  - 4W (WHY): Why does it exist?
+  - 3W (WHY): Why does it exist?
+  - 4W (WHERE): Where does it run?
   - 5W (WHEN): When to use it?
   - 6W (HOW): How to get started?
 

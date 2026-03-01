@@ -382,9 +382,9 @@ function generateReadmeSection(answers: Record<string, string>): string {
 
 **2W (WHAT):** ${answers.what}
 
-**3W (WHERE):** ${answers.where}
+**3W (WHY):** ${answers.why}
 
-**4W (WHY):** ${answers.why}
+**4W (WHERE):** ${answers.where}
 
 **5W (WHEN):** ${answers.when}
 
@@ -459,15 +459,15 @@ export async function readmeCommand(
       },
       {
         type: 'text',
-        name: 'where',
-        message: chalk.cyan('3W (WHERE): Where does it run?'),
-        initial: makeInteractiveFriendly(extracted?.where || null)
+        name: 'why',
+        message: chalk.cyan('3W (WHY): Why does it exist?'),
+        initial: makeInteractiveFriendly(extracted?.why || null)
       },
       {
         type: 'text',
-        name: 'why',
-        message: chalk.cyan('4W (WHY): Why does it exist?'),
-        initial: makeInteractiveFriendly(extracted?.why || null)
+        name: 'where',
+        message: chalk.cyan('4W (WHERE): Where does it run?'),
+        initial: makeInteractiveFriendly(extracted?.where || null)
       },
       {
         type: 'text',

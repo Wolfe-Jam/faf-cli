@@ -41,14 +41,14 @@ Sleep 300ms
 Enter
 Sleep 400ms
 
-# 3W - WHERE
-Type "Terminal, IDEs"
+# 3W - WHY
+Type "AI needs context to perform well"
 Sleep 300ms
 Enter
 Sleep 400ms
 
-# 4W - WHY
-Type "AI needs context to perform well"
+# 4W - WHERE
+Type "Terminal, IDEs"
 Sleep 300ms
 Enter
 Sleep 400ms
