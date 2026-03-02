@@ -230,7 +230,9 @@ At 100% AI Readiness:
 
 ### Ecosystem
 - **[MCPaaS](https://mcpaas.live)** — MCP as a Service (The Endpoint for Context)
-- **[claude-faf-mcp](https://npmjs.com/package/claude-faf-mcp)** — MCP server (52 tools)
+- **[claude-faf-mcp](https://npmjs.com/package/claude-faf-mcp)** — MCP server for Claude (52 tools)
+- **[grok-faf-mcp](https://npmjs.com/package/grok-faf-mcp)** — MCP server for Grok / xAI
+- **[gemini-faf-mcp](https://pypi.org/project/gemini-faf-mcp/)** — MCP server for Gemini / Google
 - **[faf-wasm](https://www.npmjs.com/package/faf-wasm)** — WASM SDK (<5ms scoring)
 - **[Chrome Extension](https://chromewebstore.google.com/detail/lnecebepmpjpilldfmndnaofbfjkjlkm)** — Browser integration
 - **[faf.one](https://faf.one)** — Official website
@@ -546,8 +548,10 @@ Boris-Flow validates the FAF file structure that WJTTC Tier 8 tests. Running it 
 |------|----------|
 | **faf-cli** (this) | Terminal, scripts, CI/CD, automation |
 | **claude-faf-mcp** | Claude Desktop via MCP protocol |
+| **grok-faf-mcp** | Grok / xAI via MCP protocol |
+| **gemini-faf-mcp** | Gemini / Google via MCP protocol |
 
-Same `project.faf`. Same scoring. Same result. Different execution layer.
+Same `project.faf`. Same scoring. Same result. Different execution layer. Three AI platforms, one format.
 
 ---
 
