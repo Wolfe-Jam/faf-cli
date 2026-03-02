@@ -5,6 +5,15 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.1] - 2026-03-02
+
+### Changed
+
+- README rewritten for v5.0.0 RAM Edition — added 3Ws/6Ws teaching, tri-sync section, sync comparison table, blog link
+- Core commands table updated with tri-sync, ram, pro
+- 6Ws sections reordered to canonical order (WHO, WHAT, WHY, WHERE, WHEN, HOW)
+- Added Documentation & Recommended Reading section with blog links
+
 ## [5.0.0] - 2026-03-01 — The RAM Edition
 
 ### Added

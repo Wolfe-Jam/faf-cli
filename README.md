@@ -43,6 +43,64 @@ At 100% AI Readiness, AI stops guessing and starts knowing. Live bi-sync between
 
 ---
 
+## 🧠 v5.0.0 — The RAM Edition
+
+**TL;DR:** `.faf` is ROM — persistent, portable, yours forever. tri-sync adds RAM: it auto-syncs with Claude's MEMORY.md. For builders, serious coders, and app-makers.
+
+The full story: **[faf.one/blog/ram-edition](https://faf.one/blog/ram-edition)**
+
+### The 3Ws — Everyone Can Have an App
+
+You don't need to be a developer to describe an app idea. You just need 3 answers:
+
+| | Question | Who answers it? |
+|---|----------|----------------|
+| **1W** | **WHO** is it for? | Anyone |
+| **2W** | **WHAT** does it do? | Anyone |
+| **3W** | **WHY** build it? | Anyone |
+
+A teacher, a chef, a parent with an app idea — they answer WHO, WHAT, WHY. That's the whole idea. Try it: **[faf.one/ideas](https://faf.one/ideas)**
+
+### The 6Ws — The Full Picture
+
+The first 3 describe the idea. The next 3 describe the implementation:
+
+| | Question | Who answers it? |
+|---|----------|----------------|
+| **4W** | **WHERE** does it live? | Developer |
+| **5W** | **WHEN** is it shipping? | Developer |
+| **6W** | **HOW** is it built? | Developer |
+
+All 6 answers live in one file: `project.faf`. The package.json for AI context. Learn more: **[faf.one/6ws](https://faf.one/6ws)**
+
+### tri-sync — ROM meets RAM
+
+```
+bi-sync  = ROM (.faf) ↔ CLAUDE.md           ← free forever
+tri-sync = ROM ↔ CLAUDE.md ↔ RAM (MEMORY.md) ← Pro
+```
+
+```bash
+faf tri-sync            # .faf ↔ CLAUDE.md ↔ MEMORY.md
+faf ram                 # Sync project context to RAM
+faf bi-sync --ram       # Include RAM in bi-sync
+faf bi-sync --all       # Everything: CLAUDE.md + AGENTS.md + .cursorrules + GEMINI.md + RAM
+faf pro                 # Check license status
+faf pro activate <key>  # Activate license
+```
+
+| Sync | Target | Status |
+|------|--------|--------|
+| bi-sync | `.faf` ↔ CLAUDE.md | Free forever |
+| bi-sync | `.faf` ↔ AGENTS.md, .cursorrules, GEMINI.md | Free forever |
+| **tri-sync** | `.faf` ↔ CLAUDE.md ↔ **MEMORY.md** | **Pro** |
+
+14-day free trial, no signup, no credit card. Early-bird: $3/mo · $19/yr (normally $10/mo — 70% off).
+
+**Release notes:** [CHANGELOG](./CHANGELOG.md)
+
+---
+
 ## 📋 The 6 Ws - Quick Reference
 
 Every README should answer these questions. Here's ours:
@@ -51,8 +109,8 @@ Every README should answer these questions. Here's ours:
 |----------|--------|
 | **👥 WHO** is this for? | Developers using AI coding assistants (Claude, Gemini, Cursor, Grok, ChatGPT) |
 | **📦 WHAT** is it? | The package.json for AI context - IANA-registered format |
+| **🎯 WHY** do you need it? | 100% context (AI-scored), persists forever, syncs automatically - saves $1000s/developer |
 | **🌍 WHERE** does it work? | Everywhere AI needs context (Claude Code, Gemini CLI, Cursor, etc.) |
-| **🎯 WHY** do you need it? | 100% context (AI-scored), persists forever, bi-syncs automatically - saves $1000s/developer |
 | **⏰ WHEN** should you use it? | New projects (day one), existing projects (now), exploring repos (instantly) |
 | **🚀 HOW** does it work? | `npx faf-cli git <url>` - No install, no clone, 2 seconds |
 
@@ -97,32 +155,6 @@ Like `package.json` tells npm about dependencies, `project.faf` tells AI about y
 | Hope | Trust |
 
 **91% fewer tokens. Zero risk. No drift.**
-
----
-
-## 🌍 WHERE does it work?
-
-**Everywhere AI needs context:**
-
-### Official Integrations
-- **[Claude Code](https://claude.ai/download)** (Anthropic) — Bi-sync with CLAUDE.md
-- **[Gemini CLI](https://github.com/google/generative-ai-cli)** (Google) — Import/export GEMINI.md
-- **[Antigravity IDE](https://antigravityide.com)** (Google) — Global config support
-- **[Conductor Extension](https://chromewebstore.google.com/detail/conductor)** (Google) — conductor/ directory sync
-
-### Works With
-- Cursor, Cline, Windsurf, any AI coding assistant
-- ChatGPT, Claude Desktop, Gemini chat interfaces
-- CI/CD pipelines, automation scripts, build tools
-
-### Ecosystem
-- **[MCPaaS](https://mcpaas.live)** — MCP as a Service (The Endpoint for Context)
-- **[claude-faf-mcp](https://npmjs.com/package/claude-faf-mcp)** — MCP server (52 tools)
-- **[faf-wasm](https://www.npmjs.com/package/faf-wasm)** — WASM SDK (<5ms scoring)
-- **[Chrome Extension](https://chromewebstore.google.com/detail/lnecebepmpjpilldfmndnaofbfjkjlkm)** — Browser integration
-- **[faf.one](https://faf.one)** — Official website
-
-**Universal format. Works everywhere. Write once, use with any AI.**
 
 ---
 
@@ -178,6 +210,32 @@ At 100% AI Readiness:
 - Zero clarifying questions needed (context persists)
 - Drift is impossible (bi-sync keeps it current)
 - Your project ships on time, within budget, with fewer surprises
+
+---
+
+## 🌍 WHERE does it work?
+
+**Everywhere AI needs context:**
+
+### Official Integrations
+- **[Claude Code](https://claude.ai/download)** (Anthropic) — Bi-sync + tri-sync with CLAUDE.md + MEMORY.md
+- **[Gemini CLI](https://github.com/google/generative-ai-cli)** (Google) — Import/export GEMINI.md
+- **[Antigravity IDE](https://antigravityide.com)** (Google) — Global config support
+- **[Conductor Extension](https://chromewebstore.google.com/detail/conductor)** (Google) — conductor/ directory sync
+
+### Works With
+- Cursor, Cline, Windsurf, any AI coding assistant
+- ChatGPT, Claude Desktop, Gemini chat interfaces
+- CI/CD pipelines, automation scripts, build tools
+
+### Ecosystem
+- **[MCPaaS](https://mcpaas.live)** — MCP as a Service (The Endpoint for Context)
+- **[claude-faf-mcp](https://npmjs.com/package/claude-faf-mcp)** — MCP server (52 tools)
+- **[faf-wasm](https://www.npmjs.com/package/faf-wasm)** — WASM SDK (<5ms scoring)
+- **[Chrome Extension](https://chromewebstore.google.com/detail/lnecebepmpjpilldfmndnaofbfjkjlkm)** — Browser integration
+- **[faf.one](https://faf.one)** — Official website
+
+**Universal format. Works everywhere. Write once, use with any AI.**
 
 ---
 
@@ -366,6 +424,9 @@ Score: (15 + 6) / 21 = 100%
 | `faf auto` | Auto-enhance to Gold Code |
 | `faf score` | Check AI-readiness (0-100%) |
 | `faf bi-sync` | Sync .faf ↔ CLAUDE.md (8ms) |
+| `faf tri-sync` | 🧠 .faf ↔ CLAUDE.md ↔ MEMORY.md (ROM meets RAM) — **Pro** |
+| `faf ram` | Sync project context to Claude's MEMORY.md — **Pro** |
+| `faf pro` | Check/activate Pro license (14-day free trial) |
 | `faf readme` | Extract 6 Ws from README (+25-35% boost) |
 | `faf human` | Interactive human context entry |
 | `faf human-set` | Non-interactive field setting |
@@ -380,22 +441,27 @@ Run `faf --help` for all 63 commands.
 
 ---
 
-## 🔄 Bi-Sync: `project.faf` ↔ `CLAUDE.md`
+## 🔄 Bi-Sync & Tri-Sync
 
-Your `project.faf` stays synchronized with `CLAUDE.md` in milliseconds.
+Your `project.faf` stays synchronized with everything in milliseconds.
 
 ```
-project.faf  ←──── 8ms ────→  CLAUDE.md
-     │                            │
-     └── Single source of truth ──┘
+bi-sync:   project.faf  ←── 8ms ──→  CLAUDE.md            (free)
+tri-sync:  project.faf  ←── 8ms ──→  CLAUDE.md ←→ MEMORY.md  (Pro)
 ```
 
 ```bash
+# bi-sync — free forever
 faf bi-sync              # Sync once (CLAUDE.md)
 faf bi-sync --agents     # Also generate AGENTS.md
 faf bi-sync --cursor     # Also generate .cursorrules
-faf bi-sync --all        # All formats at once
+faf bi-sync --all        # All formats + RAM
 faf bi-sync --watch      # Continuous sync
+
+# tri-sync — Pro (ROM meets RAM)
+faf tri-sync             # .faf ↔ CLAUDE.md ↔ MEMORY.md
+faf ram                  # Sync project context to RAM
+faf ram status           # Check RAM path and line count
 ```
 
 ---
@@ -485,43 +551,14 @@ Same `project.faf`. Same scoring. Same result. Different execution layer.
 
 ---
 
-## 🌐 What's New in v5.0.0 — The RAM Edition
+## 📚 Documentation & Recommended Reading
 
-`.faf` is ROM — persistent, portable, yours forever. The RAM Edition adds tri-sync: ROM ↔ CLAUDE.md ↔ Claude's MEMORY.md. For builders, serious coders, and app-makers.
-
-```
-bi-sync  = ROM (.faf) ↔ CLAUDE.md
-tri-sync = ROM ↔ CLAUDE.md ↔ RAM (MEMORY.md)
-```
-
-```bash
-# tri-sync — ROM meets RAM
-faf tri-sync            # .faf ↔ CLAUDE.md ↔ MEMORY.md
-faf ram                 # Sync project context to RAM
-faf bi-sync --ram       # Include RAM in bi-sync
-faf bi-sync --all       # Everything: CLAUDE.md + AGENTS.md + .cursorrules + GEMINI.md + RAM
-
-# Pro management
-faf pro                 # Check license status
-faf pro activate <key>  # Activate license
-```
-
-**Bi-sync is core. Tri-sync adds more.** What does it add? It adds RAM, and it auto-syncs with Claude's MEMORY.md. 14-day free trial, no signup, no credit card.
-
-| Sync | Target | Status |
-|------|--------|--------|
-| bi-sync | `.faf` ↔ CLAUDE.md | Free forever |
-| bi-sync | `.faf` ↔ AGENTS.md, .cursorrules, GEMINI.md | Free forever |
-| **tri-sync** | `.faf` ↔ CLAUDE.md ↔ **MEMORY.md** | **Pro** |
-
-**6Ws reordered:** WHO, WHAT, WHY, WHERE, WHEN, HOW. First 3 = the idea. Last 3 = the implementation.
-
----
-
-## 📚 Documentation
-
+- **[The RAM Edition](https://faf.one/blog/ram-edition)** — Full v5.0.0 release blog post
+- **[The 3Ws](https://faf.one/ideas)** — Describe any app idea in 3 answers
+- **[The 6Ws](https://faf.one/6ws)** — The complete project DNA framework
 - **[CHANGELOG](./CHANGELOG.md)** — Version history
 - **[Website](https://faf.one)** — Complete guide
+- **[DAAFT Analysis](https://faf.one/daaft)** — The cost of not having context
 
 ---
 

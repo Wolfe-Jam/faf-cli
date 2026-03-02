@@ -64,7 +64,7 @@ preferences:
   documentation: as_needed
 state:
   phase: development
-  version: 5.0.0
+  version: 5.0.1
   focus: production_deployment
   status: green_flag
   next_milestone: npm_publication
