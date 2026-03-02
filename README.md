@@ -485,7 +485,7 @@ Same `project.faf`. Same scoring. Same result. Different execution layer.
 
 ---
 
-## 🌐 What's New in v5.0.0 — The Memory Edition
+## 🌐 What's New in v5.0.0 — The RAM Edition
 
 Your AI now remembers across sessions. tri-sync bridges `.faf` to Claude's session memory.
 
