@@ -5,6 +5,52 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.0] - 2026-03-01 — The Memory Edition
+
+### Added
+
+- **tri-sync** — ROM↔RAM bridge for Claude Code auto-memory
+  - `faf ram` — sync project context to Claude's session memory (MEMORY.md)
+  - `faf tri-sync` — bidirectional sync: `.faf` ↔ CLAUDE.md ↔ MEMORY.md
+  - `faf bi-sync --ram` — include RAM sync in bi-sync
+  - `faf bi-sync --all` — now includes RAM alongside AGENTS.md, .cursorrules, GEMINI.md
+  - Merge-safe: replaces FAF section, preserves Claude's own notes
+  - 200-line ceiling awareness (warns when exceeding auto-load limit)
+  - `memory-parser.ts` — full parse/export/import/detect/status API
+
+- **Pro Gate** — zero-friction license system for tri-sync
+  - 14-day free trial, no signup, no credit card
+  - HMAC-signed trial and license files (honest-user guard, not DRM)
+  - `faf pro` — check license status
+  - `faf pro activate <key>` — activate with license key
+  - Legacy dev detection (turbo-license holders get automatic access)
+  - Warm messaging: "Bi-sync is core. Tri-sync adds more."
+  - Early-bird: $3/mo · $19/yr (normally $10/mo — 70% off)
+
+- **3Ws / 6Ws reorder** — canonical order is now WHO, WHAT, WHY, WHERE, WHEN, HOW
+  - WHY promoted to 3W (was 4W), WHERE moved to 4W (was 3W)
+  - Clean split: 1W–3W = the idea (anyone can answer), 4W–6W = the implementation (developer fills in)
+  - Updated across CLI help, `faf readme`, `faf 6ws` default template, SixWs interface, hybrid engine
+
+### Fixed
+
+- CRLF merge bug in `memory-parser.ts` — raw string surgery on un-normalized content produced mixed line endings
+- Pricing inconsistency — `pro.ts` said $29/yr, `license-messages.ts` said $19/yr (now consistent at $19/yr)
+- Removed dead code: `showUpgradePrompt()` (defined but never called)
+
+### Testing
+
+- 1,100 tests passing across 49 suites
+- 16 new Pro Gate tests: `gateProFeature()`, `getProStatus()`, day-14 boundary, corrupt JSON, license precedence
+- 2 new CRLF merge tests: Windows CRLF + BOM normalization during merge
+
+### Philosophy
+
+- Free for devs, for builders, for ALL the app-makers
+- bi-sync is free forever — persistent project context for any AI
+- tri-sync is Pro — your AI remembers across sessions
+- Context the way AI intended it: at the ROOT, not scattered across docs
+
 ## [4.5.0] - 2026-02-24 — The AGENTS.md Edition
 
 ### Added

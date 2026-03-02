@@ -261,4 +261,289 @@ describe('FAF Pro Gate', () => {
     // File should exist
     expect(fs.existsSync(TRIAL_PATH)).toBe(true);
   });
+
+  // --------------------------------------------------------------------------
+  // activateLicense — duplicate activation
+  // --------------------------------------------------------------------------
+  it('should reject activation when already licensed', () => {
+    const mod = freshImport();
+    const first = mod.activateLicense('FAF-PRO-AAAA-BBBB-CCCC');
+    expect(first.success).toBe(true);
+
+    // Second activation with different key should fail
+    const mod2 = freshImport();
+    const second = mod2.activateLicense('FAF-PRO-DDDD-EEEE-FFFF');
+    expect(second.success).toBe(false);
+    expect(second.message).toContain('already');
+  });
+
+  // --------------------------------------------------------------------------
+  // activateLicense — lowercase key normalized to uppercase
+  // --------------------------------------------------------------------------
+  it('should normalize lowercase key to uppercase', () => {
+    const mod = freshImport();
+    const result = mod.activateLicense('faf-pro-test-abcd-1234');
+    expect(result.success).toBe(true);
+
+    const written = JSON.parse(fs.readFileSync(LICENSE_PATH, 'utf-8'));
+    expect(written.key).toBe('FAF-PRO-TEST-ABCD-1234');
+  });
+
+  // --------------------------------------------------------------------------
+  // License takes precedence over expired trial
+  // --------------------------------------------------------------------------
+  it('should allow access with license even if trial is expired', () => {
+    // Write expired trial
+    const started = new Date();
+    started.setDate(started.getDate() - 30);
+    const expires = new Date(started);
+    expires.setDate(expires.getDate() + 14);
+    const startedAt = started.toISOString();
+    const expiresAt = expires.toISOString();
+    fs.writeFileSync(TRIAL_PATH, JSON.stringify({
+      startedAt,
+      expiresAt,
+      signature: sign(`${startedAt}:${expiresAt}`),
+    }));
+
+    // Write valid license
+    const key = 'FAF-PRO-WXYZ-ABCD-9876';
+    const activatedAt = new Date().toISOString();
+    fs.writeFileSync(LICENSE_PATH, JSON.stringify({
+      key,
+      activatedAt,
+      tier: 'pro',
+      signature: sign(`${key}:${activatedAt}`),
+    }));
+
+    const mod = freshImport();
+    const status = mod.checkProAccess();
+    expect(status.allowed).toBe(true);
+    expect(status.reason).toBe('licensed');
+  });
+
+  // --------------------------------------------------------------------------
+  // gateProFeature — returns true for fresh trial
+  // --------------------------------------------------------------------------
+  it('gateProFeature should return true and start trial when no files exist', () => {
+    const mod = freshImport();
+    const result = mod.gateProFeature();
+    expect(result).toBe(true);
+    expect(fs.existsSync(TRIAL_PATH)).toBe(true);
+  });
+
+  // --------------------------------------------------------------------------
+  // gateProFeature — returns true for active trial
+  // --------------------------------------------------------------------------
+  it('gateProFeature should return true for active trial', () => {
+    const started = new Date();
+    started.setDate(started.getDate() - 3);
+    const expires = new Date(started);
+    expires.setDate(expires.getDate() + 14);
+    const startedAt = started.toISOString();
+    const expiresAt = expires.toISOString();
+    fs.writeFileSync(TRIAL_PATH, JSON.stringify({
+      startedAt,
+      expiresAt,
+      signature: sign(`${startedAt}:${expiresAt}`),
+    }));
+
+    const mod = freshImport();
+    const result = mod.gateProFeature();
+    expect(result).toBe(true);
+  });
+
+  // --------------------------------------------------------------------------
+  // gateProFeature — returns false for expired trial
+  // --------------------------------------------------------------------------
+  it('gateProFeature should return false for expired trial', () => {
+    const started = new Date();
+    started.setDate(started.getDate() - 20);
+    const expires = new Date(started);
+    expires.setDate(expires.getDate() + 14);
+    const startedAt = started.toISOString();
+    const expiresAt = expires.toISOString();
+    fs.writeFileSync(TRIAL_PATH, JSON.stringify({
+      startedAt,
+      expiresAt,
+      signature: sign(`${startedAt}:${expiresAt}`),
+    }));
+
+    const mod = freshImport();
+    const result = mod.gateProFeature();
+    expect(result).toBe(false);
+  });
+
+  // --------------------------------------------------------------------------
+  // gateProFeature — returns true for licensed user
+  // --------------------------------------------------------------------------
+  it('gateProFeature should return true for licensed user', () => {
+    const key = 'FAF-PRO-GATE-TEST-1234';
+    const activatedAt = new Date().toISOString();
+    fs.writeFileSync(LICENSE_PATH, JSON.stringify({
+      key,
+      activatedAt,
+      tier: 'pro',
+      signature: sign(`${key}:${activatedAt}`),
+    }));
+
+    const mod = freshImport();
+    const result = mod.gateProFeature();
+    expect(result).toBe(true);
+  });
+
+  // --------------------------------------------------------------------------
+  // gateProFeature — returns true for legacy dev
+  // --------------------------------------------------------------------------
+  it('gateProFeature should return true for legacy dev', () => {
+    fs.writeFileSync(LEGACY_LICENSE_PATH, JSON.stringify({
+      key: 'FAF-DEV0-GATE-TEST-FREE',
+    }));
+
+    const mod = freshImport();
+    const result = mod.gateProFeature();
+    expect(result).toBe(true);
+  });
+
+  // --------------------------------------------------------------------------
+  // getProStatus — no files → state: none
+  // --------------------------------------------------------------------------
+  it('getProStatus should return none when no files exist', () => {
+    const mod = freshImport();
+    const status = mod.getProStatus();
+    expect(status.state).toBe('none');
+    expect(status.daysLeft).toBeUndefined();
+    expect(status.key).toBeUndefined();
+  });
+
+  // --------------------------------------------------------------------------
+  // getProStatus — active trial
+  // --------------------------------------------------------------------------
+  it('getProStatus should return trial state with days left', () => {
+    const started = new Date();
+    started.setDate(started.getDate() - 7);
+    const expires = new Date(started);
+    expires.setDate(expires.getDate() + 14);
+    const startedAt = started.toISOString();
+    const expiresAt = expires.toISOString();
+    fs.writeFileSync(TRIAL_PATH, JSON.stringify({
+      startedAt,
+      expiresAt,
+      signature: sign(`${startedAt}:${expiresAt}`),
+    }));
+
+    const mod = freshImport();
+    const status = mod.getProStatus();
+    expect(status.state).toBe('trial');
+    expect(status.daysLeft).toBeGreaterThan(0);
+    expect(status.daysLeft).toBeLessThanOrEqual(7);
+    expect(status.trialStarted).toBe(startedAt);
+    expect(status.trialExpires).toBe(expiresAt);
+  });
+
+  // --------------------------------------------------------------------------
+  // getProStatus — expired trial
+  // --------------------------------------------------------------------------
+  it('getProStatus should return trial_expired with 0 days left', () => {
+    const started = new Date();
+    started.setDate(started.getDate() - 20);
+    const expires = new Date(started);
+    expires.setDate(expires.getDate() + 14);
+    const startedAt = started.toISOString();
+    const expiresAt = expires.toISOString();
+    fs.writeFileSync(TRIAL_PATH, JSON.stringify({
+      startedAt,
+      expiresAt,
+      signature: sign(`${startedAt}:${expiresAt}`),
+    }));
+
+    const mod = freshImport();
+    const status = mod.getProStatus();
+    expect(status.state).toBe('trial_expired');
+    expect(status.daysLeft).toBe(0);
+    expect(status.trialStarted).toBe(startedAt);
+    expect(status.trialExpires).toBe(expiresAt);
+  });
+
+  // --------------------------------------------------------------------------
+  // getProStatus — licensed
+  // --------------------------------------------------------------------------
+  it('getProStatus should return licensed state with key and tier', () => {
+    const key = 'FAF-PRO-STAT-ABCD-5678';
+    const activatedAt = new Date().toISOString();
+    fs.writeFileSync(LICENSE_PATH, JSON.stringify({
+      key,
+      activatedAt,
+      tier: 'pro',
+      signature: sign(`${key}:${activatedAt}`),
+    }));
+
+    const mod = freshImport();
+    const status = mod.getProStatus();
+    expect(status.state).toBe('licensed');
+    expect(status.key).toBe(key);
+    expect(status.tier).toBe('pro');
+    expect(status.activatedAt).toBe(activatedAt);
+  });
+
+  // --------------------------------------------------------------------------
+  // getProStatus — legacy dev
+  // --------------------------------------------------------------------------
+  it('getProStatus should return legacy_dev state', () => {
+    fs.writeFileSync(LEGACY_LICENSE_PATH, JSON.stringify({
+      key: 'FAF-DEV0-STAT-TEST-FREE',
+    }));
+
+    const mod = freshImport();
+    const status = mod.getProStatus();
+    expect(status.state).toBe('legacy_dev');
+  });
+
+  // --------------------------------------------------------------------------
+  // Trial day-14 boundary — exactly 14 days
+  // --------------------------------------------------------------------------
+  it('should handle trial at exactly day 14 boundary', () => {
+    const started = new Date();
+    started.setDate(started.getDate() - 14);
+    const expires = new Date(started);
+    expires.setDate(expires.getDate() + 14);
+    const startedAt = started.toISOString();
+    const expiresAt = expires.toISOString();
+    fs.writeFileSync(TRIAL_PATH, JSON.stringify({
+      startedAt,
+      expiresAt,
+      signature: sign(`${startedAt}:${expiresAt}`),
+    }));
+
+    const mod = freshImport();
+    const status = mod.checkProAccess();
+    // At exactly 14 days, daysLeft should be 0 → expired
+    expect(status.allowed).toBe(false);
+    expect(status.reason).toBe('trial_expired');
+    expect(status.daysLeft).toBe(0);
+  });
+
+  // --------------------------------------------------------------------------
+  // Corrupt JSON files
+  // --------------------------------------------------------------------------
+  it('should handle corrupt trial.json gracefully', () => {
+    fs.writeFileSync(TRIAL_PATH, 'not valid json{{{');
+
+    const mod = freshImport();
+    const status = mod.checkProAccess();
+    // Corrupt JSON → treated as no trial → starts fresh
+    expect(status.allowed).toBe(true);
+    expect(status.reason).toBe('trial');
+    expect(status.daysLeft).toBe(14);
+  });
+
+  it('should handle corrupt license.json gracefully', () => {
+    fs.writeFileSync(LICENSE_PATH, '<<<corrupt>>>');
+
+    const mod = freshImport();
+    const status = mod.checkProAccess();
+    // Corrupt license → no license → falls to trial
+    expect(status.allowed).toBe(true);
+    expect(status.reason).toBe('trial');
+  });
 });

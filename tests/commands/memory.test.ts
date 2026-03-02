@@ -269,6 +269,71 @@ describe('MEMORY.md Parser (tri-sync)', () => {
       expect(fafSectionCount).toBe(1);
     });
 
+    it('should merge correctly when existing file has CRLF line endings', async () => {
+      // Simulate a Windows-style MEMORY.md with CRLF
+      const existingContent = [
+        '# Project Context (from project.faf)',
+        '',
+        '## Quick Reference',
+        '- **Name:** old-project',
+        '',
+        '---',
+        '*Seeded from project.faf by faf-cli tri-sync — 2026-01-01*',
+        "*This section is managed by tri-sync. Claude's own notes below are preserved.*",
+        '',
+        '## My Custom Notes',
+        '- Important pattern: always use async/await',
+        '- Key insight from debugging session',
+      ].join('\r\n');  // CRLF line endings
+
+      const outputPath = path.join(testMemoryDir, 'MEMORY.md');
+      await fs.writeFile(outputPath, existingContent);
+
+      const fafContent = {
+        project: { name: 'updated-project', type: 'cli-ts' },
+      };
+
+      const result = await memoryExport(fafContent, outputPath, { merge: true });
+      expect(result.success).toBe(true);
+      expect(result.merged).toBe(true);
+
+      const content = await fs.readFile(outputPath, 'utf-8');
+      // Should have updated project name
+      expect(content).toContain('updated-project');
+      // Should NOT have old project name
+      expect(content).not.toContain('old-project');
+      // Should preserve Claude's notes
+      expect(content).toContain('My Custom Notes');
+      expect(content).toContain('always use async/await');
+      // Should NOT have mixed line endings (no \r remaining)
+      expect(content).not.toContain('\r');
+      // Should have exactly one FAF section
+      const fafSectionCount = (content.match(/# Project Context \(from project\.faf\)/g) || []).length;
+      expect(fafSectionCount).toBe(1);
+    });
+
+    it('should handle BOM + CRLF in existing file', async () => {
+      // BOM + CRLF — common from Windows editors
+      const existingContent = '\uFEFF## My Notes\r\n- Pattern A\r\n- Pattern B\r\n';
+
+      const outputPath = path.join(testMemoryDir, 'MEMORY.md');
+      await fs.writeFile(outputPath, existingContent);
+
+      const fafContent = {
+        project: { name: 'bom-test' },
+      };
+
+      const result = await memoryExport(fafContent, outputPath, { merge: true });
+      expect(result.success).toBe(true);
+
+      const content = await fs.readFile(outputPath, 'utf-8');
+      expect(content).toContain('bom-test');
+      expect(content).toContain('Pattern A');
+      // BOM and CRLF should be stripped
+      expect(content).not.toContain('\uFEFF');
+      expect(content).not.toContain('\r');
+    });
+
     it('should overwrite entirely with force mode', async () => {
       const existingContent = '## Claude Notes\n- Important stuff\n';
       const outputPath = path.join(testMemoryDir, 'MEMORY.md');

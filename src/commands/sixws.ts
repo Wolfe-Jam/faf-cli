@@ -27,7 +27,7 @@ export async function sixwsCommand(): Promise<void> {
       type: 'editor',
       name: 'yamlInput',
       message: 'Paste the human_context YAML here (opens your editor):',
-      default: 'human_context:\n  who: ""\n  what: ""\n  where: ""\n  why: ""\n  when: ""\n  how: ""\n',
+      default: 'human_context:\n  who: ""\n  what: ""\n  why: ""\n  where: ""\n  when: ""\n  how: ""\n',
       validate: (input: string) => {
         if (!input || input.trim().length === 0) {
           return 'Please paste the human_context YAML';

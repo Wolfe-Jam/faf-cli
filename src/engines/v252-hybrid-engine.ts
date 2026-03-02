@@ -16,9 +16,9 @@ import * as path from 'path';
 export interface SixWs {
   who: string;
   what: string;
+  why: string;
   where: string;
   when: string;
-  why: string;
   how: string;
 }
 
@@ -124,7 +124,7 @@ export function runRegexFallback(context: string, sources: string[]): HybridExtr
 
   // Attempt to match patterns from collected context
   // Note: 'when' is not in PATTERN_LIBRARY, always use timestamp
-  const fieldsToMatch: (keyof typeof PATTERN_LIBRARY)[] = ['who', 'what', 'where', 'how', 'why'];
+  const fieldsToMatch: (keyof typeof PATTERN_LIBRARY)[] = ['who', 'what', 'why', 'where', 'how'];
 
   fieldsToMatch.forEach(key => {
     for (const regex of PATTERN_LIBRARY[key]) {

@@ -279,7 +279,9 @@ export async function memoryExport(
   if (options?.merge !== false) {
     // Merge mode (default)
     try {
-      const existing = await fs.readFile(outputPath, 'utf-8');
+      const raw = await fs.readFile(outputPath, 'utf-8');
+      // Normalize CRLF/CR to LF before string surgery (matches parseMemoryMd behavior)
+      const existing = raw.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
       const parsed = parseMemoryMd(existing);
 
       let merged: string;

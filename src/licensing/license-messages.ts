@@ -51,7 +51,7 @@ export function showTrialStarted(): void {
   console.log(chalk.white('   tri-sync is a Pro feature. You\'re trying it free for 14 days.'));
   console.log(chalk.gray('   Let us know what you think.'));
   console.log();
-  console.log(chalk.gray('   $3/mo (a dime a day) · $19/yr (a nickel a day)'));
+  console.log(chalk.gray('   Early-bird: $3/mo · $19/yr (normally $10/mo — 70% off)'));
   console.log(chalk.gray('   faf.one/pro when you\'re ready.'));
   console.log();
 }
@@ -71,8 +71,8 @@ export function showTrialExpired(): void {
   console.log(chalk.white('   bi-sync is free — and always will be.'));
   console.log(chalk.white('   tri-sync adds RAM: your AI remembers across sessions.'));
   console.log();
-  console.log(chalk.gray('   $3/mo (a dime a day) · $19/yr (a nickel a day)'));
-  console.log(chalk.gray('   A small fee to help us grow and serve you better.'));
+  console.log(chalk.gray('   Early-bird: $3/mo · $19/yr (normally $10/mo — 70% off)'));
+  console.log(chalk.gray('   Lock in early-adopter pricing before it\'s gone.'));
   console.log();
   console.log(FAF_COLORS.fafOrange(`   ${FAF_ICONS.trophy} faf.one/pro`));
   console.log(chalk.gray('   Run: faf pro activate <key>'));
@@ -84,11 +84,3 @@ export function showLicenseActive(): void {
   // Only shown from `faf pro status`.
 }
 
-export function showUpgradePrompt(): void {
-  console.log();
-  console.log(FAF_COLORS.fafOrange(`   ${MESSAGES.tagline}`));
-  console.log(chalk.gray('   $3/mo (a dime a day) · $19/yr (a nickel a day)'));
-  console.log(FAF_COLORS.fafOrange(`   ${FAF_ICONS.trophy} faf.one/pro`));
-  console.log(chalk.gray('   Run: faf pro activate <key>'));
-  console.log();
-}

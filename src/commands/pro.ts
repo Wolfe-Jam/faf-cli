@@ -107,7 +107,7 @@ function showProStatus(): void {
       }
       console.log();
       console.log(chalk.white('   bi-sync is free — and always will be. tri-sync Pro adds RAM.'));
-      console.log(chalk.gray('   $3/mo (a dime a day) · $29/yr (a nickel a day)'));
+      console.log(chalk.gray('   Early-bird: $3/mo · $19/yr (normally $10/mo — 70% off)'));
       console.log(FAF_COLORS.fafOrange(`   ${FAF_ICONS.trophy} faf.one/pro`));
       console.log(chalk.gray('   Activate: faf pro activate <key>'));
       break;
