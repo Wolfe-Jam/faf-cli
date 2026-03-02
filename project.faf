@@ -5,15 +5,13 @@ ai_score: 83%
 ai_confidence: HIGH
 ai_value: 30_seconds_replaces_20_minutes_of_questions
 ai_tldr:
-  project: faf-cli - "The Persistent AI Context Standard • Foundation Layer for AI
-    • IANA-Registered • Anthropic-Approved • project.faf = AI's foundation"
+  project: faf-cli - "The Persistent AI Context Standard • Foundation Layer for AI • IANA-Registered • Anthropic-Approved • project.faf = AI's foundation"
   stack: CLI/TypeScript/TypeScript (tsc)/npm registry/Node.js
   quality_bar: production_ready
   current_focus: Production deployment preparation
   your_role: Build features with perfect context
 instant_context:
-  what_building: The Persistent AI Context Standard • Foundation Layer for AI •
-    IANA-Registered • Anthropic-Approved • project.faf = AI's foundation
+  what_building: The Persistent AI Context Standard • Foundation Layer for AI • IANA-Registered • Anthropic-Approved • project.faf = AI's foundation
   tech_stack: CLI/TypeScript/TypeScript (tsc)/npm registry/Node.js
   main_language: TypeScript
   deployment: npm registry
@@ -28,8 +26,7 @@ context_quality:
     - None - fully specified!
 project:
   name: faf-cli
-  goal: The Persistent AI Context Standard • Foundation Layer for AI •
-    IANA-Registered • Anthropic-Approved • project.faf = AI's foundation
+  goal: The Persistent AI Context Standard • Foundation Layer for AI • IANA-Registered • Anthropic-Approved • project.faf = AI's foundation
   main_language: TypeScript
   type: cli-ts
 ai_instructions:
@@ -93,16 +90,8 @@ tags:
   user_defined: null
 human_context:
   who: 🏎️⚡️_wolfejam.dev team
-  what: The Persistent AI Context Standard • Foundation Layer for AI •
-    IANA-Registered • Anthropic-Approved • project.faf = AI's foundation
-  why: To enable faf, turbo-cat, format-discovery, catalytic-converter,
-    ai-context, project-dna, context-mirroring, c-mirror, bi-sync, cli,
-    free-forever, podium, fast-af, claude, chatgpt, gemini, cursor, ai-tools,
-    developer-productivity, anti-faff, react, nextjs, next, svelte, sveltekit,
-    typescript, vite, n8n, workflow-automation, stack-detection,
-    framework-detection, react-tools, typescript-tools, integration-system, mcp,
-    model-context-protocol, mcp-server, persistent, persistent-context,
-    persistent-project-context, context-on-demand, ai-readiness
+  what: The Persistent AI Context Standard • Foundation Layer for AI • IANA-Registered • Anthropic-Approved • project.faf = AI's foundation
+  why: To enable faf, turbo-cat, format-discovery, catalytic-converter, ai-context, project-dna, context-mirroring, c-mirror, bi-sync, cli, free-forever, podium, fast-af, claude, chatgpt, gemini, cursor, ai-tools, developer-productivity, anti-faff, react, nextjs, next, svelte, sveltekit, typescript, vite, n8n, workflow-automation, stack-detection, framework-detection, react-tools, typescript-tools, integration-system, mcp, model-context-protocol, mcp-server, persistent, persistent-context, persistent-project-context, context-on-demand, ai-readiness
   where: npm registry + GitHub
   when: Production/Stable
   how: Test-driven development
@@ -135,3 +124,6 @@ faf_dna:
   birth_certificate: FAF-2026-CLIX-KQPK
   birth_date: 2026-02-18T19:56:53.125Z
   current_score: 86
+metadata:
+  last_claude_sync: 2026-03-02T03:42:51.027Z
+  bi_sync: active
