@@ -37,6 +37,7 @@ export const MESSAGES = {
 export function showTrialStarted(): void {
   console.log();
   console.log(FAF_COLORS.fafOrange(`   ${MESSAGES.tagline}`));
+  console.log(chalk.white('   What does it add? It adds RAM, and it auto-syncs with Claude\'s MEMORY.md'));
   console.log();
   console.log(chalk.white('   You\'re using tri-sync right now.'));
   console.log(chalk.white('   It adds RAM to FAF — another sync, this time to Claude\'s session memory.'));
@@ -67,6 +68,7 @@ export function showTrialExpired(): void {
   console.log(chalk.yellow(`${FAF_ICONS.precision} ${MESSAGES.trialExpired}`));
   console.log();
   console.log(FAF_COLORS.fafOrange(`   ${MESSAGES.tagline}`));
+  console.log(chalk.white('   What does it add? It adds RAM, and it auto-syncs with Claude\'s MEMORY.md'));
   console.log();
   console.log(chalk.white('   bi-sync is free — and always will be.'));
   console.log(chalk.white('   tri-sync adds RAM: your AI remembers across sessions.'));

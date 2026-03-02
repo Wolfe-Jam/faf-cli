@@ -506,7 +506,7 @@ faf pro                 # Check license status
 faf pro activate <key>  # Activate license
 ```
 
-**Bi-sync is core. Tri-sync adds more.** 14-day free trial, no signup, no credit card.
+**Bi-sync is core. Tri-sync adds more.** What does it add? It adds RAM, and it auto-syncs with Claude's MEMORY.md. 14-day free trial, no signup, no credit card.
 
 | Sync | Target | Status |
 |------|--------|--------|

@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `faf pro` — check license status
   - `faf pro activate <key>` — activate with license key
   - Legacy dev detection (turbo-license holders get automatic access)
-  - Warm messaging: "Bi-sync is core. Tri-sync adds more."
+  - Warm messaging: "Bi-sync is core. Tri-sync adds more. What does it add? It adds RAM."
   - Early-bird: $3/mo · $19/yr (normally $10/mo — 70% off)
 
 - **3Ws / 6Ws reorder** — canonical order is now WHO, WHAT, WHY, WHERE, WHEN, HOW
