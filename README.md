@@ -487,17 +487,17 @@ Same `project.faf`. Same scoring. Same result. Different execution layer.
 
 ## 🌐 What's New in v5.0.0 — The RAM Edition
 
-Your AI now remembers across sessions. tri-sync bridges `.faf` to Claude's session memory.
+`.faf` is ROM — persistent, portable, yours forever. The RAM Edition adds tri-sync: ROM ↔ CLAUDE.md ↔ Claude's MEMORY.md. For builders, serious coders, and app-makers.
 
 ```
 bi-sync  = ROM (.faf) ↔ CLAUDE.md
-tri-sync = ROM ↔ CLAUDE.md ↔ RAM (Claude's session memory)
+tri-sync = ROM ↔ CLAUDE.md ↔ RAM (MEMORY.md)
 ```
 
 ```bash
-# tri-sync — your AI remembers
-faf ram                 # Sync project context to Claude's memory
-faf tri-sync            # Full bidirectional: .faf ↔ CLAUDE.md ↔ MEMORY.md
+# tri-sync — ROM meets RAM
+faf tri-sync            # .faf ↔ CLAUDE.md ↔ MEMORY.md
+faf ram                 # Sync project context to RAM
 faf bi-sync --ram       # Include RAM in bi-sync
 faf bi-sync --all       # Everything: CLAUDE.md + AGENTS.md + .cursorrules + GEMINI.md + RAM
 
@@ -506,7 +506,7 @@ faf pro                 # Check license status
 faf pro activate <key>  # Activate license
 ```
 
-**bi-sync is free — and always will be.** tri-sync is Pro: 14-day free trial, no signup.
+**Bi-sync is core. Tri-sync adds more.** 14-day free trial, no signup, no credit card.
 
 | Sync | Target | Status |
 |------|--------|--------|
