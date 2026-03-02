@@ -485,36 +485,36 @@ Same `project.faf`. Same scoring. Same result. Different execution layer.
 
 ---
 
-## 🌐 What's New in v4.5.0 — The AGENTS.md Edition
+## 🌐 What's New in v5.0.0 — The Memory Edition
 
-Define once in `.faf`, generate every AI context format. One file to rule them all.
+Your AI now remembers across sessions. tri-sync bridges `.faf` to Claude's session memory.
 
-| Platform | Format | FAF Command |
-|----------|--------|-------------|
-| **OpenAI Codex / 20+ tools** | `AGENTS.md` | `faf agents` |
-| **Cursor IDE** | `.cursorrules` | `faf cursor` |
-| **Claude Code** | `CLAUDE.md` | `faf bi-sync` |
-| **Gemini CLI** | `GEMINI.md` | `faf gemini` |
-| **Antigravity IDE** | `~/.gemini/GEMINI.md` | `faf gemini --global` |
-| **Conductor Extension** | `conductor/` directory | `faf conductor` |
-| **All at once** | Everything above | `faf bi-sync --all` |
-
-```bash
-# AGENTS.md (OpenAI Codex, Linux Foundation, 20+ tools)
-faf agents export       # .faf → AGENTS.md
-faf agents import       # AGENTS.md → .faf
-faf agents sync         # Bidirectional
-
-# .cursorrules (Cursor IDE)
-faf cursor export       # .faf → .cursorrules
-faf cursor import       # .cursorrules → .faf
-faf cursor sync         # Bidirectional
-
-# Generate ALL formats in one command
-faf bi-sync --all       # CLAUDE.md + AGENTS.md + .cursorrules + GEMINI.md
+```
+bi-sync  = ROM (.faf) ↔ CLAUDE.md
+tri-sync = ROM ↔ CLAUDE.md ↔ RAM (Claude's session memory)
 ```
 
-**Universal AI Context** — Write once, use with Claude, Codex, Cursor, Gemini, and every AI tool.
+```bash
+# tri-sync — your AI remembers
+faf ram                 # Sync project context to Claude's memory
+faf tri-sync            # Full bidirectional: .faf ↔ CLAUDE.md ↔ MEMORY.md
+faf bi-sync --ram       # Include RAM in bi-sync
+faf bi-sync --all       # Everything: CLAUDE.md + AGENTS.md + .cursorrules + GEMINI.md + RAM
+
+# Pro management
+faf pro                 # Check license status
+faf pro activate <key>  # Activate license
+```
+
+**bi-sync is free — and always will be.** tri-sync is Pro: 14-day free trial, no signup.
+
+| Sync | Target | Status |
+|------|--------|--------|
+| bi-sync | `.faf` ↔ CLAUDE.md | Free forever |
+| bi-sync | `.faf` ↔ AGENTS.md, .cursorrules, GEMINI.md | Free forever |
+| **tri-sync** | `.faf` ↔ CLAUDE.md ↔ **MEMORY.md** | **Pro** |
+
+**6Ws reordered:** WHO, WHAT, WHY, WHERE, WHEN, HOW. First 3 = the idea. Last 3 = the implementation.
 
 ---
 
