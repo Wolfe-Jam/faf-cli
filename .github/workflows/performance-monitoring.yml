@@ -84,7 +84,7 @@ jobs:
           fi
       
       - name: 📊 Upload performance report
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: performance-report-${{ matrix.platform }}
