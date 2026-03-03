@@ -43,7 +43,7 @@ At 100% AI Readiness, AI stops guessing and starts knowing. Live bi-sync between
 
 ---
 
-## 🧠 v5.0.0 — The RAM Edition
+## 🧠 v5.0.1 — The RAM Edition
 
 **TL;DR:** `.faf` is ROM — persistent, portable, yours forever. tri-sync adds RAM: it auto-syncs with Claude's MEMORY.md. For builders, serious coders, and app-makers.
 
@@ -96,6 +96,7 @@ faf pro activate <key>  # Activate license
 | **tri-sync** | `.faf` ↔ CLAUDE.md ↔ **MEMORY.md** | **Pro** |
 
 14-day free trial, no signup, no credit card. Early-bird: $3/mo · $19/yr (normally $10/mo — 70% off).
+**[Purchase at faf.one/pro](https://faf.one/pro)**
 
 **Release notes:** [CHANGELOG](./CHANGELOG.md)
 
@@ -557,12 +558,22 @@ Same `project.faf`. Same scoring. Same result. Different execution layer. Three 
 
 ## 📚 Documentation & Recommended Reading
 
-- **[The RAM Edition](https://faf.one/blog/ram-edition)** — Full v5.0.0 release blog post
+- **[The RAM Edition](https://faf.one/blog/ram-edition)** — Full v5.0.1 release blog post
+- **[FAF Pro](https://faf.one/pro)** — tri-sync pricing and activation
+- **[Pro Docs](./docs/PRO.md)** — Commands, FAQ, and licensing
 - **[The 3Ws](https://faf.one/ideas)** — Describe any app idea in 3 answers
 - **[The 6Ws](https://faf.one/6ws)** — The complete project DNA framework
 - **[CHANGELOG](./CHANGELOG.md)** — Version history
 - **[Website](https://faf.one)** — Complete guide
 - **[DAAFT Analysis](https://faf.one/daaft)** — The cost of not having context
+
+---
+
+## 💬 Support
+
+- **[GitHub Discussions](https://github.com/Wolfe-Jam/faf-cli/discussions)** — Questions, ideas, community
+- **[Pro Docs](./docs/PRO.md)** — tri-sync commands, activation, FAQ
+- **Email:** team@faf.one
 
 ---
 
