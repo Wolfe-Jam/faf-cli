@@ -92,6 +92,7 @@ test-*.faf
 !PUBLISH.md
 !CONTRIBUTING.md
 !CODE_OF_CONDUCT.md
+!docs/*.md
 !SECURITY.md
 !SUPPORT.md
 !.github/**/*.md
