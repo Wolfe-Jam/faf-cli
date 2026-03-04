@@ -28,7 +28,7 @@ const VERSION_FILES = [
       },
       {
         pattern: /🏎️⚡️🏁\s+v\d+\.\d+\.\d+/g,
-        replacement: (version) => `🏎️⚡️🏁  v${version}`
+        replacement: (version) => `🏎️⚡️🏁 v${version}`
       },
       {
         pattern: /\(v\d+\.\d+\.\d+ [^)]+\)/g,

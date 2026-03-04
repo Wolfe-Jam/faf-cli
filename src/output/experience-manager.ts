@@ -129,7 +129,7 @@ export class ExperienceManager {
     return {
       type: 'banner',
       visual: `${FAF_COLORS.fafCyan('┌─────────────────────────────────────────┐')}
-${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafWhite('███████╗ █████╗ ███████╗')}  🏎️⚡️🏁  v${version} ${FAF_COLORS.fafCyan('│')}
+${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafWhite('███████╗ █████╗ ███████╗')}  🏎️⚡️🏁 v${version} ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafCyan('██')}${FAF_COLORS.fafWhite('╔════╝')}${FAF_COLORS.fafCyan('██')}${FAF_COLORS.fafWhite('╔══')}${FAF_COLORS.fafCyan('██')}${FAF_COLORS.fafWhite('╗')}${FAF_COLORS.fafCyan('██')}${FAF_COLORS.fafWhite('╔════╝')}                ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafCyan('█████')}${FAF_COLORS.fafWhite('╗  ')}${FAF_COLORS.fafCyan('███████')}${FAF_COLORS.fafWhite('║')}${FAF_COLORS.fafCyan('█████')}${FAF_COLORS.fafWhite('╗')}                  ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafOrange('██')}${FAF_COLORS.fafWhite('╔══╝  ')}${FAF_COLORS.fafOrange('██')}${FAF_COLORS.fafWhite('╔══')}${FAF_COLORS.fafOrange('██')}${FAF_COLORS.fafWhite('║')}${FAF_COLORS.fafOrange('██')}${FAF_COLORS.fafWhite('╔══╝')}                  ${FAF_COLORS.fafCyan('│')}

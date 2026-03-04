@@ -165,7 +165,7 @@ export function generateFAFHeader(scoreboardTitle?: string): string {
 
   return `
 ${titleLine}${FAF_COLORS.fafCyan('┌─────────────────────────────────────────┐')}
-${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafWhite('███████')}${FAF_COLORS.fafWhite('╗')} ${FAF_COLORS.fafWhite('█████')}${FAF_COLORS.fafWhite('╗')} ${FAF_COLORS.fafWhite('███████')}${FAF_COLORS.fafWhite('╗')}  🏎️⚡️🏁  v${version} ${FAF_COLORS.fafCyan('│')}
+${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafWhite('███████')}${FAF_COLORS.fafWhite('╗')} ${FAF_COLORS.fafWhite('█████')}${FAF_COLORS.fafWhite('╗')} ${FAF_COLORS.fafWhite('███████')}${FAF_COLORS.fafWhite('╗')}  🏎️⚡️🏁 v${version} ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafCyan('██')}${FAF_COLORS.fafWhite('╔════╝')}${FAF_COLORS.fafCyan('██')}${FAF_COLORS.fafWhite('╔══')}${FAF_COLORS.fafCyan('██')}${FAF_COLORS.fafWhite('╗')}${FAF_COLORS.fafCyan('██')}${FAF_COLORS.fafWhite('╔════╝')}                ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafCyan('█████')}${FAF_COLORS.fafWhite('╗  ')}${FAF_COLORS.fafCyan('███████')}${FAF_COLORS.fafWhite('║')}${FAF_COLORS.fafCyan('█████')}${FAF_COLORS.fafWhite('╗')}                  ${FAF_COLORS.fafCyan('│')}
 ${FAF_COLORS.fafCyan('│')} ${FAF_COLORS.fafOrange('██')}${FAF_COLORS.fafWhite('╔══╝  ')}${FAF_COLORS.fafOrange('██')}${FAF_COLORS.fafWhite('╔══')}${FAF_COLORS.fafOrange('██')}${FAF_COLORS.fafWhite('║')}${FAF_COLORS.fafOrange('██')}${FAF_COLORS.fafWhite('╔══╝')}                  ${FAF_COLORS.fafCyan('│')}
