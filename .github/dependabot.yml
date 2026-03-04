@@ -8,40 +8,18 @@ updates:
     open-pull-requests-limit: 3
     labels:
       - "dependencies"
-      - "automated"
+      - "security"
     commit-message:
       prefix: "deps"
+    # Security-only: ignore all version updates, only alert on vulnerabilities
     ignore:
-      # inquirer v9+ is ESM-only and breaks Jest (CommonJS test runner)
-      # Upgrading requires migrating to Jest 29+ with ESM support or different test runner
-      # Keep at v8.2.5 (last stable CommonJS version) until we migrate Jest
-      - dependency-name: "inquirer"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
-
-      # open v9+ is ESM-only and breaks our CommonJS build pipeline
-      # Keep at v8.4.2 (last stable CommonJS version) until we migrate to full ESM
-      - dependency-name: "open"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
-
-      # Block major version bumps for TypeScript tooling (often breaking)
-      - dependency-name: "@typescript-eslint/*"
-        update-types: ["version-update:semver-major"]
-      - dependency-name: "eslint"
-        update-types: ["version-update:semver-major"]
-
-      # Block major version bumps for core dependencies
-      - dependency-name: "@types/node"
-        update-types: ["version-update:semver-major"]
-      - dependency-name: "jest"
-        update-types: ["version-update:semver-major"]
-      - dependency-name: "@types/jest"
-        update-types: ["version-update:semver-major"]
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "monday"
+      interval: "monthly"
     labels:
       - "dependencies"
       - "ci"
