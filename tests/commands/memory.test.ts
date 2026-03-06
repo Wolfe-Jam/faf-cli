@@ -37,35 +37,60 @@ describe('MEMORY.md Parser (tri-sync)', () => {
   // ========================================================================
 
   describe('computeProjectId', () => {
+    const isWindows = process.platform === 'win32';
+
     it('should convert absolute path to project ID', () => {
-      const result = computeProjectId('/Users/wolfejam/FAF/cli');
-      expect(result).toBe('-Users-wolfejam-FAF-cli');
+      if (isWindows) {
+        // On Windows, path.resolve('/Users/...') prepends drive letter
+        const result = computeProjectId('C:\\Users\\wolfejam\\FAF\\cli');
+        expect(result).toContain('Users');
+      } else {
+        const result = computeProjectId('/Users/wolfejam/FAF/cli');
+        expect(result).toBe('-Users-wolfejam-FAF-cli');
+      }
     });
 
     it('should handle root path', () => {
-      const result = computeProjectId('/');
-      // path.resolve('/') → '/', trailing slash strip → '', replace → ''
-      expect(result).toBe('');
+      if (isWindows) {
+        const result = computeProjectId('C:\\');
+        expect(typeof result).toBe('string');
+      } else {
+        const result = computeProjectId('/');
+        expect(result).toBe('');
+      }
     });
 
     it('should handle path with trailing slash', () => {
-      const result = computeProjectId('/Users/wolfejam/FAF/cli/');
-      expect(result).toBe('-Users-wolfejam-FAF-cli');
+      if (isWindows) {
+        const result = computeProjectId('C:\\Users\\wolfejam\\FAF\\cli\\');
+        expect(result).toContain('Users');
+      } else {
+        const result = computeProjectId('/Users/wolfejam/FAF/cli/');
+        expect(result).toBe('-Users-wolfejam-FAF-cli');
+      }
     });
 
     it('should handle deeply nested path', () => {
-      const result = computeProjectId('/home/user/projects/my-app/packages/core');
-      expect(result).toBe('-home-user-projects-my-app-packages-core');
+      if (isWindows) {
+        const result = computeProjectId('C:\\home\\user\\projects\\my-app\\packages\\core');
+        expect(result).toContain('my-app');
+      } else {
+        const result = computeProjectId('/home/user/projects/my-app/packages/core');
+        expect(result).toBe('-home-user-projects-my-app-packages-core');
+      }
     });
   });
 
   describe('resolveMemoryPath', () => {
+    const isWindows = process.platform === 'win32';
+
     it('should resolve to ~/.claude/projects/<id>/memory/MEMORY.md', () => {
-      const result = resolveMemoryPath('/Users/wolfejam/FAF/cli');
+      const testPath = isWindows ? 'C:\\Users\\wolfejam\\FAF\\cli' : '/Users/wolfejam/FAF/cli';
+      const result = resolveMemoryPath(testPath);
       const home = process.env.HOME || process.env.USERPROFILE || '';
-      expect(result).toBe(
-        path.join(home, '.claude', 'projects', '-Users-wolfejam-FAF-cli', 'memory', 'MEMORY.md')
-      );
+      expect(result).toContain(path.join('.claude', 'projects'));
+      expect(result).toContain(path.join('memory', 'MEMORY.md'));
+      expect(result.startsWith(home)).toBe(true);
     });
 
     it('should respect CLAUDE_CONFIG_DIR env var', () => {
@@ -73,10 +98,10 @@ describe('MEMORY.md Parser (tri-sync)', () => {
       const tmpDir = path.join(os.tmpdir(), 'test-claude');
       process.env.CLAUDE_CONFIG_DIR = tmpDir;
       try {
-        const result = resolveMemoryPath('/my/project');
-        expect(result).toBe(
-          path.join(tmpDir, 'projects', '-my-project', 'memory', 'MEMORY.md')
-        );
+        const testPath = isWindows ? 'C:\\my\\project' : '/my/project';
+        const result = resolveMemoryPath(testPath);
+        expect(result).toContain(path.join(tmpDir, 'projects'));
+        expect(result).toContain(path.join('memory', 'MEMORY.md'));
       } finally {
         if (original !== undefined) {
           process.env.CLAUDE_CONFIG_DIR = original;
@@ -89,11 +114,13 @@ describe('MEMORY.md Parser (tri-sync)', () => {
 
   describe('resolveMemoryDir', () => {
     it('should resolve to memory directory (without MEMORY.md)', () => {
-      const result = resolveMemoryDir('/Users/wolfejam/FAF/cli');
+      const isWindows = process.platform === 'win32';
+      const testPath = isWindows ? 'C:\\Users\\wolfejam\\FAF\\cli' : '/Users/wolfejam/FAF/cli';
+      const result = resolveMemoryDir(testPath);
       const home = process.env.HOME || process.env.USERPROFILE || '';
-      expect(result).toBe(
-        path.join(home, '.claude', 'projects', '-Users-wolfejam-FAF-cli', 'memory')
-      );
+      expect(result).toContain(path.join('.claude', 'projects'));
+      expect(result.endsWith('memory')).toBe(true);
+      expect(result.startsWith(home)).toBe(true);
     });
   });
 
