@@ -168,12 +168,12 @@ jobs:
         run: npm run build
 
       - name: Run Tests and Capture Output
-        run: npm test 2>&1 | tee test-output.txt
+        run: npm test 2>&1 | tee /tmp/test-output.txt
 
       - name: Generate TAF Receipt
         uses: Wolfe-Jam/faf-taf-git@v2.1.0
         with:
-          test-output-file: test-output.txt
+          test-output-file: /tmp/test-output.txt
           auto-commit: 'true'
           commit-message: 'chore(taf): update .taf receipt [skip ci]'
           target-branch: taf-receipts
