@@ -255,14 +255,14 @@ export async function agentsExport(
   if (hasStack) {
     lines.push('## Tech Stack');
     lines.push('');
-    if (stack.frontend) lines.push(`- Frontend: ${stack.frontend}`);
-    if (stack.backend) lines.push(`- Backend: ${stack.backend}`);
-    if (stack.runtime) lines.push(`- Runtime: ${stack.runtime}`);
-    if (stack.build) lines.push(`- Build: ${stack.build}`);
-    if (stack.database && stack.database !== 'None') lines.push(`- Database: ${stack.database}`);
-    if (stack.package_manager) lines.push(`- Package Manager: ${stack.package_manager}`);
-    if (stack.hosting) lines.push(`- Hosting: ${stack.hosting}`);
-    if (stack.cicd) lines.push(`- CI/CD: ${stack.cicd}`);
+    if (stack.frontend) {lines.push(`- Frontend: ${stack.frontend}`);}
+    if (stack.backend) {lines.push(`- Backend: ${stack.backend}`);}
+    if (stack.runtime) {lines.push(`- Runtime: ${stack.runtime}`);}
+    if (stack.build) {lines.push(`- Build: ${stack.build}`);}
+    if (stack.database && stack.database !== 'None') {lines.push(`- Database: ${stack.database}`);}
+    if (stack.package_manager) {lines.push(`- Package Manager: ${stack.package_manager}`);}
+    if (stack.hosting) {lines.push(`- Hosting: ${stack.hosting}`);}
+    if (stack.cicd) {lines.push(`- CI/CD: ${stack.cicd}`);}
     // Also include languages/frameworks arrays if present
     if (stack.languages?.length > 0) {
       lines.push(`- Languages: ${stack.languages.join(', ')}`);
@@ -279,9 +279,9 @@ export async function agentsExport(
   const preferences = fafContent.preferences || {};
   const styleItems = [...codingStyle, ...warnings_list];
 
-  if (preferences.quality_bar) styleItems.push(`Quality bar: ${preferences.quality_bar}`);
-  if (preferences.commit_style) styleItems.push(`Commit style: ${preferences.commit_style}`);
-  if (preferences.testing) styleItems.push(`Testing: ${preferences.testing}`);
+  if (preferences.quality_bar) {styleItems.push(`Quality bar: ${preferences.quality_bar}`);}
+  if (preferences.commit_style) {styleItems.push(`Commit style: ${preferences.commit_style}`);}
+  if (preferences.testing) {styleItems.push(`Testing: ${preferences.testing}`);}
 
   if (styleItems.length > 0) {
     lines.push('## Code Style Guidelines');
@@ -298,7 +298,7 @@ export async function agentsExport(
   if (howContext || buildCommands.length > 0) {
     lines.push('## Build and Test Commands');
     lines.push('');
-    if (howContext) lines.push(`- ${howContext}`);
+    if (howContext) {lines.push(`- ${howContext}`);}
     for (const cmd of buildCommands) {
       lines.push(`- ${cmd}`);
     }
@@ -309,8 +309,8 @@ export async function agentsExport(
   const humanContext = fafContent.human_context || {};
   const architecture = fafContent.project?.architecture || [];
   const archItems = [...architecture];
-  if (humanContext.what) archItems.push(humanContext.what);
-  if (humanContext.where) archItems.push(`Deployed: ${humanContext.where}`);
+  if (humanContext.what) {archItems.push(humanContext.what);}
+  if (humanContext.where) {archItems.push(`Deployed: ${humanContext.where}`);}
 
   if (archItems.length > 0) {
     lines.push('## Architecture');

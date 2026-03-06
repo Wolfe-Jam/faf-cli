@@ -272,11 +272,11 @@ export async function cursorExport(
   if (hasStack) {
     lines.push('## Tech Stack');
     lines.push('');
-    if (stack.frontend) lines.push(`- Frontend: ${stack.frontend}`);
-    if (stack.backend) lines.push(`- Backend: ${stack.backend}`);
-    if (stack.runtime) lines.push(`- Runtime: ${stack.runtime}`);
-    if (stack.build) lines.push(`- Build: ${stack.build}`);
-    if (stack.package_manager) lines.push(`- Package Manager: ${stack.package_manager}`);
+    if (stack.frontend) {lines.push(`- Frontend: ${stack.frontend}`);}
+    if (stack.backend) {lines.push(`- Backend: ${stack.backend}`);}
+    if (stack.runtime) {lines.push(`- Runtime: ${stack.runtime}`);}
+    if (stack.build) {lines.push(`- Build: ${stack.build}`);}
+    if (stack.package_manager) {lines.push(`- Package Manager: ${stack.package_manager}`);}
     if (stack.languages?.length > 0) {
       lines.push(`- Languages: ${stack.languages.join(', ')}`);
     }
@@ -292,8 +292,8 @@ export async function cursorExport(
   const codingStyle = fafContent.project?.codingStyle || [];
   const styleItems = [...codingStyle, ...warnings_list];
 
-  if (workingStyle.quality_bar) styleItems.push(`Quality bar: ${workingStyle.quality_bar}`);
-  if (workingStyle.testing) styleItems.push(`Testing: ${workingStyle.testing}`);
+  if (workingStyle.quality_bar) {styleItems.push(`Quality bar: ${workingStyle.quality_bar}`);}
+  if (workingStyle.testing) {styleItems.push(`Testing: ${workingStyle.testing}`);}
 
   if (styleItems.length > 0) {
     lines.push('## Coding Standards');
@@ -307,11 +307,11 @@ export async function cursorExport(
   // Preferences section
   const preferences = fafContent.preferences || {};
   const prefItems: string[] = [];
-  if (preferences.quality_bar) prefItems.push(`Quality bar: ${preferences.quality_bar}`);
-  if (preferences.commit_style) prefItems.push(`Commit style: ${preferences.commit_style}`);
-  if (preferences.response_style) prefItems.push(`Response style: ${preferences.response_style}`);
-  if (preferences.testing) prefItems.push(`Testing: ${preferences.testing}`);
-  if (preferences.documentation) prefItems.push(`Documentation: ${preferences.documentation}`);
+  if (preferences.quality_bar) {prefItems.push(`Quality bar: ${preferences.quality_bar}`);}
+  if (preferences.commit_style) {prefItems.push(`Commit style: ${preferences.commit_style}`);}
+  if (preferences.response_style) {prefItems.push(`Response style: ${preferences.response_style}`);}
+  if (preferences.testing) {prefItems.push(`Testing: ${preferences.testing}`);}
+  if (preferences.documentation) {prefItems.push(`Documentation: ${preferences.documentation}`);}
 
   if (prefItems.length > 0) {
     lines.push('## Preferences');

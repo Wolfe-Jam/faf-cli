@@ -36,27 +36,39 @@ export function parseJestOutput(output: string): ParsedTestOutput | null {
 
   // Must match "Tests:" line containing "total" to avoid false positives
   const match = clean.match(/Tests:\s+(.+?\d+\s+total)/im);
-  if (!match || !match[1]) return null;
+  if (!match || !match[1]) {
+    return null;
+  }
 
   const line = match[1];
 
   const totalMatch = line.match(/(\d+)\s+total/i);
-  if (!totalMatch) return null;
+  if (!totalMatch) {
+    return null;
+  }
   const total = parseInt(totalMatch[1], 10);
-  if (total === 0) return null;
+  if (total === 0) {
+    return null;
+  }
 
   let passed = 0;
   let failed = 0;
   let skipped = 0;
 
   const passedMatch = line.match(/(\d+)\s+passed/i);
-  if (passedMatch) passed = parseInt(passedMatch[1], 10);
+  if (passedMatch) {
+    passed = parseInt(passedMatch[1], 10);
+  }
 
   const failedMatch = line.match(/(\d+)\s+failed/i);
-  if (failedMatch) failed = parseInt(failedMatch[1], 10);
+  if (failedMatch) {
+    failed = parseInt(failedMatch[1], 10);
+  }
 
   const skippedMatch = line.match(/(\d+)\s+skipped/i);
-  if (skippedMatch) skipped = parseInt(skippedMatch[1], 10);
+  if (skippedMatch) {
+    skipped = parseInt(skippedMatch[1], 10);
+  }
 
   return {
     total,
@@ -80,30 +92,44 @@ export function parseVitestOutput(output: string): ParsedTestOutput | null {
   const clean = stripAnsi(output);
 
   const match = clean.match(/^\s*Tests\s+(.+?\(\d+\))/m);
-  if (!match || !match[1]) return null;
+  if (!match || !match[1]) {
+    return null;
+  }
 
   const line = match[1];
 
   const totalMatch = line.match(/\((\d+)\)\s*$/);
-  if (!totalMatch) return null;
+  if (!totalMatch) {
+    return null;
+  }
   const total = parseInt(totalMatch[1], 10);
-  if (total === 0) return null;
+  if (total === 0) {
+    return null;
+  }
 
   let passed = 0;
   let failed = 0;
   let skipped = 0;
 
   const passedMatch = line.match(/(\d+)\s+passed/i);
-  if (passedMatch) passed = parseInt(passedMatch[1], 10);
+  if (passedMatch) {
+    passed = parseInt(passedMatch[1], 10);
+  }
 
   const failedMatch = line.match(/(\d+)\s+failed/i);
-  if (failedMatch) failed = parseInt(failedMatch[1], 10);
+  if (failedMatch) {
+    failed = parseInt(failedMatch[1], 10);
+  }
 
   const skippedMatch = line.match(/(\d+)\s+skipped/i);
-  if (skippedMatch) skipped = parseInt(skippedMatch[1], 10);
+  if (skippedMatch) {
+    skipped = parseInt(skippedMatch[1], 10);
+  }
 
   const todoMatch = line.match(/(\d+)\s+todo/i);
-  if (todoMatch) skipped += parseInt(todoMatch[1], 10);
+  if (todoMatch) {
+    skipped += parseInt(todoMatch[1], 10);
+  }
 
   return {
     total,
