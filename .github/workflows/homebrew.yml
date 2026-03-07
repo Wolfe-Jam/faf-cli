@@ -1,0 +1,19 @@
+name: Update Homebrew
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  homebrew:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update Homebrew formula
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          gh workflow run update-formula.yml \
+            -R Wolfe-Jam/homebrew-faf \
+            -f formula=faf-cli \
+            -f version=$VERSION \
+            -f npm_package=faf-cli
+        env:
+          GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
