@@ -17,7 +17,7 @@ project/
 >
 > You have a `package.json`. Add a `project.faf`. Done.
 
-Git-Native. `project.faf` versions with your code — every clone, every fork, every checkout gets full AI context. No setup, no drift, no re-explaining.
+**Git-Native.** `project.faf` versions with your code — every clone, every fork, every checkout gets full AI context. No setup, no drift, no re-explaining.
 
 ### Top 6 Commands
 
