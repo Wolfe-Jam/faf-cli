@@ -5,6 +5,22 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.2] - 2026-03-08
+
+### Fixed
+
+- **TURBO-CAT Slot Audit** — 12 wrong defaults eliminated from Python project detection
+  - Stripped 9 hardcoded pyproject.toml slots (poetry, File-based, None, File I/O)
+  - Real dependency parsing: detects setuptools/hatch/flit/pdm from `[build-system]`
+  - Dependency-aware detection: BigQuery, FastMCP, FastAPI, Flask, Django, PostgreSQL, MongoDB, Redis
+  - Language-aware warnings: Python→PEP 8, Rust→clippy, TS→strict mode
+  - Language-aware milestone: pypi_publication, crates_publication, etc.
+  - Gated TS strict mode indicator to TS/JS projects only
+  - Post-allocation verification: pyproject.toml overrides package.json for mainLanguage
+  - Score metadata refresh (faf_score + ai_confidence) after auto run
+  - Priority bump: pyproject.toml/Cargo.toml/go.mod (36) > package.json (35)
+  - 8 new Python detection tests (1,108/1,108 total)
+
 ## [5.0.1] - 2026-03-02
 
 ### Changed
