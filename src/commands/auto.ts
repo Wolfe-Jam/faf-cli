@@ -233,6 +233,19 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
           });
         }
 
+        // VERIFICATION: Cross-check allocations against actual discoveries
+        const pyprojectFound = analysis.confirmedFormats.some((f: any) => f.fileName === 'pyproject.toml');
+
+        if (pyprojectFound && parsed.stack) {
+          // If pyproject.toml exists, main_language must be Python (not JS from package.json)
+          if (parsed.stack.main_language && parsed.stack.main_language !== 'Python') {
+            parsed.stack.main_language = 'Python';
+          }
+          if (parsed.stack.mainLanguage && parsed.stack.mainLanguage !== 'Python') {
+            parsed.stack.mainLanguage = 'Python';
+          }
+        }
+
         // Merge stack signature and intelligence (metadata fields)
         if (analysis.stackSignature && analysis.stackSignature !== 'unknown-stack') {
           parsed.stack_signature = analysis.stackSignature;
@@ -383,6 +396,11 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
             parsed.stats.last_auto_time = parseFloat(lapTime);
             parsed.stats.times_run = (parsed.stats.times_run || 0) + 1;
 
+            // Refresh score metadata
+            parsed.scores = parsed.scores || {};
+            parsed.scores.faf_score = newScore;
+            parsed.scores.ai_confidence = newScore >= 85 ? 'high' : newScore >= 70 ? 'medium' : 'low';
+
             await fs.writeFile(fafPath, yamlUtils.stringify(parsed), 'utf-8');
           }
         } else {
@@ -392,6 +410,11 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
           }
           parsed.stats.last_auto_time = parseFloat(lapTime);
           parsed.stats.times_run = (parsed.stats.times_run || 0) + 1;
+
+          // Refresh score metadata
+          parsed.scores = parsed.scores || {};
+          parsed.scores.faf_score = newScore;
+          parsed.scores.ai_confidence = newScore >= 85 ? 'high' : newScore >= 70 ? 'medium' : 'low';
 
           await fs.writeFile(fafPath, yamlUtils.stringify(parsed), 'utf-8');
         }

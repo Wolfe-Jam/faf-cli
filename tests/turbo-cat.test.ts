@@ -447,6 +447,122 @@ describe('📁 Claude Code Detection via TURBO-CAT', () => {
   });
 });
 
+describe('🐍 Python Project Detection (Slot Audit Fixes)', () => {
+  let turboCat: TurboCat;
+  let testDir: string;
+
+  beforeEach(async () => {
+    turboCat = new TurboCat();
+    testDir = path.join(os.tmpdir(), 'turbo-cat-python-' + Date.now());
+    await fs.mkdir(testDir, { recursive: true });
+  });
+
+  afterEach(async () => {
+    await fs.rm(testDir, { recursive: true, force: true });
+  });
+
+  it('should NOT hardcode poetry for pyproject.toml in knowledge base', async () => {
+    const { KNOWLEDGE_BASE } = await import('../src/utils/turbo-cat-knowledge');
+    const pyprojectSlots = KNOWLEDGE_BASE['pyproject.toml'].slots;
+
+    // Must NOT contain wrong defaults
+    expect(pyprojectSlots).not.toHaveProperty('packageManager');
+    expect(pyprojectSlots).not.toHaveProperty('package_manager');
+    expect(pyprojectSlots).not.toHaveProperty('buildTool');
+    expect(pyprojectSlots).not.toHaveProperty('build');
+    expect(pyprojectSlots).not.toHaveProperty('database');
+    expect(pyprojectSlots).not.toHaveProperty('apiType');
+    expect(pyprojectSlots).not.toHaveProperty('api_type');
+    expect(pyprojectSlots).not.toHaveProperty('connection');
+
+    // Must contain safe defaults
+    expect(pyprojectSlots.mainLanguage).toBe('Python');
+    expect(pyprojectSlots.runtime).toBe('Python');
+    expect(pyprojectSlots.backend).toBe('Python');
+  });
+
+  it('should NOT have duplicate snake_case keys in knowledge base', async () => {
+    const { KNOWLEDGE_BASE } = await import('../src/utils/turbo-cat-knowledge');
+    const pyprojectSlots = KNOWLEDGE_BASE['pyproject.toml'].slots;
+    const keys = Object.keys(pyprojectSlots);
+
+    // No snake_case duplicates of camelCase keys
+    expect(keys).not.toContain('main_language');
+    expect(keys).not.toContain('package_manager');
+    expect(keys).not.toContain('api_type');
+  });
+
+  it('should give pyproject.toml higher priority than package.json', async () => {
+    const { KNOWLEDGE_BASE } = await import('../src/utils/turbo-cat-knowledge');
+    const pyprojectPriority = KNOWLEDGE_BASE['pyproject.toml'].priority;
+    const packageJsonPriority = KNOWLEDGE_BASE['package.json'].priority;
+
+    expect(pyprojectPriority).toBeGreaterThan(packageJsonPriority);
+  });
+
+  it('should detect setuptools build system', async () => {
+    await fs.writeFile(
+      path.join(testDir, 'pyproject.toml'),
+      `[build-system]\nrequires = ["setuptools>=61.0"]\nbuild-backend = "setuptools.build_meta"\n\n[project]\nname = "my-tool"\ndependencies = []`
+    );
+
+    const analysis = await turboCat.discoverFormats(testDir);
+    expect(analysis.discoveredFormats.some(f => f.fileName === 'pyproject.toml')).toBe(true);
+    // mainLanguage should be Python
+    expect(analysis.slotFillRecommendations?.mainLanguage).toBe('Python');
+  });
+
+  it('should detect hatchling build system', async () => {
+    await fs.writeFile(
+      path.join(testDir, 'pyproject.toml'),
+      `[build-system]\nrequires = ["hatchling"]\nbuild-backend = "hatchling.build"\n\n[project]\nname = "hatch-project"\ndependencies = []`
+    );
+
+    const analysis = await turboCat.discoverFormats(testDir);
+    expect(analysis.discoveredFormats.some(f => f.fileName === 'pyproject.toml')).toBe(true);
+  });
+
+  it('should keep mainLanguage as Python when package.json also exists', async () => {
+    // Both pyproject.toml (priority 36) and package.json (priority 35) present
+    await fs.writeFile(
+      path.join(testDir, 'pyproject.toml'),
+      `[build-system]\nrequires = ["setuptools"]\n\n[project]\nname = "python-app"\ndependencies = ["fastmcp"]`
+    );
+    await fs.writeFile(
+      path.join(testDir, 'package.json'),
+      JSON.stringify({ name: 'helper-scripts', dependencies: { prettier: '^3.0.0' } })
+    );
+
+    const analysis = await turboCat.discoverFormats(testDir);
+
+    // Python manifest has higher priority — mainLanguage must be Python
+    expect(analysis.slotFillRecommendations?.mainLanguage).toBe('Python');
+  });
+
+  it('should NOT recommend File-based or None for Python projects', async () => {
+    await fs.writeFile(
+      path.join(testDir, 'pyproject.toml'),
+      `[build-system]\nrequires = ["setuptools"]\n\n[project]\nname = "clean-project"\ndependencies = []`
+    );
+
+    const analysis = await turboCat.discoverFormats(testDir);
+    const recs = analysis.slotFillRecommendations || {};
+
+    // No garbage defaults
+    expect(recs.database).not.toBe('File-based');
+    expect(recs.apiType).not.toBe('None');
+    expect(recs.api_type).not.toBe('None');
+    expect(recs.connection).not.toBe('File I/O');
+  });
+
+  it('should give Cargo.toml and go.mod higher priority than package.json', async () => {
+    const { KNOWLEDGE_BASE } = await import('../src/utils/turbo-cat-knowledge');
+
+    expect(KNOWLEDGE_BASE['Cargo.toml'].priority).toBeGreaterThan(KNOWLEDGE_BASE['package.json'].priority);
+    expect(KNOWLEDGE_BASE['go.mod'].priority).toBeGreaterThan(KNOWLEDGE_BASE['package.json'].priority);
+  });
+});
+
 describe('🏆 FINAL NOODLE CALCULATION', () => {
   it('should calculate total noodles earned', () => {
     const tests = {

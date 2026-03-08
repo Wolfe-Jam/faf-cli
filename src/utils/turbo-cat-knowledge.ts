@@ -135,20 +135,11 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   'pyproject.toml': {
     frameworks: ['Python'],
     slots: {
-      packageManager: 'poetry',
-      package_manager: 'poetry',
       mainLanguage: 'Python',
-      main_language: 'Python',
-      buildTool: 'poetry',
-      build: 'poetry',
       runtime: 'Python',
-      backend: 'Python',
-      database: 'File-based',
-      apiType: 'None',
-      api_type: 'None',
-      connection: 'File I/O'
+      backend: 'Python'
     },
-    priority: 35,
+    priority: 36,
     intelligence: 'ultra-high'
   },
   
@@ -174,23 +165,23 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   
   'Cargo.toml': {
     frameworks: ['Rust'],
-    slots: { 
+    slots: {
       packageManager: 'cargo',
       mainLanguage: 'Rust',
       buildTool: 'cargo'
     },
-    priority: 35,
+    priority: 36,
     intelligence: 'ultra-high'
   },
-  
+
   'go.mod': {
     frameworks: ['Go'],
-    slots: { 
+    slots: {
       packageManager: 'go modules',
       mainLanguage: 'Go',
       buildTool: 'go build'
     },
-    priority: 35,
+    priority: 36,
     intelligence: 'ultra-high'
   },
   

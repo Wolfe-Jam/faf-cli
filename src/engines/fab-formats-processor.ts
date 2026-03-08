@@ -785,10 +785,73 @@ export class FabFormatsProcessor {
       metadata.poetry = true;
     }
 
-    // Check for build system
+    // Check for build system and detect actual package manager/build tool
     if (content.includes('[build-system]')) {
       intelligenceBonus += 15;
       metadata.modernBuild = true;
+
+      // Detect actual build backend from [build-system] requires
+      const requiresMatch = content.match(/\[build-system\][^[]*requires\s*=\s*\[([^\]]*)\]/s);
+      if (requiresMatch) {
+        const requires = requiresMatch[1].toLowerCase();
+        if (requires.includes('setuptools')) {
+          if (!this.context.packageManager) this.context.packageManager = 'pip';
+          if (!this.context.buildTool) this.context.buildTool = 'setuptools';
+        } else if (requires.includes('hatchling') || requires.includes('hatch')) {
+          if (!this.context.packageManager) this.context.packageManager = 'hatch';
+          if (!this.context.buildTool) this.context.buildTool = 'hatchling';
+        } else if (requires.includes('flit')) {
+          if (!this.context.packageManager) this.context.packageManager = 'flit';
+          if (!this.context.buildTool) this.context.buildTool = 'flit';
+        } else if (requires.includes('pdm')) {
+          if (!this.context.packageManager) this.context.packageManager = 'pdm';
+          if (!this.context.buildTool) this.context.buildTool = 'pdm';
+        } else if (requires.includes('poetry')) {
+          if (!this.context.packageManager) this.context.packageManager = 'Poetry';
+          if (!this.context.buildTool) this.context.buildTool = 'Poetry';
+        }
+      }
+    }
+
+    // Parse dependencies to detect database, API type, framework
+    const allDeps = this.extractPyProjectDeps(content);
+    if (allDeps.length > 0) {
+      // Database detection
+      if (!this.context.database) {
+        if (allDeps.some(d => d.includes('bigquery') || d.includes('google-cloud-bigquery'))) {
+          this.context.database = 'BigQuery';
+          if (!this.context.connection) this.context.connection = 'gRPC';
+        } else if (allDeps.some(d => d.includes('psycopg') || d.includes('asyncpg') || d.includes('sqlalchemy'))) {
+          this.context.database = 'PostgreSQL';
+          if (!this.context.connection) this.context.connection = 'TCP';
+        } else if (allDeps.some(d => d.includes('pymongo') || d.includes('motor'))) {
+          this.context.database = 'MongoDB';
+          if (!this.context.connection) this.context.connection = 'TCP';
+        } else if (allDeps.some(d => d === 'redis' || d.includes('redis'))) {
+          this.context.database = 'Redis';
+          if (!this.context.connection) this.context.connection = 'TCP';
+        }
+      }
+
+      // API type / framework detection
+      if (!this.context.apiType) {
+        if (allDeps.some(d => d.includes('fastmcp') || d.includes('mcp'))) {
+          this.context.apiType = 'MCP';
+          if (!this.context.connection) this.context.connection = 'stdio';
+          if (!this.context.framework) this.context.framework = 'FastMCP';
+        } else if (allDeps.some(d => d.includes('fastapi'))) {
+          this.context.apiType = 'REST';
+          if (!this.context.framework) this.context.framework = 'FastAPI';
+        } else if (allDeps.some(d => d.includes('flask'))) {
+          this.context.apiType = 'REST';
+          if (!this.context.framework) this.context.framework = 'Flask';
+        } else if (allDeps.some(d => d.includes('django'))) {
+          this.context.apiType = 'REST';
+          if (!this.context.framework) this.context.framework = 'Django';
+        } else if (allDeps.some(d => d.includes('graphql') || d.includes('strawberry') || d.includes('ariadne'))) {
+          this.context.apiType = 'GraphQL';
+        }
+      }
     }
 
     // Extract project name
@@ -813,6 +876,36 @@ export class FabFormatsProcessor {
       metadata,
       category: 'package-manager-python-modern'
     };
+  }
+
+  /**
+   * Extract dependency names from pyproject.toml content
+   */
+  private extractPyProjectDeps(content: string): string[] {
+    const deps: string[] = [];
+
+    // [project] dependencies = ["foo", "bar>=1.0"]
+    const projDepsMatch = content.match(/\[project\][^[]*dependencies\s*=\s*\[([\s\S]*?)\]/);
+    if (projDepsMatch) {
+      const matches = projDepsMatch[1].match(/"([^"]+)"/g);
+      if (matches) {
+        matches.forEach(m => deps.push(m.replace(/"/g, '').split(/[>=<!\s;]/)[0].toLowerCase()));
+      }
+    }
+
+    // [tool.poetry.dependencies]
+    const poetryDepsMatch = content.match(/\[tool\.poetry\.dependencies\]([\s\S]*?)(?:\[|$)/);
+    if (poetryDepsMatch) {
+      const lines = poetryDepsMatch[1].split('\n');
+      lines.forEach(line => {
+        const pkgMatch = line.match(/^(\S+)\s*=/);
+        if (pkgMatch && pkgMatch[1] !== 'python') {
+          deps.push(pkgMatch[1].toLowerCase());
+        }
+      });
+    }
+
+    return deps;
   }
 
   /**

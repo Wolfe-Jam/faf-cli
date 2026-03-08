@@ -322,11 +322,20 @@ export function generateFafContent(projectData: {
         quality_bar: 'zero_errors',
         testing: 'required'
       },
-      warnings: [
-        'Never modify dial components without approval',
-        'All TypeScript must pass strict mode',
-        'Test coverage required for new features'
-      ]
+      warnings: (() => {
+        const lang = (projectData.mainLanguage || '').toLowerCase();
+        const w: string[] = [];
+        if (lang.includes('typescript') || lang.includes('javascript')) {
+          w.push('All TypeScript must pass strict mode');
+        } else if (lang.includes('python')) {
+          w.push('Follow PEP 8 style guidelines');
+          w.push('Use type hints for public APIs');
+        } else if (lang.includes('rust')) {
+          w.push('All code must pass clippy without warnings');
+        }
+        w.push('Test coverage required for new features');
+        return w;
+      })()
     },
     
     // 🏗️ Technical Stack (Full Details)
@@ -363,7 +372,14 @@ export function generateFafContent(projectData: {
       version: projectData.version || '1.0.0',
       focus: 'production_deployment',
       status: 'green_flag',
-      next_milestone: 'npm_publication',
+      next_milestone: (() => {
+        const lang = (projectData.mainLanguage || '').toLowerCase();
+        if (lang.includes('python')) return 'pypi_publication';
+        if (lang.includes('rust')) return 'crates_publication';
+        if (lang.includes('go')) return 'go_module_publication';
+        if (lang.includes('java') || lang.includes('kotlin')) return 'maven_publication';
+        return 'npm_publication';
+      })(),
       blockers: []
     },
 

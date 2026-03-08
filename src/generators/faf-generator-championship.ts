@@ -490,7 +490,10 @@ export async function generateFafFromProject(
     qualityIndicators.push('Strong human context');
   }
   if ((tsContext as any)?.strictMode) {
-    qualityIndicators.push('TypeScript strict mode');
+    const lang = (contextSlotsFilled['main_language'] || '').toLowerCase();
+    if (!lang || lang === 'typescript' || lang === 'javascript') {
+      qualityIndicators.push('TypeScript strict mode');
+    }
   }
 
   // Extract the stack for display
