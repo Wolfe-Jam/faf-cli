@@ -17,6 +17,8 @@ project/
 >
 > You have a `package.json`. Add a `project.faf`. Done.
 
+Git-Native. `project.faf` versions with your code — every clone, every fork, every checkout gets full AI context. No setup, no drift, no re-explaining.
+
 At 100% AI Readiness, AI stops guessing and starts knowing. Live bi-sync between `project.faf` ↔ `CLAUDE.md` means zero context-drift — your project DNA stays aligned with AI, forever.
 
 [![TAF](./badge.svg)](https://github.com/Wolfe-Jam/faf-taf-git)
@@ -43,9 +45,11 @@ At 100% AI Readiness, AI stops guessing and starts knowing. Live bi-sync between
 
 ---
 
-## 🧠 v5.0.1 — The RAM Edition
+## 🧠 v5.0.2 — The RAM Edition
 
 **TL;DR:** `.faf` is ROM — persistent, portable, yours forever. tri-sync adds RAM: it auto-syncs with Claude's MEMORY.md. For builders, serious coders, and app-makers.
+
+**v5.0.2** — Universal Stack Detection: Python, Rust, and Go projects now get language-aware detection with real dependency parsing. Powers [gemini-faf-mcp](https://pypi.org/project/gemini-faf-mcp/)'s `faf_auto` tool.
 
 The full story: **[faf.one/blog/ram-edition](https://faf.one/blog/ram-edition)**
 
