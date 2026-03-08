@@ -30,7 +30,7 @@ Git-Native. `project.faf` versions with your code — every clone, every fork, e
 | 5 | `faf bi-sync` | `.faf` ↔ CLAUDE.md — free forever |
 | 6 | `faf tri-sync` | ROM ↔ CLAUDE.md ↔ MEMORY.md — Pro |
 
-At 100% AI Readiness, AI stops guessing and starts knowing. Live bi-sync between `project.faf` ↔ `CLAUDE.md` means zero context-drift — your project DNA stays aligned with AI, forever.
+**Define. Build. Lock. Relax.** Answer the 6Ws. Run the Top 6. AI context at 100% — forever.
 
 [![TAF](./badge.svg)](https://github.com/Wolfe-Jam/faf-taf-git)
 [![CI](https://github.com/Wolfe-Jam/faf-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/Wolfe-Jam/faf-cli/actions/workflows/ci.yml)
