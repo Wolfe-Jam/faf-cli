@@ -6,6 +6,16 @@
   </div>
 </div>
 
+[![TAF](./badge.svg)](https://github.com/Wolfe-Jam/faf-taf-git)
+[![CI](https://github.com/Wolfe-Jam/faf-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/Wolfe-Jam/faf-cli/actions/workflows/ci.yml)
+[![NPM Downloads](https://img.shields.io/npm/dt/faf-cli?label=total%20downloads&color=00CCFF)](https://www.npmjs.com/package/faf-cli)
+[![npm version](https://img.shields.io/npm/v/faf-cli?color=00CCFF)](https://www.npmjs.com/package/faf-cli)
+[![Homebrew](https://img.shields.io/badge/Homebrew-faf--cli-orange)](https://github.com/Wolfe-Jam/homebrew-faf)
+[![Website](https://img.shields.io/badge/Website-faf.one-orange)](https://faf.one)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Claude Code](https://img.shields.io/badge/Claude_Code-enabled-00D4D4)](https://github.com/anthropics/claude-code-action)
+[![project.faf](https://img.shields.io/badge/project.faf-inside-00D4D4)](https://github.com/Wolfe-Jam/faf)
+
 ```
 project/
 ├── package.json     ← npm reads this
@@ -31,16 +41,6 @@ project/
 | 6 | `faf tri-sync` | ROM ↔ CLAUDE.md ↔ MEMORY.md — Pro |
 
 **Define. Build. Lock. Relax.** Answer the 6Ws. Run the Top 6. AI context at 100% — forever.
-
-[![TAF](./badge.svg)](https://github.com/Wolfe-Jam/faf-taf-git)
-[![CI](https://github.com/Wolfe-Jam/faf-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/Wolfe-Jam/faf-cli/actions/workflows/ci.yml)
-[![NPM Downloads](https://img.shields.io/npm/dt/faf-cli?label=total%20downloads&color=00CCFF)](https://www.npmjs.com/package/faf-cli)
-[![npm version](https://img.shields.io/npm/v/faf-cli?color=00CCFF)](https://www.npmjs.com/package/faf-cli)
-[![Homebrew](https://img.shields.io/badge/Homebrew-faf--cli-orange)](https://github.com/Wolfe-Jam/homebrew-faf)
-[![Website](https://img.shields.io/badge/Website-faf.one-orange)](https://faf.one)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Claude Code](https://img.shields.io/badge/Claude_Code-enabled-00D4D4)](https://github.com/anthropics/claude-code-action)
-[![project.faf](https://img.shields.io/badge/project.faf-inside-00D4D4)](https://github.com/Wolfe-Jam/faf)
 
 <p align="center">
 <a href="#-how-does-it-work">Quick Start</a> · <a href="https://faf.one">Website</a> · <a href="https://faf.one/daaft">DAAFT Analysis</a> · <a href="https://www.npmjs.com/package/faf-cli">npm</a> · <a href="#-core-commands">Commands</a> · <a href="#%EF%B8%8F-tier-system-from-blind-to-optimized">Tiers</a> · <a href="https://www.npmjs.com/package/claude-faf-mcp">MCP Server</a> · <a href="./CHANGELOG.md">Changelog</a>
