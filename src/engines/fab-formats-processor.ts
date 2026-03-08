@@ -795,20 +795,20 @@ export class FabFormatsProcessor {
       if (requiresMatch) {
         const requires = requiresMatch[1].toLowerCase();
         if (requires.includes('setuptools')) {
-          if (!this.context.packageManager) this.context.packageManager = 'pip';
-          if (!this.context.buildTool) this.context.buildTool = 'setuptools';
+          if (!this.context.packageManager) { this.context.packageManager = 'pip'; }
+          if (!this.context.buildTool) { this.context.buildTool = 'setuptools'; }
         } else if (requires.includes('hatchling') || requires.includes('hatch')) {
-          if (!this.context.packageManager) this.context.packageManager = 'hatch';
-          if (!this.context.buildTool) this.context.buildTool = 'hatchling';
+          if (!this.context.packageManager) { this.context.packageManager = 'hatch'; }
+          if (!this.context.buildTool) { this.context.buildTool = 'hatchling'; }
         } else if (requires.includes('flit')) {
-          if (!this.context.packageManager) this.context.packageManager = 'flit';
-          if (!this.context.buildTool) this.context.buildTool = 'flit';
+          if (!this.context.packageManager) { this.context.packageManager = 'flit'; }
+          if (!this.context.buildTool) { this.context.buildTool = 'flit'; }
         } else if (requires.includes('pdm')) {
-          if (!this.context.packageManager) this.context.packageManager = 'pdm';
-          if (!this.context.buildTool) this.context.buildTool = 'pdm';
+          if (!this.context.packageManager) { this.context.packageManager = 'pdm'; }
+          if (!this.context.buildTool) { this.context.buildTool = 'pdm'; }
         } else if (requires.includes('poetry')) {
-          if (!this.context.packageManager) this.context.packageManager = 'Poetry';
-          if (!this.context.buildTool) this.context.buildTool = 'Poetry';
+          if (!this.context.packageManager) { this.context.packageManager = 'Poetry'; }
+          if (!this.context.buildTool) { this.context.buildTool = 'Poetry'; }
         }
       }
     }
@@ -820,16 +820,16 @@ export class FabFormatsProcessor {
       if (!this.context.database) {
         if (allDeps.some(d => d.includes('bigquery') || d.includes('google-cloud-bigquery'))) {
           this.context.database = 'BigQuery';
-          if (!this.context.connection) this.context.connection = 'gRPC';
+          if (!this.context.connection) { this.context.connection = 'gRPC'; }
         } else if (allDeps.some(d => d.includes('psycopg') || d.includes('asyncpg') || d.includes('sqlalchemy'))) {
           this.context.database = 'PostgreSQL';
-          if (!this.context.connection) this.context.connection = 'TCP';
+          if (!this.context.connection) { this.context.connection = 'TCP'; }
         } else if (allDeps.some(d => d.includes('pymongo') || d.includes('motor'))) {
           this.context.database = 'MongoDB';
-          if (!this.context.connection) this.context.connection = 'TCP';
+          if (!this.context.connection) { this.context.connection = 'TCP'; }
         } else if (allDeps.some(d => d === 'redis' || d.includes('redis'))) {
           this.context.database = 'Redis';
-          if (!this.context.connection) this.context.connection = 'TCP';
+          if (!this.context.connection) { this.context.connection = 'TCP'; }
         }
       }
 
@@ -837,17 +837,17 @@ export class FabFormatsProcessor {
       if (!this.context.apiType) {
         if (allDeps.some(d => d.includes('fastmcp') || d.includes('mcp'))) {
           this.context.apiType = 'MCP';
-          if (!this.context.connection) this.context.connection = 'stdio';
-          if (!this.context.framework) this.context.framework = 'FastMCP';
+          if (!this.context.connection) { this.context.connection = 'stdio'; }
+          if (!this.context.framework) { this.context.framework = 'FastMCP'; }
         } else if (allDeps.some(d => d.includes('fastapi'))) {
           this.context.apiType = 'REST';
-          if (!this.context.framework) this.context.framework = 'FastAPI';
+          if (!this.context.framework) { this.context.framework = 'FastAPI'; }
         } else if (allDeps.some(d => d.includes('flask'))) {
           this.context.apiType = 'REST';
-          if (!this.context.framework) this.context.framework = 'Flask';
+          if (!this.context.framework) { this.context.framework = 'Flask'; }
         } else if (allDeps.some(d => d.includes('django'))) {
           this.context.apiType = 'REST';
-          if (!this.context.framework) this.context.framework = 'Django';
+          if (!this.context.framework) { this.context.framework = 'Django'; }
         } else if (allDeps.some(d => d.includes('graphql') || d.includes('strawberry') || d.includes('ariadne'))) {
           this.context.apiType = 'GraphQL';
         }
