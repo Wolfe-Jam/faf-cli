@@ -374,10 +374,10 @@ export function generateFafContent(projectData: {
       status: 'green_flag',
       next_milestone: (() => {
         const lang = (projectData.mainLanguage || '').toLowerCase();
-        if (lang.includes('python')) return 'pypi_publication';
-        if (lang.includes('rust')) return 'crates_publication';
-        if (lang.includes('go')) return 'go_module_publication';
-        if (lang.includes('java') || lang.includes('kotlin')) return 'maven_publication';
+        if (lang.includes('python')) { return 'pypi_publication'; }
+        if (lang.includes('rust')) { return 'crates_publication'; }
+        if (lang.includes('go')) { return 'go_module_publication'; }
+        if (lang.includes('java') || lang.includes('kotlin')) { return 'maven_publication'; }
         return 'npm_publication';
       })(),
       blockers: []
