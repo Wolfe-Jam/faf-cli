@@ -5,6 +5,17 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.3] - 2026-03-08
+
+### Changed
+
+- README optimized: badges at top, Top 6 Commands table, "Define. Build. Lock. Relax." tagline, Git-Native callout, screenshot paired with tree diagram, RAM Edition moved up
+- Lint added to `prepublishOnly` gate — no more publishing dirty builds
+
+### Fixed
+
+- ESLint curly brace errors in yaml-generator.ts and fab-formats-processor.ts
+
 ## [5.0.2] - 2026-03-08
 
 ### Fixed

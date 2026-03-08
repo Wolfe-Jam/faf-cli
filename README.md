@@ -54,11 +54,11 @@ project/
 
 ---
 
-## 🧠 v5.0.2 — The RAM Edition
+## 🧠 v5.0.3 — The RAM Edition
 
 **TL;DR:** `.faf` is ROM — persistent, portable, yours forever. tri-sync adds RAM: it auto-syncs with Claude's MEMORY.md. For builders, serious coders, and app-makers.
 
-**v5.0.2** — Universal Stack Detection: Python, Rust, and Go projects now get language-aware detection with real dependency parsing. Powers [gemini-faf-mcp](https://pypi.org/project/gemini-faf-mcp/)'s `faf_auto` tool.
+**v5.0.3** — Universal Stack Detection: Python, Rust, and Go projects now get language-aware detection with real dependency parsing. Powers [gemini-faf-mcp](https://pypi.org/project/gemini-faf-mcp/)'s `faf_auto` tool.
 
 The full story: **[faf.one/blog/ram-edition](https://faf.one/blog/ram-edition)**
 
