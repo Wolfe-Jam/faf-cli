@@ -48,14 +48,6 @@ project/
 
 ---
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/Wolfe-Jam/faf-cli/main/assets/project-faf-screenshot.png" alt="project.faf in file listing" width="600" />
-</p>
-
-<p align="center"><em>Just another file helping you code.</em></p>
-
----
-
 ## 🧠 v5.0.2 — The RAM Edition
 
 **TL;DR:** `.faf` is ROM — persistent, portable, yours forever. tri-sync adds RAM: it auto-syncs with Claude's MEMORY.md. For builders, serious coders, and app-makers.
@@ -63,6 +55,12 @@ project/
 **v5.0.2** — Universal Stack Detection: Python, Rust, and Go projects now get language-aware detection with real dependency parsing. Powers [gemini-faf-mcp](https://pypi.org/project/gemini-faf-mcp/)'s `faf_auto` tool.
 
 The full story: **[faf.one/blog/ram-edition](https://faf.one/blog/ram-edition)**
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Wolfe-Jam/faf-cli/main/assets/project-faf-screenshot.png" alt="project.faf in file listing" width="600" />
+</p>
+
+<p align="center"><em>Just another file helping you code.</em></p>
 
 ### The 3Ws — Everyone Can Have an App
 
