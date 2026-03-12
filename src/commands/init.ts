@@ -146,14 +146,15 @@ export async function initFafFile(
     }
 
     // Detect project structure
+    const { detectProjectType } = await import("../utils/file-utils");
+    const projectType =
+      options.template === "auto"
+        ? await detectProjectType(projectRoot)
+        : options.template || (await detectProjectType(projectRoot));
+
     const { FrameworkDetector } = await import("../framework-detector");
     const detector = new FrameworkDetector(projectRoot);
     const detectionResult = await detector.detect();
-    
-    const projectType =
-      options.template === "auto"
-        ? detectionResult.framework
-        : options.template || detectionResult.framework;
 
     console.log(chalk.gray(`   Detected project type: ${projectType}`));
     if (detectionResult.projectName) {
