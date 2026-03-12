@@ -146,18 +146,27 @@ export async function initFafFile(
     }
 
     // Detect project structure
+    const { FrameworkDetector } = await import("../framework-detector");
+    const detector = new FrameworkDetector(projectRoot);
+    const detectionResult = await detector.detect();
+    
     const projectType =
       options.template === "auto"
-        ? await detectProjectType(projectRoot)
-        : options.template || (await detectProjectType(projectRoot));
+        ? detectionResult.framework
+        : options.template || detectionResult.framework;
 
     console.log(chalk.gray(`   Detected project type: ${projectType}`));
+    if (detectionResult.projectName) {
+      console.log(chalk.gray(`   Detected project name: ${detectionResult.projectName}`));
+    }
 
     // Generate .faf content
     let fafContent = await generateFafFromProject({
       projectType,
       outputPath,
       projectRoot: projectRoot,
+      projectName: detectionResult.projectName,
+      projectGoal: detectionResult.projectGoal
     });
 
     // --xai: Add Grok voice configuration for xAI Collections

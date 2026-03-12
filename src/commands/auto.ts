@@ -195,6 +195,39 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
     // Step 2: Sync dependencies and context
     console.log(chalk.yellow("\n🔄 Syncing context with latest changes..."));
     await syncFafFile(fafPath || undefined, { auto: true });
+
+    // Step 2.1: Smart Metadata Sync (Parity with Python Extension)
+    try {
+      const { FrameworkDetector } = await import("../framework-detector");
+      const detector = new FrameworkDetector(targetDir);
+      const detection = await detector.detect();
+
+      if (detection.projectName || detection.projectGoal || detection.projectVersion) {
+        const fafData = await fs.readFile(fafPath!, 'utf-8');
+        let updated = fafData;
+
+        // Update name if currently placeholder
+        if (detection.projectName && (updated.includes('name: my-project') || updated.includes('name: null'))) {
+          updated = updated.replace(/name:\s*(my-project|null)/, `name: ${detection.projectName}`);
+        }
+
+        // Update goal if currently placeholder
+        if (detection.projectGoal && (updated.includes('goal: Describe your project goal') || updated.includes('goal: null'))) {
+          updated = updated.replace(/goal:\s*(Describe your project goal|null)/, `goal: ${detection.projectGoal}`);
+        }
+
+        // Update version if currently placeholder
+        if (detection.projectVersion && (updated.includes('version: 0.1.0') || updated.includes('version: null'))) {
+          updated = updated.replace(/version:\s*(0.1.0|null)/, `version: ${detection.projectVersion}`);
+        }
+
+        if (updated !== fafData) {
+          await fs.writeFile(fafPath!, updated, 'utf-8');
+          console.log(chalk.green("   ☑️ Synced project metadata from manifest files"));
+        }
+      }
+    } catch {}
+
     console.log(chalk.green("✅ Context synchronized!"));
 
     // Step 2.5: TURBO-CAT Format Discovery (Championship Intelligence)

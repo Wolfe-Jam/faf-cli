@@ -29,6 +29,9 @@ export interface DetectionResult {
   monorepo?: string;
   detectedBy: 'unique' | 'directory' | 'combination' | 'package';
   detectionTime: number;
+  projectName?: string;
+  projectVersion?: string;
+  projectGoal?: string;
 }
 
 /**
@@ -678,7 +681,61 @@ export class FrameworkDetector {
     
     // Phase 4: Package analysis fallback
     const packageResult = await this.analyzePackages();
-    return this.createResult(packageResult, 'package');
+    const result = this.createResult(packageResult, 'package');
+
+    // Phase 5: Smart Metadata Extraction (New)
+    const metadata = await this.extractProjectMetadata();
+    if (metadata.projectName) result.projectName = metadata.projectName;
+    if (metadata.projectVersion) result.projectVersion = metadata.projectVersion;
+    if (metadata.projectGoal) result.projectGoal = metadata.projectGoal;
+
+    return result;
+  }
+
+  /**
+   * Extract project metadata (name, version, goal) from manifest files
+   */
+  private async extractProjectMetadata(): Promise<{ projectName?: string; projectVersion?: string; projectGoal?: string }> {
+    const fs = await import('fs/promises');
+    const path = await import('path');
+    const metadata: { projectName?: string; projectVersion?: string; projectGoal?: string } = {};
+
+    try {
+      // Check package.json
+      const pkgJsonPath = path.join(this.projectPath, 'package.json');
+      try {
+        const content = await fs.readFile(pkgJsonPath, 'utf-8');
+        const pkg = JSON.parse(content);
+        metadata.projectName = pkg.name;
+        metadata.projectVersion = pkg.version;
+        metadata.projectGoal = pkg.description;
+      } catch {}
+
+      // Check pyproject.toml
+      const pyProjPath = path.join(this.projectPath, 'pyproject.toml');
+      try {
+        const content = await fs.readFile(pyProjPath, 'utf-8');
+        // Simple regex fallback for TOML parsing
+        const nameMatch = content.match(/^name\s*=\s*"(.*)"/m);
+        const verMatch = content.match(/^version\s*=\s*"(.*)"/m);
+        const descMatch = content.match(/^description\s*=\s*"(.*)"/m);
+        if (nameMatch) metadata.projectName = nameMatch[1];
+        if (verMatch) metadata.projectVersion = verMatch[1];
+        if (descMatch) metadata.projectGoal = descMatch[1];
+      } catch {}
+
+      // Check Cargo.toml
+      const cargoPath = path.join(this.projectPath, 'Cargo.toml');
+      try {
+        const content = await fs.readFile(cargoPath, 'utf-8');
+        const nameMatch = content.match(/^name\s*=\s*"(.*)"/m);
+        const verMatch = content.match(/^version\s*=\s*"(.*)"/m);
+        if (nameMatch) metadata.projectName = nameMatch[1];
+        if (verMatch) metadata.projectVersion = verMatch[1];
+      } catch {}
+    } catch {}
+
+    return metadata;
   }
   
   /**
