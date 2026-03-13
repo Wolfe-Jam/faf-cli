@@ -54,11 +54,11 @@ project/
 
 ---
 
-## 🧠 v5.0.3 — The RAM Edition
+## 🧠 v5.0.5 — The RAM Edition
 
 **TL;DR:** `.faf` is ROM — persistent, portable, yours forever. tri-sync adds RAM: it auto-syncs with Claude's MEMORY.md. For builders, serious coders, and app-makers.
 
-**v5.0.3** — Universal Stack Detection: Python, Rust, and Go projects now get language-aware detection with real dependency parsing. Powers [gemini-faf-mcp](https://pypi.org/project/gemini-faf-mcp/)'s `faf_auto` tool.
+**v5.0.5** — Smart Metadata Extraction: `faf auto` now pulls project name, goal, and version from your manifest files (package.json, Cargo.toml, pyproject.toml) automatically. Closer to 100% in one command.
 
 The full story: **[faf.one/blog/ram-edition](https://faf.one/blog/ram-edition)**
 
@@ -244,7 +244,7 @@ At 100% AI Readiness:
 
 ### Ecosystem
 - **[MCPaaS](https://mcpaas.live)** — MCP as a Service (The Endpoint for Context)
-- **[claude-faf-mcp](https://npmjs.com/package/claude-faf-mcp)** — MCP server for Claude (52 tools)
+- **[claude-faf-mcp](https://npmjs.com/package/claude-faf-mcp)** — MCP server for Claude (33 tools)
 - **[grok-faf-mcp](https://npmjs.com/package/grok-faf-mcp)** — MCP server for Grok / xAI
 - **[gemini-faf-mcp](https://pypi.org/project/gemini-faf-mcp/)** — MCP server for Gemini / Google
 - **[faf-wasm](https://www.npmjs.com/package/faf-wasm)** — WASM SDK (<5ms scoring)
@@ -347,7 +347,7 @@ faf git <repo-url>        # 1-Click Context (90%+)
 faf go                    # Interactive to 100%
 faf auto                  # Full automation
 faf bi-sync               # Keep synced
-# + 56 more commands
+# + 57 more commands
 ```
 
 ### The Killer Combo
@@ -453,7 +453,7 @@ Score: (15 + 6) / 21 = 100%
 | `faf gemini` | Gemini CLI / Antigravity interop |
 | `faf demo sync` | Live bi-sync demonstration |
 
-Run `faf --help` for all 63 commands.
+Run `faf --help` for all 64 commands.
 
 ---
 
