@@ -55,8 +55,9 @@ faf auto
 It reads your `package.json`, `Cargo.toml`, or `pyproject.toml` — fills in the blanks — and scores the result. No questions, no prompts, no manual entry.
 
 ```bash
-bunx faf-cli auto   # Bun (recommended — same toolchain as Claude Code)
-npx faf-cli auto    # npm (no install required)
+bunx faf-cli auto                  # Bun (same toolchain as Claude Code)
+npx faf-cli auto                   # npm (no install required)
+brew install faf-cli && faf auto   # Homebrew
 ```
 
 **91% token reclaim out the gate.** Relentless pursuit to 100%.
