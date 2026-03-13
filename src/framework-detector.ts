@@ -685,9 +685,9 @@ export class FrameworkDetector {
 
     // Phase 5: Smart Metadata Extraction (New)
     const metadata = await this.extractProjectMetadata();
-    if (metadata.projectName) result.projectName = metadata.projectName;
-    if (metadata.projectVersion) result.projectVersion = metadata.projectVersion;
-    if (metadata.projectGoal) result.projectGoal = metadata.projectGoal;
+    if (metadata.projectName) { result.projectName = metadata.projectName; }
+    if (metadata.projectVersion) { result.projectVersion = metadata.projectVersion; }
+    if (metadata.projectGoal) { result.projectGoal = metadata.projectGoal; }
 
     return result;
   }
@@ -708,9 +708,9 @@ export class FrameworkDetector {
       try {
         const content = await fs.readFile(pkgJsonPath, 'utf-8');
         const pkg = JSON.parse(content);
-        if (pkg.name) metadata.projectName = pkg.name;
-        if (pkg.version) metadata.projectVersion = pkg.version;
-        if (pkg.description) metadata.projectGoal = pkg.description;
+        if (pkg.name) { metadata.projectName = pkg.name; }
+        if (pkg.version) { metadata.projectVersion = pkg.version; }
+        if (pkg.description) { metadata.projectGoal = pkg.description; }
       } catch {}
 
       // Check pyproject.toml
@@ -721,9 +721,9 @@ export class FrameworkDetector {
         const nameMatch = content.match(/^name\s*=\s*['"](.*)['"]/m);
         const verMatch = content.match(/^version\s*=\s*['"](.*)['"]/m);
         const descMatch = content.match(/^description\s*=\s*['"](.*)['"]/m);
-        if (nameMatch) metadata.projectName = nameMatch[1];
-        if (verMatch) metadata.projectVersion = verMatch[1];
-        if (descMatch) metadata.projectGoal = descMatch[1];
+        if (nameMatch) { metadata.projectName = nameMatch[1]; }
+        if (verMatch) { metadata.projectVersion = verMatch[1]; }
+        if (descMatch) { metadata.projectGoal = descMatch[1]; }
       } catch {}
 
       // Check Cargo.toml
@@ -732,8 +732,8 @@ export class FrameworkDetector {
         const content = await fs.readFile(cargoPath, 'utf-8');
         const nameMatch = content.match(/^name\s*=\s*['"](.*)['"]/m);
         const verMatch = content.match(/^version\s*=\s*['"](.*)['"]/m);
-        if (nameMatch) metadata.projectName = nameMatch[1];
-        if (verMatch) metadata.projectVersion = verMatch[1];
+        if (nameMatch) { metadata.projectName = nameMatch[1]; }
+        if (verMatch) { metadata.projectVersion = verMatch[1]; }
       } catch {}
     } catch {}
 
