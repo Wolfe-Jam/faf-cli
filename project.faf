@@ -54,6 +54,11 @@ stack:
   api_type: CLI
   hosting: npm registry
   cicd: GitHub Actions
+  targetUser: developers
+  coreProblem: understanding project
+  missionPurpose: project documentation
+  packageManager: npm/yarn/pnpm
+  mainLanguage: JavaScript/TypeScript
 preferences:
   quality_bar: zero_errors
   commit_style: conventional_emoji
@@ -64,15 +69,16 @@ preferences:
   documentation: as_needed
 state:
   phase: development
-  version: 5.0.5
+  version: 5.0.6
   focus: production_deployment
   status: green_flag
   next_milestone: npm_publication
   blockers: null
 scores:
-  faf_score: 83
+  faf_score: 100
   slot_based_percentage: 86
   total_slots: 21
+  ai_confidence: high
 tags:
   auto_generated:
     - faf-cli
@@ -125,5 +131,17 @@ faf_dna:
   birth_date: 2026-02-18T19:56:53.125Z
   current_score: 86
 metadata:
-  last_claude_sync: 2026-03-02T03:42:51.027Z
+  last_claude_sync: 2026-03-13T13:59:05.699Z
   bi_sync: active
+stack_signature: typescript-nodejs-javascript
+detected_frameworks:
+  - Claude Code
+  - Jest
+  - Node.js
+  - JavaScript
+  - TypeScript
+turbo_cat_intelligence: 275
+stats:
+  best_auto_time: 0.2
+  last_auto_time: 0.2
+  times_run: 3
