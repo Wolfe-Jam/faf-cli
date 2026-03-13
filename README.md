@@ -55,7 +55,8 @@ faf auto
 It reads your `package.json`, `Cargo.toml`, or `pyproject.toml` — fills in the blanks — and scores the result. No questions, no prompts, no manual entry.
 
 ```bash
-npx faf-cli auto    # No install required
+bunx faf-cli auto   # Bun (recommended — same toolchain as Claude Code)
+npx faf-cli auto    # npm (no install required)
 faf auto            # Or globally installed
 ```
 
@@ -152,7 +153,7 @@ Every README should answer these questions. Here's ours:
 | **🎯 WHY** do you need it? | 100% context (AI-scored), persists forever, syncs automatically - saves $1000s/developer |
 | **🌍 WHERE** does it work? | Everywhere AI needs context (Claude Code, Gemini CLI, Cursor, etc.) |
 | **⏰ WHEN** should you use it? | New projects (day one), existing projects (now), exploring repos (instantly) |
-| **🚀 HOW** does it work? | `npx faf-cli git <url>` - No install, no clone, 2 seconds |
+| **🚀 HOW** does it work? | `bunx faf-cli git <url>` or `npx faf-cli git <url>` - No install, no clone, 2 seconds |
 
 **For AI:** Read the detailed sections below for full context.
 **For humans:** Use this pattern in YOUR README. Answer these 6 questions clearly.
@@ -302,7 +303,7 @@ faf auto                    # Auto-enhance to Gold Code
 ### Exploring Repos
 **Instantly.** Generate context for ANY GitHub repo WITHOUT cloning:
 ```bash
-npx faf-cli git https://github.com/facebook/react
+bunx faf-cli git https://github.com/facebook/react
 # 2 seconds → 95% 🥈 Silver score
 # No install. No clone. Just instant context.
 ```
@@ -332,18 +333,20 @@ Add to package.json to see FAF status every dev session:
 
 ```bash
 # Generate AI context for ANY GitHub repo
-npx faf-cli git https://github.com/facebook/react
+bunx faf-cli git https://github.com/facebook/react
 # ⏱️ 2 seconds → 95% 🥈 Silver score
 
-npx faf-cli git https://github.com/sveltejs/svelte
+bunx faf-cli git https://github.com/sveltejs/svelte
 # ⏱️ 2 seconds → 95% 🥈 Silver score
 
-npx faf-cli git https://github.com/your-org/your-repo
+bunx faf-cli git https://github.com/your-org/your-repo
 # ⏱️ 2 seconds → 90%+ context, ready for AI
 ```
 
+> **Also works with npx:** Replace `bunx` with `npx` if you prefer npm.
+
 **What just happened?**
-- ✅ No install required (`npx` runs latest version)
+- ✅ No install required (`bunx`/`npx` runs latest version)
 - ✅ No cloning required (uses GitHub API)
 - ✅ 2 seconds → 95% AI-ready context
 - ✅ Works on ANY public GitHub repo
@@ -354,10 +357,10 @@ npx faf-cli git https://github.com/your-org/your-repo
 
 ```bash
 # Start with your codebase
-npx faf-cli init
+bunx faf-cli init           # or: npx faf-cli init
 
 # Or go interactive (completes the 6 Ws)
-npx faf-cli go
+bunx faf-cli go             # or: npx faf-cli go
 ```
 
 ### For Pros: Install Globally (Daily Use)
@@ -366,6 +369,7 @@ Once you're hooked, install globally for full power:
 
 ```bash
 # Install once
+bun install -g faf-cli    # Bun (recommended)
 npm install -g faf-cli    # or: brew install faf-cli
 
 # Then use short commands forever
@@ -379,8 +383,8 @@ faf bi-sync               # Keep synced
 ### The Killer Combo
 
 ```bash
-npx faf-cli git <repo-url>   # 90%+ context, no install, no clone
-npx faf-cli go               # Interactive polish to 100%
+bunx faf-cli git <repo-url>   # 90%+ context, no install, no clone
+bunx faf-cli go               # Interactive polish to 100%
 ```
 
 ### Comparison: Traditional vs 1-Click Context
@@ -396,7 +400,7 @@ faf init                                      # 5 seconds
 
 **1-Click Context:**
 ```bash
-npx faf-cli git https://github.com/facebook/react
+bunx faf-cli git https://github.com/facebook/react
 # Total: 2 seconds + ZERO local files
 ```
 
