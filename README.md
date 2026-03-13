@@ -46,7 +46,7 @@ One command runs the full pipeline:
 ```
 faf auto
 ├── 1. Init        → Creates project.faf (or enhances existing)
-├── 2. Detect      → TURBO-CAT discovers your stack (154 formats)
+├── 2. Detect      → TURBO-CAT discovers your stack (199 formats)
 ├── 3. Extract     → Pulls name, goal, version from manifests
 ├── 4. Sync        → Generates CLAUDE.md (bi-sync)
 └── 5. Score       → Reports AI-readiness with before/after delta
