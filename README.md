@@ -57,7 +57,6 @@ It reads your `package.json`, `Cargo.toml`, or `pyproject.toml` — fills in the
 ```bash
 bunx faf-cli auto   # Bun (recommended — same toolchain as Claude Code)
 npx faf-cli auto    # npm (no install required)
-faf auto            # Or globally installed
 ```
 
 **91% token reclaim out the gate.** Relentless pursuit to 100%.
