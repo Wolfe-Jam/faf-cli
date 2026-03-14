@@ -36,6 +36,8 @@
     "format": "prettier --write src/**/*.ts",
     "emoji:check": "bash .githooks/pre-commit-emoji-check.sh",
     "emoji:audit": "(grep -r '🎯\\|✅' src/ | grep -v 'FORBIDDEN' || echo '☑️ No forbidden emojis found!')",
+    "build:bun": "bun build --compile dist/cli.js --outfile faf-bun",
+    "build:bun:all": "bun build --compile --target=bun-darwin-arm64 dist/cli.js --outfile faf-darwin-arm64 && bun build --compile --target=bun-darwin-x64 dist/cli.js --outfile faf-darwin-x64 && bun build --compile --target=bun-linux-x64 dist/cli.js --outfile faf-linux-x64 && bun build --compile --target=bun-windows-x64 dist/cli.js --outfile faf-windows-x64.exe",
     "build:engine": "webpack --config webpack.mk2.config.js",
     "obfuscate:engine": "node obfuscate-engine.js",
     "build:protected": "npm run build:engine && npm run obfuscate:engine",

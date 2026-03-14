@@ -20,6 +20,12 @@ tests/**/*.d.ts.map
 !src/**/__mocks__/**
 !tests/**/__mocks__/**
 
+# Bun compiled binaries
+faf-bun
+faf-darwin-*
+faf-linux-*
+faf-windows-*
+
 # Package files
 *.tgz
 
