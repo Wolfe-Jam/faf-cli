@@ -101,6 +101,7 @@ test-*.faf
 !docs/*.md
 !SECURITY.md
 !SUPPORT.md
+!BINARY.md
 !.github/**/*.md
 !commands/**/*.md
 !skills/**/*.md
