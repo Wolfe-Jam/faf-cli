@@ -1054,13 +1054,13 @@ export class FafCompiler {
       const setSlotIgnored = (slotPath: string) => {
         const parts = slotPath.split('.');
         if (parts[0] === 'project') {
-          if (!normalizedAst.project) normalizedAst.project = {};
+          if (!normalizedAst.project) { normalizedAst.project = {}; }
           normalizedAst.project[parts[1]] = 'slotignored';
         } else if (parts[0] === 'stack') {
-          if (!normalizedAst.stack) normalizedAst.stack = {};
+          if (!normalizedAst.stack) { normalizedAst.stack = {}; }
           normalizedAst.stack[parts[1]] = 'slotignored';
         } else if (parts[0] === 'human') {
-          if (!normalizedAst.human_context) normalizedAst.human_context = {};
+          if (!normalizedAst.human_context) { normalizedAst.human_context = {}; }
           normalizedAst.human_context[parts[1]] = 'slotignored';
         }
       };
