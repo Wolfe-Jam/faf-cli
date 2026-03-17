@@ -97,6 +97,11 @@ const TYPE_DEFINITIONS: Record<string, {
     description: 'Model Context Protocol server',
     categories: ['project', 'backend', 'human']
   },
+  'mcpaas': {
+    description: 'Context-on-demand platform — SSR, payments, email, MCP protocol',
+    categories: ['project', 'backend', 'universal', 'human'],
+    aliases: ['context-on-demand']
+  },
   'data-science': {
     description: 'Data science/analysis project',
     categories: ['project', 'backend', 'human'],
@@ -1006,7 +1011,7 @@ export class FafCompiler {
   private generate(ast: any): Omit<CompilationResult, 'trace' | 'diagnostics' | 'ir' | 'checksum'> {
     const start = Date.now();
 
-    // Build IR first
+    // Build IR first (still needed for breakdown/trace)
     const ir = this.buildIR(ast);
     this.ir = {
       version: FafCompiler.VERSION,
@@ -1014,19 +1019,94 @@ export class FafCompiler {
       metadata: { compiled: new Date().toISOString() }
     };
 
-    // Calculate from IR
+    // --- Mk4 Kernel Scoring (WASM) ---
+    // The Bouncer: type detection → applicable slots → slotignored for the rest
+    // Then kernel.score_faf() gets the canonical Mk4 score
+    let mk4Score: number | null = null;
+    let mk4Filled: number | null = null;
+    let mk4Total: number | null = null;
+
+    try {
+      const kernel = require('faf-scoring-kernel');
+      const { stringify } = require('yaml');
+
+      // Detect project type and get applicable slots
+      const projectType = this.detectProjectTypeFromContext(ast);
+      const applicableSlots = getSlotsForType(projectType);
+
+      // All 21 slot paths
+      const allSlotPaths = [
+        ...ALL_SLOTS.project,
+        ...ALL_SLOTS.frontend,
+        ...ALL_SLOTS.backend,
+        ...ALL_SLOTS.universal,
+        ...ALL_SLOTS.human
+      ];
+
+      // Bouncer: inject slotignored for inapplicable slots AND user slot_ignore
+      const normalizedAst = JSON.parse(JSON.stringify(ast));
+      // Remove internal fields
+      delete normalizedAst._discovered;
+
+      // Also parse user's slot_ignore from the .faf file
+      const userIgnored = parseSlotIgnore(ast);
+
+      const setSlotIgnored = (slotPath: string) => {
+        const parts = slotPath.split('.');
+        if (parts[0] === 'project') {
+          if (!normalizedAst.project) normalizedAst.project = {};
+          normalizedAst.project[parts[1]] = 'slotignored';
+        } else if (parts[0] === 'stack') {
+          if (!normalizedAst.stack) normalizedAst.stack = {};
+          normalizedAst.stack[parts[1]] = 'slotignored';
+        } else if (parts[0] === 'human') {
+          if (!normalizedAst.human_context) normalizedAst.human_context = {};
+          normalizedAst.human_context[parts[1]] = 'slotignored';
+        }
+      };
+
+      for (const slotPath of allSlotPaths) {
+        if (!applicableSlots.includes(slotPath) || userIgnored.includes(slotPath)) {
+          setSlotIgnored(slotPath);
+        }
+      }
+
+      const normalizedYaml = stringify(normalizedAst);
+      const kernelResult = JSON.parse(kernel.score_faf(normalizedYaml));
+
+      mk4Score = kernelResult.score;
+      mk4Filled = kernelResult.populated;
+      mk4Total = kernelResult.active;
+
+      if (process.env.FAF_DEBUG) {
+        console.log(`[DEBUG] Mk4 kernel score: ${mk4Score}% (${mk4Filled}/${mk4Total})`);
+      }
+    } catch (err) {
+      // Kernel not available — fall back to Mk3.1 TS scoring
+      if (process.env.FAF_DEBUG) {
+        const message = err instanceof Error ? err.message : String(err);
+        console.log(`[DEBUG] Mk4 kernel unavailable, using Mk3.1: ${message}`);
+      }
+    }
+
+    // Use Mk4 score if available, otherwise fall back to Mk3.1
     const slots = this.calculateSlots(ir);
-    const score = this.calculateScore(slots);
+    const fallbackScore = this.calculateScore(slots);
+
+    const score = mk4Score !== null ? mk4Score : Math.round(fallbackScore);
+    const filled = mk4Filled !== null ? mk4Filled : slots.filled;
+    const total = mk4Total !== null ? mk4Total : slots.total;
 
     const result = {
-      score: Math.round(score),
-      filled: slots.filled,
-      total: slots.total,
+      score,
+      filled,
+      total,
       breakdown: slots.breakdown
     };
 
+    const engine = mk4Score !== null ? 'Mk4 (WASM)' : 'Mk3.1 (TS fallback)';
     this.recordPass('generate', start, ast, result, [
-      `Generated score: ${result.score}% (${result.filled}/${result.total} slots)`
+      `Generated score: ${result.score}% (${result.filled}/${result.total} slots) [${engine}]`
     ]);
 
     return result;
