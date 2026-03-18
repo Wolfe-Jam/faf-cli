@@ -13,8 +13,8 @@ on:
       - 'src/**'
   
   schedule:
-    # Run performance tests daily at 2 AM UTC
-    - cron: '0 2 * * *'
+    # Run performance tests weekly on Mondays at 2 AM UTC
+    - cron: '0 2 * * 1'
   
   # Allow manual performance testing
   workflow_dispatch:
