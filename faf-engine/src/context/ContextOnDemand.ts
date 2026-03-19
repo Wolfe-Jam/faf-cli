@@ -37,16 +37,16 @@ export class ContextOnDemand {
         generated: new Date().toISOString()
       },
       stack: {
-        frontend: frameworkResult?.framework || 'None',
-        css_framework: 'None',
-        ui_library: 'None', 
-        state_management: 'None',
+        framework: frameworkResult?.framework || 'None',
+        css: 'None',
+        ui_library: 'None',
+        state: 'None',
         backend: 'None',
         runtime: 'Node.js',
-        database: 'None',
+        db: 'None',
         build: 'None',
-        package_manager: 'npm',
-        api_type: 'REST',
+        pkg_manager: 'npm',
+        api: 'REST',
         hosting: 'None',
         cicd: 'None'
       } as any
