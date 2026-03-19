@@ -122,16 +122,16 @@ export async function generateFafInstance(
   // Score 70%+: Add stack
   if (score >= 70) {
     sections.push(`stack:`);
-    sections.push(`  frontend: React`);
-    sections.push(`  css_framework: Tailwind CSS`);
+    sections.push(`  framework: React`);
+    sections.push(`  css: Tailwind CSS`);
     sections.push(`  ui_library: Headless UI`);
-    sections.push(`  state_management: React Hooks`);
+    sections.push(`  state: React Hooks`);
     sections.push(`  backend: None`);
     sections.push(`  runtime: "Node.js >=18.0.0"`);
-    sections.push(`  database: None`);
+    sections.push(`  db: None`);
     sections.push(`  build: Vite`);
-    sections.push(`  package_manager: npm`);
-    sections.push(`  api_type: Component Library`);
+    sections.push(`  pkg_manager: npm`);
+    sections.push(`  api: Component Library`);
     sections.push(`  hosting: Vercel`);
     if (score >= 85) {
       sections.push(`  cicd: GitHub Actions`);

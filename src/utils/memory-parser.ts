@@ -179,15 +179,15 @@ function generateFafSection(fafData: any): string {
 
   // Tech Stack details
   const stack = fafData.stack || {};
-  const hasStack = stack.frontend || stack.backend || stack.build || stack.runtime;
+  const hasStack = (stack.framework || stack.frontend) || stack.backend || stack.build || stack.runtime;
   if (hasStack) {
     lines.push('## Tech Stack');
-    if (stack.frontend) { lines.push(`- Frontend: ${stack.frontend}`); }
+    if (stack.framework || stack.frontend) { lines.push(`- Frontend: ${stack.framework || stack.frontend}`); }
     if (stack.backend) { lines.push(`- Backend: ${stack.backend}`); }
     if (stack.build) { lines.push(`- Build: ${stack.build}`); }
     if (stack.runtime) { lines.push(`- Runtime: ${stack.runtime}`); }
-    if (stack.package_manager) { lines.push(`- Package Manager: ${stack.package_manager}`); }
-    if (stack.database && stack.database !== 'None') { lines.push(`- Database: ${stack.database}`); }
+    if (stack.pkg_manager || stack.package_manager) { lines.push(`- Package Manager: ${stack.pkg_manager || stack.package_manager}`); }
+    if ((stack.db || stack.database) && (stack.db || stack.database) !== 'None') { lines.push(`- Database: ${stack.db || stack.database}`); }
     lines.push('');
   }
 

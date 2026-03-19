@@ -19,17 +19,43 @@ import * as path from 'path';
 // slot_ignore in .faf file overrides type defaults for edge cases.
 
 /**
- * All 21 slots in the FAF system
+ * Mk4 Slot Alias Map — Single Source of Truth
+ *
+ * Maps old slot field names to new Mk4 canonical names.
+ * Used throughout the codebase to accept both old and new names on read,
+ * while always generating new names on write.
+ *
+ * Old .faf files (36k+ downloads) use old names — they must still score correctly.
+ */
+export const SLOT_ALIASES: Record<string, string> = {
+  // old → new (Mk4 canonical)
+  frontend: 'framework',
+  css_framework: 'css',
+  state_management: 'state',
+  api_type: 'api',
+  database: 'db',
+  package_manager: 'pkg_manager',
+};
+
+/**
+ * Reverse alias map: new → old (for reading old .faf files)
+ */
+export const SLOT_ALIASES_REVERSE: Record<string, string> = Object.fromEntries(
+  Object.entries(SLOT_ALIASES).map(([old, mk4]) => [mk4, old])
+);
+
+/**
+ * All 21 slots in the FAF system (Mk4 canonical names)
  */
 const ALL_SLOTS = {
   // Project slots (3)
   project: ['project.name', 'project.goal', 'project.main_language'],
 
   // Frontend slots (4)
-  frontend: ['stack.frontend', 'stack.css_framework', 'stack.ui_library', 'stack.state_management'],
+  frontend: ['stack.framework', 'stack.css', 'stack.ui_library', 'stack.state'],
 
   // Backend slots (5)
-  backend: ['stack.backend', 'stack.api_type', 'stack.runtime', 'stack.database', 'stack.connection'],
+  backend: ['stack.backend', 'stack.api', 'stack.runtime', 'stack.db', 'stack.connection'],
 
   // Universal slots (3)
   universal: ['stack.hosting', 'stack.build', 'stack.cicd'],
@@ -643,16 +669,26 @@ function parseSlotIgnore(ast: any): string[] {
 }
 
 /**
- * Normalize slot names to full path
+ * Normalize slot names to full path (Mk4 canonical)
  * Examples: "hosting" -> "stack.hosting", "who" -> "human.who"
+ * Also resolves old aliases: "frontend" -> "stack.framework", "database" -> "stack.db"
  */
 function normalizeSlotName(slot: string): string {
-  // Already has prefix
-  if (slot.includes('.')) {return slot;}
+  // Already has prefix — check for old aliased paths like "stack.frontend"
+  if (slot.includes('.')) {
+    const [prefix, field] = slot.split('.');
+    if (prefix === 'stack' && SLOT_ALIASES[field]) {
+      return `stack.${SLOT_ALIASES[field]}`;
+    }
+    return slot;
+  }
+
+  // Resolve old name to new name first
+  const canonicalField = SLOT_ALIASES[slot] || slot;
 
   // Check each category for the slot
   for (const [_category, slots] of Object.entries(ALL_SLOTS)) {
-    const fullSlot = slots.find(s => s.endsWith(`.${slot}`));
+    const fullSlot = slots.find(s => s.endsWith(`.${canonicalField}`));
     if (fullSlot) {return fullSlot;}
   }
 
@@ -898,7 +934,7 @@ export class FafCompiler {
     }
 
     // Stack validation
-    const stackFields = ['frontend', 'backend', 'database', 'hosting'];
+    const stackFields = ['framework', 'frontend', 'backend', 'db', 'database', 'hosting'];
     for (const field of stackFields) {
       if (data.stack?.[field] && typeof data.stack[field] !== 'string') {
         this.addDiagnostic('error', `stack.${field} must be a string`, {
@@ -1058,7 +1094,9 @@ export class FafCompiler {
           normalizedAst.project[parts[1]] = 'slotignored';
         } else if (parts[0] === 'stack') {
           if (!normalizedAst.stack) { normalizedAst.stack = {}; }
-          normalizedAst.stack[parts[1]] = 'slotignored';
+          // Kernel expects old slot names — translate Mk4 back to old
+          const kernelField = SLOT_ALIASES_REVERSE[parts[1]] || parts[1];
+          normalizedAst.stack[kernelField] = 'slotignored';
         } else if (parts[0] === 'human') {
           if (!normalizedAst.human_context) { normalizedAst.human_context = {}; }
           normalizedAst.human_context[parts[1]] = 'slotignored';
@@ -1068,6 +1106,16 @@ export class FafCompiler {
       for (const slotPath of allSlotPaths) {
         if (!applicableSlots.includes(slotPath) || userIgnored.includes(slotPath)) {
           setSlotIgnored(slotPath);
+        }
+      }
+
+      // Translate Mk4 stack field names to old names for kernel compatibility
+      if (normalizedAst.stack) {
+        for (const [mk4Name, oldName] of Object.entries(SLOT_ALIASES_REVERSE)) {
+          if (normalizedAst.stack[mk4Name] !== undefined && normalizedAst.stack[oldName] === undefined) {
+            normalizedAst.stack[oldName] = normalizedAst.stack[mk4Name];
+            delete normalizedAst.stack[mk4Name];
+          }
         }
       }
 
@@ -1166,7 +1214,14 @@ export class FafCompiler {
         const flatKey = `project${  parts[1].charAt(0).toUpperCase()  }${parts[1].slice(1)}`;
         return ast[flatKey];
       } else if (parts[0] === 'stack') {
-        return ast.stack?.[parts[1]];
+        const field = parts[1];
+        // Check Mk4 canonical name first
+        const val = ast.stack?.[field];
+        if (val !== undefined && val !== null) {return val;}
+        // Fall back to old name (e.g. "framework" -> check "frontend")
+        const oldName = SLOT_ALIASES_REVERSE[field];
+        if (oldName) {return ast.stack?.[oldName];}
+        return undefined;
       } else if (parts[0] === 'human') {
         // Check human_context first (old format), then context (compact format)
         return ast.human_context?.[parts[1]] ?? ast.context?.[parts[1]];
@@ -1190,12 +1245,12 @@ export class FafCompiler {
       if (!ast.stack) {ast.stack = {};}
       if (!ast.stack.runtime) {ast.stack.runtime = 'Chrome/Browser';}
       if (!ast.stack.hosting) {ast.stack.hosting = 'Chrome Web Store';}
-      if (!ast.stack.api_type) {ast.stack.api_type = 'Chrome Extension APIs';}
+      if (!ast.stack.api && !ast.stack.api_type) {ast.stack.api = 'Chrome Extension APIs';}
       if (!ast.stack.backend) {ast.stack.backend = 'Service Worker';}
-      if (!ast.stack.database) {ast.stack.database = 'chrome.storage API';}
+      if (!ast.stack.db && !ast.stack.database) {ast.stack.db = 'chrome.storage API';}
 
       // Add auto-filled slots (only if they're in the active slots list)
-      const chromeSlots = ['stack.runtime', 'stack.hosting', 'stack.api_type', 'stack.backend', 'stack.database'];
+      const chromeSlots = ['stack.runtime', 'stack.hosting', 'stack.api', 'stack.backend', 'stack.db'];
       for (const slot of chromeSlots) {
         if (activeSlots.includes(slot) && !slots.find(s => s.path === slot)) {
           this.addSlot(slots, slot, getSlotValue(slot), 'string', 'discovered', 1);
@@ -1206,7 +1261,7 @@ export class FafCompiler {
     // Static HTML: auto-fill technical context
     if (projectType === 'static-html' || projectType === 'landing-page') {
       if (!ast.stack) {ast.stack = {};}
-      if (!ast.stack.frontend) {ast.stack.frontend = 'HTML/CSS/JavaScript';}
+      if (!ast.stack.framework && !ast.stack.frontend) {ast.stack.framework = 'HTML/CSS/JavaScript';}
       if (!ast.stack.runtime) {ast.stack.runtime = 'Browser';}
       if (!ast.stack.hosting) {ast.stack.hosting = 'Static Hosting';}
       if (!ast.stack.build) {ast.stack.build = 'Direct HTML (no build step)';}
@@ -1221,8 +1276,8 @@ export class FafCompiler {
       if (!ast.stack) {ast.stack = {};}
       if (!ast.stack.runtime) {ast.stack.runtime = ast.tech_stack?.workflow_engine || 'n8n';}
       if (!ast.stack.backend) {ast.stack.backend = 'Node.js (n8n server)';}
-      if (!ast.stack.api_type) {ast.stack.api_type = 'Webhooks + HTTP';}
-      if (!ast.stack.database) {ast.stack.database = ast.tech_stack?.infrastructure?.vector_db || 'Workflow State';}
+      if (!ast.stack.api && !ast.stack.api_type) {ast.stack.api = 'Webhooks + HTTP';}
+      if (!ast.stack.db && !ast.stack.database) {ast.stack.db = ast.tech_stack?.infrastructure?.vector_db || 'Workflow State';}
       if (!ast.stack.hosting) {ast.stack.hosting = 'n8n Cloud';}
       if (!ast.stack.build) {ast.stack.build = 'n8n Visual Editor';}
     }
@@ -1233,8 +1288,8 @@ export class FafCompiler {
       const mapping: Record<string, string> = {
         'projectName': 'project.name',
         'mainLanguage': 'project.main_language',
-        'framework': 'stack.frontend',
-        'database': 'stack.database',
+        'framework': 'stack.framework',
+        'database': 'stack.db',
         'backend': 'stack.backend',
         'hosting': 'stack.hosting',
         'buildTool': 'stack.build'
@@ -1391,14 +1446,14 @@ export class FafCompiler {
       return 'backend-api';
     }
 
-    // Frontend indicators
-    if (ast.stack?.frontend || ast.stack?.css_framework || ast.stack?.ui_library) {
+    // Frontend indicators (check both Mk4 and old names)
+    if (ast.stack?.framework || ast.stack?.frontend || ast.stack?.css || ast.stack?.css_framework || ast.stack?.ui_library) {
       return ast.stack?.backend ? 'fullstack' : 'frontend';
     }
 
     // Language-based defaults
     if (mainLanguage === 'python') {
-      if (ast.stack?.frontend) {return 'fullstack';}
+      if (ast.stack?.framework || ast.stack?.frontend) {return 'fullstack';}
       return 'python-app'; // Could be CLI, API, or data science
     }
 

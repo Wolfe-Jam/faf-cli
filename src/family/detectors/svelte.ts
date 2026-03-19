@@ -22,7 +22,7 @@ export const svelteDetector: IntegrationDetector = {
     '@langchain/mcp-adapters',   // #13: 42k/week - LangChain AI integration
     '@mzxrai/mcp-webresearch',   // #14: 36k/week - Web research tools
   ],
-  contextContribution: ['frontend', 'ui_library', 'state_management'],
+  contextContribution: ['framework', 'ui_library', 'state'],
 
   detect(projectPath: string): boolean {
     const packageJsonPath = join(projectPath, 'package.json');
@@ -71,9 +71,9 @@ export const svelteDetector: IntegrationDetector = {
 
     const baseContext: Partial<FafFile> = {
       stack: {
-        frontend: `Svelte ${version}`,
+        framework: `Svelte ${version}`,
         ui_library: 'Svelte Components',
-        state_management: 'Svelte Stores',
+        state: 'Svelte Stores',
         main_language: hasTypeScript ? 'TypeScript' : 'JavaScript',
       },
       integration: {
@@ -98,7 +98,7 @@ export const svelteDetector: IntegrationDetector = {
         ...baseContext.stack,
         backend: 'SvelteKit Server Routes',
         build: 'Vite + SvelteKit',
-        api_type: 'REST (SvelteKit endpoints)',
+        api: 'REST (SvelteKit endpoints)',
       };
       baseContext.project = {
         architecture: 'SvelteKit Full-Stack',

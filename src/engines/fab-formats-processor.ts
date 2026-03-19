@@ -1272,14 +1272,14 @@ export class FabFormatsProcessor {
       if (fafData.project?.main_language && !this.context.mainLanguage) {
         this.context.mainLanguage = fafData.project.main_language;
       }
-      if (fafData.stack?.frontend && !this.context.framework) {
-        this.context.framework = fafData.stack.frontend;
+      if ((fafData.stack?.framework || fafData.stack?.frontend) && !this.context.framework) {
+        this.context.framework = fafData.stack.framework || fafData.stack.frontend;
       }
       if (fafData.stack?.backend && !this.context.backend) {
         this.context.backend = fafData.stack.backend;
       }
-      if (fafData.stack?.database && !this.context.database) {
-        this.context.database = fafData.stack.database;
+      if ((fafData.stack?.db || fafData.stack?.database) && !this.context.database) {
+        this.context.database = fafData.stack.db || fafData.stack.database;
       }
 
       // Extract human context

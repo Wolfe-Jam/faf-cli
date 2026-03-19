@@ -55,17 +55,17 @@ export interface ContextSlots {
   connection: string;
   runtime: string;
   // Display slots (for stack display compatibility)
-  frontend: string;
   build: string;
 
   // snake_case versions (for YAML compatibility)
   main_language: string;
   build_tool: string;
-  package_manager: string;
-  api_type: string;
-  css_framework: string;
+  pkg_manager: string;
+  api: string;
+  css: string;
   ui_library: string;
-  state_management: string;
+  state: string;
+  db: string;
 
   // Human context slots (16-21)
   targetUser: string;
@@ -1369,7 +1369,6 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
       buildTool: 'zig build',
       framework: 'Zig',
       // snake_case slots (template compatibility)
-      frontend: 'Zig',
       build: 'zig build'
     },
     priority: 35,

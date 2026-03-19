@@ -19,13 +19,20 @@ export interface FafSchema {
     message: string;
   };
   stack: {
-    frontend?: string;
-    css_framework?: string;
+    // Mk4 canonical names
+    framework?: string;
+    css?: string;
     ui_library?: string;
-    state_management?: string;
+    state?: string;
     backend?: string;
     runtime?: string;
     build?: string;
+    pkg_manager?: string;
+    api?: string;
+    // Old aliases (accepted on read)
+    frontend?: string;
+    css_framework?: string;
+    state_management?: string;
     package_manager?: string;
     api_type?: string;
   };

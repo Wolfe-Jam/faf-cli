@@ -341,16 +341,16 @@ export function generateFafContent(projectData: {
     // 🏗️ Technical Stack (Full Details)
     // HONEST SCORING: null for undetected values - 0% is a valid score!
     stack: {
-      frontend: projectData.framework || null,
-      css_framework: projectData.cssFramework || null,
+      framework: projectData.framework || null,
+      css: projectData.cssFramework || null,
       ui_library: projectData.uiLibrary || null,
-      state_management: projectData.stateManagement || null,
+      state: projectData.stateManagement || null,
       backend: projectData.backend || null,
       runtime: projectData.server || null,
-      database: projectData.database || null,
+      db: projectData.database || null,
       build: projectData.buildTool || (projectData.projectType === 'static-html' || projectData.projectType === 'landing-page' ? 'Direct HTML (no build step)' : null),
-      package_manager: projectData.packageManager || null,
-      api_type: projectData.apiType || null,
+      pkg_manager: projectData.packageManager || null,
+      api: projectData.apiType || null,
       hosting: projectData.hosting || null,
       cicd: projectData.cicd || null
     },

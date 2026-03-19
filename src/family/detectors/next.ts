@@ -26,7 +26,7 @@ export const nextDetector: IntegrationDetector = {
     '@mzxrai/mcp-webresearch',   // #14: 36k/week - Web research tools
     '@supabase/mcp-utils',       // #15: 25k/week - Supabase backend integration
   ],
-  contextContribution: ['frontend', 'backend', 'runtime', 'hosting', 'api_type'],
+  contextContribution: ['framework', 'backend', 'runtime', 'hosting', 'api'],
 
   detect(projectPath: string): boolean {
     const packageJsonPath = join(projectPath, 'package.json');
@@ -78,11 +78,11 @@ export const nextDetector: IntegrationDetector = {
 
     return {
       stack: {
-        frontend: `Next.js ${version}`,
+        framework: `Next.js ${version}`,
         backend: 'Next.js API Routes',
         runtime: 'Node.js (Vercel Edge Runtime compatible)',
         build: 'Next.js Compiler (Turbopack/Webpack)',
-        api_type: 'REST/GraphQL',
+        api: 'REST/GraphQL',
         hosting: 'Vercel (optimized)',
         main_language: hasTypeScript ? 'TypeScript' : 'JavaScript',
       },

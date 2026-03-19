@@ -197,12 +197,12 @@ export async function generateFafFromProject(
     if (ctx.framework) {contextSlotsFilled['framework'] = ctx.framework;}
     if (ctx.backend) {contextSlotsFilled['backend'] = ctx.backend;}
     if (ctx.server) {contextSlotsFilled['server'] = ctx.server;}
-    if (ctx.apiType) {contextSlotsFilled['api_type'] = ctx.apiType;}
-    if (ctx.database) {contextSlotsFilled['database'] = ctx.database;}
+    if (ctx.apiType) {contextSlotsFilled['api'] = ctx.apiType;}
+    if (ctx.database) {contextSlotsFilled['db'] = ctx.database;}
     if (ctx.hosting) {contextSlotsFilled['hosting'] = ctx.hosting;}
     if (ctx.cicd) {contextSlotsFilled['cicd'] = ctx.cicd;}
     if (ctx.buildTool) {contextSlotsFilled['build_tool'] = ctx.buildTool;}
-    if (ctx.packageManager) {contextSlotsFilled['package_manager'] = ctx.packageManager;}
+    if (ctx.packageManager) {contextSlotsFilled['pkg_manager'] = ctx.packageManager;}
     if (ctx.testFramework) {contextSlotsFilled['test_framework'] = ctx.testFramework;}
     if (ctx.linter) {contextSlotsFilled['linter'] = ctx.linter;}
 
@@ -278,21 +278,21 @@ export async function generateFafFromProject(
   // 🦀 RUST CLI: Smart slot assignment
   if (isRustCLI) {
     contextSlotsFilled['framework'] = 'CLI';
-    contextSlotsFilled['api_type'] = 'CLI';
+    contextSlotsFilled['api'] = 'CLI';
     contextSlotsFilled['hosting'] = 'crates.io / Binary distribution';
     contextSlotsFilled['backend'] = 'Rust';
     contextSlotsFilled['main_language'] = 'Rust';
     contextSlotsFilled['build_tool'] = 'Cargo';
-    contextSlotsFilled['package_manager'] = 'Cargo';
+    contextSlotsFilled['pkg_manager'] = 'Cargo';
     contextSlotsFilled['runtime'] = 'Native binary';
     // 🎯 SLOT-IGNORE: Rust CLI tools don't need web frontend or databases
     // Setting to 'None' = slot-ignore (like .gitignore, .fafignore)
     // Score: (Filled + Ignored) / 21 = allows 100% without inapplicable slots
     // See docs/SLOT-IGNORE.md for specification
-    contextSlotsFilled['css_framework'] = 'None';
+    contextSlotsFilled['css'] = 'None';
     contextSlotsFilled['ui_library'] = 'None';
-    contextSlotsFilled['database'] = 'None';
-    contextSlotsFilled['frontend'] = 'None';
+    contextSlotsFilled['db'] = 'None';
+    contextSlotsFilled['framework'] = 'None';
     // Cargo.toml is AUTHORITATIVE for Rust - always override FAB/README guesses
     if (cargoTomlData.name) {
       contextSlotsFilled['project_name'] = cargoTomlData.name;
@@ -308,14 +308,14 @@ export async function generateFafFromProject(
   if (isNodeCLI) {
     // Smart slot reuse for CLI projects
     contextSlotsFilled['framework'] = 'CLI';  // frontend = CLI
-    contextSlotsFilled['api_type'] = 'CLI';
+    contextSlotsFilled['api'] = 'CLI';
     contextSlotsFilled['hosting'] = 'npm registry';
     contextSlotsFilled['backend'] = 'Node.js';
 
     // Detect terminal UI framework
-    if (deps?.chalk) {contextSlotsFilled['css_framework'] = 'chalk (terminal colors)';}
-    else if (deps?.colors) {contextSlotsFilled['css_framework'] = 'colors';}
-    else if (deps?.ora) {contextSlotsFilled['css_framework'] = 'ora';}
+    if (deps?.chalk) {contextSlotsFilled['css'] = 'chalk (terminal colors)';}
+    else if (deps?.colors) {contextSlotsFilled['css'] = 'colors';}
+    else if (deps?.ora) {contextSlotsFilled['css'] = 'ora';}
 
     // Detect interactive framework
     if (deps?.inquirer) {contextSlotsFilled['ui_library'] = 'inquirer (interactive prompts)';}
@@ -331,15 +331,15 @@ export async function generateFafFromProject(
     // Like .gitignore for files, slot-ignore marks slots as "not applicable"
     // Setting to 'None' tells scoring: "We checked. Doesn't apply. That's correct."
     // See docs/SLOT-IGNORE.md for full specification
-    contextSlotsFilled['database'] = 'None';
-    if (!contextSlotsFilled['frontend']) {
-      contextSlotsFilled['frontend'] = 'None';  // Unless already set
+    contextSlotsFilled['db'] = 'None';
+    if (!contextSlotsFilled['framework']) {
+      contextSlotsFilled['framework'] = 'None';  // Unless already set
     }
 
     // Detect runtime (Bun takes priority if bun.lockb exists)
     if (isBunProject) {
       contextSlotsFilled['runtime'] = 'Bun';
-      contextSlotsFilled['package_manager'] = 'Bun';
+      contextSlotsFilled['pkg_manager'] = 'Bun';
     } else if (packageData.engines?.node) {
       contextSlotsFilled['runtime'] = `Node.js ${packageData.engines.node}`;
     } else {
@@ -371,7 +371,7 @@ export async function generateFafFromProject(
   // 🦊 Bun Detection - applies to ALL JavaScript/Node.js projects
   if (isBunProject) {
     contextSlotsFilled['runtime'] = 'Bun';
-    contextSlotsFilled['package_manager'] = 'Bun';
+    contextSlotsFilled['pkg_manager'] = 'Bun';
   }
 
   // package.json is AUTHORITATIVE - always override FAB/README guesses
@@ -413,8 +413,8 @@ export async function generateFafFromProject(
   // Calculate slot-based score
   const technicalSlots = [
     'project_name', 'project_goal', 'main_language', 'framework',
-    'backend', 'server', 'api_type', 'database', 'hosting',
-    'cicd', 'build_tool', 'package_manager', 'test_framework', 'linter'
+    'backend', 'server', 'api', 'db', 'hosting',
+    'cicd', 'build_tool', 'pkg_manager', 'test_framework', 'linter'
   ];
   const humanSlots = ['who', 'what', 'why', 'where', 'when', 'how'];
 
@@ -499,11 +499,11 @@ export async function generateFafFromProject(
   // Extract the stack for display
   // HONEST SCORING: No fake defaults - 0% is a valid score!
   const _stack = {
-    frontend: contextSlotsFilled['framework'] || (packageData.dependencies?.react ? 'React' : undefined),
+    framework: contextSlotsFilled['framework'] || (packageData.dependencies?.react ? 'React' : undefined),
     backend: contextSlotsFilled['backend'],
-    database: contextSlotsFilled['database'],
+    db: contextSlotsFilled['db'],
     build: contextSlotsFilled['build_tool'],
-    package_manager: contextSlotsFilled['package_manager'] || undefined,
+    pkg_manager: contextSlotsFilled['pkg_manager'] || undefined,
     hosting: contextSlotsFilled['hosting'],
   };
 
@@ -515,17 +515,17 @@ export async function generateFafFromProject(
     projectGoal: contextSlotsFilled['project_goal'] || undefined,
     mainLanguage: contextSlotsFilled['main_language'] || undefined,
     framework: contextSlotsFilled['framework'] || undefined,
-    cssFramework: contextSlotsFilled['css_framework'] || undefined,
+    cssFramework: contextSlotsFilled['css'] || undefined,
     uiLibrary: contextSlotsFilled['ui_library'] || undefined,
     stateManagement: undefined,
     backend: contextSlotsFilled['backend'] || undefined,
-    apiType: contextSlotsFilled['api_type'] || undefined,
+    apiType: contextSlotsFilled['api'] || undefined,
     server: contextSlotsFilled['runtime'] || contextSlotsFilled['server'] || undefined,
-    database: contextSlotsFilled['database'] || undefined,
+    database: contextSlotsFilled['db'] || undefined,
     connection: undefined,
     hosting: contextSlotsFilled['hosting'] || undefined,
     buildTool: contextSlotsFilled['build_tool'] || undefined,
-    packageManager: contextSlotsFilled['package_manager'] || undefined,
+    packageManager: contextSlotsFilled['pkg_manager'] || undefined,
     cicd: contextSlotsFilled['cicd'] || undefined,
     fafScore,
     slotBasedPercentage: Math.round(((technicalFilled + humanFilled) / 21) * 100),

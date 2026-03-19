@@ -381,15 +381,15 @@ export async function generateEnhancedFaf(
 
   // Stack section — only populated fields, no slotignored
   const stack: Record<string, string> = {};
-  if (stackAnalysis.frontend) { stack.frontend = stackAnalysis.frontend; }
+  if (stackAnalysis.frontend) { stack.framework = stackAnalysis.frontend; }
   if (stackAnalysis.backend) { stack.backend = stackAnalysis.backend; }
   if (stackAnalysis.runtime && stackAnalysis.runtime !== mainLanguage) {
     stack.runtime = stackAnalysis.runtime;
   }
-  if (stackAnalysis.database) { stack.database = stackAnalysis.database; }
+  if (stackAnalysis.database) { stack.db = stackAnalysis.database; }
   if (stackAnalysis.buildTool) { stack.build = stackAnalysis.buildTool; }
   if (stackAnalysis.testing) { stack.testing = stackAnalysis.testing; }
-  if (packageJsonContent) { stack.package_manager = 'npm'; }
+  if (packageJsonContent) { stack.pkg_manager = 'npm'; }
   if (stackAnalysis.hosting) { stack.hosting = stackAnalysis.hosting; }
 
   // Context section — only non-default, actually extracted values

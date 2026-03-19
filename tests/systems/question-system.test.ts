@@ -37,9 +37,9 @@ describe('Question System', () => {
     });
 
     it('should have questions for stack fields', () => {
-      expect(QUESTION_REGISTRY['stack.frontend']).toBeDefined();
+      expect(QUESTION_REGISTRY['stack.framework']).toBeDefined();
       expect(QUESTION_REGISTRY['stack.backend']).toBeDefined();
-      expect(QUESTION_REGISTRY['stack.database']).toBeDefined();
+      expect(QUESTION_REGISTRY['stack.db']).toBeDefined();
       expect(QUESTION_REGISTRY['stack.hosting']).toBeDefined();
     });
 
@@ -85,7 +85,7 @@ describe('Question System', () => {
     });
 
     it('should include options for select questions', () => {
-      const question = buildQuestion('stack.database');
+      const question = buildQuestion('stack.db');
 
       expect(question).not.toBeNull();
       expect(question!.type).toBe('select');
@@ -100,17 +100,17 @@ describe('Question System', () => {
 
   describe('buildQuestionsForFields', () => {
     it('should build questions for multiple fields', () => {
-      const fields = ['project.goal', 'human_context.why', 'stack.database'];
+      const fields = ['project.goal', 'human_context.why', 'stack.db'];
       const questions = buildQuestionsForFields(fields);
 
       expect(questions.length).toBe(3);
       expect(questions[0].field).toBe('project.goal');
       expect(questions[1].field).toBe('human_context.why');
-      expect(questions[2].field).toBe('stack.database');
+      expect(questions[2].field).toBe('stack.db');
     });
 
     it('should filter out unknown fields', () => {
-      const fields = ['project.goal', 'unknown.field', 'stack.database'];
+      const fields = ['project.goal', 'unknown.field', 'stack.db'];
       const questions = buildQuestionsForFields(fields);
 
       expect(questions.length).toBe(2);
@@ -182,13 +182,13 @@ describe('Question System', () => {
     });
 
     it('should include question details in correct format', () => {
-      const questions = [buildQuestion('stack.database')!];
+      const questions = [buildQuestion('stack.db')!];
       const output = formatForClaudeCode(questions);
 
       const q = output.questions[0];
       expect(q.question).toBeDefined();
       expect(q.header).toBe('Database');
-      expect(q.field).toBe('stack.database');
+      expect(q.field).toBe('stack.db');
       expect(q.type).toBe('select');
       expect(q.options).toBeDefined();
       expect(q.options!.length).toBeGreaterThan(0);

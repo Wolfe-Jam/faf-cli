@@ -30,21 +30,32 @@ export interface FafFile {
     [key: string]: any;
   };
   stack?: {
-    frontend?: string;
+    // Mk4 canonical names
+    framework?: string;
+    css?: string;
+    state?: string;
+    db?: string;
+    pkg_manager?: string;
+    api?: string;
+    // Unchanged names
     backend?: string;
     runtime?: string;
     build?: string;
-    package_manager?: string;
-    api_type?: string;
     main_language?: string;
     ui_library?: string;
-    state_management?: string;
     hosting?: string;
     type_system?: string;
     automation_platform?: string;
     workflow_engine?: string;
     integration_layer?: string;
     api_orchestration?: string;
+    // Old aliases (accepted on read)
+    frontend?: string;
+    css_framework?: string;
+    state_management?: string;
+    database?: string;
+    package_manager?: string;
+    api_type?: string;
     [key: string]: any;
   };
   integration?: {

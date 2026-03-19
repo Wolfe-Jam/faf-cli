@@ -268,15 +268,15 @@ export async function cursorExport(
 
   // Tech Stack section
   const stack = fafContent.stack || fafContent.project?.stack || {};
-  const hasStack = stack.frontend || stack.backend || stack.build || stack.runtime;
+  const hasStack = (stack.framework || stack.frontend) || stack.backend || stack.build || stack.runtime;
   if (hasStack) {
     lines.push('## Tech Stack');
     lines.push('');
-    if (stack.frontend) {lines.push(`- Frontend: ${stack.frontend}`);}
+    if (stack.framework || stack.frontend) {lines.push(`- Frontend: ${stack.framework || stack.frontend}`);}
     if (stack.backend) {lines.push(`- Backend: ${stack.backend}`);}
     if (stack.runtime) {lines.push(`- Runtime: ${stack.runtime}`);}
     if (stack.build) {lines.push(`- Build: ${stack.build}`);}
-    if (stack.package_manager) {lines.push(`- Package Manager: ${stack.package_manager}`);}
+    if (stack.pkg_manager || stack.package_manager) {lines.push(`- Package Manager: ${stack.pkg_manager || stack.package_manager}`);}
     if (stack.languages?.length > 0) {
       lines.push(`- Languages: ${stack.languages.join(', ')}`);
     }

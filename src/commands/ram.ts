@@ -25,8 +25,14 @@ import {
   memoryImport,
   getMemoryStatus,
   resolveMemoryPath,
+  resolveMemoryDir,
   getGitRoot,
 } from '../utils/memory-parser';
+import {
+  mapFafToTopics,
+  writeTopicFiles,
+  readTopicFiles,
+} from '../utils/memory-topic-writer';
 import { gateProFeature } from '../licensing/pro-gate';
 
 // ============================================================================
@@ -147,29 +153,51 @@ async function runRamExport(args: string[]): Promise<void> {
     return;
   }
 
-  // Export
-  const result = await memoryExport(fafContent, outputPath, {
-    merge: !options.force,
-  });
+  // Map .faf data to topic files
+  const topics = mapFafToTopics(fafContent);
 
-  if (!result.success) {
-    console.log(chalk.red(`❌ Export failed`));
-    result.warnings.forEach(w => console.log(chalk.yellow(`   - ${w}`)));
+  if (topics.length === 0) {
+    console.log(chalk.yellow('   ⚠️  No meaningful context found in .faf to export'));
+    console.log();
     return;
   }
 
+  // Write topic files
+  const memoryDir = path.dirname(outputPath);
+  const topicResult = await writeTopicFiles(topics, memoryDir, {
+    preserveExisting: !options.force,
+  });
+
+  // Also write legacy MEMORY.md section for backward compat
+  const legacyResult = await memoryExport(fafContent, outputPath, {
+    merge: !options.force,
+  });
+
   // Show warnings
-  if (result.warnings.length > 0) {
-    for (const w of result.warnings) {
+  const allWarnings = [...topicResult.warnings, ...legacyResult.warnings];
+  if (allWarnings.length > 0) {
+    for (const w of allWarnings) {
       console.log(chalk.yellow(`   ⚠️  ${w}`));
     }
     console.log();
   }
 
-  console.log(chalk.green(`☑️  Created: ${result.filePath}`));
-  console.log(chalk.gray(`   Lines: ${result.linesWritten} / 200 ceiling`));
-  if (result.merged) {
-    console.log(chalk.gray(`   Mode: Merged (Claude's existing notes preserved)`));
+  // Report topic files
+  if (topicResult.filesWritten.length > 0) {
+    console.log(chalk.green(`☑️  Topic files (${topicResult.filesWritten.length}):`));
+    for (const f of topicResult.filesWritten) {
+      const topic = topics.find(t => t.fileName === f);
+      console.log(chalk.gray(`   ${f} (${topic?.type || 'unknown'})`));
+    }
+    console.log();
+  }
+
+  if (topicResult.indexUpdated) {
+    console.log(chalk.green(`☑️  Index updated: MEMORY.md`));
+  }
+
+  if (legacyResult.success) {
+    console.log(chalk.gray(`   Legacy section: ${legacyResult.linesWritten} lines`));
   }
   console.log();
 

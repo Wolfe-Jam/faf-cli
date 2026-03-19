@@ -27,20 +27,28 @@ export interface FafData {
     generated: string;
   };
   
-  // Technical Stack
+  // Technical Stack (Mk4 canonical names + old aliases for backwards compat)
   stack?: {
-    frontend?: string;
-    css_framework?: string;
+    // Mk4 canonical names
+    framework?: string;
+    css?: string;
     ui_library?: string;
-    state_management?: string;
+    state?: string;
     backend?: string;
     runtime?: string;
-    database?: string;
+    db?: string;
     build?: string;
-    package_manager?: string;
-    api_type?: string;
+    pkg_manager?: string;
+    api?: string;
     hosting?: string;
     cicd?: string;
+    // Old aliases (accepted on read, never generated on write)
+    frontend?: string;
+    css_framework?: string;
+    state_management?: string;
+    database?: string;
+    package_manager?: string;
+    api_type?: string;
   };
   
   // Human Context (6 W's)

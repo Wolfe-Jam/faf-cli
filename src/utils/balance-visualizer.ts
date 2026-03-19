@@ -28,12 +28,12 @@ export class BalanceVisualizer {
   static calculateBalance(fafData: any): BalanceData {
     // AI fields (technical detection) - what AI can detect
     const aiFields = [
-      'stack.frontend',
+      'stack.framework',
       'stack.backend',
-      'stack.database',
+      'stack.db',
       'stack.runtime',
       'stack.build',
-      'stack.package_manager',
+      'stack.pkg_manager',
       'project.main_language',
       'project.generated',
       'ai_instructions',

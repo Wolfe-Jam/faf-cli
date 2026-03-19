@@ -379,11 +379,11 @@ async function askHumanForMissingData(currentFaf: any, _score: any): Promise<any
   }
 
   // Priority 3: Technical stack (only if really needed and missing)
-  const needsFrontend = !currentFaf.stack?.frontend &&
+  const needsFrontend = !(currentFaf.stack?.framework || currentFaf.stack?.frontend) &&
     (currentFaf.project?.type?.includes('frontend') || currentFaf.project?.type?.includes('fullstack'));
   const needsBackend = !currentFaf.stack?.backend &&
     (currentFaf.project?.type?.includes('backend') || currentFaf.project?.type?.includes('api'));
-  const needsDatabase = !currentFaf.stack?.database && needsBackend;
+  const needsDatabase = !(currentFaf.stack?.db || currentFaf.stack?.database) && needsBackend;
   const needsHosting = !currentFaf.stack?.hosting;
 
   if (needsFrontend) {
@@ -552,7 +552,7 @@ async function analyzeProjectForRealImprovements(
     // Extract REAL dependencies for stack info
     const deps = { ...pkg.dependencies, ...pkg.devDependencies };
     const frameworks = detectFrameworks(deps);
-    if (frameworks.length > 0 && !currentFaf.stack?.frontend) {
+    if (frameworks.length > 0 && !(currentFaf.stack?.framework || currentFaf.stack?.frontend)) {
       improvements.framework = frameworks[0];
     }
 
@@ -564,7 +564,7 @@ async function analyzeProjectForRealImprovements(
 
     // Detect database
     const database = detectDatabase(deps);
-    if (database && !currentFaf.stack?.database) {
+    if (database && !(currentFaf.stack?.db || currentFaf.stack?.database)) {
       improvements.database = database;
     }
 
@@ -621,14 +621,14 @@ async function analyzeProjectForRealImprovements(
       improvements.mainLanguage = ctx.mainLanguage;
     }
     if (ctx.frameworks && ctx.frameworks.length > 0) {
-      if (!currentFaf.stack?.frontend && isFrontendFramework(ctx.frameworks[0])) {
+      if (!(currentFaf.stack?.framework || currentFaf.stack?.frontend) && isFrontendFramework(ctx.frameworks[0])) {
         improvements.framework = ctx.frameworks[0];
       }
       if (!currentFaf.stack?.backend && isBackendFramework(ctx.frameworks[0])) {
         improvements.backend = ctx.frameworks[0];
       }
     }
-    if ((ctx as any).database && !currentFaf.stack?.database) {
+    if ((ctx as any).database && !(currentFaf.stack?.db || currentFaf.stack?.database)) {
       improvements.database = (ctx as any).database;
     }
     if ((ctx as any).backend && !currentFaf.stack?.backend) {
@@ -760,7 +760,7 @@ async function analyzeProjectForRealImprovements(
   }
 
   // 9. Fill API type if we have a backend
-  if (!currentFaf.stack?.api_type && (currentFaf.stack?.backend || improvements.backend)) {
+  if (!(currentFaf.stack?.api || currentFaf.stack?.api_type) && (currentFaf.stack?.backend || improvements.backend)) {
     // Check package.json for API type hints
     try {
       const pkgPath = path.join(projectPath, 'package.json');
@@ -818,13 +818,13 @@ function applyRealEnhancements(fafData: any, improvements: any): any {
 
   // Apply stack improvements (TECHNICAL SLOTS)
   if (improvements.framework) {
-    enhanced.stack.frontend = improvements.framework;
+    enhanced.stack.framework = improvements.framework;
   }
   if (improvements.backend) {
     enhanced.stack.backend = improvements.backend;
   }
   if (improvements.database) {
-    enhanced.stack.database = improvements.database;
+    enhanced.stack.db = improvements.database;
   }
   if (improvements.buildTool) {
     enhanced.stack.build = improvements.buildTool;
@@ -842,7 +842,7 @@ function applyRealEnhancements(fafData: any, improvements: any): any {
     enhanced.stack.hosting = improvements.hosting;
   }
   if (improvements.api_type) {
-    enhanced.stack.api_type = improvements.api_type;
+    enhanced.stack.api = improvements.api_type;
   }
   if (improvements.mainLanguage) {
     enhanced.stack.language = improvements.mainLanguage;

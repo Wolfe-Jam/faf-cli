@@ -25,7 +25,8 @@ import { FAF_COLORS, FAF_ICONS, BRAND_MESSAGES } from '../utils/championship-sty
 import { agentsExport } from '../utils/agents-parser';
 import { cursorExport } from '../utils/cursorrules-parser';
 import { geminiExport } from '../utils/gemini-parser';
-import { memoryExport, resolveMemoryPath, getGitRoot } from '../utils/memory-parser';
+import { memoryExport, resolveMemoryPath, resolveMemoryDir, getGitRoot } from '../utils/memory-parser';
+import { mapFafToTopics, writeTopicFiles } from '../utils/memory-topic-writer';
 import { gateProFeature } from '../licensing/pro-gate';
 
 export interface BiSyncOptions {
@@ -290,9 +291,18 @@ export async function biSyncCommand(options: BiSyncOptions = {}): Promise<void> 
         if (gateProFeature()) {
           const gitRoot = getGitRoot(projectDir) || projectDir;
           const memPath = resolveMemoryPath(gitRoot);
+          const memDir = resolveMemoryDir(gitRoot);
+
+          // Write topic files (Claude Code native format)
+          const topics = mapFafToTopics(fafData);
+          if (topics.length > 0) {
+            await writeTopicFiles(topics, memDir);
+          }
+
+          // Also write legacy MEMORY.md section
           const memResult = await memoryExport(fafData, memPath, { merge: true });
           if (memResult.success) {
-            additionalFiles.push('MEMORY.md (tri-sync)');
+            additionalFiles.push(`MEMORY.md + ${topics.length} topic files (tri-sync)`);
           }
         }
       }

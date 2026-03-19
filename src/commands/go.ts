@@ -87,9 +87,9 @@ function prioritizeFields(fields: string[]): string[] {
     'human_context.what', // Problem being solved
     'project.name', // Project identity
     'project.main_language', // Technical foundation
-    'stack.database', // Architecture choices
+    'stack.db', // Architecture choices
     'stack.hosting', // Deployment context
-    'stack.frontend', // UI framework
+    'stack.framework', // UI framework
     'stack.backend', // Server framework
     'stack.build', // Build system
     'stack.cicd', // CI/CD pipeline

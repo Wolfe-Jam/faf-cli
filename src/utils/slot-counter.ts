@@ -97,17 +97,17 @@ export function countSlots(slots: {
     ['human_context.when', slots.when],
     ['human_context.how', slots.how],
     // Stack (11)
-    ['stack.frontend', slots.frontend],
+    ['stack.framework', slots.frontend],
     ['stack.ui_library', slots.uiLibrary],
     ['stack.backend', slots.backend],
     ['stack.runtime', slots.runtime],
-    ['stack.database', slots.database],
+    ['stack.db', slots.database],
     ['stack.build', slots.build],
-    ['stack.package_manager', slots.packageManager],
-    ['stack.api_type', slots.apiType],
+    ['stack.pkg_manager', slots.packageManager],
+    ['stack.api', slots.apiType],
     ['stack.hosting', slots.hosting],
     ['stack.cicd', slots.cicd],
-    ['stack.css_framework', slots.cssFramework],
+    ['stack.css', slots.cssFramework],
   ];
 
   // Count each slot

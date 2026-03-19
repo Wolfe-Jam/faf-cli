@@ -30,9 +30,9 @@ export async function editFafFile(file?: string, options: Record<string, unknown
     console.log(chalk.gray('     • human_context.how - How will it work?'));
     console.log();
     console.log(chalk.gray('   Technical Context:'));
-    console.log(chalk.gray('     • stack.frontend - Frontend framework'));
+    console.log(chalk.gray('     • stack.framework - Frontend framework'));
     console.log(chalk.gray('     • stack.backend - Backend technology'));
-    console.log(chalk.gray('     • stack.database - Database system'));
+    console.log(chalk.gray('     • stack.db - Database system'));
     console.log(chalk.gray('     • project.goal - Project objective'));
 
     console.log(chalk.green('\n   After editing, run: ') + chalk.white.bold('faf score') + chalk.green(' to see improvements'));

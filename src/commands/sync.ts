@@ -197,10 +197,10 @@ async function detectProjectChanges(fafData: any): Promise<ProjectChange[]> {
       };
 
       // Check for framework changes (nested structure - check both for compatibility)
-      const currentFramework = fafData.stack?.frontend || fafData.framework || "";
+      const currentFramework = fafData.stack?.framework || fafData.stack?.frontend || fafData.framework || "";
       if (deps.svelte && !currentFramework.includes("Svelte")) {
         changes.push({
-          path: "stack.frontend",
+          path: "stack.framework",
           description: "Svelte dependency detected",
           oldValue: currentFramework,
           newValue: "Svelte",
@@ -210,7 +210,7 @@ async function detectProjectChanges(fafData: any): Promise<ProjectChange[]> {
 
       if (deps.react && !currentFramework.includes("React")) {
         changes.push({
-          path: "stack.frontend",
+          path: "stack.framework",
           description: "React dependency detected",
           oldValue: currentFramework,
           newValue: "React",
@@ -220,7 +220,7 @@ async function detectProjectChanges(fafData: any): Promise<ProjectChange[]> {
 
       if (deps.vue && !currentFramework.includes("Vue")) {
         changes.push({
-          path: "stack.frontend",
+          path: "stack.framework",
           description: "Vue dependency detected",
           oldValue: currentFramework,
           newValue: "Vue",
@@ -230,7 +230,7 @@ async function detectProjectChanges(fafData: any): Promise<ProjectChange[]> {
 
       if (deps["@angular/core"] && !currentFramework.includes("Angular")) {
         changes.push({
-          path: "stack.frontend",
+          path: "stack.framework",
           description: "Angular dependency detected",
           oldValue: currentFramework,
           newValue: "Angular",
@@ -239,10 +239,10 @@ async function detectProjectChanges(fafData: any): Promise<ProjectChange[]> {
       }
 
       // Check for CSS frameworks (nested structure)
-      const currentCss = fafData.stack?.css_framework || fafData.cssFramework || "";
+      const currentCss = fafData.stack?.css || fafData.stack?.css_framework || fafData.cssFramework || "";
       if (deps.tailwindcss && !currentCss.includes("Tailwind")) {
         changes.push({
-          path: "stack.css_framework",
+          path: "stack.css",
           description: "Tailwind CSS dependency detected",
           oldValue: currentCss,
           newValue: "Tailwind CSS",
@@ -252,7 +252,7 @@ async function detectProjectChanges(fafData: any): Promise<ProjectChange[]> {
 
       if (deps.bootstrap && !currentCss.includes("Bootstrap")) {
         changes.push({
-          path: "stack.css_framework",
+          path: "stack.css",
           description: "Bootstrap dependency detected",
           oldValue: currentCss,
           newValue: "Bootstrap",
@@ -293,10 +293,10 @@ async function detectProjectChanges(fafData: any): Promise<ProjectChange[]> {
       }
 
       // Check for state management (nested structure)
-      const currentState = fafData.stack?.state_management || fafData.stateManagement || "";
+      const currentState = fafData.stack?.state || fafData.stack?.state_management || fafData.stateManagement || "";
       if ((deps.redux || deps["@reduxjs/toolkit"]) && !currentState.includes("Redux")) {
         changes.push({
-          path: "stack.state_management",
+          path: "stack.state",
           description: "Redux dependency detected",
           oldValue: currentState,
           newValue: "Redux Toolkit",
@@ -306,7 +306,7 @@ async function detectProjectChanges(fafData: any): Promise<ProjectChange[]> {
 
       if (deps.zustand && !currentState.includes("Zustand")) {
         changes.push({
-          path: "stack.state_management",
+          path: "stack.state",
           description: "Zustand dependency detected",
           oldValue: currentState,
           newValue: "Zustand",
@@ -316,7 +316,7 @@ async function detectProjectChanges(fafData: any): Promise<ProjectChange[]> {
 
       if (deps.jotai && !currentState.includes("Jotai")) {
         changes.push({
-          path: "stack.state_management",
+          path: "stack.state",
           description: "Jotai dependency detected",
           oldValue: currentState,
           newValue: "Jotai",
@@ -518,16 +518,16 @@ async function convertMarkdownFafToYaml(content: string): Promise<any> {
       ]
     },
     stack: {
-      frontend: framework !== 'None' ? framework : 'None',
-      css_framework: 'None',
+      framework: framework !== 'None' ? framework : 'None',
+      css: 'None',
       ui_library: 'None',
-      state_management: 'None',
+      state: 'None',
       backend: stackLines.find(s => s.toLowerCase().includes('node')) ? 'Node.js' : 'None',
       runtime: stackLines.find(s => s.toLowerCase().includes('node')) ? 'Node.js' : 'None',
-      database: 'None',
+      db: 'None',
       build: 'Vite',
-      package_manager: 'npm',
-      api_type: stackLines.find(s => s.toLowerCase().includes('mcp')) ? 'MCP' : 'REST',
+      pkg_manager: 'npm',
+      api: stackLines.find(s => s.toLowerCase().includes('mcp')) ? 'MCP' : 'REST',
       hosting: 'None',
       cicd: 'None',
       testing: 'None',

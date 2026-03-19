@@ -20,7 +20,7 @@ export const viteDetector: IntegrationDetector = {
     'chrome-devtools-mcp',       // #7: 156k/week - Chrome DevTools debugging
     '@mastra/mcp',               // #8: 130k/week - AI workflows & automation
   ],
-  contextContribution: ['build', 'package_manager'],
+  contextContribution: ['build', 'pkg_manager'],
 
   detect(projectPath: string): boolean {
     const packageJsonPath = join(projectPath, 'package.json');
@@ -80,7 +80,7 @@ export const viteDetector: IntegrationDetector = {
     return {
       stack: {
         build: `Vite ${version}`,
-        package_manager: 'npm/pnpm/yarn (Vite compatible)',
+        pkg_manager: 'npm/pnpm/yarn (Vite compatible)',
       },
       project: {
         build_config: {

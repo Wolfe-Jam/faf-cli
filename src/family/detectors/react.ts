@@ -22,7 +22,7 @@ export const reactDetector: IntegrationDetector = {
     '@langchain/mcp-adapters',   // #13: 42k/week - LangChain AI integration
     '@mzxrai/mcp-webresearch',   // #14: 36k/week - Web research tools
   ],
-  contextContribution: ['frontend', 'ui_library', 'state_management'],
+  contextContribution: ['framework', 'ui_library', 'state'],
 
   detect(projectPath: string): boolean {
     const packageJsonPath = join(projectPath, 'package.json');
@@ -66,9 +66,9 @@ export const reactDetector: IntegrationDetector = {
 
     return {
       stack: {
-        frontend: `React ${version}`,
+        framework: `React ${version}`,
         ui_library: 'React Components',
-        state_management: 'React Hooks',
+        state: 'React Hooks',
         main_language: hasTypeScript ? 'TypeScript' : 'JavaScript',
       },
       integration: {

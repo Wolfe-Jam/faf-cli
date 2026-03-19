@@ -27,16 +27,23 @@ export class ScoreCalculator {
     if (data.project?.name) filledSlots++;
     if (data.project?.goal) filledSlots++;
     if (data.project?.main_language) filledSlots++;
-    if (data.stack?.frontend && data.stack.frontend !== 'None') filledSlots++;
-    if (data.stack?.css_framework && data.stack.css_framework !== 'None') filledSlots++;
+    // Mk4 canonical names with old-name fallback
+    const fw = data.stack?.framework || data.stack?.frontend;
+    if (fw && fw !== 'None') filledSlots++;
+    const css = data.stack?.css || data.stack?.css_framework;
+    if (css && css !== 'None') filledSlots++;
     if (data.stack?.ui_library && data.stack.ui_library !== 'None') filledSlots++;
-    if (data.stack?.state_management && data.stack.state_management !== 'None') filledSlots++;
+    const st = data.stack?.state || data.stack?.state_management;
+    if (st && st !== 'None') filledSlots++;
     if (data.stack?.backend && data.stack.backend !== 'None') filledSlots++;
     if (data.stack?.runtime && data.stack.runtime !== 'None') filledSlots++;
-    if (data.stack?.database && data.stack.database !== 'None') filledSlots++;
+    const db = data.stack?.db || data.stack?.database;
+    if (db && db !== 'None') filledSlots++;
     if (data.stack?.build && data.stack.build !== 'None') filledSlots++;
-    if (data.stack?.package_manager && data.stack.package_manager !== 'npm') filledSlots++;
-    if (data.stack?.api_type && data.stack.api_type !== 'REST') filledSlots++;
+    const pm = data.stack?.pkg_manager || data.stack?.package_manager;
+    if (pm && pm !== 'npm') filledSlots++;
+    const api = data.stack?.api || data.stack?.api_type;
+    if (api && api !== 'REST') filledSlots++;
     if (data.stack?.hosting && data.stack.hosting !== 'None') filledSlots++;
     if (data.stack?.cicd && data.stack.cicd !== 'None') filledSlots++;
     

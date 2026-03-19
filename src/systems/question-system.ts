@@ -200,7 +200,7 @@ export const QUESTION_REGISTRY: Record<string, Omit<FafQuestion, 'id' | 'field'>
   },
 
   // Stack section
-  'stack.frontend': {
+  'stack.framework': {
     question: 'What frontend framework do you use?',
     header: 'Frontend',
     type: 'select',
@@ -233,7 +233,7 @@ export const QUESTION_REGISTRY: Record<string, Omit<FafQuestion, 'id' | 'field'>
     ],
   },
 
-  'stack.database': {
+  'stack.db': {
     question: 'What database do you use?',
     header: 'Database',
     type: 'select',
@@ -347,7 +347,7 @@ export function getGoldCodeQuestions(): FafQuestion[] {
     'human_context.why',
     'human_context.who',
     'human_context.what',
-    'stack.database',
+    'stack.db',
     'stack.hosting',
   ];
   return buildQuestionsForFields(goldFields);
