@@ -23,46 +23,37 @@ project/
 └── src/
 ```
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/Wolfe-Jam/faf-cli/main/assets/project-faf-screenshot.png" alt="project.faf in file listing" width="600" />
-</p>
-
-<p align="center"><em>Just another file helping you code.</em></p>
-
 > **Every building requires a foundation. `project.faf` is AI's foundation.**
 >
 > You have a `package.json`. Add a `project.faf`. Done.
 
 **Git-Native.** `project.faf` versions with your code — every clone, every fork, every checkout gets full AI context. No setup, no drift, no re-explaining.
 
-### `faf auto` — Zero to 100% in One Command
+---
+
+## Install
 
 ```bash
-faf auto
-```
-
-One command runs the full pipeline:
-
-```
-faf auto
-├── 1. Init        → Creates project.faf (or enhances existing)
-├── 2. Detect      → TURBO-CAT discovers your stack (199 formats)
-├── 3. Extract     → Pulls name, goal, version from manifests
-├── 4. Sync        → Generates CLAUDE.md (bi-sync)
-└── 5. Score       → Reports AI-readiness with before/after delta
-```
-
-It reads your `package.json`, `Cargo.toml`, or `pyproject.toml` — fills in the blanks — and scores the result. No questions, no prompts, no manual entry.
-
-```bash
-bunx faf-cli auto                  # Bun (same toolchain as Claude Code)
+bunx faf-cli auto                  # Bun (recommended — same toolchain as Claude Code)
 npx faf-cli auto                   # npm (no install required)
 brew install faf-cli && faf auto   # Homebrew
 ```
 
-**91% token reclaim out the gate.** Relentless pursuit to 100%.
+---
 
-### Top 6 Commands
+## v5.1.0 — The FAFb Edition
+
+`faf compile` turns your `.faf` into a `.fafb` binary — CRC32 sealed, deterministic, portable. Same compiler that runs in the browser (322KB WASM) now runs from the CLI. YAML is source code. FAFb is the compiled output.
+
+```bash
+faf compile                    # project.faf → project.fafb
+```
+
+The full story: **[faf.one/blog/compiler-is-the-spec](https://faf.one/blog/compiler-is-the-spec)**
+
+---
+
+## Top 7 Commands
 
 | # | Command | One-liner |
 |---|---------|-----------|
@@ -72,607 +63,102 @@ brew install faf-cli && faf auto   # Homebrew
 | 4 | `faf go` | Guided interview to gold code |
 | 5 | `faf bi-sync` | `.faf` ↔ CLAUDE.md — free forever |
 | 6 | `faf tri-sync` | ROM ↔ CLAUDE.md ↔ MEMORY.md — Pro |
+| 7 | `faf compile` | `.faf` → `.fafb` binary — sealed, portable, deterministic |
 
-**Define. Build. Lock. Relax.** Answer the 6Ws. Run the Top 6. AI context at 100% — forever.
-
-<p align="center">
-<a href="#-how-does-it-work">Quick Start</a> · <a href="https://faf.one">Website</a> · <a href="https://faf.one/daaft">DAAFT Analysis</a> · <a href="https://www.npmjs.com/package/faf-cli">npm</a> · <a href="#-core-commands">Commands</a> · <a href="#%EF%B8%8F-tier-system-from-blind-to-optimized">Tiers</a> · <a href="https://www.npmjs.com/package/claude-faf-mcp">MCP Server</a> · <a href="./CHANGELOG.md">Changelog</a>
-</p>
+Run `faf --help` for all 64+ commands.
 
 ---
 
-## 🧠 v5.0.5 — The RAM Edition
-
-**TL;DR:** `.faf` is ROM — persistent, portable, yours forever. tri-sync adds RAM: it auto-syncs with Claude's MEMORY.md. For builders, serious coders, and app-makers.
-
-**v5.0.5** — Smart Metadata Extraction: `faf auto` now pulls project name, goal, and version from your manifest files (package.json, Cargo.toml, pyproject.toml) automatically. Closer to 100% in one command.
-
-The full story: **[faf.one/blog/ram-edition](https://faf.one/blog/ram-edition)**
-
-### The 3Ws — Everyone Can Have an App
-
-You don't need to be a developer to describe an app idea. You just need 3 answers:
-
-| | Question | Who answers it? |
-|---|----------|----------------|
-| **1W** | **WHO** is it for? | Anyone |
-| **2W** | **WHAT** does it do? | Anyone |
-| **3W** | **WHY** build it? | Anyone |
-
-A teacher, a chef, a parent with an app idea — they answer WHO, WHAT, WHY. That's the whole idea. Try it: **[faf.one/ideas](https://faf.one/ideas)**
-
-### The 6Ws — The Full Picture
-
-The first 3 describe the idea. The next 3 describe the implementation:
-
-| | Question | Who answers it? |
-|---|----------|----------------|
-| **4W** | **WHERE** does it live? | Developer |
-| **5W** | **WHEN** is it shipping? | Developer |
-| **6W** | **HOW** is it built? | Developer |
-
-All 6 answers live in one file: `project.faf`. The package.json for AI context. Learn more: **[faf.one/6ws](https://faf.one/6ws)**
-
-### tri-sync — ROM meets RAM
-
-```
-bi-sync  = ROM (.faf) ↔ CLAUDE.md           ← free forever
-tri-sync = ROM ↔ CLAUDE.md ↔ RAM (MEMORY.md) ← Pro
-```
+## Quick Start
 
 ```bash
-faf tri-sync            # .faf ↔ CLAUDE.md ↔ MEMORY.md
-faf ram                 # Sync project context to RAM
-faf bi-sync --ram       # Include RAM in bi-sync
-faf bi-sync --all       # Everything: CLAUDE.md + AGENTS.md + .cursorrules + GEMINI.md + RAM
-faf pro                 # Check license status
-faf pro activate <key>  # Activate license
-```
-
-| Sync | Target | Status |
-|------|--------|--------|
-| bi-sync | `.faf` ↔ CLAUDE.md | Free forever |
-| bi-sync | `.faf` ↔ AGENTS.md, .cursorrules, GEMINI.md | Free forever |
-| **tri-sync** | `.faf` ↔ CLAUDE.md ↔ **MEMORY.md** | **Pro** |
-
-14-day free trial, no signup, no credit card. Early-bird: $3/mo · $19/yr (normally $10/mo — 70% off).
-**[Purchase at faf.one/pro](https://faf.one/pro)**
-
-**Release notes:** [CHANGELOG](./CHANGELOG.md)
-
----
-
-## 📋 The 6 Ws - Quick Reference
-
-Every README should answer these questions. Here's ours:
-
-| Question | Answer |
-|----------|--------|
-| **👥 WHO** is this for? | Developers using AI coding assistants (Claude, Gemini, Cursor, Grok, ChatGPT) |
-| **📦 WHAT** is it? | The package.json for AI context - IANA-registered format |
-| **🎯 WHY** do you need it? | 100% context (AI-scored), persists forever, syncs automatically - saves $1000s/developer |
-| **🌍 WHERE** does it work? | Everywhere AI needs context (Claude Code, Gemini CLI, Cursor, etc.) |
-| **⏰ WHEN** should you use it? | New projects (day one), existing projects (now), exploring repos (instantly) |
-| **🚀 HOW** does it work? | `bunx faf-cli git <url>` or `npx faf-cli git <url>` - No install, no clone, 2 seconds |
-
-**For AI:** Read the detailed sections below for full context.
-**For humans:** Use this pattern in YOUR README. Answer these 6 questions clearly.
-
----
-
-## 👥 WHO is this for?
-
-**Built for developers working with AI coding assistants:**
-
-- Full-stack developers using Claude, Cursor, Gemini CLI, or ChatGPT
-- Engineering teams collaborating on AI-augmented projects
-- Solo developers tired of re-explaining context every session
-- Open source maintainers wanting contributors to onboard instantly
-- Anyone building with TypeScript, React, Python, Node.js, or modern frameworks
-
-If you use AI to code, `project.faf` saves you time and tokens. Every project. Every session.
-
----
-
-## 📦 WHAT is project.faf?
-
-**The package.json for AI context.** Just another file in your project.
-
-Like `package.json` tells npm about dependencies, `project.faf` tells AI about your project DNA:
-- **Your stack:** React + TypeScript + Vite
-- **Your goals:** What you're building and why
-- **Your conventions:** How your team works
-- **Your context:** The information only YOU know
-
-**IANA-registered format:** `application/vnd.faf+yaml` — An official standard, not just another .md file.
-
-### 💎 The Math
-
-| Without `project.faf` | With `project.faf` |
-|-----------------------|-------------------|
-| ~1,750 tokens/session verifying context | ~150 tokens once |
-| Risk: wrong guess = 7,500+ tokens rework | Zero risk |
-| Context drift accumulates | Drift impossible |
-| Hope | Trust |
-
-**91% fewer tokens. Zero risk. No drift.**
-
----
-
-## 🎯 WHY do you need it?
-
-### What FAF Actually Does
-
-**1. 100% Context Quality** — AI-scored with facts, not guesswork
-Every field in your `project.faf` is validated and scored. No more "I think this is a React app" — AI **knows** it is.
-
-**2. Context Persists Forever** — Never lost, never re-explained
-Your project DNA is written once, read forever. No context drift across sessions, team members, or AI tools.
-
-**3. Bi-Sync Keeps It Current** — Responds to changes automatically
-When your project evolves, `project.faf` ↔ `CLAUDE.md` stays synchronized in 8ms. Always current, never stale.
-
----
-
-### What That Actually Costs (Or Saves)
-
-**The DAAFT Tax** (Discover, Assume, Ask, Forget, Time+Tokens)
-
-Without `project.faf`, every AI session cycles through rediscovery:
-- ❌ AI re-discovers your project (wastes tokens)
-- ❌ AI asks questions you've answered before (wastes time)
-- ❌ AI makes wrong assumptions → rework (wastes developer hours)
-- ❌ Context drifts → compounding errors → project delays
-
-**The Economics:**
-- **Per developer:** $5,460/year + 84 hours lost productivity
-- **50-developer team:** $273,000–$507,630 annually
-- **91% of tokens** wasted on rediscovery instead of building
-
-**The Real Cost:**
-- Token waste (measurable: 91% wasted)
-- Time waste (expensive: $5,460/year per developer)
-- **Project failure** (catastrophic: 70% of projects fail, with 39% citing poor requirements and 57% citing communication breakdowns — both rooted in context loss)
-
-**Full analysis:** [faf.one/daaft](https://faf.one/daaft)
-
----
-
-### The Truth People Gloss Over
-
-Bad context → wrong assumptions → rework → delays → project failure.
-
-Good context isn't a "nice to have" — it's the foundation of AI-augmented development.
-
-**`project.faf` fixes this permanently.**
-
-At 100% AI Readiness:
-- AI knows your stack, goals, and conventions (scored with facts)
-- Zero clarifying questions needed (context persists)
-- Drift is impossible (bi-sync keeps it current)
-- Your project ships on time, within budget, with fewer surprises
-
----
-
-## 🌍 WHERE does it work?
-
-**Everywhere AI needs context:**
-
-### Official Integrations
-- **[Claude Code](https://claude.ai/download)** (Anthropic) — Bi-sync + tri-sync with CLAUDE.md + MEMORY.md
-- **[Gemini CLI](https://github.com/google/generative-ai-cli)** (Google) — Import/export GEMINI.md
-- **[Antigravity IDE](https://antigravityide.com)** (Google) — Global config support
-- **[Conductor Extension](https://chromewebstore.google.com/detail/conductor)** (Google) — conductor/ directory sync
-
-### Works With
-- Cursor, Cline, Windsurf, any AI coding assistant
-- ChatGPT, Claude Desktop, Gemini chat interfaces
-- CI/CD pipelines, automation scripts, build tools
-
-### Ecosystem
-- **[MCPaaS](https://mcpaas.live)** — MCP as a Service (The Endpoint for Context)
-- **[claude-faf-mcp](https://npmjs.com/package/claude-faf-mcp)** — MCP server for Claude (33 tools)
-- **[grok-faf-mcp](https://npmjs.com/package/grok-faf-mcp)** — MCP server for Grok / xAI
-- **[gemini-faf-mcp](https://pypi.org/project/gemini-faf-mcp/)** — MCP server for Gemini / Google
-- **[faf-wasm](https://www.npmjs.com/package/faf-wasm)** — WASM SDK (<5ms scoring)
-- **[Chrome Extension](https://chromewebstore.google.com/detail/lnecebepmpjpilldfmndnaofbfjkjlkm)** — Browser integration
-- **[faf.one](https://faf.one)** — Official website
-
-**Universal format. Works everywhere. Write once, use with any AI.**
-
----
-
-## ⏰ WHEN should you use it?
-
-### New Projects
-**Day one.** Initialize with context from the start:
-```bash
-npm init -y
-faf init
-# Your project now has AI-ready context
-```
-
-### Existing Projects
-**Right now.** Add context to projects already in progress:
-```bash
-faf init                    # Start from your codebase
-faf go                      # Interview to 100%
-faf auto                    # Auto-enhance to Gold Code
-```
-
-### Exploring Repos
-**Instantly.** Generate context for ANY GitHub repo WITHOUT cloning:
-```bash
+# ANY GitHub repo — no clone, no install, 2 seconds
 bunx faf-cli git https://github.com/facebook/react
-# 2 seconds → 95% 🥈 Silver score
-# No install. No clone. Just instant context.
+
+# Your own project
+bunx faf-cli init              # Create .faf
+bunx faf-cli auto              # Zero to 100% in one command
+bunx faf-cli go                # Interactive interview to gold code
 ```
 
-### Daily Workflow
-**Always synced.** Keep context fresh automatically:
-```bash
-faf bi-sync --watch         # Continuous sync with CLAUDE.md
-```
-
-Add to package.json to see FAF status every dev session:
-```json
-{
-  "scripts": {
-    "predev": "faf status --oneline"
-  }
-}
-```
+**91% token reclaim out the gate.** Relentless pursuit to 100%.
 
 ---
 
-## 🚀 HOW does it work?
-
-### Quick Start (No Install Required)
-
-**The revolutionary way — zero install, zero clone:**
-
-```bash
-# Generate AI context for ANY GitHub repo
-bunx faf-cli git https://github.com/facebook/react
-# ⏱️ 2 seconds → 95% 🥈 Silver score
-
-bunx faf-cli git https://github.com/sveltejs/svelte
-# ⏱️ 2 seconds → 95% 🥈 Silver score
-
-bunx faf-cli git https://github.com/your-org/your-repo
-# ⏱️ 2 seconds → 90%+ context, ready for AI
-```
-
-> **Also works with npx:** Replace `bunx` with `npx` if you prefer npm.
-
-**What just happened?**
-- ✅ No install required (`bunx`/`npx` runs latest version)
-- ✅ No cloning required (uses GitHub API)
-- ✅ 2 seconds → 95% AI-ready context
-- ✅ Works on ANY public GitHub repo
-
-**This changes everything.** You can now generate AI context for repos you don't even own. 🏎️
-
-### For Your Own Projects
-
-```bash
-# Start with your codebase
-bunx faf-cli init           # or: npx faf-cli init
-
-# Or go interactive (completes the 6 Ws)
-bunx faf-cli go             # or: npx faf-cli go
-```
-
-### For Pros: Install Globally (Daily Use)
-
-Once you're hooked, install globally for full power:
-
-```bash
-# Install once
-bun install -g faf-cli    # Bun (recommended)
-npm install -g faf-cli    # or: brew install faf-cli
-
-# Then use short commands forever
-faf git <repo-url>        # 1-Click Context (90%+)
-faf go                    # Interactive to 100%
-faf auto                  # Full automation
-faf bi-sync               # Keep synced
-# + 57 more commands
-```
-
-### The Killer Combo
-
-```bash
-bunx faf-cli git <repo-url>   # 90%+ context, no install, no clone
-bunx faf-cli go               # Interactive polish to 100%
-```
-
-### Comparison: Traditional vs 1-Click Context
-
-**Traditional approach:**
-```bash
-git clone https://github.com/facebook/react  # 10-30 seconds
-cd react
-npm install -g faf-cli                       # 10 seconds
-faf init                                      # 5 seconds
-# Total: ~45 seconds + local files
-```
-
-**1-Click Context:**
-```bash
-bunx faf-cli git https://github.com/facebook/react
-# Total: 2 seconds + ZERO local files
-```
-
----
-
-## 🎖️ Tier System: From Blind to Optimized
-
-| Tier | Score | Status |
-|------|-------|--------|
-| 🏆 **Trophy** | 100% | **AI Optimized** — Gold Code |
-| 🥇 **Gold** | 99%+ | Near-perfect context |
-| 🥈 **Silver** | 95%+ | Excellent |
-| 🥉 **Bronze** | 85%+ | Production ready |
-| 🟢 **Green** | 70%+ | Solid foundation |
-| 🟡 **Yellow** | 55%+ | AI flipping coins |
-| 🔴 **Red** | <55% | AI working blind |
-| 🤍 **White** | 0% | No context at all |
-
-**At 55%, AI is guessing half the time.** At 100%, AI is optimized.
-
----
-
-## 🎯 Slot-Ignore: The Perfect Way to Handle App Types
-
-**Like `.gitignore` for files, slot-ignore for context slots.**
-
-FAF has 21 slots. Some don't apply to your project type. **Slot-ignore** handles this elegantly:
-
-```yaml
-# CLI Tool - 21 slots total
-stack:
-  database: None           # ✅ Ignored (CLI doesn't need database)
-  css_framework: None      # ✅ Ignored (no web UI)
-  backend: Node.js         # ✅ Filled (has value)
-  # ... other slots
-
-Score: (Filled + Ignored) / 21 = 100% 🏆
-```
-
-**The formula:**
-```
-Total Slots: 21 (constant)
-├── Filled: 15 (has values)
-├── Ignored: 6 (set to 'None' - not applicable)
-└── Missing: 0 (undefined - needs attention)
-
-Score: (15 + 6) / 21 = 100%
-```
-
-**Common patterns:**
-- **CLI Tools:** Ignore `database`, `css_framework`, `frontend`
-- **Backend APIs:** Ignore `css_framework`, `frontend`, `ui_library`
-- **Static Sites:** Ignore `backend`, `database`, `api_type`
-- **Libraries:** Ignore `hosting`, `cicd`, `database`
-
-**Full spec:** [docs/SLOT-IGNORE.md](./docs/SLOT-IGNORE.md)
-
----
-
-## 🔧 Core Commands
+## Core Commands
 
 | Command | Purpose |
 |---------|---------|
-| **`faf git <url>`** | **🚀 1-Click Context - 90%+ for ANY GitHub repo (no cloning!)** |
-| `faf go` | 🎯 Guided interview to 100% (completes the 6 Ws) |
+| **`faf git <url>`** | 1-Click Context — 90%+ for ANY GitHub repo (no cloning) |
+| `faf go` | Guided interview to 100% (completes the 6 Ws) |
 | `faf init` | Create project.faf from your codebase |
 | `faf auto` | Auto-enhance to Gold Code |
 | `faf score` | Check AI-readiness (0-100%) |
+| `faf compile` | Compile `.faf` → `.fafb` binary (CRC32 sealed) |
 | `faf bi-sync` | Sync .faf ↔ CLAUDE.md (8ms) |
-| `faf tri-sync` | 🧠 .faf ↔ CLAUDE.md ↔ MEMORY.md (ROM meets RAM) — **Pro** |
-| `faf ram` | Sync project context to Claude's MEMORY.md — **Pro** |
-| `faf pro` | Check/activate Pro license (14-day free trial) |
-| `faf readme` | Extract 6 Ws from README (+25-35% boost) |
-| `faf human` | Interactive human context entry |
-| `faf human-set` | Non-interactive field setting |
-| `faf formats` | Show 153 detected formats |
+| `faf tri-sync` | .faf ↔ CLAUDE.md ↔ MEMORY.md — **Pro** |
 | `faf agents` | AGENTS.md interop (import/export/sync) |
 | `faf cursor` | .cursorrules interop (import/export/sync) |
-| `faf conductor` | Google Conductor interop (import/export/sync) |
 | `faf gemini` | Gemini CLI / Antigravity interop |
-| `faf demo sync` | Live bi-sync demonstration |
-
-Run `faf --help` for all 64 commands.
+| `faf formats` | Show 199 detected formats |
 
 ---
 
-## 🔄 Bi-Sync & Tri-Sync
+## Scoring
 
-Your `project.faf` stays synchronized with everything in milliseconds.
+| Tier | Score | Status |
+|------|-------|--------|
+| 🏆 Trophy | 100% | AI Optimized — Gold Code |
+| 🥇 Gold | 99%+ | Near-perfect |
+| 🥈 Silver | 95%+ | Excellent |
+| 🥉 Bronze | 85%+ | Production ready |
+| 🟡 Yellow | 55%+ | AI flipping coins |
+| 🔴 Red | <55% | AI working blind |
 
-```
-bi-sync:   project.faf  ←── 8ms ──→  CLAUDE.md            (free)
-tri-sync:  project.faf  ←── 8ms ──→  CLAUDE.md ←→ MEMORY.md  (Pro)
-```
-
-```bash
-# bi-sync — free forever
-faf bi-sync              # Sync once (CLAUDE.md)
-faf bi-sync --agents     # Also generate AGENTS.md
-faf bi-sync --cursor     # Also generate .cursorrules
-faf bi-sync --all        # All formats + RAM
-faf bi-sync --watch      # Continuous sync
-
-# tri-sync — Pro (ROM meets RAM)
-faf tri-sync             # .faf ↔ CLAUDE.md ↔ MEMORY.md
-faf ram                  # Sync project context to RAM
-faf ram status           # Check RAM path and line count
-```
+Details: [docs/SCORING.md](./docs/SCORING.md)
 
 ---
 
-## 🧠 Human Context (The 6 Ws)
+## Sync
 
-Boost your score by 25-35% with human context — the information only YOU know.
-
-```bash
-# Auto-extract from README
-faf readme --apply
-
-# Manual entry
-faf human-set who "Frontend team at Acme Corp"
-faf human-set what "Customer dashboard with real-time analytics"
-faf human-set why "10x faster than previous solution"
 ```
+bi-sync:   .faf  ←── 8ms ──→  CLAUDE.md                (free forever)
+tri-sync:  .faf  ←── 8ms ──→  CLAUDE.md ↔ MEMORY.md    (Pro)
+```
+
+14-day free trial, no signup, no credit card. Early-bird: $3/mo · $19/yr.
+**[faf.one/pro](https://faf.one/pro)** · Details: [docs/SYNC.md](./docs/SYNC.md)
 
 ---
 
-## 🧪 Boris-Flow Integration Tests
+## Documentation
 
-**Boris-Flow** is a 12-test validation suite that ensures faf-cli is demo-ready and safe to publish.
-
-Named after Boris (Claude Code creator at Anthropic), these tests validate:
-- Version detection works correctly
-- Type and language detection (CLI, TypeScript, etc.)
-- Claude Code structure detection (agents, skills, commands)
-- Score progression: init → auto → 100%
-- Non-TTY safety (no crashes when stdin is piped)
-
-**When to run:**
-
-| Scenario | Command |
-|----------|---------|
-| **Before `faf init`** (on your project) | `./tests/boris-flow.test.sh` validates faf-cli works |
-| **After major changes** to your `.faf` | Re-run to ensure structure is valid |
-| **Before publishing** faf-cli updates | Required - ensures no regressions |
-| **Before WJTTC certification** | Validates `.faf` file for Tier 8 |
-| **Team onboarding** | Proves faf-cli installation works |
-
-**Run Boris-Flow:**
-```bash
-# Clone faf-cli repository
-git clone https://github.com/Wolfe-Jam/faf-cli
-cd faf-cli
-
-# Run integration tests
-./tests/boris-flow.test.sh
-
-# Expected output:
-# 🏆 BORIS-FLOW: ALL 12 TESTS PASSED
-# ✅ Demo ready
-# ✅ Safe to publish
-#    Final score: 100%
-```
-
-**What it tests:**
-```bash
-✅ faf --version
-✅ Created Claude Code 2.1.0 structure
-✅ faf init created project.faf
-✅ Detected CLI type
-✅ Language detected (TypeScript)
-✅ claude_code section exists
-✅ Claude Code detected: true
-✅ Subagents detected (2+)
-✅ Skills detected (1+)
-✅ Commands detected (1+)
-✅ faf auto maintained score
-✅ human-set commands succeeded
-✅ Final score is 100%
-```
-
-Boris-Flow validates the FAF file structure that WJTTC Tier 8 tests. Running it before certification helps ensure you'll pass Tier 8.
+| Doc | What |
+|-----|------|
+| [Guide (6Ws)](./docs/GUIDE.md) | WHO / WHAT / WHY / WHERE / WHEN / HOW — deep dive |
+| [Scoring & Tiers](./docs/SCORING.md) | Tier system, slot-ignore patterns |
+| [Sync](./docs/SYNC.md) | bi-sync, tri-sync, human context |
+| [Testing](./docs/TESTING.md) | Boris-Flow integration tests |
+| [Skills](./docs/SKILLS.md) | 16 Claude Code skills |
+| [Ecosystem](./docs/ECOSYSTEM.md) | CLI vs MCP, FAF Family, 3Ws/6Ws |
+| [Slot-Ignore](./docs/SLOT-IGNORE.md) | Full slot-ignore spec |
+| [Pro](./docs/PRO.md) | tri-sync commands, activation, FAQ |
+| [CHANGELOG](./CHANGELOG.md) | Version history |
+| [DAAFT Analysis](https://faf.one/daaft) | The cost of not having context |
 
 ---
 
-## 🤝 CLI vs MCP
-
-| Tool | Use Case |
-|------|----------|
-| **faf-cli** (this) | Terminal, scripts, CI/CD, automation |
-| **claude-faf-mcp** | Claude Desktop via MCP protocol |
-| **grok-faf-mcp** | Grok / xAI via MCP protocol |
-| **gemini-faf-mcp** | Gemini / Google via MCP protocol |
-
-Same `project.faf`. Same scoring. Same result. Different execution layer. Three AI platforms, one format.
-
----
-
-## ⚡ Claude Code Skills
-
-**FAF ships 16 skills** that run inside Claude Code sessions. Type `/` and go — no install, no setup.
-
-| Skill | What it does |
-|-------|-------------|
-| `/faf-score` | Score your `.faf` (0-100%) — runs in background while you work |
-| `/faf-auto` | Zero to 100% in one command |
-| `/faf-go` | Guided interview to Gold Code |
-| `/faf-init` | Create `.faf` from your project |
-| `/faf-sync` | Bi-sync `.faf` ↔ CLAUDE.md |
-| `/faf-status` | Quick health check (<200ms) |
-| `/faf-formats` | TURBO-CAT discovers all formats |
-| `/faf-expert` | Deep `.faf` knowledge on demand |
-| `/commit` | Context-aware git commits powered by FAF |
-| `/pr` | Context-aware pull requests powered by FAF |
-| `/review` | Context-aware code reviews powered by FAF |
-| `/wjttc-builder` | Auto-generate championship-grade test suites |
-| `/wjttc-tester` | F1-inspired testing expert |
-| `/mcp-builder` | Guide for creating MCP servers |
-| `/pubblog` | Generate release blog posts |
-| `/pubpro` | npm + MCP Registry publish protocol |
-
-**Why skills matter:** Claude Code runs `faf score` in the background while you're coding. No context switch, no terminal tab, no waiting. The skill tells Claude what to do — the CLI does the work. You get a score without lifting a finger.
-
-```
-You: "check the score"
-Claude: runs /faf-score in background, continues helping you code
-Claude: "100/100 🏆 — Trophy. Born at 33%, now 100% over 59 days."
-```
-
-Skills are defined in your Claude Code config. [Learn more about Claude Code skills](https://code.claude.com/docs/en/skills). Publish and discover skills on the [Anthropic Skills Registry](https://github.com/anthropics/skills).
-
----
-
-## 📚 Documentation & Recommended Reading
-
-- **[The RAM Edition](https://faf.one/blog/ram-edition)** — Full v5.0.1 release blog post
-- **[FAF Pro](https://faf.one/pro)** — tri-sync pricing and activation
-- **[Pro Docs](./docs/PRO.md)** — Commands, FAQ, and licensing
-- **[The 3Ws](https://faf.one/ideas)** — Describe any app idea in 3 answers
-- **[The 6Ws](https://faf.one/6ws)** — The complete project DNA framework
-- **[CHANGELOG](./CHANGELOG.md)** — Version history
-- **[Website](https://faf.one)** — Complete guide
-- **[DAAFT Analysis](https://faf.one/daaft)** — The cost of not having context
-
----
-
-## 💬 Support
+## Support
 
 - **[GitHub Discussions](https://github.com/Wolfe-Jam/faf-cli/discussions)** — Questions, ideas, community
-- **[Pro Docs](./docs/PRO.md)** — tri-sync commands, activation, FAQ
 - **Email:** team@faf.one
 
 ---
 
-## 📄 License
+## License
 
-MIT License — Free and open source
+MIT — Free and open source
 
----
-
-## FAF Family
-
-| | |
-|---|---|
-| **[faf-cli](https://www.npmjs.com/package/faf-cli)** | `npx faf-cli init` — create .faf for any project |
-| **[claude-faf-mcp](https://www.npmjs.com/package/claude-faf-mcp)** | MCP server for Claude Desktop |
-| **[gemini-faf-mcp](https://pypi.org/project/gemini-faf-mcp/)** | MCP server for Gemini CLI |
-| **[grok-faf-mcp](https://www.npmjs.com/package/grok-faf-mcp)** | MCP server for Grok |
-| **[faf-mcp](https://www.npmjs.com/package/faf-mcp)** | MCP server for Cursor, Windsurf, Cline, VS Code |
-| **[rust-faf-mcp](https://crates.io/crates/rust-faf-mcp)** | MCP server in Rust |
-| **[faf-skills](https://github.com/Wolfe-Jam/faf-skills)** | 17 Claude Code skills |
-| **[faf.one](https://faf.one)** | Blog, downloads, docs |
-| **[IANA Registration](https://www.iana.org/assignments/media-types/application/vnd.faf+yaml)** | `application/vnd.faf+yaml` |
+**IANA-registered:** [`application/vnd.faf+yaml`](https://www.iana.org/assignments/media-types/application/vnd.faf+yaml)
 
 *format | driven 🏎️⚡️ [wolfejam.dev](https://wolfejam.dev)*
