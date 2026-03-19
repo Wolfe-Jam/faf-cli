@@ -54,13 +54,13 @@ export function mapFafToTopics(fafData: any): MemoryTopicFile[] {
   const project = fafData.project || {};
   if (project.name || project.goal) {
     const lines: string[] = [];
-    if (project.name) lines.push(`**${project.name}**`);
-    if (project.goal) lines.push(`${project.goal}`);
-    if (project.type) lines.push(`App type: ${project.type}`);
-    if (project.main_language) lines.push(`Main language: ${project.main_language}`);
+    if (project.name) {lines.push(`**${project.name}**`);}
+    if (project.goal) {lines.push(`${project.goal}`);}
+    if (project.type) {lines.push(`App type: ${project.type}`);}
+    if (project.main_language) {lines.push(`Main language: ${project.main_language}`);}
 
     const version = fafData.state?.version || project.version;
-    if (version) lines.push(`Version: ${version}`);
+    if (version) {lines.push(`Version: ${version}`);}
 
     lines.push('');
     lines.push('**Why:** Seeded from project.faf by tri-sync');
@@ -104,7 +104,7 @@ export function mapFafToTopics(fafData: any): MemoryTopicFile[] {
     const lines: string[] = [];
     for (const [key, value] of stackEntries) {
       const display = DISPLAY_NAMES[key] || key;
-      if (seen.has(display)) continue;
+      if (seen.has(display)) {continue;}
       seen.add(display);
       lines.push(`- **${display}:** ${value}`);
     }
@@ -175,7 +175,7 @@ export function mapFafToTopics(fafData: any): MemoryTopicFile[] {
     }
 
     if (warnings.length > 0) {
-      if (lines.length > 0) lines.push('');
+      if (lines.length > 0) {lines.push('');}
       lines.push('Rules:');
       for (const w of warnings) {
         lines.push(`- ${w}`);
@@ -231,10 +231,10 @@ export function mapFafToTopics(fafData: any): MemoryTopicFile[] {
   const state = fafData.state || {};
   if (state.phase || state.focus || state.status) {
     const lines: string[] = [];
-    if (state.phase) lines.push(`- **Phase:** ${state.phase}`);
-    if (state.focus) lines.push(`- **Focus:** ${state.focus}`);
-    if (state.status) lines.push(`- **Status:** ${state.status}`);
-    if (state.version) lines.push(`- **Version:** ${state.version}`);
+    if (state.phase) {lines.push(`- **Phase:** ${state.phase}`);}
+    if (state.focus) {lines.push(`- **Focus:** ${state.focus}`);}
+    if (state.status) {lines.push(`- **Status:** ${state.status}`);}
+    if (state.version) {lines.push(`- **Version:** ${state.version}`);}
 
     lines.push('');
     lines.push('**Why:** Current project state from .faf');
@@ -376,7 +376,7 @@ async function updateMemoryIndex(indexPath: string, topics: MemoryTopicFile[]): 
       await fs.writeFile(indexPath, updated);
     } else {
       // Append FAF section to end
-      const updated = existing.trimEnd() + '\n' + fafSection + '\n';
+      const updated = `${existing.trimEnd()  }\n${  fafSection  }\n`;
       await fs.writeFile(indexPath, updated);
     }
   } else {
@@ -443,10 +443,10 @@ function parseTopicFrontmatter(raw: string): {
 } | null {
   const normalized = raw.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n');
 
-  if (!normalized.startsWith('---\n')) return null;
+  if (!normalized.startsWith('---\n')) {return null;}
 
   const endIdx = normalized.indexOf('\n---\n', 4);
-  if (endIdx === -1) return null;
+  if (endIdx === -1) {return null;}
 
   const frontmatter = normalized.substring(4, endIdx);
   const content = normalized.substring(endIdx + 5).trim();
@@ -455,7 +455,7 @@ function parseTopicFrontmatter(raw: string): {
   const descMatch = frontmatter.match(/^description:\s*(.+)$/m);
   const typeMatch = frontmatter.match(/^type:\s*(.+)$/m);
 
-  if (!nameMatch || !typeMatch) return null;
+  if (!nameMatch || !typeMatch) {return null;}
 
   return {
     name: nameMatch[1].trim(),

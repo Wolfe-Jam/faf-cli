@@ -5,6 +5,37 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.1.0] - 2026-03-19
+
+### Added
+
+- **Mk4 Slot Renames** — 6 canonical slot name updates aligned with Mk4 engine:
+  - `frontend`→`framework`, `css_framework`→`css`, `state_management`→`state`
+  - `api_type`→`api`, `database`→`db`, `package_manager`→`pkg_manager`
+  - `SLOT_ALIASES` / `SLOT_ALIASES_REVERSE` as single source of truth
+  - Full backward compatibility — old .faf files score identically
+  - WASM kernel bridge translates Mk4→old names for Rust kernel
+- **Tri-sync Topic Files** — Claude Code native memory format:
+  - `memory-topic-writer.ts`: maps .faf → individual topic files with frontmatter
+  - 6 topic types: project, stack, context, preferences, key_files, state
+  - MEMORY.md index management (insert/replace FAF section)
+  - `faf ram export` and `faf bi-sync --ram` both write topic files
+- **WJTTC Mk4 Rename Suite** — 21 tests across 7 tiers (Brake→Stress)
+- **WJTTC Topic Writer Suite** — 20 tests for Claude Code memory format
+
+### Changed
+
+- All generators output Mk4 canonical names
+- ScoreCalculator checks both old and new names
+- Slot counter outputs Mk4 paths (`stack.framework` not `stack.frontend`)
+- Family detectors updated (React, Svelte, Next, Vite)
+
+### Tests
+
+- 1184/1184 passing (up from 1143)
+- 52 test suites
+- FAFb compile/decompile verified with both name sets
+
 ## [5.0.6] - 2026-03-13
 
 ### Added
