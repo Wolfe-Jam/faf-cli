@@ -5,10 +5,14 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [5.1.0] - 2026-03-19
+## [5.2.0] - 2026-03-20
 
 ### Added
 
+- **FAFb Compile/Decompile** — `faf compile` and `faf decompile` commands now live in CLI
+  - Powered by faf-scoring-kernel (WASM) — no external binary needed
+  - `.faf → .fafb` binary compilation, `.fafb → .faf` decompilation
+  - Works with both Mk4 and old slot names
 - **Mk4 Slot Renames** — 6 canonical slot name updates aligned with Mk4 engine:
   - `frontend`→`framework`, `css_framework`→`css`, `state_management`→`state`
   - `api_type`→`api`, `database`→`db`, `package_manager`→`pkg_manager`
@@ -29,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ScoreCalculator checks both old and new names
 - Slot counter outputs Mk4 paths (`stack.framework` not `stack.frontend`)
 - Family detectors updated (React, Svelte, Next, Vite)
+- Compile/decompile switched from external xai-faf-rust binary to WASM kernel
 
 ### Tests
 
