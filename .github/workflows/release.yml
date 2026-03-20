@@ -3,7 +3,7 @@ name: 🚀 Release Pipeline
 on:
   push:
     tags: ['v*']
-  
+
   # Allow manual releases
   workflow_dispatch:
     inputs:
@@ -20,6 +20,9 @@ on:
 env:
   NODE_VERSION: '20'
 
+# NOTE: npm publishing is handled locally via /pubpro protocol.
+# This pipeline validates, builds artifacts, and creates the GitHub Release only.
+
 jobs:
   # Pre-flight validation
   validate:
@@ -28,33 +31,33 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.version }}
       is-prerelease: ${{ steps.version.outputs.is-prerelease }}
-    
+
     steps:
       - name: 📦 Checkout repository
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      
+
       - name: ⚡ Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-      
+
       - name: 📥 Install dependencies
         run: npm ci
-      
+
       - name: 🏗️ Build project
         run: npm run build
-      
+
       - name: 🧪 Run full test suite
         run: |
           npm run test
           npm run test:audit
-      
+
       - name: 🔧 ESLint validation
         run: npm run lint
-      
+
       - name: 🎯 Extract version info
         id: version
         run: |
@@ -70,10 +73,10 @@ jobs:
               IS_PRERELEASE="false"
             fi
           fi
-          
+
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "is-prerelease=$IS_PRERELEASE" >> $GITHUB_OUTPUT
-          
+
           echo "🏷️ Version: $VERSION"
           echo "🧪 Pre-release: $IS_PRERELEASE"
 
@@ -86,26 +89,26 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         node-version: ['18', '20', '22']
-    
+
     steps:
       - name: 📦 Checkout repository
         uses: actions/checkout@v6
-      
+
       - name: ⚡ Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
-      
+
       - name: 📥 Install dependencies
         run: npm ci
-      
+
       - name: 🏗️ Build project
         run: npm run build
-      
+
       - name: 🧪 Run tests
         run: npm test
-      
+
       - name: 🎯 Test CLI functionality
         run: |
           # Test basic CLI commands
@@ -117,34 +120,34 @@ jobs:
     name: 🏗️ Build Release Artifacts
     needs: [validate, test-matrix]
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: 📦 Checkout repository
         uses: actions/checkout@v6
-      
+
       - name: ⚡ Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-      
+
       - name: 📥 Install dependencies
         run: npm ci
-      
+
       - name: 🏗️ Build project
         run: npm run build
-      
+
       - name: 📦 Create package
         run: npm pack
-      
+
       - name: 📊 Package info
         run: |
           echo "🏷️ Package created:"
           ls -la *.tgz
-          
+
           echo "📦 Package contents:"
           tar -tzf *.tgz | head -20
-      
+
       - name: 💾 Upload package artifact
         uses: actions/upload-artifact@v6
         with:
@@ -159,19 +162,19 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       changelog: ${{ steps.changelog.outputs.changelog }}
-    
+
     steps:
       - name: 📦 Checkout repository
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      
+
       - name: 📝 Generate changelog
         id: changelog
         run: |
           # Get commits since last tag
           LAST_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
-          
+
           if [[ -n "$LAST_TAG" ]]; then
             echo "📅 Changes since $LAST_TAG:"
             CHANGELOG=$(git log --pretty=format:"- %s (%h)" $LAST_TAG..HEAD)
@@ -179,7 +182,7 @@ jobs:
             echo "📅 Initial release - all commits:"
             CHANGELOG=$(git log --pretty=format:"- %s (%h)" --max-count=20)
           fi
-          
+
           # Save multiline output safely
           {
             echo 'changelog<<EOF'
@@ -187,71 +190,21 @@ jobs:
             echo 'EOF'
           } >> $GITHUB_OUTPUT
 
-  # Publish to NPM
-  publish-npm:
-    name: 📢 Publish to NPM
-    needs: [validate, test-matrix, build-artifacts, changelog]
-    runs-on: ubuntu-latest
-    environment: production
-    
-    steps:
-      - name: 📦 Checkout repository
-        uses: actions/checkout@v6
-      
-      - name: ⚡ Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          registry-url: 'https://registry.npmjs.org'
-      
-      - name: 📥 Install dependencies
-        run: npm ci
-      
-      - name: 🏗️ Build project
-        run: npm run build
-      
-      - name: 🔐 Verify package before publish
-        run: |
-          echo "🔍 Verifying package integrity..."
-          npm pack --dry-run
-          
-          echo "📋 Package details:"
-          npm info faf-cli --json | jq '.versions[-5:]'
-      
-      - name: 📢 Publish to NPM
-        run: |
-          if [[ "${{ needs.validate.outputs.is-prerelease }}" == "true" ]]; then
-            echo "🧪 Publishing pre-release to NPM..."
-            npm publish --tag beta --access public
-          else
-            echo "🚀 Publishing stable release to NPM..."
-            npm publish --access public
-          fi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      
-      - name: 🎉 NPM publish success
-        run: |
-          echo "✅ Successfully published faf-cli@${{ needs.validate.outputs.version }}"
-          echo "📦 Available at: https://www.npmjs.com/package/faf-cli"
-          echo "💻 Install with: npm install -g faf-cli"
-
   # Create GitHub release
   github-release:
     name: 🏷️ Create GitHub Release
-    needs: [validate, test-matrix, build-artifacts, changelog, publish-npm]
+    needs: [validate, test-matrix, build-artifacts, changelog]
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: 📦 Checkout repository
         uses: actions/checkout@v6
-      
+
       - name: 💾 Download package artifact
         uses: actions/download-artifact@v7
         with:
           name: npm-package
-      
+
       - name: 🏷️ Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -281,27 +234,27 @@ jobs:
             # Check your AI context score
             faf score --details
 
-            # Build trust with AI
-            faf trust
+            # Compile to binary
+            faf compile
             ```
 
             ## 📊 Performance Metrics
 
-            - ⚡ Status command: <40ms (F1-inspired speed)
-            - 🎯 Trust calculation: <200ms
-            - 💎 Technical credit system active
+            - ⚡ Scoring engine: 169μs average
+            - 🏎️ Bi-sync: 8ms
+            - 🧪 1,184/1,184 tests passing
             - 🏆 Championship-grade engineering
 
             ## 🔗 Links
 
             - 📦 [NPM Package](https://www.npmjs.com/package/faf-cli)
-            - 📚 [Documentation](https://docs.faf.one)
+            - 🌐 [Website](https://faf.one)
+            - 📝 [Blog](https://faf.one/blog)
             - 🐛 [Report Issues](https://github.com/faf-org/cli/issues)
-            - 💬 [Discussions](https://github.com/faf-org/cli/discussions)
 
             ---
 
-            **🏁 Trust-driven development starts here!**
+            **🏁 Define. Build. Lock. Relax.**
           draft: false
           prerelease: ${{ needs.validate.outputs.is-prerelease == 'true' }}
           files: |
@@ -309,73 +262,72 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # Performance benchmarks
+  # Performance benchmarks (installs from npm to verify published package)
   performance-benchmark:
     name: ⚡ Performance Validation
-    needs: [validate, publish-npm]
+    needs: [validate, test-matrix]
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: 📦 Checkout repository
         uses: actions/checkout@v6
-      
+
       - name: ⚡ Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
-      
+
       - name: 📥 Install published package
         run: |
           echo "🔄 Installing published version..."
           npm install -g faf-cli@${{ needs.validate.outputs.version }}
           faf --version
-      
+
       - name: 🏎️ F1-Inspired Performance Tests
         run: |
           echo "⚡ Testing championship performance claims..."
-          
+
           # Test status command speed (<40ms target)
           echo "🎯 Testing 'faf status' speed..."
           time faf status || echo "No .faf file found (expected)"
-          
+
           # Test help command speed
           echo "📚 Testing 'faf --help' speed..."
           time faf --help
-          
+
           # Test index command speed
           echo "📋 Testing 'faf index' speed..."
           time faf index
-          
+
           echo "✅ Performance validation complete!"
 
   # Notification
   notify-success:
     name: 🎉 Success Notification
-    needs: [validate, test-matrix, build-artifacts, publish-npm, github-release, performance-benchmark]
+    needs: [validate, test-matrix, build-artifacts, github-release, performance-benchmark]
     runs-on: ubuntu-latest
     if: success()
-    
+
     steps:
       - name: 🏆 Championship Success!
         run: |
           echo "🏁 🏎️ FAF CLI ${{ needs.validate.outputs.version }} RELEASED! ⚡🏆"
           echo ""
           echo "✅ All systems green - Championship engineering delivered!"
-          echo "🚀 NPM: Published and ready"
           echo "🏷️ GitHub: Release created"
           echo "⚡ Performance: F1-validated"
-          echo "📊 Analytics: Tracking enabled"
           echo ""
-          echo "🎯 Trust-driven development is now available to everyone!"
           echo "📦 Install: npm install -g faf-cli@${{ needs.validate.outputs.version }}"
+          echo ""
+          echo "NOTE: npm publishing is handled via /pubpro protocol (local)"
 
   # Failure notification
   notify-failure:
     name: 🚨 Failure Notification
-    needs: [validate, test-matrix, build-artifacts, publish-npm, github-release]
+    needs: [validate, test-matrix, build-artifacts, github-release]
     runs-on: ubuntu-latest
     if: failure()
-    
+
     steps:
       - name: 🚨 Release Failed
         run: |
