@@ -131,7 +131,7 @@ faf_dna:
   birth_date: 2026-02-18T19:56:53.125Z
   current_score: 86
 metadata:
-  last_claude_sync: 2026-03-19T21:27:57.911Z
+  last_claude_sync: 2026-03-20T00:25:04.730Z
   bi_sync: active
 stack_signature: typescript-nodejs-javascript
 detected_frameworks:

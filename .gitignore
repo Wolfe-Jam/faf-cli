@@ -120,3 +120,13 @@ WARP-*.md
 .faf.before-*
 .mcpregistry_github_token
 .mcpregistry_registry_token
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example
+wrangler.jsonc
+
+# Compiled FAFb output
+*.fafb

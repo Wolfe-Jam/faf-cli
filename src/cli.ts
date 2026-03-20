@@ -59,9 +59,9 @@ import { readmeCommand } from './commands/readme';
 import { humanCommand, humanSetCommand } from './commands/human';
 import { sixwsCommand } from './commands/sixws';
 import { registerPluginInstallCommand } from './commands/plugin-install';
-// FAFb Commands - OFF by default (xAI exclusive)
-// import { compileCommand } from './commands/compile';
-// import { decompileCommand } from './commands/decompile';
+// FAFb Commands — WASM kernel (no external binary needed)
+import { compileCommand } from './commands/compile';
+import { decompileCommand } from './commands/decompile';
 import { setColorOptions, type ColorScheme } from './utils/color-utils';
 import { generateFAFHeader, generateHelpHeader, FAF_COLORS } from './utils/championship-style';
 import { analytics, trackCommand, trackError, withPerformanceTracking } from './telemetry/analytics';
@@ -507,27 +507,21 @@ Examples:
   .action(withAnalyticsTracking('formats', (directory, options) => formatsCommand(directory, options)));
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// FAFb BINARY FORMAT COMMANDS - OFF BY DEFAULT (xAI Exclusive)
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//
-// To enable: Uncomment the imports at the top and these command registrations
-//
-// program
-//   .command('compile [input]')
-//   .description('🔨 Compile .faf to .fafb binary format (xAI exclusive)')
-//   .option('-o, --output <file>', 'Output .fafb file path')
-//   .option('-w, --watch', 'Watch and auto-recompile on changes')
-//   .option('-b, --benchmark', 'Compare .faf vs .fafb parse speeds')
-//   .option('-v, --verbose', 'Verbose output')
-//   .action(withAnalyticsTracking('compile', (input, options) => compileCommand(input, options)));
-//
-// program
-//   .command('decompile [input]')
-//   .description('🔓 Decompile .fafb binary back to .faf YAML')
-//   .option('-o, --output <file>', 'Output .faf file path')
-//   .action(withAnalyticsTracking('decompile', (input, options) => decompileCommand(input, options)));
-//
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// FAFb BINARY FORMAT COMMANDS — WASM kernel (no external binary needed)
+program
+  .command('compile [input]')
+  .description('Compile .faf to .fafb binary format')
+  .option('-o, --output <file>', 'Output .fafb file path')
+  .option('-w, --watch', 'Watch and auto-recompile on changes')
+  .option('-b, --benchmark', 'Compare .faf vs .fafb parse speeds')
+  .option('-v, --verbose', 'Verbose output')
+  .action(withAnalyticsTracking('compile', (input: string | undefined, options: any) => compileCommand(input, options)));
+
+program
+  .command('decompile [input]')
+  .description('Decompile .fafb binary to JSON')
+  .option('-o, --output <file>', 'Output file path')
+  .action(withAnalyticsTracking('decompile', (input: string | undefined, options: any) => decompileCommand(input, options)));
 
 // 🏆 faf version - Show version with MK3 status
 program
