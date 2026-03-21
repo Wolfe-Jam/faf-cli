@@ -5,6 +5,31 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.2.1] - 2026-03-21
+
+### Changed
+
+- **All-in on Bun test runner** — migrated from Jest to `bun test` as primary
+  - `npm test` now runs `bun test`
+  - CI updated: 3 Bun jobs (3 OS) + 3 Node smoke tests
+  - Added `bunfig.toml` configuration
+- **Fixed `faf enhance` reference** — `faf auto` output now correctly suggests `faf enhance` (was `faf ai-enhance`)
+
+### Fixed
+
+- Fixed process.env.PATH poisoning in compile/decompile tests (caused 16 cascading failures)
+- Fixed type re-export for bun module resolution (`export type { ParsedTestOutput }`)
+- Fixed process.env shallow copy in execution-context tests
+- Added `finally` blocks to all mock restorations (prevents leaks in single-process runner)
+- Removed orphaned archive test files from bun discovery
+- Removed dead TTY-only integration test (25 permanent skips eliminated)
+- Rewritten meta-test infrastructure to validate bun single-process safety
+
+### Tests
+
+- 1232/1232 passing, 0 skip, 0 fail across 54 files
+- Runner: bun test (native TS, single process)
+
 ## [5.2.0] - 2026-03-20
 
 ### Added
