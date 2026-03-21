@@ -508,7 +508,7 @@ export async function autoCommand(directory?: string, options: AutoOptions = {})
     console.log(chalk.gray("  • Check your score: ") + chalk.white("faf show"));
     console.log(chalk.gray("  • See details: ") + chalk.white("faf score --details"));
     console.log(chalk.gray("  • Keep synced: ") + chalk.white("faf bi-sync --watch"));
-    console.log(chalk.gray("  • Get AI help: ") + chalk.white("faf ai-enhance"));
+    console.log(chalk.gray("  • Get AI help: ") + chalk.white("faf enhance"));
 
     console.log(chalk.gray("\n🏎️ Stop faffing about - start building!\n"));
 
