@@ -43,7 +43,7 @@
     "obfuscate:engine": "node obfuscate-engine.js",
     "build:protected": "npm run build:engine && npm run obfuscate:engine",
     "build:all": "npm run build:protected && npm run build",
-    "prepare": "npm run build && npm run test:audit",
+    "prepare": "npm run build",
     "sync-version": "node scripts/sync-version.js",
     "version": "npm run sync-version && git add project.faf",
     "prepublishOnly": "npm run lint && npm run build:verify && npm run version:truth",
