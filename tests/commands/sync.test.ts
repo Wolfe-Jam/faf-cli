@@ -6,25 +6,34 @@ import { syncFafFile } from '../../src/commands/sync';
 import { promises as fs } from 'fs';
 import * as path from 'path';
 
-// Mock console.log to capture output
+// Mock console.log to capture output — save originals so we restore them
+const originalLog = console.log;
+const originalError = console.error;
+const originalExit = process.exit;
+
 const mockLog = jest.fn();
 const mockError = jest.fn();
 const mockExit = jest.fn();
 
-console.log = mockLog;
-console.error = mockError;
-process.exit = mockExit as any;
-
 describe('Sync Command', () => {
   const testDir = path.join(__dirname, '../temp-sync');
-  
+
   beforeEach(() => {
+    console.log = mockLog;
+    console.error = mockError;
+    process.exit = mockExit as any;
     mockLog.mockClear();
     mockError.mockClear();
     mockExit.mockClear();
   });
 
-  afterEach(async () => {
+  afterEach(() => {
+    console.log = originalLog;
+    console.error = originalError;
+    process.exit = originalExit;
+  });
+
+  afterAll(async () => {
     // Cleanup test directory
     try {
       await fs.rm(testDir, { recursive: true, force: true });

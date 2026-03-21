@@ -67,5 +67,5 @@ export {
   parseJestOutput,
   parseVitestOutput,
   parseTestOutput,
-  ParsedTestOutput,
 } from './test-output-parser';
+export type { ParsedTestOutput } from './test-output-parser';

@@ -3,7 +3,6 @@
  * No testing, no noodles, Claude!
  */
 
-import { describe, it, expect, beforeEach } from '@jest/globals';
 import { TurboCat } from '../src/utils/turbo-cat';
 import { validatePyramid, getAllFormats, getFormatLevel } from '../src/utils/turbo-cat-pyramid';
 import * as fs from 'fs/promises';

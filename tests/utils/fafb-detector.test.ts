@@ -3,7 +3,6 @@
  * Tests for detecting FAFb compiler, Radio Protocol, and WASM SDK projects
  */
 
-import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';

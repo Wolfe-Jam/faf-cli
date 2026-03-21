@@ -1,5 +1,5 @@
 faf_version: 2.5.0
-generated: 2026-02-18T19:56:53.057Z
+generated: 2026-03-21T03:31:12.628Z
 ai_scoring_system: 2025-09-20
 ai_score: 83%
 ai_confidence: HIGH
@@ -59,6 +59,7 @@ stack:
   missionPurpose: project documentation
   packageManager: npm/yarn/pnpm
   mainLanguage: JavaScript/TypeScript
+  buildTool: Bun
 preferences:
   quality_bar: zero_errors
   commit_style: conventional_emoji
@@ -131,16 +132,17 @@ faf_dna:
   birth_date: 2026-02-18T19:56:53.125Z
   current_score: 86
 metadata:
-  last_claude_sync: 2026-03-20T19:26:54.660Z
+  last_claude_sync: 2026-03-21T21:41:34.300Z
   bi_sync: active
 stack_signature: typescript-nodejs-javascript
 detected_frameworks:
   - Claude Code
+  - Bun
   - Jest
   - Node.js
   - JavaScript
   - TypeScript
-turbo_cat_intelligence: 275
+turbo_cat_intelligence: 305
 stats:
   best_auto_time: 0.2
   last_auto_time: 0.2

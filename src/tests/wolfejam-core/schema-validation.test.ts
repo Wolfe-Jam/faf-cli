@@ -9,7 +9,6 @@
  * Like brakes on an F1 car - this MUST work flawlessly.
  */
 
-import { describe, it, expect } from '@jest/globals';
 import { validateSchema, ValidationResult, FafSchema } from '../../schema/faf-schema';
 
 describe('🔒 Schema Validation Engine - BRAKE SYSTEM TESTS', () => {

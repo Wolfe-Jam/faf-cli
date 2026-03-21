@@ -1,16 +1,13 @@
 /**
- * 🏎️ YOLO Meta-Test: Testing The Testing Infrastructure
+ * YOLO Meta-Test: Testing The Testing Infrastructure
  *
  * PURPOSE: Validate that our testing environment is robust and won't fail silently
- * TIER: BRAKE SYSTEMS 🚨 (Most Critical - Testing the tests themselves)
+ * TIER: BRAKE SYSTEMS (Most Critical - Testing the tests themselves)
  *
  * WHY THIS EXISTS:
- * The git drift test failures exposed critical weaknesses in our testing setup:
- * 1. Jest cache corruption (affected ALL tests)
- * 2. process.cwd() pollution (cross-test contamination)
- * 3. Template literal bugs (syntax errors hidden by test infrastructure)
- *
- * This YOLO test ensures those problems are IMPOSSIBLE going forward.
+ * Bun runs all tests in a single process. Any shared state mutation
+ * (process.env, process.cwd, console, mocks) leaks between files.
+ * This test validates that our infrastructure prevents that.
  */
 
 import { execSync } from 'child_process';
@@ -20,7 +17,6 @@ import * as os from 'os';
 
 /**
  * Cross-platform helper to find test files
- * Replaces Unix `find` command with Node.js fs
  */
 function findTestFiles(dir: string, pattern: RegExp): string[] {
   const results: string[] = [];
@@ -41,30 +37,29 @@ function findTestFiles(dir: string, pattern: RegExp): string[] {
   return results;
 }
 
-describe('🏁 YOLO: Meta-Test Infrastructure Validation', () => {
+describe('YOLO: Meta-Test Infrastructure Validation', () => {
   const originalCwd = process.cwd();
 
   afterEach(() => {
-    // CRITICAL: Always restore cwd after tests
     try {
       process.chdir(originalCwd);
     } catch (e) {
-      console.error(`⚠️ Could not restore cwd to ${originalCwd}:`, e);
+      console.error(`Could not restore cwd to ${originalCwd}:`, e);
     }
   });
 
-  describe('🚨 TIER 1: Jest Configuration Safety', () => {
-    it('should enforce sequential test execution (maxWorkers: 1)', () => {
-      const jestConfig = require('../jest.config.js');
+  describe('TIER 1: Bun Test Runner Safety', () => {
+    it('should use bun test as primary test runner', () => {
+      const packageJson = JSON.parse(
+        fs.readFileSync(path.resolve(__dirname, '../package.json'), 'utf8')
+      );
 
-      expect(jestConfig.maxWorkers).toBe(1);
+      expect(packageJson.scripts['test']).toBe('bun test');
+    });
 
-      if (jestConfig.maxWorkers !== 1) {
-        throw new Error(
-          'CRITICAL: maxWorkers must be 1 to prevent cwd corruption!\n' +
-          'Parallel tests can pollute process.cwd() and cause cascade failures.'
-        );
-      }
+    it('should have bunfig.toml configuration', () => {
+      const bunfigPath = path.resolve(__dirname, '../bunfig.toml');
+      expect(fs.existsSync(bunfigPath)).toBe(true);
     });
 
     it('should have cache clearing mechanisms in place', () => {
@@ -73,19 +68,18 @@ describe('🏁 YOLO: Meta-Test Infrastructure Validation', () => {
       );
 
       expect(packageJson.scripts['clean:cache']).toBeDefined();
-      expect(packageJson.scripts['clean:cache']).toContain('jest --clearCache');
     });
 
-    it('should reset mocks between tests', () => {
-      const jestConfig = require('../jest.config.js');
-
-      expect(jestConfig.clearMocks).toBe(true);
-      expect(jestConfig.resetModules).toBe(true);
-      expect(jestConfig.restoreMocks).toBe(true);
+    it('should not have orphaned test files in archive/', () => {
+      const archiveDir = path.resolve(__dirname, '../archive/scoring');
+      if (fs.existsSync(archiveDir)) {
+        const testFiles = fs.readdirSync(archiveDir).filter(f => f.endsWith('.test.ts'));
+        expect(testFiles).toHaveLength(0);
+      }
     });
   });
 
-  describe('🚨 TIER 1: Process State Isolation', () => {
+  describe('TIER 1: Process State Isolation', () => {
     it('should be able to detect if cwd is corrupted', () => {
       let cwdWorks = false;
 
@@ -99,8 +93,7 @@ describe('🏁 YOLO: Meta-Test Infrastructure Validation', () => {
       if (!cwdWorks) {
         throw new Error(
           'CRITICAL: process.cwd() is corrupted!\n' +
-          'This happens when tests delete directories they are inside of.\n' +
-          'FIX: Run npm run clean:cache and restart tests.'
+          'This happens when tests delete directories they are inside of.'
         );
       }
 
@@ -110,29 +103,19 @@ describe('🏁 YOLO: Meta-Test Infrastructure Validation', () => {
     it('should preserve cwd after temp directory operations', async () => {
       const beforeCwd = process.cwd();
 
-      // Simulate what failing tests were doing
       const tempDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'yolo-test-'));
 
       try {
-        // Dangerous operation: change into temp dir
         process.chdir(tempDir);
-
-        // Do some work
         await fs.promises.writeFile(path.join(tempDir, 'test.txt'), 'data');
-
-        // CRITICAL: Restore before cleanup
         process.chdir(beforeCwd);
-
-        // Now safe to delete
         await fs.promises.rm(tempDir, { recursive: true, force: true });
 
-        // Verify cwd still works
         const afterCwd = process.cwd();
         expect(afterCwd).toBe(beforeCwd);
         expect(fs.existsSync(afterCwd)).toBe(true);
 
       } catch (e) {
-        // Ensure cleanup even on error
         process.chdir(beforeCwd);
         await fs.promises.rm(tempDir, { recursive: true, force: true }).catch(() => {});
         throw e;
@@ -144,13 +127,9 @@ describe('🏁 YOLO: Meta-Test Infrastructure Validation', () => {
       const tempDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'yolo-bad-test-'));
 
       try {
-        // BAD PATTERN: Change into temp dir
         process.chdir(tempDir);
-
-        // BAD PATTERN: Delete while inside
         await fs.promises.rm(tempDir, { recursive: true, force: true });
 
-        // This should fail or detect corruption
         let cwdBroken = false;
         try {
           const cwd = process.cwd();
@@ -159,22 +138,72 @@ describe('🏁 YOLO: Meta-Test Infrastructure Validation', () => {
           cwdBroken = true;
         }
 
-        // Restore ASAP
         process.chdir(beforeCwd);
-
-        // We EXPECT this bad pattern to break cwd
         expect(cwdBroken).toBe(true);
 
       } catch (e) {
         process.chdir(beforeCwd);
-        // Test passes - we detected the bad pattern
       }
     });
   });
 
-  describe('⚡ TIER 2: Template Literal Syntax Detection', () => {
+  describe('TIER 2: Bun Single-Process Safety', () => {
+    it('should not have test files that delete process.env.PATH', async () => {
+      const testsDir = path.resolve(__dirname, '..', 'tests');
+      const srcTestsDir = path.resolve(__dirname, '..', 'src', 'tests');
+      const selfFile = path.basename(__filename);
+      const testFiles = [
+        ...findTestFiles(testsDir, /\.test\.ts$/),
+        ...(fs.existsSync(srcTestsDir) ? findTestFiles(srcTestsDir, /\.test\.ts$/) : [])
+      ].filter(f => path.basename(f) !== selfFile);
+
+      const violations: string[] = [];
+
+      for (const fullPath of testFiles) {
+        const content = await fs.promises.readFile(fullPath, 'utf8');
+        if (content.includes('delete process.env.PATH')) {
+          violations.push(path.basename(fullPath));
+        }
+      }
+
+      if (violations.length > 0) {
+        throw new Error(
+          'CRITICAL: These files delete process.env.PATH (poisons all subsequent tests in bun):\n' +
+          violations.join('\n')
+        );
+      }
+
+      expect(violations).toHaveLength(0);
+    });
+
+    it('should not have process.env shallow copy for restoration', async () => {
+      const testsDir = path.resolve(__dirname, '..', 'tests');
+      const selfFile = path.basename(__filename);
+      const testFiles = findTestFiles(testsDir, /\.test\.ts$/).filter(f => path.basename(f) !== selfFile);
+
+      const warnings: string[] = [];
+
+      for (const fullPath of testFiles) {
+        const content = await fs.promises.readFile(fullPath, 'utf8');
+        // Pattern: process.env = { ...originalEnv } — doesn't clear added keys in bun
+        if (/process\.env\s*=\s*\{\s*\.\.\./.test(content)) {
+          warnings.push(path.basename(fullPath));
+        }
+      }
+
+      if (warnings.length > 0) {
+        console.warn(
+          'WARNING: These files use shallow env copy (may leak keys in bun):\n' +
+          warnings.join('\n')
+        );
+      }
+
+      expect(warnings).toHaveLength(0);
+    });
+  });
+
+  describe('TIER 2: Template Literal Syntax Detection', () => {
     it('should detect template literal bugs in test files', async () => {
-      // Find all test files (cross-platform)
       const testsDir = path.resolve(__dirname, '..', 'tests');
       const testFiles = findTestFiles(testsDir, /\.test\.ts$/);
 
@@ -183,46 +212,24 @@ describe('🏁 YOLO: Meta-Test Infrastructure Validation', () => {
       for (const fullPath of testFiles) {
         const content = await fs.promises.readFile(fullPath, 'utf8');
 
-        // Detect: execSync('.*${
-        // This is ALWAYS wrong - should use backticks
-        // Exclude comments and strings (look for actual code)
         const lines = content.split('\n');
-        let bugCount = 0;
 
-        lines.forEach((line, idx) => {
-          // Skip comments
+        lines.forEach((line) => {
           if (line.trim().startsWith('//') || line.trim().startsWith('*')) return;
-          // Skip example strings (in error messages)
           if (line.includes('Example WRONG:') || line.includes('Example RIGHT:')) return;
 
-          // Detect real bug: execSync('...${
           if (/execSync\s*\(\s*'[^']*\$\{/.test(line)) {
-            bugCount++;
+            bugsFound.push(`${path.basename(fullPath)}: template literal bug`);
           }
         });
-
-        if (bugCount > 0) {
-          bugsFound.push(`${path.basename(fullPath)}: Found ${bugCount} template literal bugs`);
-        }
-      }
-
-      if (bugsFound.length > 0) {
-        throw new Error(
-          'TEMPLATE LITERAL BUGS DETECTED:\n' +
-          bugsFound.join('\n') + '\n\n' +
-          'These use single quotes instead of backticks and will fail!\n' +
-          'Example WRONG: execSync(\'node ${VAR}\')\n' +
-          'Example RIGHT: execSync(`node ${VAR}`)'
-        );
       }
 
       expect(bugsFound).toHaveLength(0);
     });
   });
 
-  describe('⚡ TIER 2: Test File Quality Gates', () => {
-    it('should have proper beforeEach/afterEach in tests that modify state', async () => {
-      // Find all test files (cross-platform)
+  describe('TIER 2: Test File Quality Gates', () => {
+    it('should have proper afterEach in tests that modify state', async () => {
       const testsDir = path.resolve(__dirname, '..', 'tests');
       const testFiles = findTestFiles(testsDir, /\.test\.ts$/);
 
@@ -231,12 +238,10 @@ describe('🏁 YOLO: Meta-Test Infrastructure Validation', () => {
       for (const fullPath of testFiles) {
         const content = await fs.promises.readFile(fullPath, 'utf8');
 
-        // If test uses process.chdir(), MUST have afterEach
         if (content.includes('process.chdir(') && !content.includes('afterEach')) {
           missingCleanup.push(`${path.basename(fullPath)}: Uses process.chdir() but no afterEach cleanup`);
         }
 
-        // If test creates temp dirs, MUST have cleanup
         if (content.includes('mkdtemp') && !content.includes('afterEach')) {
           missingCleanup.push(`${path.basename(fullPath)}: Creates temp dirs but no afterEach cleanup`);
         }
@@ -244,7 +249,7 @@ describe('🏁 YOLO: Meta-Test Infrastructure Validation', () => {
 
       if (missingCleanup.length > 0) {
         console.warn(
-          '⚠️  WARNING: Tests without proper cleanup:\n' +
+          'WARNING: Tests without proper cleanup:\n' +
           missingCleanup.join('\n')
         );
       }
@@ -252,49 +257,10 @@ describe('🏁 YOLO: Meta-Test Infrastructure Validation', () => {
       // Warning only - don't fail, but log for review
       expect(true).toBe(true);
     });
-
-    it('should not have undefined function calls in tests', async () => {
-      // Find all test files (cross-platform)
-      const testsDir = path.resolve(__dirname, '..', 'tests');
-      const testFiles = findTestFiles(testsDir, /\.test\.ts$/);
-
-      const suspiciousCalls: string[] = [];
-
-      for (const fullPath of testFiles) {
-        const content = await fs.promises.readFile(fullPath, 'utf8');
-
-        // Check for common undefined helper patterns
-        const patterns = [
-          /await createRepoWithDrift\(/,
-          /await setupTestRepo\(/,
-          /await createTestEnvironment\(/,
-        ];
-
-        for (const pattern of patterns) {
-          if (pattern.test(content)) {
-            // Check if function is actually defined
-            const functionName = pattern.source.match(/(\w+)\(/)?.[1];
-            if (functionName && !content.includes(`function ${functionName}`) && !content.includes(`const ${functionName}`)) {
-              suspiciousCalls.push(`${path.basename(fullPath)}: Calls ${functionName}() but it's not defined`);
-            }
-          }
-        }
-      }
-
-      if (suspiciousCalls.length > 0) {
-        console.warn(
-          '⚠️  WARNING: Tests calling undefined functions:\n' +
-          suspiciousCalls.join('\n')
-        );
-      }
-
-      // Warning only for now
-      expect(true).toBe(true);
-    });
   });
 
-  describe('🏁 TIER 3: Performance & Hygiene', () => {
-    it('should complete cache clear operation in <1 second', async () => {
+  describe('TIER 3: Performance & Hygiene', () => {
+    it('should complete cache clear operation in <15 seconds', async () => {
       const start = Date.now();
 
       execSync('npm run clean:cache', {
@@ -303,48 +269,31 @@ describe('🏁 YOLO: Meta-Test Infrastructure Validation', () => {
       });
 
       const duration = Date.now() - start;
-
-      // Should be fast (increased threshold for CI/loaded systems)
       expect(duration).toBeLessThan(15000);
     });
 
-    it('should have YOLO logs directory structure', () => {
-      const yoloDir = '/Users/wolfejam/FAF-GOLD/PLANET-FAF/WJTTC - WolfeJam Technical & Testing Center/permanent-records/yolo-logs';
-
-      if (fs.existsSync(yoloDir)) {
-        const logs = fs.readdirSync(yoloDir);
-        expect(logs.length).toBeGreaterThan(0);
-      } else {
-        console.warn('⚠️  YOLO logs directory not found - create it for test permanence');
-      }
-    });
-  });
-
-  describe('🔬 TIER 3: Regression Detection', () => {
     it('should document known test failure patterns', () => {
-      // This test documents what we learned from the keyword update incident
       const knownPatterns = [
         {
           symptom: 'ENOENT: no such file or directory, uv_cwd',
-          cause: 'Jest cache corruption from cwd modification',
-          fix: 'npm run clean:cache'
+          cause: 'process.cwd() corrupted — test deleted dir while inside it',
+          fix: 'Always chdir back before rmSync'
         },
         {
-          symptom: 'MODULE_NOT_FOUND for ${VAR}',
-          cause: 'Template literal using single quotes instead of backticks',
-          fix: 'Change \'node ${VAR}\' to `node ${VAR}`'
+          symptom: 'Command failed: bunx faf-cli (in full suite only)',
+          cause: 'process.env.PATH deleted/corrupted by another test file',
+          fix: 'Save and restore PATH in finally block, never delete'
         },
         {
           symptom: 'Tests pass individually but fail in suite',
-          cause: 'Parallel execution with shared state modification',
-          fix: 'Set maxWorkers: 1 or fix test isolation'
+          cause: 'Bun single-process: shared state leaked between files',
+          fix: 'Clean up process.env, console, mocks in afterEach/finally'
         }
       ];
 
       expect(knownPatterns).toHaveLength(3);
 
-      // Document for future reference
-      console.log('\n📋 Known Test Failure Patterns:');
+      console.log('\nKnown Test Failure Patterns:');
       knownPatterns.forEach((p, i) => {
         console.log(`\n${i + 1}. ${p.symptom}`);
         console.log(`   Cause: ${p.cause}`);

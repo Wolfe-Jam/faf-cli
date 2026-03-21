@@ -3,7 +3,6 @@
  * Tests for the user-facing compile command
  */
 
-import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';
@@ -93,17 +92,18 @@ describe('🏎️ WJTTC: faf compile Command', () => {
         throw new Error(`Process exited with code ${code}`);
       });
 
-      // Temporarily break compiler detection
+      // Temporarily break compiler detection — MUST restore original PATH
+      const originalPath = process.env.PATH;
       process.env.PATH = '/nonexistent';
 
       try {
         await compileCommand();
       } catch (error: any) {
         expect(error.message).toContain('Process exited');
+      } finally {
+        process.env.PATH = originalPath;
+        mockExit.mockRestore();
       }
-
-      mockExit.mockRestore();
-      delete process.env.PATH;
     });
 
     it('handles missing input file gracefully', async () => {

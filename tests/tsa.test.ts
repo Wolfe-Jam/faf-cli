@@ -5,7 +5,6 @@
  * CRITICAL: Tests the pipeline from package.json → type detection → TYPE_DEFINITIONS mapping
  */
 
-import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as os from 'os';

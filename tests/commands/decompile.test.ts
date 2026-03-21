@@ -3,7 +3,6 @@
  * Tests for the user-facing decompile command
  */
 
-import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';
@@ -103,16 +102,17 @@ describe('🏎️ WJTTC: faf decompile Command', () => {
         throw new Error(`Process exited with code ${code}`);
       });
 
+      const originalPath = process.env.PATH;
       process.env.PATH = '/nonexistent';
 
       try {
         await decompileCommand();
       } catch (error: any) {
         expect(error.message).toContain('Process exited');
+      } finally {
+        process.env.PATH = originalPath;
+        mockExit.mockRestore();
       }
-
-      mockExit.mockRestore();
-      delete process.env.PATH;
     });
 
     it('handles missing input file gracefully', async () => {
@@ -126,9 +126,9 @@ describe('🏎️ WJTTC: faf decompile Command', () => {
         await decompileCommand('nonexistent.fafb');
       } catch (error: any) {
         expect(error.message).toContain('Process exited');
+      } finally {
+        mockExit.mockRestore();
       }
-
-      mockExit.mockRestore();
     });
 
     it('handles invalid .fafb files gracefully', async () => {
@@ -144,9 +144,9 @@ describe('🏎️ WJTTC: faf decompile Command', () => {
         await decompileCommand('invalid.fafb');
       } catch (error: any) {
         expect(error.message).toContain('Process exited');
+      } finally {
+        mockExit.mockRestore();
       }
-
-      mockExit.mockRestore();
     });
   });
 
@@ -164,9 +164,9 @@ describe('🏎️ WJTTC: faf decompile Command', () => {
         await decompileCommand();
       } catch {
         // May not be implemented yet
+      } finally {
+        console.log = originalLog;
       }
-
-      console.log = originalLog;
 
       expect(logs.length).toBeGreaterThanOrEqual(0);
     });

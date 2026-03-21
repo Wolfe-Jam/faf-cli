@@ -18,11 +18,17 @@ import {
 
 describe('Execution Context Engine', () => {
   // Save original env and restore after each test
-  const originalEnv = { ...process.env };
+  const originalEnv = process.env;
 
   afterEach(() => {
-    // Restore original environment
-    process.env = { ...originalEnv };
+    // Restore original environment object (not a copy — bun shares process across tests)
+    process.env = originalEnv;
+    // Clean up any env vars added during tests
+    for (const key of Object.keys(process.env)) {
+      if (!(key in originalEnv)) {
+        delete process.env[key];
+      }
+    }
     clearForcedContext();
   });
 

@@ -307,7 +307,8 @@ metadata:
       const result = execSync(`node ${CLI_PATH} drift --export ${exportPath}`, {
         cwd: cliDir,
         encoding: 'utf-8',
-        stdio: 'pipe'
+        stdio: 'pipe',
+        timeout: 60000
       });
 
       expect(result).toContain('FAF DRIFT ANALYSIS');
@@ -317,7 +318,7 @@ metadata:
       console.log(result);
       console.log(`\n📊 Report saved to: ${exportPath}`);
       console.log('✅ Ready for social media sharing!\n');
-    });
+    }, 60000);
   });
 });
 

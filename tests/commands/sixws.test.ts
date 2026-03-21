@@ -12,32 +12,29 @@ import path from 'path';
 import os from 'os';
 import { parse as parseYAML, stringify as stringifyYAML } from '../../src/fix-once/yaml';
 
-// Mock dependencies
 // Note: 'open' and 'inquirer' are mocked via jest.config.js moduleNameMapper
-jest.mock('../../src/fix-once/colors', () => ({
-  chalk: {
-    cyan: (text: string) => text,
-    gray: (text: string) => text,
-    yellow: (text: string) => text,
-    red: (text: string) => text,
-    green: (text: string) => text,
-  },
-}));
+// Do NOT mock '../../src/fix-once/colors' — bun runs all tests in one process,
+// and jest.mock leaks globally, breaking other tests that depend on chalk/colors.
 
-// Mock console methods
+// Mock console methods — save originals so we restore them
+const originalLog = console.log;
+const originalError = console.error;
+const originalExit = process.exit;
+
 const mockLog = jest.fn();
 const mockError = jest.fn();
 const mockExit = jest.fn();
-
-console.log = mockLog;
-console.error = mockError;
-process.exit = mockExit as any;
 
 describe('🟡 TIER 2: ENGINE - faf 6ws Command', () => {
   let tempDir: string;
   let fafPath: string;
 
   beforeEach(async () => {
+    // Install mocks
+    console.log = mockLog;
+    console.error = mockError;
+    process.exit = mockExit as any;
+
     // Create temp directory for each test
     tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'faf-6ws-test-'));
     fafPath = path.join(tempDir, 'project.faf');
@@ -49,6 +46,9 @@ describe('🟡 TIER 2: ENGINE - faf 6ws Command', () => {
   });
 
   afterEach(async () => {
+    console.log = originalLog;
+    console.error = originalError;
+    process.exit = originalExit;
     // Clean up temp directory
     try {
       await fs.rm(tempDir, { recursive: true, force: true });

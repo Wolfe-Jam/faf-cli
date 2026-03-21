@@ -11,7 +11,6 @@
  * - Generators output new names only
  */
 
-import { describe, test, expect, beforeAll, afterAll } from '@jest/globals';
 import { FafCompiler, getSlotsForType, SLOT_ALIASES, SLOT_ALIASES_REVERSE } from '../../src/compiler/faf-compiler';
 import { ScoreCalculator } from '../../faf-engine/src/scoring/ScoreCalculator';
 import { countSlots } from '../../src/utils/slot-counter';

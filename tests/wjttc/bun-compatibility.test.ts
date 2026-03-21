@@ -36,6 +36,34 @@ const BUN_AVAILABLE = (() => {
   }
 })();
 
+const BUNX_AVAILABLE = (() => {
+  try {
+    execSync('bunx --version', { stdio: 'pipe', timeout: 10000 });
+    return true;
+  } catch {
+    return false;
+  }
+})();
+
+// Skip guard helper — works across Jest, Bun test runner, Vitest, etc.
+function skipUnlessBunx(fn: () => void): () => void {
+  return () => {
+    if (!BUNX_AVAILABLE) return; // silent skip
+    fn();
+  };
+}
+
+function skipUnlessBun(fn: () => void): () => void {
+  return () => {
+    if (!BUN_AVAILABLE) return; // silent skip
+    fn();
+  };
+}
+
+if (!BUNX_AVAILABLE) {
+  console.warn('⚠️  bunx not on PATH — all bunx-dependent tests will be skipped');
+}
+
 const bunVersion = BUN_AVAILABLE
   ? execSync('bun --version', { stdio: 'pipe' }).toString().trim()
   : 'N/A';
@@ -58,9 +86,12 @@ function bunExec(args: string, cwd?: string): string {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 describe('🏁 TIER 1: BRAKE — Bun Runtime Gate', () => {
-  test('Bun detection', () => {
+  test('Bun/bunx detection', () => {
     if (!BUN_AVAILABLE) {
       console.warn('⚠️  Bun not installed — Bun-specific tests will be skipped');
+    }
+    if (!BUNX_AVAILABLE) {
+      console.warn('⚠️  bunx not on PATH — bunx-dependent tests will be skipped');
     }
     // Always pass — Bun is optional in CI, required locally
     expect(true).toBe(true);
@@ -78,69 +109,62 @@ describe('🏁 TIER 1: BRAKE — Bun Runtime Gate', () => {
 });
 
 describe('🏁 TIER 1: BRAKE — Top 6 Commands via bunx', () => {
-  if (!BUN_AVAILABLE) {
-    test('SKIP: Bun not available', () => {
-      console.warn('⚠️  Bun not installed — skipping bunx tests');
-      expect(true).toBe(true);
-    });
-    return;
-  }
-
   let tempDir: string;
 
   beforeEach(() => {
+    if (!BUNX_AVAILABLE) return;
     tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'faf-bun-test-'));
   });
 
   afterEach(() => {
     try {
-      fs.rmSync(tempDir, { recursive: true, force: true });
+      if (tempDir) fs.rmSync(tempDir, { recursive: true, force: true });
     } catch {
       // Ignore cleanup errors
     }
   });
 
-  test('#1 bunx faf-cli --version', () => {
+  test('#1 bunx faf-cli --version', skipUnlessBunx(() => {
     const output = bunExec('--version');
     expect(output.trim()).toMatch(/^\d+\.\d+\.\d+$/);
-  });
+  }));
 
-  test('#2 bunx faf-cli init (creates project.faf)', () => {
+  test('#2 bunx faf-cli init (creates project.faf)', skipUnlessBunx(() => {
     bunExec('init', tempDir);
     const fafPath = path.join(tempDir, 'project.faf');
     expect(fs.existsSync(fafPath)).toBe(true);
     const content = fs.readFileSync(fafPath, 'utf8');
     expect(content).toContain('project:');
-  });
+  }));
 
-  test('#3 bunx faf-cli score (returns valid score)', () => {
+  test('#3 bunx faf-cli score (returns valid score)', skipUnlessBunx(() => {
     bunExec('init', tempDir);
     const output = bunExec('score', tempDir);
     expect(output).toMatch(/Score:\s*\d+\/100/);
-  });
+  }));
 
-  test('#4 bunx faf-cli auto (full pipeline)', () => {
+  test('#4 bunx faf-cli auto (full pipeline)', skipUnlessBunx(() => {
     const output = bunExec('auto', tempDir);
     expect(output).toContain('FAF AUTO COMPLETE');
     expect(fs.existsSync(path.join(tempDir, 'project.faf'))).toBe(true);
-  });
+  }));
 
-  test('#5 bunx faf-cli bi-sync (syncs CLAUDE.md)', () => {
+  test('#5 bunx faf-cli bi-sync (syncs CLAUDE.md)', skipUnlessBunx(() => {
     bunExec('init', tempDir);
     const output = bunExec('bi-sync', tempDir);
     expect(output).toContain('Synchronized');
     expect(fs.existsSync(path.join(tempDir, 'CLAUDE.md'))).toBe(true);
-  });
+  }));
 
-  test('#6 bunx faf-cli formats (TURBO-CAT)', () => {
+  test('#6 bunx faf-cli formats (TURBO-CAT)', skipUnlessBunx(() => {
     const output = bunExec('formats', tempDir);
     expect(output).toMatch(/format/i);
-  });
+  }));
 
-  test('bunx faf-cli help (no crash)', () => {
+  test('bunx faf-cli help (no crash)', skipUnlessBunx(() => {
     const output = bunExec('--help');
     expect(output).toContain('faf');
-  });
+  }));
 });
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -231,32 +255,29 @@ describe('🏁 TIER 2: ENGINE — Node.js API Compatibility', () => {
   ];
 
   for (const mod of requiredBuiltins) {
-    test(`Bun supports built-in: ${mod}`, () => {
-      if (!BUN_AVAILABLE) return;
+    test(`Bun supports built-in: ${mod}`, skipUnlessBun(() => {
       const result = execSync(`bun -e "require('${mod}'); console.log('ok')"`, {
         stdio: 'pipe',
       }).toString().trim();
       expect(result).toBe('ok');
-    });
+    }));
   }
 
-  test('Bun supports HMAC-SHA256 (Pro gate licensing)', () => {
-    if (!BUN_AVAILABLE) return;
+  test('Bun supports HMAC-SHA256 (Pro gate licensing)', skipUnlessBun(() => {
     const result = execSync(
       `bun -e "const c = require('crypto'); const h = c.createHmac('sha256', 'test').update('data').digest('hex'); console.log(h.length)"`,
       { stdio: 'pipe' }
     ).toString().trim();
     expect(result).toBe('64'); // SHA256 hex = 64 chars
-  });
+  }));
 
-  test('Bun supports commander (CLI framework)', () => {
-    if (!BUN_AVAILABLE) return;
+  test('Bun supports commander (CLI framework)', skipUnlessBun(() => {
     const result = execSync(
       `bun -e "const { Command } = require('commander'); const p = new Command(); console.log(typeof p.parse)"`,
       { stdio: 'pipe', cwd: CLI_ROOT }
     ).toString().trim();
     expect(result).toBe('function');
-  });
+  }));
 });
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -265,22 +286,15 @@ describe('🏁 TIER 2: ENGINE — Node.js API Compatibility', () => {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 describe('🏁 TIER 3: AERO — Performance', () => {
-  if (!BUN_AVAILABLE) {
-    test('SKIP: Bun not available', () => {
-      expect(true).toBe(true);
-    });
-    return;
-  }
-
-  test('bunx faf-cli --version completes in <5s', () => {
+  test('bunx faf-cli --version completes in <5s', skipUnlessBunx(() => {
     const start = Date.now();
     bunExec('--version');
     const elapsed = Date.now() - start;
     expect(elapsed).toBeLessThan(5000);
     console.log(`  --version: ${elapsed}ms`);
-  });
+  }));
 
-  test('bunx faf-cli auto completes in <10s (clean dir)', () => {
+  test('bunx faf-cli auto completes in <10s (clean dir)', skipUnlessBunx(() => {
     const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'faf-bun-perf-'));
     try {
       const start = Date.now();
@@ -291,23 +305,23 @@ describe('🏁 TIER 3: AERO — Performance', () => {
     } finally {
       fs.rmSync(tempDir, { recursive: true, force: true });
     }
-  });
+  }));
 
-  test('bunx faf-cli score completes in <5s (dog-food)', () => {
+  test('bunx faf-cli score completes in <5s (dog-food)', skipUnlessBunx(() => {
     const start = Date.now();
     bunExec('score');
     const elapsed = Date.now() - start;
     expect(elapsed).toBeLessThan(5000);
     console.log(`  score (dog-food): ${elapsed}ms`);
-  });
+  }));
 
-  test('bunx faf-cli bi-sync completes in <5s (dog-food)', () => {
+  test('bunx faf-cli bi-sync completes in <5s (dog-food)', skipUnlessBunx(() => {
     const start = Date.now();
     bunExec('bi-sync');
     const elapsed = Date.now() - start;
     expect(elapsed).toBeLessThan(5000);
     console.log(`  bi-sync (dog-food): ${elapsed}ms`);
-  });
+  }));
 });
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -318,19 +332,19 @@ describe('🏁 TIER 4: TELEMETRY — Bun Format Detection', () => {
   let tempDir: string;
 
   beforeEach(() => {
+    if (!BUNX_AVAILABLE) return;
     tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'faf-bun-detect-'));
   });
 
-  afterEach(() => {
+  afterAll(() => {
     try {
-      fs.rmSync(tempDir, { recursive: true, force: true });
+      if (tempDir) fs.rmSync(tempDir, { recursive: true, force: true });
     } catch {
       // Ignore
     }
   });
 
-  test('Detects bun.lockb as package manager', () => {
-    if (!BUN_AVAILABLE) return;
+  test('Detects bun.lockb as package manager', skipUnlessBunx(() => {
     // Create a minimal project with bun.lockb
     fs.writeFileSync(path.join(tempDir, 'package.json'), JSON.stringify({
       name: 'bun-test', version: '1.0.0',
@@ -340,10 +354,9 @@ describe('🏁 TIER 4: TELEMETRY — Bun Format Detection', () => {
     const output = bunExec('formats', tempDir);
     // bun.lockb should be detected
     expect(output.toLowerCase()).toMatch(/bun/);
-  });
+  }));
 
-  test('Detects bunfig.toml as Bun config', () => {
-    if (!BUN_AVAILABLE) return;
+  test('Detects bunfig.toml as Bun config', skipUnlessBunx(() => {
     fs.writeFileSync(path.join(tempDir, 'package.json'), JSON.stringify({
       name: 'bun-test', version: '1.0.0',
     }));
@@ -351,7 +364,7 @@ describe('🏁 TIER 4: TELEMETRY — Bun Format Detection', () => {
     bunExec('init', tempDir);
     const output = bunExec('formats', tempDir);
     expect(output.toLowerCase()).toMatch(/bun/);
-  });
+  }));
 });
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -360,34 +373,27 @@ describe('🏁 TIER 4: TELEMETRY — Bun Format Detection', () => {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 describe('🏁 TIER 5: CHAMPIONSHIP — Dog-Food via Bun', () => {
-  if (!BUN_AVAILABLE) {
-    test('SKIP: Bun not available', () => {
-      expect(true).toBe(true);
-    });
-    return;
-  }
-
-  test('bunx faf-cli score on faf-cli itself = 100% Trophy', () => {
+  test('bunx faf-cli score on faf-cli itself = 100% Trophy', skipUnlessBunx(() => {
     const output = bunExec('score');
     expect(output).toMatch(/100\/100/);
     expect(output).toMatch(/Trophy|CHAMPIONSHIP/i);
-  });
+  }));
 
-  test('bunx faf-cli auto on faf-cli is idempotent (100% → 100%)', () => {
+  test('bunx faf-cli auto on faf-cli is idempotent (100% → 100%)', skipUnlessBunx(() => {
     const output = bunExec('auto');
     expect(output).toContain('FAF AUTO COMPLETE');
     // Should show no change — already at 100%
     expect(output).toMatch(/100%.*100%|no change/i);
-  });
+  }));
 
-  test('bunx faf-cli bi-sync on faf-cli produces valid CLAUDE.md', () => {
+  test('bunx faf-cli bi-sync on faf-cli produces valid CLAUDE.md', skipUnlessBunx(() => {
     bunExec('bi-sync');
     const claudeMd = path.join(CLI_ROOT, 'CLAUDE.md');
     expect(fs.existsSync(claudeMd)).toBe(true);
     const content = fs.readFileSync(claudeMd, 'utf8');
     expect(content).toContain('faf-cli');
     expect(content).toContain('BI-SYNC ACTIVE');
-  });
+  }));
 });
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

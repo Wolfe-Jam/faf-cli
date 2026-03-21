@@ -3,7 +3,6 @@
  * These tests WILL FAIL if we don't fix issues BEFORE extraction
  */
 
-import { describe, it, expect, beforeEach } from '@jest/globals';
 import {
   calculateScorePure,
   parseFafCore,

@@ -6,25 +6,36 @@ import { scoreFafFile } from '../../src/commands/score';
 import { promises as fs } from 'fs';
 import * as path from 'path';
 
-// Mock console.log to capture output
+// Mock console.log to capture output — save originals so we can restore them
+const originalLog = console.log;
+const originalError = console.error;
+const originalExit = process.exit;
+
 const mockLog = jest.fn();
 const mockError = jest.fn();
 const mockExit = jest.fn();
 
-console.log = mockLog;
-console.error = mockError;
-process.exit = mockExit as any;
-
 describe('Score Command', () => {
   const testDir = path.join(__dirname, '../temp-score');
-  
+
   beforeEach(() => {
+    // Install mocks before each test
+    console.log = mockLog;
+    console.error = mockError;
+    process.exit = mockExit as any;
     mockLog.mockClear();
     mockError.mockClear();
     mockExit.mockClear();
   });
 
-  afterEach(async () => {
+  afterEach(() => {
+    // Restore originals after each test to avoid polluting other test files
+    console.log = originalLog;
+    console.error = originalError;
+    process.exit = originalExit;
+  });
+
+  afterAll(async () => {
     // Cleanup test directory
     try {
       await fs.rm(testDir, { recursive: true, force: true });
@@ -134,8 +145,8 @@ technical_context:
     const fafPath = path.join(testDir, 'detail-test.faf');
     await fs.writeFile(fafPath, fafContent, 'utf-8');
 
-    // Verbose mode should not throw
-    await expect(scoreFafFile(fafPath, { details: true })).resolves.not.toThrow();
+    // Verbose mode should not throw — just await; if it rejects the test fails
+    await scoreFafFile(fafPath, { details: true });
   });
 
   it('should calculate score for minimal .faf file', async () => {
@@ -149,8 +160,8 @@ project:
     const fafPath = path.join(testDir, 'low-score.faf');
     await fs.writeFile(fafPath, lowScoreFafContent, 'utf-8');
 
-    // Should complete without error
-    await expect(scoreFafFile(fafPath, { details: false })).resolves.not.toThrow();
+    // Should complete without error — just await; if it rejects the test fails
+    await scoreFafFile(fafPath, { details: false });
   });
 
   it('should handle missing .faf file', async () => {
