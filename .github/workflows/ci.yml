@@ -209,6 +209,20 @@ jobs:
       - name: Run Tests and Capture Output
         run: bun test 2>&1 | tee /tmp/test-output.txt
 
+      - name: Convert Bun output to Jest format for TAF
+        run: |
+          # Extract bun test summary (e.g., " 1232 pass", " 0 fail")
+          passed=$(grep -oP '^\s*\K\d+(?=\s+pass)' /tmp/test-output.txt || echo "0")
+          failed=$(grep -oP '^\s*\K\d+(?=\s+fail)' /tmp/test-output.txt || echo "0")
+          total=$((passed + failed))
+          # Append Jest-compatible summary line for TAF parser
+          echo "" >> /tmp/test-output.txt
+          if [ "$failed" -gt 0 ]; then
+            echo "Tests: $failed failed, $passed passed, $total total" >> /tmp/test-output.txt
+          else
+            echo "Tests: $passed passed, $total total" >> /tmp/test-output.txt
+          fi
+
       - name: Generate TAF Receipt
         uses: Wolfe-Jam/faf-taf-git@v2.1.0
         with:
