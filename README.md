@@ -13,7 +13,7 @@
 [![Homebrew](https://img.shields.io/badge/Homebrew-faf--cli-orange)](https://github.com/Wolfe-Jam/homebrew-faf)
 [![Website](https://img.shields.io/badge/Website-faf.one-orange)](https://faf.one)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Claude Code](https://img.shields.io/badge/Claude_Code-enabled-00D4D4)](https://github.com/anthropics/claude-code-action)
+[![Built with Bun](https://img.shields.io/badge/Built_with-Bun-f9f1e1?logo=bun)](https://bun.sh)
 [![project.faf](https://img.shields.io/badge/project.faf-inside-00D4D4)](https://github.com/Wolfe-Jam/faf)
 
 ```
@@ -34,26 +34,38 @@ project/
 ## Install
 
 ```bash
-bunx faf-cli auto                  # Bun (recommended — same toolchain as Claude Code)
-npx faf-cli auto                   # npm (no install required)
+bunx faf-cli auto                  # Bun — zero install, fastest path
+npx faf-cli auto                   # npm — works everywhere
 brew install faf-cli && faf auto   # Homebrew
 ```
 
 ---
 
-## v5.1.0 — The FAFb Edition
+## v6.0 — Built with Bun
 
-`faf compile` turns your `.faf` into a `.fafb` binary — CRC32 sealed, deterministic, portable. Same compiler that runs in the browser (322KB WASM) now runs from the CLI. YAML is source code. FAFb is the compiled output.
+v6 is a ground-up rewrite. All-in on Bun — same toolchain as Claude Code.
 
-```bash
-faf compile                    # project.faf → project.fafb
+| | Claude Code | faf-cli v6 |
+|-|-------------|------------|
+| **Runtime** | Bun | Bun (`bunx`) |
+| **Test** | Bun | `bun test` |
+| **Build** | Bun | `bun build` |
+| **Language** | TypeScript | TypeScript |
+| **Compile** | Bun bytecode | `bun build --compile` |
+
+218 tests in ~10s. 290KB bundle in 2.4s. Single portable binary, 4 platforms. npx backward-compatible.
+
+26 commands. 218 tests. 5,292 lines. 93% smaller than v5.
+
+```
+commands → interop → core → wasm
 ```
 
-The full story: **[faf.one/blog/compiler-is-the-spec](https://faf.one/blog/compiler-is-the-spec)**
+The WASM scoring kernel (`faf-scoring-kernel` 2.0.0) does the math. Bun does the delivery.
 
 ---
 
-## Top 7 Commands
+## Commands
 
 | # | Command | One-liner |
 |---|---------|-----------|
@@ -61,11 +73,30 @@ The full story: **[faf.one/blog/compiler-is-the-spec](https://faf.one/blog/compi
 | 2 | `faf git <url>` | Instant `.faf` from any GitHub repo — no clone |
 | 3 | `faf auto` | Zero to 100% in one command |
 | 4 | `faf go` | Guided interview to gold code |
-| 5 | `faf bi-sync` | `.faf` ↔ CLAUDE.md — free forever |
-| 6 | `faf tri-sync` | ROM ↔ CLAUDE.md ↔ MEMORY.md — Pro |
+| 5 | `faf score` | Check AI-readiness (0-100%) |
+| 6 | `faf sync` | `.faf` ↔ CLAUDE.md (bi-sync, mtime auto-direction) |
 | 7 | `faf compile` | `.faf` → `.fafb` binary — sealed, portable, deterministic |
+| 8 | `faf decompile` | `.fafb` → JSON |
+| 9 | `faf export` | Generate AGENTS.md, .cursorrules, GEMINI.md |
+| 10 | `faf check` | Validate `.faf` file |
+| 11 | `faf edit` | Edit `.faf` fields inline |
+| 12 | `faf convert` | Convert `.faf` to JSON |
+| 13 | `faf drift` | Check context drift |
+| 14 | `faf context` | Generate context output |
+| 15 | `faf recover` | Recover `.faf` from CLAUDE.md / AGENTS.md |
+| 16 | `faf migrate` | Migrate `.faf` to latest version |
+| 17 | `faf search` | Search slots and formats |
+| 18 | `faf share` | Share `.faf` via URL |
+| 19 | `faf taf` | Generate TAF test receipt |
+| 20 | `faf demo` | Demo walkthrough |
+| 21 | `faf ai` | AI-powered enhance & analyze |
+| 22 | `faf pro` | Pro features & licensing |
+| 23 | `faf conductor` | Conductor integration |
+| 24 | `faf formats` | Show supported formats |
+| 25 | `faf info` | Version and system info |
+| 26 | `faf clear` | Clear cached data |
 
-Run `faf --help` for all 64+ commands.
+Run `faf --help` for full options.
 
 ---
 
@@ -81,27 +112,6 @@ bunx faf-cli auto              # Zero to 100% in one command
 bunx faf-cli go                # Interactive interview to gold code
 ```
 
-**91% token reclaim out the gate.** Relentless pursuit to 100%.
-
----
-
-## Core Commands
-
-| Command | Purpose |
-|---------|---------|
-| **`faf git <url>`** | 1-Click Context — 90%+ for ANY GitHub repo (no cloning) |
-| `faf go` | Guided interview to 100% (completes the 6 Ws) |
-| `faf init` | Create project.faf from your codebase |
-| `faf auto` | Auto-enhance to Gold Code |
-| `faf score` | Check AI-readiness (0-100%) |
-| `faf compile` | Compile `.faf` → `.fafb` binary (CRC32 sealed) |
-| `faf bi-sync` | Sync .faf ↔ CLAUDE.md (8ms) |
-| `faf tri-sync` | .faf ↔ CLAUDE.md ↔ MEMORY.md — **Pro** |
-| `faf agents` | AGENTS.md interop (import/export/sync) |
-| `faf cursor` | .cursorrules interop (import/export/sync) |
-| `faf gemini` | Gemini CLI / Antigravity interop |
-| `faf formats` | Show 199 detected formats |
-
 ---
 
 ## Scoring
@@ -115,8 +125,6 @@ bunx faf-cli go                # Interactive interview to gold code
 | 🟡 Yellow | 55%+ | AI flipping coins |
 | 🔴 Red | <55% | AI working blind |
 
-Details: [docs/SCORING.md](./docs/SCORING.md)
-
 ---
 
 ## Sync
@@ -126,25 +134,45 @@ bi-sync:   .faf  ←── 8ms ──→  CLAUDE.md                (free forever
 tri-sync:  .faf  ←── 8ms ──→  CLAUDE.md ↔ MEMORY.md    (Pro)
 ```
 
-14-day free trial, no signup, no credit card. Early-bird: $3/mo · $19/yr.
-**[faf.one/pro](https://faf.one/pro)** · Details: [docs/SYNC.md](./docs/SYNC.md)
+---
+
+## Compiled Binaries
+
+Bun's single-file compiler produces standalone binaries — no runtime needed.
+
+```bash
+bun run compile                # Current platform
+bun run compile:all            # darwin-arm64, darwin-x64, linux-x64, windows-x64
+```
+
+Ship `faf` as a single binary for CI/CD, Docker, or air-gapped environments.
 
 ---
 
-## Documentation
+## Architecture
 
-| Doc | What |
-|-----|------|
-| [Guide (6Ws)](./docs/GUIDE.md) | WHO / WHAT / WHY / WHERE / WHEN / HOW — deep dive |
-| [Scoring & Tiers](./docs/SCORING.md) | Tier system, slot-ignore patterns |
-| [Sync](./docs/SYNC.md) | bi-sync, tri-sync, human context |
-| [Testing](./docs/TESTING.md) | Boris-Flow integration tests |
-| [Skills](./docs/SKILLS.md) | 16 Claude Code skills |
-| [Ecosystem](./docs/ECOSYSTEM.md) | CLI vs MCP, FAF Family, 3Ws/6Ws |
-| [Slot-Ignore](./docs/SLOT-IGNORE.md) | Full slot-ignore spec |
-| [Pro](./docs/PRO.md) | tri-sync commands, activation, FAQ |
-| [CHANGELOG](./CHANGELOG.md) | Version history |
-| [DAAFT Analysis](https://faf.one/daaft) | The cost of not having context |
+```
+src/
+├── cli.ts              ← Entry point, 26 command registrations
+├── commands/           ← 26 command files (1 per command)
+├── core/               ← Types, slots (33 Mk4), tiers, scorer, schema
+├── detect/             ← Framework detection, stack scanner
+├── interop/            ← YAML I/O, CLAUDE.md, AGENTS.md, GEMINI.md
+├── ui/                 ← Colors (#00D4D4), display
+└── wasm/               ← faf-scoring-kernel wrapper (Rust → WASM)
+```
+
+**Toolchain:** Bun (test, build, compile) · TypeScript (strict) · WASM (scoring kernel)
+
+---
+
+## Testing
+
+```bash
+bun test                       # 218 tests, 37 files, ~10s
+```
+
+Full e2e lifecycle test runs every command in sequence: init → auto → score → edit → sync → export → compile → decompile → taf → recover → check. Test reports in `reports/`.
 
 ---
 
