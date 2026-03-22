@@ -60,6 +60,7 @@ stack:
   packageManager: npm/yarn/pnpm
   mainLanguage: JavaScript/TypeScript
   buildTool: Bun
+  framework: React
 preferences:
   quality_bar: zero_errors
   commit_style: conventional_emoji
@@ -132,7 +133,7 @@ faf_dna:
   birth_date: 2026-02-18T19:56:53.125Z
   current_score: 86
 metadata:
-  last_claude_sync: 2026-03-22T03:40:25.385Z
+  last_claude_sync: 2026-03-22T04:04:31.516Z
   bi_sync: active
 stack_signature: typescript-nodejs-javascript
 detected_frameworks:
@@ -141,7 +142,8 @@ detected_frameworks:
   - Node.js
   - JavaScript
   - TypeScript
-turbo_cat_intelligence: 295
+  - React
+turbo_cat_intelligence: 205
 stats:
   best_auto_time: 0.2
   last_auto_time: 0.2
