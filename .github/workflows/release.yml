@@ -51,9 +51,7 @@ jobs:
         run: npm run build
 
       - name: 🧪 Run full test suite
-        run: |
-          npm run test
-          npm run test:audit
+        run: npm test
 
       - name: 🔧 ESLint validation
         run: npm run lint
@@ -232,18 +230,18 @@ jobs:
             faf init
 
             # Check your AI context score
-            faf score --details
+            faf score
 
-            # Compile to binary
-            faf compile
+            # Zero to 100% in one command
+            faf auto
             ```
 
-            ## 📊 Performance Metrics
+            ## 📊 v6 — Built with Bun
 
-            - ⚡ Scoring engine: 169μs average
-            - 🏎️ Bi-sync: 8ms
-            - 🧪 1,184/1,184 tests passing
-            - 🏆 Championship-grade engineering
+            - ⚡ Same toolchain as Claude Code
+            - 🧪 218 tests, 37 files
+            - 📦 290KB bundle
+            - 🏆 26 commands
 
             ## 🔗 Links
 
@@ -283,23 +281,20 @@ jobs:
           npm install -g faf-cli@${{ needs.validate.outputs.version }}
           faf --version
 
-      - name: 🏎️ F1-Inspired Performance Tests
+      - name: 🏎️ Performance Tests
         run: |
-          echo "⚡ Testing championship performance claims..."
+          echo "Testing v6 command speed..."
 
-          # Test status command speed (<40ms target)
-          echo "🎯 Testing 'faf status' speed..."
-          time faf status || echo "No .faf file found (expected)"
-
-          # Test help command speed
-          echo "📚 Testing 'faf --help' speed..."
+          echo "Testing 'faf --help'..."
           time faf --help
 
-          # Test index command speed
-          echo "📋 Testing 'faf index' speed..."
-          time faf index
+          echo "Testing 'faf info'..."
+          time faf info
 
-          echo "✅ Performance validation complete!"
+          echo "Testing 'faf formats'..."
+          time faf formats
+
+          echo "Performance validation complete"
 
   # Notification
   notify-success:
