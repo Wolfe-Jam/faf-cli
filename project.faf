@@ -132,17 +132,16 @@ faf_dna:
   birth_date: 2026-02-18T19:56:53.125Z
   current_score: 86
 metadata:
-  last_claude_sync: 2026-03-21T23:15:46.106Z
+  last_claude_sync: 2026-03-22T03:40:25.385Z
   bi_sync: active
 stack_signature: typescript-nodejs-javascript
 detected_frameworks:
   - Claude Code
   - Bun
-  - Jest
   - Node.js
   - JavaScript
   - TypeScript
-turbo_cat_intelligence: 305
+turbo_cat_intelligence: 295
 stats:
   best_auto_time: 0.2
   last_auto_time: 0.2

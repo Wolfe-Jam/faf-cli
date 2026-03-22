@@ -1,4 +1,3 @@
-/* eslint-env jest */
 /**
  * FAF DNA LIFECYCLE TEST SUITE
  *

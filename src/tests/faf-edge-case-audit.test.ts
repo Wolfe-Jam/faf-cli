@@ -1,4 +1,3 @@
-/* eslint-env jest */
 /**
  * 🔍 FAF Edge Case Audit Test Suite
  * Critical tests to prevent "faf" vs ".faf" confusion from ever returning
