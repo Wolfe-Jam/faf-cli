@@ -97,6 +97,7 @@ test-*.faf
 !CLAUDE.md
 !AGENTS.md
 !GEMINI.md
+!conductor/*.md
 !CHANGELOG.md
 !PUBLISH.md
 !CONTRIBUTING.md
