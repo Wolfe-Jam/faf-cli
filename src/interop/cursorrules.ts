@@ -1,11 +1,14 @@
 import { writeFileSync } from 'fs';
 import { join } from 'path';
 import type { FafData } from '../core/types.js';
+import { fafMetaTag } from './claude.js';
 
 /** Generate .cursorrules content from .faf data */
 export function generateCursorrules(data: FafData): string {
   const lines: string[] = [];
 
+  lines.push(fafMetaTag(data));
+  lines.push('');
   lines.push('# .cursorrules');
   lines.push(`# Auto-generated from project.faf — ${data.project?.name ?? 'Project'}`);
   lines.push('');

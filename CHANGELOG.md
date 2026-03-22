@@ -5,6 +5,42 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.0.0] - 2026-03-22 — Built with Bun
+
+### The Ground-Up Rewrite
+
+v6 is a complete rewrite. Same toolchain as Claude Code — Bun for runtime, test, build, and compile.
+
+### Changed
+
+- **All-in on Bun** — `bunx faf-cli` as primary, `npx` backward-compatible
+- **93% smaller** — 71k lines → 5,292 lines (commands → interop → core → wasm)
+- **WASM scoring kernel** — `faf-scoring-kernel` 2.0.0 (Rust → WASM) replaces TypeScript scorer
+- **26 commands** — clean 1-file-per-command architecture
+- **218 tests** in ~10s via `bun test` (37 files, 1223 expect() calls)
+- **290KB bundle** in 2.4s via `bun build`
+- **Single portable binary** via `bun build --compile` (4 platforms)
+- **CI cleaned** — 8 workflows → 5 (3 dead removed, 2 fixed for v6)
+
+### Commands (26)
+
+init, git, auto, go, score, sync, compile, decompile, export, check,
+edit, convert, drift, context, recover, migrate, search, share, taf,
+demo, ai, pro, conductor, formats, info, clear
+
+### Architecture
+
+```
+src/
+├── cli.ts              ← Entry point, 26 command registrations
+├── commands/           ← 26 command files (1 per command)
+├── core/               ← Types, slots (33 Mk4), tiers, scorer, schema
+├── detect/             ← Framework detection, stack scanner
+├── interop/            ← YAML I/O, CLAUDE.md, AGENTS.md, GEMINI.md
+├── ui/                 ← Colors (#00D4D4), display
+└── wasm/               ← faf-scoring-kernel wrapper (Rust → WASM)
+```
+
 ## [5.2.2] - 2026-03-21
 
 ### Removed

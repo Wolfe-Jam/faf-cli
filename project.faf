@@ -25,12 +25,12 @@ stack:
   search: slotignored
   storage: slotignored
 human_context:
-  who: ""
+  who: Developers and teams using AI coding assistants
   what: The Persistent AI Context Standard — project DNA for any AI. IANA-registered. Anthropic-approved.
-  why: ""
-  where: ""
-  when: ""
-  how: ""
+  why: Eliminates 91% context re-discovery tax — define once, AI remembers forever
+  where: npm registry, Homebrew, GitHub
+  when: Production since September 2025, v6.0 March 2026
+  how: CLI tool — bunx faf-cli auto, then project.faf versions with your code
 monorepo:
   packages_count: slotignored
   build_orchestrator: slotignored

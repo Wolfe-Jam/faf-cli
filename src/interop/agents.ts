@@ -1,11 +1,14 @@
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import type { FafData } from '../core/types.js';
+import { fafMetaTag } from './claude.js';
 
 /** Generate AGENTS.md content from .faf data */
 export function generateAgentsMd(data: FafData): string {
   const lines: string[] = [];
 
+  lines.push(fafMetaTag(data));
+  lines.push('');
   lines.push(`# AGENTS.md — ${data.project?.name ?? 'Project'}`);
   lines.push('');
   lines.push('> Auto-generated from project.faf — do not edit directly');
