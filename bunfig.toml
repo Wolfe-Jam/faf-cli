@@ -2,7 +2,6 @@
 # Single-process runner — all tests share state
 # Clean up after yourself: process.env, console, mocks
 timeout = 30000
-root = "."
+root = "./tests"
 
 # Bun discovers *.test.ts recursively from root
-# archive/ files renamed to .archived to prevent discovery

@@ -1,193 +1,78 @@
-/**
- * Tests for score command
- */
+import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
+import { mkdirSync, writeFileSync, rmSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
+import { findFafFile, readFafRaw } from '../../src/interop/faf.js';
+import * as kernel from '../../src/wasm/kernel.js';
+import { enrichScore } from '../../src/core/scorer.js';
 
-import { scoreFafFile } from '../../src/commands/score';
-import { promises as fs } from 'fs';
-import * as path from 'path';
-
-// Mock console.log to capture output — save originals so we can restore them
-const originalLog = console.log;
-const originalError = console.error;
-const originalExit = process.exit;
-
-const mockLog = jest.fn();
-const mockError = jest.fn();
-const mockExit = jest.fn();
-
-describe('Score Command', () => {
-  const testDir = path.join(__dirname, '../temp-score');
+describe('score command integration', () => {
+  let testDir: string;
 
   beforeEach(() => {
-    // Install mocks before each test
-    console.log = mockLog;
-    console.error = mockError;
-    process.exit = mockExit as any;
-    mockLog.mockClear();
-    mockError.mockClear();
-    mockExit.mockClear();
+    testDir = join(tmpdir(), `faf-test-score-${Date.now()}`);
+    mkdirSync(testDir, { recursive: true });
   });
 
   afterEach(() => {
-    // Restore originals after each test to avoid polluting other test files
-    console.log = originalLog;
-    console.error = originalError;
-    process.exit = originalExit;
+    rmSync(testDir, { recursive: true, force: true });
   });
 
-  afterAll(async () => {
-    // Cleanup test directory
-    try {
-      await fs.rm(testDir, { recursive: true, force: true });
-    } catch (error) {
-      // Directory might not exist, ignore
-    }
-  });
-
-  it('should calculate score for a well-formed .faf file', async () => {
-    await fs.mkdir(testDir, { recursive: true });
-    
-    const goodFafContent = `faf_version: 2.5.0
+  test('scores a real .faf file', () => {
+    writeFileSync(join(testDir, 'project.faf'), `
+faf_version: 2.5.0
 project:
-  name: "high-score-project"
-  description: "A well-documented project with high score"
-  version: "1.0.0"
-  type: "typescript"
-  faf_score: 95
+  name: test-app
+  goal: Test application
+  main_language: TypeScript
+`);
+    const yaml = readFafRaw(join(testDir, 'project.faf'));
+    const result = enrichScore(kernel.score(yaml));
+    expect(result.score).toBeGreaterThan(0);
+    expect(result.populated).toBeGreaterThanOrEqual(3);
+  });
 
-ai_instructions:
-  priority: "CRITICAL"
-  message: "ATTENTION AI: This is a comprehensive project context"
-  guidelines:
-    - "Follow TypeScript best practices"
-    - "Maintain high code quality"
+  test('findFafFile finds project.faf', () => {
+    writeFileSync(join(testDir, 'project.faf'), 'faf_version: 2.5.0\nproject:\n  name: test\n');
+    expect(findFafFile(testDir)).toBe(join(testDir, 'project.faf'));
+  });
 
+  test('findFafFile returns null when no .faf exists', () => {
+    const emptyDir = join(testDir, 'empty');
+    mkdirSync(emptyDir);
+    expect(findFafFile(emptyDir)).toBeNull();
+  });
+
+  test('scores 100% for CLI with all slots filled', () => {
+    writeFileSync(join(testDir, 'project.faf'), `
+faf_version: 2.5.0
+project:
+  name: my-cli
+  goal: A great CLI
+  main_language: TypeScript
+stack:
+  frontend: slotignored
+  css_framework: slotignored
+  ui_library: slotignored
+  state_management: slotignored
+  backend: slotignored
+  api_type: slotignored
+  runtime: slotignored
+  database: slotignored
+  connection: slotignored
+  hosting: slotignored
+  build: slotignored
+  cicd: slotignored
 human_context:
-  who:
-    target_audience: "Enterprise developers"
-    stakeholders: ["Product team", "Engineering team", "QA team"]
-  what:
-    purpose: "Build reliable CLI tooling"
-    scope: "Complete command-line interface with full test coverage"
-    requirements: ["Performance", "Reliability", "Usability"]
-  why:
-    business_value: "Streamline AI context generation for enterprise teams"
-    success_metrics: ["90%+ test coverage", "Sub-second execution", "Zero critical bugs"]
-
-technical_context:
-  architecture:
-    style: "Modular CLI architecture"
-    patterns: ["Command pattern", "Strategy pattern", "Factory pattern"]
-  tech_stack:
-    primary: ["TypeScript", "Node.js", "Commander.js"]
-    testing: ["Jest", "TypeScript"]
-    tools: ["ESLint", "Prettier", "Husky"]
-  key_files:
-    - path: "src/cli.ts"
-      purpose: "Main CLI entry point and command definitions"
-    - path: "src/commands/"
-      purpose: "Individual command implementations"
-    - path: "src/utils/"
-      purpose: "Shared utility functions and helpers"
-
-dependencies:
-  production:
-    commander: "^12.0.0"
-    chalk: "^4.1.2"
-    yaml: "^2.3.4"
-  development:
-    jest: "^29.7.0"
-    typescript: "^5.3.3"
-`;
-
-    const fafPath = path.join(testDir, 'high-score.faf');
-    await fs.writeFile(fafPath, goodFafContent, 'utf-8');
-
-    await scoreFafFile(fafPath, { details: false, minimum: '50' });
-
-    // Updated expectations for new balance visualizer format
-    expect(mockLog).toHaveBeenCalledWith(expect.stringMatching(/Score: \d+%/));
-    // Check if exit was called with error code
-    if (mockExit.mock.calls.length > 0) {
-      // Only fail if exit was called with code 1 (error)
-      expect(mockExit).not.toHaveBeenCalledWith(1);
-    }
-  });
-
-  it('should score a .faf file with verbose option', async () => {
-    await fs.mkdir(testDir, { recursive: true });
-
-    const fafContent = `faf_version: 2.5.0
-project:
-  name: "detail-test"
-  description: "Test detailed scoring"
-  version: "1.0.0"
-
-ai_instructions:
-  priority: "CRITICAL"
-  message: "ATTENTION AI: Basic project context"
-
-human_context:
-  who:
-    target_audience: "Developers"
-  what:
-    purpose: "Test scoring details"
-  why:
-    business_value: "Validate scoring logic"
-
-technical_context:
-  architecture:
-    style: "Simple architecture"
-  tech_stack:
-    primary: ["TypeScript"]
-`;
-
-    const fafPath = path.join(testDir, 'detail-test.faf');
-    await fs.writeFile(fafPath, fafContent, 'utf-8');
-
-    // Verbose mode should not throw — just await; if it rejects the test fails
-    await scoreFafFile(fafPath, { details: true });
-  });
-
-  it('should calculate score for minimal .faf file', async () => {
-    await fs.mkdir(testDir, { recursive: true });
-
-    const lowScoreFafContent = `faf_version: 2.5.0
-project:
-  name: "minimal-project"
-`;
-
-    const fafPath = path.join(testDir, 'low-score.faf');
-    await fs.writeFile(fafPath, lowScoreFafContent, 'utf-8');
-
-    // Should complete without error — just await; if it rejects the test fails
-    await scoreFafFile(fafPath, { details: false });
-  });
-
-  it('should handle missing .faf file', async () => {
-    const nonExistentPath = path.join(testDir, 'missing.faf');
-
-    await scoreFafFile(nonExistentPath, { details: false });
-
-    // Should exit with error code for missing file
-    expect(mockExit).toHaveBeenCalledWith(1);
-  });
-
-  it('should handle invalid YAML in .faf file', async () => {
-    await fs.mkdir(testDir, { recursive: true });
-
-    const invalidYaml = `invalid_yaml: [
-  missing_bracket: true
-  - item1
-  - item2
-`;
-
-    const fafPath = path.join(testDir, 'invalid.faf');
-    await fs.writeFile(fafPath, invalidYaml, 'utf-8');
-
-    await scoreFafFile(fafPath, { details: false });
-
-    // Should exit with error code for invalid YAML
-    expect(mockExit).toHaveBeenCalledWith(1);
+  who: developer
+  what: CLI tool
+  why: Automation
+  where: npm
+  when: 2026
+  how: TDD
+`);
+    const result = enrichScore(kernel.score(readFafRaw(join(testDir, 'project.faf'))));
+    expect(result.score).toBe(100);
+    expect(result.tier.name).toBe('TROPHY');
   });
 });

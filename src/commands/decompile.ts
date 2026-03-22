@@ -1,24 +1,24 @@
-/**
- * faf decompile — Decompile .fafb binary to JSON using WASM kernel
- */
+import { readFileSync } from 'fs';
+import * as kernel from '../wasm/kernel.js';
 
-import { chalk } from '../fix-once/colors';
-import { decompileFAFb } from '../utils/fafb-compiler';
-
-interface DecompileOptions {
+export interface DecompileOptions {
   output?: string;
 }
 
-export async function decompileCommand(input?: string, options: DecompileOptions = {}): Promise<void> {
-  const fafbPath = input || 'project.fafb';
-
-  const result = await decompileFAFb(fafbPath, options.output);
-
-  if (result.success) {
-    console.log(chalk.green(`Decompiled: ${result.input} → ${result.output}`));
-    console.log(chalk.gray(`   ${result.size} bytes in ${result.time}ms`));
-  } else {
-    console.error(chalk.red(`Decompilation failed: ${result.error}`));
+export function decompileCommand(file: string, options: DecompileOptions = {}): void {
+  if (!file) {
+    console.error('Error: Please specify a .fafb file to decompile.');
     process.exit(1);
   }
+
+  const bytes = new Uint8Array(readFileSync(file));
+
+  // Check FAFB magic
+  if (String.fromCharCode(bytes[0], bytes[1], bytes[2], bytes[3]) !== 'FAFB') {
+    console.error('Error: Not a valid .fafb file (missing FAFB magic bytes).');
+    process.exit(3);
+  }
+
+  const info = kernel.decompile(bytes);
+  console.log(JSON.stringify(info, null, 2));
 }

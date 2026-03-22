@@ -1,0 +1,188 @@
+import { existsSync, readFileSync, readdirSync } from 'fs';
+import { join } from 'path';
+import type { DetectedFramework, Signal } from '../core/types.js';
+import { FRAMEWORKS } from './frameworks.js';
+
+interface PackageJson {
+  name?: string;
+  version?: string;
+  description?: string;
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+  scripts?: Record<string, string>;
+  type?: string;
+  main?: string;
+  bin?: string | Record<string, string>;
+}
+
+/** Read and parse package.json from a directory */
+export function readPackageJson(dir: string): PackageJson | null {
+  const pkgPath = join(dir, 'package.json');
+  if (!existsSync(pkgPath)) return null;
+  try {
+    return JSON.parse(readFileSync(pkgPath, 'utf-8'));
+  } catch {
+    return null;
+  }
+}
+
+/** Scan a directory for files matching patterns */
+function fileExists(dir: string, pattern: string): boolean {
+  // Handle simple file checks
+  if (!pattern.includes('*')) {
+    return existsSync(join(dir, pattern));
+  }
+
+  // Handle glob patterns like "next.config.*" or ".github/workflows/*.yml"
+  const parts = pattern.split('/');
+  if (parts.length === 1) {
+    // Simple wildcard: "next.config.*"
+    const prefix = pattern.split('*')[0];
+    try {
+      return readdirSync(dir).some(f => f.startsWith(prefix));
+    } catch {
+      return false;
+    }
+  }
+
+  // Multi-level: ".github/workflows/*.yml"
+  const subdir = join(dir, ...parts.slice(0, -1));
+  const filePattern = parts[parts.length - 1];
+  const prefix = filePattern.split('*')[0];
+  const suffix = filePattern.split('*')[1] || '';
+  try {
+    return readdirSync(subdir).some(f => f.startsWith(prefix) && f.endsWith(suffix));
+  } catch {
+    return false;
+  }
+}
+
+/** Match a single signal against project data */
+function matchSignal(signal: Signal, pkg: PackageJson | null, dir: string): boolean {
+  switch (signal.type) {
+    case 'dependency':
+      return !!(pkg?.dependencies?.[signal.key!]);
+    case 'devDependency':
+      return !!(pkg?.devDependencies?.[signal.key!]);
+    case 'file':
+      return fileExists(dir, signal.pattern!);
+    default:
+      return false;
+  }
+}
+
+/** Detect frameworks in a directory */
+export function detectFrameworks(dir: string): DetectedFramework[] {
+  const pkg = readPackageJson(dir);
+
+  return FRAMEWORKS
+    .map(fw => {
+      const matched = fw.signals.filter(s => matchSignal(s, pkg, dir));
+      const confidence = matched.length / fw.signals.length;
+      return { name: fw.name, slug: fw.slug, category: fw.category, confidence };
+    })
+    .filter(fw => fw.confidence > 0)
+    .sort((a, b) => b.confidence - a.confidence);
+}
+
+/** Detect the primary language of a project */
+export function detectLanguage(dir: string): string {
+  const pkg = readPackageJson(dir);
+
+  // Check for TypeScript
+  if (pkg?.devDependencies?.typescript || pkg?.dependencies?.typescript) return 'TypeScript';
+  if (existsSync(join(dir, 'tsconfig.json'))) return 'TypeScript';
+
+  // Check for common language indicators
+  if (existsSync(join(dir, 'Cargo.toml'))) return 'Rust';
+  if (existsSync(join(dir, 'go.mod'))) return 'Go';
+  if (existsSync(join(dir, 'pyproject.toml')) || existsSync(join(dir, 'setup.py'))) return 'Python';
+  if (existsSync(join(dir, 'Gemfile'))) return 'Ruby';
+  if (existsSync(join(dir, 'pom.xml')) || existsSync(join(dir, 'build.gradle'))) return 'Java';
+  if (existsSync(join(dir, 'Package.swift'))) return 'Swift';
+  if (existsSync(join(dir, 'build.zig'))) return 'Zig';
+
+  // Fallback to JS if package.json exists
+  if (pkg) return 'JavaScript';
+
+  return 'Unknown';
+}
+
+/** Detect the project type for slot mapping */
+export function detectProjectType(dir: string): string {
+  const pkg = readPackageJson(dir);
+  const frameworks = detectFrameworks(dir);
+
+  // CLI detection
+  if (pkg?.bin) return 'cli';
+
+  // MCP detection
+  const hasMcp = frameworks.some(f => f.slug === 'mcp');
+  if (hasMcp) return 'mcp';
+
+  // Full-stack detection
+  const hasFrontend = frameworks.some(f => f.category === 'frontend');
+  const hasBackend = frameworks.some(f => f.category === 'backend');
+  if (hasFrontend && hasBackend) return 'fullstack';
+
+  // Frontend-only
+  if (hasFrontend) return 'frontend';
+
+  // Backend-only
+  if (hasBackend) return 'backend';
+
+  // Library detection (has main/exports but no bin)
+  if (pkg?.main && !pkg?.bin) return 'library';
+
+  // Default
+  return 'library';
+}
+
+/** Detect the runtime */
+export function detectRuntime(dir: string): string {
+  if (existsSync(join(dir, 'bunfig.toml'))) return 'Bun';
+  if (existsSync(join(dir, 'deno.json')) || existsSync(join(dir, 'deno.jsonc'))) return 'Deno';
+  if (readPackageJson(dir)) return 'Node.js';
+  if (existsSync(join(dir, 'Cargo.toml'))) return 'Rust';
+  if (existsSync(join(dir, 'go.mod'))) return 'Go';
+  return 'Unknown';
+}
+
+/** Detect package manager */
+export function detectPackageManager(dir: string): string {
+  if (existsSync(join(dir, 'bun.lockb')) || existsSync(join(dir, 'bun.lock'))) return 'bun';
+  if (existsSync(join(dir, 'pnpm-lock.yaml'))) return 'pnpm';
+  if (existsSync(join(dir, 'yarn.lock'))) return 'yarn';
+  if (existsSync(join(dir, 'package-lock.json'))) return 'npm';
+  return 'npm';
+}
+
+/** Detect CI/CD */
+export function detectCicd(dir: string): string | null {
+  if (existsSync(join(dir, '.github/workflows'))) return 'GitHub Actions';
+  if (existsSync(join(dir, '.gitlab-ci.yml'))) return 'GitLab CI';
+  if (existsSync(join(dir, '.circleci'))) return 'CircleCI';
+  if (existsSync(join(dir, 'Jenkinsfile'))) return 'Jenkins';
+  return null;
+}
+
+/** Detect hosting platform */
+export function detectHosting(dir: string): string | null {
+  if (existsSync(join(dir, 'vercel.json'))) return 'Vercel';
+  if (existsSync(join(dir, 'netlify.toml'))) return 'Netlify';
+  if (existsSync(join(dir, 'wrangler.toml'))) return 'Cloudflare';
+  if (existsSync(join(dir, 'Dockerfile'))) return 'Docker';
+  if (existsSync(join(dir, 'fly.toml'))) return 'Fly.io';
+  if (existsSync(join(dir, 'render.yaml'))) return 'Render';
+  return null;
+}
+
+/** Detect build tool */
+export function detectBuildTool(dir: string): string | null {
+  const pkg = readPackageJson(dir);
+  if (pkg?.devDependencies?.vite || pkg?.dependencies?.vite) return 'Vite';
+  if (pkg?.devDependencies?.webpack || pkg?.dependencies?.webpack) return 'webpack';
+  if (pkg?.devDependencies?.esbuild || pkg?.dependencies?.esbuild) return 'esbuild';
+  if (existsSync(join(dir, 'tsconfig.json')) && pkg?.devDependencies?.typescript) return 'TypeScript (tsc)';
+  return null;
+}

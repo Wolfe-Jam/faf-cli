@@ -1,147 +1,52 @@
-/**
- * faf pro — Manage FAF Pro license (tri-sync)
- *
- * Subcommands:
- *   faf pro            Show Pro status
- *   faf pro status     Show Pro status (alias)
- *   faf pro activate <key>  Activate a license key
- */
+import { isPro } from '../core/pro.js';
+import { bold, dim, fafCyan, orange } from '../ui/colors.js';
 
-import { chalk } from '../fix-once/colors';
-import { FAF_COLORS, FAF_ICONS } from '../utils/championship-style';
-import {
-  activateLicense,
-  getProStatus,
-} from '../licensing/pro-gate';
-
-// ============================================================================
-// Main Command Router
-// ============================================================================
-
-export async function proCommand(args: string[]): Promise<void> {
-  const subcommand = args[0];
-
-  switch (subcommand) {
-    case 'activate': {
-      const key = args[1];
-      if (!key) {
-        console.log();
-        console.log(chalk.red('Usage: faf pro activate <key>'));
-        console.log(chalk.gray('  Format: FAF-PRO-XXXX-XXXX-XXXX'));
-        console.log();
-        return;
-      }
-      runActivate(key);
-      break;
-    }
-
-    case 'status':
-    case undefined:
-    case 'help':
-    case '--help':
-    case '-h':
-      showProStatus();
-      break;
-
-    default:
-      console.error(chalk.red(`\n  Unknown pro command: ${subcommand}`));
-      console.log('  Available: faf pro, faf pro status, faf pro activate <key>\n');
-      process.exit(1);
-  }
-}
-
-// ============================================================================
-// Status
-// ============================================================================
-
-function showProStatus(): void {
-  const status = getProStatus();
-
-  console.log();
-  console.log(FAF_COLORS.fafCyan(`${FAF_ICONS.trophy} FAF Pro Status`));
-  console.log();
-
-  switch (status.state) {
-    case 'licensed':
-      console.log(chalk.green(`   ${FAF_ICONS.gem} Pro Licensed`));
-      if (status.key) {
-        console.log(chalk.gray(`   Key:       ${status.key}`));
-      }
-      if (status.tier) {
-        console.log(chalk.gray(`   Tier:      ${status.tier}`));
-      }
-      if (status.activatedAt) {
-        console.log(
-          chalk.gray(
-            `   Activated: ${new Date(status.activatedAt).toLocaleDateString()}`
-          )
-        );
-      }
-      break;
-
-    case 'trial':
-      console.log(chalk.green(`   ${FAF_ICONS.rocket} Trial Active`));
-      console.log(
-        chalk.gray(`   Days left: ${status.daysLeft}`)
-      );
-      if (status.trialExpires) {
-        console.log(
-          chalk.gray(
-            `   Expires:   ${new Date(status.trialExpires).toLocaleDateString()}`
-          )
-        );
-      }
-      console.log();
-      console.log(chalk.gray('   Activate: faf pro activate <key>'));
-      console.log(chalk.gray('   Purchase: faf.one/pro'));
-      break;
-
-    case 'trial_expired':
-      console.log(chalk.yellow(`   ${FAF_ICONS.precision} Trial Expired`));
-      if (status.trialExpires) {
-        console.log(
-          chalk.gray(
-            `   Expired:  ${new Date(status.trialExpires).toLocaleDateString()}`
-          )
-        );
-      }
-      console.log();
-      console.log(chalk.white('   bi-sync is free — and always will be. tri-sync Pro adds RAM.'));
-      console.log(chalk.gray('   Early-bird: $3/mo · $19/yr (normally $10/mo — 70% off)'));
-      console.log(FAF_COLORS.fafOrange(`   ${FAF_ICONS.trophy} faf.one/pro`));
-      console.log(chalk.gray('   Activate: faf pro activate <key>'));
-      break;
-
-    case 'legacy_dev':
-      console.log(chalk.green(`   ${FAF_ICONS.trophy} Legacy Developer Access`));
-      console.log(chalk.gray('   All Pro features unlocked via turbo-license.'));
-      break;
-
-    case 'none':
-      console.log(chalk.gray(`   No trial started yet.`));
-      console.log(
-        chalk.gray('   Run a Pro command (faf ram, faf tri-sync) to start your 14-day trial.')
-      );
-      break;
-  }
-
-  console.log();
-}
-
-// ============================================================================
-// Activate
-// ============================================================================
-
-function runActivate(key: string): void {
-  console.log();
-
-  const result = activateLicense(key);
-
-  if (result.success) {
-    console.log(chalk.green(`   ${FAF_ICONS.trophy} ${result.message}`));
+/** Pro features & licensing */
+export function proCommand(subcommand?: string): void {
+  if (subcommand === 'features') {
+    showFeatures();
+  } else if (subcommand === 'activate') {
+    activatePro();
   } else {
-    console.log(chalk.yellow(`   ${result.message}`));
+    showStatus();
   }
+}
 
-  console.log();
+function showStatus(): void {
+  const status = isPro();
+  console.log(`${fafCyan('pro')} ${dim('— FAF Pro status')}\n`);
+  console.log(`  Status: ${status ? orange(bold('PRO')) : bold('Free')}`);
+  console.log('');
+  if (!status) {
+    console.log(dim('  Upgrade: faf pro activate'));
+  }
+}
+
+function showFeatures(): void {
+  console.log(`${fafCyan('pro')} ${dim('— Pro features')}\n`);
+  const features = [
+    ['tri-sync', '.faf ↔ CLAUDE.md ↔ MEMORY.md'],
+    ['enterprise slots', '33-slot scoring (slots 22-33)'],
+    ['advanced analytics', 'Drift tracking & team metrics'],
+  ];
+  for (const [name, desc] of features) {
+    console.log(`  ${fafCyan('◆')} ${bold(name)} ${dim('—')} ${desc}`);
+  }
+  console.log('');
+}
+
+function activatePro(): void {
+  console.log(`${fafCyan('pro')} ${dim('— activate')}\n`);
+  console.log('  Set FAF_PRO=1 in your environment to enable Pro features.');
+  console.log('');
+  console.log(dim('  export FAF_PRO=1'));
+  console.log('');
+
+  // Try to open upgrade URL
+  try {
+    const open = require('open');
+    open('https://faf.one/pro');
+  } catch {
+    console.log(dim('  Visit: https://faf.one/pro'));
+  }
 }

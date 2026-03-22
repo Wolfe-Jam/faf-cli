@@ -1,115 +1,24 @@
-/**
- * 🏆 faf formats - TURBO-CAT Format Discovery Command
- * Lists all discovered formats in the project
- */
+import { FORMATS } from '../detect/formats.js';
+import { bold, dim, fafCyan } from '../ui/colors.js';
 
-import { chalk } from "../fix-once/colors";
-import { FAF_COLORS, FAF_ICONS } from "../utils/championship-style";
-import { FabFormatsEngine } from "../utils/fab-formats-engine";
+/** Show supported formats grouped by category */
+export function formatsCommand(): void {
+  console.log(`${fafCyan('formats')} ${dim('— supported file types')}\n`);
 
-interface FormatOptions {
-  export?: boolean;
-  json?: boolean;
-  category?: boolean;
-}
-
-// Constants
-const _MAX_WIDTH = 80;
-
-export async function formatsCommand(projectPath?: string, options: FormatOptions = {}) {
-  // FAF banner is now shown by cli.ts - removed duplicate
-
-  console.log();
-  console.log(FAF_COLORS.fafCyan(`😽 TURBO-CAT™ --Prowling... v2.0.0`));
-  console.log(FAF_COLORS.fafCyan(`═══════════════════════════════════`));
-  console.log();
-
-  const fabFormats = new FabFormatsEngine();
-  const projectRoot = projectPath || process.cwd();
-
-  console.log(chalk.gray(`${FAF_ICONS.lightning} Scanning project at ${projectRoot}...`));
-
-  const startTime = Date.now();
-  const analysis = await fabFormats.discoverFormats(projectRoot);
-  const elapsedTime = Date.now() - startTime;
-
-  console.log();
-  console.log(FAF_COLORS.fafGreen(`✅ Found ${analysis.discoveredFormats.length} formats in ${elapsedTime}ms!`));
-  console.log();
-
-  if (options.json || options.export) {
-    // Export as JSON
-    console.log(JSON.stringify(analysis, null, 2));
-  } else if (options.category) {
-    // Show by category (pyramid levels)
-    console.log(FAF_COLORS.fafCyan(`📊 By Category:`));
-    console.log();
-
-    const categories: { [key: string]: string[] } = {
-      'Config': [],
-      'Code': [],
-      'Documentation': [],
-      'Testing': [],
-      'CI/CD': [],
-      'Container': [],
-      'Database': [],
-      'Other': []
-    };
-
-    // Categorize formats
-    analysis.discoveredFormats.forEach(format => {
-      const formatName = format.fileName;
-      if (formatName.includes('json') || formatName.includes('yaml') || formatName.includes('toml')) {
-        categories['Config'].push(formatName);
-      } else if (formatName.includes('.ts') || formatName.includes('.js') || formatName.includes('.py')) {
-        categories['Code'].push(formatName);
-      } else if (formatName.includes('.md') || formatName.includes('README')) {
-        categories['Documentation'].push(formatName);
-      } else if (formatName.includes('test') || formatName.includes('spec')) {
-        categories['Testing'].push(formatName);
-      } else if (formatName.includes('workflow') || formatName.includes('jenkins')) {
-        categories['CI/CD'].push(formatName);
-      } else if (formatName.includes('docker') || formatName.includes('compose')) {
-        categories['Container'].push(formatName);
-      } else if (formatName.includes('.sql') || formatName.includes('migration')) {
-        categories['Database'].push(formatName);
-      } else {
-        categories['Other'].push(formatName);
-      }
-    });
-
-    // Display categories
-    Object.entries(categories).forEach(([category, formats]) => {
-      if (formats.length > 0) {
-        console.log(FAF_COLORS.fafOrange(`  ${category}:`));
-        formats.forEach(format => {
-          console.log(chalk.gray(`    - ${format}`));
-        });
-        console.log();
-      }
-    });
-  } else {
-    // Default: alphabetical list
-    console.log(FAF_COLORS.fafCyan(`📋 Discovered Formats (A-Z):`));
-    console.log();
-
-    const sorted = [...analysis.discoveredFormats].sort((a, b) => a.fileName.localeCompare(b.fileName));
-    sorted.forEach(format => {
-      // FAB-FORMATS always confirms (it reads the file)
-      const icon = '✅';
-      const color = chalk.green;
-      console.log(color(`  ${icon} ${format.fileName}`));
-    });
+  const categories = new Map<string, typeof FORMATS>();
+  for (const f of FORMATS) {
+    const list = categories.get(f.category) ?? [];
+    list.push(f);
+    categories.set(f.category, list);
   }
 
-  console.log();
-  console.log(FAF_COLORS.fafCyan(`💡 Stack Signature: ${analysis.stackSignature}`));
-  console.log(FAF_COLORS.fafOrange(`🏆 Intelligence Score: ${analysis.totalIntelligenceScore}`));
-  console.log();
+  for (const [category, entries] of categories) {
+    console.log(`  ${bold(category)}`);
+    for (const entry of entries) {
+      console.log(`    ${entry.name} ${dim(entry.extensions.join(', '))}`);
+    }
+    console.log();
+  }
 
-  // TURBO-CAT signature
-  console.log(chalk.gray('─'.repeat(40)));
-  console.log(FAF_COLORS.fafCyan(`😽 TURBO-CAT™: "I detected ${analysis.discoveredFormats.length} formats and made your stack PURRR!"`));
-  console.log(chalk.gray('─'.repeat(40)));
-  console.log();
+  console.log(dim(`  ${FORMATS.length} formats across ${categories.size} categories`));
 }

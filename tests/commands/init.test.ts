@@ -1,226 +1,104 @@
-/**
- * Tests for init command
- */
+import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
+import { mkdirSync, writeFileSync, rmSync, existsSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
+import { readFaf, readFafRaw } from '../../src/interop/faf.js';
+import { detectStack } from '../../src/detect/stack.js';
+import * as kernel from '../../src/wasm/kernel.js';
+import { enrichScore } from '../../src/core/scorer.js';
+import { writeFaf } from '../../src/interop/faf.js';
 
-import { initFafFile } from '../../src/commands/init';
-import { promises as fs } from 'fs';
-import * as path from 'path';
-
-// Mock console.log to capture output — save originals so we restore them
-const originalLog = console.log;
-const originalError = console.error;
-const originalExit = process.exit;
-
-const mockLog = jest.fn();
-const mockError = jest.fn();
-const mockExit = jest.fn();
-
-describe('Init Command', () => {
-  const testDir = path.join(__dirname, '../temp-init');
+describe('init command integration', () => {
+  let testDir: string;
 
   beforeEach(() => {
-    console.log = mockLog;
-    console.error = mockError;
-    process.exit = mockExit as any;
-    mockLog.mockClear();
-    mockError.mockClear();
-    mockExit.mockClear();
+    testDir = join(tmpdir(), `faf-test-init-${Date.now()}`);
+    mkdirSync(testDir, { recursive: true });
   });
 
   afterEach(() => {
-    console.log = originalLog;
-    console.error = originalError;
-    process.exit = originalExit;
+    rmSync(testDir, { recursive: true, force: true });
   });
 
-  afterAll(async () => {
-    // Cleanup test directory
-    try {
-      await fs.rm(testDir, { recursive: true, force: true });
-    } catch (error) {
-      // Directory might not exist, ignore
-    }
+  test('detects CLI project and creates .faf', () => {
+    writeFileSync(join(testDir, 'package.json'), JSON.stringify({
+      name: 'my-cli-tool',
+      version: '1.0.0',
+      bin: { mycli: 'dist/cli.js' },
+      dependencies: { commander: '^14.0.0' },
+      devDependencies: { typescript: '^5.0.0' },
+    }));
+    writeFileSync(join(testDir, 'tsconfig.json'), '{}');
+
+    const data = detectStack(testDir);
+    expect(data.project?.name).toBe('my-cli-tool');
+    expect(data.project?.type).toBe('cli');
+    expect(data.project?.main_language).toBe('TypeScript');
+    expect(data.stack?.frontend).toBe('slotignored');
+
+    // Write and score
+    const fafPath = join(testDir, 'project.faf');
+    writeFaf(fafPath, data);
+    const result = enrichScore(kernel.score(readFafRaw(fafPath)));
+    expect(result.score).toBeGreaterThan(0);
+    expect(result.ignored).toBeGreaterThan(0);
   });
 
-  it('should create .faf file for TypeScript project', async () => {
-    await fs.mkdir(testDir, { recursive: true });
-    
-    // Create package.json to make it look like a real project
-    const packageJson = {
-      name: "test-typescript-project",
-      version: "1.0.0",
-      description: "Test TypeScript project",
-      main: "dist/index.js",
-      scripts: {
-        build: "tsc",
-        test: "jest"
-      },
-      dependencies: {
-        "commander": "^12.0.0"
-      },
-      devDependencies: {
-        "typescript": "^5.3.3",
-        "@types/node": "^20.0.0"
-      }
-    };
-    
-    await fs.writeFile(
-      path.join(testDir, 'package.json'), 
-      JSON.stringify(packageJson, null, 2)
-    );
+  test('detects fullstack project', () => {
+    writeFileSync(join(testDir, 'package.json'), JSON.stringify({
+      name: 'my-fullstack',
+      dependencies: { react: '^18.0.0', express: '^4.0.0' },
+      devDependencies: { typescript: '^5.0.0', tailwindcss: '^3.0.0' },
+    }));
 
-    // Create tsconfig.json
-    const tsConfig = {
-      compilerOptions: {
-        target: "ES2020",
-        module: "commonjs",
-        outDir: "./dist",
-        rootDir: "./src",
-        strict: true
-      }
-    };
-    
-    await fs.writeFile(
-      path.join(testDir, 'tsconfig.json'),
-      JSON.stringify(tsConfig, null, 2)
-    );
-
-    await initFafFile(testDir, { force: false, template: 'auto' });
-
-    // v1.2.0: init creates project.faf (standard) not .faf (legacy)
-    const fafPath = path.join(testDir, 'project.faf');
-    const fafExists = await fs.access(fafPath).then(() => true).catch(() => false);
-
-    expect(fafExists).toBe(true);
-    expect(mockLog).toHaveBeenCalledWith(expect.stringContaining('Created'));
-
-    // Verify file content
-    const fafContent = await fs.readFile(fafPath, 'utf-8');
-    expect(fafContent).toContain('faf_version: 2.5.0');
-    expect(fafContent).toContain('name:'); // Has project name (any format)
-    expect(fafContent).toContain('TypeScript');
+    const data = detectStack(testDir);
+    expect(data.project?.type).toBe('fullstack');
+    expect(data.stack?.frontend).toBe('React');
+    expect(data.stack?.backend).toBe('Express');
   });
 
-  it('should force overwrite existing project.faf file', async () => {
-    await fs.mkdir(testDir, { recursive: true });
+  test('detects frontend project', () => {
+    writeFileSync(join(testDir, 'package.json'), JSON.stringify({
+      name: 'my-react-app',
+      dependencies: { react: '^18.0.0', 'react-dom': '^18.0.0' },
+    }));
 
-    // v1.2.0: Create existing project.faf file (standard)
-    const existingFaf = `faf_version: 2.0.0
-project:
-  name: "old-project"
-`;
-    const fafPath = path.join(testDir, 'project.faf');
-    await fs.writeFile(fafPath, existingFaf, 'utf-8');
-
-    // Create minimal project structure
-    await fs.writeFile(
-      path.join(testDir, 'package.json'),
-      JSON.stringify({ name: "new-project", version: "1.0.0" })
-    );
-
-    await initFafFile(testDir, { force: true, template: 'auto' });
-
-    const newContent = await fs.readFile(fafPath, 'utf-8');
-    expect(newContent).toContain('new-project');
-    expect(mockLog).toHaveBeenCalledWith(expect.stringContaining('Created'));
+    const data = detectStack(testDir);
+    expect(data.project?.type).toBe('frontend');
+    expect(data.stack?.frontend).toBe('React');
   });
 
-  it('should show friendly message when .faf file exists without force', async () => {
-    await fs.mkdir(testDir, { recursive: true });
+  test('generates valid YAML that kernel can score', () => {
+    writeFileSync(join(testDir, 'package.json'), JSON.stringify({
+      name: 'test-project',
+      version: '1.0.0',
+    }));
 
-    // Create existing .faf file
-    const existingFaf = `faf_version: 2.0.0
-project:
-  name: "existing-project"
-`;
-    const fafPath = path.join(testDir, 'project.faf');
-    await fs.writeFile(fafPath, existingFaf, 'utf-8');
+    const data = detectStack(testDir);
+    const fafPath = join(testDir, 'project.faf');
+    writeFaf(fafPath, data);
 
-    await initFafFile(testDir, { force: false, template: 'auto' });
+    expect(existsSync(fafPath)).toBe(true);
+    const yaml = readFafRaw(fafPath);
+    expect(kernel.validate(yaml)).toBe(true);
 
-    // v1.2.0: init shows friendly message instead of error
-    expect(mockLog).toHaveBeenCalledWith(expect.stringContaining('found a project.faf'));
-    // Should NOT exit with error
-    expect(mockExit).not.toHaveBeenCalledWith(1);
+    const result = kernel.score(yaml);
+    expect(result.total).toBe(21);
   });
 
-  it('should use specific template when requested', async () => {
-    await fs.mkdir(testDir, { recursive: true });
+  test('slotignored math is correct for CLI', () => {
+    writeFileSync(join(testDir, 'package.json'), JSON.stringify({
+      name: 'my-cli',
+      bin: { cli: 'index.js' },
+    }));
 
-    // Create basic package.json with react
-    await fs.writeFile(
-      path.join(testDir, 'package.json'),
-      JSON.stringify({
-        name: "react-test",
-        version: "1.0.0",
-        dependencies: { "react": "^18.0.0" }
-      })
-    );
+    const data = detectStack(testDir);
+    const fafPath = join(testDir, 'project.faf');
+    writeFaf(fafPath, data);
 
-    await initFafFile(testDir, { force: true, template: 'react' });
-
-    const fafPath = path.join(testDir, 'project.faf');
-    const fafContent = await fs.readFile(fafPath, 'utf-8');
-
-    expect(fafContent).toContain('React');
-    expect(mockLog).toHaveBeenCalledWith(expect.stringContaining('Created'));
-  });
-
-  it('should handle custom output path', async () => {
-    await fs.mkdir(testDir, { recursive: true });
-    
-    await fs.writeFile(
-      path.join(testDir, 'package.json'),
-      JSON.stringify({ name: "custom-output-test", version: "1.0.0" })
-    );
-
-    const customOutput = path.join(testDir, 'custom.faf');
-    await initFafFile(testDir, { force: false, template: 'auto', output: customOutput });
-
-    const fafExists = await fs.access(customOutput).then(() => true).catch(() => false);
-    expect(fafExists).toBe(true);
-    
-    const fafContent = await fs.readFile(customOutput, 'utf-8');
-    expect(fafContent).toContain('name:'); // Has project name (any format)
-  });
-
-  it('should detect and handle Svelte projects', async () => {
-    await fs.mkdir(testDir, { recursive: true });
-
-    // Create Svelte project structure
-    const packageJson = {
-      name: "svelte-test-project",
-      version: "1.0.0",
-      dependencies: {
-        "svelte": "^4.0.0"
-      },
-      devDependencies: {
-        "@sveltejs/kit": "^2.0.0",
-        "vite": "^5.0.0"
-      }
-    };
-
-    await fs.writeFile(
-      path.join(testDir, 'package.json'),
-      JSON.stringify(packageJson, null, 2)
-    );
-
-    // Create svelte.config.js
-    await fs.writeFile(
-      path.join(testDir, 'svelte.config.js'),
-      `import adapter from '@sveltejs/adapter-auto';
-      export default {
-        kit: { adapter: adapter() }
-      };`
-    );
-
-    await initFafFile(testDir, { force: true, template: 'auto' });
-
-    const fafPath = path.join(testDir, 'project.faf');
-    const fafContent = await fs.readFile(fafPath, 'utf-8');
-
-    // Should detect Svelte/SvelteKit
-    expect(fafContent.toLowerCase()).toMatch(/svelte/i);
-    expect(fafContent).toContain('name:'); // Has project name (any format)
+    const result = kernel.score(readFafRaw(fafPath));
+    // CLI: 9 active slots (project=3, human=6), 12 slotignored in base tier
+    expect(result.active).toBe(9);
+    expect(result.ignored).toBe(12);
   });
 });
