@@ -105,6 +105,7 @@ test-*.faf
 !.github/**/*.md
 !commands/**/*.md
 !skills/**/*.md
+!reports/**/*.md
 
 # Temporary files
 *.tmp

@@ -1,0 +1,169 @@
+bun test v1.3.5 (1e86cebd)
+
+tests/commands/migrate.test.ts:
+[38;2;0;212;212m◆[0m migrate  v1.0.0 → v2.5.0
+[2m  updated /private/var/folders/ph/nflp_qd97yb9639m_j2pp0gm0000gn/T/faf-test-migrate-1774190498907/project.faf[0m
+[38;2;0;212;212m◆[0m migrate  already at v2.5.0
+[38;2;0;212;212m◆[0m migrate  [2m(dry run)[0m v1.0.0 → v2.5.0
+[2m  would update /private/var/folders/ph/nflp_qd97yb9639m_j2pp0gm0000gn/T/faf-test-migrate-1774190498917/project.faf[0m
+
+tests/commands/info.test.ts:
+[38;2;0;212;212m[1mfaf[0m[0m v6.0.0-alpha.0
+[2mkernel 2.0.0  IANA application/vnd.faf+yaml[0m
+[38;2;0;212;212m[1mfaf[0m[0m v6.0.0-alpha.0
+[2mkernel 2.0.0  IANA application/vnd.faf+yaml[0m
+
+tests/commands/demo.test.ts:
+[38;2;0;212;212mdemo[0m [2m— FAF in action[0m
+
+  [1m1.[0m Created sample project.faf
+[2m     /var/folders/ph/nflp_qd97yb9639m_j2pp0gm0000gn/T/faf-demo-1774190498945/project.faf
+[0m
+  [1m2.[0m Scoring...
+
+[38;5;208m🏆[0m [38;5;208mTROPHY[0m [38;5;208m[1m100%[0m[0m [2m21/21 slots[0m [2m—[0m project.faf
+
+  [38;2;0;212;212m●[0m project.name
+  [38;2;0;212;212m●[0m project.goal
+  [38;2;0;212;212m●[0m project.main_language
+  [38;2;0;212;212m●[0m human_context.who
+  [38;2;0;212;212m●[0m human_context.what
+  [38;2;0;212;212m●[0m human_context.why
+  [38;2;0;212;212m●[0m human_context.where
+  [38;2;0;212;212m●[0m human_context.when
+  [38;2;0;212;212m●[0m human_context.how
+  [38;2;0;212;212m●[0m stack.frontend
+  [38;2;0;212;212m●[0m stack.css_framework
+  [38;2;0;212;212m●[0m stack.ui_library
+  [38;2;0;212;212m●[0m stack.state_management
+  [38;2;0;212;212m●[0m stack.backend
+  [38;2;0;212;212m●[0m stack.api_type
+  [38;2;0;212;212m●[0m stack.runtime
+  [38;2;0;212;212m●[0m stack.database
+  [38;2;0;212;212m●[0m stack.connection
+  [38;2;0;212;212m●[0m stack.hosting
+  [38;2;0;212;212m●[0m stack.build
+  [38;2;0;212;212m●[0m stack.cicd
+
+[2m  Demo complete. Run "faf init" in your project to get started.[0m
+[38;2;0;212;212mdemo[0m [2m— FAF in action[0m
+
+  [1m1.[0m Created sample project.faf
+[2m     /var/folders/ph/nflp_qd97yb9639m_j2pp0gm0000gn/T/faf-demo-1774190498969/project.faf
+[0m
+  [1m2.[0m Scoring...
+
+[38;5;208m🏆[0m [38;5;208mTROPHY[0m [38;5;208m[1m100%[0m[0m [2m21/21 slots[0m [2m—[0m project.faf
+
+  [38;2;0;212;212m●[0m project.name
+  [38;2;0;212;212m●[0m project.goal
+  [38;2;0;212;212m●[0m project.main_language
+  [38;2;0;212;212m●[0m human_context.who
+  [38;2;0;212;212m●[0m human_context.what
+  [38;2;0;212;212m●[0m human_context.why
+  [38;2;0;212;212m●[0m human_context.where
+  [38;2;0;212;212m●[0m human_context.when
+  [38;2;0;212;212m●[0m human_context.how
+  [38;2;0;212;212m●[0m stack.frontend
+  [38;2;0;212;212m●[0m stack.css_framework
+  [38;2;0;212;212m●[0m stack.ui_library
+  [38;2;0;212;212m●[0m stack.state_management
+  [38;2;0;212;212m●[0m stack.backend
+  [38;2;0;212;212m●[0m stack.api_type
+  [38;2;0;212;212m●[0m stack.runtime
+  [38;2;0;212;212m●[0m stack.database
+  [38;2;0;212;212m●[0m stack.connection
+  [38;2;0;212;212m●[0m stack.hosting
+  [38;2;0;212;212m●[0m stack.build
+  [38;2;0;212;212m●[0m stack.cicd
+
+[2m  Demo complete. Run "faf init" in your project to get started.[0m
+
+tests/commands/recover.test.ts:
+[38;2;0;212;212m◆[0m recover  created /private/var/folders/ph/nflp_qd97yb9639m_j2pp0gm0000gn/T/faf-test-recover-1774190499019/project.faf
+[2m  sources: CLAUDE.md[0m
+[38;2;0;212;212m◆[0m recover  created /private/var/folders/ph/nflp_qd97yb9639m_j2pp0gm0000gn/T/faf-test-recover-1774190499044/project.faf
+[2m  sources: AGENTS.md[0m
+[38;2;0;212;212m◆[0m recover  merged into /private/var/folders/ph/nflp_qd97yb9639m_j2pp0gm0000gn/T/faf-test-recover-1774190499047/project.faf
+[2m  sources: CLAUDE.md[0m
+
+tests/commands/pro.test.ts:
+[38;2;0;212;212mpro[0m [2m— FAF Pro status[0m
+
+  Status: [1mFree[0m
+
+[2m  Upgrade: faf pro activate[0m
+[38;2;0;212;212mpro[0m [2m— Pro features[0m
+
+  [38;2;0;212;212m◆[0m [1mtri-sync[0m [2m—[0m .faf ↔ CLAUDE.md ↔ MEMORY.md
+  [38;2;0;212;212m◆[0m [1menterprise slots[0m [2m—[0m 33-slot scoring (slots 22-33)
+  [38;2;0;212;212m◆[0m [1madvanced analytics[0m [2m—[0m Drift tracking & team metrics
+
+
+tests/commands/search.test.ts:
+[38;2;0;212;212mslots[0m [2m— 1 match[0m
+
+  [1m#10[0m stack.frontend [2m—[0m Framework (React, Svelte, etc.) [2m[frontend][0m
+
+
+tests/commands/conductor.test.ts:
+[38;2;0;212;212m◆[0m conductor import  created /private/var/folders/ph/nflp_qd97yb9639m_j2pp0gm0000gn/T/faf-test-conductor-1774190499059/project.faf
+{
+  "name": "test",
+  "description": "My app",
+  "language": "TypeScript",
+  "stack": {
+    "frontend": "React"
+  }
+}
+[38;2;0;212;212m◆[0m conductor import  created /private/var/folders/ph/nflp_qd97yb9639m_j2pp0gm0000gn/T/faf-test-conductor-1774190499064/project.faf
+[38;2;0;212;212mconductor[0m [2m— conductor integration[0m
+
+  [1mfaf conductor import <path>[0m [2m— import conductor config into .faf[0m
+  [1mfaf conductor export[0m [2m— generate conductor config from .faf[0m
+
+tests/commands/taf.test.ts:
+[38;2;0;212;212m◆[0m taf  receipt written to /var/folders/ph/nflp_qd97yb9639m_j2pp0gm0000gn/T/faf-test-taf-1774190499097/receipt.json
+[38;2;0;212;212m◆[0m taf  receipt written to /var/folders/ph/nflp_qd97yb9639m_j2pp0gm0000gn/T/faf-test-taf-1774190499099/receipt.json
+
+tests/commands/export.test.ts:
+  AGENTS.md
+[38;2;0;212;212mexported[0m [2mfrom /private/var/folders/ph/nflp_qd97yb9639m_j2pp0gm0000gn/T/faf-test-export-1774190499107/project.faf[0m
+  .cursorrules
+[38;2;0;212;212mexported[0m [2mfrom /private/var/folders/ph/nflp_qd97yb9639m_j2pp0gm0000gn/T/faf-test-export-1774190499111/project.faf[0m
+  GEMINI.md
+[38;2;0;212;212mexported[0m [2mfrom /private/var/folders/ph/nflp_qd97yb9639m_j2pp0gm0000gn/T/faf-test-export-1774190499113/project.faf[0m
+  AGENTS.md
+  .cursorrules
+  GEMINI.md
+[38;2;0;212;212mexported[0m [2mfrom /private/var/folders/ph/nflp_qd97yb9639m_j2pp0gm0000gn/T/faf-test-export-1774190499115/project.faf[0m
+
+tests/commands/auto.test.ts:
+[38;2;0;212;212mcreated[0m /private/var/folders/ph/nflp_qd97yb9639m_j2pp0gm0000gn/T/faf-test-auto-1774190499119/project.faf
+[2m○[0m RED [1m22%[0m [2m2/9 slots[0m [2m—[0m /private/var/folders/ph/nflp_qd97yb9639m_j2pp0gm0000gn/T/faf-test-auto-1774190499119/project.faf
+[2m  7 empty[0m
+[2m
+  run [1m'faf go'[0m to reach 100%[0m
+[38;2;0;212;212mupdated[0m /private/var/folders/ph/nflp_qd97yb9639m_j2pp0gm0000gn/T/faf-test-auto-1774190499127/project.faf
+[2m○[0m RED [1m33%[0m [2m3/9 slots[0m [2m—[0m /private/var/folders/ph/nflp_qd97yb9639m_j2pp0gm0000gn/T/faf-test-auto-1774190499127/project.faf
+[2m  6 empty[0m
+[2m
+  run [1m'faf go'[0m to reach 100%[0m
+[38;2;0;212;212mcreated[0m /private/var/folders/ph/nflp_qd97yb9639m_j2pp0gm0000gn/T/faf-test-auto-1774190499137/project.faf
+[2m○[0m RED [1m22%[0m [2m2/9 slots[0m [2m—[0m /private/var/folders/ph/nflp_qd97yb9639m_j2pp0gm0000gn/T/faf-test-auto-1774190499137/project.faf
+[2m  7 empty[0m
+[2m
+  run [1m'faf go'[0m to reach 100%[0m
+
+tests/commands/ai.test.ts:
+[38;2;0;212;212mai[0m [2m— AI-powered features[0m
+
+  [1mfaf ai enhance[0m [2m— fill empty slots via Claude[0m
+  [1mfaf ai analyze[0m [2m— get improvement suggestions[0m
+
+[2m  Requires ANTHROPIC_API_KEY environment variable.[0m
+
+ 218 pass
+ 0 fail
+ 1223 expect() calls
+Ran 218 tests across 37 files. [9.47s]
