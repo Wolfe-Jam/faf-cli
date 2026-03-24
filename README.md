@@ -45,15 +45,7 @@ brew install faf-cli && faf auto   # Homebrew
 
 Run `faf` with no arguments:
 
-```
- ▄███████▄
- █▀███████   faf v6.0.3
-▀▄ ██  ██    Nelly Never Forgets
-▔▔▔▔▔▔▔▔▔▔▔▔
-  ~/my-project
-
-🏆 TROPHY 100%
-```
+![faf](./nelly.png)
 
 ---
 
