@@ -236,13 +236,13 @@ if (process.argv.length <= 2) {
   console.log(`${DB} ${G}▄${GB}███████${DB}${G}▄${RS}`);
   console.log(`${DB} ${GB}${G}█${DB}${G}▀${GB}███████${RS}  ${fafCyan(bold('faf'))} ${dim(`v${VERSION}`)}`);
   const GR = '\x1b[38;2;39;174;96m';    // grass green
-  console.log(`${DB}${G}▀${GB}${DF}▄${DB} ${GB}${G}██${DB}  ${GB}${G}██${DB} ${RS}  ${dim('Nelly Never Forgets')}`);
+  console.log(`${DB}${G}▀${GB}${DF}▄${DB}${GR}░${GB}${G}██${DB}${GR}░░${GB}${G}██${DB}${GR}░${RS}  ${dim('Nelly Never Forgets')}`);
   console.log(`${GR}▔▔▔▔▔▔▔▔▔▔▔▔${RS}`);
   console.log(`${dim('  ' + cwd)}`);
   console.log('');
   try { await scoreCommand(undefined, { status: true }); } catch {}
   console.log('');
-  program.outputHelp();
+  console.log(`  ${dim('Run')} ${fafCyan('faf --help')} ${dim('for commands')}`);
 } else {
   program.parse(process.argv);
 }
