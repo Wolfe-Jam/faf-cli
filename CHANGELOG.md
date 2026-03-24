@@ -5,6 +5,19 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.0.5] - 2026-03-22 — Nelly Above the Fold
+
+### Changed
+
+- **Compact welcome** — bare `faf` shows Nelly + score + hint instead of full help dump
+- **Grass between feet** — green `░` texture on Nelly's ground line, no gap
+- **Green line easter egg** — `▔▔▔` line visible on ctrl+o expand
+
+### Why
+
+- Nelly was hidden behind "+34 lines (ctrl+o to expand)" in Claude Code
+- Now 3 art lines always visible above the fold
+
 ## [6.0.4] - 2026-03-23 — Nelly Never Forgets
 
 ### Added
