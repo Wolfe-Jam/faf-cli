@@ -5,7 +5,7 @@ import { bold, dim, fafCyan, orange } from './colors.js';
 /** Display a score result to stdout */
 export function displayScore(result: ScoreResult, file: string, verbose = false): void {
   const badge = tierBadge(result.tier);
-  const pct = result.score === 100 ? orange(bold('100%')) : bold(`${result.score}%`);
+  const pct = bold(`${result.score}%`);
   console.log(`${badge} ${pct} ${dim(`${result.populated}/${result.active} slots`)} ${dim('—')} ${file}`);
 
   if (result.tier.name !== 'TROPHY' && result.empty > 0) {

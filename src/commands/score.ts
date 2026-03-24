@@ -3,6 +3,7 @@ import * as kernel from '../wasm/kernel.js';
 import { enrichScore } from '../core/scorer.js';
 import { displayScore } from '../ui/display.js';
 import { tierBadge } from '../core/tiers.js';
+import { bold } from '../ui/colors.js';
 
 export interface ScoreOptions {
   verbose?: boolean;
@@ -28,7 +29,7 @@ export function scoreCommand(file?: string, options: ScoreOptions = {}): void {
 
   if (options.status) {
     // Compact one-liner for CI/scripts
-    console.log(`${tierBadge(result.tier)} ${result.score}%`);
+    console.log(`${tierBadge(result.tier)} ${bold(`${result.score}%`)}`);
     return;
   }
 

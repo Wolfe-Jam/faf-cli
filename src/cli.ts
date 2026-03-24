@@ -28,7 +28,7 @@ import { goCommand } from './commands/go.js';
 import { aiCommand } from './commands/ai.js';
 import { conductorCommand } from './commands/conductor.js';
 
-const VERSION = '6.0.0';
+const VERSION = '6.0.3';
 
 const program = new Command();
 
@@ -221,4 +221,28 @@ program.command('yolo', { hidden: true }).action(() => initCommand({ yolo: true 
 
 // === Parse and run ===
 
-program.parse(process.argv);
+// No command given → show Nelly header + score + help
+if (process.argv.length <= 2) {
+  const { bold, dim, fafCyan } = await import('./ui/colors.js');
+  const cwd = process.cwd().replace(process.env.HOME ?? '', '~');
+
+  // Nelly — pixel-art elephant (10×6 grid, half-block rendering)
+  const G = '\x1b[38;2;150;150;150m';   // gray fg
+  const GB = '\x1b[48;2;150;150;150m';  // gray bg
+  const DF = '\x1b[38;2;29;29;29m';     // dark fg (▄ trick)
+  const DB = '\x1b[48;2;29;29;29m';     // dark bg
+  const RS = '\x1b[0m';
+  console.log('');
+  console.log(`${DB} ${G}▄${GB}███████${DB}${G}▄${RS}`);
+  console.log(`${DB} ${GB}${G}█${DB}${G}▀${GB}███████${RS}  ${fafCyan(bold('faf'))} ${dim(`v${VERSION}`)}`);
+  const GR = '\x1b[38;2;39;174;96m';    // grass green
+  console.log(`${DB}${G}▀${GB}${DF}▄${DB} ${GB}${G}██${DB}  ${GB}${G}██${DB} ${RS}  ${dim('Nelly Never Forgets')}`);
+  console.log(`${GR}▔▔▔▔▔▔▔▔▔▔▔▔${RS}`);
+  console.log(`${dim('  ' + cwd)}`);
+  console.log('');
+  try { await scoreCommand(undefined, { status: true }); } catch {}
+  console.log('');
+  program.outputHelp();
+} else {
+  program.parse(process.argv);
+}

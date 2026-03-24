@@ -183,6 +183,10 @@ Full e2e lifecycle test runs every command in sequence: init → auto → score 
 
 ---
 
+If `faf-cli` has been useful, consider starring the repo — it helps others find it.
+
+---
+
 ## License
 
 MIT — Free and open source
