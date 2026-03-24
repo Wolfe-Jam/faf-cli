@@ -5,6 +5,20 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.0.3] - 2026-03-23 — Nelly Never Forgets
+
+### Added
+
+- **Nelly pixel-art elephant** — half-block Unicode art in the bare `faf` command header
+- **Green grass line** — `▔` characters in grass green (#27AE60) under Nelly
+- **Bold score percentage** — score output now uses bold white text
+
+### Technical
+
+- Dark bg pad `#1D1D1D` — matches Claude Code, VS Code, Ghostty terminals
+- `▄` color-swap trick at trunk C1 for seamless terminal line-gap bridging
+- 218 tests, 0 fail
+
 ## [6.0.0] - 2026-03-22 — Built with Bun
 
 ### The Ground-Up Rewrite
