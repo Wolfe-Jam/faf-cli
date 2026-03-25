@@ -5,6 +5,22 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.0.6] - 2026-03-25 — Svelte-Aware Context Engine
+
+### Added
+
+- **Svelte app-type** — first framework-specific app-type in faf-cli
+- **Smart defaults** — Runes (state), SvelteKit (backend), Vite (build), Server Routes (API)
+- **Adapter detection** — reads `svelte.config.js` to map adapter → hosting (Vercel, Node, Static, Cloudflare, Netlify)
+- **5 adapter framework signatures** — SvelteKit adapters detected as hosting signals
+- **WJTTC championship suite** — 49 tests (BRAKE/ENGINE/AERO) for Svelte detection
+
+### Technical
+
+- 296 tests, 0 failures, 39 files
+- Verified on faf.one, GALLERY-SVELTE, fafdev.tools, sveltejs/svelte
+- WASM kernel unaffected — "Send anything. Know nothing."
+
 ## [6.0.5] - 2026-03-22 — Nelly Above the Fold
 
 ### Changed

@@ -61,9 +61,9 @@ v6 is a ground-up rewrite. All-in on Bun — same toolchain as Claude Code.
 | **Language** | TypeScript | TypeScript |
 | **Compile** | Bun bytecode | `bun build --compile` |
 
-218 tests in ~10s. 290KB bundle in 2.4s. Single portable binary, 4 platforms. npx backward-compatible.
+296 tests in ~10s. 290KB bundle in 2.4s. Single portable binary, 4 platforms. npx backward-compatible.
 
-26 commands. 218 tests. 5,292 lines. 93% smaller than v5.
+26 commands. 296 tests. 5,292 lines. 93% smaller than v5.
 
 ```
 commands → interop → core → wasm
@@ -177,7 +177,7 @@ src/
 ## Testing
 
 ```bash
-bun test                       # 218 tests, 37 files, ~10s
+bun test                       # 296 tests, 39 files, ~12s
 ```
 
 Full e2e lifecycle test runs every command in sequence: init → auto → score → edit → sync → export → compile → decompile → taf → recover → check. Test reports in `reports/`.
