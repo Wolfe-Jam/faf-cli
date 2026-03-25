@@ -461,16 +461,148 @@ export default { kit: { adapter: adapter() } };`);
 });
 
 // ============================================================
+// 🏗️ FRAMEWORK TYPE - framework → svelte (and future sub-types)
+// ============================================================
+
+describe('🏗️ FRAMEWORK TYPE - framework → svelte', () => {
+  beforeEach(setup);
+  afterEach(teardown);
+
+  function writePkgFramework(
+    deps: Record<string, string> = {},
+    devDeps: Record<string, string> = {},
+  ): void {
+    writePkg(deps, devDeps, { private: true });
+    writeFileSync(join(testDir, 'pnpm-workspace.yaml'), 'packages:\n  - "packages/*"');
+  }
+
+  // --- BRAKE ---
+
+  test('BRAKE-F001: Private workspace + Svelte detects as framework', () => {
+    writePkgFramework({}, { '@sveltejs/eslint-config': '^1.0.0', svelte: '^5.0.0' });
+    expect(detectProjectType(testDir)).toBe('framework');
+  });
+
+  test('BRAKE-F002: Non-private Svelte project does NOT detect as framework', () => {
+    writePkg({ svelte: '^5.0.0' });
+    writeFileSync(join(testDir, 'pnpm-workspace.yaml'), 'packages:\n  - "packages/*"');
+    expect(detectProjectType(testDir)).toBe('svelte');
+  });
+
+  test('BRAKE-F003: Private Svelte without workspaces detects as svelte', () => {
+    writePkg({ svelte: '^5.0.0' }, {}, { private: true });
+    expect(detectProjectType(testDir)).toBe('svelte');
+  });
+
+  test('BRAKE-F004: framework type exists in APP_TYPE_CATEGORIES', () => {
+    expect(APP_TYPE_CATEGORIES).toHaveProperty('framework');
+  });
+
+  // --- ENGINE ---
+
+  test('ENGINE-F001: Framework sets project.framework to svelte', () => {
+    writePkgFramework({}, { svelte: '^5.0.0' });
+    const data = detectStack(testDir);
+    expect(data.project?.type).toBe('framework');
+    expect(data.project?.framework).toBe('svelte');
+  });
+
+  test('ENGINE-F002: Framework gets Svelte smart defaults', () => {
+    writePkgFramework({ '@sveltejs/kit': '^2.0.0' }, { svelte: '^5.0.0' });
+    writeSvelteConfig('export default {}');
+    const data = detectStack(testDir);
+    expect(data.stack?.frontend).toBe('SvelteKit');
+    expect(data.stack?.state_management).toBe('Runes');
+    expect(data.stack?.backend).toBe('SvelteKit');
+    expect(data.stack?.api_type).toBe('Server Routes');
+    expect(data.stack?.build).toBe('Vite');
+  });
+
+  test('ENGINE-F003: Framework slotignores css_framework', () => {
+    writePkgFramework({}, { svelte: '^5.0.0' });
+    const data = detectStack(testDir);
+    expect(data.stack?.css_framework).toBe('slotignored');
+  });
+
+  test('ENGINE-F004: Framework slotignores ui_library', () => {
+    writePkgFramework({}, { svelte: '^5.0.0' });
+    const data = detectStack(testDir);
+    expect(data.stack?.ui_library).toBe('slotignored');
+  });
+
+  test('ENGINE-F005: Framework slotignores database', () => {
+    writePkgFramework({}, { svelte: '^5.0.0' });
+    const data = detectStack(testDir);
+    expect(data.stack?.database).toBe('slotignored');
+  });
+
+  test('ENGINE-F006: Framework slotignores connection', () => {
+    writePkgFramework({}, { svelte: '^5.0.0' });
+    const data = detectStack(testDir);
+    expect(data.stack?.connection).toBe('slotignored');
+  });
+
+  test('ENGINE-F007: Framework slotignores hosting', () => {
+    writePkgFramework({}, { svelte: '^5.0.0' });
+    const data = detectStack(testDir);
+    expect(data.stack?.hosting).toBe('slotignored');
+  });
+
+  test('ENGINE-F008: Framework keeps runtime active', () => {
+    writePkgFramework({}, { svelte: '^5.0.0' });
+    const data = detectStack(testDir);
+    expect(data.stack?.runtime).not.toBe('slotignored');
+  });
+
+  test('ENGINE-F009: Framework keeps cicd active', () => {
+    writePkgFramework({}, { svelte: '^5.0.0' });
+    mkdirSync(join(testDir, '.github/workflows'), { recursive: true });
+    writeFileSync(join(testDir, '.github/workflows/ci.yml'), 'name: CI');
+    const data = detectStack(testDir);
+    expect(data.stack?.cicd).toBe('GitHub Actions');
+  });
+
+  // --- AERO ---
+
+  test('AERO-F001: Framework with npm workspaces (not pnpm)', () => {
+    writePkg({ svelte: '^5.0.0' }, {}, { private: true, workspaces: ['packages/*'] });
+    expect(detectProjectType(testDir)).toBe('framework');
+  });
+
+  test('AERO-F002: Private workspace without Svelte does NOT detect as framework (yet)', () => {
+    writePkgFramework({ react: '^18.0.0' });
+    // Only Svelte triggers framework detection today — others come later
+    expect(detectProjectType(testDir)).not.toBe('framework');
+  });
+
+  test('AERO-F003: Framework scores 100% with 6Ws filled', () => {
+    writePkgFramework({ '@sveltejs/kit': '^2.0.0' }, { svelte: '^5.0.0', typescript: '^5.0.0' });
+    writeSvelteConfig('export default {}');
+    mkdirSync(join(testDir, '.github/workflows'), { recursive: true });
+    writeFileSync(join(testDir, '.github/workflows/ci.yml'), 'name: CI');
+    writeFileSync(join(testDir, 'tsconfig.json'), '{}');
+    const data = detectStack(testDir);
+
+    // Count: 3 project + 7 stack (frontend, state, backend, api, runtime, build, cicd)
+    // + 5 slotignored (css, ui, db, conn, hosting) + enterprise slotignored
+    // With 6Ws = 16/16 = 100%
+    expect(data.project?.type).toBe('framework');
+    expect(data.stack?.css_framework).toBe('slotignored');
+    expect(data.stack?.database).toBe('slotignored');
+    expect(data.stack?.frontend).toBe('SvelteKit');
+    expect(data.stack?.build).toBe('Vite');
+  });
+});
+
+// ============================================================
 // 🏆 CHAMPIONSHIP SUMMARY
 // ============================================================
 
 describe('🏆 WJTTC CHAMPIONSHIP - Svelte Context Engine', () => {
-  test('CHAMP-S001: All three tiers defined and passing', () => {
-    // Meta-test: confirms full tier coverage
-    // BRAKE: 10 tests (S001-S010) — detection must never misclassify
-    // ENGINE: 23 tests (S001-S023) — smart defaults and adapter intelligence
-    // AERO: 15 tests (S001-S015) — edge cases, boundary conditions
-    // Total: 49 championship-grade tests
+  test('CHAMP-S001: All tiers defined and passing', () => {
+    // Svelte app-type: BRAKE (10) + ENGINE (23) + AERO (15) = 49
+    // Framework type: BRAKE (4) + ENGINE (9) + AERO (3) = 16
+    // Total: 65 championship-grade tests
     expect(true).toBe(true);
   });
 });

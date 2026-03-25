@@ -99,5 +99,6 @@ export const APP_TYPE_CATEGORIES: Record<string, SlotCategory[]> = {
   frontend: ['project', 'frontend', 'human'],
   fullstack: ['project', 'frontend', 'backend', 'universal', 'human'],
   svelte: ['project', 'frontend', 'backend', 'universal', 'human'],
+  framework: ['project', 'frontend', 'backend', 'universal', 'human'],
   enterprise: ['project', 'frontend', 'backend', 'universal', 'human', 'enterprise_infra', 'enterprise_app', 'enterprise_ops'],
 };

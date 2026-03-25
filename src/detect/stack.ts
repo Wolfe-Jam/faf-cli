@@ -36,12 +36,18 @@ export function detectStack(dir: string): FafData {
   // Determine which categories are active
   const activeCategories = APP_TYPE_CATEGORIES[projectType] || APP_TYPE_CATEGORIES.library;
 
-  // Svelte-aware: detect adapter for hosting
-  const isSvelte = projectType === 'svelte';
-  const svelteAdapter = isSvelte ? detectSvelteAdapter(dir) : null;
+  // Framework sub-type detection (framework → svelte, framework → nextjs, etc.)
+  const isFramework = projectType === 'framework';
+  const hasSvelteSignal = frameworks.some(f => f.slug === 'svelte' || f.slug === 'sveltekit');
+  const frameworkSubType = isFramework && hasSvelteSignal ? 'svelte' : (isFramework ? null : null);
 
-  // Svelte-aware: check if SvelteKit is present (has server routes)
+  // Svelte-aware: fires for svelte apps AND framework→svelte repos
+  const isSvelte = projectType === 'svelte' || frameworkSubType === 'svelte';
+  const svelteAdapter = isSvelte ? detectSvelteAdapter(dir) : null;
   const hasSvelteKit = isSvelte && frameworks.some(f => f.slug === 'sveltekit');
+
+  // Framework repos: slots that never apply to framework source code
+  const frameworkIgnoredSlots = new Set(['css_framework', 'ui_library', 'database', 'connection', 'hosting']);
 
   // Build stack with slotignored for inactive categories
   const stack: Record<string, string> = {};
@@ -50,6 +56,12 @@ export function detectStack(dir: string): FafData {
   for (const slot of stackSlots) {
     const field = slot.path.replace('stack.', '');
     if (!activeCategories.includes(slot.category)) {
+      stack[field] = 'slotignored';
+      continue;
+    }
+
+    // Framework repos: slotignore slots that never apply to framework source code
+    if (isFramework && frameworkIgnoredSlots.has(field)) {
       stack[field] = 'slotignored';
       continue;
     }
@@ -109,14 +121,20 @@ export function detectStack(dir: string): FafData {
     }
   }
 
+  // Build project section
+  const project: Record<string, string> = {
+    name: pkg?.name ?? dir.split('/').pop() ?? 'project',
+    goal: pkg?.description ?? '',
+    main_language: language,
+    type: projectType,
+  };
+  if (isFramework && frameworkSubType) {
+    project.framework = frameworkSubType;
+  }
+
   return {
     faf_version: '2.5.0',
-    project: {
-      name: pkg?.name ?? dir.split('/').pop() ?? 'project',
-      goal: pkg?.description ?? '',
-      main_language: language,
-      type: projectType,
-    },
+    project,
     stack,
     human_context: {
       who: '',

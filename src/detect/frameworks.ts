@@ -16,6 +16,7 @@ export const FRAMEWORKS: FrameworkSignature[] = [
   ]},
   { name: 'Svelte', slug: 'svelte', category: 'frontend', signals: [
     { type: 'dependency', key: 'svelte' },
+    { type: 'devDependency', key: 'svelte' },
   ]},
   { name: 'Vue.js', slug: 'vue', category: 'frontend', signals: [
     { type: 'dependency', key: 'vue' },

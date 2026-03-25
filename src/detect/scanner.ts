@@ -13,6 +13,8 @@ interface PackageJson {
   type?: string;
   main?: string;
   bin?: string | Record<string, string>;
+  private?: boolean;
+  workspaces?: string[] | { packages?: string[] };
 }
 
 /** Read and parse package.json from a directory */
@@ -120,8 +122,15 @@ export function detectProjectType(dir: string): string {
   const hasMcp = frameworks.some(f => f.slug === 'mcp');
   if (hasMcp) return 'mcp';
 
-  // Svelte/SvelteKit detection — fullstack by nature (server routes + frontend)
+  // Framework repo detection — private workspace monorepo that builds a framework
   const hasSvelte = frameworks.some(f => f.slug === 'svelte' || f.slug === 'sveltekit');
+  const isPrivateWorkspace = pkg?.private === true && (
+    existsSync(join(dir, 'pnpm-workspace.yaml')) ||
+    pkg?.workspaces !== undefined
+  );
+  if (isPrivateWorkspace && hasSvelte) return 'framework';
+
+  // Svelte/SvelteKit app detection — fullstack by nature (server routes + frontend)
   if (hasSvelte) return 'svelte';
 
   // Full-stack detection
