@@ -1,7 +1,7 @@
 faf_version: 2.5.0
 project:
   name: faf-cli
-  goal: The Persistent AI Context Standard — project DNA for any AI. IANA-registered. Anthropic-approved.
+  goal: Persistent AI Context Standard — project DNA for AI. IANA-registered. Anthropic-approved.
   main_language: TypeScript
   type: cli
 stack:
@@ -26,7 +26,7 @@ stack:
   storage: slotignored
 human_context:
   who: Developers and teams using AI coding assistants
-  what: The Persistent AI Context Standard — project DNA for any AI. IANA-registered. Anthropic-approved.
+  what: Persistent AI Context Standard — project DNA for AI. IANA-registered. Anthropic-approved.
   why: Eliminates 91% context re-discovery tax — define once, AI remembers forever
   where: npm registry, Homebrew, GitHub
   when: Production since September 2025, v6.0 March 2026

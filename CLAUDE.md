@@ -22,7 +22,7 @@ Layer order: `commands → interop → core → wasm`. No upward imports.
 ## Toolchain
 
 - **Runtime:** Bun (`bunx faf-cli`), Node backward-compatible (`npx faf-cli`)
-- **Test:** `bun test` — 218 tests, 37 files
+- **Test:** `bun test` — 312 tests, 39 files
 - **Build:** `bun build src/cli.ts --outfile dist/cli.js --target=node --minify`
 - **Compile:** `bun build --compile` — standalone binary, 4 platforms
 - **WASM:** `faf-scoring-kernel` 2.0.0 — Mk4 33-slot scoring engine (Rust → WASM)
