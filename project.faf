@@ -1,7 +1,7 @@
 faf_version: 2.5.0
 project:
-  name: faf-cli
-  goal: Persistent AI Context Standard — project DNA for AI. IANA-registered. Anthropic-approved.
+  name: faf-cli v6
+  goal: "CLI tool for creating and managing `.faf` files — persistent AI context that versions with your code. IANA-registered media type: `application/vnd.faf+yaml`."
   main_language: TypeScript
   type: cli
 stack:
