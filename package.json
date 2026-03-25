@@ -1,7 +1,7 @@
 {
   "name": "faf-cli",
   "version": "6.0.6",
-  "description": "The Persistent AI Context Standard — project DNA for any AI. IANA-registered. Anthropic-approved.",
+  "description": "Persistent AI Context Standard — project DNA for AI. IANA-registered. Anthropic-approved.",
   "type": "module",
   "icon": "https://faf.one/orange-smiley.svg",
   "logo": "https://faf.one/orange-smiley.svg",
