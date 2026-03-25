@@ -5,6 +5,22 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.0.7] - 2026-03-25 — Framework Type
+
+### Added
+
+- **`framework` type** — first repo-type for framework source code (private + workspace)
+- **`framework: svelte` sub-type** — Svelte smart defaults with 5 slot-level ignores
+- **Svelte devDependency detection** — framework repos with svelte in devDeps now detected
+- **16 active slots** — css_framework, ui_library, database, connection, hosting slotignored
+- **16 new WJTTC tests** — BRAKE (4), ENGINE (9), AERO (3) for framework type
+
+### Technical
+
+- 312 tests, 0 failures, 39 files
+- Svelte apps remain `type: svelte` (21 active slots) — no change
+- Detection: `private: true` + workspace + svelte signal → `type: framework`
+
 ## [6.0.6] - 2026-03-25 — Svelte-Aware Context Engine
 
 ### Added
