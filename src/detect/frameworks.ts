@@ -46,6 +46,28 @@ export const FRAMEWORKS: FrameworkSignature[] = [
     { type: 'dependency', key: '@builder.io/qwik' },
   ]},
 
+  // SvelteKit Adapters (hosting signal)
+  { name: 'Vercel (SvelteKit)', slug: 'adapter-vercel', category: 'hosting', signals: [
+    { type: 'dependency', key: '@sveltejs/adapter-vercel' },
+    { type: 'devDependency', key: '@sveltejs/adapter-vercel' },
+  ]},
+  { name: 'Node (SvelteKit)', slug: 'adapter-node', category: 'hosting', signals: [
+    { type: 'dependency', key: '@sveltejs/adapter-node' },
+    { type: 'devDependency', key: '@sveltejs/adapter-node' },
+  ]},
+  { name: 'Static (SvelteKit)', slug: 'adapter-static', category: 'hosting', signals: [
+    { type: 'dependency', key: '@sveltejs/adapter-static' },
+    { type: 'devDependency', key: '@sveltejs/adapter-static' },
+  ]},
+  { name: 'Cloudflare (SvelteKit)', slug: 'adapter-cloudflare', category: 'hosting', signals: [
+    { type: 'dependency', key: '@sveltejs/adapter-cloudflare' },
+    { type: 'devDependency', key: '@sveltejs/adapter-cloudflare' },
+  ]},
+  { name: 'Netlify (SvelteKit)', slug: 'adapter-netlify', category: 'hosting', signals: [
+    { type: 'dependency', key: '@sveltejs/adapter-netlify' },
+    { type: 'devDependency', key: '@sveltejs/adapter-netlify' },
+  ]},
+
   // CSS Frameworks
   { name: 'Tailwind CSS', slug: 'tailwind', category: 'css', signals: [
     { type: 'dependency', key: 'tailwindcss' },

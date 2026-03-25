@@ -120,6 +120,10 @@ export function detectProjectType(dir: string): string {
   const hasMcp = frameworks.some(f => f.slug === 'mcp');
   if (hasMcp) return 'mcp';
 
+  // Svelte/SvelteKit detection — fullstack by nature (server routes + frontend)
+  const hasSvelte = frameworks.some(f => f.slug === 'svelte' || f.slug === 'sveltekit');
+  if (hasSvelte) return 'svelte';
+
   // Full-stack detection
   const hasFrontend = frameworks.some(f => f.category === 'frontend');
   const hasBackend = frameworks.some(f => f.category === 'backend');
@@ -175,6 +179,34 @@ export function detectHosting(dir: string): string | null {
   if (existsSync(join(dir, 'fly.toml'))) return 'Fly.io';
   if (existsSync(join(dir, 'render.yaml'))) return 'Render';
   return null;
+}
+
+/** Detect SvelteKit adapter from svelte.config.js */
+export function detectSvelteAdapter(dir: string): string | null {
+  const configPath = join(dir, 'svelte.config.js');
+  if (!existsSync(configPath)) return null;
+  try {
+    const content = readFileSync(configPath, 'utf-8');
+    // Match adapter imports: import adapter from '@sveltejs/adapter-vercel'
+    // Or: import { adapter } from '@sveltejs/adapter-node'
+    // Or: const adapter = require('@sveltejs/adapter-static')
+    const adapterMatch = content.match(/@sveltejs\/adapter-(\w+)/);
+    if (adapterMatch) {
+      const adapter = adapterMatch[1];
+      switch (adapter) {
+        case 'vercel': return 'Vercel';
+        case 'node': return 'Node';
+        case 'static': return 'Static';
+        case 'cloudflare': return 'Cloudflare';
+        case 'netlify': return 'Netlify';
+        case 'auto': return 'Auto';
+        default: return adapter;
+      }
+    }
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 /** Detect build tool */

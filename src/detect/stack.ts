@@ -9,6 +9,7 @@ import {
   detectCicd,
   detectHosting,
   detectBuildTool,
+  detectSvelteAdapter,
   readPackageJson,
 } from './scanner.js';
 
@@ -35,6 +36,13 @@ export function detectStack(dir: string): FafData {
   // Determine which categories are active
   const activeCategories = APP_TYPE_CATEGORIES[projectType] || APP_TYPE_CATEGORIES.library;
 
+  // Svelte-aware: detect adapter for hosting
+  const isSvelte = projectType === 'svelte';
+  const svelteAdapter = isSvelte ? detectSvelteAdapter(dir) : null;
+
+  // Svelte-aware: check if SvelteKit is present (has server routes)
+  const hasSvelteKit = isSvelte && frameworks.some(f => f.slug === 'sveltekit');
+
   // Build stack with slotignored for inactive categories
   const stack: Record<string, string> = {};
   const stackSlots = SLOTS.filter(s => s.path.startsWith('stack.'));
@@ -46,19 +54,43 @@ export function detectStack(dir: string): FafData {
       continue;
     }
 
-    // Auto-fill detected values
+    // Auto-fill detected values (Svelte-aware overrides applied inline)
     switch (field) {
       case 'frontend': stack[field] = frontendFw?.name ?? (projectType === 'cli' ? 'CLI' : ''); break;
       case 'css_framework': stack[field] = cssFw?.name ?? ''; break;
       case 'ui_library': stack[field] = uiFw?.name ?? ''; break;
-      case 'state_management': stack[field] = stateFw?.name ?? ''; break;
-      case 'backend': stack[field] = backendFw?.name ?? ''; break;
-      case 'api_type': stack[field] = ''; break;
+      case 'state_management':
+        // Svelte 5 uses Runes — no external state library needed
+        stack[field] = isSvelte ? (stateFw?.name ?? 'Runes') : (stateFw?.name ?? '');
+        break;
+      case 'backend':
+        // SvelteKit IS the backend (server routes, form actions, hooks)
+        stack[field] = isSvelte ? (hasSvelteKit ? 'SvelteKit' : (backendFw?.name ?? '')) : (backendFw?.name ?? '');
+        break;
+      case 'api_type':
+        // SvelteKit uses form actions + server routes
+        stack[field] = hasSvelteKit ? 'Server Routes' : '';
+        break;
       case 'runtime': stack[field] = runtime !== 'Unknown' ? runtime : ''; break;
-      case 'database': stack[field] = dbFw?.name ?? ''; break;
-      case 'connection': stack[field] = dbFw?.name ?? ''; break;
-      case 'hosting': stack[field] = hosting ?? ''; break;
-      case 'build': stack[field] = buildTool ?? ''; break;
+      case 'database':
+        // Only populate if ORM actually detected
+        stack[field] = dbFw?.name ?? '';
+        break;
+      case 'connection':
+        stack[field] = dbFw?.name ?? '';
+        break;
+      case 'hosting':
+        // Svelte adapter → hosting platform (adapter-vercel = Vercel, etc.)
+        if (isSvelte && svelteAdapter) {
+          stack[field] = svelteAdapter;
+        } else {
+          stack[field] = hosting ?? '';
+        }
+        break;
+      case 'build':
+        // SvelteKit always uses Vite
+        stack[field] = isSvelte ? 'Vite' : (buildTool ?? '');
+        break;
       case 'cicd': stack[field] = cicd ?? ''; break;
       case 'package_manager': stack[field] = pkgManager; break;
       default: stack[field] = ''; break;
