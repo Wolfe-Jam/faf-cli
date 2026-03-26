@@ -139,6 +139,16 @@ describe('scanner', () => {
       writePkg({ react: '^18.0.0', express: '^4.0.0' });
       expect(detectProjectType(testDir)).toBe('fullstack');
     });
+
+    test('detects Next.js as fullstack', () => {
+      writePkg({ next: '^16.0.0', react: '^19.0.0' });
+      expect(detectProjectType(testDir)).toBe('fullstack');
+    });
+
+    test('detects Nuxt as fullstack', () => {
+      writePkg({ nuxt: '^3.0.0', vue: '^3.0.0' });
+      expect(detectProjectType(testDir)).toBe('fullstack');
+    });
   });
 
   describe('detectRuntime', () => {
