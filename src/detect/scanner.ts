@@ -133,6 +133,10 @@ export function detectProjectType(dir: string): string {
   // Svelte/SvelteKit app detection — fullstack by nature (server routes + frontend)
   if (hasSvelte) return 'svelte';
 
+  // Next.js and Nuxt are fullstack by nature (API routes built in)
+  const hasNextOrNuxt = frameworks.some(f => f.slug === 'nextjs' || f.slug === 'nuxt');
+  if (hasNextOrNuxt) return 'fullstack';
+
   // Full-stack detection
   const hasFrontend = frameworks.some(f => f.category === 'frontend');
   const hasBackend = frameworks.some(f => f.category === 'backend');
