@@ -5,6 +5,20 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.2.5] - 2026-03-27 — The Sunset Edition
+
+The final v5 release. 21-slot Mk3.1 scoring engine. 1,232 tests (1,224 pass, 8 known Bun runner quirks).
+
+The 8 failures are Bun single-process PATH contamination when running `bunx faf-cli` inside the test suite — not code bugs. They pass individually. v6 fixed them by restructuring the test suite.
+
+Thank you to everyone who used v5. The format is unchanged — your `.faf` files work in v6.
+
+### What's Next
+
+- **v6.0** is a ground-up Bun-native rewrite with 33 Mk4 slots, WASM kernel, and 89% code reduction.
+- `npm install -g faf-cli@6` to upgrade.
+- `.faf` files are 100% compatible — no migration needed.
+
 ## [5.2.2] - 2026-03-21
 
 ### Removed
