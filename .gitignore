@@ -135,3 +135,5 @@ wrangler.jsonc
 
 # Compiled FAFb output
 *.fafb
+AGENTS.md
+GEMINI.md
