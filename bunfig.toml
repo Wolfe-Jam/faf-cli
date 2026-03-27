@@ -4,5 +4,5 @@
 timeout = 30000
 root = "."
 
-# Bun discovers *.test.ts recursively from root
-# archive/ files renamed to .archived to prevent discovery
+# Exclude faf-engine (legacy, missing deps in CI)
+exclude = ["faf-engine", "node_modules"]
