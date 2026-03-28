@@ -22,10 +22,10 @@ Layer order: `commands → interop → core → wasm`. No upward imports.
 ## Toolchain
 
 - **Runtime:** Bun (`bunx faf-cli`), Node backward-compatible (`npx faf-cli`)
-- **Test:** `bun test` — 312 tests, 39 files
+- **Test:** `bun test` — 348 tests, 40 files
 - **Build:** `bun build src/cli.ts --outfile dist/cli.js --target=node --minify`
 - **Compile:** `bun build --compile` — standalone binary, 4 platforms
-- **WASM:** `faf-scoring-kernel` 2.0.0 — Mk4 33-slot scoring engine (Rust → WASM)
+- **WASM:** `faf-scoring-kernel` 2.0.3 — Mk4 33-slot scoring engine (Rust → WASM)
 
 ## Key Patterns
 
@@ -42,6 +42,6 @@ init, git, auto, go, score, sync, compile, decompile, export, check,
 edit, convert, drift, context, recover, migrate, search, share, taf,
 demo, ai, pro, conductor, formats, info, clear
 
-## Branch
+## Version
 
-`v6` — ground-up rewrite. `main` has v5.2.x (sunset March 28, 2026).
+v6.0 — ground-up Bun-native rewrite. v5.2.5 (Sunset Edition) was the final v5.
