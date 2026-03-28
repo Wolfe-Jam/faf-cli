@@ -9,7 +9,7 @@ import type { FafData } from '../core/types.js';
 export function recoverCommand(): void {
   const dir = process.cwd();
   const sources: string[] = [];
-  const data: FafData = { faf_version: '2.5.0', project: {} };
+  const data: FafData = { faf_version: '3.0', project: {} };
 
   // Try CLAUDE.md first (richest source)
   const claudePath = join(dir, 'CLAUDE.md');

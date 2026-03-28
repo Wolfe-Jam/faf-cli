@@ -133,7 +133,7 @@ export function detectStack(dir: string): FafData {
   }
 
   return {
-    faf_version: '2.5.0',
+    faf_version: '3.0',
     project,
     stack,
     human_context: {

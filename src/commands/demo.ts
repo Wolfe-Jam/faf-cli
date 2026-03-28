@@ -15,7 +15,7 @@ export function demoCommand(): void {
   console.log(`${fafCyan('demo')} ${dim('— FAF in action')}\n`);
 
   // Step 1: Create a sample .faf
-  const sampleYaml = `faf_version: 2.5.0
+  const sampleYaml = `faf_version: "3.0"
 project:
   name: acme-app
   goal: Full-stack web application for team collaboration

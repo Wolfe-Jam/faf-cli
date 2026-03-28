@@ -29,7 +29,7 @@ function conductorImport(configPath?: string): void {
     process.exit(2);
   }
 
-  const data: FafData = { faf_version: '2.5.0', project: {} };
+  const data: FafData = { faf_version: '3.0', project: {} };
 
   // Try to read YAML/JSON files from the config directory or file
   if (existsSync(configPath) && configPath.endsWith('.json')) {
