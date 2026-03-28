@@ -5,6 +5,27 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.0.10] - 2026-03-28 — Format Version + Detection Fixes
+
+### Fixed
+
+- **`faf_version` 2.5.0 → 3.0** — all generated .faf files now use format version 3.0 (5 source files updated: stack.ts, recover.ts, migrate.ts, demo.ts, conductor.ts). Cascades to migrate, TAF receipts, share URLs.
+- **Next.js detected over React** — meta-frameworks now supersede their base. Next.js → React, Nuxt → Vue, SvelteKit → Svelte. When both detected, meta-framework wins.
+- **Python/Rust project names from manifest** — `readProjectManifest()` reads name and description from `pyproject.toml` and `Cargo.toml`, not just `package.json`. Python and Rust projects no longer use folder name as project name.
+
+### Technical
+
+- 348/348 tests passing, 0 failures, 40 files
+- All test assertions updated for faf_version 3.0
+- Framework supersede test updated (React no longer appears alongside Next.js)
+- `kernel.scoreFafb` correctly returns version from compiled binary, not current version
+
+### Known Issues (to fix in 6.0.11+)
+
+- Python dependency detection — `pyproject.toml` dependencies (FastAPI, SQLAlchemy, Redis) not parsed for stack slot population
+- `info` command shows kernel 2.0.0 instead of 2.0.3
+- `auto` command doesn't mine README.md for human_context fields
+
 ## [6.0.9] - 2026-03-28 — Safe Sync
 
 ### Fixed
