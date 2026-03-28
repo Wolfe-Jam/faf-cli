@@ -127,13 +127,13 @@ bunx faf-cli go                # Interactive interview to gold code
 | Tier | Score | Status |
 |------|-------|--------|
 | 🏆 Trophy | 100% | AI Optimized — Gold Code |
-| Gold | 99%+ | Near-perfect |
-| Silver | 95%+ | Excellent |
-| Bronze | 85%+ | Production ready |
-| Green | 70%+ | Solid foundation |
-| Yellow | 55%+ | AI flipping coins |
-| Red | <55% | AI working blind |
-| White | 0% | No context |
+| ★ Gold | 99%+ | Near-perfect |
+| ◆ Silver | 95%+ | Excellent |
+| ◇ Bronze | 85%+ | Production ready |
+| ● Green | 70%+ | Solid foundation |
+| ● Yellow | 55%+ | AI flipping coins |
+| ○ Red | <55% | AI working blind |
+| ♡ White | 0% | No context |
 
 ---
 
