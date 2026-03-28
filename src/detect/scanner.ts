@@ -183,12 +183,12 @@ export function detectProjectType(dir: string): string {
   const pkg = readPackageJson(dir);
   const frameworks = detectFrameworks(dir);
 
+  // MCP detection — takes priority (MCP servers often have bin entries too)
+  const hasMcp = frameworks.some(f => f.category === 'mcp');
+  if (hasMcp) {return 'mcp';}
+
   // CLI detection
   if (pkg?.bin) {return 'cli';}
-
-  // MCP detection
-  const hasMcp = frameworks.some(f => f.slug === 'mcp');
-  if (hasMcp) {return 'mcp';}
 
   // Framework repo detection — private workspace monorepo that builds a framework
   const hasSvelte = frameworks.some(f => f.slug === 'svelte' || f.slug === 'sveltekit');

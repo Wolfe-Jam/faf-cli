@@ -223,10 +223,40 @@ export const FRAMEWORKS: FrameworkSignature[] = [
     { type: 'file', pattern: 'lerna.json' },
   ]},
 
-  // MCP / AI
-  { name: 'MCP SDK', slug: 'mcp', category: 'ai', signals: [
+  // MCP Frameworks (10 — ordered by priority)
+  // #1 Official TS SDK — claude-faf-mcp, grok-faf-mcp, faf-mcp
+  { name: 'MCP SDK (TS)', slug: 'mcp-sdk-ts', category: 'mcp', signals: [
     { type: 'dependency', key: '@modelcontextprotocol/sdk' },
   ]},
+  // #2 FastMCP — 70% of MCP servers, 1M downloads/day — gemini-faf-mcp
+  { name: 'FastMCP', slug: 'fastmcp', category: 'mcp', signals: [
+    { type: 'dependency', key: 'fastmcp' },
+  ]},
+  // #3 Official Python SDK
+  { name: 'MCP SDK (Python)', slug: 'mcp-sdk-py', category: 'mcp', signals: [
+    { type: 'dependency', key: 'mcp' },
+  ]},
+  // #4 rmcp — rust-faf-mcp
+  { name: 'rmcp', slug: 'rmcp', category: 'mcp', signals: [
+    { type: 'dependency', key: 'rmcp' },
+  ]},
+  // #5 mcp-go — Go ecosystem
+  { name: 'MCP Go', slug: 'mcp-go', category: 'mcp', signals: [
+    { type: 'dependency', key: 'github.com/mark3labs/mcp-go' },
+  ]},
+  // #6 C# / .NET — Microsoft ecosystem
+  { name: 'MCP .NET', slug: 'mcp-dotnet', category: 'mcp', signals: [
+    { type: 'dependency', key: 'ModelContextProtocol' },
+  ]},
+  // #7 FastMCP for TypeScript
+  { name: 'FastMCP (TS)', slug: 'fastmcp-ts', category: 'mcp', signals: [
+    { type: 'dependency', key: '@fastmcp/server' },
+  ]},
+  // #8 Kotlin — JetBrains/Android (signal TBD)
+  // #9 Zig WASM — 2.7KB ghost binary (detected by build.zig + MCP signals)
+  // #10 Swift — Apple ecosystem (signal TBD)
+
+  // AI SDKs (not MCP — these call AI APIs, not build MCP servers)
   { name: 'Anthropic SDK', slug: 'anthropic', category: 'ai', signals: [
     { type: 'dependency', key: '@anthropic-ai/sdk' },
   ]},

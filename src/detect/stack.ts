@@ -37,10 +37,15 @@ export function detectStack(dir: string): FafData {
   // Determine which categories are active
   const activeCategories = APP_TYPE_CATEGORIES[projectType] || APP_TYPE_CATEGORIES.library;
 
-  // Framework sub-type detection (framework → svelte, framework → nextjs, etc.)
+  // Framework sub-type detection (framework → svelte, mcp → fastmcp, etc.)
   const isFramework = projectType === 'framework';
   const hasSvelteSignal = frameworks.some(f => f.slug === 'svelte' || f.slug === 'sveltekit');
   const frameworkSubType = isFramework && hasSvelteSignal ? 'svelte' : (isFramework ? null : null);
+
+  // MCP sub-type detection — which MCP SDK is this project using?
+  const isMcp = projectType === 'mcp';
+  const mcpFramework = isMcp ? frameworks.find(f => f.category === 'mcp') : null;
+  const mcpSubType = mcpFramework?.slug ?? null;
 
   // Svelte-aware: fires for svelte apps AND framework→svelte repos
   const isSvelte = projectType === 'svelte' || frameworkSubType === 'svelte';
@@ -77,12 +82,24 @@ export function detectStack(dir: string): FafData {
         stack[field] = isSvelte ? (stateFw?.name ?? 'Runes') : (stateFw?.name ?? '');
         break;
       case 'backend':
-        // SvelteKit IS the backend (server routes, form actions, hooks)
-        stack[field] = isSvelte ? (hasSvelteKit ? 'SvelteKit' : (backendFw?.name ?? '')) : (backendFw?.name ?? '');
+        // MCP servers: use the MCP framework name
+        if (isMcp && mcpFramework) {
+          stack[field] = mcpFramework.name;
+        } else if (isSvelte) {
+          stack[field] = hasSvelteKit ? 'SvelteKit' : (backendFw?.name ?? '');
+        } else {
+          stack[field] = backendFw?.name ?? '';
+        }
         break;
       case 'api_type':
-        // SvelteKit uses form actions + server routes
-        stack[field] = hasSvelteKit ? 'Server Routes' : '';
+        // MCP servers use MCP protocol
+        if (isMcp) {
+          stack[field] = 'MCP (stdio/SSE)';
+        } else if (hasSvelteKit) {
+          stack[field] = 'Server Routes';
+        } else {
+          stack[field] = '';
+        }
         break;
       case 'runtime': stack[field] = runtime !== 'Unknown' ? runtime : ''; break;
       case 'database':
@@ -132,6 +149,9 @@ export function detectStack(dir: string): FafData {
   };
   if (isFramework && frameworkSubType) {
     project.framework = frameworkSubType;
+  }
+  if (isMcp && mcpSubType) {
+    project.framework = mcpSubType;
   }
 
   return {
