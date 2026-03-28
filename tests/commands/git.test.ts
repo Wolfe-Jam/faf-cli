@@ -45,6 +45,7 @@ describe('git command', () => {
     const repoDir = join(testDir, 'source-repo');
     mkdirSync(repoDir);
     execSync(`git init ${repoDir}`, { stdio: 'pipe' });
+    execSync(`git -C ${repoDir} config user.email "test@test.com" && git -C ${repoDir} config user.name "Test"`, { stdio: 'pipe' });
     writeFileSync(join(repoDir, 'package.json'), JSON.stringify({ name: 'local-repo' }));
     execSync(`git -C ${repoDir} add -A && git -C ${repoDir} commit -m "init"`, { stdio: 'pipe' });
 
