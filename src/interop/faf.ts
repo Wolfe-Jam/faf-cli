@@ -24,14 +24,14 @@ export function findFafFile(dir: string = process.cwd()): string | null {
   const candidates = ['project.faf', '.faf'];
   for (const name of candidates) {
     const full = `${dir}/${name}`;
-    if (existsSync(full)) return full;
+    if (existsSync(full)) {return full;}
   }
   // Walk up one level
   const parent = dir.replace(/\/[^/]+$/, '');
   if (parent !== dir) {
     for (const name of candidates) {
       const full = `${parent}/${name}`;
-      if (existsSync(full)) return full;
+      if (existsSync(full)) {return full;}
     }
   }
   return null;

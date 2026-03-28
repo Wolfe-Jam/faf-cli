@@ -98,9 +98,9 @@ function pullSync(fafPath: string, claudePath: string): void {
   const parsed = parseClaudeMd(claudeContent);
   const existing = readFaf(fafPath);
 
-  if (parsed.project?.name) existing.project = { ...existing.project, name: parsed.project.name };
-  if (parsed.project?.goal) existing.project = { ...existing.project, goal: parsed.project.goal };
-  if (parsed.project?.main_language) existing.project = { ...existing.project, main_language: parsed.project.main_language };
+  if (parsed.project?.name) {existing.project = { ...existing.project, name: parsed.project.name };}
+  if (parsed.project?.goal) {existing.project = { ...existing.project, goal: parsed.project.goal };}
+  if (parsed.project?.main_language) {existing.project = { ...existing.project, main_language: parsed.project.main_language };}
 
   writeFaf(fafPath, existing);
   console.log(`${fafCyan('◆')} sync  CLAUDE.md → .faf   ${dim('← bi-sync')}`);
@@ -135,12 +135,12 @@ function generateMemoryTopics(data: Record<string, unknown>): string {
     '',
   ];
 
-  if (project.name) lines.push(`- **Project:** ${project.name}`);
-  if (project.goal) lines.push(`- **Goal:** ${project.goal}`);
-  if (project.main_language) lines.push(`- **Language:** ${project.main_language}`);
-  if (project.type) lines.push(`- **Type:** ${project.type}`);
+  if (project.name) {lines.push(`- **Project:** ${project.name}`);}
+  if (project.goal) {lines.push(`- **Goal:** ${project.goal}`);}
+  if (project.main_language) {lines.push(`- **Language:** ${project.main_language}`);}
+  if (project.type) {lines.push(`- **Type:** ${project.type}`);}
 
-  return lines.join('\n') + '\n';
+  return `${lines.join('\n')  }\n`;
 }
 
 function watchSync(fafPath: string, claudePath: string, memoryPath: string, dir: string): void {
@@ -148,15 +148,15 @@ function watchSync(fafPath: string, claudePath: string, memoryPath: string, dir:
   let debounce: ReturnType<typeof setTimeout> | null = null;
 
   const handler = () => {
-    if (debounce) clearTimeout(debounce);
+    if (debounce) {clearTimeout(debounce);}
     debounce = setTimeout(() => {
       console.log(dim('change detected...'));
       autoSync(fafPath, claudePath, dir);
-      if (isPro()) triSync(fafPath, memoryPath, dir);
+      if (isPro()) {triSync(fafPath, memoryPath, dir);}
     }, 200);
   };
 
   watch(fafPath, handler);
-  if (existsSync(claudePath)) watch(claudePath, handler);
-  if (isPro() && existsSync(memoryPath)) watch(memoryPath, handler);
+  if (existsSync(claudePath)) {watch(claudePath, handler);}
+  if (isPro() && existsSync(memoryPath)) {watch(memoryPath, handler);}
 }

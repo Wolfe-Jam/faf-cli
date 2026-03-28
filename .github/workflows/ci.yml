@@ -103,6 +103,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
       - name: Setup Node.js ${{ matrix.node }}
         uses: actions/setup-node@v6
         with:
@@ -112,7 +117,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build TypeScript
+      - name: Build
         run: npm run build
 
       - name: CLI smoke test

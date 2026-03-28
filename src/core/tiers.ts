@@ -31,7 +31,7 @@ export function tierBadge(tier: TierInfo): string {
 /** Get tier info for a given score */
 export function getTier(score: number): TierInfo {
   for (const tier of TIERS) {
-    if (score >= tier.threshold) return tier;
+    if (score >= tier.threshold) {return tier;}
   }
   return TIERS[TIERS.length - 1]; // White
 }

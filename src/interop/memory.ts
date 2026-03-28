@@ -4,7 +4,7 @@ import { join } from 'path';
 /** Read MEMORY.md content */
 export function readMemoryMd(dir: string): string | null {
   const path = join(dir, 'MEMORY.md');
-  if (!existsSync(path)) return null;
+  if (!existsSync(path)) {return null;}
   return readFileSync(path, 'utf-8');
 }
 

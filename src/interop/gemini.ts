@@ -14,9 +14,9 @@ export function generateGeminiMd(data: FafData): string {
   lines.push('> Auto-generated from project.faf');
   lines.push('');
 
-  if (data.project?.name) lines.push(`Project: ${data.project.name}`);
-  if (data.project?.goal) lines.push(`Goal: ${data.project.goal}`);
-  if (data.project?.main_language) lines.push(`Language: ${data.project.main_language}`);
+  if (data.project?.name) {lines.push(`Project: ${data.project.name}`);}
+  if (data.project?.goal) {lines.push(`Goal: ${data.project.goal}`);}
+  if (data.project?.main_language) {lines.push(`Language: ${data.project.main_language}`);}
 
   if (data.stack) {
     lines.push('');

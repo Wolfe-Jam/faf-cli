@@ -11,8 +11,8 @@ export function spinner(label: string): { stop: (msg?: string) => void } {
   return {
     stop(msg?: string) {
       clearInterval(interval);
-      process.stderr.write('\r' + ' '.repeat(label.length + 6) + '\r');
-      if (msg) console.log(msg);
+      process.stderr.write(`\r${  ' '.repeat(label.length + 6)  }\r`);
+      if (msg) {console.log(msg);}
     },
   };
 }

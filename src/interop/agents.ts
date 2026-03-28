@@ -16,9 +16,9 @@ export function generateAgentsMd(data: FafData): string {
   lines.push('## Project Context');
   lines.push('');
 
-  if (data.project?.name) lines.push(`- **Name:** ${data.project.name}`);
-  if (data.project?.goal) lines.push(`- **Goal:** ${data.project.goal}`);
-  if (data.project?.main_language) lines.push(`- **Language:** ${data.project.main_language}`);
+  if (data.project?.name) {lines.push(`- **Name:** ${data.project.name}`);}
+  if (data.project?.goal) {lines.push(`- **Goal:** ${data.project.goal}`);}
+  if (data.project?.main_language) {lines.push(`- **Language:** ${data.project.main_language}`);}
 
   lines.push('');
   lines.push('## Stack');

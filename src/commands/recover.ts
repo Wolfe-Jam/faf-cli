@@ -16,9 +16,9 @@ export function recoverCommand(): void {
   if (existsSync(claudePath)) {
     const content = readFileSync(claudePath, 'utf-8');
     const parsed = parseClaudeMd(content);
-    if (parsed.project?.name) data.project!.name = parsed.project.name;
-    if (parsed.project?.goal) data.project!.goal = parsed.project.goal;
-    if (parsed.project?.main_language) data.project!.main_language = parsed.project.main_language;
+    if (parsed.project?.name) {data.project!.name = parsed.project.name;}
+    if (parsed.project?.goal) {data.project!.goal = parsed.project.goal;}
+    if (parsed.project?.main_language) {data.project!.main_language = parsed.project.main_language;}
     sources.push('CLAUDE.md');
   }
 
@@ -28,7 +28,7 @@ export function recoverCommand(): void {
     const content = readFileSync(agentsPath, 'utf-8');
     if (!data.project!.name) {
       const m = content.match(/^#\s+(.+)/m);
-      if (m) data.project!.name = m[1].trim();
+      if (m) {data.project!.name = m[1].trim();}
     }
     sources.push('AGENTS.md');
   }
@@ -39,7 +39,7 @@ export function recoverCommand(): void {
     const content = readFileSync(geminiPath, 'utf-8');
     if (!data.project!.name) {
       const m = content.match(/^#\s+(.+)/m);
-      if (m) data.project!.name = m[1].trim();
+      if (m) {data.project!.name = m[1].trim();}
     }
     sources.push('GEMINI.md');
   }
@@ -59,10 +59,10 @@ export function recoverCommand(): void {
   const existing = findFafFile(dir);
   if (existing) {
     const prev = readFaf(existing);
-    if (!prev.project) prev.project = {};
-    if (data.project!.name && !prev.project.name) prev.project.name = data.project!.name;
-    if (data.project!.goal && !prev.project.goal) prev.project.goal = data.project!.goal;
-    if (data.project!.main_language && !prev.project.main_language) prev.project.main_language = data.project!.main_language;
+    if (!prev.project) {prev.project = {};}
+    if (data.project!.name && !prev.project.name) {prev.project.name = data.project!.name;}
+    if (data.project!.goal && !prev.project.goal) {prev.project.goal = data.project!.goal;}
+    if (data.project!.main_language && !prev.project.main_language) {prev.project.main_language = data.project!.main_language;}
     writeFaf(existing, prev);
     console.log(`${fafCyan('◆')} recover  merged into ${existing}`);
   } else {

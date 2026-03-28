@@ -1,7 +1,7 @@
 import type { KernelScoreResult, FafbInfo } from '../core/types.js';
 
 // faf-scoring-kernel is CommonJS with synchronous WASM loading
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+ 
 let kernel: typeof import('faf-scoring-kernel') | null = null;
 
 function getKernel(): typeof import('faf-scoring-kernel') {

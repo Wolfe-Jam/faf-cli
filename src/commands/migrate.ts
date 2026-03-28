@@ -28,10 +28,10 @@ export function migrateCommand(options: MigrateOptions = {}): void {
   data.faf_version = CURRENT_VERSION;
 
   // Ensure all section roots exist
-  if (!data.project) data.project = {};
-  if (!data.stack) data.stack = {};
-  if (!data.human_context) data.human_context = {};
-  if (!data.monorepo) data.monorepo = {};
+  if (!data.project) {data.project = {};}
+  if (!data.stack) {data.stack = {};}
+  if (!data.human_context) {data.human_context = {};}
+  if (!data.monorepo) {data.monorepo = {};}
 
   if (options.dryRun) {
     console.log(`${fafCyan('◆')} migrate  ${dim('(dry run)')} v${oldVersion} → v${CURRENT_VERSION}`);

@@ -34,14 +34,14 @@ function conductorImport(configPath?: string): void {
   // Try to read YAML/JSON files from the config directory or file
   if (existsSync(configPath) && configPath.endsWith('.json')) {
     const raw = JSON.parse(readFileSync(configPath, 'utf-8'));
-    if (raw.name) data.project!.name = raw.name;
-    if (raw.description) data.project!.goal = raw.description;
-    if (raw.language) data.project!.main_language = raw.language;
+    if (raw.name) {data.project!.name = raw.name;}
+    if (raw.description) {data.project!.goal = raw.description;}
+    if (raw.language) {data.project!.main_language = raw.language;}
   } else if (existsSync(configPath) && (configPath.endsWith('.yml') || configPath.endsWith('.yaml'))) {
     const raw = parse(readFileSync(configPath, 'utf-8'));
-    if (raw.name) data.project!.name = raw.name;
-    if (raw.description) data.project!.goal = raw.description;
-    if (raw.language) data.project!.main_language = raw.language;
+    if (raw.name) {data.project!.name = raw.name;}
+    if (raw.description) {data.project!.goal = raw.description;}
+    if (raw.language) {data.project!.main_language = raw.language;}
   } else {
     // Directory: scan for config files
     try {
@@ -51,8 +51,8 @@ function conductorImport(configPath?: string): void {
         if (file.endsWith('.json')) {
           try {
             const raw = JSON.parse(readFileSync(filePath, 'utf-8'));
-            if (raw.name && !data.project!.name) data.project!.name = raw.name;
-            if (raw.description && !data.project!.goal) data.project!.goal = raw.description;
+            if (raw.name && !data.project!.name) {data.project!.name = raw.name;}
+            if (raw.description && !data.project!.goal) {data.project!.goal = raw.description;}
           } catch { /* skip malformed files */ }
         }
       }
@@ -67,10 +67,10 @@ function conductorImport(configPath?: string): void {
   const existing = findFafFile(dir);
   if (existing) {
     const prev = readFaf(existing);
-    if (!prev.project) prev.project = {};
-    if (data.project!.name && !prev.project.name) prev.project.name = data.project!.name;
-    if (data.project!.goal && !prev.project.goal) prev.project.goal = data.project!.goal;
-    if (data.project!.main_language && !prev.project.main_language) prev.project.main_language = data.project!.main_language;
+    if (!prev.project) {prev.project = {};}
+    if (data.project!.name && !prev.project.name) {prev.project.name = data.project!.name;}
+    if (data.project!.goal && !prev.project.goal) {prev.project.goal = data.project!.goal;}
+    if (data.project!.main_language && !prev.project.main_language) {prev.project.main_language = data.project!.main_language;}
     writeFaf(existing, prev);
     console.log(`${fafCyan('◆')} conductor import  merged into ${existing}`);
   } else {
