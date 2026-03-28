@@ -61,6 +61,15 @@ stack:
   mainLanguage: JavaScript/TypeScript
   buildTool: Bun
   framework: React
+  css_framework: slotignored
+  state_management: slotignored
+  connection: slotignored
+  monorepo_tool: slotignored
+  workspaces: slotignored
+  admin: slotignored
+  cache: slotignored
+  search: slotignored
+  storage: slotignored
 preferences:
   quality_bar: zero_errors
   commit_style: conventional_emoji
@@ -148,3 +157,9 @@ stats:
   best_auto_time: 0.2
   last_auto_time: 0.2
   times_run: 3
+monorepo:
+  packages_count: slotignored
+  build_orchestrator: slotignored
+  versioning_strategy: slotignored
+  shared_configs: slotignored
+  remote_cache: slotignored
