@@ -28,6 +28,37 @@ export function readPackageJson(dir: string): PackageJson | null {
   }
 }
 
+/** Read project name and description from any manifest (package.json, pyproject.toml, Cargo.toml) */
+export function readProjectManifest(dir: string): { name?: string; description?: string } | null {
+  // package.json
+  const pkg = readPackageJson(dir);
+  if (pkg?.name) {return { name: pkg.name, description: pkg.description };}
+
+  // pyproject.toml — [project] section
+  const pyprojectPath = join(dir, 'pyproject.toml');
+  if (existsSync(pyprojectPath)) {
+    try {
+      const content = readFileSync(pyprojectPath, 'utf-8');
+      const nameMatch = content.match(/^\s*name\s*=\s*"([^"]+)"/m);
+      const descMatch = content.match(/^\s*description\s*=\s*"([^"]+)"/m);
+      if (nameMatch) {return { name: nameMatch[1], description: descMatch?.[1] };}
+    } catch { /* ignore */ }
+  }
+
+  // Cargo.toml — [package] section
+  const cargoPath = join(dir, 'Cargo.toml');
+  if (existsSync(cargoPath)) {
+    try {
+      const content = readFileSync(cargoPath, 'utf-8');
+      const nameMatch = content.match(/^\s*name\s*=\s*"([^"]+)"/m);
+      const descMatch = content.match(/^\s*description\s*=\s*"([^"]+)"/m);
+      if (nameMatch) {return { name: nameMatch[1], description: descMatch?.[1] };}
+    } catch { /* ignore */ }
+  }
+
+  return null;
+}
+
 /** Scan a directory for files matching patterns */
 function fileExists(dir: string, pattern: string): boolean {
   // Handle simple file checks

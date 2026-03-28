@@ -11,6 +11,7 @@ import {
   detectBuildTool,
   detectSvelteAdapter,
   readPackageJson,
+  readProjectManifest,
 } from './scanner.js';
 
 /** Auto-detect project stack and generate .faf data */
@@ -121,10 +122,11 @@ export function detectStack(dir: string): FafData {
     }
   }
 
-  // Build project section
+  // Build project section — read name/description from any manifest
+  const manifest = readProjectManifest(dir);
   const project: Record<string, string> = {
-    name: pkg?.name ?? dir.split('/').pop() ?? 'project',
-    goal: pkg?.description ?? '',
+    name: manifest?.name ?? dir.split('/').pop() ?? 'project',
+    goal: manifest?.description ?? '',
     main_language: language,
     type: projectType,
   };
