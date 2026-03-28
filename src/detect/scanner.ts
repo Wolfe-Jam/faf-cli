@@ -112,12 +112,36 @@ function readPythonDeps(dir: string): Record<string, string> {
     const content = readFileSync(pyprojectPath, 'utf-8');
     const deps: Record<string, string> = {};
     // Match dependencies = ["fastapi", "uvicorn>=0.20", "sqlalchemy[asyncio]"]
-    const depsMatch = content.match(/dependencies\s*=\s*\[([\s\S]*?)\]/);
+    // Use greedy match — lazy stops at first ] which could be inside extras like [asyncio]
+    const depsMatch = content.match(/dependencies\s*=\s*\[([\s\S]*)\]/);
     if (depsMatch) {
       const items = depsMatch[1].match(/"([^"]+)"/g) || [];
       for (const item of items) {
-        const name = item.replace(/"/g, '').split(/[>=<[]/)[0].trim().toLowerCase();
+        const name = item.replace(/"/g, '').replace(/\[.*/, '').split(/[>=<]/)[0].trim().toLowerCase();
         if (name) {deps[name] = '*';}
+      }
+    }
+    return deps;
+  } catch {
+    return {};
+  }
+}
+
+/** Read Rust dependencies from Cargo.toml */
+function readCargoDeps(dir: string): Record<string, string> {
+  const cargoPath = join(dir, 'Cargo.toml');
+  if (!existsSync(cargoPath)) {return {};}
+  try {
+    const content = readFileSync(cargoPath, 'utf-8');
+    const deps: Record<string, string> = {};
+    // Match lines after [dependencies] until next section
+    const depsSection = content.match(/\[dependencies\]([\s\S]*?)(?:\[|$)/);
+    if (depsSection) {
+      const lines = depsSection[1].split('\n');
+      for (const line of lines) {
+        // Simple: rmcp = "0.1"  or  rmcp = { version = "0.1", features = [...] }
+        const match = line.match(/^\s*([a-zA-Z_-]+)\s*=/);
+        if (match) {deps[match[1].toLowerCase()] = '*';}
       }
     }
     return deps;
@@ -130,10 +154,12 @@ function readPythonDeps(dir: string): Record<string, string> {
 export function detectFrameworks(dir: string): DetectedFramework[] {
   const pkg = readPackageJson(dir);
 
-  // Merge Python deps into virtual package for framework detection
+  // Merge Python + Cargo deps into virtual package for framework detection
   const pythonDeps = readPythonDeps(dir);
-  const mergedPkg = pkg ? { ...pkg, dependencies: { ...pkg.dependencies, ...pythonDeps } }
-    : Object.keys(pythonDeps).length > 0 ? { dependencies: pythonDeps } as PackageJson
+  const cargoDeps = readCargoDeps(dir);
+  const extraDeps = { ...pythonDeps, ...cargoDeps };
+  const mergedPkg = pkg ? { ...pkg, dependencies: { ...pkg.dependencies, ...extraDeps } }
+    : Object.keys(extraDeps).length > 0 ? { dependencies: extraDeps } as PackageJson
     : null;
 
   const detected = FRAMEWORKS
