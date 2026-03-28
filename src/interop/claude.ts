@@ -100,6 +100,24 @@ export function generateClaudeMd(data: FafData): string {
   return lines.join('\n');
 }
 
+/** Inject or update faf meta tag in existing content — touch nothing else */
+export function injectMetaTag(content: string, data: FafData): { content: string; changed: boolean } {
+  const tag = fafMetaTag(data);
+  const lines = content.split('\n');
+
+  // Already has a faf meta tag — update it
+  if (lines[0]?.startsWith('<!-- faf:')) {
+    if (lines[0] === tag) {
+      return { content, changed: false }; // identical, no change
+    }
+    lines[0] = tag;
+    return { content: lines.join('\n'), changed: true };
+  }
+
+  // No meta tag — prepend it
+  return { content: tag + '\n\n' + content, changed: true };
+}
+
 /** Extract project data from CLAUDE.md content (pull direction) */
 export function parseClaudeMd(content: string): Partial<FafData> {
   const data: Partial<FafData> = { project: {} };

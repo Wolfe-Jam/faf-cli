@@ -1,7 +1,7 @@
 import { existsSync, statSync } from 'fs';
 import { join } from 'path';
 import { findFafFile, readFaf, readFafRaw, writeFaf } from '../interop/faf.js';
-import { readClaudeMd, writeClaudeMd, generateClaudeMd, parseClaudeMd } from '../interop/claude.js';
+import { readClaudeMd, writeClaudeMd, generateClaudeMd, parseClaudeMd, injectMetaTag } from '../interop/claude.js';
 import { readMemoryMd, writeMemoryMd } from '../interop/memory.js';
 import * as kernel from '../wasm/kernel.js';
 import { enrichScore } from '../core/scorer.js';
@@ -60,16 +60,26 @@ function autoSync(fafPath: string, claudePath: string, dir: string): void {
 
 function pushSync(fafPath: string, dir: string): void {
   const claudePath = join(dir, 'CLAUDE.md');
+  const data = readFaf(fafPath);
 
   if (existsSync(claudePath)) {
-    // CLAUDE.md exists — NEVER overwrite. Only pull FROM it.
-    console.log(`${fafCyan('◆')} sync  CLAUDE.md exists — preserved   ${dim('← bi-sync')}`);
+    // CLAUDE.md exists — stamp meta tag, never overwrite content
+    const existing = readClaudeMd(dir);
+    if (existing) {
+      const { content, changed } = injectMetaTag(existing, data);
+      if (changed) {
+        writeClaudeMd(dir, content);
+        console.log(`${fafCyan('◆')} sync  .faf → CLAUDE.md (stamped)   ${dim('← bi-sync')}`);
+      } else {
+        console.log(`${fafCyan('◆')} sync  CLAUDE.md up-to-date   ${dim('← bi-sync')}`);
+      }
+    }
+    // Also pull data FROM CLAUDE.md into .faf
     pullSync(fafPath, claudePath);
     return;
   }
 
   // No CLAUDE.md — create one from .faf
-  const data = readFaf(fafPath);
   const content = generateClaudeMd(data);
   writeClaudeMd(dir, content);
   console.log(`${fafCyan('◆')} sync  .faf → CLAUDE.md (created)   ${dim('← bi-sync')}`);

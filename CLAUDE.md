@@ -1,3 +1,5 @@
+<!-- faf: faf-cli v6 | TypeScript | CLI tool for creating and managing `.faf` files — persistent AI context that versions with your code. IANA-registered media type: `application/vnd.faf+yaml`. -->
+
 # CLAUDE.md — faf-cli v6
 
 ## What This Is
