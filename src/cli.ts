@@ -238,7 +238,7 @@ if (process.argv.length <= 2) {
   const GR = '\x1b[38;2;39;174;96m';    // grass green
   console.log(`${DB}${G}▀${GB}${DF}▄${DB}${GR}░${GB}${G}██${DB}${GR}░░${GB}${G}██${DB}${GR}░${RS}  ${dim('Nelly Never Forgets')}`);
   console.log(`${GR}▔▔▔▔▔▔▔▔▔▔▔▔${RS}`);
-  console.log(`${dim('  ' + cwd)}`);
+  console.log(`${dim(`  ${  cwd}`)}`);
   console.log('');
   try { await scoreCommand(undefined, { status: true }); } catch {}
   console.log('');
