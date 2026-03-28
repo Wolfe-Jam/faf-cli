@@ -116,7 +116,7 @@ function readPythonDeps(dir: string): Record<string, string> {
     if (depsMatch) {
       const items = depsMatch[1].match(/"([^"]+)"/g) || [];
       for (const item of items) {
-        const name = item.replace(/"/g, '').split(/[>=<\[]/)[0].trim().toLowerCase();
+        const name = item.replace(/"/g, '').split(/[>=<[]/)[0].trim().toLowerCase();
         if (name) {deps[name] = '*';}
       }
     }
