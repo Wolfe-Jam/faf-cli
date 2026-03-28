@@ -143,11 +143,11 @@ describe('WJTTC — Next.js Edge Cases', () => {
       expect(fws.some(f => f.slug === 'nextjs')).toBe(true);
     });
 
-    test('Next.js + React both detected', () => {
+    test('Next.js supersedes React when both present', () => {
       writePkg({ next: '^16.0.0', react: '^19.0.0' });
       const fws = detectFrameworks(testDir);
       expect(fws.some(f => f.slug === 'nextjs')).toBe(true);
-      expect(fws.some(f => f.slug === 'react')).toBe(true);
+      expect(fws.some(f => f.slug === 'react')).toBe(false); // superseded
     });
 
     test('Next.js + Tailwind + shadcn detected together', () => {

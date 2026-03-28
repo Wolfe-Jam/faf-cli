@@ -40,7 +40,7 @@ describe('faf e2e — full lifecycle', () => {
     run('init --yolo');
     expect(existsSync(join(testDir, 'project.faf'))).toBe(true);
     const faf = parse(readFileSync(join(testDir, 'project.faf'), 'utf-8'));
-    expect(faf.faf_version).toBe('2.5.0');
+    expect(faf.faf_version).toBe('3.0');
     expect(faf.project.name).toBe('e2e-test-app');
   });
 
@@ -48,7 +48,7 @@ describe('faf e2e — full lifecycle', () => {
     run('auto');
     const faf = parse(readFileSync(join(testDir, 'project.faf'), 'utf-8'));
     expect(faf.project.name).toBe('e2e-test-app');
-    expect(faf.faf_version).toBe('2.5.0');
+    expect(faf.faf_version).toBe('3.0');
   });
 
   // --- Phase 2: Score & Validate ---

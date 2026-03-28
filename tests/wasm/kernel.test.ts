@@ -145,7 +145,7 @@ describe('kernel.scoreFafb', () => {
     const result = kernel.scoreFafb(binary);
     expect(result.source).toBe('fafb_meta');
     expect(result.name).toBe('test-project');
-    expect(result.faf_version).toBe('2.5.0');
+    expect(result.faf_version).toBe('2.5.0'); // returns what's in the compiled binary
   });
 });
 

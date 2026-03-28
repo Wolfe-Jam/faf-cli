@@ -119,7 +119,7 @@ describe('🛑 BRAKE TIER - Svelte Detection Critical Path', () => {
     expect(data.stack).toBeDefined();
     expect(data.human_context).toBeDefined();
     expect(data.monorepo).toBeDefined();
-    expect(data.faf_version).toBe('2.5.0');
+    expect(data.faf_version).toBe('3.0');
   });
 
   test('BRAKE-S007: Svelte project type must set project.type to svelte', () => {

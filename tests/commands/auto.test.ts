@@ -28,11 +28,11 @@ describe('auto command', () => {
 
     expect(existsSync(join(testDir, 'project.faf'))).toBe(true);
     const content = parse(readFileSync(join(testDir, 'project.faf'), 'utf-8'));
-    expect(content.faf_version).toBe('2.5.0');
+    expect(content.faf_version).toBe('3.0');
   });
 
   test('merges into existing project.faf', () => {
-    writeFileSync(join(testDir, 'project.faf'), `faf_version: 2.5.0\nproject:\n  name: existing\n  goal: My goal\n`);
+    writeFileSync(join(testDir, 'project.faf'), `faf_version: "3.0"\nproject:\n  name: existing\n  goal: My goal\n`);
     writeFileSync(join(testDir, 'package.json'), JSON.stringify({ name: 'test-auto' }));
 
     const { autoCommand } = require('../../src/commands/auto.js');

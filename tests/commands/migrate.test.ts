@@ -20,14 +20,14 @@ describe('migrate command', () => {
     rmSync(testDir, { recursive: true, force: true });
   });
 
-  test('migrates old version to 2.5.0', () => {
+  test('migrates old version to 3.0', () => {
     writeFileSync(join(testDir, 'project.faf'), `faf_version: 1.0.0\nproject:\n  name: test\n`);
 
     const { migrateCommand } = require('../../src/commands/migrate.js');
     migrateCommand();
 
     const content = parse(readFileSync(join(testDir, 'project.faf'), 'utf-8'));
-    expect(content.faf_version).toBe('2.5.0');
+    expect(content.faf_version).toBe('3.0');
     expect(content.project.name).toBe('test');
     expect(content.stack).toBeDefined();
     expect(content.human_context).toBeDefined();
@@ -35,15 +35,15 @@ describe('migrate command', () => {
   });
 
   test('already at current version is no-op', () => {
-    const original = `faf_version: 2.5.0\nproject:\n  name: test\n`;
+    const original = `faf_version: "3.0"\nproject:\n  name: test\n`;
     writeFileSync(join(testDir, 'project.faf'), original);
 
     const { migrateCommand } = require('../../src/commands/migrate.js');
     migrateCommand();
 
-    // File should be unchanged (or at least still 2.5.0)
+    // File should be unchanged (still 3.0)
     const content = parse(readFileSync(join(testDir, 'project.faf'), 'utf-8'));
-    expect(content.faf_version).toBe('2.5.0');
+    expect(content.faf_version).toBe('3.0');
   });
 
   test('dry run does not modify file', () => {

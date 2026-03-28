@@ -3,7 +3,7 @@ import { validateFaf } from '../../src/core/schema.js';
 
 describe('validateFaf', () => {
   test('valid .faf data passes', () => {
-    const result = validateFaf({ faf_version: '2.5.0', project: { name: 'test' } });
+    const result = validateFaf({ faf_version: '3.0', project: { name: 'test' } });
     expect(result.valid).toBe(true);
     expect(result.errors).toHaveLength(0);
   });
@@ -15,7 +15,7 @@ describe('validateFaf', () => {
   });
 
   test('missing project.name fails', () => {
-    const result = validateFaf({ faf_version: '2.5.0' });
+    const result = validateFaf({ faf_version: '3.0' });
     expect(result.valid).toBe(false);
     expect(result.errors).toContain('Missing required field: project.name');
   });

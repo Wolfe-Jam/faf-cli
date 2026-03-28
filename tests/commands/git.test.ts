@@ -31,12 +31,12 @@ describe('git command', () => {
 
     const data = detectStack(testDir);
     expect(data.project?.name).toBe('git-test-app');
-    expect(data.faf_version).toBe('2.5.0');
+    expect(data.faf_version).toBe('3.0');
   });
 
   test('detectStack handles empty directory', () => {
     const data = detectStack(testDir);
-    expect(data.faf_version).toBe('2.5.0');
+    expect(data.faf_version).toBe('3.0');
     expect(data.project).toBeDefined();
   });
 
