@@ -12,3 +12,12 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "✅ Version check passed!"
+
+# 🔍 Lint check — errors only (warnings pass)
+echo "🏎️ Running lint check..."
+npx eslint src/**/*.ts --quiet 2>/dev/null
+if [ $? -ne 0 ]; then
+  echo "❌ Lint errors found! Fix with: npx eslint src/**/*.ts --fix"
+  exit 1
+fi
+echo "✅ Lint passed!"
