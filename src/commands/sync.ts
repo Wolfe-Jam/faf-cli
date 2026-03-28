@@ -59,10 +59,20 @@ function autoSync(fafPath: string, claudePath: string, dir: string): void {
 }
 
 function pushSync(fafPath: string, dir: string): void {
+  const claudePath = join(dir, 'CLAUDE.md');
+
+  if (existsSync(claudePath)) {
+    // CLAUDE.md exists — NEVER overwrite. Only pull FROM it.
+    console.log(`${fafCyan('◆')} sync  CLAUDE.md exists — preserved   ${dim('← bi-sync')}`);
+    pullSync(fafPath, claudePath);
+    return;
+  }
+
+  // No CLAUDE.md — create one from .faf
   const data = readFaf(fafPath);
   const content = generateClaudeMd(data);
   writeClaudeMd(dir, content);
-  console.log(`${fafCyan('◆')} sync  .faf → CLAUDE.md   ${dim('← bi-sync')}`);
+  console.log(`${fafCyan('◆')} sync  .faf → CLAUDE.md (created)   ${dim('← bi-sync')}`);
 
   const result = enrichScore(kernel.score(readFafRaw(fafPath)));
   displayScore(result, fafPath);
