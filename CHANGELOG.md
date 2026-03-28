@@ -5,25 +5,51 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [6.0.10] - 2026-03-28 — Format Version + Detection Fixes
+## [6.0.10] - 2026-03-28 — MCP Detection + Format 3.0
+
+### Added
+
+- **MCP server detection** — new project type `mcp` with framework sub-types. 10 MCP SDKs architected, 7 with detection signals. MCP takes priority over CLI (MCP servers often have bin entries).
+  - #1 `@modelcontextprotocol/sdk` (TS) — claude-faf-mcp, grok-faf-mcp, faf-mcp
+  - #2 `fastmcp` (Python) — gemini-faf-mcp, 70% of MCP servers
+  - #3 `mcp` (Python) — official Anthropic Python SDK
+  - #4 `rmcp` (Rust) — rust-faf-mcp
+  - #5-7 mcp-go, MCP .NET, FastMCP (TS) — signals ready
+  - #8-10 Kotlin, Zig WASM, Swift — placeholders
+- **MCP framework sub-types** — `project.framework: fastmcp / mcp-sdk-ts / mcp-sdk-py / rmcp` (same pattern as `framework: svelte`)
+- **MCP auto-fill** — `backend` slot populated with MCP framework name, `api_type: MCP (stdio/SSE)`
+- **Python dep detection from pyproject.toml** — FastAPI, FastMCP, Django, Flask, SQLAlchemy, Tortoise ORM detected from `[project].dependencies`
+- **Cargo.toml dep detection** — rmcp and other Rust deps detected from `[dependencies]` section
+- **Project name from pyproject.toml and Cargo.toml** — Python and Rust projects use manifest name, not folder name
+- **WJTTC MCP test suite** — 27 tests across 3 tiers (BRAKE 11, ENGINE 7, AERO 9)
+- **Pre-commit lint hook** — errors blocked at commit time, never reach CI
 
 ### Fixed
 
-- **`faf_version` 2.5.0 → 3.0** — all generated .faf files now use format version 3.0 (5 source files updated: stack.ts, recover.ts, migrate.ts, demo.ts, conductor.ts). Cascades to migrate, TAF receipts, share URLs.
-- **Next.js detected over React** — meta-frameworks now supersede their base. Next.js → React, Nuxt → Vue, SvelteKit → Svelte. When both detected, meta-framework wins.
-- **Python/Rust project names from manifest** — `readProjectManifest()` reads name and description from `pyproject.toml` and `Cargo.toml`, not just `package.json`. Python and Rust projects no longer use folder name as project name.
+- **`faf_version` 2.5.0 → 3.0** — all generated .faf files now use format version 3.0 (5 source files)
+- **Next.js detected over React** — meta-frameworks supersede their base (Next.js→React, Nuxt→Vue, SvelteKit→Svelte)
+- **Python extras parsing** — `sqlalchemy[asyncio]>=2.0` correctly parsed as `sqlalchemy`
+- **Sync never overwrites CLAUDE.md** (from v6.0.9)
+- **Meta tag stamping** — `<!-- faf: ... -->` injected at line 1 (from v6.0.9)
+
+### Tested Against Real Repos
+
+| Server | Before | After |
+|--------|--------|-------|
+| claude-faf-mcp | 44% cli | 59% mcp |
+| grok-faf-mcp | 44% cli | 59% mcp |
+| gemini-faf-mcp | 33% library | 41% mcp |
 
 ### Technical
 
-- 348/348 tests passing, 0 failures, 40 files
-- All test assertions updated for faf_version 3.0
-- Framework supersede test updated (React no longer appears alongside Next.js)
-- `kernel.scoreFafb` correctly returns version from compiled binary, not current version
+- 375/375 tests passing, 0 failures, 41 files
+- 27 new MCP WJTTC tests
+- Cargo.toml dep reading + Python extras fix
+- Pre-commit hook: version check + lint
 
 ### Known Issues (to fix in 6.0.11+)
 
-- Python dependency detection — `pyproject.toml` dependencies (FastAPI, SQLAlchemy, Redis) not parsed for stack slot population
-- `info` command shows kernel 2.0.0 instead of 2.0.3
+- `info` command shows kernel 2.0.0 instead of 2.0.3 (kernel internal version)
 - `auto` command doesn't mine README.md for human_context fields
 
 ## [6.0.9] - 2026-03-28 — Safe Sync
