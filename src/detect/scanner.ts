@@ -108,7 +108,7 @@ function matchSignal(signal: Signal, pkg: PackageJson | null, dir: string): bool
 export function detectFrameworks(dir: string): DetectedFramework[] {
   const pkg = readPackageJson(dir);
 
-  return FRAMEWORKS
+  const detected = FRAMEWORKS
     .map(fw => {
       const matched = fw.signals.filter(s => matchSignal(s, pkg, dir));
       const confidence = matched.length / fw.signals.length;
@@ -116,6 +116,15 @@ export function detectFrameworks(dir: string): DetectedFramework[] {
     })
     .filter(fw => fw.confidence > 0)
     .sort((a, b) => b.confidence - a.confidence);
+
+  // Meta-frameworks supersede their base — Next.js beats React, Nuxt beats Vue, SvelteKit beats Svelte
+  const slugs = new Set(detected.map(d => d.slug));
+  const superseded = new Set<string>();
+  if (slugs.has('nextjs')) {superseded.add('react');}
+  if (slugs.has('nuxt')) {superseded.add('vue');}
+  if (slugs.has('sveltekit')) {superseded.add('svelte');}
+
+  return detected.filter(d => !superseded.has(d.slug));
 }
 
 /** Detect the primary language of a project */

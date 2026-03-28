@@ -5,7 +5,6 @@ export const FRAMEWORKS: FrameworkSignature[] = [
   // Frontend Frameworks
   { name: 'Next.js', slug: 'nextjs', category: 'frontend', signals: [
     { type: 'dependency', key: 'next' },
-    { type: 'file', pattern: 'next.config.*' },
   ]},
   { name: 'React', slug: 'react', category: 'frontend', signals: [
     { type: 'dependency', key: 'react' },
