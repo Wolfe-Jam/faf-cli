@@ -29,6 +29,8 @@ project/
 
 **Git-Native.** `project.faf` versions with your code — every clone, every fork, every checkout gets full AI context. No setup, no drift, no re-explaining.
 
+10 lines of structured YAML gives AI more context than 550 lines of prose. [Read why →](https://faf.one/blog/sunset-edition)
+
 ---
 
 ## Install
@@ -61,15 +63,15 @@ v6 is a ground-up rewrite. All-in on Bun — same toolchain as Claude Code.
 | **Language** | TypeScript | TypeScript |
 | **Compile** | Bun bytecode | `bun build --compile` |
 
-312 tests in ~10s. 290KB bundle in 2.4s. Single portable binary, 4 platforms. npx backward-compatible.
+375 tests in ~19s. 95KB package in 1s. Single portable binary, 4 platforms. npx backward-compatible.
 
-26 commands. 312 tests. 5,292 lines. 93% smaller than v5.
+26 commands. 375 tests. 3,182 lines. 94% smaller than v5.
 
 ```
 commands → interop → core → wasm
 ```
 
-The WASM scoring kernel (`faf-scoring-kernel` 2.0.0) does the math. Bun does the delivery.
+The WASM scoring kernel (`faf-scoring-kernel`) does the math. Bun does the delivery.
 
 ---
 
@@ -137,6 +139,39 @@ bunx faf-cli go                # Interactive interview to gold code
 
 ---
 
+## Project Types
+
+faf-cli auto-detects your project type and activates the right slots:
+
+| Type | Detection | Active Slots |
+|------|-----------|-------------|
+| **mcp** | `@modelcontextprotocol/sdk`, `fastmcp`, `mcp`, `rmcp` | project + backend + universal + human |
+| **fullstack** | Next.js, Nuxt, frontend + backend | project + frontend + backend + universal + human |
+| **svelte** | SvelteKit / Svelte | project + frontend + backend + universal + human |
+| **backend** | FastAPI, Express, Django, Flask | project + backend + universal + human |
+| **frontend** | React, Vue, Angular (no backend) | project + frontend + human |
+| **cli** | `bin` field in package.json | project + human |
+| **library** | No framework signals | project + human |
+
+### MCP Server Detection
+
+10 MCP frameworks supported. Your MCP server gets the right type, backend, and framework sub-type automatically:
+
+```yaml
+project:
+  type: mcp
+  framework: fastmcp       # or: mcp-sdk-ts, mcp-sdk-py, rmcp
+stack:
+  backend: FastMCP          # auto-filled from MCP SDK
+  api_type: MCP (stdio/SSE) # auto-filled
+```
+
+### Python & Rust Support
+
+Project name and description read from `pyproject.toml` and `Cargo.toml` — not just `package.json`. Python deps (FastAPI, SQLAlchemy, Django) and Rust deps (rmcp, tokio) detected from manifests.
+
+---
+
 ## Sync
 
 ```
@@ -179,7 +214,7 @@ src/
 ## Testing
 
 ```bash
-bun test                       # 312 tests, 39 files, ~12s
+bun test                       # 375 tests, 41 files, ~19s
 ```
 
 Full e2e lifecycle test runs every command in sequence: init → auto → score → edit → sync → export → compile → decompile → taf → recover → check. Test reports in `reports/`.
