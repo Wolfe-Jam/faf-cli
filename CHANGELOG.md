@@ -5,6 +5,20 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.0.9] - 2026-03-28 — Safe Sync
+
+### Fixed
+
+- **Sync never overwrites existing CLAUDE.md** — if file exists, content is preserved
+- **Meta tag stamping** — `<!-- faf: name | language | goal -->` injected at line 1 of existing context files
+- Idempotent — second sync says "up-to-date", no changes
+- Complete tier table in README — added Green (70%+) and White (0%), v6 compact symbols (★◆◇●○♡)
+- CLAUDE.md updated — 348 tests, kernel 2.0.3
+
+### Technical
+
+- 348 tests, 1 pre-existing e2e timeout, 40 files
+
 ## [6.0.8] - 2026-03-27 — Next.js Edge Cases
 
 ### Fixed
