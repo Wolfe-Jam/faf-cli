@@ -130,15 +130,16 @@ export const FRAMEWORKS: FrameworkSignature[] = [
   { name: 'Koa', slug: 'koa', category: 'backend', signals: [
     { type: 'dependency', key: 'koa' },
   ]},
+  { name: 'FastAPI', slug: 'fastapi', category: 'backend', signals: [
+    { type: 'dependency', key: 'fastapi' },
+  ]},
   { name: 'Django', slug: 'django', category: 'backend', signals: [
+    { type: 'dependency', key: 'django' },
     { type: 'file', pattern: 'manage.py' },
-    { type: 'file', pattern: 'settings.py' },
   ]},
   { name: 'Flask', slug: 'flask', category: 'backend', signals: [
+    { type: 'dependency', key: 'flask' },
     { type: 'file', pattern: 'app.py' },
-  ]},
-  { name: 'FastAPI', slug: 'fastapi', category: 'backend', signals: [
-    { type: 'file', pattern: 'main.py' },
   ]},
   { name: 'Rails', slug: 'rails', category: 'backend', signals: [
     { type: 'file', pattern: 'Gemfile' },
@@ -164,6 +165,12 @@ export const FRAMEWORKS: FrameworkSignature[] = [
   ]},
   { name: 'Mongoose', slug: 'mongoose', category: 'database', signals: [
     { type: 'dependency', key: 'mongoose' },
+  ]},
+  { name: 'SQLAlchemy', slug: 'sqlalchemy', category: 'database', signals: [
+    { type: 'dependency', key: 'sqlalchemy' },
+  ]},
+  { name: 'Tortoise ORM', slug: 'tortoise', category: 'database', signals: [
+    { type: 'dependency', key: 'tortoise-orm' },
   ]},
 
   // Build Tools

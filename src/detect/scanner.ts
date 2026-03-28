@@ -104,13 +104,41 @@ function matchSignal(signal: Signal, pkg: PackageJson | null, dir: string): bool
   }
 }
 
+/** Read Python dependencies from pyproject.toml */
+function readPythonDeps(dir: string): Record<string, string> {
+  const pyprojectPath = join(dir, 'pyproject.toml');
+  if (!existsSync(pyprojectPath)) {return {};}
+  try {
+    const content = readFileSync(pyprojectPath, 'utf-8');
+    const deps: Record<string, string> = {};
+    // Match dependencies = ["fastapi", "uvicorn>=0.20", "sqlalchemy[asyncio]"]
+    const depsMatch = content.match(/dependencies\s*=\s*\[([\s\S]*?)\]/);
+    if (depsMatch) {
+      const items = depsMatch[1].match(/"([^"]+)"/g) || [];
+      for (const item of items) {
+        const name = item.replace(/"/g, '').split(/[>=<\[]/)[0].trim().toLowerCase();
+        if (name) {deps[name] = '*';}
+      }
+    }
+    return deps;
+  } catch {
+    return {};
+  }
+}
+
 /** Detect frameworks in a directory */
 export function detectFrameworks(dir: string): DetectedFramework[] {
   const pkg = readPackageJson(dir);
 
+  // Merge Python deps into virtual package for framework detection
+  const pythonDeps = readPythonDeps(dir);
+  const mergedPkg = pkg ? { ...pkg, dependencies: { ...pkg.dependencies, ...pythonDeps } }
+    : Object.keys(pythonDeps).length > 0 ? { dependencies: pythonDeps } as PackageJson
+    : null;
+
   const detected = FRAMEWORKS
     .map(fw => {
-      const matched = fw.signals.filter(s => matchSignal(s, pkg, dir));
+      const matched = fw.signals.filter(s => matchSignal(s, mergedPkg, dir));
       const confidence = matched.length / fw.signals.length;
       return { name: fw.name, slug: fw.slug, category: fw.category, confidence };
     })
