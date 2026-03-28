@@ -28,7 +28,7 @@ import { goCommand } from './commands/go.js';
 import { aiCommand } from './commands/ai.js';
 import { conductorCommand } from './commands/conductor.js';
 
-const VERSION = '6.0.10';
+const VERSION = '6.0.11';
 
 const program = new Command();
 
@@ -224,6 +224,7 @@ program.command('yolo', { hidden: true }).action(() => initCommand({ yolo: true 
 // No command given → show Nelly header + score + help
 if (process.argv.length <= 2) {
   const { bold, dim, fafCyan } = await import('./ui/colors.js');
+  const { autoCommand } = await import('./commands/auto.js');
   const cwd = process.cwd().replace(process.env.HOME ?? '', '~');
 
   // Nelly — pixel-art elephant (10×6 grid, half-block rendering)
@@ -240,7 +241,10 @@ if (process.argv.length <= 2) {
   console.log(`${GR}▔▔▔▔▔▔▔▔▔▔▔▔${RS}`);
   console.log(`${dim(`  ${  cwd}`)}`);
   console.log('');
-  try { await scoreCommand(undefined, { status: true }); } catch {}
+
+  // faf with no args = faf auto (safe — merges, never overwrites)
+  autoCommand();
+
   console.log('');
   console.log(`  ${dim('Run')} ${fafCyan('faf --help')} ${dim('for commands')}`);
 } else {
