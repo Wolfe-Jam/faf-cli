@@ -247,6 +247,7 @@ if (process.argv.length <= 2) {
 
   console.log('');
   console.log(`  ${dim('Run')} ${fafCyan('faf --help')} ${dim('for commands')}`);
+  console.log(`  ${dim('Like it?')} ${fafCyan('github.com/Wolfe-Jam/faf-cli')} ${dim('— a')} ⭐ ${dim('goes a long way')}`);
 } else {
   program.parse(process.argv);
 }

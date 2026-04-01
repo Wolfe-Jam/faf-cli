@@ -5,6 +5,20 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.0.12] - 2026-04-01 — FAF is all you Need
+
+### Changed
+
+- **Before:** `bunx faf-cli auto` — 18 characters, you had to know the command
+- **Now:** `bunx faf` — 8 characters, does everything automatically
+- Three letters. Auto-detects your project, creates .faf, scores it, tells you what's next.
+- Works with `npx faf`, `bunx faf`, or just `faf` if installed globally.
+- FAF is all you need.
+
+### Added
+
+- **GitHub star nudge** — gentle one-liner after auto-score for first-time users
+
 ## [6.0.11] - 2026-03-28 — Three Letters
 
 ### Changed

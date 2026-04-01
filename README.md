@@ -36,10 +36,15 @@ project/
 ## Install
 
 ```bash
-bunx faf-cli auto                  # Bun — zero install, fastest path
-npx faf-cli auto                   # npm — works everywhere
-brew install faf-cli && faf auto   # Homebrew
+bunx faf                           # That's it. FAF is all you need.
+npx faf                            # Also works.
+brew install faf-cli && faf        # Homebrew
 ```
+
+Three letters. Auto-detects your project, creates `.faf`, scores it, tells you what's next.
+
+**Before:** `bunx faf-cli auto` — 18 characters, you had to know the command.
+**Now:** `bunx faf` — 8 characters, does everything automatically.
 
 ---
 
