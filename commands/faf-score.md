@@ -1,5 +1,5 @@
 ---
-description: Rate your .faf completeness (0-100%). Aim for 🥉 85% BRONZE+ for solid AI context
+description: Rate .faf completeness (0-100%). Target 85%+ for solid AI context
 argument-hint: Optional .faf file path
 ---
 

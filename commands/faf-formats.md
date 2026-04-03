@@ -1,5 +1,5 @@
 ---
-description: 😽 TURBO-CAT discovers all formats in your project (153 validated framework types)
+description: Discover all formats and frameworks in your project
 argument-hint: Optional project path
 ---
 

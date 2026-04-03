@@ -1,5 +1,5 @@
 ---
-description: Create .faf file from your project (detects React, Python, Node.js, etc.)
+description: Create .faf file from project structure
 argument-hint: Optional project path
 ---
 

@@ -1,5 +1,5 @@
 ---
-description: Quick .faf context health check (<200ms)
+description: Quick .faf context health check
 argument-hint: None
 ---
 

@@ -1,5 +1,5 @@
 ---
-description: Bi-directional sync between .faf ↔ CLAUDE.md (8ms average)
+description: Bi-directional sync between .faf and CLAUDE.md
 argument-hint: None
 ---
 

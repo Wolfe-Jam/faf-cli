@@ -1,5 +1,5 @@
 ---
-description: 🏎️ ONE COMMAND TO RULE THEM ALL - Zero to Championship AI context instantly
+description: Auto-generate complete .faf project context
 argument-hint: Optional project path
 ---
 
