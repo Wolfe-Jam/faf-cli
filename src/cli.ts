@@ -27,15 +27,16 @@ import { tafCommand } from './commands/taf.js';
 import { goCommand } from './commands/go.js';
 import { aiCommand } from './commands/ai.js';
 import { conductorCommand } from './commands/conductor.js';
+import { readFileSync } from 'fs';
 
-const VERSION = '6.0.11';
+const { version } = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 
 const program = new Command();
 
 program
   .name('faf')
   .description('Foundational AI-Context Format — project DNA for any AI')
-  .version(VERSION, '-v, --version');
+  .version(version, '-v, --version');
 
 // === Core Commands (Top 6) ===
 
