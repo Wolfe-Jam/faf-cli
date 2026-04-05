@@ -5,6 +5,21 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.0.14] - 2026-04-04 — Skills Ecosystem Integration
+
+### Added
+
+- **Skills ecosystem integration** — Direct Claude Code skills management via new commands
+- **Claude sync commands** — `claude-sync`, `skills-install` for seamless integration  
+- **MCP ecosystem enhancements** — Enhanced server tools and testing capabilities
+- **Skills distribution hub** — skills.faf.one landing page and collection organization
+- **Documentation strategy** — Comprehensive docs for MCP registry and community engagement
+
+### Enhanced
+
+- **Core architecture** — New modules for hook system, MCP server management, permissions
+- **Integration tooling** — Direct Claude Code interop and skills workflow automation
+
 ## [6.0.12] - 2026-04-01 — FAF is all you Need
 
 ### Changed

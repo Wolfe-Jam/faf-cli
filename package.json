@@ -1,6 +1,6 @@
 {
   "name": "faf-cli",
-  "version": "6.0.13",
+  "version": "6.0.14",
   "description": "Persistent AI Context Standard — project DNA for AI. IANA-registered. Anthropic-approved.",
   "type": "module",
   "icon": "https://faf.one/orange-smiley.svg",
@@ -18,12 +18,13 @@
   },
   "files": [
     "dist/**/*",
+    "skills/**/*",
     "README.md",
     "LICENSE",
     "project.faf"
   ],
   "scripts": {
-    "dev": "bun src/cli.ts",
+    "dev": "bun run src/cli.ts",
     "build": "bun build src/cli.ts --outfile dist/cli.js --target=node --minify && bun build src/index.ts --outfile dist/index.js --target=node --minify",
     "compile": "bun build src/cli.ts --compile --bytecode --minify --outfile faf",
     "compile:all": "bun build src/cli.ts --compile --target=bun-darwin-arm64 --outfile faf-darwin-arm64 && bun build src/cli.ts --compile --target=bun-darwin-x64 --outfile faf-darwin-x64 && bun build src/cli.ts --compile --target=bun-linux-x64 --outfile faf-linux-x64 && bun build src/cli.ts --compile --target=bun-windows-x64 --outfile faf-windows-x64.exe",
@@ -31,7 +32,9 @@
     "test:watch": "bun test --watch",
     "lint": "eslint src/**/*.ts",
     "format": "prettier --write 'src/**/*.ts'",
-    "prepublishOnly": "bun run build"
+    "prepublishOnly": "bun run build",
+    "test:coverage": "bun test --coverage",
+    "typecheck": "bun --bun tsc --noEmit"
   },
   "keywords": [
     "faf",
@@ -52,29 +55,30 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Wolfe-Jam/faf-cli.git"
+    "url": "git+https://github.com/Wolfe-Jam/faf-cli.git"
   },
   "homepage": "https://faf.one",
   "bugs": {
     "url": "https://github.com/Wolfe-Jam/faf-cli/issues"
   },
   "dependencies": {
-    "commander": "^14.0.1",
+    "commander": "^14.0.3",
     "faf-scoring-kernel": "^2.0.3",
     "open": "8.4.2",
-    "yaml": "^2.4.1"
+    "yaml": "^2.8.3",
+    "zod": "^3.25.76"
   },
   "optionalDependencies": {
     "@anthropic-ai/sdk": "^0.74.0"
   },
   "devDependencies": {
-    "@types/node": "^22.15.0",
-    "@typescript-eslint/eslint-plugin": "^8.41.0",
-    "@typescript-eslint/parser": "^8.41.0",
-    "eslint": "^9.39.2",
-    "prettier": "^3.2.5",
-    "typescript": "^5.3.3",
-    "typescript-eslint": "^8.57.2"
+    "@types/node": "^22.19.17",
+    "@typescript-eslint/eslint-plugin": "^8.58.0",
+    "@typescript-eslint/parser": "^8.58.0",
+    "eslint": "^9.39.4",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.58.0"
   },
   "engines": {
     "node": ">=18.0.0"

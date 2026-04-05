@@ -1,0 +1,81 @@
+{
+  "name": "@faf/core",
+  "version": "1.0.0",
+  "description": "Zero-dependency FAF core for Claude Code integration",
+  "main": "dist/core/faf-core.js",
+  "module": "dist/core/faf-core.js",
+  "types": "dist/core/faf-core.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/core/faf-core.js",
+      "require": "./dist/core/faf-core.js",
+      "types": "./dist/core/faf-core.d.ts"
+    },
+    "./tools": {
+      "import": "./dist/tools/claude-native-tools.js",
+      "require": "./dist/tools/claude-native-tools.js", 
+      "types": "./dist/tools/claude-native-tools.d.ts"
+    },
+    "./integration": {
+      "import": "./dist/integrations/claude-core-integration.js",
+      "require": "./dist/integrations/claude-core-integration.js",
+      "types": "./dist/integrations/claude-core-integration.d.ts"
+    }
+  },
+  "files": [
+    "dist/core/",
+    "dist/tools/",
+    "dist/integrations/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.core.json",
+    "test": "bun test core.test.ts",
+    "prepublishOnly": "bun run build"
+  },
+  "keywords": [
+    "faf", 
+    "ai-context",
+    "claude-code",
+    "mcp",
+    "context-management",
+    "ai-development",
+    "persistent-context",
+    "foundational"
+  ],
+  "author": "FAF Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Wolfe-Jam/faf-cli.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://faf.one",
+  "bugs": {
+    "url": "https://github.com/Wolfe-Jam/faf-cli/issues"
+  },
+  "dependencies": {
+    "yaml": "^2.8.3"
+  },
+  "peerDependencies": {
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "zod": "^3.25.76"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "bun": ">=1.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "sideEffects": false,
+  "bundleSize": {
+    "minified": "< 15KB",
+    "gzipped": "< 5KB"
+  }
+}

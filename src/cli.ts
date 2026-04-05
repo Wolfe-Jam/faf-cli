@@ -27,6 +27,10 @@ import { tafCommand } from './commands/taf.js';
 import { goCommand } from './commands/go.js';
 import { aiCommand } from './commands/ai.js';
 import { conductorCommand } from './commands/conductor.js';
+import { claudeSyncCommand } from './commands/claude-sync.js';
+import { bunUpdateCommand } from './commands/bun-update.js';
+import { skillsInstallCommand } from './commands/skills-install.js';
+import { mcpTestCommand } from './commands/mcp-test.js';
 import { readFileSync } from 'fs';
 
 const { version } = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
@@ -210,6 +214,26 @@ program
   .description('Conductor integration')
   .action((subcommand, path) => conductorCommand(subcommand, path));
 
+// === Claude Code & Maintenance Commands ===
+
+program.addCommand(claudeSyncCommand());
+program.addCommand(bunUpdateCommand());
+
+program
+  .command('skills-install')
+  .description('Install FAF skills package for Claude Code')
+  .action(() => skillsInstallCommand());
+
+program
+  .command('mcp-test')
+  .description('Test Claude Code MCP native integration')
+  .option('--permission <level>', 'Permission level (plan|standard|auto|bypass)', 'standard')
+  .option('--tool <name>', 'Test specific tool')
+  .option('--dry-run', 'Dry run mode')
+  .option('--no-hooks', 'Disable hooks')
+  .option('--status', 'Show integration status')
+  .action((options) => mcpTestCommand(options));
+
 // === Soft Deprecation Aliases (v5.x compat) ===
 
 program.command('bi-sync', { hidden: true }).action(() => syncCommand());
@@ -217,38 +241,16 @@ program.command('status', { hidden: true }).action(() => scoreCommand(undefined,
 program.command('agents', { hidden: true }).action(() => exportCommand({ agents: true }));
 program.command('cursor', { hidden: true }).action(() => exportCommand({ cursor: true }));
 program.command('gemini', { hidden: true }).action(() => exportCommand({ gemini: true }));
-program.command('validate', { hidden: true }).action((file: string) => checkCommand(file));
+program.command('validate [file]', { hidden: true }).action((file, options) => checkCommand(file, options));
 program.command('yolo', { hidden: true }).action(() => initCommand({ yolo: true }));
 
 // === Parse and run ===
 
-// No command given → show Nelly header + score + help
+// No command given → run faf auto
 if (process.argv.length <= 2) {
-  const { bold, dim, fafCyan } = await import('./ui/colors.js');
   const { autoCommand } = await import('./commands/auto.js');
-  const cwd = process.cwd().replace(process.env.HOME ?? '', '~');
-
-  // Nelly — pixel-art elephant (10×6 grid, half-block rendering)
-  const G = '\x1b[38;2;150;150;150m';   // gray fg
-  const GB = '\x1b[48;2;150;150;150m';  // gray bg
-  const DF = '\x1b[38;2;29;29;29m';     // dark fg (▄ trick)
-  const DB = '\x1b[48;2;29;29;29m';     // dark bg
-  const RS = '\x1b[0m';
-  console.log('');
-  console.log(`${DB} ${G}▄${GB}███████${DB}${G}▄${RS}`);
-  console.log(`${DB} ${GB}${G}█${DB}${G}▀${GB}███████${RS}  ${fafCyan(bold('faf'))} ${dim(`v${VERSION}`)}`);
-  const GR = '\x1b[38;2;39;174;96m';    // grass green
-  console.log(`${DB}${G}▀${GB}${DF}▄${DB} ${GB}${G}██${DB}  ${GB}${G}██${DB} ${RS}  ${dim('Nelly Never Forgets')}`);
-  console.log(`${GR}▔▔▔▔▔▔▔▔▔▔▔▔${RS}`);
-  console.log(`${dim(`  ${  cwd}`)}`);
-  console.log('');
-
-  // faf with no args = faf auto (safe — merges, never overwrites)
-  autoCommand();
-
-  console.log('');
-  console.log(`  ${dim('Run')} ${fafCyan('faf --help')} ${dim('for commands')}`);
-  console.log(`  ${dim('Like it?')} ${fafCyan('github.com/Wolfe-Jam/faf-cli')} ${dim('— a')} ⭐ ${dim('goes a long way')}`);
-} else {
-  program.parse(process.argv);
+  await autoCommand();
+  process.exit(0);
 }
+
+program.parse(process.argv);

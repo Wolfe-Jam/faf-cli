@@ -5,3 +5,7 @@ timeout = 30000
 root = "./tests"
 
 # Bun discovers *.test.ts recursively from root
+
+test.coverage = true
+test.coverageThreshold = 0.8
+install.lockfile.print = "yarn"

@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAF Skills - Championship-Grade AI Workflows</title>
+    <meta name="description" content="32 battle-tested Claude Code skills powered by the IANA-registered .faf format. From zero to championship-grade AI workflows in minutes.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23FF6B35'/><path d='M30 50 L45 65 L70 35' stroke='white' stroke-width='8' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+    
+    <!-- Open Graph / X -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://skills.faf.one/">
+    <meta property="og:title" content="FAF Skills - Championship-Grade AI Workflows">
+    <meta property="og:description" content="32 battle-tested Claude Code skills powered by the IANA-registered .faf format. Championship workflows that remember your project.">
+    <meta property="og:image" content="https://skills.faf.one/og-skills.png">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://skills.faf.one/">
+    <meta property="twitter:title" content="FAF Skills - Championship-Grade AI Workflows">
+    <meta property="twitter:description" content="32 battle-tested Claude Code skills powered by the IANA-registered .faf format. Championship workflows that remember your project.">
+    <meta property="twitter:image" content="https://skills.faf.one/og-skills.png">
+
+    <style>
+        :root {
+            /* Dark/creme/orange theme */
+            --faf-orange: #FF6B35;
+            --faf-orange-hover: #FF8555;
+            --faf-orange-bright: #FFA075;
+            --faf-creme: #FEFCF8;
+            --faf-creme-dark: #F9F6F1;
+            --dark-primary: #0a0a0a;
+            --dark-secondary: #1a1a1a;
+            --dark-tertiary: #2a2a2a;
+            --cyan-primary: #00D4D4;
+            --cyan-bright: #00ffff;
+            --text-light: #FEFCF8;
+            --text-gray: #aaa;
+            --text-muted: #888;
+            --border-dark: #333;
+            
+            /* Typography */
+            --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: var(--dark-primary);
+            color: var(--text-light);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Wolfejam Gizmo Spinner */
+        .wolfejam-gizmo {
+            position: relative;
+            width: 32px;
+            height: 32px;
+            background: transparent;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            outline: none;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .wolfejam-gizmo__gradient {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--faf-creme) 50%, var(--dark-secondary) 50%);
+            transition: transform 0.3s ease;
+            border-radius: 50%;
+        }
+
+        .wolfejam-gizmo:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 16px rgba(255, 107, 53, 0.3);
+        }
+
+        .wolfejam-gizmo:hover .wolfejam-gizmo__gradient {
+            transform: rotate(180deg);
+        }
+
+        /* Navigation */
+        nav {
+            background: var(--dark-secondary);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border-dark);
+        }
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text-light);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo .text {
+            background: linear-gradient(135deg, var(--faf-orange) 0%, var(--faf-orange-bright) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-gray);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--faf-orange);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--dark-primary) 0%, var(--dark-secondary) 100%);
+            padding: 6rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 107, 53, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            font-weight: 800;
+        }
+
+        .hero h1 .highlight {
+            background: linear-gradient(135deg, var(--faf-orange) 0%, var(--faf-orange-bright) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero .subtitle {
+            font-size: 1.5rem;
+            color: var(--text-gray);
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero .tagline {
+            font-size: 1.1rem;
+            color: var(--cyan-primary);
+            margin-bottom: 3rem;
+            font-weight: 600;
+        }
+
+        /* Stats Grid */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .stat {
+            text-align: center;
+            padding: 1.5rem;
+            background: rgba(255, 107, 53, 0.1);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 107, 53, 0.2);
+        }
+
+        .stat .number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--faf-orange);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat .label {
+            color: var(--text-gray);
+            font-size: 0.9rem;
+        }
+
+        /* CTA Buttons */
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-block;
+            font-size: 1.1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--faf-orange) 0%, var(--faf-orange-hover) 100%);
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--faf-orange-hover) 0%, var(--faf-orange-bright) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--cyan-primary);
+            border: 2px solid var(--cyan-primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--cyan-primary);
+            color: var(--dark-primary);
+            box-shadow: 0 8px 25px rgba(0, 212, 212, 0.3);
+        }
+
+        /* Skills Collections */
+        .collections {
+            padding: 4rem 0;
+            background: var(--dark-secondary);
+        }
+
+        .collections h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: var(--text-light);
+        }
+
+        .collections-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .collection {
+            background: var(--dark-tertiary);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid var(--border-dark);
+            transition: all 0.3s;
+        }
+
+        .collection:hover {
+            border-color: var(--faf-orange);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.2);
+        }
+
+        .collection h3 {
+            color: var(--faf-orange);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .collection .description {
+            color: var(--text-gray);
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .collection .skills {
+            list-style: none;
+        }
+
+        .collection .skills li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .collection .skills li:last-child {
+            border-bottom: none;
+        }
+
+        .collection .skills .skill-name {
+            font-family: 'Monaco', 'Menlo', monospace;
+            color: var(--cyan-primary);
+            font-weight: 600;
+            min-width: 140px;
+        }
+
+        .collection .skills .skill-desc {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Installation Section */
+        .installation {
+            padding: 4rem 0;
+            background: var(--dark-primary);
+        }
+
+        .installation h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            color: var(--text-light);
+        }
+
+        .install-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            margin: 2rem 0;
+        }
+
+        .install-step {
+            background: var(--dark-secondary);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-dark);
+        }
+
+        .install-step h3 {
+            color: var(--faf-orange);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .install-code {
+            background: var(--dark-tertiary);
+            color: var(--cyan-bright);
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            border: 1px solid var(--border-dark);
+        }
+
+        .install-step p {
+            color: var(--text-gray);
+            margin-top: 0.5rem;
+        }
+
+        /* Ecosystem Section */
+        .ecosystem {
+            padding: 4rem 0;
+            background: var(--dark-secondary);
+        }
+
+        .ecosystem h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: var(--text-light);
+        }
+
+        .ecosystem-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .ecosystem-item {
+            text-align: center;
+            padding: 2rem;
+            background: var(--dark-tertiary);
+            border-radius: 12px;
+            border: 1px solid var(--border-dark);
+        }
+
+        .ecosystem-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .ecosystem-item h3 {
+            color: var(--faf-orange);
+            margin-bottom: 1rem;
+        }
+
+        .ecosystem-item p {
+            color: var(--text-gray);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark-primary);
+            padding: 3rem 0;
+            text-align: center;
+            border-top: 1px solid var(--border-dark);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: var(--text-gray);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--faf-orange);
+        }
+
+        .footer-text {
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .footer-tagline {
+            color: var(--cyan-primary);
+            font-weight: 600;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .install-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .collections-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Loading Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .collection {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .collection:nth-child(1) { animation-delay: 0.1s; }
+        .collection:nth-child(2) { animation-delay: 0.2s; }
+        .collection:nth-child(3) { animation-delay: 0.3s; }
+        .collection:nth-child(4) { animation-delay: 0.4s; }
+        .collection:nth-child(5) { animation-delay: 0.5s; }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div class="nav-content">
+            <a href="#" class="logo">
+                <button class="wolfejam-gizmo" title="Light/Dark Toggle">
+                    <div class="wolfejam-gizmo__gradient"></div>
+                </button>
+                <span class="text">FAF Skills</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="#collections">Collections</a></li>
+                <li><a href="#install">Install</a></li>
+                <li><a href="https://github.com/Wolfe-Jam/faf-cli">GitHub</a></li>
+                <li><a href="https://faf.one">faf.one</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="container">
+            <h1>🏆 <span class="highlight">Championship-Grade</span><br>AI Workflows</h1>
+            <p class="subtitle">32 battle-tested Claude Code skills powered by the IANA-registered .faf format</p>
+            <p class="tagline">From zero to professional AI workflows in 60 seconds</p>
+            
+            <div class="stats">
+                <div class="stat">
+                    <span class="number">32</span>
+                    <span class="label">Battle-Tested Skills</span>
+                </div>
+                <div class="stat">
+                    <span class="number">50k+</span>
+                    <span class="label">Total Downloads</span>
+                </div>
+                <div class="stat">
+                    <span class="number">100%</span>
+                    <span class="label">FAF Score</span>
+                </div>
+                <div class="stat">
+                    <span class="number">#2759</span>
+                    <span class="label">Official Anthropic MCP</span>
+                </div>
+            </div>
+
+            <div class="cta-buttons">
+                <a href="#install" class="btn btn-primary">Get Started</a>
+                <a href="#collections" class="btn btn-secondary">Browse Skills</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="collections" class="collections">
+        <div class="container">
+            <h2>Skills Collections</h2>
+            <div class="collections-grid">
+                <div class="collection">
+                    <h3>🏎️ FAF Core</h3>
+                    <p class="description">Essential .faf format management and AI-readiness optimization</p>
+                    <ul class="skills">
+                        <li><span class="skill-name">/faf-expert</span> <span class="skill-desc">Deep .faf knowledge expert</span></li>
+                        <li><span class="skill-name">/faf-go</span> <span class="skill-desc">Guided setup & optimization</span></li>
+                        <li><span class="skill-name">/faf-champion</span> <span class="skill-desc">Achieve 100% AI-readiness</span></li>
+                        <li><span class="skill-name">/faf-wizard</span> <span class="skill-desc">Done-for-you generation</span></li>
+                        <li><span class="skill-name">/faf-sync-master</span> <span class="skill-desc">Bi-sync .faf ↔ CLAUDE.md</span></li>
+                    </ul>
+                </div>
+
+                <div class="collection">
+                    <h3>🚀 Publishing Pro</h3>
+                    <p class="description">Professional publishing workflows across all registries</p>
+                    <ul class="skills">
+                        <li><span class="skill-name">/pubpro</span> <span class="skill-desc">Zero-mistakes publish protocol</span></li>
+                        <li><span class="skill-name">/pubblog</span> <span class="skill-desc">Release blog post generator</span></li>
+                        <li><span class="skill-name">/pubpypi</span> <span class="skill-desc">PyPI publishing workflow</span></li>
+                        <li><span class="skill-name">/pubcrate</span> <span class="skill-desc">crates.io publishing workflow</span></li>
+                        <li><span class="skill-name">/downloads</span> <span class="skill-desc">Multi-registry analytics</span></li>
+                    </ul>
+                </div>
+
+                <div class="collection">
+                    <h3>💎 Development</h3>
+                    <p class="description">Context-aware development tools that understand your project</p>
+                    <ul class="skills">
+                        <li><span class="skill-name">/commit</span> <span class="skill-desc">FAF-powered git commits</span></li>
+                        <li><span class="skill-name">/pr</span> <span class="skill-desc">Context-aware pull requests</span></li>
+                        <li><span class="skill-name">/review</span> <span class="skill-desc">Intelligent code reviews</span></li>
+                        <li><span class="skill-name">/git</span> <span class="skill-desc">Advanced git operations</span></li>
+                        <li><span class="skill-name">/wjttc-builder</span> <span class="skill-desc">Championship test suites</span></li>
+                    </ul>
+                </div>
+
+                <div class="collection">
+                    <h3>🛠️ Creative & Architecture</h3>
+                    <p class="description">Design and planning tools for championship-grade engineering</p>
+                    <ul class="skills">
+                        <li><span class="skill-name">/arch-builder</span> <span class="skill-desc">Architecture planning</span></li>
+                        <li><span class="skill-name">/diagram-builder</span> <span class="skill-desc">Visual diagrams</span></li>
+                        <li><span class="skill-name">/prd-builder</span> <span class="skill-desc">Product requirements</span></li>
+                        <li><span class="skill-name">/gif-recorder</span> <span class="skill-desc">GIF workflows</span></li>
+                        <li><span class="skill-name">/n8n-builder</span> <span class="skill-desc">Automation workflows</span></li>
+                    </ul>
+                </div>
+
+                <div class="collection">
+                    <h3>🔧 Automation & Utilities</h3>
+                    <p class="description">Workflow automation and productivity tools</p>
+                    <ul class="skills">
+                        <li><span class="skill-name">/radiofaf</span> <span class="skill-desc">Radio FAF protocols</span></li>
+                        <li><span class="skill-name">/send-email</span> <span class="skill-desc">Email automation</span></li>
+                        <li><span class="skill-name">/globe-post</span> <span class="skill-desc">Global posting workflows</span></li>
+                        <li><span class="skill-name">/claim-namepoint</span> <span class="skill-desc">Name/namespace claiming</span></li>
+                        <li><span class="skill-name">/repo-maintainer</span> <span class="skill-desc">Repository maintenance</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="install" class="installation">
+        <div class="container">
+            <h2>Get Started in 60 Seconds</h2>
+            <div class="install-grid">
+                <div class="install-step">
+                    <h3>1. Install MCP Server</h3>
+                    <div class="install-code">npm install -g claude-faf-mcp</div>
+                    <p>Provides 33 tools for persistent AI context</p>
+                </div>
+                
+                <div class="install-step">
+                    <h3>2. Install Skills Collection</h3>
+                    <div class="install-code">faf setup --complete</div>
+                    <p>Adds 32 championship-grade workflow skills</p>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 2rem;">
+                <div class="install-step" style="display: inline-block; max-width: 500px;">
+                    <h3>Individual Collections</h3>
+                    <div class="install-code">faf skills install --bundle=core<br>faf skills install --bundle=development<br>faf skills install --bundle=publishing</div>
+                    <p>Install specific skill collections as needed</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="ecosystem">
+        <div class="container">
+            <h2>🔗 Powered by Official Infrastructure</h2>
+            <div class="ecosystem-grid">
+                <div class="ecosystem-item">
+                    <div class="ecosystem-icon">🏆</div>
+                    <h3>Official Recognition</h3>
+                    <p>Anthropic MCP Registry #2759 - First persistent context server in the ecosystem</p>
+                </div>
+                
+                <div class="ecosystem-item">
+                    <div class="ecosystem-icon">⚡</div>
+                    <h3>Championship Performance</h3>
+                    <p>19ms execution, 100/100 FAF score, zero dependencies</p>
+                </div>
+                
+                <div class="ecosystem-item">
+                    <div class="ecosystem-icon">🌍</div>
+                    <h3>IANA Registered</h3>
+                    <p>Official internet standard format (application/vnd.faf+yaml)</p>
+                </div>
+                
+                <div class="ecosystem-item">
+                    <div class="ecosystem-icon">🔒</div>
+                    <h3>Local & Private</h3>
+                    <p>No data leaves your machine. No analytics, tracking, or accounts required</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="https://faf.one">faf.one</a>
+                <a href="https://foundation.faf.one">Foundation</a>
+                <a href="https://github.com/Wolfe-Jam/faf-cli">GitHub</a>
+                <a href="https://npmjs.com/package/claude-faf-mcp">MCP Server</a>
+                <a href="https://glama.ai/mcp/servers/@Wolfe-Jam/claude-faf-mcp">Glama.ai</a>
+            </div>
+            <p class="footer-text">&copy; 2026 FAF Ecosystem | Championship-grade engineering for the AI age</p>
+            <p class="footer-tagline">50k+ across npm, PyPI, crates • 32 skills • IANA-registered format</p>
+        </div>
+    </footer>
+
+    <script>
+        // Wolfejam Gizmo interaction
+        document.querySelector('.wolfejam-gizmo').addEventListener('click', function() {
+            const gradient = this.querySelector('.wolfejam-gizmo__gradient');
+            gradient.style.transform = gradient.style.transform === 'rotate(180deg)' ? '' : 'rotate(180deg)';
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add loading state management
+        document.addEventListener('DOMContentLoaded', function() {
+            // Stagger collection animations
+            const collections = document.querySelectorAll('.collection');
+            collections.forEach((collection, index) => {
+                collection.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
+    </script>
+</body>
+</html>

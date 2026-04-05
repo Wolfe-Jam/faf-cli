@@ -1,0 +1,46 @@
+{
+  "name": "FAF Skills Package",
+  "version": "1.0.0",
+  "description": "Foundational AI-Context Format skills for Claude Code",
+  "author": "FAF Team",
+  "skills": [
+    {
+      "name": "faf-champion",
+      "description": "Achieve 100% AI-readiness score for your project",
+      "category": "optimization",
+      "complexity": "intermediate"
+    },
+    {
+      "name": "faf-quickstart", 
+      "description": "Initialize FAF context for your project in seconds",
+      "argument-hint": "[--yolo]",
+      "category": "setup",
+      "complexity": "beginner"
+    },
+    {
+      "name": "faf-sync-master",
+      "description": "Keep .faf and CLAUDE.md perfectly synchronized",
+      "argument-hint": "[--watch]",
+      "category": "maintenance",
+      "complexity": "beginner"
+    }
+  ],
+  "categories": {
+    "setup": {
+      "name": "Setup & Initialization",
+      "icon": "🚀"
+    },
+    "optimization": {
+      "name": "Optimization & Scoring",
+      "icon": "🏆"
+    },
+    "maintenance": {
+      "name": "Maintenance & Sync",
+      "icon": "🔄"
+    }
+  },
+  "requirements": {
+    "faf-cli": ">=6.0.0",
+    "claude-code": ">=2.0.0"
+  }
+}
