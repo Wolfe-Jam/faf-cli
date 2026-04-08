@@ -189,6 +189,9 @@ export function detectLanguage(dir: string): string {
   if (pkg?.devDependencies?.typescript || pkg?.dependencies?.typescript) {return 'TypeScript';}
   if (existsSync(join(dir, 'tsconfig.json'))) {return 'TypeScript';}
 
+  // Check for HTML first (static sites)
+  if (existsSync(join(dir, 'index.html')) || existsSync(join(dir, 'index.htm'))) {return 'HTML';}
+
   // Check for common language indicators
   if (existsSync(join(dir, 'Cargo.toml'))) {return 'Rust';}
   if (existsSync(join(dir, 'go.mod'))) {return 'Go';}
@@ -231,10 +234,19 @@ export function detectProjectType(dir: string): string {
   const hasNextOrNuxt = frameworks.some(f => f.slug === 'nextjs' || f.slug === 'nuxt');
   if (hasNextOrNuxt) {return 'fullstack';}
 
+  // Static site detection — check for index.html before other detection
+  const hasIndexHtml = existsSync(join(dir, 'index.html')) || existsSync(join(dir, 'index.htm'));
+  const hasStaticSiteMarkers = existsSync(join(dir, '404.html')) || 
+                                existsSync(join(dir, 'about.html')) ||
+                                existsSync(join(dir, 'contact.html'));
+
   // Full-stack detection
   const hasFrontend = frameworks.some(f => f.category === 'frontend');
   const hasBackend = frameworks.some(f => f.category === 'backend');
   if (hasFrontend && hasBackend) {return 'fullstack';}
+
+  // Static site detection — if has HTML files but no backend framework
+  if ((hasIndexHtml || hasStaticSiteMarkers) && !hasBackend) {return 'static-site';}
 
   // Frontend-only
   if (hasFrontend) {return 'frontend';}

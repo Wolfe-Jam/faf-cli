@@ -93,6 +93,7 @@ export function isPlaceholder(value: unknown): boolean {
 export const APP_TYPE_CATEGORIES: Record<string, SlotCategory[]> = {
   cli: ['project', 'human'],
   library: ['project', 'human'],
+  'static-site': ['project', 'frontend', 'human'],
   mcp: ['project', 'backend', 'universal', 'human'],
   backend: ['project', 'backend', 'universal', 'human'],
   'data-science': ['project', 'backend', 'human'],

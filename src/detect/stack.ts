@@ -74,9 +74,27 @@ export function detectStack(dir: string): FafData {
 
     // Auto-fill detected values (Svelte-aware overrides applied inline)
     switch (field) {
-      case 'frontend': stack[field] = frontendFw?.name ?? (projectType === 'cli' ? 'CLI' : ''); break;
-      case 'css_framework': stack[field] = cssFw?.name ?? ''; break;
-      case 'ui_library': stack[field] = uiFw?.name ?? ''; break;
+      case 'frontend': 
+        if (projectType === 'static-site') {
+          stack[field] = 'Vanilla HTML';
+        } else {
+          stack[field] = frontendFw?.name ?? (projectType === 'cli' ? 'CLI' : '');
+        }
+        break;
+      case 'css_framework': 
+        if (projectType === 'static-site') {
+          stack[field] = 'Vanilla CSS';
+        } else {
+          stack[field] = cssFw?.name ?? '';
+        }
+        break;
+      case 'ui_library': 
+        if (projectType === 'static-site') {
+          stack[field] = 'Vanilla JS';
+        } else {
+          stack[field] = uiFw?.name ?? '';
+        }
+        break;
       case 'state_management':
         // Svelte 5 uses Runes — no external state library needed
         stack[field] = isSvelte ? (stateFw?.name ?? 'Runes') : (stateFw?.name ?? '');
@@ -85,6 +103,8 @@ export function detectStack(dir: string): FafData {
         // MCP servers: use the MCP framework name
         if (isMcp && mcpFramework) {
           stack[field] = mcpFramework.name;
+        } else if (projectType === 'static-site') {
+          stack[field] = 'Static';
         } else if (isSvelte) {
           stack[field] = hasSvelteKit ? 'SvelteKit' : (backendFw?.name ?? '');
         } else {
@@ -101,7 +121,13 @@ export function detectStack(dir: string): FafData {
           stack[field] = '';
         }
         break;
-      case 'runtime': stack[field] = runtime !== 'Unknown' ? runtime : ''; break;
+      case 'runtime': 
+        if (projectType === 'static-site') {
+          stack[field] = 'Browser';
+        } else {
+          stack[field] = runtime !== 'Unknown' ? runtime : '';
+        }
+        break;
       case 'database':
         // Only populate if ORM actually detected
         stack[field] = dbFw?.name ?? '';
@@ -113,6 +139,9 @@ export function detectStack(dir: string): FafData {
         // Svelte adapter → hosting platform (adapter-vercel = Vercel, etc.)
         if (isSvelte && svelteAdapter) {
           stack[field] = svelteAdapter;
+        } else if (projectType === 'static-site' && hosting) {
+          // Static sites: inform about detected hosting even if not in universal category
+          stack[field] = `${hosting} (detected)`;
         } else {
           stack[field] = hosting ?? '';
         }
@@ -121,7 +150,14 @@ export function detectStack(dir: string): FafData {
         // SvelteKit always uses Vite
         stack[field] = isSvelte ? 'Vite' : (buildTool ?? '');
         break;
-      case 'cicd': stack[field] = cicd ?? ''; break;
+      case 'cicd': 
+        if (projectType === 'static-site' && cicd) {
+          // Static sites: inform about detected CI/CD even if not in universal category
+          stack[field] = `${cicd} (detected)`;
+        } else {
+          stack[field] = cicd ?? '';
+        }
+        break;
       case 'package_manager': stack[field] = pkgManager; break;
       default: stack[field] = ''; break;
     }
