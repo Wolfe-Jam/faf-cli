@@ -5,6 +5,15 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.0.15] - 2026-04-08 — Static Site Detection
+
+### Added
+
+- **static-site app type** — Detects `index.html`/`index.htm` as static site indicators
+- **HTML as main language** — Correctly identifies HTML projects instead of misclassifying as libraries
+- **Smart defaults for static sites** — Auto-sets Vanilla HTML/CSS/JS slots; ignores backend/server slots
+- Fixes issue where static HTML sites scored 11% — now correctly score 54%+ on init
+
 ## [6.0.14] - 2026-04-04 — Skills Ecosystem Integration
 
 ### Added
