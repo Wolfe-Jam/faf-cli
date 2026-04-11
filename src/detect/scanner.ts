@@ -236,9 +236,15 @@ export function detectProjectType(dir: string): string {
 
   // Static site detection — check for index.html before other detection
   const hasIndexHtml = existsSync(join(dir, 'index.html')) || existsSync(join(dir, 'index.htm'));
-  const hasStaticSiteMarkers = existsSync(join(dir, '404.html')) || 
+  const hasStaticSiteMarkers = existsSync(join(dir, '404.html')) ||
                                 existsSync(join(dir, 'about.html')) ||
                                 existsSync(join(dir, 'contact.html'));
+
+  // API platform detection — has API endpoints alongside HTML (Edge Functions, serverless)
+  const hasApiDir = existsSync(join(dir, 'api'));
+  const hasVercelJson = existsSync(join(dir, 'vercel.json'));
+  const hasWranglerConfig = existsSync(join(dir, 'wrangler.toml')) || existsSync(join(dir, 'wrangler.jsonc'));
+  if (hasApiDir && (hasIndexHtml || hasVercelJson || hasWranglerConfig)) {return 'api-platform';}
 
   // Full-stack detection
   const hasFrontend = frameworks.some(f => f.category === 'frontend');
