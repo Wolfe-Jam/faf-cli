@@ -33,7 +33,7 @@ Layer order: `commands → interop → core → wasm`. No upward imports.
 
 - Scoring: WASM kernel does the math. `kernel.score(yaml)` returns `{score, tier, populated, empty, ignored}`.
 - Slots: 33 Mk4 slots. `isPlaceholder(value)` checks for empty/placeholder. `slotsByCategory()` groups them.
-- Pro gating: `isPro()` checks `FAF_PRO=1` env var. Gates tri-sync only.
+- Pro gating: `isPro()` checks `FAF_PRO=1` env var. Reserved for Teams/Enterprise. tri-sync is free for all developers.
 - File discovery: `findFafFile(dir)` finds `project.faf` > `*.faf` > `.faf`.
 - YAML I/O: `readFaf(path)` / `writeFaf(path, data)` via `yaml` package.
 - Tests: All use `os.tmpdir()` — never touch real project files.

@@ -7,7 +7,6 @@ import * as kernel from '../wasm/kernel.js';
 import { enrichScore } from '../core/scorer.js';
 import { displayScore } from '../ui/display.js';
 import { bold, dim, fafCyan } from '../ui/colors.js';
-import { isPro } from '../core/pro.js';
 
 export interface SyncOptions {
   watch?: boolean;
@@ -36,10 +35,8 @@ export function syncCommand(options: SyncOptions = {}): void {
     pullSync(fafPath, claudePath);
   }
 
-  // tri-sync: .faf ↔ MEMORY.md (Pro)
-  if (isPro()) {
-    triSync(fafPath, memoryPath, dir);
-  }
+  // tri-sync: .faf ↔ MEMORY.md
+  triSync(fafPath, memoryPath, dir);
 
   if (options.watch) {
     console.log(dim('watching for changes... (Ctrl+C to stop)'));
@@ -152,11 +149,11 @@ function watchSync(fafPath: string, claudePath: string, memoryPath: string, dir:
     debounce = setTimeout(() => {
       console.log(dim('change detected...'));
       autoSync(fafPath, claudePath, dir);
-      if (isPro()) {triSync(fafPath, memoryPath, dir);}
+      triSync(fafPath, memoryPath, dir);
     }, 200);
   };
 
   watch(fafPath, handler);
   if (existsSync(claudePath)) {watch(claudePath, handler);}
-  if (isPro() && existsSync(memoryPath)) {watch(memoryPath, handler);}
+  if (existsSync(memoryPath)) {watch(memoryPath, handler);}
 }

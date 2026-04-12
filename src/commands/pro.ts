@@ -25,7 +25,7 @@ function showStatus(): void {
 function showFeatures(): void {
   console.log(`${fafCyan('pro')} ${dim('— Pro features')}\n`);
   const features = [
-    ['tri-sync', '.faf ↔ CLAUDE.md ↔ MEMORY.md'],
+    ['tri-sync', '.faf ↔ CLAUDE.md ↔ MEMORY.md — free for developers'],
     ['enterprise slots', '33-slot scoring (slots 22-33)'],
     ['advanced analytics', 'Drift tracking & team metrics'],
   ];
