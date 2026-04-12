@@ -16,6 +16,10 @@
 [![Built with Bun](https://img.shields.io/badge/Built_with-Bun-f9f1e1?logo=bun)](https://bun.sh)
 [![project.faf](https://img.shields.io/badge/project.faf-inside-00D4D4)](https://github.com/Wolfe-Jam/faf)
 
+**FAF defines. MD instructs. AI codes.**
+
+> 🐘 **tri-sync now free for all builders** — `.faf` ↔ `CLAUDE.md` ↔ `MEMORY.md` in one command. Pro feature. Now free.
+
 > **51,582+ downloads** | **Claude Code Skills** | **Homebrew AI Tools** | **Championship-grade developer productivity**
 
 ```
