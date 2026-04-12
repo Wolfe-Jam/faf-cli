@@ -5,12 +5,13 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [6.0.16] - 2026-04-12 — tri-sync Free for Devs
+## [6.0.16] - 2026-04-12 — tri-sync Free for Every Developer
 
 ### Changed
 
-- **tri-sync is now free for all developers** — No gate, no trial, no friction. Pro feature, free for devs. Teams & Enterprise: faf.one/pro
-- Updated `faf pro features` display to reflect new positioning
+- **tri-sync is now free for all developers** — `.faf` ↔ `CLAUDE.md` ↔ `MEMORY.md` in one command. Your AI remembers your project across every session. No gate, no trial, no friction.
+- tri-sync is a Pro feature. Pro is free for individual developers. Teams & Enterprise: [faf.one/pro](https://faf.one/pro) (plans)
+- `faf sync` now runs full tri-sync for everyone — bi-sync + MEMORY.md in one shot
 
 ## [6.0.15] - 2026-04-08 — Static Site Detection
 

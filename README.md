@@ -183,8 +183,10 @@ Project name and description read from `pyproject.toml` and `Cargo.toml` — not
 
 ```
 bi-sync:   .faf  ←── 8ms ──→  CLAUDE.md                (free forever)
-tri-sync:  .faf  ←── 8ms ──→  CLAUDE.md ↔ MEMORY.md    (Pro)
+tri-sync:  .faf  ←── 8ms ──→  CLAUDE.md ↔ MEMORY.md    (free for devs 🐘)
 ```
+
+tri-sync is a Pro feature, free for all developers. Your AI remembers your project across every session — Nelly never forgets. Teams & Enterprise: [faf.one/pro](https://faf.one/pro) (plans)
 
 ---
 
