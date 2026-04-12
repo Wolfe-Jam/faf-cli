@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **tri-sync is now free for all developers** — `.faf` ↔ `CLAUDE.md` ↔ `MEMORY.md` in one command. Your AI remembers your project across every session. No gate, no trial, no friction.
-- tri-sync is a Pro feature. Pro is free for individual developers. Teams & Enterprise: [faf.one/pro](https://faf.one/pro) (plans)
+- Nelly never forgets — and now she's free for all builders 🐘
 - `faf sync` now runs full tri-sync for everyone — bi-sync + MEMORY.md in one shot
 
 ## [6.0.15] - 2026-04-08 — Static Site Detection
