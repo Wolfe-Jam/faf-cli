@@ -5,6 +5,23 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.2.0] - 2026-04-14 — The One Sentence Edition
+
+### Added
+
+- `faf go` — 3Ws opener: one sentence unlocks the interview ("In one sentence, what is this project designed to do?")
+- `faf go` — 6Ws sign-off loop: AI infers where/when/how from stack, human confirms or corrects by slot name
+- `faf go` — AI thinking step: with `ANTHROPIC_API_KEY`, Claude interprets the opener into meaningful who/what/why/where/when/how
+- `faf go` — keyword extraction for `who` without API key (detects devs/engineers/teams/users from opener)
+- `faf git --keep` — keeps cloned repo in cwd for `faf auto` / `faf go` follow-up workflow
+- `faf git` README enrichment — extracts goal from README, detects build tool, sets `slotignored` for MCP servers
+
+### Changed
+
+- `faf go` interview order: 6Ws (human_context) always run first, stack slots after
+- `faf go` `project.goal` auto-synthesized as `what — why` after interview (not asked directly)
+- `faf git` default behaviour unchanged — still clones to tmp, enriches, writes `project.faf`, cleans up
+
 ## [6.1.0] - 2026-04-14 — The Go Rusty Python Edition
 
 ### Added
