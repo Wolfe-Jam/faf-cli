@@ -213,7 +213,7 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
           filled++;
         }
       } else {
-        // No API key — store opener as what + goal only
+        // No API key — store opener as what + goal, extract who from keywords
         if (isPlaceholder(getNestedValue(data as Record<string, unknown>, 'human_context.what'))) {
           setNestedValue(data as Record<string, unknown>, 'human_context.what', opener);
           filled++;
@@ -221,6 +221,23 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
         if (isPlaceholder(getNestedValue(data as Record<string, unknown>, 'project.goal'))) {
           setNestedValue(data as Record<string, unknown>, 'project.goal', opener);
           filled++;
+        }
+        // Best-effort who extraction from opener
+        const lc = opener.toLowerCase();
+        const whoMap: [RegExp, string][] = [
+          [/\bdevs?\b|\bdevelopers?\b/, 'developers'],
+          [/\bengineers?\b/, 'engineers'],
+          [/\bteams?\b/, 'engineering teams'],
+          [/\busers?\b/, 'end users'],
+          [/\bdata scientists?\b/, 'data scientists'],
+          [/\bdesigners?\b/, 'designers'],
+        ];
+        for (const [pattern, who] of whoMap) {
+          if (pattern.test(lc) && isPlaceholder(getNestedValue(data as Record<string, unknown>, 'human_context.who'))) {
+            setNestedValue(data as Record<string, unknown>, 'human_context.who', who);
+            filled++;
+            break;
+          }
         }
       }
     }
