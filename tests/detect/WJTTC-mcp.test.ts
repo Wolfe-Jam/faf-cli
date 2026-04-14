@@ -254,10 +254,10 @@ describe('WJTTC — MCP Server Detection', () => {
       expect(data.stack?.backend).toBe('FastAPI');
     });
 
-    test('#24 Non-MCP Python library stays as library', () => {
+    test('#24 Non-MCP Python project defaults to service', () => {
       writePyproject(['pyyaml', 'requests']);
       const data = detectStack(testDir);
-      expect(data.project?.type).toBe('library');
+      expect(data.project?.type).toBe('service');
     });
 
     test('#25 Mixed project — package.json MCP + pyproject.toml — TS MCP wins', () => {
@@ -281,5 +281,114 @@ describe('WJTTC — MCP Server Detection', () => {
       expect(data.project?.type).toBeDefined();
       expect(data.faf_version).toBe('3.0');
     });
+  });
+
+  // =============================================================================
+  // TIER 4: NATIVE — Go / Rust / Python type detection
+  // =============================================================================
+
+  describe('TIER 4 NATIVE — Go / Rust / Python Type Detection', () => {
+
+    // --- Go ---
+
+    test('#28 Go MCP server — mark3labs/mcp-go detected', () => {
+      writeFileSync(join(testDir, 'go.mod'), 'module example.com/myserver\n\nrequire (\n\tgithub.com/mark3labs/mcp-go v0.20.0\n)\n');
+      writeFileSync(join(testDir, 'main.go'), 'package main');
+      const data = detectStack(testDir);
+      expect(data.project?.type).toBe('mcp');
+      expect(data.project?.main_language).toBe('Go');
+    });
+
+    test('#29 Go MCP server — modelcontextprotocol/go-sdk detected (github-mcp-server pattern)', () => {
+      writeFileSync(join(testDir, 'go.mod'), 'module github.com/github/github-mcp-server\n\nrequire (\n\tgithub.com/modelcontextprotocol/go-sdk v1.3.0\n)\n');
+      writeFileSync(join(testDir, 'main.go'), 'package main');
+      const data = detectStack(testDir);
+      expect(data.project?.type).toBe('mcp');
+      expect(data.project?.main_language).toBe('Go');
+    });
+
+    test('#30 Go CLI — Cobra detected', () => {
+      writeFileSync(join(testDir, 'go.mod'), 'module example.com/mytool\n\nrequire (\n\tgithub.com/spf13/cobra v1.8.0\n)\n');
+      writeFileSync(join(testDir, 'main.go'), 'package main');
+      const data = detectStack(testDir);
+      expect(data.project?.type).toBe('cli');
+      expect(data.project?.main_language).toBe('Go');
+    });
+
+    test('#31 Go CLI — cmd/ + main.go pattern', () => {
+      writeFileSync(join(testDir, 'go.mod'), 'module example.com/mytool\n\ngo 1.21\n');
+      writeFileSync(join(testDir, 'main.go'), 'package main');
+      mkdirSync(join(testDir, 'cmd'), { recursive: true });
+      writeFileSync(join(testDir, 'cmd/root.go'), 'package cmd');
+      const data = detectStack(testDir);
+      expect(data.project?.type).toBe('cli');
+    });
+
+    test('#32 Go service — no CLI markers', () => {
+      writeFileSync(join(testDir, 'go.mod'), 'module example.com/myservice\n\nrequire (\n\tgithub.com/gin-gonic/gin v1.9.0\n)\n');
+      const data = detectStack(testDir);
+      expect(data.project?.type).toBe('service');
+      expect(data.project?.main_language).toBe('Go');
+    });
+
+    // --- Rust ---
+
+    test('#33 Rust CLI — [[bin]] section in Cargo.toml', () => {
+      writeFileSync(join(testDir, 'Cargo.toml'), '[package]\nname = "ripgrep"\nversion = "15.0.0"\ncategories = ["command-line-utilities"]\n\n[[bin]]\nname = "rg"\npath = "src/main.rs"\n\n[dependencies]\n');
+      mkdirSync(join(testDir, 'src'), { recursive: true });
+      writeFileSync(join(testDir, 'src/main.rs'), 'fn main() {}');
+      const data = detectStack(testDir);
+      expect(data.project?.type).toBe('cli');
+      expect(data.project?.main_language).toBe('Rust');
+    });
+
+    test('#34 Rust CLI — clap dependency + src/main.rs', () => {
+      writeCargo({ clap: '4', serde: '1' }, 'mycli');
+      mkdirSync(join(testDir, 'src'), { recursive: true });
+      writeFileSync(join(testDir, 'src/main.rs'), 'fn main() {}');
+      const data = detectStack(testDir);
+      expect(data.project?.type).toBe('cli');
+    });
+
+    test('#35 Rust service — src/main.rs but no CLI markers', () => {
+      writeCargo({ tokio: '1', axum: '0.7' }, 'myservice');
+      mkdirSync(join(testDir, 'src'), { recursive: true });
+      writeFileSync(join(testDir, 'src/main.rs'), 'fn main() {}');
+      const data = detectStack(testDir);
+      expect(data.project?.type).toBe('service');
+    });
+
+    test('#36 Rust library — src/lib.rs only, no main.rs', () => {
+      writeCargo({ serde: '1' }, 'mylib');
+      mkdirSync(join(testDir, 'src'), { recursive: true });
+      writeFileSync(join(testDir, 'src/lib.rs'), 'pub fn hello() {}');
+      const data = detectStack(testDir);
+      expect(data.project?.type).toBe('library');
+      expect(data.project?.main_language).toBe('Rust');
+    });
+
+    // --- Python ---
+
+    test('#37 Python CLI — console_scripts in pyproject.toml', () => {
+      writeFileSync(join(testDir, 'pyproject.toml'), '[project]\nname = "mycli"\n\n[project.scripts]\nmycli = "mycli:main"\n');
+      const data = detectStack(testDir);
+      expect(data.project?.type).toBe('cli');
+      expect(data.project?.main_language).toBe('Python');
+    });
+
+    test('#38 Python service — has main.py', () => {
+      writeFileSync(join(testDir, 'pyproject.toml'), '[project]\nname = "myservice"\ndependencies = ["pyyaml"]\n');
+      writeFileSync(join(testDir, 'main.py'), 'if __name__ == "__main__": pass');
+      const data = detectStack(testDir);
+      expect(data.project?.type).toBe('service');
+    });
+
+    test('#39 Python library — setup.py present', () => {
+      writeFileSync(join(testDir, 'pyproject.toml'), '[project]\nname = "mylib"\ndependencies = ["pyyaml"]\n');
+      writeFileSync(join(testDir, 'setup.py'), 'from setuptools import setup; setup()');
+      const data = detectStack(testDir);
+      expect(data.project?.type).toBe('library');
+    });
+
   });
 });

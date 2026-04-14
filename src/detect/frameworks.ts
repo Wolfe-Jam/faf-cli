@@ -243,6 +243,7 @@ export const FRAMEWORKS: FrameworkSignature[] = [
   // #5 mcp-go — Go ecosystem
   { name: 'MCP Go', slug: 'mcp-go', category: 'mcp', signals: [
     { type: 'dependency', key: 'github.com/mark3labs/mcp-go' },
+    { type: 'dependency', key: 'github.com/modelcontextprotocol/go-sdk' },
   ]},
   // #6 C# / .NET — Microsoft ecosystem
   { name: 'MCP .NET', slug: 'mcp-dotnet', category: 'mcp', signals: [

@@ -90,11 +90,30 @@ function fileExists(dir: string, pattern: string): boolean {
   }
 }
 
+/** Read Go module dependencies from go.mod */
+function readGoDeps(dir: string): Set<string> {
+  const goModPath = join(dir, 'go.mod');
+  if (!existsSync(goModPath)) {return new Set();}
+  try {
+    const content = readFileSync(goModPath, 'utf-8');
+    const deps = new Set<string>();
+    // Match lines like: github.com/mark3labs/mcp-go v0.x.x
+    for (const match of content.matchAll(/^\s*([\w./\-]+)\s+v[\d.]/gm)) {
+      deps.add(match[1]);
+    }
+    return deps;
+  } catch {
+    return new Set();
+  }
+}
+
 /** Match a single signal against project data */
 function matchSignal(signal: Signal, pkg: PackageJson | null, dir: string): boolean {
   switch (signal.type) {
     case 'dependency':
-      return !!(pkg?.dependencies?.[signal.key!]);
+      if (pkg?.dependencies?.[signal.key!]) {return true;}
+      // Also check go.mod for Go projects
+      return readGoDeps(dir).has(signal.key!);
     case 'devDependency':
       return !!(pkg?.devDependencies?.[signal.key!]);
     case 'file':
@@ -260,11 +279,44 @@ export function detectProjectType(dir: string): string {
   // Backend-only
   if (hasBackend) {return 'backend';}
 
-  // Library detection (has main/exports but no bin)
+  // Library detection (has main/exports but no bin) — npm packages only
   if (pkg?.main && !pkg?.bin) {return 'library';}
 
+  // Go — check for CLI markers (main.go in cmd/, cobra usage) vs service
+  if (existsSync(join(dir, 'go.mod'))) {
+    const hasCmdDir = existsSync(join(dir, 'cmd'));
+    const hasMainGo = existsSync(join(dir, 'main.go'));
+    const goMod = (() => { try { return readFileSync(join(dir, 'go.mod'), 'utf-8'); } catch { return ''; } })();
+    const hasCobra = goMod.includes('github.com/spf13/cobra');
+    if (hasCobra || (hasCmdDir && hasMainGo)) {return 'cli';}
+    return 'service';
+  }
+
+  // Rust — check for binary vs library crate
+  if (existsSync(join(dir, 'Cargo.toml'))) {
+    const hasSrcMain = existsSync(join(dir, 'src/main.rs'));
+    const cargo = (() => { try { return readFileSync(join(dir, 'Cargo.toml'), 'utf-8'); } catch { return ''; } })();
+    const hasBinSection = cargo.includes('[[bin]]');
+    const hasCmdUtilCategory = cargo.includes('command-line-utilities');
+    const hasCliDep = cargo.includes('clap') || cargo.includes('argh') || cargo.includes('structopt') || cargo.includes('lexopt');
+    if (hasBinSection || hasCmdUtilCategory || (hasSrcMain && hasCliDep)) {return 'cli';}
+    if (hasSrcMain) {return 'service';}
+    return 'library'; // src/lib.rs only → Rust library crate
+  }
+
+  // Python — check for CLI (setup.py console_scripts, pyproject entry_points) vs service vs library
+  if (existsSync(join(dir, 'pyproject.toml')) || existsSync(join(dir, 'requirements.txt'))) {
+    const pyproject = (() => { try { return readFileSync(join(dir, 'pyproject.toml'), 'utf-8'); } catch { return ''; } })();
+    const hasEntryPoints = pyproject.includes('console_scripts') || pyproject.includes('[project.scripts]');
+    const hasSetupPy = existsSync(join(dir, 'setup.py'));
+    const hasSrcLib = existsSync(join(dir, 'src')) || existsSync(join(dir, 'lib'));
+    if (hasEntryPoints) {return 'cli';}
+    if (hasSetupPy || (hasSrcLib && !existsSync(join(dir, 'app.py')) && !existsSync(join(dir, 'main.py')))) {return 'library';}
+    return 'service';
+  }
+
   // Default
-  return 'library';
+  return 'service';
 }
 
 /** Detect the runtime */
