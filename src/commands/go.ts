@@ -67,7 +67,7 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
 
   const data = readFaf(fafPath);
 
-  // Find empty slots — skip project.goal (auto-synthesized from what+why after interview)
+  // Find empty slots — goal handled separately as opener question
   const allEmpty = SLOTS.filter(s => {
     const val = getNestedValue(data as Record<string, unknown>, s.path);
     return isPlaceholder(val) && val !== 'slotignored' && s.path !== 'project.goal';
@@ -78,15 +78,19 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
   const otherSlots = allEmpty.filter(s => s.category !== 'human');
   const emptySlots = [...humanSlots, ...otherSlots];
 
-  if (emptySlots.length === 0) {
+  const goalVal = getNestedValue(data as Record<string, unknown>, 'project.goal');
+  const goalIsEmpty = isPlaceholder(goalVal);
+
+  if (emptySlots.length === 0 && !goalIsEmpty) {
     console.log(`${fafCyan('◆')} go  all slots populated`);
     const result = enrichScore(kernel.score(readFafRaw(fafPath)));
     displayScore(result, fafPath);
     return;
   }
 
+  const totalQuestions = emptySlots.length + (goalIsEmpty ? 1 : 0);
   console.log(`${fafCyan('go')} ${dim('— guided interview')}`);
-  console.log(dim(`  ${emptySlots.length} empty slots. Enter a value, "skip" to skip, or "quit" to stop.\n`));
+  console.log(dim(`  ${totalQuestions} empty slots. Enter a value, "skip" to skip, or "quit" to stop.\n`));
 
   const rl = createInterface({ input: process.stdin, output: process.stdout });
 
@@ -94,6 +98,26 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
     new Promise(resolve => rl.question(prompt, resolve));
 
   let filled = 0;
+  let goalAnswer = '';
+
+  // Goal is the opener — one sentence unlocks everything
+  if (goalIsEmpty && startIndex === 0) {
+    const answer = await ask(`  ${bold('★')} In one sentence, what is this project designed to do? `);
+    if (answer.toLowerCase() === 'quit') {
+      const session: GoSession = { slotIndex: 0, fafPath };
+      writeFileSync(sessionPath, JSON.stringify(session), 'utf-8');
+      console.log(dim(`\n  session saved. Resume with: faf go --resume`));
+      rl.close();
+      return;
+    }
+    if (answer.toLowerCase() !== 'skip' && answer.trim() !== '') {
+      goalAnswer = answer.trim();
+      setNestedValue(data as Record<string, unknown>, 'project.goal', goalAnswer);
+      filled++;
+      console.log();
+    }
+  }
+
   const slotsToProcess = emptySlots.slice(startIndex);
 
   for (let i = 0; i < slotsToProcess.length; i++) {
@@ -118,13 +142,18 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
 
   rl.close();
 
-  // Auto-synthesize project.goal from what + why (goal is a shortcut summary, not a standalone question)
-  const what = getNestedValue(data as Record<string, unknown>, 'human_context.what');
-  const why = getNestedValue(data as Record<string, unknown>, 'human_context.why');
-  const currentGoal = getNestedValue(data as Record<string, unknown>, 'project.goal');
-  if (what && why && isPlaceholder(currentGoal)) {
-    setNestedValue(data as Record<string, unknown>, 'project.goal', `${what} — ${why}`);
-    filled++;
+  // If what/why still empty but goal was answered, derive them from the goal answer
+  if (goalAnswer) {
+    const what = getNestedValue(data as Record<string, unknown>, 'human_context.what');
+    const why = getNestedValue(data as Record<string, unknown>, 'human_context.why');
+    if (isPlaceholder(what)) {
+      setNestedValue(data as Record<string, unknown>, 'human_context.what', goalAnswer);
+      filled++;
+    }
+    if (isPlaceholder(why)) {
+      setNestedValue(data as Record<string, unknown>, 'human_context.why', goalAnswer);
+      filled++;
+    }
   }
 
   if (filled > 0) {
