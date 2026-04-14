@@ -44,6 +44,50 @@ function setNestedValue(obj: Record<string, unknown>, path: string, value: strin
   current[parts[parts.length - 1]] = value;
 }
 
+/** Infer where/when/how from existing stack slots and project files */
+function inferSecondary(data: Record<string, unknown>, dir: string): { where: string; when: string; how: string } {
+  const stack = (data.stack ?? {}) as Record<string, unknown>;
+
+  // where — from hosting slot
+  const where = (typeof stack.hosting === 'string' && !isPlaceholder(stack.hosting))
+    ? stack.hosting
+    : '';
+
+  // when — from package.json version
+  let when = '';
+  const pkgPath = join(dir, 'package.json');
+  if (existsSync(pkgPath)) {
+    try {
+      const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
+      if (pkg.version) when = `v${pkg.version}`;
+    } catch { /* ignore */ }
+  }
+
+  // how — from build + api_type
+  const parts: string[] = [];
+  if (typeof stack.build === 'string' && !isPlaceholder(stack.build)) parts.push(stack.build);
+  if (typeof stack.api_type === 'string' && !isPlaceholder(stack.api_type)) parts.push(stack.api_type);
+  const how = parts.join(', ');
+
+  return { where, when, how };
+}
+
+/** Display the 6Ws summary for sign-off */
+function display6Ws(data: Record<string, unknown>, inferred: { where: string; when: string; how: string }): void {
+  const hc = (data.human_context ?? {}) as Record<string, unknown>;
+  const val = (v: unknown, fallback: string) =>
+    (typeof v === 'string' && !isPlaceholder(v) && v) ? v : (fallback || dim('—'));
+
+  console.log(`\n  ${bold('6Ws')} ${dim('— confirm or type a slot name to correct:')}\n`);
+  console.log(`  ${bold('who')}   ${val(hc.who, '')}`);
+  console.log(`  ${bold('what')}  ${val(hc.what, '')}`);
+  console.log(`  ${bold('why')}   ${val(hc.why, '')}`);
+  console.log(`  ${bold('where')} ${val(hc.where, inferred.where)}`);
+  console.log(`  ${bold('when')}  ${val(hc.when, inferred.when)}`);
+  console.log(`  ${bold('how')}   ${val(hc.how, inferred.how)}`);
+  console.log();
+}
+
 /** Guided interview to gold code */
 export async function goCommand(options: GoOptions = {}): Promise<void> {
   const fafPath = findFafFile();
@@ -67,42 +111,39 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
 
   const data = readFaf(fafPath);
 
-  // Find empty slots — goal handled separately as opener question
+  // Non-human slots (stack etc.) — still asked slot-by-slot
   const allEmpty = SLOTS.filter(s => {
     const val = getNestedValue(data as Record<string, unknown>, s.path);
     return isPlaceholder(val) && val !== 'slotignored' && s.path !== 'project.goal';
   });
-
-  // 6Ws first, then remaining slots
-  const humanSlots = allEmpty.filter(s => s.category === 'human');
   const otherSlots = allEmpty.filter(s => s.category !== 'human');
-  const emptySlots = [...humanSlots, ...otherSlots];
 
-  const goalVal = getNestedValue(data as Record<string, unknown>, 'project.goal');
-  const goalIsEmpty = isPlaceholder(goalVal);
+  // Check if any 6Ws are empty
+  const sixWsPaths = ['human_context.who', 'human_context.what', 'human_context.why',
+                      'human_context.where', 'human_context.when', 'human_context.how'];
+  const any6WsEmpty = sixWsPaths.some(p => isPlaceholder(getNestedValue(data as Record<string, unknown>, p)));
+  const goalIsEmpty = isPlaceholder(getNestedValue(data as Record<string, unknown>, 'project.goal'));
 
-  if (emptySlots.length === 0 && !goalIsEmpty) {
+  if (!any6WsEmpty && !goalIsEmpty && otherSlots.length === 0) {
     console.log(`${fafCyan('◆')} go  all slots populated`);
     const result = enrichScore(kernel.score(readFafRaw(fafPath)));
     displayScore(result, fafPath);
     return;
   }
 
-  const totalQuestions = emptySlots.length + (goalIsEmpty ? 1 : 0);
   console.log(`${fafCyan('go')} ${dim('— guided interview')}`);
-  console.log(dim(`  ${totalQuestions} empty slots. Enter a value, "skip" to skip, or "quit" to stop.\n`));
 
   const rl = createInterface({ input: process.stdin, output: process.stdout });
-
   const ask = (prompt: string): Promise<string> =>
     new Promise(resolve => rl.question(prompt, resolve));
 
   let filled = 0;
-  let goalAnswer = '';
 
-  // Goal is the opener — one sentence unlocks everything
-  if (goalIsEmpty && startIndex === 0) {
+  // === 3Ws OPENER ===
+  if (any6WsEmpty && startIndex === 0) {
+    console.log();
     const answer = await ask(`  ${bold('★')} In one sentence, what is this project designed to do? `);
+
     if (answer.toLowerCase() === 'quit') {
       const session: GoSession = { slotIndex: 0, fafPath };
       writeFileSync(sessionPath, JSON.stringify(session), 'utf-8');
@@ -110,22 +151,86 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
       rl.close();
       return;
     }
+
     if (answer.toLowerCase() !== 'skip' && answer.trim() !== '') {
-      goalAnswer = answer.trim();
-      setNestedValue(data as Record<string, unknown>, 'project.goal', goalAnswer);
-      filled++;
-      console.log();
+      const opener = answer.trim();
+
+      // Store opener as what (core answer), goal (summary), and backfill why if empty
+      if (isPlaceholder(getNestedValue(data as Record<string, unknown>, 'human_context.what'))) {
+        setNestedValue(data as Record<string, unknown>, 'human_context.what', opener);
+        filled++;
+      }
+      if (isPlaceholder(getNestedValue(data as Record<string, unknown>, 'project.goal'))) {
+        setNestedValue(data as Record<string, unknown>, 'project.goal', opener);
+        filled++;
+      }
+      if (isPlaceholder(getNestedValue(data as Record<string, unknown>, 'human_context.why'))) {
+        setNestedValue(data as Record<string, unknown>, 'human_context.why', opener);
+        filled++;
+      }
     }
+
+    // Infer where/when/how from stack
+    const inferred = inferSecondary(data as Record<string, unknown>, dir);
+    if (inferred.where && isPlaceholder(getNestedValue(data as Record<string, unknown>, 'human_context.where'))) {
+      setNestedValue(data as Record<string, unknown>, 'human_context.where', inferred.where);
+      filled++;
+    }
+    if (inferred.when && isPlaceholder(getNestedValue(data as Record<string, unknown>, 'human_context.when'))) {
+      setNestedValue(data as Record<string, unknown>, 'human_context.when', inferred.when);
+      filled++;
+    }
+    if (inferred.how && isPlaceholder(getNestedValue(data as Record<string, unknown>, 'human_context.how'))) {
+      setNestedValue(data as Record<string, unknown>, 'human_context.how', inferred.how);
+      filled++;
+    }
+
+    // === 6Ws SIGN-OFF LOOP ===
+    display6Ws(data as Record<string, unknown>, inferred);
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const correction = await ask(`  ${dim('[Enter to confirm, or type: who / what / why / where / when / how]')} `);
+      if (correction.trim() === '' || correction.toLowerCase() === 'confirm') break;
+      if (correction.toLowerCase() === 'quit') {
+        rl.close();
+        return;
+      }
+
+      const slot = correction.trim().toLowerCase();
+      const validSlots = ['who', 'what', 'why', 'where', 'when', 'how'];
+      if (validSlots.includes(slot)) {
+        const newVal = await ask(`  ${bold(slot)} → `);
+        if (newVal.trim()) {
+          setNestedValue(data as Record<string, unknown>, `human_context.${slot}`, newVal.trim());
+          if (slot === 'what' || slot === 'why') {
+            // Re-synthesize goal from corrected what/why
+            const what = getNestedValue(data as Record<string, unknown>, 'human_context.what');
+            const why = getNestedValue(data as Record<string, unknown>, 'human_context.why');
+            if (what && why) {
+              setNestedValue(data as Record<string, unknown>, 'project.goal', `${what} — ${why}`);
+            }
+          }
+          filled++;
+          display6Ws(data as Record<string, unknown>, inferred);
+        }
+      }
+    }
+    console.log();
   }
 
-  const slotsToProcess = emptySlots.slice(startIndex);
+  // === REMAINING STACK SLOTS (slot-by-slot as before) ===
+  const slotsToProcess = otherSlots.slice(startIndex);
+
+  if (slotsToProcess.length > 0) {
+    console.log(dim(`  ${slotsToProcess.length} stack slot${slotsToProcess.length === 1 ? '' : 's'} remaining.\n`));
+  }
 
   for (let i = 0; i < slotsToProcess.length; i++) {
     const slot = slotsToProcess[i];
     const answer = await ask(`  ${bold(`#${slot.index}`)} ${slot.description} ${dim(`(${slot.path})`)}: `);
 
     if (answer.toLowerCase() === 'quit') {
-      // Save session for resume
       const session: GoSession = { slotIndex: startIndex + i, fafPath };
       writeFileSync(sessionPath, JSON.stringify(session), 'utf-8');
       console.log(dim(`\n  session saved. Resume with: faf go --resume`));
@@ -141,20 +246,6 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
   }
 
   rl.close();
-
-  // If what/why still empty but goal was answered, derive them from the goal answer
-  if (goalAnswer) {
-    const what = getNestedValue(data as Record<string, unknown>, 'human_context.what');
-    const why = getNestedValue(data as Record<string, unknown>, 'human_context.why');
-    if (isPlaceholder(what)) {
-      setNestedValue(data as Record<string, unknown>, 'human_context.what', goalAnswer);
-      filled++;
-    }
-    if (isPlaceholder(why)) {
-      setNestedValue(data as Record<string, unknown>, 'human_context.why', goalAnswer);
-      filled++;
-    }
-  }
 
   if (filled > 0) {
     writeFaf(fafPath, data);
