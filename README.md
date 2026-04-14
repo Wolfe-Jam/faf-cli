@@ -74,9 +74,9 @@ v6 is a ground-up rewrite. All-in on Bun — same toolchain as Claude Code.
 | **Language** | TypeScript | TypeScript |
 | **Compile** | Bun bytecode | `bun build --compile` |
 
-375 tests in ~19s. 95KB package in 1s. Single portable binary, 4 platforms. npx backward-compatible.
+402 tests in ~19s. 95KB package in 1s. Single portable binary, 4 platforms. npx backward-compatible.
 
-26 commands. 375 tests. 3,182 lines. 94% smaller than v5.
+26 commands. 402 tests. 3,182 lines. 94% smaller than v5.
 
 ```
 commands → interop → core → wasm
@@ -91,9 +91,9 @@ The WASM scoring kernel (`faf-scoring-kernel`) does the math. Bun does the deliv
 | # | Command | One-liner |
 |---|---------|-----------|
 | 1 | `faf init` | Create `.faf` from your local project |
-| 2 | `faf git <url>` | Instant `.faf` from any GitHub repo — no clone |
+| 2 | `faf git <url>` | Instant `.faf` from any GitHub repo — README enriched, `--keep` to stay |
 | 3 | `faf auto` | Zero to 100% in one command |
-| 4 | `faf go` | Guided interview to gold code |
+| 4 | `faf go` | One sentence in. Review. Sign off. 🏆 |
 | 5 | `faf score` | Check AI-readiness (0-100%) |
 | 6 | `faf sync` | `.faf` ↔ CLAUDE.md (bi-sync, mtime auto-direction) |
 | 7 | `faf compile` | `.faf` → `.fafb` binary — sealed, portable, deterministic |
@@ -130,7 +130,7 @@ bunx faf-cli git https://github.com/facebook/react
 # Your own project
 bunx faf-cli init              # Create .faf
 bunx faf-cli auto              # Zero to 100% in one command
-bunx faf-cli go                # Interactive interview to gold code
+bunx faf-cli go                # One sentence in. Review. Sign off.
 ```
 
 ---
@@ -227,7 +227,7 @@ src/
 ## Testing
 
 ```bash
-bun test                       # 375 tests, 41 files, ~19s
+bun test                       # 402 tests, 44 files, ~19s
 ```
 
 Full e2e lifecycle test runs every command in sequence: init → auto → score → edit → sync → export → compile → decompile → taf → recover → check. Test reports in `reports/`.
