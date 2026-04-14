@@ -67,11 +67,16 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
 
   const data = readFaf(fafPath);
 
-  // Find empty slots
-  const emptySlots = SLOTS.filter(s => {
+  // Find empty slots — skip project.goal (auto-synthesized from what+why after interview)
+  const allEmpty = SLOTS.filter(s => {
     const val = getNestedValue(data as Record<string, unknown>, s.path);
-    return isPlaceholder(val) && val !== 'slotignored';
+    return isPlaceholder(val) && val !== 'slotignored' && s.path !== 'project.goal';
   });
+
+  // 6Ws first, then remaining slots
+  const humanSlots = allEmpty.filter(s => s.category === 'human');
+  const otherSlots = allEmpty.filter(s => s.category !== 'human');
+  const emptySlots = [...humanSlots, ...otherSlots];
 
   if (emptySlots.length === 0) {
     console.log(`${fafCyan('◆')} go  all slots populated`);
@@ -112,6 +117,15 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
   }
 
   rl.close();
+
+  // Auto-synthesize project.goal from what + why (goal is a shortcut summary, not a standalone question)
+  const what = getNestedValue(data as Record<string, unknown>, 'human_context.what');
+  const why = getNestedValue(data as Record<string, unknown>, 'human_context.why');
+  const currentGoal = getNestedValue(data as Record<string, unknown>, 'project.goal');
+  if (what && why && isPlaceholder(currentGoal)) {
+    setNestedValue(data as Record<string, unknown>, 'project.goal', `${what} — ${why}`);
+    filled++;
+  }
 
   if (filled > 0) {
     writeFaf(fafPath, data);
