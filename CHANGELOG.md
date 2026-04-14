@@ -5,6 +5,21 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.1.0] - 2026-04-14 — Native Type Detection
+
+### Added
+
+- Go module dependency parsing — detects MCP servers, Cobra CLIs, and services from `go.mod`
+- `github.com/modelcontextprotocol/go-sdk` detected as MCP Go (covers github/github-mcp-server pattern)
+- `github.com/mark3labs/mcp-go` detection now works (was silently missing for Go projects)
+- Rust binary detection via `[[bin]]` in `Cargo.toml` (covers ripgrep-style projects)
+- Rust CLI detection via `clap`, `argh`, `lexopt`, `structopt` + `src/main.rs`
+- Python CLI detection via `console_scripts` / `[project.scripts]` in `pyproject.toml`
+- Python library detection via `setup.py` marker
+- Go CLI detection via Cobra dependency or `cmd/` + `main.go` pattern
+- Default project type fallback changed from `library` → `service` (more accurate for unknown Go/Rust/Python projects)
+- WJTTC TIER 4 NATIVE — 12 new tests (#28–#39), 402/402 passing
+
 ## [6.0.16] - 2026-04-12 — tri-sync Free for Every Developer
 
 ### Changed
