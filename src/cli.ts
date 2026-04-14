@@ -96,7 +96,8 @@ program
 program
   .command('git <url>')
   .description('Instant .faf from any GitHub repo')
-  .action((url) => gitCommand(url));
+  .option('--keep', 'Keep the cloned repo in cwd — enables faf auto to read README, Dockerfile, etc.')
+  .action((url, options) => gitCommand(url, options));
 
 program
   .command('export')
