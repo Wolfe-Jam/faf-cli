@@ -155,17 +155,13 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
     if (answer.toLowerCase() !== 'skip' && answer.trim() !== '') {
       const opener = answer.trim();
 
-      // Store opener as what (core answer), goal (summary), and backfill why if empty
+      // Store opener as what + goal only — who/why left blank for sign-off correction
       if (isPlaceholder(getNestedValue(data as Record<string, unknown>, 'human_context.what'))) {
         setNestedValue(data as Record<string, unknown>, 'human_context.what', opener);
         filled++;
       }
       if (isPlaceholder(getNestedValue(data as Record<string, unknown>, 'project.goal'))) {
         setNestedValue(data as Record<string, unknown>, 'project.goal', opener);
-        filled++;
-      }
-      if (isPlaceholder(getNestedValue(data as Record<string, unknown>, 'human_context.why'))) {
-        setNestedValue(data as Record<string, unknown>, 'human_context.why', opener);
         filled++;
       }
     }
