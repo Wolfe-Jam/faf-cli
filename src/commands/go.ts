@@ -9,6 +9,43 @@ import { enrichScore } from '../core/scorer.js';
 import { displayScore } from '../ui/display.js';
 import { bold, dim, fafCyan } from '../ui/colors.js';
 
+/** Use Claude to interpret the opener and extract meaningful 6Ws */
+async function interpret6Ws(opener: string, context: string): Promise<Record<string, string> | null> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return null;
+
+  try {
+    const { default: Anthropic } = await import('@anthropic-ai/sdk');
+    const client = new Anthropic({ apiKey });
+
+    const prompt = `A developer described their project in one sentence: "${opener}"
+
+Here is the project's detected stack context:
+${context}
+
+Based on this, extract the 6Ws as SHORT, specific values (one line each):
+- who: who are the primary users of this project?
+- what: what does it do? (rephrase the opener as a crisp description)
+- why: why does it exist? what problem does it solve?
+- where: where does it run/deploy? (use stack context)
+- when: when was it started or what is the timeline?
+- how: how does it work technically? (use stack context)
+
+Respond ONLY with valid JSON mapping these 6 keys to string values. No markdown.`;
+
+    const response = await client.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 512,
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    const text = (response.content[0] as { text: string }).text;
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
+
 export interface GoOptions {
   resume?: boolean;
 }
@@ -155,14 +192,36 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
     if (answer.toLowerCase() !== 'skip' && answer.trim() !== '') {
       const opener = answer.trim();
 
-      // Store opener as what + goal only — who/why left blank for sign-off correction
-      if (isPlaceholder(getNestedValue(data as Record<string, unknown>, 'human_context.what'))) {
-        setNestedValue(data as Record<string, unknown>, 'human_context.what', opener);
-        filled++;
-      }
-      if (isPlaceholder(getNestedValue(data as Record<string, unknown>, 'project.goal'))) {
-        setNestedValue(data as Record<string, unknown>, 'project.goal', opener);
-        filled++;
+      // Try AI interpretation first — extracts meaningful who/what/why/where/when/how
+      console.log(dim('  thinking...'));
+      const interpreted = await interpret6Ws(opener, readFafRaw(fafPath));
+
+      const sixWsKeys = ['who', 'what', 'why', 'where', 'when', 'how'] as const;
+      if (interpreted) {
+        for (const key of sixWsKeys) {
+          const path = `human_context.${key}`;
+          if (interpreted[key] && isPlaceholder(getNestedValue(data as Record<string, unknown>, path))) {
+            setNestedValue(data as Record<string, unknown>, path, interpreted[key]);
+            filled++;
+          }
+        }
+        // Goal from what + why
+        const what = interpreted.what || opener;
+        const why = interpreted.why;
+        if (isPlaceholder(getNestedValue(data as Record<string, unknown>, 'project.goal'))) {
+          setNestedValue(data as Record<string, unknown>, 'project.goal', why ? `${what} — ${why}` : what);
+          filled++;
+        }
+      } else {
+        // No API key — store opener as what + goal only
+        if (isPlaceholder(getNestedValue(data as Record<string, unknown>, 'human_context.what'))) {
+          setNestedValue(data as Record<string, unknown>, 'human_context.what', opener);
+          filled++;
+        }
+        if (isPlaceholder(getNestedValue(data as Record<string, unknown>, 'project.goal'))) {
+          setNestedValue(data as Record<string, unknown>, 'project.goal', opener);
+          filled++;
+        }
       }
     }
 
