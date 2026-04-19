@@ -87,6 +87,7 @@ jobs:
     needs: validate
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         node-version: ['18', '20', '22']
