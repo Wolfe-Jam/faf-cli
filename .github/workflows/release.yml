@@ -14,6 +14,7 @@ on:
 
 permissions:
   contents: write
+  actions: read
 
 jobs:
   github-release:
@@ -22,6 +23,42 @@ jobs:
     steps:
       - name: 📦 Checkout
         uses: actions/checkout@v6
+
+      - name: 🔢 Verify tag matches package.json version
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/}"
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          if [ "v$PKG_VERSION" != "$VERSION" ]; then
+            echo "::error::tag $VERSION does not match package.json version v$PKG_VERSION — refusing to release"
+            exit 1
+          fi
+          echo "✓ tag $VERSION matches package.json (v$PKG_VERSION)"
+
+      - name: 🟢 Verify Championship CI is green at this commit
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          SHA="${{ github.sha }}"
+          for attempt in $(seq 1 20); do
+            RUN=$(gh api "repos/${{ github.repository }}/actions/runs?head_sha=$SHA&per_page=20" \
+              --jq '[.workflow_runs[] | select(.name == "Championship CI/CD")] | .[0]')
+            STATUS=$(echo "$RUN" | jq -r '.status // "missing"')
+            CONCLUSION=$(echo "$RUN" | jq -r '.conclusion // ""')
+
+            if [ "$STATUS" = "completed" ]; then
+              if [ "$CONCLUSION" = "success" ]; then
+                echo "✓ Championship CI green at $SHA"
+                exit 0
+              fi
+              echo "::error::Championship CI not green at $SHA (conclusion=$CONCLUSION) — refusing to release"
+              exit 1
+            fi
+
+            echo "⏳ Championship CI status=$STATUS at $SHA (attempt $attempt/20) — waiting 30s"
+            sleep 30
+          done
+          echo "::error::Championship CI did not complete within 10 minutes — refusing to release"
+          exit 1
 
       - name: 📝 Extract release notes from CHANGELOG.md
         id: notes
