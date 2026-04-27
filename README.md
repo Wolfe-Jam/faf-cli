@@ -74,7 +74,7 @@ v6 is a ground-up rewrite. All-in on Bun — same toolchain as Claude Code.
 | **Language** | TypeScript | TypeScript |
 | **Compile** | Bun bytecode | `bun build --compile` |
 
-409 tests in ~20s. 95KB package in 1s. Single portable binary, 4 platforms. npx backward-compatible.
+409 tests in ~20s. 128 kB package. Single portable binary, 4 platforms. npx backward-compatible.
 
 26 commands. 409 tests. 3,182 lines. 94% smaller than v5.
 
