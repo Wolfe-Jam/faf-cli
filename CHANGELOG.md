@@ -5,6 +5,16 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Desktop notifications for Trophy unlocks, tier upgrades, and long-running command completion (`faf auto`, `faf go`, `faf sync`).
+- OSC 9 escape sequence on TTY (Ghostty / iTerm2 / Wezterm / Kitty); silent no-op elsewhere.
+- macOS preference: routes through `terminal-notifier` if installed (`brew install terminal-notifier`) for click-to-dismiss persistence when set to "Alerts" in System Settings → Notifications.
+- 5-second duration guard on `auto` / `sync` so notifications fire only when the user has actually drifted away. Trophy and tier-upgrade always fire (rarity-gated).
+- Opt-out: `FAF_NO_NOTIFY=1`. Force OSC 9 path: `FAF_NOTIFY_OSC9=1`.
+
 ## [6.2.0] - 2026-04-14 — The One Sentence Edition
 
 ### Added
