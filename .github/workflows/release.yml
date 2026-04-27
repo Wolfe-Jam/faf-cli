@@ -44,6 +44,11 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
+      - name: 🥖 Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
       - name: 📥 Sync lockfile
         run: npm install --package-lock-only --ignore-scripts
 
@@ -102,6 +107,11 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
 
+      - name: 🥖 Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
       - name: 📥 Sync lockfile
         run: npm install --package-lock-only --ignore-scripts
 
@@ -135,6 +145,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
+
+      - name: 🥖 Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
 
       - name: 📥 Sync lockfile
         run: npm install --package-lock-only --ignore-scripts
