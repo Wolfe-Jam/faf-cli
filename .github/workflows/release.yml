@@ -1,363 +1,73 @@
-name: 🚀 Release Pipeline
+name: Release
+
+# Triggered on tag push (e.g. v6.3.0). Creates a GitHub Release with the title
+# and body extracted from CHANGELOG.md. Single purpose, single job.
+#
+# npm publishing is handled locally via /pubpro protocol.
+# Quality gates (build, test, lint) are handled by Championship CI on every push.
+# Homebrew formula update is handled by homebrew.yml.
+# This workflow does ONE thing: turn a CHANGELOG entry into a GitHub Release.
 
 on:
   push:
     tags: ['v*']
 
-  # Allow manual releases
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version to release (e.g., v2.8.0)'
-        required: true
-        type: string
-      prerelease:
-        description: 'Mark as pre-release'
-        required: false
-        default: false
-        type: boolean
-
-env:
-  NODE_VERSION: '20'
-
-# NOTE: npm publishing is handled locally via /pubpro protocol.
-# This pipeline validates, builds artifacts, and creates the GitHub Release only.
+permissions:
+  contents: write
 
 jobs:
-  # Pre-flight validation
-  validate:
-    name: 🔍 Pre-flight Validation
-    runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.version.outputs.version }}
-      is-prerelease: ${{ steps.version.outputs.is-prerelease }}
-
-    steps:
-      - name: 📦 Checkout repository
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: ⚡ Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: 🥖 Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: 📥 Sync lockfile
-        run: npm install --package-lock-only --ignore-scripts
-
-      - name: 📥 Install dependencies
-        run: npm ci
-
-      - name: 🏗️ Build project
-        run: npm run build
-
-      - name: 🧪 Run full test suite
-        run: npm test
-
-      - name: 🔧 ESLint validation
-        run: npm run lint
-
-      - name: 🎯 Extract version info
-        id: version
-        run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            VERSION="${{ github.event.inputs.version }}"
-            IS_PRERELEASE="${{ github.event.inputs.prerelease }}"
-          else
-            VERSION="${GITHUB_REF#refs/tags/}"
-            # Detect pre-release from tag (contains alpha, beta, rc)
-            if [[ "$VERSION" =~ (alpha|beta|rc) ]]; then
-              IS_PRERELEASE="true"
-            else
-              IS_PRERELEASE="false"
-            fi
-          fi
-
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "is-prerelease=$IS_PRERELEASE" >> $GITHUB_OUTPUT
-
-          echo "🏷️ Version: $VERSION"
-          echo "🧪 Pre-release: $IS_PRERELEASE"
-
-  # Cross-platform testing
-  # NOTE: windows-latest is intentionally excluded — Windows tests need rework
-  # (path-normalization in toBe assertions, EBUSY/ETIMEDOUT handling for file
-  # locks). Tracked in TODO.md. Matches Championship CI's matrix policy.
-  test-matrix:
-    name: 🧪 Cross-Platform Testing
-    needs: validate
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-        node-version: ['18', '20', '22']
-
-    steps:
-      - name: 📦 Checkout repository
-        uses: actions/checkout@v6
-
-      - name: ⚡ Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-
-      - name: 🥖 Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: 📥 Sync lockfile
-        run: npm install --package-lock-only --ignore-scripts
-
-      - name: 📥 Install dependencies
-        run: npm ci
-
-      - name: 🏗️ Build project
-        run: npm run build
-
-      - name: 🧪 Run tests
-        run: npm test
-
-      - name: 🎯 Test CLI functionality
-        run: |
-          # Test basic CLI commands
-          node dist/cli.js --version
-          node dist/cli.js --help
-
-  # Build release artifacts
-  build-artifacts:
-    name: 🏗️ Build Release Artifacts
-    needs: [validate, test-matrix]
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: 📦 Checkout repository
-        uses: actions/checkout@v6
-
-      - name: ⚡ Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: 🥖 Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: 📥 Sync lockfile
-        run: npm install --package-lock-only --ignore-scripts
-
-      - name: 📥 Install dependencies
-        run: npm ci
-
-      - name: 🏗️ Build project
-        run: npm run build
-
-      - name: 📦 Create package
-        run: npm pack
-
-      - name: 📊 Package info
-        run: |
-          echo "🏷️ Package created:"
-          ls -la *.tgz
-
-          echo "📦 Package contents:"
-          tar -tzf *.tgz | head -20
-
-      - name: 💾 Upload package artifact
-        uses: actions/upload-artifact@v6
-        with:
-          name: npm-package
-          path: '*.tgz'
-          retention-days: 30
-
-  # Generate changelog
-  changelog:
-    name: 📝 Generate Changelog
-    needs: validate
-    runs-on: ubuntu-latest
-    outputs:
-      changelog: ${{ steps.changelog.outputs.changelog }}
-
-    steps:
-      - name: 📦 Checkout repository
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: 📝 Generate changelog
-        id: changelog
-        run: |
-          # Get commits since last tag
-          LAST_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
-
-          if [[ -n "$LAST_TAG" ]]; then
-            echo "📅 Changes since $LAST_TAG:"
-            CHANGELOG=$(git log --pretty=format:"- %s (%h)" $LAST_TAG..HEAD)
-          else
-            echo "📅 Initial release - all commits:"
-            CHANGELOG=$(git log --pretty=format:"- %s (%h)" --max-count=20)
-          fi
-
-          # Save multiline output safely
-          {
-            echo 'changelog<<EOF'
-            echo "$CHANGELOG"
-            echo 'EOF'
-          } >> $GITHUB_OUTPUT
-
-  # Create GitHub release
   github-release:
     name: 🏷️ Create GitHub Release
-    needs: [validate, test-matrix, build-artifacts, changelog]
     runs-on: ubuntu-latest
-
     steps:
-      - name: 📦 Checkout repository
+      - name: 📦 Checkout
         uses: actions/checkout@v6
 
-      - name: 💾 Download package artifact
-        uses: actions/download-artifact@v7
-        with:
-          name: npm-package
+      - name: 📝 Extract release notes from CHANGELOG.md
+        id: notes
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/}"
 
-      - name: 🏷️ Create GitHub Release
+          # Pre-release detection (alpha/beta/rc in tag)
+          if [[ "$VERSION" =~ (alpha|beta|rc) ]]; then
+            PRERELEASE="true"
+          else
+            PRERELEASE="false"
+          fi
+
+          # Strip the leading v — CHANGELOG headings use [6.3.0] not [v6.3.0]
+          BARE="${VERSION#v}"
+
+          # Title: capture optional " — Edition Name" trailer from the heading
+          # Heading format: "## [6.3.0] - 2026-04-27 — The Ghostty-Inspired Edition"
+          TITLE_LINE=$(grep "^## \[$BARE\]" CHANGELOG.md | head -1)
+          EDITION=$(echo "$TITLE_LINE" | sed -n 's/.*— \(.*\)$/\1/p')
+          if [ -n "$EDITION" ]; then
+            TITLE="$VERSION — $EDITION"
+          else
+            TITLE="$VERSION"
+          fi
+
+          # Body: the lines between this version's heading and the next "## [" heading
+          BODY=$(sed -n "/^## \[$BARE\]/,/^## \[/p" CHANGELOG.md | sed '1d;$d')
+          if [ -z "$BODY" ]; then
+            BODY="See [CHANGELOG.md](./CHANGELOG.md) for changes in $VERSION."
+          fi
+
+          {
+            echo "version=$VERSION"
+            echo "prerelease=$PRERELEASE"
+            echo "title=$TITLE"
+            echo "body<<EOF"
+            echo "$BODY"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: 🏷️ Create release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ needs.validate.outputs.version }}
-          name: FAF CLI ${{ needs.validate.outputs.version }}
-          body: |
-            # 🏎️ FAF CLI ${{ needs.validate.outputs.version }}
-
-            **F1-Inspired Software Engineering** - Making AI development better for everyone! 🏁
-
-            ## 🚀 Installation
-
-            ```bash
-            npm install -g faf-cli@${{ needs.validate.outputs.version }}
-            ```
-
-            ## 📋 Changes
-
-            ${{ needs.changelog.outputs.changelog }}
-
-            ## 🎯 Quick Start
-
-            ```bash
-            # Create .faf file for your project
-            faf init
-
-            # Check your AI context score
-            faf score
-
-            # Zero to 100% in one command
-            faf auto
-            ```
-
-            ## 📊 v6 — Built with Bun
-
-            - ⚡ Same toolchain as Claude Code
-            - 🧪 409 tests, 45 files
-            - 📦 ~128 kB tarball
-            - 🏆 26 commands
-
-            ## 🔗 Links
-
-            - 📦 [NPM Package](https://www.npmjs.com/package/faf-cli)
-            - 🌐 [Website](https://faf.one)
-            - 📝 [Blog](https://faf.one/blog)
-            - 🐛 [Report Issues](https://github.com/faf-org/cli/issues)
-
-            ---
-
-            **🏁 Define. Build. Lock. Relax.**
+          tag_name: ${{ steps.notes.outputs.version }}
+          name: ${{ steps.notes.outputs.title }}
+          body: ${{ steps.notes.outputs.body }}
           draft: false
-          prerelease: ${{ needs.validate.outputs.is-prerelease == 'true' }}
-          files: |
-            *.tgz
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  # Performance benchmarks — installs from the local tarball artifact built
-  # by build-artifacts. Decoupled from npm registry timing: pubpro publishes
-  # to npm separately, and this job tests the EXACT bits we'd ship.
-  performance-benchmark:
-    name: ⚡ Performance Validation
-    needs: [validate, test-matrix, build-artifacts]
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: ⚡ Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: 💾 Download package artifact
-        uses: actions/download-artifact@v7
-        with:
-          name: npm-package
-
-      - name: 📥 Install package from tarball
-        run: |
-          echo "🔄 Installing local tarball..."
-          npm install -g ./*.tgz
-          faf --version
-
-      - name: 🏎️ Performance Tests
-        run: |
-          echo "Testing v6 command speed..."
-
-          echo "Testing 'faf --help'..."
-          time faf --help
-
-          echo "Testing 'faf info'..."
-          time faf info
-
-          echo "Testing 'faf formats'..."
-          time faf formats
-
-          echo "Performance validation complete"
-
-  # Notification
-  notify-success:
-    name: 🎉 Success Notification
-    needs: [validate, test-matrix, build-artifacts, github-release, performance-benchmark]
-    runs-on: ubuntu-latest
-    if: success()
-
-    steps:
-      - name: 🏆 Championship Success!
-        run: |
-          echo "🏁 🏎️ FAF CLI ${{ needs.validate.outputs.version }} RELEASED! ⚡🏆"
-          echo ""
-          echo "✅ All systems green - Championship engineering delivered!"
-          echo "🏷️ GitHub: Release created"
-          echo "⚡ Performance: F1-validated"
-          echo ""
-          echo "📦 Install: npm install -g faf-cli@${{ needs.validate.outputs.version }}"
-          echo ""
-          echo "NOTE: npm publishing is handled via /pubpro protocol (local)"
-
-  # Failure notification
-  notify-failure:
-    name: 🚨 Failure Notification
-    needs: [validate, test-matrix, build-artifacts, github-release]
-    runs-on: ubuntu-latest
-    if: failure()
-
-    steps:
-      - name: 🚨 Release Failed
-        run: |
-          echo "❌ FAF CLI ${{ needs.validate.outputs.version }} release failed!"
-          echo "🔧 Check the workflow logs for details"
-          echo "🏎️ F1-inspired engineering demands perfection - we'll fix this!"
+          prerelease: ${{ steps.notes.outputs.prerelease == 'true' }}
