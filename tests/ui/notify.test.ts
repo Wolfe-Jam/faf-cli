@@ -15,7 +15,8 @@ import { notify } from '../../src/ui/notify.js';
 interface StubState {
   written: string[];
   isTTY: boolean | undefined;
-  envValue: string | undefined;
+  envNoNotify: string | undefined;
+  envOsc9: string | undefined;
   originalWrite: typeof process.stdout.write;
   originalIsTTY: typeof process.stdout.isTTY;
 }
@@ -24,7 +25,8 @@ function setup(opts: { isTTY: boolean; envOptOut?: boolean }): StubState {
   const state: StubState = {
     written: [],
     isTTY: process.stdout.isTTY,
-    envValue: process.env.FAF_NO_NOTIFY,
+    envNoNotify: process.env.FAF_NO_NOTIFY,
+    envOsc9: process.env.FAF_NOTIFY_OSC9,
     originalWrite: process.stdout.write.bind(process.stdout),
     originalIsTTY: process.stdout.isTTY,
   };
@@ -42,16 +44,25 @@ function setup(opts: { isTTY: boolean; envOptOut?: boolean }): StubState {
     delete process.env.FAF_NO_NOTIFY;
   }
 
+  // Force OSC 9 path so tests are deterministic regardless of whether
+  // terminal-notifier is installed on the dev machine.
+  process.env.FAF_NOTIFY_OSC9 = '1';
+
   return state;
 }
 
 function teardown(state: StubState): void {
   process.stdout.write = state.originalWrite;
   Object.defineProperty(process.stdout, 'isTTY', { value: state.originalIsTTY, configurable: true });
-  if (state.envValue === undefined) {
+  if (state.envNoNotify === undefined) {
     delete process.env.FAF_NO_NOTIFY;
   } else {
-    process.env.FAF_NO_NOTIFY = state.envValue;
+    process.env.FAF_NO_NOTIFY = state.envNoNotify;
+  }
+  if (state.envOsc9 === undefined) {
+    delete process.env.FAF_NOTIFY_OSC9;
+  } else {
+    process.env.FAF_NOTIFY_OSC9 = state.envOsc9;
   }
 }
 

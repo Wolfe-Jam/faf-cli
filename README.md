@@ -238,9 +238,21 @@ Full e2e lifecycle test runs every command in sequence: init → auto → score 
 
 | Variable | Effect |
 |----------|--------|
-| `FAF_NO_NOTIFY=1` | Disable desktop notifications (Trophy unlocks, long-running command completion). Notifications use OSC 9 — emitted on Ghostty / iTerm2 / Wezterm / Kitty, silently ignored elsewhere. |
+| `FAF_NO_NOTIFY=1` | Disable desktop notifications (Trophy unlocks, long-running command completion). |
 | `FAF_PRO=1` | Enable Pro features (reserved for Teams/Enterprise; tri-sync is free for all developers). |
 | `ANTHROPIC_API_KEY` | Used by `faf go` to interpret the project opener via Claude. Falls back to keyword extraction if unset. |
+
+### Click-to-dismiss notifications (macOS)
+
+Notifications use OSC 9 by default — emitted on Ghostty / iTerm2 / Wezterm / Kitty, silently ignored elsewhere. macOS auto-dismisses these after a few seconds.
+
+For sticky **click-to-dismiss** notifications:
+
+```bash
+brew install terminal-notifier
+```
+
+Then in System Settings → Notifications → **terminal-notifier** → switch to **Alerts**. faf-cli detects `terminal-notifier` automatically and routes through it on macOS.
 
 ---
 
