@@ -234,6 +234,16 @@ Full e2e lifecycle test runs every command in sequence: init → auto → score 
 
 ---
 
+## Environment Variables
+
+| Variable | Effect |
+|----------|--------|
+| `FAF_NO_NOTIFY=1` | Disable desktop notifications (Trophy unlocks, long-running command completion). Notifications use OSC 9 — emitted on Ghostty / iTerm2 / Wezterm / Kitty, silently ignored elsewhere. |
+| `FAF_PRO=1` | Enable Pro features (reserved for Teams/Enterprise; tri-sync is free for all developers). |
+| `ANTHROPIC_API_KEY` | Used by `faf go` to interpret the project opener via Claude. Falls back to keyword extraction if unset. |
+
+---
+
 ## Support
 
 - **[GitHub Discussions](https://github.com/Wolfe-Jam/faf-cli/discussions)** — Questions, ideas, community

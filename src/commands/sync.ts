@@ -6,6 +6,7 @@ import { readMemoryMd, writeMemoryMd } from '../interop/memory.js';
 import * as kernel from '../wasm/kernel.js';
 import { enrichScore } from '../core/scorer.js';
 import { displayScore } from '../ui/display.js';
+import { notify } from '../ui/notify.js';
 import { bold, dim, fafCyan } from '../ui/colors.js';
 
 export interface SyncOptions {
@@ -14,6 +15,7 @@ export interface SyncOptions {
 }
 
 export function syncCommand(options: SyncOptions = {}): void {
+  const start = Date.now();
   const dir = process.cwd();
   const fafPath = findFafFile(dir);
 
@@ -41,6 +43,12 @@ export function syncCommand(options: SyncOptions = {}): void {
   if (options.watch) {
     console.log(dim('watching for changes... (Ctrl+C to stop)'));
     watchSync(fafPath, claudePath, memoryPath, dir);
+    return; // watch mode does not emit a one-shot completion notification
+  }
+
+  // Desktop notification — only if the sync took long enough that the user might have drifted
+  if (Date.now() - start >= 5000) {
+    notify('FAF: sync complete');
   }
 }
 

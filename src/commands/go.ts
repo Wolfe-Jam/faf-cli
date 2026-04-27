@@ -7,6 +7,7 @@ import { isPlaceholder } from '../core/slots.js';
 import * as kernel from '../wasm/kernel.js';
 import { enrichScore } from '../core/scorer.js';
 import { displayScore } from '../ui/display.js';
+import { notify } from '../ui/notify.js';
 import { bold, dim, fafCyan } from '../ui/colors.js';
 
 /** Use Claude to interpret the opener and extract meaningful 6Ws */
@@ -165,6 +166,7 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
     console.log(`${fafCyan('◆')} go  all slots populated`);
     const result = enrichScore(kernel.score(readFafRaw(fafPath)));
     displayScore(result, fafPath);
+    if (result.score === 100) notify('FAF: Trophy unlocked at 100%');
     return;
   }
 
@@ -327,6 +329,13 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
   // Show updated score
   const result = enrichScore(kernel.score(readFafRaw(fafPath)));
   displayScore(result, fafPath);
+
+  // Desktop notification (always — interactive command, user likely walked away during input)
+  if (result.score === 100) {
+    notify('FAF: Trophy unlocked at 100%');
+  } else {
+    notify(`FAF: ${result.score}% ${result.tier.name} - go complete`);
+  }
 
   // Clean up session file if we finished all slots
   if (existsSync(sessionPath)) {

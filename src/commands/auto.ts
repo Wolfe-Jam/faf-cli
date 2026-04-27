@@ -5,14 +5,26 @@ import { writeFaf, readFaf, readFafRaw } from '../interop/faf.js';
 import * as kernel from '../wasm/kernel.js';
 import { enrichScore } from '../core/scorer.js';
 import { displayScore } from '../ui/display.js';
+import { notify } from '../ui/notify.js';
 import { bold, dim, fafCyan } from '../ui/colors.js';
 import { APP_TYPE_CATEGORIES, SLOTS } from '../core/slots.js';
+import { TIERS } from '../core/tiers.js';
 
 export function autoCommand(): void {
+  const start = Date.now();
   const dir = process.cwd();
   const fafPath = join(dir, 'project.faf');
 
   const detected = detectStack(dir);
+
+  // Capture previous tier (for upgrade-detection notification)
+  let prevTier: string | null = null;
+  if (existsSync(fafPath)) {
+    try {
+      const prev = enrichScore(kernel.score(readFafRaw(fafPath)));
+      prevTier = prev.tier.name;
+    } catch { /* fresh score below will succeed or fail uniformly */ }
+  }
 
   if (existsSync(fafPath)) {
     const existing = readFaf(fafPath);
@@ -46,6 +58,21 @@ export function autoCommand(): void {
   if (result.score < 100) {
     console.log(dim(`\n  run ${bold("'faf go'")} to reach 100%`));
   }
+
+  // Desktop notification: trophy / tier-upgrade / long-scan-complete (in priority order)
+  const elapsed = Date.now() - start;
+  if (result.score === 100) {
+    notify('FAF: Trophy unlocked at 100%');
+  } else if (prevTier && tierImproved(prevTier, result.tier.name)) {
+    notify(`FAF: tier upgraded ${prevTier} -> ${result.tier.name} (${result.score}%)`);
+  } else if (elapsed >= 5000) {
+    notify(`FAF: ${result.score}% ${result.tier.name} - stack detected`);
+  }
+}
+
+function tierImproved(prev: string, next: string): boolean {
+  const order = TIERS.map(t => t.name);
+  return order.indexOf(next) < order.indexOf(prev);
 }
 
 function mergeDetected(existing: Record<string, unknown>, detected: Record<string, unknown>): Record<string, unknown> {
