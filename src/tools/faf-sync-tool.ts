@@ -64,7 +64,7 @@ export class FafSyncTool extends BaseFAFTool<FafSyncInput, FafSyncOutput> {
       const originalLog = console.log;
       
       console.log = (...args) => {
-        capturedOutput += args.join(' ') + '\n';
+        capturedOutput += `${args.join(' ')  }\n`;
       };
       
       try {
@@ -83,8 +83,8 @@ export class FafSyncTool extends BaseFAFTool<FafSyncInput, FafSyncOutput> {
       const syncedMatch = capturedOutput.includes('synced') || capturedOutput.includes('updated');
       
       let direction: 'push' | 'pull' | 'none' = 'none';
-      if (pushMatch) direction = 'push';
-      else if (pullMatch) direction = 'pull';
+      if (pushMatch) {direction = 'push';}
+      else if (pullMatch) {direction = 'pull';}
       
       // Extract file paths and changes
       const changes: string[] = [];

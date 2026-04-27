@@ -4,7 +4,7 @@ let cachedTerminalNotifier: string | null | undefined;
 
 /** Resolve `terminal-notifier` path on macOS (cached). Returns null on other platforms or if not installed. */
 function getTerminalNotifierPath(): string | null {
-  if (cachedTerminalNotifier !== undefined) return cachedTerminalNotifier;
+  if (cachedTerminalNotifier !== undefined) {return cachedTerminalNotifier;}
   if (process.platform !== 'darwin') {
     cachedTerminalNotifier = null;
     return null;
@@ -32,9 +32,10 @@ function getTerminalNotifierPath(): string | null {
  * Force OSC 9 path (skip terminal-notifier): FAF_NOTIFY_OSC9=1
  */
 export function notify(message: string): void {
-  if (process.env.FAF_NO_NOTIFY === '1') return;
-  if (!process.stdout.isTTY) return;
+  if (process.env.FAF_NO_NOTIFY === '1') {return;}
+  if (!process.stdout.isTTY) {return;}
 
+  // eslint-disable-next-line no-control-regex -- intentional: stripping ASCII control chars before OSC 9 emit
   const safe = message.replace(/[\x00-\x1f]/g, ' ').slice(0, 200);
 
   if (process.env.FAF_NOTIFY_OSC9 !== '1') {

@@ -98,7 +98,7 @@ function readGoDeps(dir: string): Set<string> {
     const content = readFileSync(goModPath, 'utf-8');
     const deps = new Set<string>();
     // Match lines like: github.com/mark3labs/mcp-go v0.x.x
-    for (const match of content.matchAll(/^\s*([\w./\-]+)\s+v[\d.]/gm)) {
+    for (const match of content.matchAll(/^\s*([\w./-]+)\s+v[\d.]/gm)) {
       deps.add(match[1]);
     }
     return deps;

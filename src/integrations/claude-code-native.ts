@@ -152,7 +152,7 @@ export class ClaudeCodeNativeIntegration {
    * Initialize session with FAF context detection
    */
   private async initializeSession(): Promise<void> {
-    if (!this.hooks) return;
+    if (!this.hooks) {return;}
     
     // Detect project context
     const hasProjectFaf = existsSync(join(this.config.workingDirectory, 'project.faf'));
@@ -180,7 +180,7 @@ export class ClaudeCodeNativeIntegration {
    * Finalize session and save state
    */
   async finalizeSession(): Promise<void> {
-    if (!this.hooks) return;
+    if (!this.hooks) {return;}
     
     await this.hooks.execute(HookType.SessionEnd, {
       toolName: 'session_end',

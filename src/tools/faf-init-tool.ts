@@ -66,7 +66,7 @@ export class FafInitTool extends BaseFAFTool<FafInitInput, FafInitOutput> {
       const originalLog = console.log;
       
       console.log = (...args) => {
-        capturedOutput += args.join(' ') + '\n';
+        capturedOutput += `${args.join(' ')  }\n`;
       };
       
       try {

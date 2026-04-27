@@ -166,7 +166,7 @@ export class FAFMCPServer {
     requestedLevel: PermissionLevel
   ): Promise<boolean> {
     const tool = this.registry.get(toolName);
-    if (!tool) return false;
+    if (!tool) {return false;}
     
     // In real implementation, this would trigger Claude Code's permission dialog
     // For now, simulate auto-approval for safe operations

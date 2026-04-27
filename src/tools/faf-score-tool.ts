@@ -46,17 +46,17 @@ export class FafScoreTool extends BaseFAFTool<FafScoreInput, FafScoreOutput> {
     try {
       // Capture output from existing command
       let capturedOutput = '';
-      let capturedData: any = null;
+      const capturedData: any = null;
       
       const originalLog = console.log;
       const originalError = console.error;
       
       // Intercept console output for processing
       console.log = (...args) => {
-        capturedOutput += args.join(' ') + '\n';
+        capturedOutput += `${args.join(' ')  }\n`;
       };
       console.error = (...args) => {
-        capturedOutput += args.join(' ') + '\n';
+        capturedOutput += `${args.join(' ')  }\n`;
       };
       
       try {
@@ -91,7 +91,7 @@ export class FafScoreTool extends BaseFAFTool<FafScoreInput, FafScoreOutput> {
         for (const line of lines) {
           if (line.includes('empty') && line.includes('○')) {
             const match = line.match(/([a-z_]+\.[a-z_]+)/);
-            if (match) empty.push(match[1]);
+            if (match) {empty.push(match[1]);}
           }
         }
       }

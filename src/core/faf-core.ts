@@ -126,7 +126,7 @@ export class FAFCore {
         main_language: options.language
       },
       human_context: {
-        what: 'Building ' + (options.name || 'a project'),
+        what: `Building ${  options.name || 'a project'}`,
         why: options.goal || 'To solve problems and create value'
       },
       stack: options.framework ? {
@@ -245,7 +245,7 @@ export class FAFCore {
       
       if (line.startsWith('# ') && line.includes('CLAUDE.md')) {
         const match = line.match(/# CLAUDE\.md — (.+)/);
-        if (match) name = match[1];
+        if (match) {name = match[1];}
       }
       
       if (line === '## What This Is' && i + 2 < lines.length) {
@@ -314,11 +314,11 @@ export class FAFCore {
    * Get scoring tier based on percentage
    */
   private static getTier(score: number): FAFScore['tier'] {
-    if (score >= 100) return 'TROPHY';
-    if (score >= 95) return 'GOLD';
-    if (score >= 85) return 'SILVER';
-    if (score >= 70) return 'GREEN';
-    if (score >= 55) return 'YELLOW';
+    if (score >= 100) {return 'TROPHY';}
+    if (score >= 95) {return 'GOLD';}
+    if (score >= 85) {return 'SILVER';}
+    if (score >= 70) {return 'GREEN';}
+    if (score >= 55) {return 'YELLOW';}
     return 'RED';
   }
 
@@ -351,7 +351,7 @@ export class FAFCore {
    * Check if value is a placeholder
    */
   private static isPlaceholder(value: any): boolean {
-    if (typeof value !== 'string') return false;
+    if (typeof value !== 'string') {return false;}
     
     const placeholders = [
       'TODO', 'FIXME', 'TBD', 'PLACEHOLDER',
@@ -412,9 +412,9 @@ export class FAFCore {
    * Remove undefined values from object
    */
   private static cleanUndefined(obj: any): any {
-    if (obj === null || obj === undefined) return obj;
-    if (typeof obj !== 'object') return obj;
-    if (Array.isArray(obj)) return obj.map(item => this.cleanUndefined(item));
+    if (obj === null || obj === undefined) {return obj;}
+    if (typeof obj !== 'object') {return obj;}
+    if (Array.isArray(obj)) {return obj.map(item => this.cleanUndefined(item));}
     
     const cleaned: any = {};
     for (const [key, value] of Object.entries(obj)) {

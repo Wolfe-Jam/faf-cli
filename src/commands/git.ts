@@ -17,32 +17,32 @@ function extractGoal(dir: string): string {
     const p = join(dir, name);
     if (existsSync(p)) { content = readFileSync(p, 'utf-8'); break; }
   }
-  if (!content) return '';
+  if (!content) {return '';}
 
   const lines = content.split('\n');
   let pastTitle = false;
   for (const raw of lines) {
     const line = raw.trim();
-    if (!line) continue;
+    if (!line) {continue;}
     // Skip the title heading
     if (line.startsWith('# ') && !pastTitle) { pastTitle = true; continue; }
     // Skip badges, shields, HTML tags, sub-headings, table rows
     if (line.startsWith('![') || line.startsWith('<') || line.startsWith('|') ||
-        line.startsWith('#') || line.startsWith('[![') || line.startsWith('---')) continue;
+        line.startsWith('#') || line.startsWith('[![') || line.startsWith('---')) {continue;}
     // First real sentence — cap at 120 chars
     const clean = line.replace(/\*\*/g, '').replace(/\*/g, '').replace(/`/g, '').trim();
-    if (clean.length > 10) return clean.slice(0, 120);
+    if (clean.length > 10) {return clean.slice(0, 120);}
   }
   return '';
 }
 
 /** Detect build tool from repo files */
 function detectBuild(dir: string): string {
-  if (existsSync(join(dir, 'Dockerfile')) || existsSync(join(dir, 'docker-compose.yml'))) return 'Docker';
-  if (existsSync(join(dir, 'Makefile'))) return 'make';
-  if (existsSync(join(dir, 'go.mod'))) return 'go build';
-  if (existsSync(join(dir, 'Cargo.toml'))) return 'cargo build';
-  if (existsSync(join(dir, 'pyproject.toml'))) return 'pip / uv';
+  if (existsSync(join(dir, 'Dockerfile')) || existsSync(join(dir, 'docker-compose.yml'))) {return 'Docker';}
+  if (existsSync(join(dir, 'Makefile'))) {return 'make';}
+  if (existsSync(join(dir, 'go.mod'))) {return 'go build';}
+  if (existsSync(join(dir, 'Cargo.toml'))) {return 'cargo build';}
+  if (existsSync(join(dir, 'pyproject.toml'))) {return 'pip / uv';}
   return '';
 }
 
@@ -54,19 +54,19 @@ function enrichFromRepo(data: Record<string, unknown>, dir: string): Record<stri
   // goal — fill if empty
   if (!project.goal) {
     const goal = extractGoal(dir);
-    if (goal) project.goal = goal;
+    if (goal) {project.goal = goal;}
   }
 
   // build — fill if empty
   if (!stack.build || stack.build === '') {
     const build = detectBuild(dir);
-    if (build) stack.build = build;
+    if (build) {stack.build = build;}
   }
 
   // database/connection — slotignored for MCP servers (no database needed)
   if (project.type === 'mcp') {
-    if (!stack.database || stack.database === '') stack.database = 'slotignored';
-    if (!stack.connection || stack.connection === '') stack.connection = 'slotignored';
+    if (!stack.database || stack.database === '') {stack.database = 'slotignored';}
+    if (!stack.connection || stack.connection === '') {stack.connection = 'slotignored';}
   }
 
   return { ...data, project, stack };

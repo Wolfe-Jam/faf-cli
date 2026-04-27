@@ -253,7 +253,7 @@ export class FAFExportTool extends BaseFAFTool<z.infer<typeof ExportInputSchema>
 
 ${project.project.goal}
 
-${project.human_context?.what || 'Building ' + project.project.name}
+${project.human_context?.what || `Building ${  project.project.name}`}
 
 ## Tech Stack
 
@@ -281,7 +281,7 @@ ${project.stack ? Object.entries(project.stack).map(([k, v]) => `- ${k}: ${v}`).
       rules.push(`Frontend framework: ${project.stack.frontend}`);
     }
 
-    return rules.join('\n') + '\n\nAlways maintain context awareness and follow project conventions.';
+    return `${rules.join('\n')  }\n\nAlways maintain context awareness and follow project conventions.`;
   }
 
   private toGemini(project: FAFProject): string {

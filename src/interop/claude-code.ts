@@ -126,7 +126,7 @@ export class ClaudeCodeSync {
       }
     }
     
-    if (!description) return null;
+    if (!description) {return null;}
     
     const name = filename.replace('.md', '');
     
@@ -172,7 +172,7 @@ This skill is automatically synced from faf-cli v6 commands.
 
 ### Usage in Claude Code:
 \`\`\`
-/${skill.name}${skill['argument-hint'] && skill['argument-hint'] !== 'None' ? ' [' + skill['argument-hint'] + ']' : ''}
+/${skill.name}${skill['argument-hint'] && skill['argument-hint'] !== 'None' ? ` [${  skill['argument-hint']  }]` : ''}
 \`\`\`
 `;
     

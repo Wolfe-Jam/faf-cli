@@ -13,7 +13,7 @@ import { bold, dim, fafCyan } from '../ui/colors.js';
 /** Use Claude to interpret the opener and extract meaningful 6Ws */
 async function interpret6Ws(opener: string, context: string): Promise<Record<string, string> | null> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return null;
+  if (!apiKey) {return null;}
 
   try {
     const { default: Anthropic } = await import('@anthropic-ai/sdk');
@@ -97,14 +97,14 @@ function inferSecondary(data: Record<string, unknown>, dir: string): { where: st
   if (existsSync(pkgPath)) {
     try {
       const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
-      if (pkg.version) when = `v${pkg.version}`;
+      if (pkg.version) {when = `v${pkg.version}`;}
     } catch { /* ignore */ }
   }
 
   // how — from build + api_type
   const parts: string[] = [];
-  if (typeof stack.build === 'string' && !isPlaceholder(stack.build)) parts.push(stack.build);
-  if (typeof stack.api_type === 'string' && !isPlaceholder(stack.api_type)) parts.push(stack.api_type);
+  if (typeof stack.build === 'string' && !isPlaceholder(stack.build)) {parts.push(stack.build);}
+  if (typeof stack.api_type === 'string' && !isPlaceholder(stack.api_type)) {parts.push(stack.api_type);}
   const how = parts.join(', ');
 
   return { where, when, how };
@@ -166,7 +166,7 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
     console.log(`${fafCyan('◆')} go  all slots populated`);
     const result = enrichScore(kernel.score(readFafRaw(fafPath)));
     displayScore(result, fafPath);
-    if (result.score === 100) notify('FAF: Trophy unlocked at 100%');
+    if (result.score === 100) {notify('FAF: Trophy unlocked at 100%');}
     return;
   }
 
@@ -262,10 +262,10 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
     // === 6Ws SIGN-OFF LOOP ===
     display6Ws(data as Record<string, unknown>, inferred);
 
-    // eslint-disable-next-line no-constant-condition
+     
     while (true) {
       const correction = await ask(`  ${dim('[Enter to confirm, or type: who / what / why / where / when / how]')} `);
-      if (correction.trim() === '' || correction.toLowerCase() === 'confirm') break;
+      if (correction.trim() === '' || correction.toLowerCase() === 'confirm') {break;}
       if (correction.toLowerCase() === 'quit') {
         rl.close();
         return;

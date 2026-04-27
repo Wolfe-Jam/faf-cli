@@ -264,8 +264,8 @@ jobs:
             ## 📊 v6 — Built with Bun
 
             - ⚡ Same toolchain as Claude Code
-            - 🧪 218 tests, 37 files
-            - 📦 290KB bundle
+            - 🧪 409 tests, 45 files
+            - 📦 ~128 kB tarball
             - 🏆 26 commands
 
             ## 🔗 Links
@@ -285,25 +285,29 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # Performance benchmarks (installs from npm to verify published package)
+  # Performance benchmarks — installs from the local tarball artifact built
+  # by build-artifacts. Decoupled from npm registry timing: pubpro publishes
+  # to npm separately, and this job tests the EXACT bits we'd ship.
   performance-benchmark:
     name: ⚡ Performance Validation
-    needs: [validate, test-matrix]
+    needs: [validate, test-matrix, build-artifacts]
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📦 Checkout repository
-        uses: actions/checkout@v6
-
       - name: ⚡ Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: 📥 Install published package
+      - name: 💾 Download package artifact
+        uses: actions/download-artifact@v7
+        with:
+          name: npm-package
+
+      - name: 📥 Install package from tarball
         run: |
-          echo "🔄 Installing published version..."
-          npm install -g faf-cli@${{ needs.validate.outputs.version }}
+          echo "🔄 Installing local tarball..."
+          npm install -g ./*.tgz
           faf --version
 
       - name: 🏎️ Performance Tests
