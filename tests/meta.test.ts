@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'bun:test';
-import { readdirSync, readFileSync } from 'fs';
+import { readdirSync, readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 
 describe('YOLO Infrastructure Safety', () => {
@@ -96,5 +96,44 @@ describe('YOLO Infrastructure Safety', () => {
     expect(srcDirs).toContain('interop');
     expect(srcDirs).toContain('wasm');
     expect(srcDirs).toContain('ui');
+  });
+
+  // Build invariants — guard against bundler regressions that caused v6.3.0 install crash.
+  // Bun (and other bundlers) can inline modules and convert __dirname into the
+  // build-machine path as a string literal. Source can be clean while dist is poisoned.
+  // This test enforces the "No Hardcode" policy on the actual published artifact.
+  describe('build invariants — dist/ is portable', () => {
+    const distDir = join(__dirname, '../dist');
+    const distFiles = ['cli.js', 'index.js'];
+    const buildMachinePatterns = [
+      { name: 'macOS user paths', pattern: /\/Users\// },
+      { name: 'GitHub Actions Linux paths', pattern: /\/home\/runner\// },
+      { name: 'macOS tmp paths', pattern: /\/private\/var\// },
+    ];
+
+    test.each(distFiles)('dist/%s contains no build-machine paths', (file) => {
+      const path = join(distDir, file);
+      if (!existsSync(path)) {
+        // dist not built; CI always builds before tests, but locally a dev may
+        // run `bun test` without `bun run build` first. Surface a clear message.
+        throw new Error(
+          `dist/${file} not found. Run \`bun run build\` before running tests.`
+        );
+      }
+
+      const content = readFileSync(path, 'utf-8');
+      for (const { name, pattern } of buildMachinePatterns) {
+        const match = content.match(pattern);
+        if (match) {
+          const idx = match.index ?? 0;
+          const ctx = content.slice(Math.max(0, idx - 60), idx + 60);
+          throw new Error(
+            `dist/${file} leaked a ${name} build path matching ${pattern}.\n` +
+            `Context: ...${ctx}...\n` +
+            `Fix: externalize the offending dep in the build script (--external <pkg>).`
+          );
+        }
+      }
+    });
   });
 });
