@@ -31,7 +31,8 @@
     "test:watch": "bun test --watch",
     "lint": "eslint src/**/*.ts",
     "format": "prettier --write 'src/**/*.ts'",
-    "prepublishOnly": "bun run build"
+    "check:no-hardcode": "! grep -rEln '/(Users|home/runner|private/var)/' dist/ || (echo '❌ Hardcoded build-machine path leaked into dist — see grep output above. Externalize the offending dep in the build script.'; exit 1)",
+    "prepublishOnly": "bun run build && bun run check:no-hardcode"
   },
   "keywords": [
     "faf",
