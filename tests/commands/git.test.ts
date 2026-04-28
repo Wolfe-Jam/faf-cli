@@ -45,6 +45,8 @@ describe('git command', () => {
     const repoDir = join(testDir, 'source-repo');
     mkdirSync(repoDir);
     execSync(`git init ${repoDir}`, { stdio: 'pipe' });
+    // CI runners have no global git identity; set it locally so the commit succeeds.
+    execSync(`git -C ${repoDir} config user.email "test@faf.one" && git -C ${repoDir} config user.name "faf-test"`, { stdio: 'pipe' });
     writeFileSync(join(repoDir, 'package.json'), JSON.stringify({ name: 'local-repo' }));
     execSync(`git -C ${repoDir} add -A && git -C ${repoDir} commit -m "init"`, { stdio: 'pipe' });
 
