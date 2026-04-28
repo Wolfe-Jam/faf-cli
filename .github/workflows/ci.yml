@@ -2,9 +2,9 @@ name: Championship CI/CD
 
 on:
   push:
-    branches: [ main, develop, v6 ]
+    branches: [ main, develop ]
   pull_request:
-    branches: [ main, v6 ]
+    branches: [ main ]
 
 env:
   NODE_VERSION: '20.x'
