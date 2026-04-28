@@ -41,12 +41,12 @@ function activatePro(): void {
   console.log('');
   console.log(dim('  export FAF_PRO=1'));
   console.log('');
+  console.log(dim('  Visit: https://faf.one/pro'));
 
-  // Try to open upgrade URL
-  try {
-    const open = require('open');
-    open('https://faf.one/pro');
-  } catch {
-    console.log(dim('  Visit: https://faf.one/pro'));
-  }
+  // Try to also open the upgrade URL in the browser. Fire-and-forget;
+  // the printed link above is the always-on fallback.
+  // `open` v9+ is ESM-only, so we use dynamic import.
+  import('open')
+    .then(({ default: open }) => open('https://faf.one/pro'))
+    .catch(() => {});
 }
