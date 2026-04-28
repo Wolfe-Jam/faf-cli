@@ -223,26 +223,30 @@ program.command('yolo', { hidden: true }).action(() => initCommand({ yolo: true 
 
 // No command given → show Nelly header + score + help
 if (process.argv.length <= 2) {
-  const { bold, dim, fafCyan } = await import('./ui/colors.js');
-  const cwd = process.cwd().replace(process.env.HOME ?? '', '~');
+  // Wrap top-level await in an async IIFE so `bun build --compile` accepts it.
+  // (Plain `bun build` tolerates top-level await; --compile is stricter.)
+  (async () => {
+    const { bold, dim, fafCyan } = await import('./ui/colors.js');
+    const cwd = process.cwd().replace(process.env.HOME ?? '', '~');
 
-  // Nelly — pixel-art elephant (10×6 grid, half-block rendering)
-  const G = '\x1b[38;2;150;150;150m';   // gray fg
-  const GB = '\x1b[48;2;150;150;150m';  // gray bg
-  const DF = '\x1b[38;2;29;29;29m';     // dark fg (▄ trick)
-  const DB = '\x1b[48;2;29;29;29m';     // dark bg
-  const RS = '\x1b[0m';
-  console.log('');
-  console.log(`${DB} ${G}▄${GB}███████${DB}${G}▄${RS}`);
-  console.log(`${DB} ${GB}${G}█${DB}${G}▀${GB}███████${RS}  ${fafCyan(bold('faf'))} ${dim(`v${VERSION}`)}`);
-  const GR = '\x1b[38;2;39;174;96m';    // grass green
-  console.log(`${DB}${G}▀${GB}${DF}▄${DB}${GR}░${GB}${G}██${DB}${GR}░░${GB}${G}██${DB}${GR}░${RS}  ${dim('Nelly Never Forgets')}`);
-  console.log(`${GR}▔▔▔▔▔▔▔▔▔▔▔▔${RS}`);
-  console.log(`${dim('  ' + cwd)}`);
-  console.log('');
-  try { await scoreCommand(undefined, { status: true }); } catch {}
-  console.log('');
-  console.log(`  ${dim('Run')} ${fafCyan('faf --help')} ${dim('for commands')}`);
+    // Nelly — pixel-art elephant (10×6 grid, half-block rendering)
+    const G = '\x1b[38;2;150;150;150m';   // gray fg
+    const GB = '\x1b[48;2;150;150;150m';  // gray bg
+    const DF = '\x1b[38;2;29;29;29m';     // dark fg (▄ trick)
+    const DB = '\x1b[48;2;29;29;29m';     // dark bg
+    const RS = '\x1b[0m';
+    console.log('');
+    console.log(`${DB} ${G}▄${GB}███████${DB}${G}▄${RS}`);
+    console.log(`${DB} ${GB}${G}█${DB}${G}▀${GB}███████${RS}  ${fafCyan(bold('faf'))} ${dim(`v${VERSION}`)}`);
+    const GR = '\x1b[38;2;39;174;96m';    // grass green
+    console.log(`${DB}${G}▀${GB}${DF}▄${DB}${GR}░${GB}${G}██${DB}${GR}░░${GB}${G}██${DB}${GR}░${RS}  ${dim('Nelly Never Forgets')}`);
+    console.log(`${GR}▔▔▔▔▔▔▔▔▔▔▔▔${RS}`);
+    console.log(`${dim('  ' + cwd)}`);
+    console.log('');
+    try { await scoreCommand(undefined, { status: true }); } catch {}
+    console.log('');
+    console.log(`  ${dim('Run')} ${fafCyan('faf --help')} ${dim('for commands')}`);
+  })();
 } else {
   program.parse(process.argv);
 }

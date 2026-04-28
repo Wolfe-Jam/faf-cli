@@ -1,6 +1,6 @@
 {
   "name": "faf-cli",
-  "version": "6.3.2",
+  "version": "6.3.3",
   "description": "Persistent AI Context Standard — project DNA for AI. IANA-registered. Anthropic-approved.",
   "type": "module",
   "icon": "https://faf.one/orange-smiley.svg",
@@ -25,8 +25,8 @@
   "scripts": {
     "dev": "bun src/cli.ts",
     "build": "bun build src/cli.ts --outfile dist/cli.js --target=node --minify --external faf-scoring-kernel --external open && bun build src/index.ts --outfile dist/index.js --target=node --minify --external faf-scoring-kernel --external open",
-    "compile": "bun build src/cli.ts --compile --bytecode --minify --outfile faf",
-    "compile:all": "bun build src/cli.ts --compile --target=bun-darwin-arm64 --outfile faf-darwin-arm64 && bun build src/cli.ts --compile --target=bun-darwin-x64 --outfile faf-darwin-x64 && bun build src/cli.ts --compile --target=bun-linux-x64 --outfile faf-linux-x64 && bun build src/cli.ts --compile --target=bun-windows-x64 --outfile faf-windows-x64.exe",
+    "compile": "bun build src/cli.ts --compile --bytecode --minify --sourcemap --outfile faf",
+    "compile:all": "bun build src/cli.ts --compile --bytecode --minify --sourcemap --target=bun-darwin-arm64 --outfile faf-darwin-arm64 && bun build src/cli.ts --compile --bytecode --minify --sourcemap --target=bun-darwin-x64 --outfile faf-darwin-x64 && bun build src/cli.ts --compile --bytecode --minify --sourcemap --target=bun-linux-x64 --outfile faf-linux-x64 && bun build src/cli.ts --compile --bytecode --minify --sourcemap --target=bun-windows-x64 --outfile faf-windows-x64.exe",
     "test": "bun test",
     "test:watch": "bun test --watch",
     "lint": "eslint src/**/*.ts",
