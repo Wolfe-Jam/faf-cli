@@ -2,9 +2,11 @@
   <img src="https://www.faf.one/orange-smiley.svg" alt="FAF" width="40" />
   <div>
     <h1 style="margin: 0; color: #000000;">faf-cli</h1>
-    <p style="margin: 4px 0 0 0;"><strong>The package.json for AI Context</strong></p>
+    <p style="margin: 4px 0 0 0;"><strong>Persistent Project Context for AI. Define once. Run anywhere.</strong></p>
   </div>
 </div>
+
+**FAF defines. MD instructs. AI codes.**
 
 [![TAF](./badge.svg)](https://github.com/Wolfe-Jam/faf-taf-git)
 [![CI](https://github.com/Wolfe-Jam/faf-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/Wolfe-Jam/faf-cli/actions/workflows/ci.yml)
