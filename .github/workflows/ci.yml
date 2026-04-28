@@ -8,7 +8,7 @@ on:
 
 env:
   NODE_VERSION: '20.x'
-  BUN_VERSION: '1.x'
+  BUN_VERSION: '1.3.13'
 
 jobs:
   # Security Check
@@ -195,7 +195,7 @@ jobs:
           fi
 
       - name: Generate TAF Receipt
-        uses: Wolfe-Jam/faf-taf-git@v2.1.0
+        uses: Wolfe-Jam/faf-taf-git@v2.1.1
         with:
           test-output-file: /tmp/test-output.txt
           auto-commit: 'true'
