@@ -193,6 +193,8 @@ jobs:
     name: 🏷️ Create GitHub Release
     needs: [validate, test-matrix, build-artifacts, changelog]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Required by softprops/action-gh-release to create the GitHub Release
 
     steps:
       - name: 📦 Checkout repository
