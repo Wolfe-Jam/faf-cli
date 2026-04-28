@@ -5,6 +5,91 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.3.3] - 2026-04-28 — Build Resilience + Hygiene
+
+### Fixed
+
+- **P0 install crash** — `npm install -g faf-cli` followed by `faf info`
+  was crashing with "faf-scoring-kernel not installed" on v6.0.12 →
+  v6.3.0. Bun was inlining `faf-scoring-kernel` and `open` into the
+  bundle, baking the build-machine `__dirname` as a string literal.
+  On user machines the path didn't exist and the WASM/binary loaders
+  failed. Fixed by externalizing both deps in the `bun build` config
+  so they resolve at runtime via standard Node module resolution.
+- **`faf --version` drifted** — `cli.ts` had a hardcoded
+  `const VERSION = '6.0.8'` that never got updated. Every release
+  since v6.0.8 reported the wrong version. Now reads dynamically from
+  `package.json` via `require`.
+- **`bun run compile` regression** — top-level `await` in `cli.ts` was
+  tolerated by `bun build` but rejected by `bun build --compile`.
+  Wrapped the affected branch in an async IIFE; standalone-binary
+  builds (`faf-darwin-arm64`, `-x64`, `faf-linux-x64`,
+  `faf-windows-x64.exe`) work again.
+- **GitHub Release CI** — the `Create GitHub Release` step in the
+  release pipeline was failing with HTTP 403 because the job had no
+  explicit `permissions` block; GITHUB_TOKEN inherited read-only
+  defaults. Added `permissions: contents: write`.
+- **CI on v6 branch** — Championship CI/CD only listened to
+  `main` + `develop`, so every commit on the v6 default branch went
+  unvalidated. Added `v6` to the trigger branches; surfaced and fixed
+  six pre-existing v6 issues that had rotted unnoticed: lockfile
+  drift, missing `typescript-eslint` package, yaml CVE, missing Bun
+  setup in Node Smoke matrix, git identity in temp-repo tests.
+
+### Added
+
+- **Prepublish no-hardcode guard** — `npm publish` now greps `dist/`
+  for build-machine path patterns (`/Users/`, `/home/runner/`,
+  `/private/var/`) and refuses to publish if any leak. Runs via
+  `prepublishOnly`. Catches future bundler regressions of the
+  v6.0.12 → v6.3.0 class before they reach users.
+- **Build-invariant tests** — two tests in `tests/meta.test.ts` lock
+  the no-hardcode property as a unit-test concern, not just a
+  prepublish concern. Runs on every `bun test`.
+- **Packed-tarball smoke test in CI** — Node Smoke matrix now does
+  `npm pack` + install from tarball + run `faf info` + assert
+  `--version` matches `package.json`. Tests the actual user
+  experience, not the dev tree.
+- **Deterministic Bun in CI** — `BUN_VERSION` pinned to `1.3.13`
+  (was wildcard `1.x`). Every CI build is now reproducible against a
+  specific Bun. Bumping is now an explicit commit.
+
+### Changed
+
+- `@anthropic-ai/sdk` `^0.74.0` → `^0.91.1` (optionalDep used by
+  `faf ai` enhance / analyze). Public API surface unchanged; opens
+  the door to memory tool, typed tool helpers, and workspace-isolated
+  prompt caching in future work.
+- `open` `8.4.2` → `^11.0.0`. Package went ESM-only at v9; converted
+  the call in `pro.ts` to `import('open')` (dynamic, fire-and-forget).
+- `faf-taf-git` action `v2.1.0` → `v2.1.1`. Picks up the upstream
+  stash-before-checkout fix; TAF Receipt was failing for 5 weeks.
+- `compile:all` script now matches `compile`: `--bytecode --minify`
+  applied to all four cross-platform binaries.
+
+### Technical
+
+- 350 tests (was 348), 0 failures, 1484 expects, 40 files
+- Local validation: tests + build + hardcode guard + compile binary
+  + packed-tarball install + `--version` match all green
+- CI on v6 branch: 6 consecutive green Championship CI/CD runs
+- `dist/cli.js`: 296 KB, `dist/index.js`: 5.7 KB, install size 328 KB
+- Compiled binary: 66 MB (Darwin arm64)
+
+### Notes
+
+- Versions v6.3.1 and v6.3.2 were release markers in git (release
+  cadence discipline) but never published to npm. Users upgrade
+  directly from v6.3.0 → v6.3.3.
+- Sourcemap addition to the dist build was attempted and reverted —
+  Bun 1.3.11's `--sourcemap=linked` + `--outfile` has a bug that
+  pollutes `src/`. Will revisit when Bun 1.3.13 is locally available.
+- Lint surfaces 196 pre-existing issues (111 errors, 85 warnings).
+  Set to `continue-on-error: true` per the "lint never gates the
+  badge" doctrine. Real cleanup deferred to a focused session.
+
+---
+
 ## [6.0.8] - 2026-03-27 — Next.js Edge Cases
 
 ### Fixed
