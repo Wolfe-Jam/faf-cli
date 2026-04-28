@@ -137,3 +137,7 @@ wrangler.jsonc
 *.fafb
 AGENTS.md
 GEMINI.md
+
+# Compile binary + sourcemap outputs (`bun run compile`)
+/faf
+/cli.js.map
