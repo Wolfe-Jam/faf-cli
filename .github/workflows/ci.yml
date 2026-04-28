@@ -129,6 +129,35 @@ jobs:
           node dist/cli.js score test.faf
           node dist/cli.js check test.faf
 
+      # Pack-and-install smoke test — catches the v6.3.0 class of bug where
+      # the local build works but the published tarball crashes for end users.
+      # Tests the actual user experience: `npm install -g <tarball>` + `faf info`.
+      - name: Packed-tarball smoke test
+        run: |
+          set -euo pipefail
+          TARBALL_DIR=$(mktemp -d)
+          npm pack --pack-destination "$TARBALL_DIR" >/dev/null
+          TARBALL=$(ls "$TARBALL_DIR"/faf-cli-*.tgz | head -1)
+          echo "::group::Tarball contents"
+          tar -tzf "$TARBALL" | head -20
+          echo "::endgroup::"
+          # Install globally from the tarball into a fresh prefix
+          INSTALL_PREFIX=$(mktemp -d)
+          npm install --prefix "$INSTALL_PREFIX" --no-save --no-audit --no-fund "$TARBALL"
+          # Run the binary from that fresh install — this is what users get
+          BIN="$INSTALL_PREFIX/node_modules/.bin/faf"
+          # Assert --version matches package.json (catches stale hardcoded VERSION constants)
+          EXPECTED=$(node -p "require('./package.json').version")
+          ACTUAL=$("$BIN" --version)
+          if [ "$EXPECTED" != "$ACTUAL" ]; then
+            echo "::error::Version mismatch from packed tarball — expected '$EXPECTED', got '$ACTUAL'"
+            exit 1
+          fi
+          echo "✓ faf --version: $ACTUAL"
+          echo "::group::faf info"
+          "$BIN" info
+          echo "::endgroup::"
+
   # Code Quality
   quality:
     name: Code Quality
