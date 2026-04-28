@@ -28,7 +28,7 @@ import { goCommand } from './commands/go.js';
 import { aiCommand } from './commands/ai.js';
 import { conductorCommand } from './commands/conductor.js';
 
-const VERSION = '6.0.8';
+const { version: VERSION } = require('../package.json');
 
 const program = new Command();
 
