@@ -5,7 +5,14 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [6.3.3] - 2026-04-28 — Build Resilience + Hygiene
+## [6.3.3] - 2026-04-28 — Build Resilience + Bible-Grade Test Suite
+
+> **The memorable release.** v6.3.3 is the first solid base on `main`
+> (the v6 branch was promoted to default; legacy v5.2.x archived to
+> `sunset-final`). It bundles the P0 fix for the install crash
+> (v6.0.12 → v6.3.0) with the Bible-Grade Test Suite — every lesson
+> learned during the recovery is now an executable contract. CLI
+> powers all other FAF apps; this release locks the foundation.
 
 ### Fixed
 
@@ -35,6 +42,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   six pre-existing v6 issues that had rotted unnoticed: lockfile
   drift, missing `typescript-eslint` package, yaml CVE, missing Bun
   setup in Node Smoke matrix, git identity in temp-repo tests.
+- **`faf git` crashed on unreachable URLs** — `execSync('git clone')`
+  threw a raw error that propagated to the user as a stack trace.
+  Now wrapped in try/catch with a friendly `Error: could not clone
+  <url>\n  <reason>` message; exits 1 cleanly. Cleanup via finally
+  still removes the temp dir on every code path.
 
 ### Added
 
@@ -53,6 +65,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Deterministic Bun in CI** — `BUN_VERSION` pinned to `1.3.13`
   (was wildcard `1.x`). Every CI build is now reproducible against a
   specific Bun. Bumping is now an explicit commit.
+- **WJTTC Build Resilience suite** (`tests/wjttc/build-resilience.test.ts`)
+  — 13 tests in three F1-inspired tiers covering every lesson
+  learned during the v6.0.12 → v6.3.3 recovery. BRAKE: production-
+  critical (no hardcoded paths, kernel/open externalized, version
+  drift, dist artifacts). ENGINE: dev/CI quality (top-level await
+  detection, CHANGELOG present, lockfile sync, ESLint config
+  resolvable). AERO: drift detection (semver, `npm audit`, engines
+  field, CHANGELOG-version match). Skip audit gate via
+  `WJTTC_SKIP_AUDIT=1` for fast local loops.
+- **WJTTC Kernel Stress suite** (`tests/wasm/kernel-stress.test.ts`)
+  — 19 tests exercising the WASM scoring kernel at boundaries the
+  happy-path tests didn't cover: 50KB string values, 200 extra slots,
+  BOM markers, deeply nested YAML, Unicode roundtrip, mixed
+  tabs/spaces, 100 parallel `score()` calls (consistency), mixed
+  score+validate+compile under concurrency, compile→decompile
+  determinism, FAFB magic-header invariant, and four binary-corruption
+  scenarios (empty bytes, garbage, tampered magic, truncated FAFb).
+  Every downstream FAF app trusts the kernel not to crash the host
+  process — this suite enforces that contract.
+- **Network-failure tests for `faf git`** — three new tests verify
+  clean exits on missing URL, unreachable URL (`.invalid` TLD per
+  RFC 2606 — DNS-fails without internet), and malformed URL.
+- **Bible-Grade command-coverage uplift** — four under-tested commands
+  bulked up to ≥116% test:src LOC ratio:
+    - `ai` (was 25.8%) → 116% — subcommand dispatch, missing API key /
+      missing .faf paths, all-slots-populated early-exit (uses real
+      SLOTS module, no API call ever attempted), help-text contracts.
+    - `sync` (was 32.3%) → 148% — direction logic (auto/push/pull),
+      mtime-aware auto direction, pull-with-no-CLAUDE.md error path,
+      `generateClaudeMd` determinism + slotignored skip + empty
+      project safety.
+    - `go` (was 47.2%) → 150% — error paths, all-slots-populated
+      early-exit, session resume (corrupted JSON graceful-fail, valid
+      session logs 1-indexed slot number).
+    - `demo` (was 32.7%) → 149% — output contract (header + steps +
+      completion + `faf init` CTA), kernel-exercised end-to-end
+      (asserts a percentage / tier marker is emitted), no temp-file
+      leaks, no cwd modification, two-invocations-no-state-leak
+      robustness.
 
 ### Changed
 
@@ -67,14 +118,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `compile:all` script now matches `compile`: `--bytecode --minify`
   applied to all four cross-platform binaries.
 
+### Branch topology
+
+- **`v6` → `main`** rename — v6 was the GitHub default branch carrying
+  all the active rewrite work; legacy v5.2.x `main` was retained but
+  dormant. v6 is now `main`; the legacy line moved to `sunset-final`
+  (GitHub auto-redirects old refs ~3 months). First green Championship
+  CI/CD run on the renamed `main` confirmed the topology change.
+  `branches: [ main, develop ]` is back to canonical.
+
 ### Technical
 
-- 350 tests (was 348), 0 failures, 1484 expects, 40 files
+- **408 tests** (was 348 at the start of the day, 350 after the
+  initial v6.3.3 push), **0 failures**, 1707 expects, 42 files
 - Local validation: tests + build + hardcode guard + compile binary
-  + packed-tarball install + `--version` match all green
-- CI on v6 branch: 6 consecutive green Championship CI/CD runs
+  + packed-tarball install + `--version` match all green (~13s)
+- CI on `main`: green Championship CI/CD runs across the entire
+  recovery + Bible-Grade sweep
 - `dist/cli.js`: 296 KB, `dist/index.js`: 5.7 KB, install size 328 KB
 - Compiled binary: 66 MB (Darwin arm64)
+- Three-layer no-hardcode defense: `meta.test.ts` build invariants
+  (test-time) + `check:no-hardcode` (prepublish gate) + packed-tarball
+  smoke test (CI gate)
 
 ### Notes
 
@@ -87,6 +152,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Lint surfaces 196 pre-existing issues (111 errors, 85 warnings).
   Set to `continue-on-error: true` per the "lint never gates the
   badge" doctrine. Real cleanup deferred to a focused session.
+- Test B (externalize-kernel substring invariant) deliberately not
+  added — already covered by the externalize tests in WJTTC Build
+  Resilience and Kernel Stress suites.
+
+### Why v6.3.3 is memorable
+
+This release is the moment faf-cli became the **trusted foundation**
+for every other FAF app. Before today: a working CLI with a hidden
+P0 install bug for ~25k+ downloads, broken compile pipeline, drifted
+version constants, broken release workflow, untested v6 branch,
+under-tested flagship commands, and no contract on kernel resilience.
+After today: every one of those gaps is closed, locked as an
+executable test, and gated at three points (test, prepublish, CI).
+When the WJTTC suite is green, every lesson learned is provably
+fixed. CLI powers everything else; v6.3.3 makes that promise true.
 
 ---
 
