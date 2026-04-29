@@ -45,7 +45,7 @@ bundled inline; users hit "faf-scoring-kernel not installed" on
 - **Branch topology** — `v6` promoted to `main`, legacy v5.2.x
   archived to `sunset-final`
 
-See the [v6.3.3 entry](#633---2026-04-28--build-resilience--bible-grade-test-suite)
+See the [v6.3.3 entry](#633---2026-04-28--build-resilience--next-level-wjttc-testing)
 below for the detailed breakdown of every change.
 
 ### FAF defines. MD instructs. AI codes.
@@ -57,7 +57,7 @@ below for the detailed breakdown of every change.
 > **The memorable release.** v6.3.3 is the first solid base on `main`
 > (the v6 branch was promoted to default; legacy v5.2.x archived to
 > `sunset-final`). It bundles the P0 fix for the install crash
-> (v6.0.12 → v6.3.0) with the Bible-Grade Test Suite — every lesson
+> (v6.0.12 → v6.3.0) with next-level WJTTC testing — every lesson
 > learned during the recovery is now an executable contract. CLI
 > powers all other FAF apps; this release locks the foundation.
 
@@ -134,7 +134,7 @@ below for the detailed breakdown of every change.
 - **Network-failure tests for `faf git`** — three new tests verify
   clean exits on missing URL, unreachable URL (`.invalid` TLD per
   RFC 2606 — DNS-fails without internet), and malformed URL.
-- **Bible-Grade command-coverage uplift** — four under-tested commands
+- **WJTTC command-coverage uplift** — four under-tested commands
   bulked up to ≥116% test:src LOC ratio:
     - `ai` (was 25.8%) → 116% — subcommand dispatch, missing API key /
       missing .faf paths, all-slots-populated early-exit (uses real
@@ -181,7 +181,7 @@ below for the detailed breakdown of every change.
 - Local validation: tests + build + hardcode guard + compile binary
   + packed-tarball install + `--version` match all green (~13s)
 - CI on `main`: green Championship CI/CD runs across the entire
-  recovery + Bible-Grade sweep
+  recovery + WJTTC sweep
 - `dist/cli.js`: 296 KB, `dist/index.js`: 5.7 KB, install size 328 KB
 - Compiled binary: 66 MB (Darwin arm64)
 - Three-layer no-hardcode defense: `meta.test.ts` build invariants
