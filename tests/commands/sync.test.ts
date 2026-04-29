@@ -62,7 +62,9 @@ describe('sync command — generateClaudeMd output contract', () => {
       faf_version: '2.5.0',
       project: { name: 'deterministic', goal: 'same in same out' },
     };
-    const stripTimestamp = (s: string) => s.replace(/Last Sync.*$/m, 'Last Sync: <timestamp>');
+    // Strip ISO 8601 timestamps (the only non-deterministic content). Robust
+    // to which marker text the implementation uses around the timestamp.
+    const stripTimestamp = (s: string) => s.replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z/g, '<TS>');
     const a = stripTimestamp(generateClaudeMd(data));
     const b = stripTimestamp(generateClaudeMd(data));
     expect(a).toBe(b);
