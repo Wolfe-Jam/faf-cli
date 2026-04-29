@@ -14,7 +14,9 @@ describe('faf e2e — full lifecycle', () => {
   let testDir: string;
   let originalCwd: string;
   const cli = join(__dirname, '../src/cli.ts');
-  const run = (cmd: string) => execSync(`bun ${cli} ${cmd}`, { cwd: testDir, encoding: 'utf-8', timeout: 15000 });
+  // 30s timeout — Windows CI runners have slower Bun startup than Linux/macOS;
+  // 15s was tight enough that `score --status` flaked on windows-latest/Node 22.
+  const run = (cmd: string) => execSync(`bun ${cli} ${cmd}`, { cwd: testDir, encoding: 'utf-8', timeout: 30000 });
 
   beforeEach(() => {
     testDir = join(tmpdir(), `faf-e2e-${Date.now()}`);
