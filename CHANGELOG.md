@@ -7,8 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [6.4.0] - 2026-04-29 — The Foundation Edition
 
-The Foundation Edition. The proper-protocol publish of the Build
-Resilience + Bible-Grade work that landed in v6.3.3.
+> **Robust. Reliable. Next-level WJTTC tested.**
+> **The foundational CLI for all FAF MCPs, apps, skills, and tools.**
+
+The Foundation Edition. Every FAF surface — Claude / Grok / Gemini /
+Rust / Python / WASM MCPs and SDKs, every skill, every downstream app
+— builds on this CLI. v6.4.0 is the version that makes that
+foundation provably solid.
+
+Published through the full `/pubpro` protocol (the v6.3.3 publish
+shipped the same artifact but bypassed the ceremony).
 
 **Upgrade from v6.3.x users:** functionally identical to v6.3.3,
 but v6.4.0 is now `latest` on npm. Use this.
