@@ -1,8 +1,10 @@
 <div style="display: flex; align-items: center; gap: 12px;">
   <img src="https://www.faf.one/orange-smiley.svg" alt="FAF" width="40" />
   <div>
-    <h1 style="margin: 0; color: #000000;">faf-cli</h1>
-    <p style="margin: 4px 0 0 0;"><strong>Persistent Project Context for AI. Define once. Run anywhere.</strong></p>
+    <h1 style="margin: 0; color: #000000;">faf-cli v6.4</h1>
+    <p style="margin: 2px 0 0 0; font-size: 0.85em; letter-spacing: 0.12em; opacity: 0.7; text-transform: uppercase;"><strong>The Foundation Edition</strong></p>
+    <p style="margin: 6px 0 0 0;"><strong>Persistent Project Context for AI.</strong></p>
+    <p style="margin: 0;"><strong>Define once. Run anywhere.</strong></p>
   </div>
 </div>
 
@@ -22,12 +24,13 @@
 project/
 ├── package.json     ← npm reads this
 ├── project.faf      ← AI reads this
+├── README.md        ← humans read this
 └── src/
 ```
 
-> **Every building requires a foundation. `project.faf` is AI's foundation.**
+> **Every building requires a foundation. FAF is AI's foundational layer.**
 >
-> You have a `package.json`. Add a `project.faf`. Done.
+> You have a `package.json`. AI needs you to add a `project.faf`. Done.
 
 **Git-Native.** `project.faf` versions with your code — every clone, every fork, every checkout gets full AI context. No setup, no drift, no re-explaining.
 
@@ -36,10 +39,12 @@ project/
 ## Install
 
 ```bash
-bunx faf-cli auto                  # Bun — zero install, fastest path
-npx faf-cli auto                   # npm — works everywhere
-brew install faf-cli && faf auto   # Homebrew
+bunx faf                      # Bun — zero install, fastest path
+npx faf                       # npm — works everywhere
+brew install faf-cli && faf   # Homebrew
 ```
+
+> `faf` is shorthand for `faf-cli auto` — same behavior, fewer keystrokes.
 
 ---
 
@@ -63,9 +68,9 @@ v6 is a ground-up rewrite. All-in on Bun — same toolchain as Claude Code.
 | **Language** | TypeScript | TypeScript |
 | **Compile** | Bun bytecode | `bun build --compile` |
 
-312 tests in ~10s. 290KB bundle in 2.4s. Single portable binary, 4 platforms. npx backward-compatible.
+408 tests in ~13s. 296KB bundle in 2.4s. Single portable binary, 4 platforms. npx backward-compatible.
 
-26 commands. 312 tests. 5,292 lines. 93% smaller than v5.
+26 commands. 408 tests. WJTTC-tested. 93% smaller than v5.
 
 ```
 commands → interop → core → wasm
@@ -128,12 +133,14 @@ bunx faf-cli go                # Interactive interview to gold code
 
 | Tier | Score | Status |
 |------|-------|--------|
-| 🏆 Trophy | 100% | AI Optimized — Gold Code |
-| 🥇 Gold | 99%+ | Near-perfect |
-| 🥈 Silver | 95%+ | Excellent |
-| 🥉 Bronze | 85%+ | Production ready |
-| 🟡 Yellow | 55%+ | AI flipping coins |
-| 🔴 Red | <55% | AI working blind |
+| 🏆 **Trophy** | 100% | AI Optimized — Gold Code |
+| ★ **Gold** | 99%+ | Near-perfect |
+| ◆ **Silver** | 95%+ | Excellent |
+| ◇ **Bronze** | 85%+ | Production ready |
+| ● **Green** | 70%+ | Solid foundation |
+| ● **Yellow** | 55%+ | AI flipping coins |
+| ○ **Red** | <55% | AI working blind |
+| **♡** **White** | 0% | No context at all |
 
 ---
 
@@ -178,11 +185,17 @@ src/
 
 ## Testing
 
+> **Robust. Reliable. Next-level WJTTC tested.** — The Foundation Edition.
+
 ```bash
-bun test                       # 312 tests, 39 files, ~12s
+bun test                       # 408 tests, 42 files, ~13s
 ```
 
-Full e2e lifecycle test runs every command in sequence: init → auto → score → edit → sync → export → compile → decompile → taf → recover → check. Test reports in `reports/`.
+- **WJTTC Build Resilience** (13) — every regression class locked.
+- **WJTTC Kernel Stress** (19) — WASM kernel boundary tests.
+- **e2e lifecycle** — every command in sequence.
+
+Test reports in `reports/`.
 
 ---
 
