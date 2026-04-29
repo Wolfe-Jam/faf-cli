@@ -295,9 +295,19 @@ jobs:
 
       - name: 📥 Install published package
         run: |
-          echo "🔄 Installing published version..."
-          npm install -g faf-cli@${{ needs.validate.outputs.version }}
-          faf --version
+          # The release.yml fires on tag push, but /pubpro publishes to npm
+          # AFTER the GitHub Release is created. So at first run, the version
+          # may not be on npm yet. Skip-with-warning if not present; re-run the
+          # workflow manually (workflow_dispatch) once /pubpro completes.
+          VERSION="${{ needs.validate.outputs.version }}"
+          if npm view "faf-cli@${VERSION}" version >/dev/null 2>&1; then
+            echo "🔄 Installing published version v${VERSION}..."
+            npm install -g "faf-cli@${VERSION}"
+            faf --version
+          else
+            echo "::warning::Version v${VERSION} not yet on npm — Performance Validation skipped. Re-run this workflow after /pubpro publish to validate."
+            exit 0
+          fi
 
       - name: 🏎️ Performance Tests
         run: |
