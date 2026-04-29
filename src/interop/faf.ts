@@ -1,4 +1,5 @@
 import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { join, dirname } from 'path';
 import { parse, stringify } from 'yaml';
 import type { FafData } from '../core/types.js';
 
@@ -22,15 +23,21 @@ export function readFafRaw(path: string): string {
 /** Find the .faf file in a directory (walks up) */
 export function findFafFile(dir: string = process.cwd()): string | null {
   const candidates = ['project.faf', '.faf'];
+  // Use path.join for cross-platform separator handling — earlier
+  // template-literal `${dir}/${name}` produced forward-slash paths
+  // even on Windows, breaking strict path equality and any consumer
+  // that path-compared the result.
   for (const name of candidates) {
-    const full = `${dir}/${name}`;
+    const full = join(dir, name);
     if (existsSync(full)) return full;
   }
-  // Walk up one level
-  const parent = dir.replace(/\/[^/]+$/, '');
+  // Walk up one level — use path.dirname for cross-platform parent
+  // resolution. The earlier regex `dir.replace(/\/[^/]+$/, '')`
+  // only matched POSIX separators and silently no-op'd on Windows.
+  const parent = dirname(dir);
   if (parent !== dir) {
     for (const name of candidates) {
-      const full = `${parent}/${name}`;
+      const full = join(parent, name);
       if (existsSync(full)) return full;
     }
   }

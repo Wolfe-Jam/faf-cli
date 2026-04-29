@@ -1,5 +1,5 @@
 import { existsSync, statSync } from 'fs';
-import { join } from 'path';
+import { join, dirname } from 'path';
 import { findFafFile, readFaf, readFafRaw, writeFaf } from '../interop/faf.js';
 import { readClaudeMd, writeClaudeMd, generateClaudeMd, parseClaudeMd } from '../interop/claude.js';
 import { readMemoryMd, writeMemoryMd } from '../interop/memory.js';
@@ -69,7 +69,11 @@ function pushSync(fafPath: string, dir: string): void {
 }
 
 function pullSync(fafPath: string, claudePath: string): void {
-  const claudeContent = readClaudeMd(claudePath.replace('/CLAUDE.md', ''));
+  // Use dirname() to extract the directory portably — claudePath comes from
+  // join(dir, 'CLAUDE.md') which produces backslashes on Windows. The previous
+  // claudePath.replace('/CLAUDE.md', '') only worked on POSIX path separators
+  // and silently returned the unchanged path on Windows, breaking pull-sync.
+  const claudeContent = readClaudeMd(dirname(claudePath));
   if (!claudeContent) {
     console.error('CLAUDE.md not found.');
     return;
