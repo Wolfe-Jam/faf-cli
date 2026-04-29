@@ -52,13 +52,19 @@ describe('sync command — generateClaudeMd output contract', () => {
     expect(content.length).toBeGreaterThan(0);
   });
 
-  test('generateClaudeMd output is deterministic for same input', () => {
+  test('generateClaudeMd output is stable across calls (modulo timestamp)', () => {
+    // generateClaudeMd embeds a `Last Sync: <ISO timestamp>` line, so byte-
+    // identical determinism is not a real invariant. What IS invariant is
+    // that the structural content (project metadata, sync marker, body) stays
+    // the same — only the timestamp moves. Strip the timestamp line and
+    // assert the rest matches.
     const data = {
       faf_version: '2.5.0',
       project: { name: 'deterministic', goal: 'same in same out' },
     };
-    const a = generateClaudeMd(data);
-    const b = generateClaudeMd(data);
+    const stripTimestamp = (s: string) => s.replace(/Last Sync.*$/m, 'Last Sync: <timestamp>');
+    const a = stripTimestamp(generateClaudeMd(data));
+    const b = stripTimestamp(generateClaudeMd(data));
     expect(a).toBe(b);
   });
 });
