@@ -294,6 +294,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: 📥 Install published package
+        id: install
         run: |
           # The release.yml fires on tag push, but /pubpro publishes to npm
           # AFTER the GitHub Release is created. So at first run, the version
@@ -304,12 +305,14 @@ jobs:
             echo "🔄 Installing published version v${VERSION}..."
             npm install -g "faf-cli@${VERSION}"
             faf --version
+            echo "skipped=false" >> "$GITHUB_OUTPUT"
           else
             echo "::warning::Version v${VERSION} not yet on npm — Performance Validation skipped. Re-run this workflow after /pubpro publish to validate."
-            exit 0
+            echo "skipped=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: 🏎️ Performance Tests
+        if: steps.install.outputs.skipped != 'true'
         run: |
           echo "Testing v6 command speed..."
 
