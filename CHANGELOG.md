@@ -5,6 +5,45 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.4.0] - 2026-04-29 — The Foundation Edition
+
+The Foundation Edition. The proper-protocol publish of the Build
+Resilience + Bible-Grade work that landed in v6.3.3.
+
+**Upgrade from v6.3.x users:** functionally identical to v6.3.3,
+but v6.4.0 is now `latest` on npm. Use this.
+
+**Upgrade from v6.0.12 → v6.3.0 users:** critical — fixes the install
+crash that affected every version since v6.0.12 (kernel + open were
+bundled inline; users hit "faf-scoring-kernel not installed" on
+`faf info`).
+
+### What's bundled
+
+- **P0 install fix** + 3-layer no-hardcode defense (test-time
+  invariants + prepublish guard + packed-tarball CI)
+- **408 tests, 0 fail** — WJTTC Build Resilience suite (13 tests
+  locking 11 lessons-learned classes), WJTTC Kernel Stress suite
+  (19 boundary / concurrency / corruption tests), command-coverage
+  uplift (`ai`, `sync`, `go`, `demo` all at ≥116% test:src ratio)
+- **`bun run compile` restored** — top-level await IIFE wrap,
+  `--bytecode --minify` on all cross-platform binaries
+- **Deps refresh** — `@anthropic-ai/sdk` ^0.74 → ^0.91.1,
+  `open` 8 → ^11 (ESM dynamic import), Bun pinned to `1.3.13` for
+  deterministic CI
+- **`faf git` handles network failures gracefully** — was crashing
+  with raw `execSync` stack traces on unreachable URLs; now exits
+  cleanly with friendly message
+- **Branch topology** — `v6` promoted to `main`, legacy v5.2.x
+  archived to `sunset-final`
+
+See the [v6.3.3 entry](#633---2026-04-28--build-resilience--bible-grade-test-suite)
+below for the detailed breakdown of every change.
+
+### FAF defines. MD instructs. AI codes.
+
+---
+
 ## [6.3.3] - 2026-04-28 — Build Resilience + Bible-Grade Test Suite
 
 > **The memorable release.** v6.3.3 is the first solid base on `main`
