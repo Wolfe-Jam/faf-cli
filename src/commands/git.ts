@@ -21,7 +21,14 @@ export function gitCommand(url: string): void {
 
   try {
     console.log(dim(`cloning ${url}...`));
-    execSync(`git clone --depth 1 ${repoUrl} ${tmpDir}`, { stdio: 'pipe' });
+    try {
+      execSync(`git clone --depth 1 ${repoUrl} ${tmpDir}`, { stdio: 'pipe' });
+    } catch (err) {
+      const stderr = (err as { stderr?: Buffer })?.stderr?.toString() ?? '';
+      const reason = stderr.trim().split('\n').slice(-2).join(' ').trim() || 'git clone failed';
+      console.error(`Error: could not clone ${url}\n\n  ${reason}`);
+      process.exit(1);
+    }
 
     const data = detectStack(tmpDir);
     const outputPath = join(process.cwd(), 'project.faf');
