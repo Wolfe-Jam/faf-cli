@@ -52,7 +52,7 @@ below for the detailed breakdown of every change.
 
 ---
 
-## [6.3.3] - 2026-04-28 — Build Resilience + Bible-Grade Test Suite
+## [6.3.3] - 2026-04-28 — Build Resilience + Next-Level WJTTC Testing
 
 > **The memorable release.** v6.3.3 is the first solid base on `main`
 > (the v6 branch was promoted to default; legacy v5.2.x archived to
