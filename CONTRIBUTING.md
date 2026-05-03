@@ -1,3 +1,6 @@
+<!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
+<!-- faf: doc=contributing | canonical=project.faf | family=FAF -->
+
 # Contributing to faf-cli
 
 Thank you for your interest in contributing to faf-cli, the command-line tool for .faf (Foundational AI-context Format). This document provides guidelines for contributing to the project.

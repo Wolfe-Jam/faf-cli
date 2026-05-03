@@ -1,3 +1,6 @@
+<!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
+<!-- faf: doc=changelog | latest=v6.4.0 | canonical=project.faf | family=FAF -->
+
 # Changelog
 
 All notable changes to faf-cli will be documented in this file.

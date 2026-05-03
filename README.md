@@ -1,3 +1,6 @@
+<!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
+<!-- faf: doc=readme | canonical=project.faf | score=100 | family=FAF -->
+
 <div style="display: flex; align-items: center; gap: 12px;">
   <img src="https://www.faf.one/orange-smiley.svg" alt="FAF" width="40" />
   <div>
