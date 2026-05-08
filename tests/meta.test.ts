@@ -81,7 +81,11 @@ describe('YOLO Infrastructure Safety', () => {
     expect(pkg.dependencies?.commander).toBeDefined();
     expect(pkg.dependencies?.['faf-scoring-kernel']).toBeDefined();
     expect(pkg.dependencies?.inquirer).toBeUndefined();
-    expect(pkg.scripts?.test).toBe('bun test');
+    // Lock the test runner (bun) but allow flags — e.g. `--timeout=30000` was
+    // added in v6.4.1 to give subprocess-based tests room before bun's outer
+    // 5s wall kills them. Locking the exact string would force every flag
+    // change through this assertion.
+    expect(pkg.scripts?.test).toMatch(/^bun test\b/);
   });
 
   test('source files are in correct directories', () => {

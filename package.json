@@ -1,6 +1,6 @@
 {
   "name": "faf-cli",
-  "version": "6.4.0",
+  "version": "6.4.1",
   "description": "Persistent AI Context Standard — project DNA for AI. IANA-registered. Anthropic-approved.",
   "type": "module",
   "icon": "https://faf.one/orange-smiley.svg",
@@ -27,8 +27,8 @@
     "build": "bun build src/cli.ts --outdir dist --target=node --minify --sourcemap=linked --external faf-scoring-kernel --external open && bun build src/index.ts --outdir dist --target=node --minify --sourcemap=linked --external faf-scoring-kernel --external open",
     "compile": "bun build src/cli.ts --compile --bytecode --minify --outfile faf",
     "compile:all": "bun build src/cli.ts --compile --bytecode --minify --target=bun-darwin-arm64 --outfile faf-darwin-arm64 && bun build src/cli.ts --compile --bytecode --minify --target=bun-darwin-x64 --outfile faf-darwin-x64 && bun build src/cli.ts --compile --bytecode --minify --target=bun-linux-x64 --outfile faf-linux-x64 && bun build src/cli.ts --compile --bytecode --minify --target=bun-windows-x64 --outfile faf-windows-x64.exe",
-    "test": "bun test",
-    "test:watch": "bun test --watch",
+    "test": "bun test --timeout=30000",
+    "test:watch": "bun test --watch --timeout=30000",
     "lint": "eslint src/**/*.ts",
     "format": "prettier --write 'src/**/*.ts'",
     "check:no-hardcode": "! grep -rEln '/(Users|home/runner|private/var)/' dist/ || (echo '❌ Hardcoded build-machine path leaked into dist — see grep output above. Externalize the offending dep in the build script.'; exit 1)",

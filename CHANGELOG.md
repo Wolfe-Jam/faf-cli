@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v6.4.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v6.4.1 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -7,6 +7,40 @@ All notable changes to faf-cli will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [6.4.1] - 2026-05-08 — Drift Cleanup
+
+> **Patch ship. Quiet. Receipts not promises.**
+
+A focused patch closing pre-existing test wall-clock issues, sharpening
+the empty-slot diagnostic, and adding Zig project-type detection. No
+new features. No public-surface claims.
+
+### What's bundled
+
+- **Empty-slot diagnostic** — `displayScore` now names slot paths inline
+  (top 3 + `+N more` overflow) instead of emitting just `${empty} empty`.
+  `faf auto`'s no-op case now shows exactly which slots are blocking
+  improvement; missing-context diagnostic gains its slot keys.
+- **Zig project-type detection** — `detectProjectType` reads `build.zig`
+  + entry-file convention (`src/main.zig` → `cli`; `src/root.zig` →
+  `library`). Was falling through to `library` default for every Zig
+  project regardless of layout.
+- **Test wall-clock fix** — `bun test --timeout=30000` is now the npm
+  test default. Bun's per-test 5s wall was killing subprocess-based
+  tests (`L7: npm ci --dry-run`, `L8: npm audit`, `e2e init`) before
+  their inner subprocess timeout (60s) could complete. Lockfile
+  regenerated to v6.4.0 metadata. `bunfig.toml`'s `timeout` key
+  (silently ignored by `bun test`) removed with inline note.
+
+### Test status
+
+416 tests across 43 files. New WJTTC ENGINE shadows: 4 for the empty-
+slot diagnostic, 4 for Zig project-type detection.
+
+### FAF defines. MD instructs. AI codes.
+
+---
 
 ## [6.4.0] - 2026-04-29 — The Foundation Edition
 

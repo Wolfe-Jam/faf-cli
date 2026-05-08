@@ -122,6 +122,14 @@ export function detectProjectType(dir: string): string {
   const hasMcp = frameworks.some(f => f.slug === 'mcp');
   if (hasMcp) return 'mcp';
 
+  // Zig project-type detection — build.zig + entry-file convention.
+  // src/main.zig → cli (executable); src/root.zig → library.
+  // main.zig wins when both exist (typical: cli with internal lib exports).
+  if (existsSync(join(dir, 'build.zig'))) {
+    if (existsSync(join(dir, 'src/main.zig'))) return 'cli';
+    if (existsSync(join(dir, 'src/root.zig'))) return 'library';
+  }
+
   // Framework repo detection — private workspace monorepo that builds a framework
   const hasSvelte = frameworks.some(f => f.slug === 'svelte' || f.slug === 'sveltekit');
   const isPrivateWorkspace = pkg?.private === true && (

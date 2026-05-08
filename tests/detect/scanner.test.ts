@@ -149,6 +149,35 @@ describe('scanner', () => {
       writePkg({ nuxt: '^3.0.0', vue: '^3.0.0' });
       expect(detectProjectType(testDir)).toBe('fullstack');
     });
+
+    // Issue L — Zig project-type detection beyond language fall-through.
+    // Before: Zig projects defaulted to 'library' regardless of layout.
+    test('Zig: build.zig + src/main.zig → cli', () => {
+      writeFileSync(join(testDir, 'build.zig'), '');
+      mkdirSync(join(testDir, 'src'));
+      writeFileSync(join(testDir, 'src/main.zig'), 'pub fn main() void {}');
+      expect(detectProjectType(testDir)).toBe('cli');
+    });
+
+    test('Zig: build.zig + src/root.zig → library', () => {
+      writeFileSync(join(testDir, 'build.zig'), '');
+      mkdirSync(join(testDir, 'src'));
+      writeFileSync(join(testDir, 'src/root.zig'), 'pub const x = 1;');
+      expect(detectProjectType(testDir)).toBe('library');
+    });
+
+    test('Zig: build.zig + both main.zig + root.zig → cli (executable wins)', () => {
+      writeFileSync(join(testDir, 'build.zig'), '');
+      mkdirSync(join(testDir, 'src'));
+      writeFileSync(join(testDir, 'src/main.zig'), 'pub fn main() void {}');
+      writeFileSync(join(testDir, 'src/root.zig'), 'pub const x = 1;');
+      expect(detectProjectType(testDir)).toBe('cli');
+    });
+
+    test('Zig: build.zig with no entry file falls through to library default', () => {
+      writeFileSync(join(testDir, 'build.zig'), '');
+      expect(detectProjectType(testDir)).toBe('library');
+    });
   });
 
   describe('detectRuntime', () => {

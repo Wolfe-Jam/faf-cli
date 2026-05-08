@@ -1,7 +1,9 @@
 [test]
 # Single-process runner — all tests share state
 # Clean up after yourself: process.env, console, mocks
-timeout = 30000
 root = "./tests"
 
-# Bun discovers *.test.ts recursively from root
+# Bun discovers *.test.ts recursively from root.
+# Per-test timeout is set via the npm test script (--timeout=30000) —
+# bunfig's `timeout` key is silently ignored by `bun test`, only the
+# CLI flag is honored.
