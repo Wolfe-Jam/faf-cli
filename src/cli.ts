@@ -236,8 +236,15 @@ if (process.argv.length <= 2) {
     const DB = '\x1b[48;2;29;29;29m';     // dark bg
     const RS = '\x1b[0m';
     console.log('');
+    // Row 1: back arc — canonical (March 23, commit 7eb1042)
+    // Row 2: body — cell 3 is a SOLID DARK block (DF█ on GB bg) = the eye.
+    // The canonical's `${DB}${G}▀` head-curve at cell 3 already put the eye
+    // there as a subtle dark-bottom-half. Replacing with a full dark cell
+    // makes the eye visible in any rendering (monochrome too) without changing
+    // the silhouette width — `█` and `█` are the same character, just
+    // re-coloured.
     console.log(`${DB} ${G}▄${GB}███████${DB}${G}▄${RS}`);
-    console.log(`${DB} ${GB}${G}█${DB}${G}▀${GB}███████${RS}  ${fafCyan(bold('faf'))} ${dim(`v${VERSION}`)}`);
+    console.log(`${DB} ${GB}${G}█${DF}█${G}███████${RS}  ${fafCyan(bold('faf'))} ${dim(`v${VERSION}`)}`);
     const GR = '\x1b[38;2;39;174;96m';    // grass green
     // Restore Nelly's clean dark gaps between legs (pre-grass-between-feet).
     // The fa74012 fix ("restore Nelly's eye — revert grass between feet") was
