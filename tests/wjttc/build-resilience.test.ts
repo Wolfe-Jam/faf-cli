@@ -176,9 +176,9 @@ describe('WJTTC ENGINE: build pipeline integrity', () => {
   });
 
   // L7
-  // Bun's default test timeout is 5s — npm ci --dry-run reaches the npm registry
-  // and routinely takes 5-15s on a cold cache. Extend to 30s; subprocess timeout
-  // stays at 60s as a hard outer bound.
+  // npm ci --dry-run hits the npm registry. Most days < 15s; on slow registry
+  // days observed up to 42s. Match the subprocess timeout (60s) so the inner
+  // error message wins over a meaningless bun-test wall.
   test('L7: package.json + package-lock.json are in sync (npm ci would pass)', () => {
     try {
       execSync('npm ci --dry-run', {
@@ -194,7 +194,7 @@ describe('WJTTC ENGINE: build pipeline integrity', () => {
         `Run \`npm install\` to resync.\n${stderr || msg}`
       );
     }
-  }, 30_000);
+  }, 60_000);
 
   // L10
   test('L10: ESLint config dependencies are resolvable', () => {

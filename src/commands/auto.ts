@@ -1,41 +1,54 @@
 import { existsSync } from 'fs';
 import { join } from 'path';
 import { detectStack } from '../detect/stack.js';
+import { interrogateRepo } from '../interrogate/index.js';
 import { writeFaf, readFaf, readFafRaw } from '../interop/faf.js';
 import * as kernel from '../wasm/kernel.js';
 import { enrichScore } from '../core/scorer.js';
 import { displayScore } from '../ui/display.js';
 import { bold, dim, fafCyan } from '../ui/colors.js';
-import { APP_TYPE_CATEGORIES, SLOTS } from '../core/slots.js';
+import { APP_TYPE_CATEGORIES, SLOTS, isPlaceholder } from '../core/slots.js';
 
 export function autoCommand(): void {
   const dir = process.cwd();
   const fafPath = join(dir, 'project.faf');
 
+  // Detection: signal-based stack/language/runtime/etc. (existing).
   const detected = detectStack(dir);
+  // Interrogation: per-slot evidence from README + Cargo.toml (no-guess/no-slop).
+  const interrogated = interrogateRepo(dir);
 
   if (existsSync(fafPath)) {
     const existing = readFaf(fafPath);
-    const merged = mergeDetected(existing, detected);
+    // Merge order: existing wins (preserve user edits), then interrogated fills
+    // empties (README/Cargo evidence), then detected fills any remaining empties.
+    const withInterrogated = fillEmpties(existing, interrogated as Record<string, unknown>);
+    const merged = fillEmpties(withInterrogated, detected as Record<string, unknown>);
     writeFaf(fafPath, merged);
     console.log(`${fafCyan('updated')} ${fafPath}`);
   } else {
-    const projectType = detected.project?.type ?? 'library';
+    // New file: detected provides scaffold (slotignored markers), interrogated
+    // overlays evidence-backed values where it has them.
+    const seeded = fillEmpties(
+      detected as Record<string, unknown>,
+      interrogated as Record<string, unknown>,
+    );
+    const projectType = (seeded.project as { type?: string } | undefined)?.type ?? 'library';
     const activeCategories = APP_TYPE_CATEGORIES[projectType] || APP_TYPE_CATEGORIES.library;
 
     for (const slot of SLOTS) {
       if (!activeCategories.includes(slot.category)) {
         const [section, field] = slot.path.split('.');
-        if (section === 'stack' && detected.stack) {
-          (detected.stack as Record<string, string>)[field] = 'slotignored';
+        if (section === 'stack' && seeded.stack) {
+          (seeded.stack as Record<string, string>)[field] = 'slotignored';
         }
-        if (section === 'monorepo' && detected.monorepo) {
-          (detected.monorepo as Record<string, string>)[field] = 'slotignored';
+        if (section === 'monorepo' && seeded.monorepo) {
+          (seeded.monorepo as Record<string, string>)[field] = 'slotignored';
         }
       }
     }
 
-    writeFaf(fafPath, detected);
+    writeFaf(fafPath, seeded);
     console.log(`${fafCyan('created')} ${fafPath}`);
   }
 
@@ -48,14 +61,30 @@ export function autoCommand(): void {
   }
 }
 
-function mergeDetected(existing: Record<string, unknown>, detected: Record<string, unknown>): Record<string, unknown> {
-  const result = { ...existing };
-  for (const [key, value] of Object.entries(detected)) {
-    if (!(key in result) || result[key] === null || result[key] === undefined) {
+/** Fill empty/placeholder slots in `target` with values from `source`.
+ *  `target` wins when its slot is non-empty. Empty here is per `isPlaceholder`
+ *  (covers '', null, undefined, and known placeholder strings) — this is what
+ *  lets interrogated/detected values overwrite the empty-string defaults that
+ *  detectStack writes to human_context. */
+function fillEmpties(
+  target: Record<string, unknown>,
+  source: Record<string, unknown>,
+): Record<string, unknown> {
+  const result = { ...target };
+  for (const [key, value] of Object.entries(source)) {
+    const existing = result[key];
+    if (isPlaceholder(existing)) {
       result[key] = value;
-    } else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-      result[key] = mergeDetected(
-        (result[key] as Record<string, unknown>) ?? {},
+    } else if (
+      typeof value === 'object' &&
+      value !== null &&
+      !Array.isArray(value) &&
+      typeof existing === 'object' &&
+      existing !== null &&
+      !Array.isArray(existing)
+    ) {
+      result[key] = fillEmpties(
+        existing as Record<string, unknown>,
         value as Record<string, unknown>,
       );
     }

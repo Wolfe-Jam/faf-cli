@@ -4,11 +4,11 @@ import type { SlotDef, SlotCategory } from './types.js';
 export const SLOTS: SlotDef[] = [
   // Project Meta (3)
   { index: 1, path: 'project.name', description: 'Project name', category: 'project' },
-  { index: 2, path: 'project.goal', description: 'What the project does', category: 'project' },
+  { index: 2, path: 'project.goal', description: 'Goal (use case)', category: 'project' },
   { index: 3, path: 'project.main_language', description: 'Primary language', category: 'project' },
 
   // Human Context (6)
-  { index: 4, path: 'human_context.who', description: 'Who is building this', category: 'human' },
+  { index: 4, path: 'human_context.who', description: 'Who is this for?', category: 'human' },
   { index: 5, path: 'human_context.what', description: 'What are they building', category: 'human' },
   { index: 6, path: 'human_context.why', description: 'Why does it exist', category: 'human' },
   { index: 7, path: 'human_context.where', description: 'Where does it run', category: 'human' },

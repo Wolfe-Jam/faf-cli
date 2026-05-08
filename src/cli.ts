@@ -237,9 +237,13 @@ if (process.argv.length <= 2) {
     const RS = '\x1b[0m';
     console.log('');
     console.log(`${DB} ${G}▄${GB}███████${DB}${G}▄${RS}`);
-    console.log(`${DB} ${GB}${G}█${DB}${G}▀${GB}███████${RS}  ${fafCyan(bold('faf'))} ${dim(`v${VERSION}`)}`);
+    console.log(`${DB} ${GB}${G}█${DB}${G}▀${GB}${DF}-${G}██████${RS}  ${fafCyan(bold('faf'))} ${dim(`v${VERSION}`)}`);
     const GR = '\x1b[38;2;39;174;96m';    // grass green
-    console.log(`${DB}${G}▀${GB}${DF}▄${DB}${GR}░${GB}${G}██${DB}${GR}░░${GB}${G}██${DB}${GR}░${RS}  ${dim('Nelly Never Forgets')}`);
+    // Restore Nelly's clean dark gaps between legs (pre-grass-between-feet).
+    // The fa74012 fix ("restore Nelly's eye — revert grass between feet") was
+    // accidentally re-regressed somewhere between v6.0.12 and v6.3.3 (likely the
+    // IIFE wrap copied an older line). Pinning the canonical here.
+    console.log(`${DB}${G}▀${GB}${DF}▀${DB} ${GB}${G}██${DB}  ${GB}${G}██${DB} ${RS}  ${dim('Nelly Never Forgets')}`);
     console.log(`${GR}▔▔▔▔▔▔▔▔▔▔▔▔${RS}`);
     console.log(`${dim('  ' + cwd)}`);
     console.log('');
