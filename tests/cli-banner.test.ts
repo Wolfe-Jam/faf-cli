@@ -23,16 +23,23 @@ import { join } from 'path';
 
 const CLI_SRC = readFileSync(join(__dirname, '../src/cli.ts'), 'utf-8');
 
-/** The canonical Nelly shape — three art rows in order, dark/gray/eye/legs.
- *  Approved by wolfejam 2026-05-08 ("100% Nelly shape", #YES! 🐘❤️).
+/** The canonical Nelly shape — three art rows in order, dark/gray/legs.
+ *  Approved by wolfejam: original March 23 (commit 7eb1042) for body shape;
+ *  trunk-tip lifted 2026-05-08.
  *
  *  Row 1 (back arc):     ` ▄███████▄`
- *  Row 2 (body + eye):   ` █▀-██████`   ← `-` is the eye on cell 4
+ *  Row 2 (body):         ` █▀███████`   ← eye is the subtle cell-3 ▀ notch
  *  Row 3 (legs + trunk): `▀▀ ██  ██ `   ← cell 2 `▀` is the trunk-tip lifted off ground
  *  Row 4 (grass line):   `▔▔▔▔▔▔▔▔▔▔▔▔`
+ *
+ *  NB: An inserted ASCII eye char (`-`, `·`, etc.) was tried and rejected
+ *  2026-05-08 — monospace fonts render `-` narrower than `█`, breaking
+ *  the silhouette (wolfejam: "adding the eye has added an entire | < column").
+ *  The eye must come from half-block tricks ON existing cells, not by
+ *  inserting characters of different visual width.
  */
 const NELLY_ROW1 = '${DB} ${G}▄${GB}███████${DB}${G}▄${RS}';
-const NELLY_ROW2_BODY = '${DB} ${GB}${G}█${DB}${G}▀${GB}${DF}-${G}██████${RS}';
+const NELLY_ROW2_BODY = '${DB} ${GB}${G}█${DB}${G}▀${GB}███████${RS}';
 const NELLY_ROW3_LEGS = '${DB}${G}▀${GB}${DF}▀${DB} ${GB}${G}██${DB}  ${GB}${G}██${DB} ${RS}';
 const NELLY_ROW4_GRASS = '${GR}▔▔▔▔▔▔▔▔▔▔▔▔${RS}';
 
@@ -41,8 +48,12 @@ describe('WJTTC BRAKE: Nelly banner shape (canonical 2026-05-08)', () => {
     expect(CLI_SRC).toContain(NELLY_ROW1);
   });
 
-  test('Row 2 — body has eye dot at cell 4 (- char, dark fg on gray bg)', () => {
+  test('Row 2 — body uses pure half-block (no inserted ASCII char that would break silhouette width)', () => {
     expect(CLI_SRC).toContain(NELLY_ROW2_BODY);
+    // Explicit guard: do NOT re-insert `-` or `·` etc. as the "eye" — they
+    // render narrower than `█` in most monospace fonts, adding a visible gap.
+    expect(CLI_SRC).not.toMatch(/\$\{GB\}\$\{DF\}-\$\{G\}/);
+    expect(CLI_SRC).not.toMatch(/\$\{GB\}\$\{DF\}·\$\{G\}/);
   });
 
   test('Row 3 — trunk-tip lifted off the ground (cell 2 ▀ not ▄)', () => {
