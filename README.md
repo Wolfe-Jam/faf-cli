@@ -4,8 +4,8 @@
 <div style="display: flex; align-items: center; gap: 12px;">
   <img src="https://www.faf.one/orange-smiley.svg" alt="FAF" width="40" />
   <div>
-    <h1 style="margin: 0; color: #000000;">faf-cli v6.4</h1>
-    <p style="margin: 2px 0 0 0; font-size: 0.85em; letter-spacing: 0.12em; opacity: 0.7; text-transform: uppercase;"><strong>The Foundation Edition</strong></p>
+    <h1 style="margin: 0; color: #000000;">faf-cli v6.5</h1>
+    <p style="margin: 2px 0 0 0; font-size: 0.85em; letter-spacing: 0.12em; opacity: 0.7; text-transform: uppercase;"><strong>The Conformance Edition</strong></p>
     <p style="margin: 6px 0 0 0;"><strong>Persistent Project Context for AI.</strong></p>
     <p style="margin: 0;"><strong>Define once. Run anywhere.</strong></p>
   </div>

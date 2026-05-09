@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v6.4.1 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v6.5.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -7,6 +7,134 @@ All notable changes to faf-cli will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [6.5.0] - 2026-05-08 — The Conformance Edition
+
+> **FAFB v1.0 conformance, byte-verified. Receipts not promises.**
+
+The headline receipt: cli-compiled `.fafb` is **byte-identical** to the
+`xai-faf-rust` reference implementation for the same `.faf` input. Round-
+trip parity is a permanent BRAKE-tier test — if conformance ever drifts,
+CI fails with a byte-by-byte diff. No marketing prose; the test is the
+receipt.
+
+### FAFB v1.0 conformance — locked
+
+- **Round-trip parity BRAKE gate.** `tests/parity-brake.test.ts` asserts
+  byte-identical `.fafb` output between the cli (via `faf-scoring-kernel`
+  WASM) and the `xai-faf` Rust reference impl (via `faf-rust-sdk`'s
+  binary module). Same `.faf` input → bit-for-bit equal output. Verified
+  independently via shell `cmp`.
+- **Multi-section binaries.** Top-level YAML keys
+  (`tech_stack` / `key_files` / `commands`) now auto-populate from
+  observable signals. `faf compile` produces structurally-rich `.fafb`
+  (4+ sections) instead of META-only (1 section). Live: faf-cli's own
+  project.faf compiles to a 375-byte / 4-section binary (was 84 bytes /
+  1 section).
+- **Deterministic timestamp.** Companion fix landed in `xai-faf-rust`
+  commit `d5236ad` — both impls now write `created_timestamp = 0` for
+  reproducibility. CRC32 source-checksum is the integrity receipt;
+  provenance lives in external receipts (TAF, git, OCI manifests).
+
+### `# found:` detection rationale (Glass-Hood-adjacent)
+
+- Every cli project-type classification renders a YAML comment showing
+  the signals that earned it:
+  ```yaml
+  project:
+    type: cli  # found: package.json bin
+  ```
+  Anyone reading the `.faf` can refute the cli's reasoning by inspection.
+  If wrong, the evidence is right there. *(Note: this is not the same as
+  xai-faf-rust's "Glass Hood" weighted score breakdown — that's a
+  separate, kernel-side feature.)*
+- New API: `detectProjectTypeWithRationale(dir)`. Backward-compatible
+  wrapper `detectProjectType(dir): string` preserves existing callers.
+
+### App-types — comprehensive 19-type ladder
+
+- **9 new types** with detection wired up: `documentation`, `sdk`, `wasm`,
+  `mobile`, `monorepo-root`, `html`, `website`, `saas`, `mcpaas`.
+- **`universal` extension** to `cli` / `library` / `mcp` / `frontend` /
+  `data-science`. These types ship/build/CI somewhere — slotignoring
+  hosting/build/cicd was losing real signal. Active slot counts lifted
+  (cli/library 9→12; mcp/data-science 14→17; frontend 13→16).
+- **Orphan fix:** `data-science` and `enterprise` now have detection
+  logic (Python DS deps for the former; private workspace + multi-FW
+  for the latter). Were defined-but-undetectable before.
+- **SDK-priority rule.** When SDK signals fire (keyword, name suffix,
+  Cargo `[lib]`+name), classification is `sdk` regardless of other
+  matches. mcpaas-sdk-style repos classify correctly.
+- **Cargo `[[bin]]`** detection added (xai-faf-rust shape — Rust cli
+  with `[[bin]]` entries was falling through to library fallback).
+- Doctrine memory: `app-types-canonical-v6.5.md` locks the ladder.
+
+### `faf wjttc` — vendor-neutral test audit (NEW)
+
+- New top-level command. Reads tests across **TypeScript, Rust, Python,
+  Zig, Go**; classifies each by WJTTC tier (BRAKE/ENGINE/AERO/PIT) by
+  test name; reports tier balance + untiered breakdown.
+- Brace-depth-tracked TS parser correctly attributes child tests to
+  parent describe scopes (so tier markers propagate into nested tests).
+- Flags: `--json` (CI consumption), `--strict` (exit 1 on untiered),
+  `--path` (custom dir).
+- Coverage warning fires when **0 BRAKE-tier tests** exist
+  ("no safety canaries").
+
+### `faf auto` — README + Cargo.toml interrogation (RESTORED)
+
+- README extraction restored under strict no-guess discipline. v1.0.3
+  had heuristic last-asterisked-line parsing (broken — Issue A). It was
+  removed in retreat between v1.0.3 → v6.4.x, leaving auto unable to
+  fill `human_context.*` from README evidence. v6.5.0 restores the
+  capability with **per-slot semantic anchors** (`## About` → what,
+  `## Audience` → who, `## Use Case` → goal, etc.).
+- Cargo.toml `[package].description` now reads through to `goal`
+  (parallel to package.json's `description`).
+- Doctrine: `faf-auto-no-guess-no-slop.md` — extract valid+concise OR
+  leave alone. Empty is honest; wrong is a lie.
+
+### `faf ai enhance` — no-guess/no-slop hardening
+
+- Old prompt invited guessing ("fill with reasonable values based on
+  the project context"). Replaced with **extraction-or-null** prompt:
+  return null when no concrete evidence; never use generic placeholders;
+  never fabricate; ≤200 char extracted values.
+- **Client-side defensive validator** (`isValidAiExtraction` +
+  `AI_SLOP_PATTERNS`) — even if the model slips, the cli rejects
+  forbidden values before writing to disk. Belt + braces.
+- Source-level prompt content lock-in tests guard against future
+  prompt softening.
+
+### Slot UX — voice-aligned prompts
+
+- **`human_context.who`**: "Who is building this" → **"Who is this for?"**.
+  Aligns the prompt with how the slot is universally answered (audience,
+  not builder).
+- **`project.goal`**: "What the project does" → **"Goal (use case)"**.
+  Bilingual label — "Goal" for anyone, "use case" for tech-vernacular
+  audiences. The slot is overarching/additional/bonus relative to the
+  6Ws (per `goal-is-not-a-6w.md` doctrine).
+
+### Nelly — back
+
+- Restored to canonical March 23 shape (commit `7eb1042`) with the
+  trunk-tip lifted off the grass-line and a solid-dark eye visible in
+  any rendering (monochrome, true-color, screenshots).
+- BRAKE-tier byte-snapshot test (`tests/cli-banner.test.ts`) guards
+  against the regression class that bit us twice (grass-between-feet
+  silently re-introduced via the IIFE wrap).
+
+### Test status
+
+**639 tests across 53 files.** New shadows since v6.4.1: 223
+(parity-brake, fafb-sections, found-rationale, app-types, new-types,
+wjttc, ai-slop-guard, cli-banner). Every new tool ships with its tests
+in the same commit per Test Shadows discipline.
+
+### FAF defines. MD instructs. AI codes.
+
+---
 
 ## [6.4.1] - 2026-05-08 — Drift Cleanup
 
