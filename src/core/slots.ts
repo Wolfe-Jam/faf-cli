@@ -89,16 +89,48 @@ export function isPlaceholder(value: unknown): boolean {
   return false;
 }
 
-/** App-type to active category mapping for faf init */
+/** App-type to active category mapping. The canonical 19-type ladder
+ *  (see app-types-canonical-v6.5.md doctrine memory). Sorted ascending by
+ *  active slot count for readability.
+ *
+ *  v6.5.0 changes vs prior:
+ *  - Added `universal` to cli / library / mcp / frontend / data-science.
+ *    These types ship/build/CI somewhere — slotignoring those slots was
+ *    losing real signal. (cli/library: 9→12; mcp/data-science: 14→17;
+ *    frontend: 13→16.)
+ *  - Order is by ascending slot count, not insertion order.
+ */
 export const APP_TYPE_CATEGORIES: Record<string, SlotCategory[]> = {
-  cli: ['project', 'human'],
-  library: ['project', 'human'],
-  mcp: ['project', 'backend', 'human'],
+  // 9 slots — minimal (project meta + human only)
+  documentation: ['project', 'human'],
+
+  // 12 slots — project + human + universal (build/ci/hosting matters)
+  cli: ['project', 'human', 'universal'],
+  library: ['project', 'human', 'universal'],
+  sdk: ['project', 'human', 'universal'],
+  wasm: ['project', 'human', 'universal'],
+  html: ['project', 'human', 'universal'],
+
+  // 16 slots — project + frontend + human + universal
+  frontend: ['project', 'frontend', 'human', 'universal'],
+  website: ['project', 'frontend', 'human', 'universal'],
+  mobile: ['project', 'frontend', 'human', 'universal'],
+
+  // 17 slots — project + backend + universal + human
+  mcp: ['project', 'backend', 'human', 'universal'],
   backend: ['project', 'backend', 'universal', 'human'],
-  'data-science': ['project', 'backend', 'human'],
-  frontend: ['project', 'frontend', 'human'],
+  'data-science': ['project', 'backend', 'human', 'universal'],
+
+  // 21 slots — full base ladder
   fullstack: ['project', 'frontend', 'backend', 'universal', 'human'],
   svelte: ['project', 'frontend', 'backend', 'universal', 'human'],
   framework: ['project', 'frontend', 'backend', 'universal', 'human'],
+  'monorepo-root': ['project', 'human', 'enterprise_infra', 'enterprise_app', 'enterprise_ops'],
+
+  // 24-25 slots — platform / SaaS shapes (base + selected enterprise)
+  mcpaas: ['project', 'backend', 'universal', 'human', 'enterprise_app', 'enterprise_ops'],
+  saas: ['project', 'frontend', 'backend', 'universal', 'human', 'enterprise_app'],
+
+  // 33 slots — full enterprise
   enterprise: ['project', 'frontend', 'backend', 'universal', 'human', 'enterprise_infra', 'enterprise_app', 'enterprise_ops'],
 };
