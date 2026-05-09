@@ -7,7 +7,7 @@
  *         Glass Hood for test-suite quality.
  */
 
-import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
+import { describe, test, expect, beforeEach, afterEach, spyOn } from 'bun:test';
 import { mkdirSync, writeFileSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
@@ -265,5 +265,184 @@ describe('WJTTC BRAKE: aggregateReport — Rust + TypeScript polyglot', () => {
     expect(report.totalTests).toBe(3);
     expect(report.byLanguage.typescript).toBe(1);
     expect(report.byLanguage.rust).toBe(2);
+  });
+});
+
+describe('WJTTC ENGINE: wjttcCommand — JSON + path + strict modes', () => {
+  test('--json output is valid JSON with the AuditReport shape', async () => {
+    mkdirSync(join(dir, 'tests'));
+    writeFileSync(join(dir, 'tests', 'sample.test.ts'),
+      `describe('WJTTC ENGINE: x', () => { test('y', () => {}); });`);
+
+    const { wjttcCommand } = await import('../../src/commands/wjttc.js');
+    const logs: string[] = [];
+    const spy = spyOn(console, 'log').mockImplementation((...args: unknown[]) => {
+      logs.push(args.join(' '));
+    });
+    wjttcCommand({ path: join(dir, 'tests'), json: true });
+    spy.mockRestore();
+
+    const output = logs.join('\n');
+    const parsed = JSON.parse(output);
+    expect(parsed.totalTests).toBe(1);
+    expect(parsed.byTier.ENGINE).toBe(1);
+    expect(parsed.byLanguage.typescript).toBe(1);
+    expect(parsed.untieredExamples).toEqual([]);
+  });
+
+  test('--path option respects custom directory', async () => {
+    mkdirSync(join(dir, 'custom-test-dir'));
+    writeFileSync(join(dir, 'custom-test-dir', 'a.test.ts'),
+      `describe('WJTTC BRAKE: in-custom', () => { test('z', () => {}); });`);
+
+    const { wjttcCommand } = await import('../../src/commands/wjttc.js');
+    const logs: string[] = [];
+    const spy = spyOn(console, 'log').mockImplementation((...args: unknown[]) => {
+      logs.push(args.join(' '));
+    });
+    wjttcCommand({ path: join(dir, 'custom-test-dir'), json: true });
+    spy.mockRestore();
+
+    const parsed = JSON.parse(logs.join('\n'));
+    expect(parsed.totalTests).toBe(1);
+    expect(parsed.byTier.BRAKE).toBe(1);
+  });
+
+  test('--strict flag exits non-zero when untiered tests exist', async () => {
+    mkdirSync(join(dir, 'tests'));
+    writeFileSync(join(dir, 'tests', 'a.test.ts'),
+      `test('untiered', () => {});`);
+
+    const { wjttcCommand } = await import('../../src/commands/wjttc.js');
+    const logSpy = spyOn(console, 'log').mockImplementation(() => {});
+    const exitSpy = spyOn(process, 'exit').mockImplementation((() => {}) as never);
+
+    wjttcCommand({ path: join(dir, 'tests'), strict: true, json: true });
+
+    expect(exitSpy).toHaveBeenCalledWith(1);
+    logSpy.mockRestore();
+    exitSpy.mockRestore();
+  });
+
+  test('--strict does NOT exit when zero untiered tests', async () => {
+    mkdirSync(join(dir, 'tests'));
+    writeFileSync(join(dir, 'tests', 'a.test.ts'),
+      `describe('WJTTC ENGINE: clean', () => { test('all-tiered', () => {}); });`);
+
+    const { wjttcCommand } = await import('../../src/commands/wjttc.js');
+    const logSpy = spyOn(console, 'log').mockImplementation(() => {});
+    const exitSpy = spyOn(process, 'exit').mockImplementation((() => {}) as never);
+
+    wjttcCommand({ path: join(dir, 'tests'), strict: true, json: true });
+
+    expect(exitSpy).not.toHaveBeenCalled();
+    logSpy.mockRestore();
+    exitSpy.mockRestore();
+  });
+
+  test('default (no --json) prints human-readable report', async () => {
+    mkdirSync(join(dir, 'tests'));
+    writeFileSync(join(dir, 'tests', 'a.test.ts'),
+      `describe('WJTTC ENGINE: x', () => { test('y', () => {}); });`);
+
+    const { wjttcCommand } = await import('../../src/commands/wjttc.js');
+    const logs: string[] = [];
+    const spy = spyOn(console, 'log').mockImplementation((...args: unknown[]) => {
+      logs.push(args.join(' '));
+    });
+    wjttcCommand({ path: join(dir, 'tests') });
+    spy.mockRestore();
+
+    const out = logs.join('\n');
+    expect(out).toMatch(/faf wjttc/);
+    expect(out).toMatch(/Files scanned/);
+    expect(out).toMatch(/Tests found/);
+    expect(out).toMatch(/Tiers:/);
+  });
+});
+
+describe('WJTTC ENGINE: wjttcCommand — coverage warning', () => {
+  test('warns "no BRAKE-tier tests" when zero BRAKE-tagged', async () => {
+    mkdirSync(join(dir, 'tests'));
+    writeFileSync(join(dir, 'tests', 'a.test.ts'),
+      `describe('WJTTC ENGINE: x', () => { test('y', () => {}); });`);
+
+    const { wjttcCommand } = await import('../../src/commands/wjttc.js');
+    const logs: string[] = [];
+    const spy = spyOn(console, 'log').mockImplementation((...args: unknown[]) => {
+      logs.push(args.join(' '));
+    });
+    wjttcCommand({ path: join(dir, 'tests') });
+    spy.mockRestore();
+
+    const out = logs.join('\n');
+    expect(out).toMatch(/no BRAKE-tier tests/);
+  });
+
+  test('does NOT warn when BRAKE-tier tests exist', async () => {
+    mkdirSync(join(dir, 'tests'));
+    writeFileSync(join(dir, 'tests', 'a.test.ts'),
+      `describe('WJTTC BRAKE: critical', () => { test('y', () => {}); });`);
+
+    const { wjttcCommand } = await import('../../src/commands/wjttc.js');
+    const logs: string[] = [];
+    const spy = spyOn(console, 'log').mockImplementation((...args: unknown[]) => {
+      logs.push(args.join(' '));
+    });
+    wjttcCommand({ path: join(dir, 'tests') });
+    spy.mockRestore();
+
+    const out = logs.join('\n');
+    expect(out).not.toMatch(/no BRAKE-tier tests/);
+  });
+});
+
+describe('WJTTC AERO: edge cases', () => {
+  test('empty test dir returns 0 tests, no crash', () => {
+    mkdirSync(join(dir, 'tests'));
+    const findings = scanTests(join(dir, 'tests'));
+    const report = aggregateReport(findings);
+    expect(report.totalTests).toBe(0);
+    expect(report.filesScanned).toBe(0);
+  });
+
+  test('test file with no actual tests returns 0 findings', () => {
+    mkdirSync(join(dir, 'tests'));
+    writeFileSync(join(dir, 'tests', 'empty.test.ts'),
+      `// just a comment, no tests\nconst x = 1;`);
+    const findings = scanTests(join(dir, 'tests'));
+    expect(findings.length).toBe(0);
+  });
+
+  test('Rust file without #[test] is excluded from scan', () => {
+    mkdirSync(join(dir, 'tests'));
+    writeFileSync(join(dir, 'tests', 'helpers.rs'),
+      `pub fn helper() -> i32 { 42 }`);
+    const findings = scanTests(join(dir, 'tests'));
+    expect(findings.length).toBe(0);
+  });
+
+  test('Zig file without test "..." block is excluded', () => {
+    mkdirSync(join(dir, 'tests'));
+    writeFileSync(join(dir, 'tests', 'helpers.zig'),
+      `pub fn helper() i32 { return 42; }`);
+    const findings = scanTests(join(dir, 'tests'));
+    expect(findings.length).toBe(0);
+  });
+
+  test('nested describes inherit ALL ancestors in test path', () => {
+    mkdirSync(join(dir, 'tests'));
+    writeFileSync(join(dir, 'tests', 'nested.test.ts'), `
+describe('WJTTC BRAKE: outer', () => {
+  describe('inner block', () => {
+    test('leaf', () => {});
+  });
+});
+`);
+    const findings = scanTests(join(dir, 'tests'));
+    expect(findings.length).toBe(1);
+    expect(findings[0].testName).toContain('WJTTC BRAKE: outer');
+    expect(findings[0].testName).toContain('inner block');
+    expect(findings[0].tier).toBe('BRAKE');
   });
 });

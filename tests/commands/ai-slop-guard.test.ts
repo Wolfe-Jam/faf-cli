@@ -12,6 +12,8 @@
  */
 
 import { describe, test, expect } from 'bun:test';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { isValidAiExtraction, AI_SLOP_PATTERNS } from '../../src/commands/ai.js';
 
 describe('WJTTC BRAKE: AI slop-guard rejects forbidden patterns', () => {
@@ -112,5 +114,47 @@ describe('WJTTC ENGINE: AI_SLOP_PATTERNS is non-empty (regression guard)', () =>
     for (const p of AI_SLOP_PATTERNS) {
       expect(p).toBeInstanceOf(RegExp);
     }
+  });
+});
+
+describe('WJTTC BRAKE: source-level prompt content lock-in', () => {
+  // Reading the source guards the doctrine — if someone "softens" the prompt
+  // to be more permissive, these assertions fire. The validator is
+  // belt-and-braces; the prompt is the FIRST line of defense.
+  const AI_SRC = readFileSync(join(__dirname, '../../src/commands/ai.ts'), 'utf-8');
+
+  test('prompt includes "DO NOT GUESS" instruction', () => {
+    expect(AI_SRC).toContain('DO NOT GUESS');
+  });
+
+  test('prompt includes "NEVER use generic placeholders"', () => {
+    expect(AI_SRC).toContain('NEVER use generic placeholders');
+  });
+
+  test('prompt includes "NEVER fabricate"', () => {
+    expect(AI_SRC).toContain('NEVER fabricate');
+  });
+
+  test('prompt explicitly lists forbidden slop values', () => {
+    expect(AI_SRC).toContain('"TBD"');
+    expect(AI_SRC).toContain('"see README"');
+    expect(AI_SRC).toContain('"software application"');
+    expect(AI_SRC).toContain('"for users"');
+  });
+
+  test('prompt instructs to return null when no concrete evidence', () => {
+    expect(AI_SRC).toMatch(/return null/i);
+  });
+
+  test('prompt requires DIRECTLY supported values (no fabrication)', () => {
+    expect(AI_SRC).toMatch(/DIRECTLY supported/i);
+  });
+
+  test('prompt has a length cap of ~200 chars on extracted values', () => {
+    expect(AI_SRC).toMatch(/under 200 characters|≤\s*200|max(?:imum)?\s*200/i);
+  });
+
+  test('does NOT contain the old permissive "reasonable values" phrasing', () => {
+    expect(AI_SRC).not.toContain('reasonable values based on the project');
   });
 });
