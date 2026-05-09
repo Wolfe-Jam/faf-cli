@@ -284,6 +284,13 @@ describe('WJTTC BRAKE: priority order — most-specific wins', () => {
     expect(detectProjectTypeWithRationale(dir).type).toBe('sdk');
   });
 
+  test('SDK keyword + mcpaas keyword → sdk wins (NOT mcpaas)', () => {
+    // wolfejam doctrine 2026-05-08: SDK takes priority. mcpaas-sdk-style repos
+    // (consumer SDKs FOR a platform) classify as sdk, not the platform itself.
+    pkg({ name: 'platform-sdk', keywords: ['sdk', 'mcpaas', 'platform'] });
+    expect(detectProjectTypeWithRationale(dir).type).toBe('sdk');
+  });
+
   test('mcpaas signals + mcp signals → mcpaas wins (NOT mcp)', () => {
     pkg({ name: 'mcpaas-platform', dependencies: { '@modelcontextprotocol/sdk': '^1.0.0' } });
     expect(detectProjectTypeWithRationale(dir).type).toBe('mcpaas');
@@ -299,5 +306,35 @@ describe('WJTTC BRAKE: priority order — most-specific wins', () => {
       },
     });
     expect(detectProjectTypeWithRationale(dir).type).toBe('saas');
+  });
+});
+
+describe('WJTTC ENGINE: Cargo [[bin]] cli detection (xai-faf-rust shape)', () => {
+  test('Cargo.toml with [[bin]] section → cli', () => {
+    cargo([
+      '[package]',
+      'name = "my-rust-cli"',
+      'version = "1.0.0"',
+      '',
+      '[[bin]]',
+      'name = "my-rust-cli"',
+      'path = "src/main.rs"',
+    ].join('\n'));
+    const r = detectProjectTypeWithRationale(dir);
+    expect(r.type).toBe('cli');
+    expect(r.found).toContain('Cargo.toml [[bin]]');
+  });
+
+  test('Cargo with [lib] only (no [[bin]]) does NOT classify as cli', () => {
+    cargo([
+      '[package]',
+      'name = "my-lib"',
+      'version = "1.0.0"',
+      '',
+      '[lib]',
+      'crate-type = ["rlib"]',
+    ].join('\n'));
+    const r = detectProjectTypeWithRationale(dir);
+    expect(r.type).not.toBe('cli');
   });
 });

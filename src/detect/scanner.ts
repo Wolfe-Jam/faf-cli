@@ -34,6 +34,18 @@ function readCargoName(dir: string): string | null {
   }
 }
 
+/** True if Cargo.toml declares one or more `[[bin]]` sections — Rust cli marker. */
+function hasCargoBin(dir: string): boolean {
+  const path = join(dir, 'Cargo.toml');
+  if (!existsSync(path)) return false;
+  try {
+    const content = readFileSync(path, 'utf-8');
+    return /^\s*\[\[bin\]\]/m.test(content);
+  } catch {
+    return false;
+  }
+}
+
 /** Detect SDK signals — keyword-based per the SDK-priority doctrine.
  *  Returns the matched evidence string, or null if no SDK signal. */
 function detectSdkSignal(dir: string, pkg: PackageJson | null): string | null {
@@ -333,25 +345,29 @@ export function detectProjectTypeWithRationale(dir: string): ProjectTypeDetectio
     return { type: 'documentation', found };
   }
 
-  // ─── 2. mcpaas — post-MCP platforms (multiple MCP signals + auth + DB) ──
+  // ─── 2. sdk — SDK keyword/structure WINS over mcpaas/saas/wasm/cli/library ─
+  // wolfejam doctrine: if a repo signals SDK (name contains "-sdk", keywords
+  // contains "sdk"), it's an SDK regardless of what platform/wasm/cli signals
+  // would also fire. Confirmed for mcpaas-sdk (SDK FOR the platform, not the
+  // platform itself).
+  const sdkSignal = detectSdkSignal(dir, pkg);
+  if (sdkSignal) {
+    found.push(sdkSignal);
+    return { type: 'sdk', found };
+  }
+
+  // ─── 3. mcpaas — post-MCP platforms (multiple MCP signals + auth + DB) ──
   const mcpaasSignal = detectMcpaasSignal(dir, pkg, frameworks);
   if (mcpaasSignal) {
     found.push(mcpaasSignal);
     return { type: 'mcpaas', found };
   }
 
-  // ─── 3. saas — subscription products (auth + payment) ───────────────────
+  // ─── 4. saas — subscription products (auth + payment) ───────────────────
   const saasSignal = detectSaasSignal(dir, pkg);
   if (saasSignal) {
     found.push(saasSignal);
     return { type: 'saas', found };
-  }
-
-  // ─── 4. sdk — SDK keyword/structure WINS over library/cli/wasm ──────────
-  const sdkSignal = detectSdkSignal(dir, pkg);
-  if (sdkSignal) {
-    found.push(sdkSignal);
-    return { type: 'sdk', found };
   }
 
   // ─── 5. wasm — WASM target in build config ──────────────────────────────
@@ -375,9 +391,13 @@ export function detectProjectTypeWithRationale(dir: string): ProjectTypeDetectio
     return { type: 'mcp', found };
   }
 
-  // ─── 8. cli — Node bin / Zig main.zig / Rust [[bin]] ────────────────────
+  // ─── 8. cli — Node bin / Cargo [[bin]] / Zig main.zig ───────────────────
   if (pkg?.bin) {
     found.push('package.json bin');
+    return { type: 'cli', found };
+  }
+  if (hasCargoBin(dir)) {
+    found.push('Cargo.toml [[bin]]');
     return { type: 'cli', found };
   }
 
