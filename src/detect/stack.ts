@@ -11,6 +11,9 @@ import {
   detectBuildTool,
   detectSvelteAdapter,
   readPackageJson,
+  detectKeyFiles,
+  detectCommands,
+  detectTechStack,
 } from './scanner.js';
 
 /** Auto-detect project stack and generate .faf data */
@@ -133,7 +136,17 @@ export function detectStack(dir: string): FafData {
     project.framework = frameworkSubType;
   }
 
-  return {
+  // FAFB top-level sections (read by faf-rust-sdk's compile_fafb).
+  // Without these, every cli-generated .fafb is META-only.
+  // Per app-types-canonical-v6.5.md + faf-auto-no-guess-no-slop:
+  // tech_stack/key_files/commands auto-populate from observable signals;
+  // architecture/context stay empty (user fill — architecture overlaps with
+  // human_context.how, context is free-form additional signal).
+  const techStack = detectTechStack(dir, pkg, frameworks, language);
+  const keyFiles = detectKeyFiles(dir);
+  const commands = detectCommands(dir, pkg);
+
+  const result: FafData = {
     faf_version: '2.5.0',
     project,
     stack,
@@ -150,5 +163,12 @@ export function detectStack(dir: string): FafData {
     // which uses _meta.found to inject `# found: <list>` next to `type:`.
     // Glass Hood doctrine — the user sees WHY the cli classified as it did.
     _meta: { found: detection.found },
-  } as FafData;
+  };
+
+  // Only emit FAFB top-level keys if non-empty (no slop / empty-list pollution)
+  if (techStack.length > 0) result.tech_stack = techStack;
+  if (keyFiles.length > 0) result.key_files = keyFiles;
+  if (Object.keys(commands).length > 0) result.commands = commands;
+
+  return result;
 }

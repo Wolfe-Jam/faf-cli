@@ -594,3 +594,120 @@ export function detectBuildTool(dir: string): string | null {
   if (existsSync(join(dir, 'tsconfig.json')) && pkg?.devDependencies?.typescript) return 'TypeScript (tsc)';
   return null;
 }
+
+/* ─── FAFB section helpers (top-level YAML keys read by compile_fafb) ───────
+ *
+ * These detect content for the FAFB binary's TECH_STACK, KEY_FILES, and
+ * COMMANDS sections. ARCHITECTURE and CONTEXT are deliberately left empty
+ * for user fill (architecture overlaps with human_context.how; context is
+ * deliberately free-form additional signal beyond the 6Ws).
+ */
+
+/** Detect a list of important file paths for the KEY_FILES FAFB section.
+ *  Returns up to ~10 entries, ordered by canonical importance. */
+export function detectKeyFiles(dir: string): string[] {
+  const candidates = [
+    // Manifests
+    'package.json', 'Cargo.toml', 'pyproject.toml', 'go.mod',
+    'build.zig', 'build.zig.zon',
+    // Entry points (TS/JS)
+    'src/index.ts', 'src/index.js', 'src/main.ts', 'src/cli.ts',
+    // Entry points (Rust)
+    'src/main.rs', 'src/lib.rs',
+    // Entry points (Zig)
+    'src/main.zig', 'src/root.zig',
+    // Entry points (Python)
+    'src/__init__.py', 'main.py', '__main__.py',
+    // Entry points (Go)
+    'main.go', 'cmd/main.go',
+    // Specs / docs
+    'README.md', 'SPECIFICATION.md', 'BINARY-FORMAT.md',
+    // Config
+    'tsconfig.json', 'wrangler.toml', 'vercel.json',
+  ];
+  return candidates.filter(f => existsSync(join(dir, f)));
+}
+
+/** Detect build/test/lint commands for the COMMANDS FAFB section.
+ *  Returns a Record<string, string> mapping command name → shell command. */
+export function detectCommands(dir: string, pkg: PackageJson | null): Record<string, string> {
+  const commands: Record<string, string> = {};
+
+  // From package.json scripts (most reliable)
+  if (pkg?.scripts) {
+    for (const key of ['build', 'test', 'lint', 'dev', 'start']) {
+      if (pkg.scripts[key]) {
+        // Determine the runner — prefer bun if available, else npm
+        const runner = existsSync(join(dir, 'bun.lock')) || existsSync(join(dir, 'bun.lockb'))
+          ? 'bun run'
+          : 'npm run';
+        commands[key] = `${runner} ${key}`;
+      }
+    }
+  }
+
+  // Cargo defaults (Rust)
+  if (existsSync(join(dir, 'Cargo.toml'))) {
+    if (!commands.build) commands.build = 'cargo build --release';
+    if (!commands.test) commands.test = 'cargo test';
+    if (!commands.lint) commands.lint = 'cargo clippy';
+  }
+
+  // Zig defaults
+  if (existsSync(join(dir, 'build.zig'))) {
+    if (!commands.build) commands.build = 'zig build';
+    if (!commands.test) commands.test = 'zig build test';
+  }
+
+  // Go defaults
+  if (existsSync(join(dir, 'go.mod'))) {
+    if (!commands.build) commands.build = 'go build ./...';
+    if (!commands.test) commands.test = 'go test ./...';
+  }
+
+  // Python defaults (if pytest is detectable)
+  if (existsSync(join(dir, 'pyproject.toml')) || existsSync(join(dir, 'pytest.ini'))) {
+    if (!commands.test) commands.test = 'pytest';
+  }
+
+  return commands;
+}
+
+/** Detect a tech-stack list for the TECH_STACK FAFB section.
+ *  Combines language + frameworks + runtime into a flat list of strings
+ *  (matching the canonical xai-faf-rust project.faf shape). */
+export function detectTechStack(
+  dir: string,
+  pkg: PackageJson | null,
+  frameworks: DetectedFramework[],
+  language: string,
+): string[] {
+  const stack: string[] = [];
+
+  // Language goes first
+  if (language && language !== 'Unknown') stack.push(language);
+
+  // Notable frameworks (frontend / backend / database / build)
+  const notableCategories = new Set(['frontend', 'backend', 'database', 'build', 'css', 'state', 'monorepo']);
+  for (const fw of frameworks) {
+    if (notableCategories.has(fw.category)) {
+      stack.push(fw.name);
+    }
+  }
+
+  // Runtime if non-trivial (Node.js by default for JS — only call out Bun/Deno/etc.)
+  if (existsSync(join(dir, 'bunfig.toml'))) stack.push('Bun');
+  else if (existsSync(join(dir, 'deno.json')) || existsSync(join(dir, 'deno.jsonc'))) stack.push('Deno');
+
+  // Top deps from package.json/Cargo.toml — only if stack is still sparse
+  if (stack.length < 3 && pkg?.dependencies) {
+    const topDeps = Object.keys(pkg.dependencies).slice(0, 5);
+    for (const dep of topDeps) {
+      if (!stack.some(s => s.toLowerCase().includes(dep.toLowerCase()))) {
+        stack.push(dep);
+      }
+    }
+  }
+
+  return stack;
+}

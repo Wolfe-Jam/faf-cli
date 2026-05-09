@@ -72,6 +72,18 @@ export interface FafData {
   human_context?: Record<string, unknown>;
   monorepo?: Record<string, unknown>;
   scores?: Record<string, unknown>;
+  // FAFB top-level keys (read by faf-rust-sdk's compile_fafb to produce
+  // multi-section binaries instead of META-only).
+  /** TECH_STACK section content — flat list of technology components */
+  tech_stack?: string[];
+  /** KEY_FILES section — list of important file paths */
+  key_files?: string[];
+  /** COMMANDS section — build/test/lint/dev command map */
+  commands?: Record<string, string>;
+  /** ARCHITECTURE section — free-form structural description (user-fill) */
+  architecture?: string;
+  /** CONTEXT section — free-form additional signal (user-fill, NOT human_context) */
+  context?: string;
   [key: string]: unknown;
 }
 
