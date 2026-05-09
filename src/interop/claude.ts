@@ -25,12 +25,51 @@ export function claudeMdMtime(dir: string): number | null {
   return statSync(path).mtimeMs;
 }
 
-/** Build the faf meta tag — one-line project DNA for any md */
-export function fafMetaTag(data: FafData): string {
-  const parts = [data.project?.name, data.project?.main_language, data.project?.goal]
-    .filter(Boolean)
-    .map(s => String(s).trim());
-  return `<!-- faf: ${parts.join(' | ')} -->`;
+/** Optional knobs for the 2-line FAF stamp. */
+export interface FafMetaOpts {
+  /** Canonical structured-truth file the md claims (default `project.faf`).
+   *  Use for AI-context md (CLAUDE/GEMINI/AGENTS/.cursorrules). */
+  claim?: string;
+  /** Role identifier (`readme`, `changelog`, `skill`, …).
+   *  Use for repo-meta md whose primary reader is human. Mutually exclusive with `claim`. */
+  doc?: string;
+  /** Current AI-readiness score (0–100). */
+  score?: number;
+  /** Sister-product family — `FAF` (default), `TAF`, `WJTTC`, … */
+  family?: string;
+  /** Other docs in the repo the reader should know about. */
+  siblings?: string[];
+}
+
+/**
+ * Build the canonical 2-line FAF stamp.
+ *
+ * Line 1 — positional identity: `name | lang | type | description`
+ * Line 2 — key=value navigation/state: `claim=… | score=… | family=… | siblings=…`
+ *
+ * Spec: `memory/cross-ai-2-line-meta-stamp.md`. Issue #64.
+ */
+export function fafMetaTag(data: FafData, opts: FafMetaOpts = {}): string {
+  const name = String(data.project?.name ?? '').trim();
+  const lang = String(data.project?.main_language ?? '').trim();
+  const type = String(data.project?.type ?? '').trim();
+  const desc = String(data.project?.goal ?? '').trim();
+  const line1 = `<!-- faf: ${[name, lang, type, desc].join(' | ')} -->`;
+
+  const kv: string[] = [];
+  if (opts.doc) {
+    kv.push(`doc=${opts.doc}`);
+  } else {
+    kv.push(`claim=${opts.claim ?? 'project.faf'}`);
+  }
+  if (typeof opts.score === 'number') kv.push(`score=${opts.score}`);
+  kv.push(`family=${opts.family ?? 'FAF'}`);
+  if (opts.siblings && opts.siblings.length > 0) {
+    kv.push(`siblings=${opts.siblings.join(',')}`);
+  }
+  const line2 = `<!-- faf: ${kv.join(' | ')} -->`;
+
+  return `${line1}\n${line2}`;
 }
 
 /** Generate CLAUDE.md content from .faf data */
