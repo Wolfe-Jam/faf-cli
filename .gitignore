@@ -135,6 +135,8 @@ wrangler.jsonc
 
 # Compiled FAFb output
 *.fafb
+# Exception: test fixtures (deterministic .fafb checked in for parity-brake test)
+!tests/fixtures/**/*.fafb
 AGENTS.md
 GEMINI.md
 
