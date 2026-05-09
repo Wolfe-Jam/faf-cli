@@ -192,27 +192,77 @@ describe('sync command — direction logic (auto / push / pull)', () => {
     expect(errs.join('\n')).toMatch(/CLAUDE\.md not found/);
   });
 
-  test('auto with newer CLAUDE.md prefers pull direction', async () => {
-    // Write .faf first, then CLAUDE.md with a later mtime
+  // ─── #63: auto sync is one-way push (.faf → CLAUDE.md), regardless of mtime ───
+  // Doctrine: "FAF defines. MD instructs." — .faf is the FCL canonical truth;
+  // CLAUDE.md is a downstream prose surface that READS .faf. mtime-based "newer
+  // wins" silently overwrote canonical .faf content (issue #63).
+  // Use `faf sync --pull` for the explicit legacy bootstrap case.
+
+  test('#63: auto sync never pulls from CLAUDE.md, even when CLAUDE.md is newer', async () => {
+    // Write .faf with canonical content
     writeFaf(join(testDir, 'project.faf'), {
       faf_version: '2.5.0',
-      project: { name: 'old' },
+      project: { name: 'canonical-name', goal: 'canonical goal phrasing' },
     });
     // Force .faf mtime to be older
     const past = new Date(Date.now() - 60_000);
     utimesSync(join(testDir, 'project.faf'), past, past);
 
-    const newData = { faf_version: '2.5.0', project: { name: 'newer-from-md' } };
-    writeFileSync(join(testDir, 'CLAUDE.md'), generateClaudeMd(newData));
-    // CLAUDE.md mtime is now (newer)
+    // Author a CLAUDE.md (newer mtime) with divergent prose
+    const drift = { faf_version: '2.5.0', project: { name: 'drifted-md-name', goal: 'rephrased prose' } };
+    writeFileSync(join(testDir, 'CLAUDE.md'), generateClaudeMd(drift));
 
     const { syncCommand } = await import('../../src/commands/sync.js');
     const logSpy = spyOn(console, 'log').mockImplementation(() => {});
     syncCommand({ direction: 'auto' });
     logSpy.mockRestore();
 
-    // With CLAUDE.md newer than .faf, auto should pull → .faf gets updated
+    // Critical: .faf must NOT be overwritten by the newer CLAUDE.md.
+    const after = readFaf(join(testDir, 'project.faf'));
+    expect(after.project?.name).toBe('canonical-name');
+    expect(after.project?.goal).toBe('canonical goal phrasing');
+  });
+
+  test('#63: auto sync always pushes — CLAUDE.md regenerated from .faf', async () => {
+    writeFaf(join(testDir, 'project.faf'), {
+      faf_version: '2.5.0',
+      project: { name: 'src-of-truth', goal: 'the structured goal' },
+    });
+    // Older .faf mtime
+    const past = new Date(Date.now() - 60_000);
+    utimesSync(join(testDir, 'project.faf'), past, past);
+
+    // Existing CLAUDE.md with stale content (newer mtime)
+    writeFileSync(join(testDir, 'CLAUDE.md'), '# CLAUDE.md — stale-name\n\n## What This Is\n\nstale prose\n');
+
+    const { syncCommand } = await import('../../src/commands/sync.js');
+    const logSpy = spyOn(console, 'log').mockImplementation(() => {});
+    syncCommand({ direction: 'auto' });
+    logSpy.mockRestore();
+
+    // CLAUDE.md must reflect .faf (push), not its own previous content
+    const md = readFileSync(join(testDir, 'CLAUDE.md'), 'utf-8');
+    expect(md).toContain('src-of-truth');
+    expect(md).toContain('the structured goal');
+    expect(md).not.toContain('stale-name');
+    expect(md).not.toContain('stale prose');
+  });
+
+  test('explicit --pull still works (legacy bootstrap path preserved)', async () => {
+    writeFaf(join(testDir, 'project.faf'), {
+      faf_version: '2.5.0',
+      project: { name: 'old' },
+    });
+    const newData = { faf_version: '2.5.0', project: { name: 'pulled-from-md' } };
+    writeFileSync(join(testDir, 'CLAUDE.md'), generateClaudeMd(newData));
+
+    const { syncCommand } = await import('../../src/commands/sync.js');
+    const logSpy = spyOn(console, 'log').mockImplementation(() => {});
+    syncCommand({ direction: 'pull' });
+    logSpy.mockRestore();
+
+    // Explicit pull still overwrites .faf — user opted in.
     const updated = readFaf(join(testDir, 'project.faf'));
-    expect(updated.project?.name).toBe('newer-from-md');
+    expect(updated.project?.name).toBe('pulled-from-md');
   });
 });

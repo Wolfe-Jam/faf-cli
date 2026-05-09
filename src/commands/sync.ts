@@ -48,14 +48,13 @@ export function syncCommand(options: SyncOptions = {}): void {
 }
 
 function autoSync(fafPath: string, claudePath: string, dir: string): void {
-  const fafMtime = statSync(fafPath).mtimeMs;
-  const claudeMtime = existsSync(claudePath) ? statSync(claudePath).mtimeMs : 0;
-
-  if (!existsSync(claudePath) || fafMtime > claudeMtime) {
-    pushSync(fafPath, dir);
-  } else {
-    pullSync(fafPath, claudePath);
-  }
+  // .faf is the FCL — the canonical truth. CLAUDE.md is a downstream prose
+  // surface that READS .faf to save AI time. They are not peers. mtime-based
+  // "newer wins" auto-direction silently overwrote canonical .faf content
+  // when a user edited CLAUDE.md prose (issue #63). FAF fills its own slots.
+  // Use `faf sync --pull` for the explicit legacy bootstrap case.
+  void claudePath;
+  pushSync(fafPath, dir);
 }
 
 function pushSync(fafPath: string, dir: string): void {
