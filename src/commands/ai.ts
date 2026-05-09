@@ -6,6 +6,31 @@ import { enrichScore } from '../core/scorer.js';
 import { displayScore } from '../ui/display.js';
 import { bold, dim, fafCyan } from '../ui/colors.js';
 
+/** Per faf-auto-no-guess-no-slop: client-side guard against AI returning
+ *  generic slop / placeholder text / fabrications. Even if Claude slips
+ *  and returns "for users" or "TBD", we reject it before writing to disk.
+ *
+ *  Rules:
+ *  - Length 4-280 chars (too short = unhelpful; too long = essay, not a slot)
+ *  - Not a generic-slop pattern (see SLOP_PATTERNS)
+ *  - Must be a string (null/undefined are the honest "leave empty" signal)
+ *
+ *  Exported for testability (avoids mocking Anthropic SDK in tests).
+ */
+export const AI_SLOP_PATTERNS: readonly RegExp[] = [
+  /^(tbd|see\s+readme|todo|fixme|coming\s+soon|n\/a|unknown|none|null|not\s+specified)\b/i,
+  /^(software|application|app|project|tool|library|framework)\.?$/i,
+  /^(for\s+(users|developers|teams|engineers))\.?$/i,
+  /^(general\s+purpose|various|multiple|description|goal|name|title)\.?$/i,
+];
+
+export function isValidAiExtraction(v: unknown): v is string {
+  if (typeof v !== 'string') return false;
+  const trimmed = v.trim();
+  if (trimmed.length < 4 || trimmed.length > 280) return false;
+  return !AI_SLOP_PATTERNS.some(re => re.test(trimmed));
+}
+
 /** Get a nested value from an object by dot-path */
 function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
   const parts = path.split('.');
@@ -82,12 +107,31 @@ async function enhanceCommand(): Promise<void> {
     return;
   }
 
-  console.log(`${fafCyan('ai')} enhance  ${dim(`filling ${emptySlots.length} empty slots...`)}`);
+  console.log(`${fafCyan('ai')} enhance  ${dim(`extracting from ${emptySlots.length} empty slots...`)}`);
 
   const client = await getClient();
 
   const slotList = emptySlots.map(s => `- ${s.path}: ${s.description}`).join('\n');
-  const prompt = `Given this project .faf file:\n\n${yaml}\n\nFill in these empty slots with reasonable values based on the project context. Return ONLY a JSON object mapping dot-paths to values.\n\nEmpty slots:\n${slotList}\n\nRespond with ONLY valid JSON, no markdown fences.`;
+  // Per faf-auto-no-guess-no-slop doctrine — extract-or-null per slot.
+  // Empty is honest; wrong is a lie. Forbidden: generic slop, fabricated
+  // values, content not present in the source. JSON null = leave the slot
+  // empty for `faf go` interview.
+  const prompt = `You are extracting concrete content from a project's .faf file to fill empty slots. STRICT RULES:
+
+1. Return JSON mapping dot-paths to values OR null.
+2. Use null when the source doesn't contain CONCRETE evidence for that slot — DO NOT GUESS.
+3. NEVER use generic placeholders. Forbidden values include: "TBD", "see README", "software application", "for users", "for developers", "general purpose", "various", "multiple", "n/a", "unknown".
+4. NEVER fabricate. If the .faf doesn't say it explicitly, return null for that slot.
+5. Extracted values must be SHORT (under 200 characters) and DIRECTLY supported by the source.
+
+The .faf source:
+
+${yaml}
+
+Empty slots to fill (return null if no concrete evidence):
+${slotList}
+
+Respond with ONLY valid JSON, no markdown fences. Each value is either a short string (with concrete evidence) or null (leave empty).`;
 
   const response = await client.messages.create({
     model: 'claude-haiku-4-5-20251001',
@@ -99,21 +143,31 @@ async function enhanceCommand(): Promise<void> {
     const text = response.content[0].text;
     const suggestions = JSON.parse(text);
     let filled = 0;
+    let rejected = 0;
 
     for (const slot of emptySlots) {
       const value = suggestions[slot.path];
-      if (value && typeof value === 'string') {
+      if (value === null || value === undefined) continue; // honest empty
+      if (isValidAiExtraction(value)) {
         setNestedValue(data as Record<string, unknown>, slot.path, value);
         console.log(`  ${fafCyan('●')} ${slot.path} ${dim('←')} ${value}`);
         filled++;
+      } else {
+        // Defensive rejection — Claude returned slop or out-of-bounds value
+        console.log(`  ${dim('○')} ${slot.path} ${dim('— rejected as slop, left empty')}`);
+        rejected++;
       }
     }
 
     if (filled > 0) {
       writeFaf(fafPath, data);
-      console.log(`\n${fafCyan('◆')} ai enhance  filled ${filled} slot${filled === 1 ? '' : 's'}`);
+      console.log(`\n${fafCyan('◆')} ai enhance  filled ${filled} slot${filled === 1 ? '' : 's'}${rejected > 0 ? ` (${rejected} rejected)` : ''}`);
       const result = enrichScore(kernel.score(readFafRaw(fafPath)));
       displayScore(result, fafPath);
+    } else if (rejected > 0) {
+      console.log(`\n${dim('all extractions rejected as slop. Run')} ${bold("'faf go'")} ${dim('for interview-fill.')}`);
+    } else {
+      console.log(`\n${dim('no concrete evidence for empty slots. Run')} ${bold("'faf go'")} ${dim('for interview-fill.')}`);
     }
   } catch {
     console.error('Error: Could not parse AI response.');
