@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v6.5.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v6.5.1 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -7,6 +7,23 @@ All notable changes to faf-cli will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [6.5.1] - 2026-05-09 — The Glass-Hood Edition
+
+Glass-Hood = the cli shows its work. Decisions are visible and refutable by inspection.
+
+When the cli classifies a project, it emits a `# found:` YAML comment next to `type:` listing the observable evidence:
+
+```yaml
+project:
+  type: cli  # found: package.json bin
+```
+
+Read the rationale, agree or disagree. No opaque hood — you can see the engine bay.
+
+xai-faf-rust ships the same doctrine as a weighted score-breakdown view. Different surface, same idea: don't hide your reasoning.
+
+---
 
 ## [6.5.0] - 2026-05-08 — The Conformance Edition
 

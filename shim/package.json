@@ -1,0 +1,26 @@
+{
+  "name": "faf",
+  "version": "6.5.1",
+  "description": "FAF — Foundational AI-context Format. IANA-registered (application/vnd.faf+yaml). Project DNA for AI. This package is a thin alias to faf-cli — see the canonical CLI for full docs.",
+  "keywords": ["faf", "ai-context", "ai", "context", "llm", "claude", "grok", "mcp", "yaml", "cli"],
+  "author": "wolfejam <wolfejam@faf.one>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Wolfe-Jam/faf-cli",
+    "directory": "shim"
+  },
+  "homepage": "https://faf.one",
+  "bugs": {
+    "url": "https://github.com/Wolfe-Jam/faf-cli/issues"
+  },
+  "dependencies": {
+    "faf-cli": "latest"
+  },
+  "bin": {
+    "faf": "./bin/faf.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
