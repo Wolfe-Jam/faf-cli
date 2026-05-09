@@ -139,18 +139,25 @@ export function generateClaudeMd(data: FafData): string {
   return lines.join('\n');
 }
 
+/** Strip a trailing `vN`, `vN.N`, `vN.N.N…` version token from a project name.
+ *  Requires whitespace before the `v` so hyphenated names like `mcpaas-vue` or
+ *  `faf-cli-v6` are preserved. Issue #64 sibling — see #62. */
+function stripVersionTrailer(name: string): string {
+  return name.replace(/\s+v\d+(?:\.\d+)*\s*$/i, '').trim();
+}
+
 /** Extract project data from CLAUDE.md content (pull direction) */
 export function parseClaudeMd(content: string): Partial<FafData> {
   const data: Partial<FafData> = { project: {} };
 
   // New format: "# CLAUDE.md — project-name"
   const titleMatch = content.match(/^# CLAUDE\.md\s*[—–-]\s*(.+)$/m);
-  if (titleMatch) data.project!.name = titleMatch[1].trim();
+  if (titleMatch) data.project!.name = stripVersionTrailer(titleMatch[1].trim());
 
   // Old format fallback: "**Name:** value"
   if (!data.project!.name) {
     const nameMatch = content.match(/\*\*Name:\*\*\s*(.+)/);
-    if (nameMatch) data.project!.name = nameMatch[1].trim();
+    if (nameMatch) data.project!.name = stripVersionTrailer(nameMatch[1].trim());
   }
 
   // New format: paragraph after "## What This Is"

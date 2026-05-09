@@ -137,4 +137,53 @@ describe('interop/claude', () => {
     expect(firstTwoLines[0]).toMatch(/^<!-- faf: .* -->$/);
     expect(firstTwoLines[1]).toMatch(/^<!-- faf: .* -->$/);
   });
+
+  // ─── #62: parseClaudeMd strips trailing vN.N.N from project.name ───
+
+  describe('parseClaudeMd — strip version trailer from heading (#62)', () => {
+    test('strips full semver: # CLAUDE.md — faf-agent v0.1.0 → faf-agent', () => {
+      const parsed = parseClaudeMd('# CLAUDE.md — faf-agent v0.1.0\n');
+      expect(parsed.project?.name).toBe('faf-agent');
+    });
+
+    test('strips major-only: # CLAUDE.md — pkg v1 → pkg', () => {
+      const parsed = parseClaudeMd('# CLAUDE.md — pkg v1\n');
+      expect(parsed.project?.name).toBe('pkg');
+    });
+
+    test('strips major.minor: # CLAUDE.md — pkg v2.10 → pkg', () => {
+      const parsed = parseClaudeMd('# CLAUDE.md — pkg v2.10\n');
+      expect(parsed.project?.name).toBe('pkg');
+    });
+
+    test('strips deep version: # CLAUDE.md — pkg v1.2.3.4 → pkg', () => {
+      const parsed = parseClaudeMd('# CLAUDE.md — pkg v1.2.3.4\n');
+      expect(parsed.project?.name).toBe('pkg');
+    });
+
+    test('case-insensitive: # CLAUDE.md — pkg V1.0.0 → pkg', () => {
+      const parsed = parseClaudeMd('# CLAUDE.md — pkg V1.0.0\n');
+      expect(parsed.project?.name).toBe('pkg');
+    });
+
+    test('preserves names with embedded "v" but no whitespace: faf-cli-v6 stays', () => {
+      const parsed = parseClaudeMd('# CLAUDE.md — faf-cli-v6\n');
+      expect(parsed.project?.name).toBe('faf-cli-v6');
+    });
+
+    test('preserves names that just contain "version" word: version-tracker stays', () => {
+      const parsed = parseClaudeMd('# CLAUDE.md — version-tracker\n');
+      expect(parsed.project?.name).toBe('version-tracker');
+    });
+
+    test('no version trailer: name unchanged', () => {
+      const parsed = parseClaudeMd('# CLAUDE.md — plain-name\n');
+      expect(parsed.project?.name).toBe('plain-name');
+    });
+
+    test('also strips version trailer in old "**Name:** ..." fallback format', () => {
+      const parsed = parseClaudeMd('**Name:** legacy-pkg v3.2.1\n');
+      expect(parsed.project?.name).toBe('legacy-pkg');
+    });
+  });
 });
