@@ -9,9 +9,33 @@ export function readFaf(path: string): FafData {
   return parse(text) as FafData;
 }
 
-/** Write a .faf file from data */
+/** Write a .faf file from data.
+ *
+ *  If `data._meta.found` is present, it's stripped before serialization and
+ *  rendered as a `# found: <list>` YAML comment next to the `type:` field —
+ *  Glass Hood doctrine: the user sees WHY the cli classified the project as
+ *  it did. `_meta` is a runtime hint, never a serialized .faf field. */
 export function writeFaf(path: string, data: FafData): void {
-  const text = stringify(data, { lineWidth: 0 });
+  const meta = (data as FafData & { _meta?: { found?: string[] } })._meta;
+  // Strip _meta before serialization — it's never part of the .faf schema.
+  const cleanData: FafData = { ...data };
+  delete (cleanData as Record<string, unknown>)._meta;
+
+  let text = stringify(cleanData, { lineWidth: 0 });
+
+  // Inject `# found: ...` next to `type:` if rationale was provided.
+  if (meta?.found && meta.found.length > 0) {
+    const comment = meta.found.join(' + ');
+    // Match `  type: <value>` — only inject if there isn't already a comment.
+    text = text.replace(
+      /^(\s+type:\s+\S+)(\s*)$/m,
+      (match, prefix: string, trailing: string) => {
+        if (trailing.includes('#')) return match;
+        return `${prefix}  # found: ${comment}`;
+      },
+    );
+  }
+
   writeFileSync(path, text, 'utf-8');
 }
 

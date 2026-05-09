@@ -110,24 +110,52 @@ export function detectLanguage(dir: string): string {
   return 'Unknown';
 }
 
-/** Detect the project type for slot mapping */
-export function detectProjectType(dir: string): string {
+/** Project-type detection result + rationale (the #found list).
+ *  Each `found` entry is a human-readable signal that contributed to the
+ *  classification — emitted as a YAML comment by `writeFaf` for transparency
+ *  ("Glass Hood" doctrine: the user sees WHY the cli classified as it did). */
+export interface ProjectTypeDetection {
+  type: string;
+  /** Signals that matched, in order observed. */
+  found: string[];
+}
+
+/** Detect the project type with rationale. The `found` list captures every
+ *  positive signal that contributed to the classification — used downstream
+ *  by `writeFaf` to render `# found: <list>` next to `type:` in the .faf.
+ *
+ *  Rule: SDK keyword takes priority (per app-types-canonical-v6.5 doctrine). */
+export function detectProjectTypeWithRationale(dir: string): ProjectTypeDetection {
   const pkg = readPackageJson(dir);
   const frameworks = detectFrameworks(dir);
+  const found: string[] = [];
 
-  // CLI detection
-  if (pkg?.bin) return 'cli';
+  // CLI detection — Node bin
+  if (pkg?.bin) {
+    found.push('package.json bin');
+    return { type: 'cli', found };
+  }
 
   // MCP detection
   const hasMcp = frameworks.some(f => f.slug === 'mcp');
-  if (hasMcp) return 'mcp';
+  if (hasMcp) {
+    found.push('MCP SDK signal');
+    return { type: 'mcp', found };
+  }
 
   // Zig project-type detection — build.zig + entry-file convention.
   // src/main.zig → cli (executable); src/root.zig → library.
   // main.zig wins when both exist (typical: cli with internal lib exports).
   if (existsSync(join(dir, 'build.zig'))) {
-    if (existsSync(join(dir, 'src/main.zig'))) return 'cli';
-    if (existsSync(join(dir, 'src/root.zig'))) return 'library';
+    found.push('build.zig');
+    if (existsSync(join(dir, 'src/main.zig'))) {
+      found.push('src/main.zig');
+      return { type: 'cli', found };
+    }
+    if (existsSync(join(dir, 'src/root.zig'))) {
+      found.push('src/root.zig');
+      return { type: 'library', found };
+    }
   }
 
   // Framework repo detection — private workspace monorepo that builds a framework
@@ -136,31 +164,60 @@ export function detectProjectType(dir: string): string {
     existsSync(join(dir, 'pnpm-workspace.yaml')) ||
     pkg?.workspaces !== undefined
   );
-  if (isPrivateWorkspace && hasSvelte) return 'framework';
+  if (isPrivateWorkspace && hasSvelte) {
+    found.push('private workspace', 'Svelte');
+    return { type: 'framework', found };
+  }
 
   // Svelte/SvelteKit app detection — fullstack by nature (server routes + frontend)
-  if (hasSvelte) return 'svelte';
+  if (hasSvelte) {
+    found.push('Svelte/SvelteKit');
+    return { type: 'svelte', found };
+  }
 
   // Next.js and Nuxt are fullstack by nature (API routes built in)
   const hasNextOrNuxt = frameworks.some(f => f.slug === 'nextjs' || f.slug === 'nuxt');
-  if (hasNextOrNuxt) return 'fullstack';
+  if (hasNextOrNuxt) {
+    found.push(frameworks.find(f => f.slug === 'nextjs') ? 'Next.js' : 'Nuxt');
+    return { type: 'fullstack', found };
+  }
 
   // Full-stack detection
   const hasFrontend = frameworks.some(f => f.category === 'frontend');
   const hasBackend = frameworks.some(f => f.category === 'backend');
-  if (hasFrontend && hasBackend) return 'fullstack';
+  if (hasFrontend && hasBackend) {
+    found.push('frontend framework', 'backend framework');
+    return { type: 'fullstack', found };
+  }
 
   // Frontend-only
-  if (hasFrontend) return 'frontend';
+  if (hasFrontend) {
+    found.push('frontend framework');
+    return { type: 'frontend', found };
+  }
 
   // Backend-only
-  if (hasBackend) return 'backend';
+  if (hasBackend) {
+    found.push('backend framework');
+    return { type: 'backend', found };
+  }
 
   // Library detection (has main/exports but no bin)
-  if (pkg?.main && !pkg?.bin) return 'library';
+  if (pkg?.main && !pkg?.bin) {
+    found.push('package.json main (no bin)');
+    return { type: 'library', found };
+  }
 
   // Default
-  return 'library';
+  found.push('no classifying signals — fallback');
+  return { type: 'library', found };
+}
+
+/** Detect the project type for slot mapping. Backward-compatible wrapper —
+ *  returns just the type string. New code should prefer
+ *  `detectProjectTypeWithRationale` to access the `#found` rationale. */
+export function detectProjectType(dir: string): string {
+  return detectProjectTypeWithRationale(dir).type;
 }
 
 /** Detect the runtime */

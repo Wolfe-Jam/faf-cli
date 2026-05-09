@@ -3,7 +3,7 @@ import { APP_TYPE_CATEGORIES, SLOTS } from '../core/slots.js';
 import {
   detectFrameworks,
   detectLanguage,
-  detectProjectType,
+  detectProjectTypeWithRationale,
   detectRuntime,
   detectPackageManager,
   detectCicd,
@@ -18,7 +18,8 @@ export function detectStack(dir: string): FafData {
   const pkg = readPackageJson(dir);
   const frameworks = detectFrameworks(dir);
   const language = detectLanguage(dir);
-  const projectType = detectProjectType(dir);
+  const detection = detectProjectTypeWithRationale(dir);
+  const projectType = detection.type;
   const runtime = detectRuntime(dir);
   const pkgManager = detectPackageManager(dir);
   const cicd = detectCicd(dir);
@@ -145,5 +146,9 @@ export function detectStack(dir: string): FafData {
       how: '',
     },
     monorepo,
-  };
+    // Runtime-only meta. Stripped before YAML serialization by writeFaf,
+    // which uses _meta.found to inject `# found: <list>` next to `type:`.
+    // Glass Hood doctrine — the user sees WHY the cli classified as it did.
+    _meta: { found: detection.found },
+  } as FafData;
 }
