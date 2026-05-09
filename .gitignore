@@ -90,6 +90,8 @@ test-*.faf
 *.faf
 !project.faf
 !project-*.faf
+# Exception: test fixtures
+!tests/fixtures/**/*.faf
 
 # Internal documents - ALL .md files go to FAF-GOLD/PLANET-FAF
 *.md
