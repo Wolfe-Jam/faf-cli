@@ -27,6 +27,7 @@ import { tafCommand } from './commands/taf.js';
 import { goCommand } from './commands/go.js';
 import { aiCommand } from './commands/ai.js';
 import { conductorCommand } from './commands/conductor.js';
+import { wjttcCommand } from './commands/wjttc.js';
 
 const { version: VERSION } = require('../package.json');
 
@@ -208,6 +209,14 @@ program
   .command('conductor [subcommand] [path]')
   .description('Conductor integration')
   .action((subcommand, path) => conductorCommand(subcommand, path));
+
+program
+  .command('wjttc')
+  .description('Audit test suite for WJTTC tier coverage (vendor-neutral)')
+  .option('--path <path>', 'Test directory (default: tests)')
+  .option('--strict', 'Exit non-zero if any tests are untiered')
+  .option('--json', 'Output as JSON for CI consumption')
+  .action((options) => wjttcCommand(options));
 
 // === Soft Deprecation Aliases (v5.x compat) ===
 
