@@ -7,14 +7,209 @@ interface PackageJson {
   name?: string;
   version?: string;
   description?: string;
+  keywords?: string[];
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
   scripts?: Record<string, string>;
   type?: string;
   main?: string;
+  types?: string;
+  exports?: unknown;
   bin?: string | Record<string, string>;
   private?: boolean;
   workspaces?: string[] | { packages?: string[] };
+  files?: string[];
+}
+
+/** Read [package].name field from Cargo.toml — naive but adequate. */
+function readCargoName(dir: string): string | null {
+  const path = join(dir, 'Cargo.toml');
+  if (!existsSync(path)) return null;
+  try {
+    const content = readFileSync(path, 'utf-8');
+    const m = content.match(/^\s*\[package\][\s\S]*?^\s*name\s*=\s*"([^"]+)"/m);
+    return m ? m[1] : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Detect SDK signals — keyword-based per the SDK-priority doctrine.
+ *  Returns the matched evidence string, or null if no SDK signal. */
+function detectSdkSignal(dir: string, pkg: PackageJson | null): string | null {
+  // pkg.keywords contains 'sdk'
+  if (pkg?.keywords?.some(k => /^sdk(?:\s|-|$)|\-sdk$/i.test(k))) {
+    return 'package.json keywords contains "sdk"';
+  }
+  // pkg.name contains 'sdk' or '-sdk' suffix
+  if (pkg?.name && /(?:^|[-_/])sdk(?:[-_/]|$)/i.test(pkg.name)) {
+    return `package.json name "${pkg.name}" → sdk`;
+  }
+  // Cargo.toml [package].name contains 'sdk'
+  const cargoName = readCargoName(dir);
+  if (cargoName && /(?:^|[-_])sdk(?:[-_]|$)/i.test(cargoName)) {
+    return `Cargo.toml name "${cargoName}" → sdk`;
+  }
+  return null;
+}
+
+/** Python data-science dependency detection (pyproject.toml + requirements.txt). */
+function detectDataScienceSignal(dir: string): string | null {
+  const dsPatterns = /(numpy|pandas|jupyter|scikit-learn|sklearn|pytorch|tensorflow|matplotlib|scipy)/i;
+  const pyproject = join(dir, 'pyproject.toml');
+  if (existsSync(pyproject)) {
+    try {
+      const content = readFileSync(pyproject, 'utf-8');
+      const match = content.match(dsPatterns);
+      if (match) return `pyproject.toml depends on ${match[1]}`;
+    } catch { /* fall through */ }
+  }
+  const reqs = join(dir, 'requirements.txt');
+  if (existsSync(reqs)) {
+    try {
+      const content = readFileSync(reqs, 'utf-8');
+      const match = content.match(dsPatterns);
+      if (match) return `requirements.txt contains ${match[1]}`;
+    } catch { /* fall through */ }
+  }
+  return null;
+}
+
+/** Mobile platform signal (React Native / Expo / Capacitor / Ionic / Flutter / native dirs). */
+function detectMobileSignal(dir: string, pkg: PackageJson | null): string | null {
+  const mobileDeps = ['react-native', 'expo', '@capacitor/core', '@ionic/core'];
+  if (pkg) {
+    for (const dep of mobileDeps) {
+      if (pkg.dependencies?.[dep] || pkg.devDependencies?.[dep]) {
+        return `${dep} dependency`;
+      }
+    }
+  }
+  if (existsSync(join(dir, 'pubspec.yaml'))) return 'pubspec.yaml (Flutter)';
+  if (existsSync(join(dir, 'ios')) && existsSync(join(dir, 'android'))) {
+    return 'ios/ + android/ dirs';
+  }
+  return null;
+}
+
+/** WASM target detection (Cargo cdylib + wasm32 OR build.zig wasm OR pkg WASM build scripts). */
+function detectWasmSignal(dir: string, pkg: PackageJson | null): string | null {
+  const cargoPath = join(dir, 'Cargo.toml');
+  if (existsSync(cargoPath)) {
+    try {
+      const content = readFileSync(cargoPath, 'utf-8');
+      // crate-type = ["cdylib"] is the canonical wasm-output marker
+      if (/crate-type\s*=\s*\[[^\]]*"cdylib"/.test(content)) {
+        return 'Cargo.toml crate-type = ["cdylib"]';
+      }
+      // wasm-bindgen / wasm-pack as deps
+      if (/wasm-bindgen|wasm-pack/i.test(content)) {
+        return 'Cargo.toml wasm-bindgen/wasm-pack';
+      }
+    } catch { /* fall through */ }
+  }
+  // Zig WASM target — build.zig with .wasm or wasm in script
+  const buildZig = join(dir, 'build.zig');
+  if (existsSync(buildZig)) {
+    try {
+      const content = readFileSync(buildZig, 'utf-8');
+      if (/\.wasm\b|wasm32|setOutputFormat\(\.wasm/i.test(content)) {
+        return 'build.zig wasm target';
+      }
+    } catch { /* fall through */ }
+  }
+  // pkg keywords contains 'wasm' AND no app frameworks
+  if (pkg?.keywords?.some(k => /^wasm(?:-|$)|webassembly/i.test(k))) {
+    return 'package.json keywords contains "wasm"';
+  }
+  return null;
+}
+
+/** Bare HTML / vanilla site detection. */
+function detectHtmlSignal(dir: string, pkg: PackageJson | null): string | null {
+  // Must have index.html at root
+  if (!existsSync(join(dir, 'index.html'))) return null;
+  // Must NOT have any frontend deps (those would classify as frontend/website/etc)
+  if (pkg?.dependencies || pkg?.devDependencies) {
+    const allDeps = { ...(pkg.dependencies ?? {}), ...(pkg.devDependencies ?? {}) };
+    const frontendDeps = ['react', 'vue', 'svelte', '@sveltejs/kit', 'next', 'nuxt', 'astro', 'gatsby', 'solid-js', 'qwik'];
+    if (frontendDeps.some(d => allDeps[d])) return null;
+  }
+  return 'index.html (vanilla, no frontend framework)';
+}
+
+/** Documentation / spec-only repo signal. */
+function detectDocumentationSignal(dir: string, pkg: PackageJson | null): string | null {
+  // Strong signal: name or keywords contains 'specification'
+  if (pkg?.name && /specification|^@.*\/spec/i.test(pkg.name)) {
+    return `package name "${pkg.name}" → documentation`;
+  }
+  if (pkg?.keywords?.some(k => /^(specification|format-spec|standard)$/i.test(k))) {
+    return 'package keywords contains "specification"';
+  }
+  // pkg.files contains only md / examples / assets (no dist/, no src/)
+  if (pkg?.files && pkg.files.length > 0) {
+    const sourcePatterns = /^(dist|src|lib|build|bin)\/|\.(js|ts|tsx|jsx|mjs|cjs|py|rs|go)$/;
+    const hasSource = pkg.files.some(f => sourcePatterns.test(f));
+    const hasDocs = pkg.files.some(f => /\.(md|MD)|examples?\//.test(f));
+    if (!hasSource && hasDocs) {
+      return 'package.json files = docs/examples only (no source)';
+    }
+  }
+  return null;
+}
+
+/** Marketing / website signal — Astro/Gatsby static OR pkg keywords. */
+function detectWebsiteSignal(dir: string, pkg: PackageJson | null, frameworks: DetectedFramework[]): string | null {
+  // Astro/Gatsby are typically used for content/marketing sites
+  const astroOrGatsby = frameworks.find(f => f.slug === 'astro' || f.slug === 'gatsby');
+  if (astroOrGatsby) return `${astroOrGatsby.name} (static-site framework)`;
+  // pkg.keywords explicitly marketing
+  if (pkg?.keywords?.some(k => /^(website|marketing|landing|brochure|portfolio)$/i.test(k))) {
+    return 'package keywords contains "website"/"marketing"/"landing"';
+  }
+  return null;
+}
+
+/** SAAS shape — auth + payments + database + dashboard. */
+function detectSaasSignal(dir: string, pkg: PackageJson | null): string | null {
+  if (!pkg) return null;
+  const allDeps = { ...(pkg.dependencies ?? {}), ...(pkg.devDependencies ?? {}) };
+  const authDeps = ['@clerk/nextjs', '@clerk/clerk-react', 'next-auth', '@auth/core', 'auth0', '@auth0/nextjs-auth0'];
+  const paymentDeps = ['stripe', '@stripe/stripe-js', 'lemonsqueezy'];
+  const hasAuth = authDeps.some(d => allDeps[d]);
+  const hasPayment = paymentDeps.some(d => allDeps[d]);
+  if (hasAuth && hasPayment) {
+    return 'auth + payment dependencies';
+  }
+  return null;
+}
+
+/** MCPaaS (post-MCP platform) shape — multiple MCP signals + hosting + DB. */
+function detectMcpaasSignal(dir: string, pkg: PackageJson | null, frameworks: DetectedFramework[]): string | null {
+  // pkg.keywords contains 'mcpaas' is the strongest signal
+  if (pkg?.keywords?.some(k => /mcpaas/i.test(k))) {
+    return 'package keywords contains "mcpaas"';
+  }
+  // pkg.name contains 'mcpaas'
+  if (pkg?.name && /mcpaas/i.test(pkg.name)) {
+    return `package name "${pkg.name}" → mcpaas`;
+  }
+  // Multi-signal: MCP framework + database + hosting (a platform, not a single server)
+  const hasMcp = frameworks.some(f => f.slug === 'mcp');
+  const hasDb = frameworks.some(f => f.category === 'database');
+  if (hasMcp && hasDb && pkg?.dependencies && Object.keys(pkg.dependencies).length > 10) {
+    return 'MCP + database + complex deps (platform shape)';
+  }
+  return null;
+}
+
+/** Monorepo-root — private workspace with multiple packages, no single dominant FW. */
+function detectMonorepoRootSignal(dir: string, pkg: PackageJson | null): string | null {
+  if (!pkg?.private) return null;
+  const hasWorkspaces = !!pkg.workspaces || existsSync(join(dir, 'pnpm-workspace.yaml'));
+  if (!hasWorkspaces) return null;
+  return 'private workspace + multi-package';
 }
 
 /** Read and parse package.json from a directory */
@@ -124,23 +319,66 @@ export interface ProjectTypeDetection {
  *  positive signal that contributed to the classification — used downstream
  *  by `writeFaf` to render `# found: <list>` next to `type:` in the .faf.
  *
- *  Rule: SDK keyword takes priority (per app-types-canonical-v6.5 doctrine). */
+ *  Priority order per app-types-canonical-v6.5 doctrine (most-specific first).
+ *  Rule: SDK keyword takes priority (sdk wins over library/cli/wasm). */
 export function detectProjectTypeWithRationale(dir: string): ProjectTypeDetection {
   const pkg = readPackageJson(dir);
   const frameworks = detectFrameworks(dir);
   const found: string[] = [];
 
-  // CLI detection — Node bin
-  if (pkg?.bin) {
-    found.push('package.json bin');
-    return { type: 'cli', found };
+  // ─── 1. documentation — spec-only / docs-only repos ─────────────────────
+  const docSignal = detectDocumentationSignal(dir, pkg);
+  if (docSignal) {
+    found.push(docSignal);
+    return { type: 'documentation', found };
   }
 
-  // MCP detection
+  // ─── 2. mcpaas — post-MCP platforms (multiple MCP signals + auth + DB) ──
+  const mcpaasSignal = detectMcpaasSignal(dir, pkg, frameworks);
+  if (mcpaasSignal) {
+    found.push(mcpaasSignal);
+    return { type: 'mcpaas', found };
+  }
+
+  // ─── 3. saas — subscription products (auth + payment) ───────────────────
+  const saasSignal = detectSaasSignal(dir, pkg);
+  if (saasSignal) {
+    found.push(saasSignal);
+    return { type: 'saas', found };
+  }
+
+  // ─── 4. sdk — SDK keyword/structure WINS over library/cli/wasm ──────────
+  const sdkSignal = detectSdkSignal(dir, pkg);
+  if (sdkSignal) {
+    found.push(sdkSignal);
+    return { type: 'sdk', found };
+  }
+
+  // ─── 5. wasm — WASM target in build config ──────────────────────────────
+  const wasmSignal = detectWasmSignal(dir, pkg);
+  if (wasmSignal) {
+    found.push(wasmSignal);
+    return { type: 'wasm', found };
+  }
+
+  // ─── 6. mobile — mobile platform deps / native dirs ─────────────────────
+  const mobileSignal = detectMobileSignal(dir, pkg);
+  if (mobileSignal) {
+    found.push(mobileSignal);
+    return { type: 'mobile', found };
+  }
+
+  // ─── 7. mcp — single MCP server ─────────────────────────────────────────
   const hasMcp = frameworks.some(f => f.slug === 'mcp');
   if (hasMcp) {
     found.push('MCP SDK signal');
     return { type: 'mcp', found };
+  }
+
+  // ─── 8. cli — Node bin / Zig main.zig / Rust [[bin]] ────────────────────
+  if (pkg?.bin) {
+    found.push('package.json bin');
+    return { type: 'cli', found };
   }
 
   // Zig project-type detection — build.zig + entry-file convention.
@@ -158,7 +396,7 @@ export function detectProjectTypeWithRationale(dir: string): ProjectTypeDetectio
     }
   }
 
-  // Framework repo detection — private workspace monorepo that builds a framework
+  // ─── 9. framework — private workspace + Svelte ──────────────────────────
   const hasSvelte = frameworks.some(f => f.slug === 'svelte' || f.slug === 'sveltekit');
   const isPrivateWorkspace = pkg?.private === true && (
     existsSync(join(dir, 'pnpm-workspace.yaml')) ||
@@ -169,20 +407,46 @@ export function detectProjectTypeWithRationale(dir: string): ProjectTypeDetectio
     return { type: 'framework', found };
   }
 
-  // Svelte/SvelteKit app detection — fullstack by nature (server routes + frontend)
+  // ─── 10. svelte — Svelte/SvelteKit app (fullstack by nature) ────────────
   if (hasSvelte) {
     found.push('Svelte/SvelteKit');
     return { type: 'svelte', found };
   }
 
-  // Next.js and Nuxt are fullstack by nature (API routes built in)
+  // ─── 11. enterprise — private workspace + multi-FW (more specific than monorepo-root) ──
+  // Must be checked BEFORE monorepo-root (which is private workspace fallback).
+  const hasFrontendFw = frameworks.some(f => f.category === 'frontend');
+  const hasBackendFw = frameworks.some(f => f.category === 'backend');
+  if (
+    pkg?.private &&
+    (pkg.workspaces || existsSync(join(dir, 'pnpm-workspace.yaml'))) &&
+    hasFrontendFw && hasBackendFw
+  ) {
+    found.push('private workspace + frontend + backend frameworks');
+    return { type: 'enterprise', found };
+  }
+
+  // ─── 12. monorepo-root — private workspace, multi-package, no specific FW story ──
+  const monoSignal = detectMonorepoRootSignal(dir, pkg);
+  if (monoSignal) {
+    found.push(monoSignal);
+    return { type: 'monorepo-root', found };
+  }
+
+  // ─── 13. website — marketing-shape (Astro/Gatsby OR keywords) ───────────
+  const websiteSignal = detectWebsiteSignal(dir, pkg, frameworks);
+  if (websiteSignal) {
+    found.push(websiteSignal);
+    return { type: 'website', found };
+  }
+
+  // ─── 14. fullstack — Next/Nuxt OR (frontend + backend) ──────────────────
   const hasNextOrNuxt = frameworks.some(f => f.slug === 'nextjs' || f.slug === 'nuxt');
   if (hasNextOrNuxt) {
     found.push(frameworks.find(f => f.slug === 'nextjs') ? 'Next.js' : 'Nuxt');
     return { type: 'fullstack', found };
   }
 
-  // Full-stack detection
   const hasFrontend = frameworks.some(f => f.category === 'frontend');
   const hasBackend = frameworks.some(f => f.category === 'backend');
   if (hasFrontend && hasBackend) {
@@ -190,25 +454,39 @@ export function detectProjectTypeWithRationale(dir: string): ProjectTypeDetectio
     return { type: 'fullstack', found };
   }
 
-  // Frontend-only
+  // ─── 14. frontend — frontend framework only ─────────────────────────────
   if (hasFrontend) {
     found.push('frontend framework');
     return { type: 'frontend', found };
   }
 
-  // Backend-only
+  // ─── 15. backend — backend framework only ───────────────────────────────
   if (hasBackend) {
     found.push('backend framework');
     return { type: 'backend', found };
   }
 
-  // Library detection (has main/exports but no bin)
+  // ─── 16. data-science — Python DS deps (numpy/pandas/jupyter/sklearn) ───
+  const dsSignal = detectDataScienceSignal(dir);
+  if (dsSignal) {
+    found.push(dsSignal);
+    return { type: 'data-science', found };
+  }
+
+  // ─── 17. html — bare index.html, no framework ──────────────────────────
+  const htmlSignal = detectHtmlSignal(dir, pkg);
+  if (htmlSignal) {
+    found.push(htmlSignal);
+    return { type: 'html', found };
+  }
+
+  // ─── 18. library — fallback (has main/exports but no bin) ──────────────
   if (pkg?.main && !pkg?.bin) {
     found.push('package.json main (no bin)');
     return { type: 'library', found };
   }
 
-  // Default
+  // Default — bare repo with no classifying signals
   found.push('no classifying signals — fallback');
   return { type: 'library', found };
 }

@@ -135,8 +135,8 @@ describe('isPlaceholder', () => {
 });
 
 describe('APP_TYPE_CATEGORIES', () => {
-  test('cli has project + human only', () => {
-    expect(APP_TYPE_CATEGORIES.cli).toEqual(['project', 'human']);
+  test('cli has project + human + universal (12 slots — v6.5.0 universal-extension)', () => {
+    expect(new Set(APP_TYPE_CATEGORIES.cli)).toEqual(new Set(['project', 'human', 'universal']));
   });
 
   test('fullstack has 5 categories', () => {

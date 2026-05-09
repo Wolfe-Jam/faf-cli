@@ -86,7 +86,7 @@ describe('init command integration', () => {
     expect(result.total).toBe(21);
   });
 
-  test('slotignored math is correct for CLI', () => {
+  test('slotignored math is correct for CLI (v6.5.0 — universal extension)', () => {
     writeFileSync(join(testDir, 'package.json'), JSON.stringify({
       name: 'my-cli',
       bin: { cli: 'index.js' },
@@ -97,8 +97,9 @@ describe('init command integration', () => {
     writeFaf(fafPath, data);
 
     const result = kernel.score(readFafRaw(fafPath));
-    // CLI: 9 active slots (project=3, human=6), 12 slotignored in base tier
-    expect(result.active).toBe(9);
-    expect(result.ignored).toBe(12);
+    // CLI: 12 active slots (project=3, human=6, universal=3), 9 slotignored in base tier.
+    // v6.5.0 added `universal` to cli — it ships/builds/CIs somewhere.
+    expect(result.active).toBe(12);
+    expect(result.ignored).toBe(9);
   });
 });
