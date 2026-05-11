@@ -66,6 +66,8 @@ Until now we have had 85% as a recommended minimum. **It's now 100! All or nothi
 
 AI gets its best shot at assisting you.
 
+We can ask this because we can now get you to 100% on virtually any app-type.
+
 The CLI follows through: `faf go` ramps to 100%, not 85%. `sync --pull` (MD → .faf) is Trophy-gated. The score-line tells you how far you are from 🏆.
 
 (Adding `about` — the 20th app-type — made the ladder hit a score. *How no-score became a score.* Fitting, because v6.6 is when that score became the only one we recommend.)
