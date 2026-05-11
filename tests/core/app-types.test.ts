@@ -1,11 +1,17 @@
 /**
- * WJTTC — app-types canonical ladder (v6.5.0)
+ * WJTTC — app-types canonical ladder (v6.6.0)
  *
- * ENGINE: locks the 19-type ladder, slot allocation, and the universal-
+ * ENGINE: locks the 20-type ladder, slot allocation, and the universal-
  *         category extension to small types (cli/library/mcp/frontend/
  *         data-science).
  *
- * Per app-types-canonical-v6.5.md doctrine memory.
+ * v6.6.0 — Added `about` as the first non-app type (0 slots; score is
+ * INHERITED from the source codebase, not calculated). About Repos are
+ * documentation surfaces for private codebases — they DISPLAY the source's
+ * Trophy badge, they don't earn one. Per
+ * memory/private-source-public-about-pattern.md.
+ *
+ * Per app-types-canonical-v6.5.md → v6.6.md doctrine memory.
  */
 
 import { describe, test, expect } from 'bun:test';
@@ -26,13 +32,16 @@ const CATEGORY_SIZES: Record<SlotCategory, number> = {
   enterprise_ops: 3,
 };
 
-describe('WJTTC ENGINE: app-types canonical ladder (19 types)', () => {
-  test('exactly 19 types defined', () => {
-    expect(Object.keys(APP_TYPE_CATEGORIES).length).toBe(19);
+describe('WJTTC ENGINE: app-types canonical ladder (20 types)', () => {
+  test('exactly 20 types defined', () => {
+    expect(Object.keys(APP_TYPE_CATEGORIES).length).toBe(20);
   });
 
   test('all canonical types present', () => {
     const expected = [
+      // 0 slots — non-app representation (v6.6.0)
+      'about',
+      // 9 slots — minimal
       'documentation',
       'cli', 'library', 'sdk', 'wasm', 'html',
       'frontend', 'website', 'mobile',
@@ -44,6 +53,10 @@ describe('WJTTC ENGINE: app-types canonical ladder (19 types)', () => {
     for (const t of expected) {
       expect(APP_TYPE_CATEGORIES).toHaveProperty(t);
     }
+  });
+
+  test('about type has zero slot categories (non-app, score is inherited)', () => {
+    expect(APP_TYPE_CATEGORIES.about).toEqual([]);
   });
 });
 

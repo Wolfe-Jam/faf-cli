@@ -2,8 +2,7 @@ import { existsSync } from 'fs';
 import { join } from 'path';
 import { detectStack } from '../detect/stack.js';
 import { writeFaf, readFafRaw } from '../interop/faf.js';
-import * as kernel from '../wasm/kernel.js';
-import { enrichScore } from '../core/scorer.js';
+import { scoreFafYaml } from '../core/scorer.js';
 import { displayScore } from '../ui/display.js';
 import { bold, dim, fafCyan } from '../ui/colors.js';
 
@@ -29,7 +28,7 @@ export function initCommand(options: InitOptions = {}): void {
   writeFaf(outputPath, data);
 
   const yaml = readFafRaw(outputPath);
-  const result = enrichScore(kernel.score(yaml));
+  const result = scoreFafYaml(yaml);
 
   console.log(`${fafCyan('created')} ${outputPath}`);
   displayScore(result, outputPath);

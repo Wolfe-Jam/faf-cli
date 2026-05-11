@@ -101,6 +101,15 @@ export function isPlaceholder(value: unknown): boolean {
  *  - Order is by ascending slot count, not insertion order.
  */
 export const APP_TYPE_CATEGORIES: Record<string, SlotCategory[]> = {
+  // 0 slots — non-app representation surface. Score is INHERITED, not calculated.
+  // About Repos are public faces of private codebases (private source / public
+  // about pattern, same shape as Anthropic's claude-code repo). They display
+  // the source's Trophy badge; they don't earn one. Required: about.represents
+  // (Wolfe-Jam/<source>). Optional: about.source_score (number). Scorer
+  // short-circuits when app_type === 'about' — see scorer.ts.
+  // Doctrine: memory/private-source-public-about-pattern.md.
+  about: [],
+
   // 9 slots — minimal (project meta + human only)
   documentation: ['project', 'human'],
 

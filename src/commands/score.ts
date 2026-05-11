@@ -1,6 +1,5 @@
 import { findFafFile, readFafRaw } from '../interop/faf.js';
-import * as kernel from '../wasm/kernel.js';
-import { enrichScore } from '../core/scorer.js';
+import { scoreFafYaml } from '../core/scorer.js';
 import { displayScore } from '../ui/display.js';
 import { tierBadge } from '../core/tiers.js';
 import { bold } from '../ui/colors.js';
@@ -19,8 +18,9 @@ export function scoreCommand(file?: string, options: ScoreOptions = {}): void {
   }
 
   const yaml = readFafRaw(fafPath);
-  const raw = kernel.score(yaml);
-  const result = enrichScore(raw);
+  // scoreFafYaml short-circuits when app_type: about — see core/scorer.ts.
+  // About Repos display the source's Trophy; they aren't scored themselves.
+  const result = scoreFafYaml(yaml);
 
   if (options.json) {
     console.log(JSON.stringify(result, null, 2));

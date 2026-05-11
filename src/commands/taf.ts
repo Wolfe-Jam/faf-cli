@@ -1,7 +1,6 @@
 import { writeFileSync } from 'fs';
 import { findFafFile, readFaf, readFafRaw } from '../interop/faf.js';
-import * as kernel from '../wasm/kernel.js';
-import { enrichScore } from '../core/scorer.js';
+import { scoreFafYaml } from '../core/scorer.js';
 import { fafCyan, dim } from '../ui/colors.js';
 
 export interface TafOptions {
@@ -18,7 +17,7 @@ export function tafCommand(options: TafOptions = {}): void {
 
   const data = readFaf(fafPath);
   const yaml = readFafRaw(fafPath);
-  const result = enrichScore(kernel.score(yaml));
+  const result = scoreFafYaml(yaml);
 
   const receipt = {
     taf_version: '1.0.0',

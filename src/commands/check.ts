@@ -1,7 +1,7 @@
 import { findFafFile, readFaf, readFafRaw } from '../interop/faf.js';
 import { validateFaf } from '../core/schema.js';
 import * as kernel from '../wasm/kernel.js';
-import { enrichScore } from '../core/scorer.js';
+import { scoreFafYaml } from '../core/scorer.js';
 import { displayScore } from '../ui/display.js';
 import { bold, dim, fafCyan } from '../ui/colors.js';
 
@@ -38,7 +38,7 @@ export function checkCommand(file?: string, options: CheckOptions = {}): void {
 
   console.log(`${fafCyan('valid')} ${fafPath}`);
 
-  const result = enrichScore(kernel.score(yaml));
+  const result = scoreFafYaml(yaml);
   displayScore(result, fafPath);
 
   if (options.strict && result.score < 100) {
