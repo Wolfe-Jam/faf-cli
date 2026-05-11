@@ -1,4 +1,5 @@
-<!-- faf: faf-cli v6 | TypeScript | CLI tool for creating and managing `.faf` files — persistent AI context that versions with your code. IANA-registered media type: `application/vnd.faf+yaml`. -->
+<!-- faf: faf-cli v6 | TypeScript | cli | CLI tool for creating and managing `.faf` files — persistent AI context that versions with your code. IANA-registered media type: `application/vnd.faf+yaml`. -->
+<!-- faf: claim=project.faf | family=FAF -->
 
 # CLAUDE.md — faf-cli v6
 
@@ -21,4 +22,4 @@ CLI tool for creating and managing `.faf` files — persistent AI context that v
 
 ---
 
-*STATUS: BI-SYNC ACTIVE — 2026-05-09T03:53:57.879Z*
+*STATUS: BI-SYNC ACTIVE — 2026-05-11T21:46:47.136Z*
