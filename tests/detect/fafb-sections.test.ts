@@ -8,7 +8,7 @@
  * BRAKE:  the headline v6.5.0 capability — cli-generated .faf now produces
  *         multi-section .fafb when compiled (verified via section_count > 1).
  *
- * Per app-types-canonical-v6.5 + faf-auto-no-guess-no-slop: tech_stack /
+ * Per v6.6.md + faf-auto-no-guess-no-slop: tech_stack /
  * key_files / commands auto-populate from observable signals;
  * architecture / context stay empty (user-fill).
  */

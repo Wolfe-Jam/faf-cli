@@ -162,7 +162,7 @@ faf auto                    # Auto-enhance to Gold Code
 **Instantly.** Generate context for ANY GitHub repo WITHOUT cloning:
 ```bash
 bunx faf-cli git https://github.com/facebook/react
-# 2 seconds → 95% 🥈 Silver score
+# 2 seconds → 95% ◆ Silver score
 # No install. No clone. Just instant context.
 ```
 
@@ -192,10 +192,10 @@ Add to package.json to see FAF status every dev session:
 ```bash
 # Generate AI context for ANY GitHub repo
 bunx faf-cli git https://github.com/facebook/react
-# ⏱️ 2 seconds → 95% 🥈 Silver score
+# ⏱️ 2 seconds → 95% ◆ Silver score
 
 bunx faf-cli git https://github.com/sveltejs/svelte
-# ⏱️ 2 seconds → 95% 🥈 Silver score
+# ⏱️ 2 seconds → 95% ◆ Silver score
 ```
 
 > **Also works with npx:** Replace `bunx` with `npx` if you prefer npm.

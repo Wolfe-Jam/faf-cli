@@ -7,12 +7,12 @@
 ## The Problem It Solves
 
 **Without slot-ignore:**
-- CLI tool with no database → "Database missing" → Low score ❌
+- CLI tool with no db → "Database missing" → Low score ❌
 - Static site with no backend → "Backend missing" → Low score ❌
 - Library with no hosting → "Hosting missing" → Low score ❌
 
 **With slot-ignore:**
-- CLI tool with `database: None` → Database ignored → Not counted as missing ✅
+- CLI tool with `db: None` → Database ignored → Not counted as missing ✅
 - Static site with `backend: None` → Backend ignored → Not counted as missing ✅
 - Library with `hosting: None` → Hosting ignored → Not counted as missing ✅
 
@@ -36,8 +36,8 @@ Score = (Filled + Ignored) / 21 * 100
 **Example:**
 ```yaml
 stack:
-  database: None           # ✅ Ignored (CLI doesn't need database)
-  css_framework: None      # ✅ Ignored (CLI doesn't have CSS)
+  db: None           # ✅ Ignored (CLI doesn't need db)
+  css: None      # ✅ Ignored (CLI doesn't have CSS)
   backend: PostgreSQL      # ✅ Filled (has value)
   hosting: (undefined)     # ❌ Missing (not set)
 ```
@@ -47,26 +47,26 @@ stack:
 ### CLI Tools (Node.js, Rust, Go, Python CLI)
 
 **Ignored slots:**
-- `database` - CLI tools don't typically need databases
-- `css_framework` - No web UI
-- `frontend` - No web UI
+- `db` - CLI tools don't typically need databases
+- `css` - No web UI
+- `framework` - No web UI
 
 **Example:**
 ```yaml
 project:
   type: cli-ts
 stack:
-  database: None
-  css_framework: None
-  frontend: None
+  db: None
+  css: None
+  framework: None
 ```
 
 ### Static Sites (HTML, Gatsby, Hugo)
 
 **Ignored slots:**
 - `backend` - No server-side code
-- `database` - No data storage
-- `api_type` - No API
+- `db` - No data storage
+- `api` - No API
 
 **Example:**
 ```yaml
@@ -74,15 +74,15 @@ project:
   type: static-html
 stack:
   backend: None
-  database: None
-  api_type: None
+  db: None
+  api: None
 ```
 
 ### Backend APIs (REST, GraphQL, gRPC)
 
 **Ignored slots:**
-- `css_framework` - No frontend UI
-- `frontend` - No client-side framework
+- `css` - No framework UI
+- `framework` - No client-side framework
 - `ui_library` - No UI components
 
 **Example:**
@@ -90,8 +90,8 @@ stack:
 project:
   type: api-server
 stack:
-  css_framework: None
-  frontend: None
+  css: None
+  framework: None
   ui_library: None
 ```
 
@@ -100,7 +100,7 @@ stack:
 **Ignored slots:**
 - `hosting` - Libraries aren't deployed
 - `cicd` - Often handled by consumers
-- `database` - Libraries don't run databases
+- `db` - Libraries don't run databases
 
 **Example:**
 ```yaml
@@ -109,7 +109,7 @@ project:
 stack:
   hosting: None
   cicd: None
-  database: None
+  db: None
 ```
 
 ### Full-Stack Web Apps (React, Vue, Svelte + Backend)
@@ -122,9 +122,9 @@ stack:
 project:
   type: web-app
 stack:
-  frontend: React
+  framework: React
   backend: Node.js
-  database: PostgreSQL
+  db: PostgreSQL
   # All 21 slots typically filled
 ```
 
@@ -135,9 +135,9 @@ stack:
 ```typescript
 // For CLI projects
 if (isNodeCLI || isRustCLI) {
-  contextSlotsFilled['database'] = 'None';
-  contextSlotsFilled['css_framework'] = 'None';
-  contextSlotsFilled['frontend'] = 'None';
+  contextSlotsFilled['db'] = 'None';
+  contextSlotsFilled['css'] = 'None';
+  contextSlotsFilled['framework'] = 'None';
 }
 ```
 
@@ -145,7 +145,7 @@ if (isNodeCLI || isRustCLI) {
 
 ```typescript
 // Only mark as missing if NOT set to 'None'
-if (!projectData.database && projectData.database !== 'None') {
+if (!projectData.db && projectData.db !== 'None') {
   missingSlots.push('Database');
 }
 ```
@@ -170,16 +170,16 @@ project.name: faf-cli               # ✅ Filled
 project.goal: AI context standard   # ✅ Filled
 main_language: TypeScript           # ✅ Filled
 framework: CLI                      # ✅ Filled
-css_framework: None                 # ✅ Ignored
+css: None                 # ✅ Ignored
 ui_library: inquirer                # ✅ Filled
 backend: Node.js                    # ✅ Filled
 runtime: Node.js                    # ✅ Filled
-database: None                      # ✅ Ignored
-api_type: CLI                       # ✅ Filled
+db: None                      # ✅ Ignored
+api: CLI                       # ✅ Filled
 hosting: npm registry               # ✅ Filled
 cicd: GitHub Actions                # ✅ Filled
 build_tool: TypeScript (tsc)        # ✅ Filled
-package_manager: npm                # ✅ Filled
+pkg_manager: npm                # ✅ Filled
 version: 4.2.1                      # ✅ Filled
 
 # Human Context (6)
@@ -192,7 +192,7 @@ how: Test-driven development        # ✅ Filled
 
 # Score Calculation
 Filled: 19/21
-Ignored: 2/21 (css_framework, database)
+Ignored: 2/21 (css, db)
 Missing: 0/21
 
 Score: (19 + 2) / 21 = 100%
@@ -202,9 +202,9 @@ Score: (19 + 2) / 21 = 100%
 
 ```yaml
 # All 21 slots have real values
-database: PostgreSQL                # ✅ Filled
-css_framework: Tailwind             # ✅ Filled
-frontend: React                     # ✅ Filled
+db: PostgreSQL                # ✅ Filled
+css: Tailwind             # ✅ Filled
+framework: React                     # ✅ Filled
 # ... all other slots filled
 
 Score: 21/21 = 100%
@@ -219,8 +219,8 @@ main_language: JavaScript           # ✅ Filled
 # ... 8 more filled
 
 # Some slots ignored
-database: None                      # ✅ Ignored
-css_framework: None                 # ✅ Ignored
+db: None                      # ✅ Ignored
+css: None                 # ✅ Ignored
 
 # Some slots missing
 backend: (undefined)                # ❌ Missing
@@ -239,7 +239,7 @@ Score: (10 + 2) / 21 = 57%
 
 ### DON'T:
 ❌ Use `'None'` to hide missing information
-❌ Ignore slots that DO apply (e.g., don't ignore `database` if you use one)
+❌ Ignore slots that DO apply (e.g., don't ignore `db` if you use one)
 ❌ Mix `null`, `undefined`, and `'None'` - use `'None'` consistently
 
 ## Slot-Ignore vs. Missing
@@ -256,9 +256,9 @@ Score: (10 + 2) / 21 = 57%
 
 ```yaml
 # .slotignore - Explicitly declare ignored slots
-- database       # CLI tool doesn't need database
-- css_framework  # No frontend styling
-- frontend       # No web UI
+- db       # CLI tool doesn't need db
+- css  # No framework styling
+- framework       # No web UI
 
 # Auto-applied based on project.type
 auto_detect: true
@@ -269,9 +269,9 @@ auto_detect: true
 The generator automatically detects project type and applies slot-ignore rules:
 
 ```typescript
-// Auto-detect CLI → ignore database/css/frontend
+// Auto-detect CLI → ignore db/css/framework
 if (isNodeCLI) {
-  applySlotIgnore(['database', 'css_framework', 'frontend']);
+  applySlotIgnore(['db', 'css', 'framework']);
 }
 ```
 

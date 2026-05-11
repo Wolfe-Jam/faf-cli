@@ -74,14 +74,15 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
   });
 
   if (emptySlots.length === 0) {
-    console.log(`${fafCyan('◆')} go  all slots populated`);
+    console.log(`${fafCyan('◆')} go  all slots populated — 🏆 Trophy`);
     const result = enrichScore(kernel.score(readFafRaw(fafPath)));
     displayScore(result, fafPath);
     return;
   }
 
-  console.log(`${fafCyan('go')} ${dim('— guided interview')}`);
-  console.log(dim(`  ${emptySlots.length} empty slots. Enter a value, "skip" to skip, or "quit" to stop.\n`));
+  console.log(`${fafCyan('go')} ${dim('— guided interview to 🏆 Trophy')}`);
+  const noun = emptySlots.length === 1 ? 'slot' : 'slots';
+  console.log(dim(`  ${emptySlots.length} ${noun} from Trophy. Enter a value, "skip" to skip, or "quit" to stop.\n`));
 
   const rl = createInterface({ input: process.stdin, output: process.stdout });
 

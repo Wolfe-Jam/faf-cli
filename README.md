@@ -135,16 +135,18 @@ bunx faf-cli go                # Interactive interview to gold code
 
 ## Scoring
 
+**🏆 Trophy 100% — all or nothing.** From v6.6.0 onward, faf-cli recommends only Trophy. 100% on the FCL is what makes the layers above (MD instructions, Agents, AI tooling) work — sub-Trophy leaves gaps that AI guesses on. Sub-Trophy tiers are honest interim states on the way to Trophy, not endpoints.
+
 | Tier | Score | Status |
 |------|-------|--------|
-| 🏆 **Trophy** | 100% | AI Optimized — Gold Code |
-| ★ **Gold** | 99%+ | Near-perfect |
-| ◆ **Silver** | 95%+ | Excellent |
-| ◇ **Bronze** | 85%+ | Production ready |
-| ● **Green** | 70%+ | Solid foundation |
+| 🏆 **Trophy** | 100% | AI never has to guess |
+| ★ **Gold** | 99%+ | 1 slot from Trophy |
+| ◆ **Silver** | 95%+ | Close — keep going |
+| ◇ **Bronze** | 85%+ | Interim — keep going |
+| ● **Green** | 70%+ | Interim — keep going |
 | ● **Yellow** | 55%+ | AI flipping coins |
 | ○ **Red** | <55% | AI working blind |
-| **♡** **White** | 0% | No context at all |
+| ♡ **White** | 0% | No context at all |
 
 ---
 

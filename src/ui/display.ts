@@ -8,16 +8,22 @@ export function displayScore(result: ScoreResult, file: string, verbose = false)
   const pct = bold(`${result.score}%`);
   console.log(`${badge} ${pct} ${dim(`${result.populated}/${result.active} slots`)} ${dim('—')} ${file}`);
 
-  // Name the empty slots so users know exactly what blocks improvement.
-  // Compact preview (top 3) on the count line, "+N more" suffix for overflow,
-  // verbose mode shows all via displaySlotBreakdown below.
-  if (result.tier.name !== 'TROPHY' && result.empty > 0) {
+  // Trophy = the only recommended state (v6.6.0+). Celebrate explicitly so the
+  // user sees Trophy as the destination, not just a tier. Per
+  // memory/trophy-is-the-target.md: 100% on the FCL is what makes the layers
+  // above (MD instructions, Agents, AI tooling) work — sub-Trophy degrades them.
+  if (result.tier.name === 'TROPHY') {
+    console.log(dim('  Trophy. AI never has to guess.'));
+  } else if (result.empty > 0) {
+    // Sub-Trophy is an interim state on the way to Trophy, not an endpoint.
+    // Frame the gap as "N slots from Trophy" so the next move is obvious.
     const emptyPaths = Object.entries(result.slots)
       .filter(([, state]) => state === 'empty')
       .map(([path]) => path);
     const preview = emptyPaths.slice(0, 3).join(', ');
     const suffix = emptyPaths.length > 3 ? `, +${emptyPaths.length - 3} more` : '';
-    console.log(dim(`  ${result.empty} empty: ${preview}${suffix}`));
+    const noun = result.empty === 1 ? 'slot' : 'slots';
+    console.log(dim(`  ${result.empty} ${noun} from Trophy: ${preview}${suffix}`));
   }
 
   if (verbose) {

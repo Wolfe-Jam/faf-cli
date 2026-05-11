@@ -20,16 +20,16 @@ Example:
 ### CLI Tools
 ```yaml
 stack:
-  database: None           # No data storage
-  css_framework: None      # No web UI
-  frontend: None           # No client-side framework
+  db: None           # No data storage
+  css: None      # No web UI
+  framework: None           # No client-side framework
 ```
 
 ### Backend APIs
 ```yaml
 stack:
-  css_framework: None      # No frontend
-  frontend: None           # No UI framework
+  css: None      # No framework
+  framework: None           # No UI framework
   ui_library: None         # No UI components
 ```
 
@@ -37,15 +37,15 @@ stack:
 ```yaml
 stack:
   backend: None            # No server code
-  database: None           # No data storage
-  api_type: None           # No API
+  db: None           # No data storage
+  api: None           # No API
 ```
 
 ### Libraries/SDKs
 ```yaml
 stack:
   hosting: None            # Not deployed
-  database: None           # No runtime storage
+  db: None           # No runtime storage
   cicd: None               # Consumer handles CI
 ```
 
@@ -61,10 +61,10 @@ stack:
 
 ```typescript
 // Set slot-ignore
-contextSlotsFilled['database'] = 'None';
+contextSlotsFilled['db'] = 'None';
 
 // Check slot-ignore
-if (!database && database !== 'None') {
+if (!db && db !== 'None') {
   missingSlots.push('Database');  // Only if NOT ignored
 }
 ```

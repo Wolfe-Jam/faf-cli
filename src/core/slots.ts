@@ -89,8 +89,9 @@ export function isPlaceholder(value: unknown): boolean {
   return false;
 }
 
-/** App-type to active category mapping. The canonical 19-type ladder
- *  (see app-types-canonical-v6.5.md doctrine memory). Sorted ascending by
+/** App-type to active category mapping. The canonical 20-type ladder —
+ *  19 detectable apps + `about` (non-app, 0 slots, owner-attested).
+ *  (See v6.6.md doctrine memory.) Sorted ascending by
  *  active slot count for readability.
  *
  *  v6.5.0 changes vs prior:

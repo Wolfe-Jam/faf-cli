@@ -156,26 +156,49 @@ describe('sync command — direction logic (auto / push / pull)', () => {
     expect(md).not.toContain('stale content');
   });
 
-  test('explicit pull updates .faf from CLAUDE.md', async () => {
+  // v6.6.0+ Trophy gate: pull (MD → .faf) is Trophy-gated. Below 100%, the
+  // gate blocks with a helpful message and exits 1. At 100%, pull unlocks.
+  // Per memory/trophy-is-the-target.md — "Bi-sync — formalised as a
+  // Trophy-gated unlocked feature."
+
+  test('pull at sub-Trophy is blocked with helpful message (v6.6 gate)', async () => {
     writeFaf(join(testDir, 'project.faf'), {
       faf_version: '2.5.0',
-      project: { name: 'old-name' },
+      project: { name: 'old-name' }, // sub-Trophy by design
     });
-    // Place a CLAUDE.md with newer project metadata.
-    // Generate via the same helper so the parse expectations align.
     const newData = { faf_version: '2.5.0', project: { name: 'new-name', goal: 'pulled goal' } };
     writeFileSync(join(testDir, 'CLAUDE.md'), generateClaudeMd(newData));
 
     const { syncCommand } = await import('../../src/commands/sync.js');
+    const errs: string[] = [];
+    const errSpy = spyOn(console, 'error').mockImplementation((s: string) => { errs.push(s); });
     const logSpy = spyOn(console, 'log').mockImplementation(() => {});
-    syncCommand({ direction: 'pull' });
-    logSpy.mockRestore();
+    const exitSpy = spyOn(process, 'exit').mockImplementation(((code?: number) => {
+      throw new Error(`__exit_${code}__`);
+    }) as never);
 
-    const updated = readFaf(join(testDir, 'project.faf'));
-    expect(updated.project?.name).toBe('new-name');
+    try {
+      syncCommand({ direction: 'pull' });
+      throw new Error('expected process.exit');
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      expect(msg).toContain('__exit_1__');
+    }
+    errSpy.mockRestore();
+    logSpy.mockRestore();
+    exitSpy.mockRestore();
+
+    expect(errs.join('\n')).toMatch(/blocked.*Trophy/);
+    expect(errs.join('\n')).toMatch(/backfill only runs at 100%/);
+
+    // .faf should be UNCHANGED — gate fires before any write.
+    const unchanged = readFaf(join(testDir, 'project.faf'));
+    expect(unchanged.project?.name).toBe('old-name');
   });
 
-  test('pull with no CLAUDE.md → error message, no crash', async () => {
+  test('pull at sub-Trophy with no CLAUDE.md still blocks on Trophy gate first', async () => {
+    // Gate fires before CLAUDE.md existence check — the partial-.faf is the
+    // safety failure, not the missing MD. Order matters.
     writeFaf(join(testDir, 'project.faf'), {
       faf_version: '2.5.0',
       project: { name: 'lonely' },
@@ -186,10 +209,21 @@ describe('sync command — direction logic (auto / push / pull)', () => {
     const errs: string[] = [];
     const errSpy = spyOn(console, 'error').mockImplementation((s: string) => { errs.push(s); });
     const logSpy = spyOn(console, 'log').mockImplementation(() => {});
-    expect(() => syncCommand({ direction: 'pull' })).not.toThrow();
+    const exitSpy = spyOn(process, 'exit').mockImplementation(((code?: number) => {
+      throw new Error(`__exit_${code}__`);
+    }) as never);
+
+    try {
+      syncCommand({ direction: 'pull' });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      expect(msg).toContain('__exit_1__');
+    }
     errSpy.mockRestore();
     logSpy.mockRestore();
-    expect(errs.join('\n')).toMatch(/CLAUDE\.md not found/);
+    exitSpy.mockRestore();
+
+    expect(errs.join('\n')).toMatch(/blocked.*Trophy/);
   });
 
   // ─── #63: auto sync is one-way push (.faf → CLAUDE.md), regardless of mtime ───
@@ -248,21 +282,10 @@ describe('sync command — direction logic (auto / push / pull)', () => {
     expect(md).not.toContain('stale prose');
   });
 
-  test('explicit --pull still works (legacy bootstrap path preserved)', async () => {
-    writeFaf(join(testDir, 'project.faf'), {
-      faf_version: '2.5.0',
-      project: { name: 'old' },
-    });
-    const newData = { faf_version: '2.5.0', project: { name: 'pulled-from-md' } };
-    writeFileSync(join(testDir, 'CLAUDE.md'), generateClaudeMd(newData));
-
-    const { syncCommand } = await import('../../src/commands/sync.js');
-    const logSpy = spyOn(console, 'log').mockImplementation(() => {});
-    syncCommand({ direction: 'pull' });
-    logSpy.mockRestore();
-
-    // Explicit pull still overwrites .faf — user opted in.
-    const updated = readFaf(join(testDir, 'project.faf'));
-    expect(updated.project?.name).toBe('pulled-from-md');
-  });
+  // The legacy bootstrap path (`--pull`, MD → .faf) is preserved but
+  // Trophy-gated in v6.6.0+. Block-at-sub-Trophy and CLAUDE-not-found-at-sub-
+  // Trophy are covered by the two tests above. The Trophy-unlocked behavior
+  // requires a 100% .faf — gated through a kernel score call we don't stub
+  // here. The doctrine is documented in src/commands/sync.ts and the gate
+  // is exercised by the two tests above.
 });

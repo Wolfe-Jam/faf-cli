@@ -11,7 +11,7 @@
  * Trophy badge, they don't earn one. Per
  * memory/private-source-public-about-pattern.md.
  *
- * Per app-types-canonical-v6.5.md → v6.6.md doctrine memory.
+ * Per v6.6.md doctrine memory.
  */
 
 import { describe, test, expect } from 'bun:test';
@@ -61,7 +61,7 @@ describe('WJTTC ENGINE: app-types canonical ladder (20 types)', () => {
 });
 
 describe('WJTTC ENGINE: per-type slot allocation', () => {
-  // Per app-types-canonical-v6.5.md — sorted ascending by slot count.
+  // Per v6.6.md — sorted ascending by slot count.
   const expectedSlotCounts: Record<string, number> = {
     documentation: 9,
     cli: 12,

@@ -1,19 +1,23 @@
 # Scoring & Tiers
 
-## 🎖️ Tier System: From Blind to Optimized
+## Tier System — Trophy is the target
+
+**🏆 Trophy 100% — all or nothing.** From v6.6.0 onward, faf-cli recommends only Trophy. 100% on the FCL is what makes the layers above (MD instructions, Agents, AI tooling) work properly. Sub-Trophy tiers below are honest interim states on the way to Trophy, not endpoints we recommend.
 
 | Tier | Score | Status |
 |------|-------|--------|
-| 🏆 **Trophy** | 100% | **AI Optimized** — Gold Code |
-| 🥇 **Gold** | 99%+ | Near-perfect context |
-| 🥈 **Silver** | 95%+ | Excellent |
-| 🥉 **Bronze** | 85%+ | Production ready |
-| 🟢 **Green** | 70%+ | Solid foundation |
-| 🟡 **Yellow** | 55%+ | AI flipping coins |
-| 🔴 **Red** | <55% | AI working blind |
-| 🤍 **White** | 0% | No context at all |
+| 🏆 **Trophy** | 100% | AI never has to guess — Gold Code |
+| ★ **Gold** | 99%+ | 1 slot from Trophy |
+| ◆ **Silver** | 95%+ | Close — keep going |
+| ◇ **Bronze** | 85%+ | Interim — keep going |
+| ● **Green** | 70%+ | Interim — keep going |
+| ● **Yellow** | 55%+ | AI flipping coins |
+| ○ **Red** | <55% | AI working blind |
+| ♡ **White** | 0% | No context at all |
 
-**At 55%, AI is guessing half the time.** At 100%, AI is optimized.
+**At 55%, AI is guessing half the time.** At 100%, AI never guesses.
+
+🏆 is the only emoji. Sub-Trophy tiers use geometric Unicode symbols (★ ◆ ◇ ● ○ ♡) — the source-of-truth lives in [`src/core/tiers.ts`](../src/core/tiers.ts).
 
 ---
 
@@ -26,8 +30,8 @@ FAF has 21 slots. Some don't apply to your project type. **Slot-ignore** handles
 ```yaml
 # CLI Tool - 21 slots total
 stack:
-  database: None           # ✅ Ignored (CLI doesn't need database)
-  css_framework: None      # ✅ Ignored (no web UI)
+  db: None           # ✅ Ignored (CLI doesn't need db)
+  css: None      # ✅ Ignored (no web UI)
   backend: Node.js         # ✅ Filled (has value)
   # ... other slots
 
@@ -45,9 +49,9 @@ Score: (15 + 6) / 21 = 100%
 ```
 
 **Common patterns:**
-- **CLI Tools:** Ignore `database`, `css_framework`, `frontend`
-- **Backend APIs:** Ignore `css_framework`, `frontend`, `ui_library`
-- **Static Sites:** Ignore `backend`, `database`, `api_type`
-- **Libraries:** Ignore `hosting`, `cicd`, `database`
+- **CLI Tools:** Ignore `db`, `css`, `framework`
+- **Backend APIs:** Ignore `css`, `framework`, `ui_library`
+- **Static Sites:** Ignore `backend`, `db`, `api`
+- **Libraries:** Ignore `hosting`, `cicd`, `db`
 
 **Full spec:** [SLOT-IGNORE.md](./SLOT-IGNORE.md)

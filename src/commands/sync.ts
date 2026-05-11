@@ -68,6 +68,20 @@ function pushSync(fafPath: string, dir: string): void {
 }
 
 function pullSync(fafPath: string, claudePath: string): void {
+  // Trophy gate (v6.6.0+ — per memory/trophy-is-the-target.md):
+  // MD → .faf backfill is the bi-directional flow that's only safe at 🏆 Trophy.
+  // Below Trophy, the .faf is incomplete by definition; CLAUDE.md prose is
+  // not a derivation from .faf (since .faf has gaps) and may contain stale or
+  // contradictory text. Pulling it overwrites canonical slots with that text.
+  // At Trophy, CLAUDE.md is a complete push-derivation from .faf, so selective
+  // re-read is safe. This gate matches the pubpro doctrine: Trophy or nothing.
+  const preScore = enrichScore(kernel.score(readFafRaw(fafPath)));
+  if (preScore.tier.name !== 'TROPHY') {
+    console.error(`${bold('×')} sync --pull blocked: requires 🏆 Trophy (currently ${preScore.score}%)`);
+    console.error(dim(`  MD → .faf backfill only runs at 100%. Reach Trophy with 'faf go', then retry.`));
+    process.exit(1);
+  }
+
   // Use dirname() to extract the directory portably — claudePath comes from
   // join(dir, 'CLAUDE.md') which produces backslashes on Windows. The previous
   // claudePath.replace('/CLAUDE.md', '') only worked on POSIX path separators
@@ -86,7 +100,7 @@ function pullSync(fafPath: string, claudePath: string): void {
   if (parsed.project?.main_language) existing.project = { ...existing.project, main_language: parsed.project.main_language };
 
   writeFaf(fafPath, existing);
-  console.log(`${fafCyan('◆')} sync  CLAUDE.md → .faf   ${dim('← bi-sync')}`);
+  console.log(`${fafCyan('◆')} sync  CLAUDE.md → .faf   ${dim('← bi-sync (Trophy-gated)')}`);
 
   const result = enrichScore(kernel.score(readFafRaw(fafPath)));
   displayScore(result, fafPath);

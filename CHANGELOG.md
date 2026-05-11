@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v6.5.1 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v6.6.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -7,6 +7,102 @@ All notable changes to faf-cli will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [6.6.0] - 2026-05-11 — The Trophy Edition
+
+> **How no-score became a score.**
+
+Two shifts arrive together: the **20th app-type** lands (`about` — the
+first non-app, owner-attested representation of another codebase) and the
+**recommendation flips to 🏆 Trophy 100% only**. Sub-Trophy is an interim
+state on the way to Trophy, not an endpoint we recommend.
+
+The wordplay carries the story: adding `about` brought the ladder to **a
+score** (20, in the old English sense). The 20th type doesn't score —
+it inherits its source's score. The system now distinguishes what scores
+from what doesn't.
+
+### `app_type: about` — the 20th type, first non-app
+
+- **New type:** `about` (0 slots, owner-attested, no detection branch).
+  Public About Repos for private codebases get a first-class
+  representation. See `private-source-public-about-pattern.md`.
+- **Scoring short-circuit:** `app_type: about` skips slot-based scoring.
+  Result inherits `about.source_score` (declared by owner, 0–100). Missing
+  source_score renders as `—` / White ♡ — truth-printing applies.
+- **Schema validation:** `about.represents` is REQUIRED (`owner/repo`
+  format). `about.source_score` is OPTIONAL but range-checked when present.
+- **New API:** `scoreFafYaml(yaml)` in `src/core/scorer.ts` — entry point
+  that respects the about short-circuit. `score`, `init`, `check`, and
+  `taf` commands all route through it.
+- **TAF downstream signal:** about results carry `inherited: true` and
+  `represents` so receipts distinguish inherited scores from calculated
+  ones.
+
+### Trophy 100% — all or nothing
+
+From v6.6.0 onward, faf-cli recommends **only 🏆 Trophy**. The why is
+architectural, not aspirational:
+
+```
+Layer 4   AI tooling          ← AI optimised by complete FCL
+Layer 3   Agents              ← can act because FCL is complete
+Layer 2   MD instructions     ← can be regenerated correctly
+Layer 1   .faf (FCL)          ← 🏆 Trophy = complete = foundation
+```
+
+100% on Layer 1 makes Layers 2–4 work. Sub-100% degrades every layer
+above it — instructions miss context, agents guess, AI optimisation
+can't happen because the foundation has holes.
+
+Concrete shifts:
+
+- **pubpro FAF Gate** — publish threshold rises 85% Bronze → 100% Trophy.
+  Sub-Trophy publishes get blocked, not approved-with-note.
+- **`faf go` / `faf auto`** — keep ramping toward Trophy; don't stop at 85%.
+- **Score-line copy** — Trophy celebrated explicitly; sub-Trophy framed
+  as *"N slots from Trophy"* (interim, not endpoint).
+- **Bi-sync** — formalised as a Trophy-gated unlocked feature. Prose
+  backfill from MD into `.faf` is only safe at 100%.
+- **README / docs** — *"Bronze 85% minimum"* framing retired. New
+  framing: *"🏆 Trophy 100% — all or nothing."*
+
+What does NOT change: the **tier ladder itself** (🏆 / ★ / ◆ / ◇ / ● /
+● / ○ / ♡, source-of-truth in `src/core/tiers.ts`) stays as honest
+intermediate rungs. Sub-Trophy tiers still render on score output — the
+*recommendation* shifts, not the ladder.
+
+### Slot vocabulary — user-surface flip (task #25)
+
+Mk4 canonical slot names land in user-facing surfaces (README, help text,
+docs). Code-side aliasing was completed 2026-03-18 and remains
+backward-compatible on read:
+
+| Pre-v6.6 surface | v6.6 canonical |
+|---|---|
+| `frontend` | `framework` |
+| `css_framework` | `css` |
+| `state_management` | `state` |
+| `api_type` | `api` |
+| `database` | `db` |
+| `package_manager` | `pkg_manager` |
+
+Old slot names continue to score correctly — 36k+ existing `.faf` files
+are unaffected. Only the user-facing vocabulary shifts.
+
+### Doctrine pointers
+
+- `v6.6.md` — canonical app-types ladder (renamed from
+  `app-types-canonical-v6.5.md` to mark the v6.6.0 boundary)
+- `trophy-is-the-target.md` — *"Trophy is the only recommended state from
+  v6.6 onward"* — wolfejam doctrine 2026-05-09
+- `private-source-public-about-pattern.md` — the About Repo pattern
+  v6.6.0 operationalizes
+- `score-edition-no-score-becomes-a-score.md` — the launch slogan
+  ("How no-score became a score") — Score is the slogan, Trophy is the
+  edition
+
+---
 
 ## [6.5.1] - 2026-05-09 — The Glass-Hood Edition
 

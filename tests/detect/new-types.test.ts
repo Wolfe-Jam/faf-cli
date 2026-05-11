@@ -7,7 +7,7 @@
  * BRAKE:  the SDK-priority rule — sdk wins over library/cli/wasm when
  *         keyword/name signals fire.
  *
- * Per app-types-canonical-v6.5 + glass-hood-found-detection doctrines.
+ * Per v6.6.md + glass-hood-found-detection doctrines.
  */
 
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';

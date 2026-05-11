@@ -138,7 +138,7 @@ export function detectStack(dir: string): FafData {
 
   // FAFB top-level sections (read by faf-rust-sdk's compile_fafb).
   // Without these, every cli-generated .fafb is META-only.
-  // Per app-types-canonical-v6.5.md + faf-auto-no-guess-no-slop:
+  // Per v6.6.md + faf-auto-no-guess-no-slop:
   // tech_stack/key_files/commands auto-populate from observable signals;
   // architecture/context stay empty (user fill — architecture overlaps with
   // human_context.how, context is free-form additional signal).
