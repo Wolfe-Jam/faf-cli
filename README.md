@@ -64,7 +64,7 @@ Run `faf` with no arguments:
 
 Until now we have had 85% as a recommended minimum. **It's now 100! All or nothing.**
 
-AI gets its best shot at assisting you.
+AI gets its best shot at assisting you. **Period.**
 
 We can ask this because we can now get you to 100% on virtually any app-type.
 
