@@ -60,6 +60,20 @@ Run `faf` with no arguments:
 
 ---
 
+## v6.6 — The Trophy Edition
+
+Until now we have had 85% as a recommended minimum. **It's now 100! All or nothing.**
+
+AI gets its best shot at assisting you.
+
+The CLI follows through: `faf go` ramps to 100%, not 85%. `sync --pull` (MD → .faf) is Trophy-gated. The score-line tells you how far you are from 🏆.
+
+(Adding `about` — the 20th app-type — made the ladder hit a score. *How no-score became a score.* Fitting, because v6.6 is when that score became the only one we recommend.)
+
+Receipts → [CHANGELOG](./CHANGELOG.md)
+
+---
+
 ## v6.0 — Built with Bun
 
 v6 is a ground-up rewrite. All-in on Bun — same toolchain as Claude Code.
