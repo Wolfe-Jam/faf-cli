@@ -45,8 +45,13 @@ export function scoreFafYaml(yaml: string): ScoreResult {
     const sourceScoreMatch = yaml.match(/^\s+source_score:\s*(\d+)\s*$/m);
     const declared = sourceScoreMatch ? parseInt(sourceScoreMatch[1], 10) : -1;
     const score = (declared >= 0 && declared <= 100) ? declared : -1;
+    // Read `about.represents` for downstream consumers (TAF receipts etc.).
+    const representsMatch = yaml.match(/^\s+represents:\s*(\S+)\s*$/m);
+    const represents = representsMatch ? representsMatch[1] : undefined;
     // About repos have no scored slots — return a ScoreResult with zeroed
-    // counts but a real score+tier. Tier is null when no source_score declared.
+    // counts but a real score+tier. White ♡ when source_score unknown.
+    // `inherited: true` flags this as an attested score, not calculated —
+    // TAF + display code can distinguish.
     return {
       score,
       tier: score >= 0 ? getTier(score) : TIERS[TIERS.length - 1], // White when unknown
@@ -55,7 +60,9 @@ export function scoreFafYaml(yaml: string): ScoreResult {
       ignored: 0,
       active: 0,
       total: 0,
-      slots: [],
+      slots: {},
+      inherited: true,
+      represents,
     };
   }
 
