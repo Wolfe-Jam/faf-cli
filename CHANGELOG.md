@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v6.6.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v6.6.1 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -7,6 +7,37 @@ All notable changes to faf-cli will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [6.6.1] - 2026-05-12 — Windows CI Restored
+
+A dedicated patch for Windows users. No bin/lib changes; npm package
+contents are byte-identical to v6.6.0 aside from the version field.
+The reason this release exists: make a Windows-specific fix impossible
+to miss, and verify Windows CI end-to-end on a real release tag.
+
+### Fixed
+
+- **Release CI on Windows.** `windows-latest` is back in the
+  `release.yml` test matrix. The FAFB byte-parity gate was failing on
+  Windows because `git autocrlf` was rewriting `.faf` fixtures from LF
+  to CRLF on checkout, shifting the input-hash byte at offset 8.
+- **`.gitattributes`** (new) pins `*.faf` to `text eol=lf` and `*.fafb`
+  to `binary`. Windows contributors can now clone, run the test suite,
+  and develop without CRLF rewrites breaking parity tests. Every future
+  release tag will exercise the Windows job end-to-end.
+
+### Also bundled (no npm impact)
+
+- **Plugin marketplace refresh** — manifests synced to faf-cli versioning
+  per the one-verb doctrine; commands surface rebuilt for sharp, elegant
+  discovery of faf-cli. Distributed via the Claude Code plugin
+  marketplace, not via npm.
+
+### Notes
+
+- No changes to CLI behavior, scoring, or output.
+- Existing v6.6.0 installs continue to work identically. This patch
+  exists for maintainer-side CI confidence and the public Windows signal.
 
 ## [6.6.0] - 2026-05-11 — The Trophy Edition
 

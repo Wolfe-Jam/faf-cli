@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "faf-marketplace",
-  "version": "6.6.0",
+  "version": "6.6.1",
   "description": "The .faf format toolkit — IANA-registered AI context, Anthropic-listed. Discovery surface for faf-cli inside Claude Code.",
   "owner": {
     "name": "wolfejam",
@@ -12,7 +12,7 @@
     {
       "name": "faf",
       "description": "Persistent Project Context for AI — IANA-registered .faf format. Run /faf to score your project; install the CLI via `bunx faf` or `npm install -g faf-cli` for the full toolkit.",
-      "version": "6.6.0",
+      "version": "6.6.1",
       "author": {
         "name": "wolfejam",
         "email": "wolfejam.dev",
