@@ -1,7 +1,7 @@
 {
   "name": "faf",
-  "version": "3.3.0",
-  "description": "😽 TURBO-CAT: Universal AI context standard. Auto-generate and sync .faf files with Claude, Cursor, and all AI tools. FREE FOREVER.",
+  "version": "6.6.0",
+  "description": "Persistent Project Context for AI — IANA-registered .faf format. Run /faf to score your project in Claude Code; install the CLI via `bunx faf` or `npm install -g faf-cli` for the full toolkit.",
   "author": {
     "name": "wolfejam",
     "email": "wolfejam.dev",
@@ -10,11 +10,13 @@
   "repository": "https://github.com/Wolfe-Jam/faf-cli",
   "keywords": [
     "ai-context",
+    "persistent-context",
     "project-dna",
-    "turbo-cat",
-    "claude",
-    "cursor",
-    "universal-standard",
-    "championship"
+    "faf",
+    "claude-code",
+    "iana",
+    "mcp",
+    "typescript",
+    "foundational-context-layer"
   ]
 }
