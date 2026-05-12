@@ -1,0 +1,4 @@
+# Pin line endings on Windows checkout.
+# FAFB parity tests hash input bytes — CRLF rewrite breaks byte-identical parity.
+*.faf  text eol=lf
+*.fafb binary
