@@ -16,17 +16,17 @@ export const SLOTS: SlotDef[] = [
   { index: 9, path: 'human_context.how', description: 'How is it built', category: 'human' },
 
   // Frontend Stack (4)
-  { index: 10, path: 'stack.frontend', description: 'Framework (React, Svelte, etc.)', category: 'frontend' },
-  { index: 11, path: 'stack.css_framework', description: 'CSS framework', category: 'frontend' },
-  { index: 12, path: 'stack.ui_library', description: 'UI component library', category: 'frontend' },
-  { index: 13, path: 'stack.state_management', description: 'State management', category: 'frontend' },
+  { index: 10, path: 'stack.frontend',         canonical: 'stack.framework', description: 'Framework (React, Svelte, etc.)', category: 'frontend' },
+  { index: 11, path: 'stack.css_framework',    canonical: 'stack.css',       description: 'CSS framework',                   category: 'frontend' },
+  { index: 12, path: 'stack.ui_library',                                     description: 'UI component library',            category: 'frontend' },
+  { index: 13, path: 'stack.state_management', canonical: 'stack.state',     description: 'State management',                category: 'frontend' },
 
   // Backend Stack (5)
-  { index: 14, path: 'stack.backend', description: 'Backend framework', category: 'backend' },
-  { index: 15, path: 'stack.api_type', description: 'API style (REST, GraphQL, etc.)', category: 'backend' },
-  { index: 16, path: 'stack.runtime', description: 'Runtime (Node, Bun, Python, etc.)', category: 'backend' },
-  { index: 17, path: 'stack.database', description: 'Database', category: 'backend' },
-  { index: 18, path: 'stack.connection', description: 'Connection method (Prisma, etc.)', category: 'backend' },
+  { index: 14, path: 'stack.backend',                                        description: 'Backend framework',                 category: 'backend' },
+  { index: 15, path: 'stack.api_type',         canonical: 'stack.api',       description: 'API style (REST, GraphQL, etc.)',   category: 'backend' },
+  { index: 16, path: 'stack.runtime',                                        description: 'Runtime (Node, Bun, Python, etc.)', category: 'backend' },
+  { index: 17, path: 'stack.database',         canonical: 'stack.db',        description: 'Database',                          category: 'backend' },
+  { index: 18, path: 'stack.connection',                                     description: 'Connection method (Prisma, etc.)',  category: 'backend' },
 
   // Universal Stack (3)
   { index: 19, path: 'stack.hosting', description: 'Hosting platform', category: 'universal' },
@@ -34,8 +34,8 @@ export const SLOTS: SlotDef[] = [
   { index: 21, path: 'stack.cicd', description: 'CI/CD', category: 'universal' },
 
   // Enterprise Infra (5)
-  { index: 22, path: 'stack.monorepo_tool', description: 'Monorepo tool', category: 'enterprise_infra' },
-  { index: 23, path: 'stack.package_manager', description: 'Package manager', category: 'enterprise_infra' },
+  { index: 22, path: 'stack.monorepo_tool',                                  description: 'Monorepo tool',     category: 'enterprise_infra' },
+  { index: 23, path: 'stack.package_manager',  canonical: 'stack.pkg_manager', description: 'Package manager', category: 'enterprise_infra' },
   { index: 24, path: 'stack.workspaces', description: 'Workspace configuration', category: 'enterprise_infra' },
   { index: 25, path: 'monorepo.packages_count', description: 'Number of packages', category: 'enterprise_infra' },
   { index: 26, path: 'monorepo.build_orchestrator', description: 'Build orchestration tool', category: 'enterprise_infra' },
@@ -52,8 +52,55 @@ export const SLOTS: SlotDef[] = [
   { index: 33, path: 'monorepo.remote_cache', description: 'Remote build cache', category: 'enterprise_ops' },
 ];
 
-/** Slot lookup by path */
-export const SLOT_BY_PATH = new Map(SLOTS.map(s => [s.path, s]));
+/** Slot lookup by path — dual-keyed (current on-wire `path` AND Mk4 `canonical`
+ *  where defined) so callers can look up by either name. See issue #66. */
+export const SLOT_BY_PATH = new Map<string, SlotDef>(
+  SLOTS.flatMap(s => s.canonical ? [[s.path, s], [s.canonical, s]] : [[s.path, s]])
+);
+
+/** Mk4 canonical → current on-wire path. Used by read helpers to resolve
+ *  a canonical name back to the path that read/write/kernel actually uses
+ *  today. Empty for slots whose path is already canonical. */
+export const CANONICAL_TO_CURRENT: ReadonlyMap<string, string> = new Map(
+  SLOTS.filter(s => s.canonical).map(s => [s.canonical as string, s.path])
+);
+
+/** Current on-wire path → Mk4 canonical. Used by display helpers when the
+ *  UI wants to surface the forward-spec name. */
+export const CURRENT_TO_CANONICAL: ReadonlyMap<string, string> = new Map(
+  SLOTS.filter(s => s.canonical).map(s => [s.path, s.canonical as string])
+);
+
+/** Resolve any path (legacy or canonical) to the slot definition. */
+export function getSlotByAnyPath(path: string): SlotDef | undefined {
+  return SLOT_BY_PATH.get(path);
+}
+
+/** Read a value from a .faf data object, checking both the slot's current
+ *  `path` and its Mk4 `canonical` (if defined). Returns the first non-undefined
+ *  value. Lets the cli read .faf files that contain either legacy or canonical
+ *  keys without forcing a migration. */
+export function readSlotValue(
+  data: Record<string, unknown>,
+  slot: SlotDef
+): unknown {
+  const tryPath = (p: string): unknown => {
+    const parts = p.split('.');
+    let cur: unknown = data;
+    for (const part of parts) {
+      if (cur && typeof cur === 'object' && part in (cur as Record<string, unknown>)) {
+        cur = (cur as Record<string, unknown>)[part];
+      } else {
+        return undefined;
+      }
+    }
+    return cur;
+  };
+  const primary = tryPath(slot.path);
+  if (primary !== undefined) return primary;
+  if (slot.canonical) return tryPath(slot.canonical);
+  return undefined;
+}
 
 /** Slots grouped by category */
 export function slotsByCategory(category: SlotCategory): SlotDef[] {

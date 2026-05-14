@@ -18,8 +18,13 @@ export type SlotCategory =
 export interface SlotDef {
   /** Slot number (1-33) */
   index: number;
-  /** Dot-path in .faf YAML (e.g. "project.name") */
+  /** Dot-path in .faf YAML (e.g. "project.name") — current on-wire identifier
+   *  used for read/write and kernel scoring. */
   path: string;
+  /** Mk4 canonical dot-path (forward spec). Defined for slots where the
+   *  current `path` is a legacy name pending lockstep rename with
+   *  faf-scoring-kernel + xai-faf-rust. See issue #66. */
+  canonical?: string;
   /** Human description */
   description: string;
   /** Category this slot belongs to */
