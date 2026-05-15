@@ -32,9 +32,9 @@ const CATEGORY_SIZES: Record<SlotCategory, number> = {
   enterprise_ops: 3,
 };
 
-describe('WJTTC ENGINE: app-types canonical ladder (20 types)', () => {
-  test('exactly 20 types defined', () => {
-    expect(Object.keys(APP_TYPE_CATEGORIES).length).toBe(20);
+describe('WJTTC ENGINE: app-types canonical ladder (21 types)', () => {
+  test('exactly 21 types defined', () => {
+    expect(Object.keys(APP_TYPE_CATEGORIES).length).toBe(21);
   });
 
   test('all canonical types present', () => {
@@ -43,6 +43,7 @@ describe('WJTTC ENGINE: app-types canonical ladder (20 types)', () => {
       'about',
       // 9 slots — minimal
       'documentation',
+      'encyclopedia',
       'cli', 'library', 'sdk', 'wasm', 'html',
       'frontend', 'website', 'mobile',
       'mcp', 'backend', 'data-science',
@@ -64,6 +65,7 @@ describe('WJTTC ENGINE: per-type slot allocation', () => {
   // Per v6.6.md — sorted ascending by slot count.
   const expectedSlotCounts: Record<string, number> = {
     documentation: 9,
+    encyclopedia: 9,
     cli: 12,
     library: 12,
     sdk: 12,

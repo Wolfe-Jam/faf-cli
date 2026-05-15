@@ -82,13 +82,15 @@ Layer 1   .faf (FCL)          ← 🏆 Trophy = complete = foundation
 
 🏆 is the only emoji. Sub-Trophy tiers use geometric Unicode (★ ◆ ◇ ● ○ ♡). The retired medal ladder (🥇🥈🥉🟢🟡🔴🤍) is history.
 
-## The 20 app-types
+## The 21 app-types
 
-v6.6.0 ships a 20-type canonical ladder — 19 detectable + 1 owner-attested:
+v6.6.0 ships a 21-type canonical ladder — 19 detectable + 1 owner-attested + 1 curated-knowledge:
 
 **Detectable:** documentation · cli · library · sdk · wasm · html · frontend · website · mobile · mcp · backend · data-science · fullstack · svelte · framework · monorepo-root · mcpaas · saas · enterprise
 
 **Owner-attested (non-app):** `about` — represents another codebase (public About Repo for a private source). Inherits the source's Trophy via owner attestation.
+
+**Curated knowledge:** `encyclopedia` — structured, git-versioned knowledge surface (FAFipedia and similar). Project + human slots, 9 active. Content is `.fafi` files (inclusion markers, same parser as `.faf`).
 
 The CLI auto-detects via `# found:` rationale next to `type:`:
 

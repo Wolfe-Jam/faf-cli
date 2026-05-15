@@ -136,10 +136,11 @@ export function isPlaceholder(value: unknown): boolean {
   return false;
 }
 
-/** App-type to active category mapping. The canonical 20-type ladder —
- *  19 detectable apps + `about` (non-app, 0 slots, owner-attested).
- *  (See v6.6.md doctrine memory.) Sorted ascending by
- *  active slot count for readability.
+/** App-type to active category mapping. The canonical 21-type ladder —
+ *  19 detectable apps + `about` (non-app, 0 slots, owner-attested)
+ *  + `encyclopedia` (curated knowledge surface, FAFipedia and similar).
+ *  (See v6.6.md doctrine memory + fafipedia-vs-grokipedia-architecture.)
+ *  Sorted ascending by active slot count for readability.
  *
  *  v6.5.0 changes vs prior:
  *  - Added `universal` to cli / library / mcp / frontend / data-science.
@@ -160,6 +161,12 @@ export const APP_TYPE_CATEGORIES: Record<string, SlotCategory[]> = {
 
   // 9 slots — minimal (project meta + human only)
   documentation: ['project', 'human'],
+  // encyclopedia: same shape as documentation — content repo with project
+  // metadata + human context. Used by FAFipedia and similar curated-knowledge
+  // surfaces. Per fafipedia-vs-grokipedia-architecture doctrine, this is the
+  // structured, git-versioned, agent-consumable knowledge layer. Each .fafi
+  // file under an encyclopedia repo is itself a valid .faf (inclusion marker).
+  encyclopedia: ['project', 'human'],
 
   // 12 slots — project + human + universal (build/ci/hosting matters)
   cli: ['project', 'human', 'universal'],
