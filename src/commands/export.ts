@@ -1,7 +1,9 @@
-import { findFafFile, readFaf } from '../interop/faf.js';
+import { findFafFile, readFaf, readFafRaw } from '../interop/faf.js';
 import { writeAgentsMd } from '../interop/agents.js';
 import { writeCursorrules } from '../interop/cursorrules.js';
 import { writeGeminiMd } from '../interop/gemini.js';
+import { writeProjectHtml } from '../interop/projecthtml.js';
+import { scoreFafYaml } from '../core/scorer.js';
 import { dim, fafCyan } from '../ui/colors.js';
 
 export interface ExportOptions {
@@ -9,6 +11,7 @@ export interface ExportOptions {
   cursor?: boolean;
   gemini?: boolean;
   conductor?: boolean;
+  html?: boolean;
   all?: boolean;
 }
 
@@ -21,7 +24,13 @@ export function exportCommand(options: ExportOptions = {}): void {
 
   const dir = process.cwd();
   const data = readFaf(fafPath);
-  const exportAll = options.all || (!options.agents && !options.cursor && !options.gemini && !options.conductor);
+  const exportAll =
+    options.all ||
+    (!options.agents &&
+      !options.cursor &&
+      !options.gemini &&
+      !options.conductor &&
+      !options.html);
 
   if (exportAll || options.agents) {
     writeAgentsMd(dir, data);
@@ -36,6 +45,14 @@ export function exportCommand(options: ExportOptions = {}): void {
   if (exportAll || options.gemini) {
     writeGeminiMd(dir, data);
     console.log(`  GEMINI.md`);
+  }
+
+  if (exportAll || options.html) {
+    // Render from the CURRENT project.faf — scored via the real scorer,
+    // never a reimplementation. project.html is a view, not a format.
+    const result = scoreFafYaml(readFafRaw(fafPath));
+    writeProjectHtml(dir, data, result);
+    console.log(`  project.html`);
   }
 
   console.log(`${fafCyan('exported')} ${dim(`from ${fafPath}`)}`);

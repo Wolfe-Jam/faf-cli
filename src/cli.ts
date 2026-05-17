@@ -101,6 +101,7 @@ program
   .option('--cursor', 'Generate .cursorrules')
   .option('--gemini', 'Generate GEMINI.md')
   .option('--conductor', 'Generate conductor config')
+  .option('--html', 'Generate project.html (visual render of project.faf)')
   .option('--all', 'Generate all formats')
   .action((options) => exportCommand(options));
 

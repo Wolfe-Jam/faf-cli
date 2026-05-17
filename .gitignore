@@ -140,6 +140,9 @@ wrangler.jsonc
 # Exception: test fixtures (deterministic .fafb checked in for parity-brake test)
 !tests/fixtures/**/*.fafb
 AGENTS.md
+# Rendered project.html — visual view of project.faf (generated, like .fafb/AGENTS.md)
+project.html
+!tests/fixtures/**/project.html
 GEMINI.md
 
 # Compile binary + sourcemap outputs (`bun run compile`)
