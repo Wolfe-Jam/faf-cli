@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v6.6.1 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v6.7.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -7,6 +7,55 @@ All notable changes to faf-cli will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [6.7.0] - 2026-05-17 — The HTML Edition
+
+**We rendered a `.faf`. 🔥**
+
+A `.faf` was always machine-readable. Now it is human-visible. `faf show`
+renders the current `project.faf` to a self-contained `project.html` and
+opens it — the score, the tier, the 6 W's, the stack, on screen, in any
+browser. The same truth your AI reads, shown to you. Humans like visuals.
+We gave them one.
+
+### Added
+
+- **`faf show`** — render `project.faf` → `project.html` and open it in
+  the browser. One verb. Render + open.
+- **`faf export --html`** (and `--all`) — emit `project.html` alongside
+  `AGENTS.md` / `.cursorrules` / `GEMINI.md`.
+- **`project.html` renderer** — self-contained, zero-dependency,
+  HTML-escaped, deterministic (no timestamps; a regenerate only differs
+  when the `.faf` actually changed). Scored by the real scorer — never a
+  reimplementation. Trophy renders the earned award line; sub-Trophy
+  renders the honest gaps (a map, not a verdict).
+- **Public API** — `generateProjectHtml`, `writeProjectHtml`,
+  `scoreFafYaml`, `findFafFile`, `readFaf`, `readFafRaw`, `FAF_HEX`
+  exported from the package entry, so consumers render from the single
+  source instead of reinventing it.
+
+### Changed
+
+- **Tier colors are now single-sourced.** New `FAF_HEX` in `ui/colors.ts`
+  is the one record for brand hex; `tiers.ts` (ANSI) and `project.html`
+  (hex) both derive from it — change once, propagates. Trophy/Gold
+  orange `#FF6B35`, Silver `#00D4D4`, **Bronze deep cyan `#0E8C8C`**
+  (was indistinguishable from Silver). Status colors sourced from the
+  FAF brand style guide. HTML communicates with colour the terminal
+  cannot.
+
+### Fixed
+
+- **`faf show` opener** uses the canonical externalized `open`
+  dependency — never a hand-rolled `xdg-open` (which would inline into
+  the bundle and trip the build-resilience brake).
+
+### Notes
+
+- `project.html` is a generated artifact, gitignored like
+  `.fafb` / `AGENTS.md`.
+- No changes to scoring, the `.faf` schema, or existing command
+  behaviour.
 
 ## [6.6.1] - 2026-05-12 — Windows CI Restored
 

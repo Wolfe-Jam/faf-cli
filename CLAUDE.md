@@ -22,4 +22,4 @@ CLI tool for creating and managing `.faf` files — persistent AI context that v
 
 ---
 
-*STATUS: BI-SYNC ACTIVE — 2026-05-11T21:46:47.136Z*
+*STATUS: BI-SYNC ACTIVE — 2026-05-17T21:12:30.322Z*

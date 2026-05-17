@@ -4,8 +4,8 @@
 <div style="display: flex; align-items: center; gap: 12px;">
   <img src="https://www.faf.one/orange-smiley.svg" alt="FAF" width="40" />
   <div>
-    <h1 style="margin: 0; color: #000000;">faf-cli v6.6</h1>
-    <p style="margin: 2px 0 0 0; font-size: 0.85em; letter-spacing: 0.12em; opacity: 0.7; text-transform: uppercase;"><strong>The Trophy Edition</strong></p>
+    <h1 style="margin: 0; color: #000000;">faf-cli v6.7</h1>
+    <p style="margin: 2px 0 0 0; font-size: 0.85em; letter-spacing: 0.12em; opacity: 0.7; text-transform: uppercase;"><strong>The HTML Edition</strong></p>
     <p style="margin: 6px 0 0 0;"><strong>Persistent Project Context for AI.</strong></p>
     <p style="margin: 0;"><strong>Define once. Run anywhere.</strong></p>
   </div>
@@ -57,6 +57,37 @@ brew install faf-cli && faf   # Homebrew
 Run `faf` with no arguments:
 
 ![faf](./nelly.png)
+
+---
+
+## v6.7 — The HTML Edition
+
+**We rendered a `.faf`. 🔥**
+
+A `.faf` was always machine-readable. Now it is human-visible.
+
+```
+faf show
+```
+
+**What:** one verb renders your *current* `project.faf` to a
+self-contained `project.html` and opens it — score, tier, the 6 W's,
+the stack, in any browser.
+
+**Why it matters:** HTML shows **on-demand** — current truth, never a
+stale snapshot — **visuals for human *and team* review.** The same
+context your AI reads, now reviewable by people. Trophy renders the
+earned award; sub-Trophy renders the honest gaps — a map, not a
+verdict. Humans like visuals. We gave them one.
+
+This is the **4th pillar**:
+
+> **FAF defines. MD instructs. AI codes. HTML shows.**
+
+`faf show` · `faf export --html` · a public render API
+(`generateProjectHtml`) — one single-sourced renderer, no reinvention.
+
+Receipts → [CHANGELOG](./CHANGELOG.md)
 
 ---
 
