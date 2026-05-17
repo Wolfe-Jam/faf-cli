@@ -80,6 +80,10 @@ context your AI reads, now reviewable by people. Trophy renders the
 earned award; sub-Trophy renders the honest gaps — a map, not a
 verdict. Humans like visuals. We gave them one.
 
+It is a **cross-check**: see what your AI sees, then improve what it is
+working with **at the root** — the `project.faf` itself, not the
+symptoms.
+
 This is the **4th pillar**:
 
 > **FAF defines. MD instructs. AI codes. HTML shows.**
