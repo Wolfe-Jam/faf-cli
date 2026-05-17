@@ -51,7 +51,7 @@ export function exportCommand(options: ExportOptions = {}): void {
     // Render from the CURRENT project.faf — scored via the real scorer,
     // never a reimplementation. project.html is a view, not a format.
     const result = scoreFafYaml(readFafRaw(fafPath));
-    writeProjectHtml(dir, data, result);
+    writeProjectHtml(dir, data, result, fafPath);
     console.log(`  project.html`);
   }
 

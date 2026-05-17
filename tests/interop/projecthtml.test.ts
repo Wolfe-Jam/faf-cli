@@ -94,6 +94,15 @@ describe('interop/projecthtml', () => {
     expect(html).toContain('inherited from Wolfe-Jam/private-src');
   });
 
+  test('includes the source faf path (HTML-escaped)', () => {
+    const html = generateProjectHtml(data, result, '/repo/project.faf');
+    expect(html).toContain('Rendered on-demand from your current');
+    expect(html).toContain('/repo/project.faf');
+    const evil = generateProjectHtml(data, result, '/x/<b>p</b>.faf');
+    expect(evil).not.toContain('<b>p</b>');
+    expect(evil).toContain('&lt;b&gt;');
+  });
+
   test('writeProjectHtml emits project.html at the given dir', () => {
     writeProjectHtml(testDir, data, result);
     const out = join(testDir, 'project.html');

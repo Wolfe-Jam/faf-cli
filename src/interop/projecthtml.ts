@@ -50,7 +50,11 @@ function rows(entries: [string, unknown][]): string {
 }
 
 /** Render project.faf data + its score into a self-contained HTML string. */
-export function generateProjectHtml(data: FafData, result: ScoreResult): string {
+export function generateProjectHtml(
+  data: FafData,
+  result: ScoreResult,
+  fafPath = 'project.faf',
+): string {
   const name = esc(data.project?.name ?? 'Project');
   const tierName = result.tier?.name ?? 'WHITE';
   const vis = TIER_VIS[tierName] ?? TIER_VIS.WHITE;
@@ -145,7 +149,7 @@ ${
 </section>
 
 <footer>
-Rendered on-demand from your current <strong>project.faf</strong><br>
+Rendered on-demand from your current <strong>${esc(fafPath)}</strong><br>
 <strong>Humans like visuals. We gave them one.</strong>
 </footer>
 </div>
@@ -159,6 +163,11 @@ export function writeProjectHtml(
   dir: string,
   data: FafData,
   result: ScoreResult,
+  fafPath = 'project.faf',
 ): void {
-  writeFileSync(join(dir, 'project.html'), generateProjectHtml(data, result), 'utf-8');
+  writeFileSync(
+    join(dir, 'project.html'),
+    generateProjectHtml(data, result, fafPath),
+    'utf-8',
+  );
 }
