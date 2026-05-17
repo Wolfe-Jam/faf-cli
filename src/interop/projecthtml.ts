@@ -1,6 +1,7 @@
 import { writeFileSync } from 'fs';
 import { join } from 'path';
 import type { FafData, ScoreResult } from '../core/types.js';
+import { FAF_HEX } from '../ui/colors.js';
 
 /**
  * project.html — the visual render of project.faf.
@@ -16,13 +17,15 @@ import type { FafData, ScoreResult } from '../core/types.js';
  */
 
 // Tier glyph + accent. Glyphs = canonical tier symbols (core/tiers.ts).
-// Colors are canon-sourced from PLANET-FAF/website-docs/FAF-BRAND-STYLE-GUIDE.md
-// — NOT invented. Two registers: brand (tiers.ts: orange #FF6B35 Trophy/Gold,
-// cyan #00D4D4 Silver/Bronze) + STATUS (HTML affords color the CLI can't —
-// warning #ff9500, error #ff3b30). Green #00BF63 is reserved for the GO/✅
-// all-pass state, never a tier band. Neutral = theme grey, not brand.
-const ORANGE = '#FF6B35'; // --faf-orange (brand)
-const CYAN = '#00D4D4'; // --faf-cyan applied sweetspot (brand)
+// BRAND colors DERIVE from ui/colors.ts FAF_HEX (single source — change there,
+// propagates to CLI + here). STATUS colors are canon-sourced from
+// PLANET-FAF/website-docs/FAF-BRAND-STYLE-GUIDE.md (--faf-warning/--faf-error).
+// Two registers: brand (orange Trophy/Gold · cyan Silver · deep-cyan Bronze)
+// + status (HTML affords color the CLI can't). Green #00BF63 reserved for the
+// GO/✅ all-pass state, never a tier band. Neutral = theme grey, not brand.
+const ORANGE = FAF_HEX.orange; // brand — derived
+const CYAN = FAF_HEX.cyan; // brand — derived (Silver)
+const CYAN_DEEP = FAF_HEX.cyanDeep; // brand — derived (Bronze: same lane, one rung down)
 const WARNING = '#FF9500'; // --faf-warning (status: caution)
 const ERROR = '#FF3B30'; // --faf-error (status: danger)
 const NEUTRAL_BRIGHT = '#E6EDF3'; // theme grey — "good, not done, no alarm"
@@ -31,7 +34,7 @@ const TIER_VIS: Record<string, { glyph: string; color: string }> = {
   TROPHY: { glyph: '🏆', color: ORANGE },
   GOLD: { glyph: '★', color: ORANGE },
   SILVER: { glyph: '◆', color: CYAN },
-  BRONZE: { glyph: '◇', color: CYAN },
+  BRONZE: { glyph: '◇', color: CYAN_DEEP },
   GREEN: { glyph: '●', color: NEUTRAL_BRIGHT },
   YELLOW: { glyph: '●', color: WARNING },
   RED: { glyph: '○', color: ERROR },

@@ -1,5 +1,5 @@
 import type { TierInfo } from './types.js';
-import { bold, dim, fafCyan, orange } from '../ui/colors.js';
+import { bold, dim, fafCyan, fafCyanDeep, orange } from '../ui/colors.js';
 
 /** Tier boundaries — ordered from highest to lowest
  *
@@ -7,7 +7,7 @@ import { bold, dim, fafCyan, orange } from '../ui/colors.js';
  *   🏆 trophy (earned at 100%)
  *   ★ filled star (gold — orange)
  *   ◆ filled diamond (silver — cyan)
- *   ◇ open diamond (bronze — cyan)
+ *   ◇ open diamond (bronze — deep cyan, one rung below silver)
  *   ● filled circle (mid tiers)
  *   ○ open circle (low — dim)
  *   ♡ heart (empty — good luck)
@@ -16,7 +16,7 @@ export const TIERS: TierInfo[] = [
   { name: 'TROPHY', indicator: `${orange('🏆')} ${orange('TROPHY')}`, threshold: 100 },
   { name: 'GOLD',   indicator: `${orange(bold('★'))} ${orange('GOLD')}`,    threshold: 99 },
   { name: 'SILVER', indicator: `${fafCyan('◆')} ${fafCyan('SILVER')}`, threshold: 95 },
-  { name: 'BRONZE', indicator: `${fafCyan('◇')} ${fafCyan('BRONZE')}`, threshold: 85 },
+  { name: 'BRONZE', indicator: `${fafCyanDeep('◇')} ${fafCyanDeep('BRONZE')}`, threshold: 85 },
   { name: 'GREEN',  indicator: `${bold('●')} GREEN`,                   threshold: 70 },
   { name: 'YELLOW', indicator: `${dim('●')} YELLOW`,                   threshold: 55 },
   { name: 'RED',    indicator: `${dim('○')} RED`,                      threshold: 1 },
