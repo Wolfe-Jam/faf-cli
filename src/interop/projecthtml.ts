@@ -15,16 +15,27 @@ import type { FafData, ScoreResult } from '../core/types.js';
  * Humans like visuals. We gave them one.
  */
 
-/** Canonical tier glyph + accent — evergreen constants (see core/tiers.ts). */
+// Tier glyph + accent. Glyphs = canonical tier symbols (core/tiers.ts).
+// Colors are canon-sourced from PLANET-FAF/website-docs/FAF-BRAND-STYLE-GUIDE.md
+// — NOT invented. Two registers: brand (tiers.ts: orange #FF6B35 Trophy/Gold,
+// cyan #00D4D4 Silver/Bronze) + STATUS (HTML affords color the CLI can't —
+// warning #ff9500, error #ff3b30). Green #00BF63 is reserved for the GO/✅
+// all-pass state, never a tier band. Neutral = theme grey, not brand.
+const ORANGE = '#FF6B35'; // --faf-orange (brand)
+const CYAN = '#00D4D4'; // --faf-cyan applied sweetspot (brand)
+const WARNING = '#FF9500'; // --faf-warning (status: caution)
+const ERROR = '#FF3B30'; // --faf-error (status: danger)
+const NEUTRAL_BRIGHT = '#E6EDF3'; // theme grey — "good, not done, no alarm"
+const NEUTRAL_DIM = '#6E7681'; // theme grey — empty
 const TIER_VIS: Record<string, { glyph: string; color: string }> = {
-  TROPHY: { glyph: '🏆', color: '#FF6B35' },
-  GOLD: { glyph: '★', color: '#FFB000' },
-  SILVER: { glyph: '◆', color: '#00D4D4' },
-  BRONZE: { glyph: '◇', color: '#00D4D4' },
-  GREEN: { glyph: '●', color: '#3FB950' },
-  YELLOW: { glyph: '●', color: '#D4A017' },
-  RED: { glyph: '○', color: '#8B949E' },
-  WHITE: { glyph: '♡', color: '#6E7681' },
+  TROPHY: { glyph: '🏆', color: ORANGE },
+  GOLD: { glyph: '★', color: ORANGE },
+  SILVER: { glyph: '◆', color: CYAN },
+  BRONZE: { glyph: '◇', color: CYAN },
+  GREEN: { glyph: '●', color: NEUTRAL_BRIGHT },
+  YELLOW: { glyph: '●', color: WARNING },
+  RED: { glyph: '○', color: ERROR },
+  WHITE: { glyph: '♡', color: NEUTRAL_DIM },
 };
 
 /** HTML-escape — project.faf content is arbitrary; never inject raw. */
