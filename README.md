@@ -62,9 +62,11 @@ Run `faf` with no arguments:
 
 ## v6.7 — The HTML Edition
 
-**We rendered a `.faf`. 🔥**
+**We rendered a `.faf`. 🔥 The day we *saw* FAF.**
 
-A `.faf` was always machine-readable. Now it is human-visible.
+A major development — not a new flag, a new way to *see* what your AI
+works from. A `.faf` was always machine-readable. Now it is
+human-visible.
 
 ```
 faf show

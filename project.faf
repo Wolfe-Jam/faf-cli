@@ -1,7 +1,7 @@
 faf_version: "3.0"
 project:
   name: faf-cli v6
-  goal: "CLI tool for creating and managing `.faf` files — persistent AI context that versions with your code. IANA-registered media type: `application/vnd.faf+yaml`."
+  goal: "CLI for the `.faf` format — persistent AI context that versions with your code, and (v6.7, The HTML Edition) renders human-visible on-demand via `faf show`. IANA-registered media type: `application/vnd.faf+yaml`."
   main_language: TypeScript
   type: cli  # found: package.json bin
 stack:
@@ -30,7 +30,7 @@ human_context:
   why: Eliminates 91% context re-discovery tax — define once, AI remembers forever
   where: npm registry, Homebrew, GitHub
   when: Production since September 2025, v6.0 March 2026
-  how: CLI tool — bunx faf-cli auto, then project.faf versions with your code
+  how: bunx faf-cli auto, then project.faf versions with your code — faf show renders it human-visible
 monorepo:
   packages_count: slotignored
   build_orchestrator: slotignored

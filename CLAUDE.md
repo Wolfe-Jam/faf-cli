@@ -1,11 +1,11 @@
-<!-- faf: faf-cli v6 | TypeScript | cli | CLI tool for creating and managing `.faf` files — persistent AI context that versions with your code. IANA-registered media type: `application/vnd.faf+yaml`. -->
+<!-- faf: faf-cli v6 | TypeScript | cli | CLI for the `.faf` format — persistent AI context that versions with your code, and (v6.7, The HTML Edition) renders human-visible on-demand via `faf show`. IANA-registered media type: `application/vnd.faf+yaml`. -->
 <!-- faf: claim=project.faf | family=FAF -->
 
 # CLAUDE.md — faf-cli v6
 
 ## What This Is
 
-CLI tool for creating and managing `.faf` files — persistent AI context that versions with your code. IANA-registered media type: `application/vnd.faf+yaml`.
+CLI for the `.faf` format — persistent AI context that versions with your code, and (v6.7, The HTML Edition) renders human-visible on-demand via `faf show`. IANA-registered media type: `application/vnd.faf+yaml`.
 
 ## Stack
 
@@ -18,8 +18,8 @@ CLI tool for creating and managing `.faf` files — persistent AI context that v
 - **Why:** Eliminates 91% context re-discovery tax — define once, AI remembers forever
 - **Where:** npm registry, Homebrew, GitHub
 - **When:** Production since September 2025, v6.0 March 2026
-- **How:** CLI tool — bunx faf-cli auto, then project.faf versions with your code
+- **How:** bunx faf-cli auto, then project.faf versions with your code — faf show renders it human-visible
 
 ---
 
-*STATUS: BI-SYNC ACTIVE — 2026-05-17T21:12:30.322Z*
+*STATUS: BI-SYNC ACTIVE — 2026-05-17T21:20:54.361Z*

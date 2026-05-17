@@ -10,7 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [6.7.0] - 2026-05-17 — The HTML Edition
 
-**We rendered a `.faf`. 🔥**
+**We rendered a `.faf`. 🔥 The day we *saw* FAF.**
+
+This is a major development, not a feature note. The `.faf` was always
+there — machine-readable, scoring, versioning with your code. v6.7 is
+the day it became **visible**: the same context your AI reads, rendered
+for human and team eyes, on-demand, in any browser.
 
 A `.faf` was always machine-readable. Now it is human-visible. `faf show`
 renders the current `project.faf` to a self-contained `project.html` and
