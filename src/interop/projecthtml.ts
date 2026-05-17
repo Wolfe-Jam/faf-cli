@@ -150,7 +150,7 @@ ${
 
 <footer>
 Rendered on-demand from your current <strong>${esc(fafPath)}</strong><br>
-<strong>Humans like visuals. We gave them one.</strong>
+<strong>Humans like visuals. <span style="color:#00D4D4">We gave them one.</span></strong>
 </footer>
 </div>
 </body>
