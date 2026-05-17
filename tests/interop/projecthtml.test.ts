@@ -110,7 +110,7 @@ describe('interop/projecthtml', () => {
       tier: { name: 'TROPHY', threshold: 100, indicator: '🏆 TROPHY' },
     };
     const t = generateProjectHtml(data, trophy, '/x/project.faf');
-    expect(t).toContain('Required slots filled ✅ 100%');
+    expect(t).toContain('All Required slots filled ✅ 100%');
     expect(t).toContain('Trophy 🏆 Awarded');
     expect(t).toContain('class="awd-win"');
     expect(t).not.toContain('slots populated ·');

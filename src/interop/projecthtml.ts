@@ -144,7 +144,7 @@ footer strong{color:#e6edf3}
 <div class="meter"><span></span></div>
 ${
   isTrophy
-    ? '<p class="award"><span class="awd-pre">Required slots filled ✅ 100%</span> <span class="awd-win">Trophy 🏆 Awarded</span></p>'
+    ? '<p class="award"><span class="awd-pre">All Required slots filled ✅ 100%</span> <span class="awd-win">Trophy 🏆 Awarded</span></p>'
     : `<p class="muted">${result.populated}/${result.active} slots populated · ${result.total} total${stackIgnored ? ` · ${stackIgnored} slotignored` : ''}</p>`
 }
 
