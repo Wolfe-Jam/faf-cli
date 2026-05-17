@@ -9,6 +9,7 @@ import { compileCommand } from './commands/compile.js';
 import { decompileCommand } from './commands/decompile.js';
 import { checkCommand } from './commands/check.js';
 import { exportCommand } from './commands/export.js';
+import { showCommand } from './commands/show.js';
 import { gitCommand } from './commands/git.js';
 import { infoCommand } from './commands/info.js';
 import { formatsCommand } from './commands/formats.js';
@@ -67,6 +68,11 @@ program
   .option('--status', 'Compact one-liner output')
   .option('--json', 'Output as JSON')
   .action((file, options) => scoreCommand(file, options));
+
+program
+  .command('show')
+  .description('Render project.faf → project.html and open it')
+  .action(() => showCommand());
 
 program
   .command('sync')
