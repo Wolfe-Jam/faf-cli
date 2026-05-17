@@ -124,6 +124,7 @@ h2{font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;co
 .meter{height:8px;border-radius:4px;background:rgba(255,255,255,.06);overflow:hidden;margin:6px 0 10px}
 .meter span{display:block;height:100%;background:${vis.color};width:${Math.max(0, Math.min(100, result.score))}%}
 .award{font-size:.95rem}
+.statline{margin-bottom:32px}
 .awd-pre{color:#6E7681}
 .awd-win{color:#FFFFFF;font-weight:700}
 .muted{color:#6e7681;font-size:.85rem}
@@ -144,8 +145,8 @@ footer strong{color:#e6edf3}
 <div class="meter"><span></span></div>
 ${
   isTrophy
-    ? '<p class="award"><span class="awd-pre">✅ All Required slots filled.</span> <span class="awd-win">100% Trophy 🏆 Awarded</span></p>'
-    : `<p class="muted">${result.populated}/${result.active} slots populated · ${result.total} total${stackIgnored ? ` · ${stackIgnored} slotignored` : ''}</p>`
+    ? '<p class="award statline"><span class="awd-pre">✅ All Required slots filled.</span> <span class="awd-win">100% Trophy 🏆 Awarded</span></p>'
+    : `<p class="muted statline">${result.populated}/${result.active} slots populated · ${result.total} total${stackIgnored ? ` · ${stackIgnored} slotignored` : ''}</p>`
 }
 
 <section>
