@@ -145,7 +145,7 @@ ${
 </section>
 
 <footer>
-Rendered from <strong>project.faf</strong> by <strong>faf</strong> — a view, not a format. Registers nothing.<br>
+Rendered on-demand from your current <strong>project.faf</strong><br>
 <strong>Humans like visuals. We gave them one.</strong>
 </footer>
 </div>
