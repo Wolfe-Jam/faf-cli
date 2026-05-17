@@ -74,6 +74,8 @@ export function generateProjectHtml(
       ? `inherited from ${esc(result.represents)}`
       : 'inherited'
     : `${result.score}%`;
+  // Trophy = earned (not an About-repo inherited 100 — that one displays, doesn't earn).
+  const isTrophy = tierName === 'TROPHY' && !result.inherited;
 
   // 6 W's first, in canonical order, then any other human_context keys.
   const hc = data.human_context ?? {};
@@ -121,6 +123,7 @@ h2{font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;co
 .v{flex:1;color:#e6edf3;font-size:.95rem;word-break:break-word}
 .meter{height:8px;border-radius:4px;background:rgba(255,255,255,.06);overflow:hidden;margin:6px 0 10px}
 .meter span{display:block;height:100%;background:${vis.color};width:${Math.max(0, Math.min(100, result.score))}%}
+.award{color:${vis.color};font-weight:700;font-size:.95rem}
 .muted{color:#6e7681;font-size:.85rem}
 footer{margin-top:48px;padding-top:20px;border-top:1px solid rgba(255,255,255,.07);font-size:.82rem;color:#6e7681}
 footer strong{color:#e6edf3}
@@ -137,7 +140,11 @@ footer strong{color:#e6edf3}
 <span class="score">${scoreText}</span>
 </header>
 <div class="meter"><span></span></div>
-<p class="muted">${result.populated}/${result.active} slots populated · ${result.total} total${stackIgnored ? ` · ${stackIgnored} slotignored` : ''}</p>
+${
+  isTrophy
+    ? '<p class="award">Required slots filled ✅ 100% Trophy 🏆 Awarded</p>'
+    : `<p class="muted">${result.populated}/${result.active} slots populated · ${result.total} total${stackIgnored ? ` · ${stackIgnored} slotignored` : ''}</p>`
+}
 
 <section>
 <h2>The 6 W's</h2>

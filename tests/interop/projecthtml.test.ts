@@ -103,6 +103,31 @@ describe('interop/projecthtml', () => {
     expect(evil).toContain('&lt;b&gt;');
   });
 
+  test('Trophy shows the awarded affirmation; sub-Trophy shows the diagnostic', () => {
+    const trophy: ScoreResult = {
+      ...result,
+      score: 100,
+      tier: { name: 'TROPHY', threshold: 100, indicator: '🏆 TROPHY' },
+    };
+    const t = generateProjectHtml(data, trophy, '/x/project.faf');
+    expect(t).toContain('Required slots filled ✅ 100% Trophy 🏆 Awarded');
+    expect(t).not.toContain('slots populated ·');
+
+    const bronze = generateProjectHtml(data, result, '/x/project.faf');
+    expect(bronze).toContain('slots populated');
+    expect(bronze).not.toContain('Awarded');
+
+    // About-repo inherited 100 displays, does not earn — no "Awarded".
+    const inherited: ScoreResult = {
+      ...trophy,
+      inherited: true,
+      represents: 'Wolfe-Jam/src',
+    };
+    expect(generateProjectHtml(data, inherited, '/x/project.faf')).not.toContain(
+      'Awarded',
+    );
+  });
+
   test('writeProjectHtml emits project.html at the given dir', () => {
     writeProjectHtml(testDir, data, result);
     const out = join(testDir, 'project.html');
