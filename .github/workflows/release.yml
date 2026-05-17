@@ -226,51 +226,18 @@ jobs:
         with:
           tag_name: ${{ needs.validate.outputs.version }}
           name: FAF CLI ${{ needs.validate.outputs.version }}
+          # Body = the curated CHANGELOG section (single source — pubpro's
+          # doc-gate owns release-note quality) + a version-AGNOSTIC install
+          # line. Never interpolate the tag into an npm spec (`@v6.7.0` is the
+          # git tag, NOT an npm version — it fails). `@latest` is always valid.
           body: |
-            # 🏎️ FAF CLI ${{ needs.validate.outputs.version }}
-
-            **F1-Inspired Software Engineering** - Making AI development better for everyone! 🏁
-
-            ## 🚀 Installation
+            ## Install
 
             ```bash
-            npm install -g faf-cli@${{ needs.validate.outputs.version }}
+            npm install -g faf-cli@latest
             ```
-
-            ## 📋 Changes
 
             ${{ needs.changelog.outputs.changelog }}
-
-            ## 🎯 Quick Start
-
-            ```bash
-            # Create .faf file for your project
-            faf init
-
-            # Check your AI context score
-            faf score
-
-            # Zero to 100% in one command
-            faf auto
-            ```
-
-            ## 📊 v6 — Built with Bun
-
-            - ⚡ Same toolchain as Claude Code
-            - 🧪 218 tests, 37 files
-            - 📦 290KB bundle
-            - 🏆 26 commands
-
-            ## 🔗 Links
-
-            - 📦 [NPM Package](https://www.npmjs.com/package/faf-cli)
-            - 🌐 [Website](https://faf.one)
-            - 📝 [Blog](https://faf.one/blog)
-            - 🐛 [Report Issues](https://github.com/faf-org/cli/issues)
-
-            ---
-
-            **🏁 Define. Build. Lock. Relax.**
           draft: false
           prerelease: ${{ needs.validate.outputs.is-prerelease == 'true' }}
           files: |
@@ -343,7 +310,7 @@ jobs:
           echo "🏷️ GitHub: Release created"
           echo "⚡ Performance: F1-validated"
           echo ""
-          echo "📦 Install: npm install -g faf-cli@${{ needs.validate.outputs.version }}"
+          echo "📦 Install: npm install -g faf-cli@latest"
           echo ""
           echo "NOTE: npm publishing is handled via /pubpro protocol (local)"
 
