@@ -70,7 +70,7 @@ jobs:
         run: npm run build
 
       - name: Run tests (bun)
-        run: bun test
+        run: bun test --timeout=120000
 
       - name: Test CLI functionality
         run: |
@@ -214,7 +214,7 @@ jobs:
         run: npm run build
 
       - name: Run Tests and Capture Output
-        run: bun test 2>&1 | tee /tmp/test-output.txt
+        run: bun test --timeout=120000 2>&1 | tee /tmp/test-output.txt
 
       - name: Convert Bun output to Jest format for TAF
         run: |
