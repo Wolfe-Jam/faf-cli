@@ -5,16 +5,16 @@ import type { KernelScoreResult, FafbInfo } from '../core/types.js';
 let kernel: typeof import('faf-scoring-kernel') | null = null;
 
 function getKernel(): typeof import('faf-scoring-kernel') {
-  if (!kernel) {
-    try {
-      kernel = require('faf-scoring-kernel');
-    } catch {
-      throw new Error(
-        'faf-scoring-kernel not installed.\n\n  Run: npm install faf-scoring-kernel\n'
-      );
-    }
+  if (kernel) return kernel;
+  try {
+    const loaded = require('faf-scoring-kernel') as typeof import('faf-scoring-kernel');
+    kernel = loaded;
+    return loaded;
+  } catch {
+    throw new Error(
+      'faf-scoring-kernel not installed.\n\n  Run: npm install faf-scoring-kernel\n'
+    );
   }
-  return kernel;
 }
 
 /** Score a .faf YAML string (21 base slots) */

@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v6.7.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v6.7.1 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -7,6 +7,32 @@ All notable changes to faf-cli will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [6.7.1] - 2026-05-17
+
+Completes the public API shipped in 6.7.0. The `.` entry now ships
+TypeScript declarations so the renderer is consumable from typed
+projects, not just at runtime.
+
+### Added
+
+- **Type declarations** — `bun run build` now emits a `.d.ts` tree for
+  the public surface via `tsc -p tsconfig.build.json`. `package.json`
+  declares `types` and a `types` condition in `exports["."]`.
+
+### Why
+
+6.7.0 exported `generateProjectHtml`, `writeProjectHtml`, `scoreFafYaml`,
+`findFafFile`, `readFaf`, `readFafRaw`, `FAF_HEX` as runtime values but
+shipped no declarations — a TypeScript consumer (`faf-mcp`, NodeNext)
+got `TS2307: Cannot find module 'faf-cli'`. The public API worked at
+runtime but was not statically consumable. 6.7.1 makes it real:
+single-source the renderer with full types, no hand-written shim.
+
+### Fixed
+
+- `wasm/kernel.ts` — `getKernel()` return narrowed correctly (latent
+  `| null` the declaration type-check surfaced; behavior unchanged).
 
 ## [6.7.0] - 2026-05-17 — The HTML Edition
 
