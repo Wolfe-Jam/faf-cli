@@ -11,6 +11,7 @@
         "yaml": "^2.4.1",
       },
       "devDependencies": {
+        "@faf/specification": "github:Wolfe-Jam/faf",
         "@types/node": "^22.15.0",
         "@typescript-eslint/eslint-plugin": "^8.41.0",
         "@typescript-eslint/parser": "^8.41.0",
@@ -47,6 +48,8 @@
     "@eslint/object-schema": ["@eslint/object-schema@2.1.7", "", {}, "sha512-VtAOaymWVfZcmZbp6E2mympDIHvyjXs/12LqWYjVw6qjrfF+VK+fyG33kChz3nnK+SU5/NeHOqrTEHS8sXO3OA=="],
 
     "@eslint/plugin-kit": ["@eslint/plugin-kit@0.4.1", "", { "dependencies": { "@eslint/core": "^0.17.0", "levn": "^0.4.1" } }, "sha512-43/qtrDUokr7LJqoF2c3+RInu/t4zfrpYdoSDfYyhg52rwLV6TnOvdG4fXm7IkSB3wErkcmJS9iEhjVtOSEjjA=="],
+
+    "@faf/specification": ["@faf/specification@github:Wolfe-Jam/faf#e6ad4c3", {}, "Wolfe-Jam-faf-e6ad4c3", "sha512-WFteJdfbLSmPLXdYFkpSXlvNcajSrCoLMwd0RG1AmWntnXVM+n4BtGvrmisaij/w256JKju00zl6zhN8qi9zrQ=="],
 
     "@humanfs/core": ["@humanfs/core@0.19.1", "", {}, "sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA=="],
 

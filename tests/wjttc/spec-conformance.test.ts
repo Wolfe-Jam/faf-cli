@@ -22,18 +22,21 @@ import Ajv2020 from 'ajv/dist/2020.js';
 import * as kernel from '../../src/wasm/kernel.js';
 
 function resolveSpecRoot(): string {
-  // 1) published package (CI / installed)
-  try {
-    return dirname(require.resolve('@faf/specification/package.json'));
-  } catch {
-    /* not installed — fall through to local sibling */
-  }
-  // 2) sibling repo (local monorepo layout: ~/FAF/cli + ~/FAF/faf)
   const here = dirname(fileURLToPath(import.meta.url));
-  const sibling = join(here, '../../../faf');
-  if (existsSync(join(sibling, 'conformance/expected.json'))) return sibling;
+  const candidates = [
+    join(here, '../../node_modules/@faf/specification'), // installed devDep (CI + local)
+    join(here, '../../../faf'), // sibling repo (local monorepo: ~/FAF/cli + ~/FAF/faf)
+  ];
+  try {
+    candidates.unshift(dirname(require.resolve('@faf/specification/package.json')));
+  } catch {
+    /* require.resolve unavailable in this context — the path candidates cover it */
+  }
+  for (const root of candidates) {
+    if (existsSync(join(root, 'conformance/expected.json'))) return root;
+  }
   throw new Error(
-    'FAF conformance corpus not found — install @faf/specification or check out the faf repo as a sibling of faf-cli.',
+    'FAF conformance corpus not found — ensure the @faf/specification devDep is installed (or the faf repo is a sibling). No silent skip.',
   );
 }
 
