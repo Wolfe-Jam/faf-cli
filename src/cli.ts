@@ -3,6 +3,7 @@
 import { Command } from 'commander';
 import { scoreCommand } from './commands/score.js';
 import { initCommand } from './commands/init.js';
+import { dnaCommand } from './commands/dna.js';
 import { autoCommand } from './commands/auto.js';
 import { syncCommand } from './commands/sync.js';
 import { compileCommand } from './commands/compile.js';
@@ -49,6 +50,11 @@ program
   .option('--force', 'Overwrite existing project.faf')
   .option('--output <path>', 'Output path')
   .action((options) => initCommand(options));
+
+program
+  .command('dna')
+  .description('🧬 Show your FAF DNA journey (birth → growth)')
+  .action(() => dnaCommand());
 
 program
   .command('auto')

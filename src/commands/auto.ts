@@ -2,9 +2,11 @@ import { existsSync } from 'fs';
 import { join } from 'path';
 import { detectStack } from '../detect/stack.js';
 import { interrogateRepo } from '../interrogate/index.js';
+import { seedHumanContext } from '../detect/context-seed.js';
 import { writeFaf, readFaf, readFafRaw } from '../interop/faf.js';
 import * as kernel from '../wasm/kernel.js';
 import { enrichScore } from '../core/scorer.js';
+import { FafDNAManager } from '../core/faf-dna.js';
 import { displayScore } from '../ui/display.js';
 import { bold, dim, fafCyan } from '../ui/colors.js';
 import { APP_TYPE_CATEGORIES, SLOTS, isPlaceholder } from '../core/slots.js';
@@ -24,7 +26,9 @@ export function autoCommand(): void {
     // empties (README/Cargo evidence), then detected fills any remaining empties.
     const withInterrogated = fillEmpties(existing, interrogated as Record<string, unknown>);
     const merged = fillEmpties(withInterrogated, detected as Record<string, unknown>);
-    writeFaf(fafPath, merged);
+    // Seed-and-suggest: fill empty 6 W's from evidence (faf go confirms).
+    const seeded = fillEmpties(merged, { human_context: seedHumanContext(dir) } as Record<string, unknown>);
+    writeFaf(fafPath, seeded);
     console.log(`${fafCyan('updated')} ${fafPath}`);
   } else {
     // New file: detected provides scaffold (slotignored markers), interrogated
@@ -48,12 +52,20 @@ export function autoCommand(): void {
       }
     }
 
-    writeFaf(fafPath, seeded);
+    const ctxSeeded = fillEmpties(seeded, { human_context: seedHumanContext(dir) } as Record<string, unknown>);
+    writeFaf(fafPath, ctxSeeded);
     console.log(`${fafCyan('created')} ${fafPath}`);
   }
 
   const yaml = readFafRaw(fafPath);
   const result = enrichScore(kernel.score(yaml));
+
+  // Record growth on the DNA journey, if a heartbeat exists (faf init births it).
+  const dna = new FafDNAManager(dir);
+  if (dna.exists()) {
+    dna.recordGrowth(result.score, ['faf auto']);
+  }
+
   displayScore(result, fafPath);
 
   if (result.score < 100) {
