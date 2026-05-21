@@ -3,6 +3,7 @@ import { join } from 'path';
 import { detectStack } from '../detect/stack.js';
 import { interrogateRepo } from '../interrogate/index.js';
 import { seedHumanContext } from '../detect/context-seed.js';
+import { turboCatSlots } from '../detect/turbo-cat.js';
 import { writeFaf, readFaf, readFafRaw } from '../interop/faf.js';
 import * as kernel from '../wasm/kernel.js';
 import { enrichScore } from '../core/scorer.js';
@@ -26,8 +27,11 @@ export function autoCommand(): void {
     // empties (README/Cargo evidence), then detected fills any remaining empties.
     const withInterrogated = fillEmpties(existing, interrogated as Record<string, unknown>);
     const merged = fillEmpties(withInterrogated, detected as Record<string, unknown>);
+    // Turbo-Cat: fill remaining empties from format evidence across ~200 formats
+    // (esp. non-npm package managers/languages v6 detection misses). Lowest precedence.
+    const withFormats = fillEmpties(merged, turboCatSlots(dir) as Record<string, unknown>);
     // Seed-and-suggest: fill empty 6 W's from evidence (faf go confirms).
-    const seeded = fillEmpties(merged, { human_context: seedHumanContext(dir) } as Record<string, unknown>);
+    const seeded = fillEmpties(withFormats, { human_context: seedHumanContext(dir) } as Record<string, unknown>);
     writeFaf(fafPath, seeded);
     console.log(`${fafCyan('updated')} ${fafPath}`);
   } else {
@@ -52,7 +56,10 @@ export function autoCommand(): void {
       }
     }
 
-    const ctxSeeded = fillEmpties(seeded, { human_context: seedHumanContext(dir) } as Record<string, unknown>);
+    // Turbo-Cat fills format-evidenced empties (after slotignore, so inactive
+    // categories stay ignored), before the human-context seed.
+    const withFormats = fillEmpties(seeded, turboCatSlots(dir) as Record<string, unknown>);
+    const ctxSeeded = fillEmpties(withFormats, { human_context: seedHumanContext(dir) } as Record<string, unknown>);
     writeFaf(fafPath, ctxSeeded);
     console.log(`${fafCyan('created')} ${fafPath}`);
   }
