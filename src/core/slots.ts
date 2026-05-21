@@ -136,8 +136,8 @@ export function isPlaceholder(value: unknown): boolean {
   return false;
 }
 
-/** App-type to active category mapping. The canonical 21-type ladder —
- *  19 detectable apps + `about` (non-app, 0 slots, owner-attested)
+/** App-type to active category mapping. The canonical 22-type ladder —
+ *  20 detectable apps + `about` (non-app, 0 slots, owner-attested)
  *  + `encyclopedia` (curated knowledge surface, FAFipedia and similar).
  *  (See v6.6.md doctrine memory + fafipedia-vs-grokipedia-architecture.)
  *  Sorted ascending by active slot count for readability.
@@ -179,6 +179,9 @@ export const APP_TYPE_CATEGORIES: Record<string, SlotCategory[]> = {
   frontend: ['project', 'frontend', 'human', 'universal'],
   website: ['project', 'frontend', 'human', 'universal'],
   mobile: ['project', 'frontend', 'human', 'universal'],
+  // browser/chrome extension — popup/content-script UI + build/CI/store
+  // (manifest_version), NO backend. Detected via manifest_version in scanner.ts.
+  extension: ['project', 'frontend', 'human', 'universal'],
 
   // 17 slots — project + backend + universal + human
   mcp: ['project', 'backend', 'human', 'universal'],

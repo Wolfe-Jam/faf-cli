@@ -150,6 +150,13 @@ describe('APP_TYPE_CATEGORIES', () => {
   test('enterprise has all 8 categories', () => {
     expect(APP_TYPE_CATEGORIES.enterprise).toHaveLength(8);
   });
+
+  test('extension has frontend + universal, NO backend (browser extension shape)', () => {
+    expect(APP_TYPE_CATEGORIES.extension).toBeDefined();
+    expect(new Set(APP_TYPE_CATEGORIES.extension)).toEqual(
+      new Set(['project', 'frontend', 'human', 'universal']));
+    expect(APP_TYPE_CATEGORIES.extension).not.toContain('backend');
+  });
 });
 
 describe('Mk4 canonical alias map (issue #66 — staged prep)', () => {

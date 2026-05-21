@@ -1,7 +1,7 @@
 /**
  * WJTTC — app-types canonical ladder (v6.6.0)
  *
- * ENGINE: locks the 20-type ladder, slot allocation, and the universal-
+ * ENGINE: locks the 22-type ladder, slot allocation, and the universal-
  *         category extension to small types (cli/library/mcp/frontend/
  *         data-science).
  *
@@ -32,9 +32,9 @@ const CATEGORY_SIZES: Record<SlotCategory, number> = {
   enterprise_ops: 3,
 };
 
-describe('WJTTC ENGINE: app-types canonical ladder (21 types)', () => {
-  test('exactly 21 types defined', () => {
-    expect(Object.keys(APP_TYPE_CATEGORIES).length).toBe(21);
+describe('WJTTC ENGINE: app-types canonical ladder (22 types)', () => {
+  test('exactly 22 types defined', () => {
+    expect(Object.keys(APP_TYPE_CATEGORIES).length).toBe(22);
   });
 
   test('all canonical types present', () => {
@@ -45,7 +45,7 @@ describe('WJTTC ENGINE: app-types canonical ladder (21 types)', () => {
       'documentation',
       'encyclopedia',
       'cli', 'library', 'sdk', 'wasm', 'html',
-      'frontend', 'website', 'mobile',
+      'frontend', 'website', 'mobile', 'extension',
       'mcp', 'backend', 'data-science',
       'fullstack', 'svelte', 'framework', 'monorepo-root',
       'mcpaas', 'saas',
@@ -74,6 +74,7 @@ describe('WJTTC ENGINE: per-type slot allocation', () => {
     frontend: 16,
     website: 16,
     mobile: 16,
+    extension: 16,
     mcp: 17,
     backend: 17,
     'data-science': 17,

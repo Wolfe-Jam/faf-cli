@@ -65,6 +65,32 @@ function detectSdkSignal(dir: string, pkg: PackageJson | null): string | null {
   return null;
 }
 
+/** Browser / Chrome extension signal — a manifest.json that declares
+ *  `manifest_version` (the defining MV2/MV3 trait, absent from PWA web-app
+ *  manifests). Checked at the repo root and common source/build locations,
+ *  since extensions often keep the manifest under public/ or src/. */
+function detectExtensionSignal(dir: string): string | null {
+  const candidates = [
+    'manifest.json',
+    'public/manifest.json',
+    'src/manifest.json',
+    'app/manifest.json',
+    'extension/manifest.json',
+    'dist/manifest.json',
+  ];
+  for (const rel of candidates) {
+    const path = join(dir, rel);
+    if (!existsSync(path)) continue;
+    try {
+      const parsed = JSON.parse(readFileSync(path, 'utf-8')) as { manifest_version?: unknown };
+      if (typeof parsed.manifest_version === 'number') {
+        return `${rel} manifest_version ${parsed.manifest_version} (browser extension)`;
+      }
+    } catch { /* not valid JSON / unreadable — keep scanning */ }
+  }
+  return null;
+}
+
 /** Python data-science dependency detection (pyproject.toml + requirements.txt). */
 function detectDataScienceSignal(dir: string): string | null {
   const dsPatterns = /(numpy|pandas|jupyter|scikit-learn|sklearn|pytorch|tensorflow|matplotlib|scipy)/i;
@@ -357,42 +383,52 @@ export function detectProjectTypeWithRationale(dir: string): ProjectTypeDetectio
     return { type: 'sdk', found };
   }
 
-  // ─── 3. mcpaas — post-MCP platforms (multiple MCP signals + auth + DB) ──
+  // ─── 3. extension — browser/chrome extension (manifest_version) ─────────
+  // manifest_version is the unambiguous MV2/MV3 trait — must beat the framework
+  // heuristics below (a framework-built extension would otherwise classify as
+  // svelte/frontend/fullstack — confirmed on Stack⚡️Grabber).
+  const extensionSignal = detectExtensionSignal(dir);
+  if (extensionSignal) {
+    found.push(extensionSignal);
+    return { type: 'extension', found };
+  }
+
+  // ─── 4. mcpaas — post-MCP platforms (multiple MCP signals + auth + DB) ──
   const mcpaasSignal = detectMcpaasSignal(dir, pkg, frameworks);
   if (mcpaasSignal) {
     found.push(mcpaasSignal);
     return { type: 'mcpaas', found };
   }
 
-  // ─── 4. saas — subscription products (auth + payment) ───────────────────
+  // ─── 5. saas — subscription products (auth + payment) ───────────────────
   const saasSignal = detectSaasSignal(dir, pkg);
   if (saasSignal) {
     found.push(saasSignal);
     return { type: 'saas', found };
   }
 
-  // ─── 5. wasm — WASM target in build config ──────────────────────────────
+  // ─── 6. wasm — WASM target in build config ──────────────────────────────
   const wasmSignal = detectWasmSignal(dir, pkg);
   if (wasmSignal) {
     found.push(wasmSignal);
     return { type: 'wasm', found };
   }
 
-  // ─── 6. mobile — mobile platform deps / native dirs ─────────────────────
+  // ─── 7. mobile — mobile platform deps / native dirs ─────────────────────
   const mobileSignal = detectMobileSignal(dir, pkg);
   if (mobileSignal) {
     found.push(mobileSignal);
     return { type: 'mobile', found };
   }
 
-  // ─── 7. mcp — single MCP server ─────────────────────────────────────────
+  // ─── 8. mcp — single MCP server ─────────────────────────────────────────
   const hasMcp = frameworks.some(f => f.slug === 'mcp');
   if (hasMcp) {
     found.push('MCP SDK signal');
     return { type: 'mcp', found };
   }
 
-  // ─── 8. cli — Node bin / Cargo [[bin]] / Zig main.zig ───────────────────
+  // ─── 9. cli — Node bin / Cargo [[bin]] / Zig main.zig ───────────────────
   if (pkg?.bin) {
     found.push('package.json bin');
     return { type: 'cli', found };
@@ -417,7 +453,7 @@ export function detectProjectTypeWithRationale(dir: string): ProjectTypeDetectio
     }
   }
 
-  // ─── 9. framework — private workspace + Svelte ──────────────────────────
+  // ─── 10. framework — private workspace + Svelte ──────────────────────────
   const hasSvelte = frameworks.some(f => f.slug === 'svelte' || f.slug === 'sveltekit');
   const isPrivateWorkspace = pkg?.private === true && (
     existsSync(join(dir, 'pnpm-workspace.yaml')) ||
@@ -428,13 +464,13 @@ export function detectProjectTypeWithRationale(dir: string): ProjectTypeDetectio
     return { type: 'framework', found };
   }
 
-  // ─── 10. svelte — Svelte/SvelteKit app (fullstack by nature) ────────────
+  // ─── 11. svelte — Svelte/SvelteKit app (fullstack by nature) ────────────
   if (hasSvelte) {
     found.push('Svelte/SvelteKit');
     return { type: 'svelte', found };
   }
 
-  // ─── 11. enterprise — private workspace + multi-FW (more specific than monorepo-root) ──
+  // ─── 12. enterprise — private workspace + multi-FW (more specific than monorepo-root) ──
   // Must be checked BEFORE monorepo-root (which is private workspace fallback).
   const hasFrontendFw = frameworks.some(f => f.category === 'frontend');
   const hasBackendFw = frameworks.some(f => f.category === 'backend');
@@ -447,21 +483,21 @@ export function detectProjectTypeWithRationale(dir: string): ProjectTypeDetectio
     return { type: 'enterprise', found };
   }
 
-  // ─── 12. monorepo-root — private workspace, multi-package, no specific FW story ──
+  // ─── 13. monorepo-root — private workspace, multi-package, no specific FW story ──
   const monoSignal = detectMonorepoRootSignal(dir, pkg);
   if (monoSignal) {
     found.push(monoSignal);
     return { type: 'monorepo-root', found };
   }
 
-  // ─── 13. website — marketing-shape (Astro/Gatsby OR keywords) ───────────
+  // ─── 14. website — marketing-shape (Astro/Gatsby OR keywords) ───────────
   const websiteSignal = detectWebsiteSignal(dir, pkg, frameworks);
   if (websiteSignal) {
     found.push(websiteSignal);
     return { type: 'website', found };
   }
 
-  // ─── 14. fullstack — Next/Nuxt OR (frontend + backend) ──────────────────
+  // ─── 15. fullstack — Next/Nuxt OR (frontend + backend) ──────────────────
   const hasNextOrNuxt = frameworks.some(f => f.slug === 'nextjs' || f.slug === 'nuxt');
   if (hasNextOrNuxt) {
     found.push(frameworks.find(f => f.slug === 'nextjs') ? 'Next.js' : 'Nuxt');
@@ -475,33 +511,33 @@ export function detectProjectTypeWithRationale(dir: string): ProjectTypeDetectio
     return { type: 'fullstack', found };
   }
 
-  // ─── 14. frontend — frontend framework only ─────────────────────────────
+  // ─── 16. frontend — frontend framework only ─────────────────────────────
   if (hasFrontend) {
     found.push('frontend framework');
     return { type: 'frontend', found };
   }
 
-  // ─── 15. backend — backend framework only ───────────────────────────────
+  // ─── 17. backend — backend framework only ───────────────────────────────
   if (hasBackend) {
     found.push('backend framework');
     return { type: 'backend', found };
   }
 
-  // ─── 16. data-science — Python DS deps (numpy/pandas/jupyter/sklearn) ───
+  // ─── 18. data-science — Python DS deps (numpy/pandas/jupyter/sklearn) ───
   const dsSignal = detectDataScienceSignal(dir);
   if (dsSignal) {
     found.push(dsSignal);
     return { type: 'data-science', found };
   }
 
-  // ─── 17. html — bare index.html, no framework ──────────────────────────
+  // ─── 19. html — bare index.html, no framework ──────────────────────────
   const htmlSignal = detectHtmlSignal(dir, pkg);
   if (htmlSignal) {
     found.push(htmlSignal);
     return { type: 'html', found };
   }
 
-  // ─── 18. library — fallback (has main/exports but no bin) ──────────────
+  // ─── 20. library — fallback (has main/exports but no bin) ──────────────
   if (pkg?.main && !pkg?.bin) {
     found.push('package.json main (no bin)');
     return { type: 'library', found };

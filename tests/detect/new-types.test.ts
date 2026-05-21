@@ -142,6 +142,42 @@ describe('WJTTC ENGINE: mobile type', () => {
   });
 });
 
+describe('WJTTC ENGINE: extension type (browser/chrome extension)', () => {
+  test('manifest.json with manifest_version → extension', () => {
+    writeFileSync(join(dir, 'manifest.json'),
+      JSON.stringify({ manifest_version: 3, name: 'X', version: '1.0.0' }));
+    const r = detectProjectTypeWithRationale(dir);
+    expect(r.type).toBe('extension');
+    expect(r.found.join(' ')).toMatch(/manifest_version/);
+  });
+
+  test('public/manifest.json (common build layout) → extension', () => {
+    mkdirSync(join(dir, 'public'));
+    writeFileSync(join(dir, 'public/manifest.json'),
+      JSON.stringify({ manifest_version: 3, name: 'X' }));
+    const r = detectProjectTypeWithRationale(dir);
+    expect(r.type).toBe('extension');
+  });
+
+  test('manifest_version WINS over a Svelte build (the Stack⚡️Grabber regression)', () => {
+    // A framework-built extension must classify as extension — NOT svelte/
+    // fullstack. This is the exact misclassification that motivated the type.
+    writeFileSync(join(dir, 'manifest.json'),
+      JSON.stringify({ manifest_version: 3, name: 'Grabber' }));
+    pkg({ dependencies: { svelte: '^4.0.0' } });
+    const r = detectProjectTypeWithRationale(dir);
+    expect(r.type).toBe('extension');
+  });
+
+  test('PWA web-app manifest (no manifest_version) does NOT classify as extension', () => {
+    writeFileSync(join(dir, 'manifest.json'),
+      JSON.stringify({ name: 'My PWA', start_url: '/', display: 'standalone' }));
+    pkg({ dependencies: { react: '^18.0.0' } });
+    const r = detectProjectTypeWithRationale(dir);
+    expect(r.type).not.toBe('extension');
+  });
+});
+
 describe('WJTTC ENGINE: data-science type', () => {
   test('pyproject.toml with numpy → data-science', () => {
     writeFileSync(join(dir, 'pyproject.toml'),
