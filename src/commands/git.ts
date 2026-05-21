@@ -2,7 +2,7 @@ import { mkdirSync, rmSync } from 'fs';
 import { join } from 'path';
 import { execSync } from 'child_process';
 import { tmpdir } from 'os';
-import { detectStack } from '../detect/stack.js';
+import { assembleFreshFaf } from '../detect/assemble.js';
 import { writeFaf, readFafRaw } from '../interop/faf.js';
 import * as kernel from '../wasm/kernel.js';
 import { enrichScore } from '../core/scorer.js';
@@ -30,7 +30,8 @@ export function gitCommand(url: string): void {
       process.exit(1);
     }
 
-    const data = detectStack(tmpDir);
+    // Full slot-filling pipeline (shared with `faf auto`) — not detectStack alone.
+    const data = assembleFreshFaf(tmpDir);
     const outputPath = join(process.cwd(), 'project.faf');
     writeFaf(outputPath, data);
 
