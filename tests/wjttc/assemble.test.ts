@@ -21,7 +21,7 @@ afterEach(() => {
 
 const write = (name: string, body: string): void => writeFileSync(join(dir, name), body);
 
-describe('WJTTC ENGINE: shared assembly pipeline (auto + git)', () => {
+describe('WJTTC AERO: shared assembly pipeline (auto + git)', () => {
   test('fills human_context (Relentless) — not detectStack-only', () => {
     write('package.json', JSON.stringify({ description: 'A drop-in checkout flow for fast payment integration' }));
     write('README.md', '# Kit\n\n## Why\nOur mission is to remove payment-integration friction for teams.\n\nBuilt for developers who ship commerce features.\n');
@@ -48,7 +48,10 @@ describe('WJTTC ENGINE: shared assembly pipeline (auto + git)', () => {
     expect(Object.values(stack)).toContain('slotignored');
   });
 
-  test('fillEmpties: existing values win, empties get filled', () => {
+});
+
+describe('WJTTC ENGINE: fillEmpties merge', () => {
+  test('existing values win, empties get filled', () => {
     const merged = fillEmpties(
       { project: { name: 'keep-me', main_language: '' } },
       { project: { name: 'override', main_language: 'TypeScript' } },

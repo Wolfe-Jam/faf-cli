@@ -49,25 +49,6 @@ describe('WJTTC ENGINE: Turbo-Cat format → slot', () => {
     expect(s.stack?.build).toBe('cargo');
   });
 
-  test('NO-GUESS: a stray .tsx asserts language only, never frontend:React', () => {
-    write('Button.tsx', 'export const B = () => null;');
-    const s = turboCatSlots(dir);
-    expect(s.project?.main_language).toBe('TypeScript');
-    expect(s.stack?.frontend).toBeUndefined();
-  });
-
-  test('NO-GUESS: ambiguous "/" hints never fill (package.json alone)', () => {
-    write('package.json', '{"name":"x"}');
-    const s = turboCatSlots(dir);
-    // mainLanguage "JavaScript/TypeScript" and pkg "npm/yarn/pnpm" are excluded.
-    expect(s.project?.main_language).toBeUndefined();
-    expect(s.stack?.package_manager).toBeUndefined();
-  });
-
-  test('NO-GUESS: empty evidence → empty (never guesses)', () => {
-    expect(turboCatSlots(dir)).toEqual({});
-  });
-
   test('priority-wins is deterministic: config beats extension for a slot', () => {
     write('requirements.txt', 'flask\n'); // priority 35 → Python
     write('a.py', 'x=1');                  // priority 15 → Python
@@ -79,5 +60,26 @@ describe('WJTTC ENGINE: Turbo-Cat format → slot', () => {
     write('requirements.txt', 'x');
     // confirmedCount reflects matched formats; KB itself is the asset.
     expect(turboCatScan(dir).confirmedCount).toBeGreaterThan(0);
+  });
+});
+
+describe('WJTTC BRAKE: Turbo-Cat no-guess invariants', () => {
+  test('a stray .tsx asserts language only, never frontend:React', () => {
+    write('Button.tsx', 'export const B = () => null;');
+    const s = turboCatSlots(dir);
+    expect(s.project?.main_language).toBe('TypeScript');
+    expect(s.stack?.frontend).toBeUndefined();
+  });
+
+  test('ambiguous "/" hints never fill (package.json alone)', () => {
+    write('package.json', '{"name":"x"}');
+    const s = turboCatSlots(dir);
+    // mainLanguage "JavaScript/TypeScript" and pkg "npm/yarn/pnpm" are excluded.
+    expect(s.project?.main_language).toBeUndefined();
+    expect(s.stack?.package_manager).toBeUndefined();
+  });
+
+  test('empty evidence → empty (never guesses)', () => {
+    expect(turboCatSlots(dir)).toEqual({});
   });
 });

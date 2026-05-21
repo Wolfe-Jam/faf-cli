@@ -75,8 +75,10 @@ describe('WJTTC ENGINE: Relentless 6-W extractor', () => {
     expect(how).toContain('npm run start');
     expect(how).toContain('npm run build');
   });
+});
 
-  test('NO-GUESS: project name alone never infers "what" (v5 INFERRED tier dropped)', () => {
+describe('WJTTC BRAKE: Relentless no-guess invariants', () => {
+  test('project name alone never infers "what" (v5 INFERRED tier dropped)', () => {
     pkg({ name: 'super-payment-router' });
     expect(relentlessContext(dir).what).toBeUndefined();
   });
