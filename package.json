@@ -71,6 +71,7 @@
     "@anthropic-ai/sdk": "^0.91.1"
   },
   "devDependencies": {
+    "ajv": "^8.17.1",
     "@types/node": "^22.15.0",
     "@typescript-eslint/eslint-plugin": "^8.41.0",
     "@typescript-eslint/parser": "^8.41.0",
