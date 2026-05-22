@@ -1,4 +1,4 @@
-<!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
+<!-- faf: faf-cli | TypeScript | cli | CLI for the .faf and .fafm IANA-registered formats — AI context + memory that versions with your code -->
 <!-- faf: doc=readme | canonical=project.faf | score=100 | family=FAF -->
 
 <div style="display: flex; align-items: center; gap: 12px;">
@@ -275,6 +275,41 @@ If `faf-cli` has been useful, consider starring the repo — it helps others fin
 
 MIT — Free and open source
 
-**IANA-registered:** [`application/vnd.faf+yaml`](https://www.iana.org/assignments/media-types/application/vnd.faf+yaml)
+**IANA-registered:** [`application/vnd.faf+yaml`](https://www.iana.org/assignments/media-types/application/vnd.faf+yaml) (Context) · [`application/vnd.fafm+yaml`](https://www.iana.org/assignments/media-types/application/vnd.fafm+yaml) (Memory)
 
 *format | driven 🏎️⚡️ [wolfejam.dev](https://wolfejam.dev)*
+
+## Citation
+
+If you use `.faf` (and/or `.fafm`) in research or production, please cite the format papers:
+
+> Wolfe, J. (2025). *Format-Driven AI Context Architecture: The .faf Standard for Persistent Project Understanding*. Zenodo. https://doi.org/10.5281/zenodo.18251362
+
+> Wolfe, J. (2026). *Permanent Memory and Instant Recall: The .fafm Standard for Multi-Profile AI Agent Memory*. Zenodo. https://doi.org/10.5281/zenodo.20348942
+
+### BibTeX
+
+```bibtex
+@article{wolfe2025faf,
+  title     = {Format-Driven AI Context Architecture: The .faf Standard for Persistent Project Understanding},
+  author    = {Wolfe, James},
+  year      = {2025},
+  month     = {nov},
+  publisher = {Zenodo},
+  doi       = {10.5281/zenodo.18251362},
+  url       = {https://doi.org/10.5281/zenodo.18251362}
+}
+
+@article{wolfe2026fafm,
+  title     = {Permanent Memory and Instant Recall: The .fafm Standard for Multi-Profile AI Agent Memory},
+  author    = {Wolfe, James},
+  year      = {2026},
+  month     = {may},
+  publisher = {Zenodo},
+  doi       = {10.5281/zenodo.20348942},
+  url       = {https://doi.org/10.5281/zenodo.20348942}
+}
+```
+
+[![DOI: Context paper](https://img.shields.io/badge/DOI-Context%20paper-FF6B35)](https://doi.org/10.5281/zenodo.18251362)[![DOI: Memory paper](https://img.shields.io/badge/DOI-Memory%20paper-FF6B35)](https://doi.org/10.5281/zenodo.20348942)
+
