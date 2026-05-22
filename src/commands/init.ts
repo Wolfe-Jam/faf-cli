@@ -1,6 +1,6 @@
 import { existsSync } from 'fs';
 import { join } from 'path';
-import { detectStack } from '../detect/stack.js';
+import { assembleFreshFaf } from '../detect/assemble.js';
 import { writeFaf, readFafRaw } from '../interop/faf.js';
 import { scoreFafYaml } from '../core/scorer.js';
 import { FafDNAManager } from '../core/faf-dna.js';
@@ -25,7 +25,8 @@ export function initCommand(options: InitOptions = {}): void {
     process.exit(1);
   }
 
-  const data = detectStack(dir);
+  // Full slot-filling pipeline (shared with `faf auto` + `faf git`).
+  const data = assembleFreshFaf(dir);
   writeFaf(outputPath, data);
 
   const yaml = readFafRaw(outputPath);
