@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>faf-cli | Persistent AI Context Standard</title>
+  <meta name="description" content="faf-cli — Bun-native CLI for the .faf format. IANA-registered AI context that versions with your code. Generates AGENTS.md · .cursorrules · CLAUDE.md · GEMINI.md.">
+  <meta property="og:title" content="faf-cli | Persistent AI Context Standard">
+  <meta property="og:description" content="Bun-native CLI for the IANA-registered .faf format. One file → AGENTS.md · .cursorrules · CLAUDE.md · GEMINI.md.">
+  <meta property="og:image" content="https://raw.githubusercontent.com/Wolfe-Jam/faf-cli/main/assets/thumbnail.png">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍊</text></svg>">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: #0a0a0a;
+      color: #fff;
+      min-height: 100vh;
+      position: relative;
+    }
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(ellipse at 50% 30%, rgba(255, 102, 0, 0.06) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .accent-line {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent 0%, #333 20%, #ff6600 50%, #333 80%, transparent 100%);
+      z-index: 10;
+    }
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 60px 40px 40px;
+      text-align: center;
+    }
+    .logo {
+      font-size: 100px;
+      margin-bottom: 12px;
+      filter: drop-shadow(0 0 30px rgba(255, 165, 0, 0.3));
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 900;
+      letter-spacing: -1px;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+    .tagline {
+      font-size: 1.3rem;
+      color: #FFD700;
+      font-weight: 600;
+      margin: 0.5rem 0;
+    }
+    .registry-line {
+      font-size: 0.95rem;
+      color: #777;
+      margin: 0.5rem 0;
+    }
+    .registry-line a { color: #aaa; }
+    .squeeze {
+      font-size: 1rem;
+      color: #fff;
+      font-weight: 700;
+      margin: 0.5rem 0 2rem 0;
+    }
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      margin-bottom: 32px;
+    }
+    .stat-value { font-size: 2rem; font-weight: 800; color: #fff; }
+    .stat-label { font-size: 11px; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: 1px; }
+    .interop {
+      background: rgba(255, 102, 0, 0.04);
+      border: 1px solid rgba(255, 102, 0, 0.2);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 32px;
+      text-align: left;
+    }
+    .interop h2 { font-size: 14px; color: #ff6600; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px; }
+    .interop pre {
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 6px;
+      padding: 14px 16px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      color: #ddd;
+      overflow-x: auto;
+      line-height: 1.5;
+    }
+    .interop .desc { font-size: 12px; color: #888; margin-bottom: 10px; }
+    .deploy { margin-bottom: 32px; }
+    .deploy h2 { font-size: 14px; color: #ff6600; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px; }
+    .deploy-grid {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+    }
+    .deploy-option {
+      background: rgba(255, 102, 0, 0.04);
+      border: 1px solid rgba(255, 102, 0, 0.15);
+      border-radius: 8px;
+      padding: 16px 24px;
+      flex: 1;
+      max-width: 220px;
+    }
+    .deploy-option .label { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+    .deploy-option .desc { font-size: 12px; color: #666; margin-bottom: 6px; }
+    .deploy-option code { font-size: 12px; color: #ff6600; font-family: 'Courier New', monospace; }
+    .bottom-bar {
+      border-top: 1px solid rgba(255, 102, 0, 0.1);
+      padding-top: 24px;
+      text-align: center;
+      font-size: 12px;
+      color: #555;
+    }
+    .bottom-bar .links { margin-bottom: 8px; }
+    .bottom-bar .big-orange { color: #777; font-style: italic; }
+    a { color: #ff6600; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Version badge */
+    .version-badge {
+      display: inline-block;
+      background: #ff6600;
+      color: #000;
+      font-size: 0.85rem;
+      font-weight: 800;
+      padding: 4px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      user-select: none;
+    }
+    .version-badge:hover {
+      background: #ff8833;
+      transform: scale(1.05);
+    }
+
+    /* About overlay */
+    .about-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .about-overlay.visible {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .about-box {
+      background: #141414;
+      border: 1px solid rgba(255, 102, 0, 0.3);
+      border-radius: 16px;
+      padding: 40px;
+      max-width: 480px;
+      width: 90%;
+      text-align: center;
+      position: relative;
+      transform: scale(0.9);
+      transition: transform 0.3s;
+    }
+    .about-overlay.visible .about-box {
+      transform: scale(1);
+    }
+    .about-version {
+      display: inline-block;
+      background: #ff6600;
+      color: #000;
+      font-size: 1.1rem;
+      font-weight: 900;
+      padding: 6px 20px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+    }
+    .about-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+    .about-subtitle {
+      font-size: 0.95rem;
+      color: #ff6600;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    .about-items {
+      text-align: left;
+      margin: 0 auto 24px;
+      max-width: 340px;
+    }
+    .about-item {
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 0.9rem;
+      color: #ccc;
+    }
+    .about-item span {
+      color: #ff6600;
+      font-weight: 700;
+    }
+    .about-close {
+      background: none;
+      border: 1px solid rgba(255, 102, 0, 0.3);
+      color: #888;
+      font-size: 0.8rem;
+      padding: 8px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .about-close:hover {
+      color: #fff;
+      border-color: #ff6600;
+    }
+    .about-progress {
+      position: absolute;
+      bottom: 0; left: 0;
+      height: 3px;
+      background: #ff6600;
+      border-radius: 0 0 16px 16px;
+      transition: width 0.1s linear;
+    }
+  </style>
+</head>
+<body>
+  <div class="accent-line"></div>
+  <div class="container">
+    <div class="logo">🍊</div>
+    <h1>faf-cli</h1>
+    <div class="tagline">📦 The HTML Edition <span class="version-badge" onclick="showAbout()">v6.7.1</span></div>
+    <div class="registry-line">Bun-native CLI · <code>npm i faf-cli</code> or <code>npm i faf</code> (dual-published)</div>
+    <div class="squeeze">FAF defines. MD instructs. AI codes.</div>
+
+    <div class="stats">
+      <div><div class="stat-value">25,000+</div><div class="stat-label">Downloads</div></div>
+      <div><div class="stat-value">0</div><div class="stat-label">Config Required</div></div>
+      <div><div class="stat-value">100%</div><div class="stat-label">Trophy Scored</div></div>
+    </div>
+
+    <div class="interop">
+      <h2>AI Interop — One file, four outputs</h2>
+      <div class="desc">Define once in <code>project.faf</code>. Generate the AI-instruction file every assistant reads:</div>
+<pre>project.faf  →  AGENTS.md     (OpenAI Codex)
+             →  .cursorrules  (Cursor)
+             →  CLAUDE.md     (Anthropic)
+             →  GEMINI.md     (Google)</pre>
+    </div>
+
+    <div class="deploy">
+      <h2>Three Ways to Install</h2>
+      <div class="deploy-grid">
+        <div class="deploy-option">
+          <div class="label">npm</div>
+          <div class="desc">Global install</div>
+          <code>npm i -g faf-cli</code>
+        </div>
+        <div class="deploy-option">
+          <div class="label">Homebrew</div>
+          <div class="desc">macOS / Linux</div>
+          <code>brew install wolfe-jam/faf/faf-cli</code>
+        </div>
+        <div class="deploy-option">
+          <div class="label">npx</div>
+          <div class="desc">No install</div>
+          <code>npx faf</code>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:center;margin:1.5rem 0;">
+      <iframe src="https://ghbtns.com/github-btn.html?user=Wolfe-Jam&repo=faf-cli&type=star&count=false"
+              frameborder="0" scrolling="0" width="80" height="20"
+              title="Star Wolfe-Jam/faf-cli on GitHub"></iframe>
+    </div>
+
+    <div style="margin:1.5rem 0;padding:0.75rem 1rem;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);border-radius:8px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;">
+      <div style="font-size:0.85rem;color:#aaa;">Your <span style="color:#fff;">@handle</span> is your namepoint on MCPaaS™. You're here, you're early — <a href="https://mcpaas.live/claim" style="color:#fff;text-decoration:none;">get yours</a>.</div>
+    </div>
+
+    <div class="bottom-bar">
+      <div class="links"><span class="version-badge" onclick="showAbout()" style="font-size:0.75rem;padding:3px 10px;">v6.7.1</span> &bull; <a href="https://github.com/Wolfe-Jam/faf-cli">GitHub</a> &bull; <a href="https://npmjs.com/package/faf-cli">npm</a> &bull; <a href="https://github.com/Wolfe-Jam/homebrew-faf">Homebrew</a> &bull; <a href="https://faf.one">faf.one</a></div>
+      <div class="big-orange">Persistent AI Context Standard — IANA-registered <code>application/vnd.faf+yaml</code> 🍊</div>
+      <div style="margin-top:0.5rem;font-size:0.75rem;"><a href="https://mcpaas.live/privacy" style="color:#666;text-decoration:none;">Privacy</a> · <a href="https://mcpaas.live/terms" style="color:#666;text-decoration:none;">Terms</a> · <a href="mailto:team@faf.one" style="color:#666;text-decoration:none;">team@faf.one</a></div>
+      <div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid rgba(255,255,255,0.1);font-size:0.8rem;color:#fff;">Part of the <a href="https://faf.one" style="color:#ff6600;text-decoration:none;">FAF.one Family</a> · <a href="https://mcpaas.live" style="color:#888;text-decoration:none;">MCPaaS</a> · <a href="https://radiofaf.com" style="color:#888;text-decoration:none;">RadioFAF</a> · <a href="https://fafdev.tools" style="color:#888;text-decoration:none;">fafdev.tools</a></div>
+    </div>
+  </div>
+  <div class="about-overlay" id="aboutOverlay" onclick="if(event.target===this)hideAbout()">
+    <div class="about-box">
+      <div class="about-version">v6.7.1</div>
+      <div class="about-title">The HTML Edition</div>
+      <div class="about-subtitle">Bun-native · Dual-published</div>
+      <div class="about-items">
+        <div class="about-item"><span>Runtime:</span> Bun-native CLI</div>
+        <div class="about-item"><span>Engine:</span> Mk4 WASM via faf-scoring-kernel</div>
+        <div class="about-item"><span>AI Interop:</span> AGENTS.md · .cursorrules · CLAUDE.md · GEMINI.md</div>
+        <div class="about-item"><span>Publish:</span> npm (faf-cli + faf) · Homebrew tap</div>
+        <div class="about-item"><span>Format:</span> IANA-registered .faf (application/vnd.faf+yaml)</div>
+        <div class="about-item"><span>Workflow:</span> faf init → faf auto → faf score</div>
+      </div>
+      <button class="about-close" onclick="hideAbout()">Got it</button>
+      <div class="about-progress" id="aboutProgress"></div>
+    </div>
+  </div>
+
+  <a href="https://twitter.com/intent/tweet?text=faf-cli%20%E2%80%94%20Bun-native%20CLI%20for%20the%20IANA-registered%20.faf%20format.%20One%20file%20%E2%86%92%20AGENTS.md%20%C2%B7%20.cursorrules%20%C2%B7%20CLAUDE.md%20%C2%B7%20GEMINI.md.&url=https%3A%2F%2Fnpmjs.com%2Fpackage%2Ffaf-cli" target="_blank" rel="noopener"
+     style="position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;align-items:center;gap:6px;background:#1a1a1a;color:#fff;border:1px solid #333;border-radius:20px;padding:8px 14px;font-size:0.8rem;font-weight:600;text-decoration:none;transition:all 0.2s;font-family:-apple-system,BlinkMacSystemFont,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,0.3);"
+     onmouseover="this.style.background='#ff6600';this.style.borderColor='#ff6600';"
+     onmouseout="this.style.background='#1a1a1a';this.style.borderColor='#333';">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+    Share
+  </a>
+
+  <script>
+    var aboutTimer, progressInterval;
+    function showAbout(autoLaunch) {
+      clearTimeout(aboutTimer);
+      clearInterval(progressInterval);
+      var el = document.getElementById('aboutOverlay');
+      var bar = document.getElementById('aboutProgress');
+      el.classList.add('visible');
+      if (autoLaunch) {
+        bar.style.width = '100%';
+        bar.style.display = '';
+        var start = Date.now();
+        var duration = 6000;
+        progressInterval = setInterval(function() {
+          var elapsed = Date.now() - start;
+          var pct = Math.max(0, 100 - (elapsed / duration) * 100);
+          bar.style.width = pct + '%';
+          if (pct <= 0) clearInterval(progressInterval);
+        }, 50);
+        aboutTimer = setTimeout(hideAbout, duration);
+      } else {
+        bar.style.display = 'none';
+      }
+    }
+    function hideAbout() {
+      clearTimeout(aboutTimer);
+      clearInterval(progressInterval);
+      document.getElementById('aboutOverlay').classList.remove('visible');
+    }
+    window.addEventListener('load', function() { setTimeout(function() { showAbout(true); }, 500); });
+  </script>
+</body>
+</html>
