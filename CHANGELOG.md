@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v6.7.1 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v6.7.2 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -7,6 +7,18 @@ All notable changes to faf-cli will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [6.7.2] - 2026-05-26
+
+### Fixed
+
+- **`exports` map** — removed the `bun` condition that pointed at
+  unshipped `src/index.ts`. Bun consumers (downstream FAF MCP servers
+  using `bun test`) couldn't resolve `from 'faf-cli'` against the
+  published tarball; Node was unaffected. Now both runtimes resolve
+  to `dist/index.js` (same code Node was already loading). Removes
+  the need for the `src/utils/faf-cli-bridge.ts` workaround in
+  faf-mcp 2.1.1 + claude-faf-mcp 5.6.1.
 
 ## [6.7.1] - 2026-05-17
 
