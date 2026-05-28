@@ -2,6 +2,7 @@ import { findFafFile, readFaf, readFafRaw } from '../interop/faf.js';
 import { writeAgentsMd } from '../interop/agents.js';
 import { writeCursorrules } from '../interop/cursorrules.js';
 import { writeGeminiMd } from '../interop/gemini.js';
+import { writeGrokConfig } from '../interop/grok.js';
 import { writeProjectHtml } from '../interop/projecthtml.js';
 import { scoreFafYaml } from '../core/scorer.js';
 import { dim, fafCyan } from '../ui/colors.js';
@@ -10,6 +11,7 @@ export interface ExportOptions {
   agents?: boolean;
   cursor?: boolean;
   gemini?: boolean;
+  grok?: boolean;
   conductor?: boolean;
   html?: boolean;
   all?: boolean;
@@ -29,6 +31,7 @@ export function exportCommand(options: ExportOptions = {}): void {
     (!options.agents &&
       !options.cursor &&
       !options.gemini &&
+      !options.grok &&
       !options.conductor &&
       !options.html);
 
@@ -45,6 +48,13 @@ export function exportCommand(options: ExportOptions = {}): void {
   if (exportAll || options.gemini) {
     writeGeminiMd(dir, data);
     console.log(`  GEMINI.md`);
+  }
+
+  // Opt-in only: wires an MCP server into the user's .grok/ config, so it
+  // never fires on a bare `faf export` or `--all` — only on explicit --grok.
+  if (options.grok) {
+    const status = writeGrokConfig(dir, data);
+    console.log(`  .grok/config.toml (${status})`);
   }
 
   if (exportAll || options.html) {

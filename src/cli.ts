@@ -112,6 +112,7 @@ program
   .option('--agents', 'Generate AGENTS.md')
   .option('--cursor', 'Generate .cursorrules')
   .option('--gemini', 'Generate GEMINI.md')
+  .option('--grok', 'Wire grok-faf-mcp into .grok/config.toml')
   .option('--conductor', 'Generate conductor config')
   .option('--html', 'Generate project.html (visual render of project.faf)')
   .option('--all', 'Generate all formats')
@@ -238,6 +239,7 @@ program.command('status', { hidden: true }).action(() => scoreCommand(undefined,
 program.command('agents', { hidden: true }).action(() => exportCommand({ agents: true }));
 program.command('cursor', { hidden: true }).action(() => exportCommand({ cursor: true }));
 program.command('gemini', { hidden: true }).action(() => exportCommand({ gemini: true }));
+program.command('grok', { hidden: true }).action(() => exportCommand({ grok: true }));
 program.command('validate', { hidden: true }).action((file: string) => checkCommand(file));
 program.command('yolo', { hidden: true }).action(() => initCommand({ yolo: true }));
 
