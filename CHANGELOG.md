@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v6.7.2 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v6.8.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -8,17 +8,50 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [6.7.2] - 2026-05-26
+## [6.8.0] - 2026-05-30 — The Relentless Edition
 
-### Fixed
+**Restored: Birth DNA, 6-W extractor, format-finder. Added: Grok interop, extension App-Type. One shared pipeline.**
 
-- **`exports` map** — removed the `bun` condition that pointed at
-  unshipped `src/index.ts`. Bun consumers (downstream FAF MCP servers
-  using `bun test`) couldn't resolve `from 'faf-cli'` against the
-  published tarball; Node was unaffected. Now both runtimes resolve
-  to `dist/index.js` (same code Node was already loading). Removes
-  the need for the `src/utils/faf-cli-bridge.ts` workaround in
-  faf-mcp 2.1.1 + claude-faf-mcp 5.6.1.
+Every fresh `.faf` ships richer-by-default. `init`, `auto`, `git` flow through one shared assembly pipeline. Grok interop closed. Browser extensions earn their shape. Windows CI root-caused.
+
+### Added
+
+- **`faf export --grok`** — hosted Grok MCP wired (#76)
+- **`faf dna`** — birth-to-growth journey
+- **Birth DNA** — `.faf-dna` on every fresh `.faf`
+- **Relentless 6-W extractor** — manifest + README → context
+- **Turbo-Cat format-finder** — 200+ format detection
+- **`extension` App-Type** — Manifest V3 browser extensions
+
+### Improved
+
+- **`faf init`** — fully-filled `.faf`, not sparse scaffold
+- **`faf git <url>`** — same pipeline as `faf auto`
+- **`exports` map** — bun consumers resolve cleanly (#73)
+- **Windows CI** — real test timeout on every invocation
+- **WJTTC spec-conformance** — `@faf/specification` corpus in isolated CI
+
+### Refactored
+
+- **`src/detect/assemble.ts`** — single source for fresh-.faf entry (init/auto/git)
+
+### Tests
+
+- **WJTTC spec-conformance tier** — ajv on fafm schema
+- **WJTTC re-tiering** — restored-tool BRAKE/ENGINE/AERO balance
+- **762 pass / 0 fail / 2461 expects** (was 716 at v6.7.1)
+
+### Internal
+
+- CI Node 22 default, matrix `['20','22','24']`
+- Dead `.husky/pre-commit` removed
+- README — cohort badges top, Home → faf.one/cli, Trophy badge
+- `docs/index.html` — 5-surface mirror
+- `CITATION.cff` — Context paper + Memory paper
+
+### Notes
+
+- 6.7.2 manifest bump folded into 6.8.0 — never published. Schema unchanged. Public API unchanged.
 
 ## [6.7.1] - 2026-05-17
 
