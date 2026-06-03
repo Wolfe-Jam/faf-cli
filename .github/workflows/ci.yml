@@ -31,7 +31,7 @@ jobs:
         run: npm audit --audit-level=moderate --omit=dev
 
       - name: Check for secrets
-        uses: trufflesecurity/trufflehog@c563a0692fa2017ff949d219cc9f586293d41e66
+        uses: trufflesecurity/trufflehog@d411fff7b8879a62509f3fa98c07f247ac089a51
         with:
           path: ./
           base: ${{ github.event.repository.default_branch }}
