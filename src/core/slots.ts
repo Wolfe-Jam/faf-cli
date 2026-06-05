@@ -161,6 +161,12 @@ export const APP_TYPE_CATEGORIES: Record<string, SlotCategory[]> = {
 
   // 9 slots — minimal (project meta + human only)
   documentation: ['project', 'human'],
+  // intent: the human-intent SEED type, produced by builder.faf.one — a human
+  // captures name/goal + the 6 Ws (no stack yet). Same 9 active slots as
+  // documentation, but named honestly: it is intent awaiting a stack. An AI that
+  // fills the stack re-types it to the real app_type (cli/mcp/frontend/…). Reads
+  // honestly even if abandoned ("intent captured, never built").
+  intent: ['project', 'human'],
   // encyclopedia: same shape as documentation — content repo with project
   // metadata + human context. Used by FAFipedia and similar curated-knowledge
   // surfaces. Per fafipedia-vs-grokipedia-architecture doctrine, this is the
