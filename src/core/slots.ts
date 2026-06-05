@@ -136,9 +136,10 @@ export function isPlaceholder(value: unknown): boolean {
   return false;
 }
 
-/** App-type to active category mapping. The canonical 22-type ladder —
+/** App-type to active category mapping. The canonical 23-type ladder —
  *  20 detectable apps + `about` (non-app, 0 slots, owner-attested)
- *  + `encyclopedia` (curated knowledge surface, FAFipedia and similar).
+ *  + `encyclopedia` (curated knowledge surface, FAFipedia and similar)
+ *  + `intent` (human-intent seed from builder.faf.one, not auto-detected).
  *  (See v6.6.md doctrine memory + fafipedia-vs-grokipedia-architecture.)
  *  Sorted ascending by active slot count for readability.
  *
