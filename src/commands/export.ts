@@ -4,6 +4,7 @@ import { writeCursorrules } from '../interop/cursorrules.js';
 import { writeGeminiMd } from '../interop/gemini.js';
 import { writeGrokConfig } from '../interop/grok.js';
 import { writeProjectHtml } from '../interop/projecthtml.js';
+import { writeServerCard } from '../interop/servercard.js';
 import { scoreFafYaml } from '../core/scorer.js';
 import { dim, fafCyan } from '../ui/colors.js';
 
@@ -14,6 +15,7 @@ export interface ExportOptions {
   grok?: boolean;
   conductor?: boolean;
   html?: boolean;
+  card?: boolean;
   all?: boolean;
 }
 
@@ -33,7 +35,8 @@ export function exportCommand(options: ExportOptions = {}): void {
       !options.gemini &&
       !options.grok &&
       !options.conductor &&
-      !options.html);
+      !options.html &&
+      !options.card);
 
   if (exportAll || options.agents) {
     writeAgentsMd(dir, data);
@@ -63,6 +66,15 @@ export function exportCommand(options: ExportOptions = {}): void {
     const result = scoreFafYaml(readFafRaw(fafPath));
     writeProjectHtml(dir, data, result, fafPath);
     console.log(`  project.html`);
+  }
+
+  // MCP Server Card. Explicit via --card, OR by default for server-card projects
+  // (app_type: server-card) on a plain export — the card carries the FAF
+  // context-block in _meta, so FAF context ships by default.
+  const isServerCard = data.app_type === 'server-card' || data.project?.type === 'server-card';
+  if (options.card || (exportAll && isServerCard)) {
+    const out = writeServerCard(dir, data);
+    console.log(`  ${out.replace(`${dir}/`, '')}`);
   }
 
   console.log(`${fafCyan('exported')} ${dim(`from ${fafPath}`)}`);
