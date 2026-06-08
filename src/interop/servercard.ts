@@ -1,4 +1,4 @@
-import { writeFileSync, mkdirSync } from 'fs';
+import { writeFileSync } from 'fs';
 import { join } from 'path';
 import type { FafData } from '../core/types.js';
 
@@ -99,16 +99,17 @@ export function generateServerCard(
   return card;
 }
 
-/** Write the Server Card to `.well-known/mcp/server-card`. Returns the path. */
+/** Write the Server Card to a `server-card` file. Returns the path.
+ *  Per experimental-ext-server-card#22 the reserved location is
+ *  `<streamable-http-url>/server-card` (no longer `.well-known`); serve the
+ *  emitted file there as `application/mcp-server-card+json`. */
 export function writeServerCard(
   dir: string,
   data: FafData,
   opts: ServerCardOptions = {},
 ): string {
   const card = generateServerCard(data, opts);
-  const outDir = join(dir, '.well-known', 'mcp');
-  mkdirSync(outDir, { recursive: true });
-  const out = join(outDir, 'server-card');
+  const out = join(dir, 'server-card');
   writeFileSync(out, JSON.stringify(card, null, 2) + '\n', 'utf-8');
   return out;
 }
