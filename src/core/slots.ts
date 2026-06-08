@@ -136,8 +136,8 @@ export function isPlaceholder(value: unknown): boolean {
   return false;
 }
 
-/** App-type to active category mapping. The canonical 23-type ladder —
- *  20 detectable apps + `about` (non-app, 0 slots, owner-attested)
+/** App-type to active category mapping. The canonical 24-type ladder —
+ *  21 detectable apps + `about` (non-app, 0 slots, owner-attested)
  *  + `encyclopedia` (curated knowledge surface, FAFipedia and similar)
  *  + `intent` (human-intent seed from builder.faf.one, not auto-detected).
  *  (See v6.6.md doctrine memory + fafipedia-vs-grokipedia-architecture.)
@@ -181,6 +181,12 @@ export const APP_TYPE_CATEGORIES: Record<string, SlotCategory[]> = {
   sdk: ['project', 'human', 'universal'],
   wasm: ['project', 'human', 'universal'],
   html: ['project', 'human', 'universal'],
+  // server-card: a published MCP Server Card (discovery manifest) — artifact-class
+  // like sdk/wasm/html. Identity + human context + build/ship matter; frontend,
+  // backend and DB are N/A. By design it carries the FAF context-block in the
+  // card's `_meta["one.faf/context"]` by default — so anyone generating a Server
+  // Card through FAF gets FAF context for free. See faf-server-card-ref.
+  'server-card': ['project', 'human', 'universal'],
 
   // 16 slots — project + frontend + human + universal
   frontend: ['project', 'frontend', 'human', 'universal'],

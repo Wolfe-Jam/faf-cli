@@ -115,6 +115,7 @@ program
   .option('--grok', 'Wire grok-faf-mcp into .grok/config.toml')
   .option('--conductor', 'Generate conductor config')
   .option('--html', 'Generate project.html (visual render of project.faf)')
+  .option('--card', 'Generate MCP Server Card (.well-known/mcp/server-card) with the FAF context-block')
   .option('--all', 'Generate all formats')
   .action((options) => exportCommand(options));
 
