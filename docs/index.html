@@ -246,10 +246,12 @@
 </head>
 <body>
   <div class="accent-line"></div>
+  <a href="https://github.com/Wolfe-Jam/faf-cli" id="versionBadge" target="_blank" rel="noopener"
+     style="position:fixed;top:16px;left:16px;z-index:9999;background:#ff6600;color:#000;font-size:0.85rem;font-weight:800;padding:4px 14px;border-radius:4px;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,0.3);">v6.8.0</a>
   <div class="container">
     <div class="logo">🍊</div>
     <h1>faf-cli</h1>
-    <div class="tagline">📦 The HTML Edition <span class="version-badge" onclick="showAbout()">v6.7.1</span></div>
+    <div class="tagline">📦 <span class="version-badge" onclick="showAbout()">The Relentless Edition</span></div>
     <div class="registry-line">Bun-native CLI · <code>npm i faf-cli</code> or <code>npm i faf</code> (dual-published)</div>
     <div class="squeeze">FAF defines. MD instructs. AI codes.</div>
 
@@ -300,7 +302,7 @@
     </div>
 
     <div class="bottom-bar">
-      <div class="links"><span class="version-badge" onclick="showAbout()" style="font-size:0.75rem;padding:3px 10px;">v6.7.1</span> &bull; <a href="https://github.com/Wolfe-Jam/faf-cli">GitHub</a> &bull; <a href="https://npmjs.com/package/faf-cli">npm</a> &bull; <a href="https://github.com/Wolfe-Jam/homebrew-faf">Homebrew</a> &bull; <a href="https://faf.one">faf.one</a></div>
+      <div class="links"><span class="version-badge" onclick="showAbout()" style="font-size:0.75rem;padding:3px 10px;">The Relentless Edition</span> &bull; <a href="https://github.com/Wolfe-Jam/faf-cli">GitHub</a> &bull; <a href="https://npmjs.com/package/faf-cli">npm</a> &bull; <a href="https://github.com/Wolfe-Jam/homebrew-faf">Homebrew</a> &bull; <a href="https://faf.one">faf.one</a></div>
       <div class="big-orange">Persistent AI Context Standard — IANA-registered <code>application/vnd.faf+yaml</code> 🍊</div>
       <div style="margin-top:0.5rem;font-size:0.75rem;"><a href="https://mcpaas.live/privacy" style="color:#666;text-decoration:none;">Privacy</a> · <a href="https://mcpaas.live/terms" style="color:#666;text-decoration:none;">Terms</a> · <a href="mailto:team@faf.one" style="color:#666;text-decoration:none;">team@faf.one</a></div>
       <div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid rgba(255,255,255,0.1);font-size:0.8rem;color:#fff;">Part of the <a href="https://faf.one" style="color:#ff6600;text-decoration:none;">FAF.one Family</a> · <a href="https://mcpaas.live" style="color:#888;text-decoration:none;">MCPaaS</a> · <a href="https://radiofaf.com" style="color:#888;text-decoration:none;">RadioFAF</a> · <a href="https://fafdev.tools" style="color:#888;text-decoration:none;">fafdev.tools</a></div>
@@ -308,8 +310,8 @@
   </div>
   <div class="about-overlay" id="aboutOverlay" onclick="if(event.target===this)hideAbout()">
     <div class="about-box">
-      <div class="about-version">v6.7.1</div>
-      <div class="about-title">The HTML Edition</div>
+      <div class="about-version">The Relentless Edition</div>
+      <div class="about-title">Persistent AI Context Standard</div>
       <div class="about-subtitle">Bun-native · Dual-published</div>
       <div class="about-items">
         <div class="about-item"><span>Runtime:</span> Bun-native CLI</div>
@@ -362,6 +364,7 @@
       document.getElementById('aboutOverlay').classList.remove('visible');
     }
     window.addEventListener('load', function() { setTimeout(function() { showAbout(true); }, 500); });
+    fetch('https://registry.npmjs.org/faf-cli/latest').then(r=>r.json()).then(d=>{if(d&&d.version)document.getElementById('versionBadge').textContent='v'+d.version;}).catch(()=>{});
   </script>
 </body>
 </html>
