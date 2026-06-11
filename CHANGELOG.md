@@ -8,6 +8,14 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+**Interop now enhances your files.** The same solid, structured `.faf` data is prefixed to the top of your context files for rapid AI consumption upfront — and your Markdown stays in the instruction lane.
+
+### Changed
+
+- **Non-destructive interop.** `faf export --agents/--gemini/--cursor` and `faf sync` now inject a structured `.faf` block at the top of AGENTS.md, CLAUDE.md, GEMINI.md, and .cursorrules and preserve everything you've written below. Re-runs update the block in place (idempotent); existing faf-generated files upgrade cleanly in one pass.
+
 ## [6.8.0] - 2026-05-30 — The Relentless Edition
 
 **Restored: Birth DNA, 6-W extractor, format-finder. Added: Grok interop, extension App-Type. One shared pipeline.**
