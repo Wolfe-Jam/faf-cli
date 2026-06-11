@@ -1,7 +1,7 @@
-import { writeFileSync } from 'fs';
 import { join } from 'path';
 import type { FafData } from '../core/types.js';
 import { fafMetaTag } from './claude.js';
+import { injectFafBlock } from './inject.js';
 
 /** Generate .cursorrules content from .faf data */
 export function generateCursorrules(data: FafData): string {
@@ -31,7 +31,7 @@ export function generateCursorrules(data: FafData): string {
   return lines.join('\n');
 }
 
-/** Write .cursorrules to a directory */
+/** Write .cursorrules — non-destructive: injects/updates the faf block (hash-comment markers), preserves the rest. */
 export function writeCursorrules(dir: string, data: FafData): void {
-  writeFileSync(join(dir, '.cursorrules'), generateCursorrules(data), 'utf-8');
+  injectFafBlock(join(dir, '.cursorrules'), generateCursorrules(data), '# faf:start', '# faf:end');
 }

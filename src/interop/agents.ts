@@ -1,7 +1,7 @@
-import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import type { FafData } from '../core/types.js';
 import { fafMetaTag } from './claude.js';
+import { injectFafBlock } from './inject.js';
 
 /** Generate AGENTS.md content from .faf data */
 export function generateAgentsMd(data: FafData): string {
@@ -47,7 +47,7 @@ export function generateAgentsMd(data: FafData): string {
   return lines.join('\n');
 }
 
-/** Write AGENTS.md to a directory */
+/** Write AGENTS.md — non-destructive: injects/updates the faf block, preserves the rest. */
 export function writeAgentsMd(dir: string, data: FafData): void {
-  writeFileSync(join(dir, 'AGENTS.md'), generateAgentsMd(data), 'utf-8');
+  injectFafBlock(join(dir, 'AGENTS.md'), generateAgentsMd(data));
 }
