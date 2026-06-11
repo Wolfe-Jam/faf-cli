@@ -10,6 +10,14 @@ export const FAF_START = '<!-- faf:start -->';
 export const FAF_END = '<!-- faf:end -->';
 
 /**
+ * faf's own metastamp fingerprint. Every faf-generated file begins with it
+ * (`<!-- faf: name | … -->`), and a user never hand-writes it. So a markerless
+ * file led by this fingerprint is legacy faf output we can safely reclaim —
+ * never genuine user content.
+ */
+const FAF_METASTAMP = '<!-- faf:';
+
+/**
  * Non-destructively write a faf-managed block into a file.
  *
  *   - file does not exist     → create it containing just the block
@@ -46,6 +54,14 @@ export function injectFafBlock(
     return;
   }
 
-  // 3. Existing file, no markers → prefix the block; preserve all existing content.
+  // 3. Legacy faf file — no markers, but led by faf's own metastamp fingerprint.
+  //    faf reclaims its own output (upgrade in place; no duplication). Only ever
+  //    triggers on content faf itself generated, never on hand-written files.
+  if (existing.trimStart().startsWith(FAF_METASTAMP)) {
+    writeFileSync(path, `${wrapped}\n`, 'utf-8');
+    return;
+  }
+
+  // 4. Genuine user file → prefix the block; preserve all existing content.
   writeFileSync(path, `${wrapped}\n\n${existing}`, 'utf-8');
 }

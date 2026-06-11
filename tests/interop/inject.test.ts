@@ -60,6 +60,27 @@ describe('injectFafBlock — non-destructive', () => {
     injectFafBlock(p, 'block');
     expect(readFileSync(p, 'utf-8')).toBe(once);
   });
+
+  test('legacy faf file (metastamp, no markers) → upgraded in place, no duplication', () => {
+    const p = join(tmp(), 'F.md');
+    // an old faf-generated file: led by the metastamp, no start/end markers
+    writeFileSync(p, '<!-- faf: demo | TS | lib | x -->\n\n# AGENTS.md — demo\nold faf body\n');
+    injectFafBlock(p, 'fresh block');
+    const out = readFileSync(p, 'utf-8');
+    expect(out).toContain('fresh block');
+    expect(out).not.toContain('old faf body');          // legacy faf content reclaimed
+    expect(out.split(FAF_START).length - 1).toBe(1);    // single block, no duplication
+    expect(out.trimStart().startsWith(FAF_START)).toBe(true);
+  });
+
+  test('user file WITHOUT the faf metastamp → prefixed + fully preserved (never reclaimed)', () => {
+    const p = join(tmp(), 'F.md');
+    writeFileSync(p, '# My own file\nUSER OWNED\n');     // no faf metastamp
+    injectFafBlock(p, 'block');
+    const out = readFileSync(p, 'utf-8');
+    expect(out).toContain('USER OWNED');                // preserved
+    expect(out.indexOf(FAF_START)).toBeLessThan(out.indexOf('USER OWNED'));
+  });
 });
 
 describe('interop writers — enhance, never replace', () => {
