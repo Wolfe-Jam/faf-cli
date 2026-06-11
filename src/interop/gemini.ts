@@ -1,7 +1,7 @@
-import { writeFileSync } from 'fs';
 import { join } from 'path';
 import type { FafData } from '../core/types.js';
 import { fafMetaTag } from './claude.js';
+import { injectFafBlock } from './inject.js';
 
 /** Generate GEMINI.md content from .faf data */
 export function generateGeminiMd(data: FafData): string {
@@ -32,7 +32,7 @@ export function generateGeminiMd(data: FafData): string {
   return lines.join('\n');
 }
 
-/** Write GEMINI.md to a directory */
+/** Write GEMINI.md — non-destructive: injects/updates the faf block, preserves the rest. */
 export function writeGeminiMd(dir: string, data: FafData): void {
-  writeFileSync(join(dir, 'GEMINI.md'), generateGeminiMd(data), 'utf-8');
+  injectFafBlock(join(dir, 'GEMINI.md'), generateGeminiMd(data));
 }

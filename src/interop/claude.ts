@@ -1,6 +1,7 @@
-import { readFileSync, writeFileSync, existsSync, statSync } from 'fs';
+import { readFileSync, existsSync, statSync } from 'fs';
 import { join } from 'path';
 import type { FafData } from '../core/types.js';
+import { injectFafBlock } from './inject.js';
 
 const CLAUDE_MD = 'CLAUDE.md';
 const SYNC_MARKER = 'STATUS: BI-SYNC ACTIVE';
@@ -12,10 +13,9 @@ export function readClaudeMd(dir: string): string | null {
   return readFileSync(path, 'utf-8');
 }
 
-/** Write CLAUDE.md with bi-sync footer */
+/** Write CLAUDE.md — non-destructive: injects/updates the faf block, preserves the rest. */
 export function writeClaudeMd(dir: string, content: string): void {
-  const path = join(dir, CLAUDE_MD);
-  writeFileSync(path, content, 'utf-8');
+  injectFafBlock(join(dir, CLAUDE_MD), content);
 }
 
 /** Get mtime of CLAUDE.md */

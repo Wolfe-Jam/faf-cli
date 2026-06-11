@@ -45,10 +45,10 @@ describe('interop/claude', () => {
     expect(parsed.project?.main_language).toBe('TypeScript');
   });
 
-  test('write and read CLAUDE.md', () => {
+  test('write and read CLAUDE.md (non-destructive: content lives in the faf block)', () => {
     writeClaudeMd(testDir, 'test content');
     const content = readClaudeMd(testDir);
-    expect(content).toBe('test content');
+    expect(content).toContain('test content');
   });
 
   test('readClaudeMd returns null when missing', () => {

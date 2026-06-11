@@ -138,13 +138,16 @@ describe('sync command — direction logic (auto / push / pull)', () => {
     expect(existsSync(join(testDir, 'CLAUDE.md'))).toBe(true);
   });
 
-  test('explicit push always writes CLAUDE.md from .faf', async () => {
+  test('explicit push regenerates the faf block from .faf, preserves user content', async () => {
     writeFaf(join(testDir, 'project.faf'), {
       faf_version: '2.5.0',
       project: { name: 'push-test' },
     });
-    // Pre-existing CLAUDE.md with stale content
-    writeFileSync(join(testDir, 'CLAUDE.md'), '# stale content\n');
+    // faf-managed CLAUDE.md: stale content INSIDE the block + user content OUTSIDE it
+    writeFileSync(
+      join(testDir, 'CLAUDE.md'),
+      '<!-- faf:start -->\nstale block content\n<!-- faf:end -->\n\n## My Notes\nKEEP THIS\n',
+    );
 
     const { syncCommand } = await import('../../src/commands/sync.js');
     const logSpy = spyOn(console, 'log').mockImplementation(() => {});
@@ -152,8 +155,9 @@ describe('sync command — direction logic (auto / push / pull)', () => {
     logSpy.mockRestore();
 
     const md = readFileSync(join(testDir, 'CLAUDE.md'), 'utf-8');
-    expect(md).toContain('push-test');
-    expect(md).not.toContain('stale content');
+    expect(md).toContain('push-test');          // fresh .faf pushed into the block
+    expect(md).not.toContain('stale block content'); // stale BLOCK content replaced
+    expect(md).toContain('KEEP THIS');          // user content preserved (non-destructive)
   });
 
   // v6.6.0+ Trophy gate: pull (MD → .faf) is Trophy-gated. Below 100%, the
@@ -257,7 +261,7 @@ describe('sync command — direction logic (auto / push / pull)', () => {
     expect(after.project?.goal).toBe('canonical goal phrasing');
   });
 
-  test('#63: auto sync always pushes — CLAUDE.md regenerated from .faf', async () => {
+  test('#63: auto sync always pushes — faf block regenerated from .faf, user content kept', async () => {
     writeFaf(join(testDir, 'project.faf'), {
       faf_version: '2.5.0',
       project: { name: 'src-of-truth', goal: 'the structured goal' },
@@ -266,20 +270,24 @@ describe('sync command — direction logic (auto / push / pull)', () => {
     const past = new Date(Date.now() - 60_000);
     utimesSync(join(testDir, 'project.faf'), past, past);
 
-    // Existing CLAUDE.md with stale content (newer mtime)
-    writeFileSync(join(testDir, 'CLAUDE.md'), '# CLAUDE.md — stale-name\n\n## What This Is\n\nstale prose\n');
+    // faf-managed CLAUDE.md (newer mtime): stale content INSIDE the block + user content OUTSIDE
+    writeFileSync(
+      join(testDir, 'CLAUDE.md'),
+      '<!-- faf:start -->\n# CLAUDE.md — stale-name\n\nstale prose\n<!-- faf:end -->\n\n## Team Notes\nKEEP THIS\n',
+    );
 
     const { syncCommand } = await import('../../src/commands/sync.js');
     const logSpy = spyOn(console, 'log').mockImplementation(() => {});
     syncCommand({ direction: 'auto' });
     logSpy.mockRestore();
 
-    // CLAUDE.md must reflect .faf (push), not its own previous content
+    // The faf block must reflect .faf (push), not its own previous content; user content stays
     const md = readFileSync(join(testDir, 'CLAUDE.md'), 'utf-8');
     expect(md).toContain('src-of-truth');
     expect(md).toContain('the structured goal');
-    expect(md).not.toContain('stale-name');
+    expect(md).not.toContain('stale-name');   // stale BLOCK content replaced
     expect(md).not.toContain('stale prose');
+    expect(md).toContain('KEEP THIS');         // user content preserved
   });
 
   // The legacy bootstrap path (`--pull`, MD → .faf) is preserved but
