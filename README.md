@@ -4,7 +4,7 @@
 <div style="display: flex; align-items: center; gap: 12px;">
   <img src="https://www.faf.one/orange-smiley.svg" alt="FAF" width="40" />
   <div>
-    <h1 style="margin: 0; color: #000000;">faf-cli — The Relentless Edition</h1>
+    <h1 style="margin: 0; color: #000000;">faf-cli — The Grounded Edition</h1>
     <p style="margin: 2px 0 0 0; font-size: 0.85em; letter-spacing: 0.12em; opacity: 0.7; text-transform: uppercase;"><strong>Persistent AI Context Standard</strong></p>
     <p style="margin: 6px 0 0 0;"><strong>Persistent Project Context for AI.</strong></p>
     <p style="margin: 0;"><strong>Define once. Run anywhere.</strong></p>
@@ -60,6 +60,16 @@ brew install faf-cli && faf   # Homebrew
 Run `faf` with no arguments:
 
 ![faf](./nelly.png)
+
+---
+
+## v6.9 — The Grounded Edition
+
+**Grounding becomes a first-class primitive: `faf bench` proves it, the 6Ws Interview single-sources it, `faf refresh` keeps it.**
+
+- **`faf bench`** — the AI-grounding benchmark. Cold vs with-faf, two numbers (answers right, tokens burned), and **the `.faf` is the answer key** — grading is mechanical, the receipt is a verifiable `✪` sha256. A low cold score is an alarm bell: you are hemorrhaging tokens and the AI is guessing at what you're building. `faf bench` → protocol, `faf bench questions` → hand them to any AI, `faf bench grade answers.json --cold|--faf` → the pair.
+- **The 6Ws Interview, exported** — the 8-question core (name + goal + the six Ws) plus the stack interview now ship as the public API (`SIX_WS_INTERVIEW`, `questionForSlot`, `interviewForMissing`). One registry; every consumer (CLI, MCPs, UIs) asks the same questions. Question drift is dead.
+- **`faf refresh`** — the re-ground: re-score the live `.faf`, measure drift vs the DNA baseline (`drift: 43% ↑ 55% (+12)`), keep an existing `.fafb` fast tier compiled current, record the journey. `drift → refresh → re-grounded`.
 
 ---
 

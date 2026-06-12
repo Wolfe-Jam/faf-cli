@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v6.8.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v6.9.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -10,11 +10,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-**Interop now enhances your files.** The same solid, structured `.faf` data is prefixed to the top of your context files for rapid AI consumption upfront — and your Markdown stays in the instruction lane.
+## [6.9.0] - 2026-06-12 — The Grounded Edition
 
-### Changed
+**Grounding becomes a first-class primitive: `faf bench` proves it, the 6Ws Interview single-sources it, `faf refresh` keeps it.**
 
-- **Non-destructive interop.** `faf export --agents/--gemini/--cursor` and `faf sync` now inject a structured `.faf` block at the top of AGENTS.md, CLAUDE.md, GEMINI.md, and .cursorrules and preserve everything you've written below. Re-runs update the block in place (idempotent); existing faf-generated files upgrade cleanly in one pass.
+### Added
+
+- **`faf bench` — the AI-grounding benchmark.** Measures the thing FAF sells, falsifiably: AI works better and faster WITH structured context. Two numbers, one harness — grounding accuracy (N project questions, cold vs with-faf) and grounding cost (reported tokens). The unfair advantage: **the `.faf` IS the answer key** — questions derive from the populated active slots (`slotignored` is never a quiz topic), grading is mechanical (normalize + versioned alias groups + significant-token containment), and the `✪` receipt is a third-party-verifiable sha256 over the run projection. Cold-only runs get the alarm framing — a low score means the AI needs context, never that it needs replacing — and every output ends in the prescription: `faf init && faf bench`. Surface: `faf bench` (protocol) · `bench questions [--json]` · `bench grade <answers.json> --cold|--faf [--tokens N] [--model M]`.
+- **The 6Ws Interview, exported — single source.** The canonical question registry (`core/interview.ts`) now ships on the public API: `SIX_WS_INTERVIEW` (the 8-Q core: name + goal + the six Ws, terse-label doctrine in every prompt), `STACK_INTERVIEW` (selects with escape hatches), `INTERVIEW_BY_PATH`, `questionForSlot()`, `interviewForMissing()`, `INTERVIEW_VERSION`. Consumers (claude-faf-mcp's `faf_go` and siblings) import it instead of reimplementing — question drift becomes impossible. `faf go` speaks the same voice.
+- **`faf refresh` — the re-ground primitive.** `drift → refresh → re-grounded`: re-reads and re-scores the live `.faf` (authoritative), measures the score-delta vs the DNA baseline (`drift: 43% ↑ 55% (+12)`), keeps an existing `.fafb` fast tier compiled current (never forces a binary on YAML-only projects), and records the re-score on the DNA journey. First refresh births the baseline so the ground always persists. Distinct from `faf drift` (mtime sync) and `faf score` (point-in-time). Grok-driven, root-banked — every surface (CLI, the MCPs' `refresh_faf`, SDKs) inherits this one implementation.
+
+### Fixed
+
+- **Enhanced interop — your files are enhanced, never replaced.** `faf export --agents/--gemini/--cursor` and `faf sync` overwrote AGENTS.md, CLAUDE.md, GEMINI.md, and .cursorrules wholesale — anything you'd written was lost. Now every write goes through a non-destructive injector: a structured `.faf` block owns the top of the file, everything below is preserved, re-runs update the block in place (idempotent), and existing faf-generated files upgrade cleanly in one pass. A build-failing write-guard makes the old behavior impossible to reintroduce.
 
 ## [6.8.0] - 2026-05-30 — The Relentless Edition
 
