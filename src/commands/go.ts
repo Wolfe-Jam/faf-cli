@@ -4,6 +4,7 @@ import { join } from 'path';
 import { findFafFile, readFaf, readFafRaw, writeFaf } from '../interop/faf.js';
 import { SLOTS } from '../core/slots.js';
 import { isPlaceholder } from '../core/slots.js';
+import { questionForSlot } from '../core/interview.js';
 import * as kernel from '../wasm/kernel.js';
 import { enrichScore } from '../core/scorer.js';
 import { displayScore } from '../ui/display.js';
@@ -94,7 +95,9 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
 
   for (let i = 0; i < slotsToProcess.length; i++) {
     const slot = slotsToProcess[i];
-    const answer = await ask(`  ${bold(`#${slot.index}`)} ${slot.description} ${dim(`(${slot.path})`)}: `);
+    // Interview voice from the single-source registry (core/interview.ts) —
+    // the same question CFM's faf_go and every other consumer asks.
+    const answer = await ask(`  ${bold(`#${slot.index}`)} ${questionForSlot(slot.path)} ${dim(`(${slot.path})`)}: `);
 
     if (answer.toLowerCase() === 'quit') {
       // Save session for resume

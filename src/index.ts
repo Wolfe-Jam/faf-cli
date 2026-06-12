@@ -23,4 +23,16 @@ export { findFafFile, readFaf, readFafRaw } from './interop/faf.js';
 // Single-source project.html renderer — consumers (faf-mcp etc.) MUST use
 // this, never reimplement, never copy (kills the divergent old display).
 export { generateProjectHtml, writeProjectHtml } from './interop/projecthtml.js';
+// Single-source 6Ws Interview — consumers (claude-faf-mcp's faf_go etc.) MUST
+// import this registry, never reimplement, never copy (kills question drift).
+export type { InterviewQuestion, InterviewOption } from './core/interview.js';
+export {
+  INTERVIEW,
+  SIX_WS_INTERVIEW,
+  STACK_INTERVIEW,
+  INTERVIEW_BY_PATH,
+  INTERVIEW_VERSION,
+  questionForSlot,
+  interviewForMissing,
+} from './core/interview.js';
 export * as kernel from './wasm/kernel.js';
