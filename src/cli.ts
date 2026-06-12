@@ -31,6 +31,7 @@ import { aiCommand } from './commands/ai.js';
 import { conductorCommand } from './commands/conductor.js';
 import { wjttcCommand } from './commands/wjttc.js';
 import { benchCommand } from './commands/bench.js';
+import { refreshCommand } from './commands/refresh.js';
 
 const { version: VERSION } = require('../package.json');
 
@@ -171,6 +172,12 @@ program
   .command('context')
   .description('Generate context output')
   .action(() => contextCommand());
+
+program
+  .command('refresh')
+  .description('Re-ground on the live .faf — re-score, measure drift vs the DNA baseline, keep .fafb current')
+  .option('--json', 'Output as JSON')
+  .action((options) => refreshCommand(options));
 
 program
   .command('drift')
