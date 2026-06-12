@@ -30,6 +30,7 @@ import { goCommand } from './commands/go.js';
 import { aiCommand } from './commands/ai.js';
 import { conductorCommand } from './commands/conductor.js';
 import { wjttcCommand } from './commands/wjttc.js';
+import { benchCommand } from './commands/bench.js';
 
 const { version: VERSION } = require('../package.json');
 
@@ -74,6 +75,17 @@ program
   .option('--status', 'Compact one-liner output')
   .option('--json', 'Output as JSON')
   .action((file, options) => scoreCommand(file, options));
+
+program
+  .command('bench [action] [answersFile]')
+  .description('AI-grounding benchmark — cold vs with-faf (the .faf is the answer key)')
+  .option('--json', 'Output as JSON')
+  .option('--cold', 'Grade as the without-context run')
+  .option('--faf', 'Grade as the with-context run')
+  .option('--tokens <n>', 'Tokens used in the run (reported by the agent)')
+  .option('--model <name>', 'Model that answered (reported)')
+  .option('--file <path>', 'Path to project.faf (default: discovered)')
+  .action((action, answersFile, options) => benchCommand(action, answersFile, options));
 
 program
   .command('show')

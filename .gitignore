@@ -148,3 +148,4 @@ GEMINI.md
 # Compile binary + sourcemap outputs (`bun run compile`)
 /faf
 /cli.js.map
+.faf-bench.json
