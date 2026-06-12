@@ -159,6 +159,21 @@ export function deriveQuestionSet(yaml: string): QuestionSet {
   return { version: BENCH_VERSION, qsetHash, questions, answers };
 }
 
+/**
+ * The answer-key-safe projection of a QuestionSet — version + qsetHash +
+ * questions, NEVER `answers`. Any "give me the questions" surface (MCP tools,
+ * UIs) MUST hand out THIS, not the raw QuestionSet: a tool that prints the
+ * answer key makes the benchmark a lie. The CLI's `bench questions` follows
+ * the same rule.
+ */
+export function publicQuestions(qset: QuestionSet): {
+  version: string;
+  qsetHash: string;
+  questions: BenchQuestion[];
+} {
+  return { version: qset.version, qsetHash: qset.qsetHash, questions: qset.questions };
+}
+
 export interface GradeResult {
   correct: number;
   total: number;
@@ -175,14 +190,14 @@ export function gradeAnswers(qset: QuestionSet, given: Record<string, string>): 
   return { correct: perQuestion.filter((r) => r.ok).length, total: qset.questions.length, misses, perQuestion };
 }
 
-interface RunRecord {
+export interface RunRecord {
   score: number;
   total: number;
   tokens?: number;
   model?: string;
 }
 
-interface BenchState {
+export interface BenchState {
   version: string;
   qsetHash: string;
   protocol: 'in-session';

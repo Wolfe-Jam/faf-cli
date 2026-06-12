@@ -36,6 +36,24 @@ export {
   questionForSlot,
   interviewForMissing,
 } from './core/interview.js';
+// Single-source bench engine (the grounding benchmark) — consumers compose
+// deriveQuestionSet/gradeAnswers/buildReceipt through the bridge (a future
+// faf_bench tool etc.); grading stays byte-identical across CLI and servers.
+// INTEGRITY: hand out publicQuestions(qset) — NEVER the raw QuestionSet's
+// `answers` (the answer key). The ✪ receipt (sha256 over a canonical
+// projection) is the same convention as parity (P3) and trust (P4).
+// CLI state-file I/O (.faf-bench.json) is deliberately NOT exported.
+export {
+  BENCH_VERSION,
+  deriveQuestionSet,
+  publicQuestions,
+  gradeAnswers,
+  buildReceipt,
+  normalizeAnswer,
+  answersMatch,
+  ALIAS_GROUPS,
+} from './commands/bench.js';
+export type { BenchQuestion, QuestionSet, GradeResult, BenchState, RunRecord } from './commands/bench.js';
 // Single-source Turbo-Cat (Format-finder) — ~200-format knowledge base.
 // Consumers (claude-faf-mcp/grok/faf-mcp faf_formats) compose these through
 // the bridge and DELETE their local hardcoded format maps. Contract: sourced-
