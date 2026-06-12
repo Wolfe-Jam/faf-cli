@@ -42,16 +42,63 @@ const SLOT_MAP: Record<string, [section: string, field: string]> = {
   cicd: ['stack', 'cicd'],
 };
 
+/** A format actually discovered on disk (config-file layer; real files only). */
+export interface DiscoveredFormat {
+  fileName: string;
+  /** Derived from the entry's primary slot family (deterministic — real
+   *  knowledge surfaced, not invented): package-manager, language, framework,
+   *  backend, database, ci-cd, hosting, build, … */
+  category: string;
+  priority: number;
+}
+
 export interface TurboCatResult {
   slotFills: Record<string, string>; // ContextSlots key → value (priority-wins)
   frameworks: string[];
   confirmedCount: number;
+  /** Option B (compose spec 2026-06-12): the per-format breakdown consumers
+   *  display — surfaced so MCPs can DELETE their local format maps entirely. */
+  discoveredFormats: DiscoveredFormat[];
+  /** Deterministic lowercase signature, e.g. "typescript-react" ('unknown-stack' when bare). */
+  stackSignature: string;
 }
 
 interface FoundFormat {
   slots: Record<string, string>;
   priority: number;
   frameworks: string[];
+  fileName?: string; // set for the config-file layer (real files on disk)
+}
+
+/** slot-family → display category (first match wins; deterministic). */
+const CATEGORY_BY_SLOT: Array<[slot: string, category: string]> = [
+  ['packageManager', 'package-manager'],
+  ['pkg_manager', 'package-manager'],
+  ['mainLanguage', 'language'],
+  ['main_language', 'language'],
+  ['framework', 'framework'],
+  ['backend', 'backend'],
+  ['database', 'database'],
+  ['db', 'database'],
+  ['cicd', 'ci-cd'],
+  ['hosting', 'hosting'],
+  ['buildTool', 'build'],
+  ['build_tool', 'build'],
+  ['build', 'build'],
+  ['runtime', 'runtime'],
+  ['cssFramework', 'css'],
+  ['css', 'css'],
+  ['uiLibrary', 'ui-library'],
+  ['stateManagement', 'state-management'],
+  ['apiType', 'api'],
+  ['api', 'api'],
+];
+
+function categoryFor(slots: Record<string, string>, frameworks: string[]): string {
+  for (const [slot, category] of CATEGORY_BY_SLOT) {
+    if (slot in slots) {return category;}
+  }
+  return frameworks.length > 0 ? 'framework' : 'config';
 }
 
 /** Layer 1A — config files, walking up to the monorepo .git boundary. */
@@ -68,7 +115,7 @@ function scanConfigFiles(projectDir: string): FoundFormat[] {
     }
     for (const f of files) {
       const k = KNOWLEDGE_BASE[f];
-      if (k) {found.push({ slots: (k.slots as Record<string, string>) || {}, priority: k.priority, frameworks: k.frameworks });}
+      if (k) {found.push({ slots: (k.slots as Record<string, string>) || {}, priority: k.priority, frameworks: k.frameworks, fileName: f });}
     }
     if (ownGit && i === 0) {break;}
     const parent = dirname(cur);
@@ -110,7 +157,30 @@ export function turboCatScan(projectDir: string): TurboCatResult {
       }
     }
   }
-  return { slotFills, frameworks: [...fw], confirmedCount: found.length };
+  // Per-format breakdown — real files only, deduped, deterministic order
+  // (priority desc, then name) regardless of filesystem enumeration order.
+  const seen = new Map<string, DiscoveredFormat>();
+  for (const item of found) {
+    if (!item.fileName) {continue;}
+    if (!seen.has(item.fileName)) {
+      seen.set(item.fileName, {
+        fileName: item.fileName,
+        category: categoryFor(item.slots, item.frameworks),
+        priority: item.priority,
+      });
+    }
+  }
+  const discoveredFormats = [...seen.values()].sort(
+    (a, b) => b.priority - a.priority || a.fileName.localeCompare(b.fileName),
+  );
+
+  // Deterministic stack signature: language + framework, lowercased, dash-joined.
+  const sigParts: string[] = [];
+  if (slotFills.mainLanguage) {sigParts.push(slotFills.mainLanguage.toLowerCase());}
+  if (slotFills.framework) {sigParts.push(slotFills.framework.toLowerCase());}
+  const stackSignature = sigParts.length > 0 ? sigParts.join('-') : 'unknown-stack';
+
+  return { slotFills, frameworks: [...fw], confirmedCount: found.length, discoveredFormats, stackSignature };
 }
 
 /** Turbo-Cat slot fills shaped as a v6 .faf partial ({ project, stack }) for fillEmpties. */

@@ -31,8 +31,15 @@ export {
   SIX_WS_INTERVIEW,
   STACK_INTERVIEW,
   INTERVIEW_BY_PATH,
+  INTERVIEW_PATHS,
   INTERVIEW_VERSION,
   questionForSlot,
   interviewForMissing,
 } from './core/interview.js';
+// Single-source Turbo-Cat (Format-finder) — ~200-format knowledge base.
+// Consumers (claude-faf-mcp/grok/faf-mcp faf_formats) compose these through
+// the bridge and DELETE their local hardcoded format maps. Contract: sourced-
+// only/no-guess, deterministic & order-independent, pure read.
+export { turboCatScan, turboCatSlots } from './detect/turbo-cat.js';
+export type { TurboCatResult, DiscoveredFormat } from './detect/turbo-cat.js';
 export * as kernel from './wasm/kernel.js';

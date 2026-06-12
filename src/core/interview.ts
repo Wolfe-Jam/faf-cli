@@ -211,6 +211,17 @@ export const INTERVIEW_BY_PATH = new Map<string, InterviewQuestion>(
 );
 
 /**
+ * Plain-object companion to INTERVIEW_BY_PATH. A Map JSON-serializes to `{}`,
+ * which reads as "the export shipped empty" to any consumer that crosses a
+ * serialization boundary (caught by the CFM compose handoff, 2026-06-12).
+ * Bridge consumers that serialize should use THIS; in-process consumers can
+ * use either.
+ */
+export const INTERVIEW_PATHS: Record<string, InterviewQuestion> = Object.fromEntries(
+  INTERVIEW.map((q) => [q.path, q]),
+);
+
+/**
  * Interview voice for ANY slot: the registry question when one exists,
  * otherwise derived from the slot's canonical description — so slot-driven
  * flows (faf go) and registry-driven flows (faf_go) speak the same language.
