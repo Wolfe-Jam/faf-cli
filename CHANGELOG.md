@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v6.10.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v6.10.1 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -9,6 +9,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [6.10.1] - 2026-06-12 — The Composed Edition
+
+### Fixed
+
+- **`manifest.json` asserts Chrome only when content proves it (a no-guess fix).** The knowledge-base entry asserted a full chrome-extension stack (framework, runtime, `mainLanguage: JavaScript`, hosting, apiType) from the filename alone — overriding real `.ts`/`tsconfig` evidence. `manifest.json` is overloaded (chrome extension / mcpb MCP manifest / PWA / plain config), so this was an inference, not sourced truth — and every FAF MCP ships an mcpb `manifest.json`, mis-detecting as a JavaScript Chrome Extension under `turboCatScan`. Now disambiguated by CONTENT: chrome asserts only when `manifest_version` is a number AND a chrome field is present (v2 and v3 both still detect); mcpb, PWA, ambiguous, and unreadable manifests assert nothing — an honest empty beats a guessed stack. Verified on the fleet: claude-faf-mcp / grok-faf-mcp / faf-mcp all detect `TypeScript`. Unblocks the MCP fleet's Turbo-Cat composition.
 
 ## [6.10.0] - 2026-06-12 — The Composed Edition
 
