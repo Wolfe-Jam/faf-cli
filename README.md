@@ -4,7 +4,7 @@
 <div style="display: flex; align-items: center; gap: 12px;">
   <img src="https://www.faf.one/orange-smiley.svg" alt="FAF" width="40" />
   <div>
-    <h1 style="margin: 0; color: #000000;">faf-cli — The Grounded Edition</h1>
+    <h1 style="margin: 0; color: #000000;">faf-cli — The Composed Edition</h1>
     <p style="margin: 2px 0 0 0; font-size: 0.85em; letter-spacing: 0.12em; opacity: 0.7; text-transform: uppercase;"><strong>Persistent AI Context Standard</strong></p>
     <p style="margin: 6px 0 0 0;"><strong>Persistent Project Context for AI.</strong></p>
     <p style="margin: 0;"><strong>Define once. Run anywhere.</strong></p>
@@ -60,6 +60,20 @@ brew install faf-cli && faf   # Homebrew
 Run `faf` with no arguments:
 
 ![faf](./nelly.png)
+
+---
+
+## v6.10 — The Composed Edition
+
+**Every FAF MCP composes single-source engines, never reimplements them.** Turbo-Cat (the ~200-format knowledge base) and the bench engine join the public API, alongside scoring and the 6Ws Interview:
+
+```ts
+import { turboCatScan, deriveQuestionSet, publicQuestions, gradeAnswers, buildReceipt } from 'faf-cli';
+```
+
+- **Turbo-Cat composed** — `turboCatScan` / `turboCatSlots`: per-format breakdown + stack signature, sourced-only, deterministic, pure read. The MCPs retire their hardcoded format maps.
+- **Bench composed** — derive questions from any `.faf` (the answer key stays server-side via `publicQuestions`), grade mechanically, emit the `✪` receipt. One grading engine, byte-identical everywhere.
+- **`✪` = one convention** — parity · trust · bench all emit sha256-over-canonical-projection receipts any third party can re-derive.
 
 ---
 

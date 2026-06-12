@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v6.9.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v6.10.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -9,6 +9,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [6.10.0] - 2026-06-12 — The Composed Edition
+
+**Every FAF MCP composes single-source engines, never reimplements them.** The bench engine and Turbo-Cat's ~200-format knowledge base join the public API — the third and fourth composed engines, alongside scoring and the 6Ws Interview.
+
+### Added
+
+- **Turbo-Cat exported (`turboCatScan` / `turboCatSlots` / `TurboCatResult` / `DiscoveredFormat`).** The real ~200-format knowledge base, composable through the bridge — so the MCPs DELETE their inferior hardcoded format maps (claude-faf-mcp's 25-entry copy first). `TurboCatResult` widened (additive) with `discoveredFormats` ({fileName, category, priority}[], real files only, deterministic order) and `stackSignature` — the MCP swap is a true drop-in with zero display regression. Contract semver-locked: sourced-only/no-guess (ambiguous npm/yarn/pnpm hints skipped; a stray `.tsx` asserts language, never React), deterministic & order-independent, pure read.
+- **The bench engine exported (`deriveQuestionSet` / `gradeAnswers` / `buildReceipt` / `normalizeAnswer` / `answersMatch` / `ALIAS_GROUPS` / `BENCH_VERSION` + types incl. promoted `BenchState`/`RunRecord`).** MCPs compose the grounding benchmark; grading stays byte-identical across CLI and every server. **`publicQuestions(qset)`** — the answer-key-safe projection: any "give me the questions" surface hands out THIS, never the raw `QuestionSet.answers` (a tool that prints the answer key makes the benchmark a lie). The `✪` receipt (sha256 over a canonical projection, third-party re-derivable) is now ONE convention across parity · trust · bench. CLI state-file I/O stays internal.
+- **`INTERVIEW_PATHS`** — plain-object companion to `INTERVIEW_BY_PATH`. A `Map` JSON-serializes to `{}`, which reads as "shipped empty" to serializing consumers; bridge consumers that cross a JSON boundary use the record.
+
+17 new contract tests (present + POPULATED on real fixtures, answer-key-not-leaked, deterministic grading, ✪ re-derivation, sourced-only, pure-read). No engine behavior changes — export + stabilize only.
 
 ## [6.9.0] - 2026-06-12 — The Grounded Edition
 
