@@ -11,7 +11,7 @@
  * Turbo-Cat fills only the slots still empty (esp. non-npm stacks).
  */
 
-import { existsSync, readdirSync } from 'fs';
+import { existsSync, readdirSync, readFileSync } from 'fs';
 import { join, dirname, extname, resolve } from 'path';
 import { KNOWLEDGE_BASE } from './turbo-cat-knowledge.js';
 
@@ -101,6 +101,33 @@ function categoryFor(slots: Record<string, string>, frameworks: string[]): strin
   return frameworks.length > 0 ? 'framework' : 'config';
 }
 
+/**
+ * `manifest.json` is one of the most overloaded filenames in software —
+ * Chrome/browser extension, mcpb/MCP manifest, PWA manifest, or plain config.
+ * Asserting a Chrome stack from the FILENAME is a guess, and sourced-only
+ * forbids guessing (every FAF MCP ships an mcpb manifest.json and was
+ * mis-detected as a JS Chrome Extension — the 2026-06-12 blocker).
+ *
+ * Disambiguate by CONTENT, or assert nothing:
+ *   chrome  — manifest_version is a NUMBER (2/3) AND a chrome field present
+ *             → the KB's chrome entry applies (as before)
+ *   mcpb    — manifest_version is a STRING ("0.x") or MCP fields present
+ *             → assert NOTHING (real evidence — .ts/tsconfig/deps — wins)
+ *   pwa     — start_url/display/icons → assert nothing
+ *   unknown/unreadable → assert NOTHING. An honest empty beats a guessed stack.
+ */
+function classifyManifestJson(filePath: string): 'chrome' | 'other' {
+  try {
+    const m = JSON.parse(readFileSync(filePath, 'utf-8')) as Record<string, unknown>;
+    const chromeField = ['background', 'content_scripts', 'action', 'browser_action', 'permissions']
+      .some((k) => k in m);
+    if (typeof m.manifest_version === 'number' && chromeField) {return 'chrome';}
+    return 'other'; // mcpb (string manifest_version / server / tools / display_name), PWA, or plain config
+  } catch {
+    return 'other'; // unreadable → assert nothing
+  }
+}
+
 /** Layer 1A — config files, walking up to the monorepo .git boundary. */
 function scanConfigFiles(projectDir: string): FoundFormat[] {
   const found: FoundFormat[] = [];
@@ -115,7 +142,11 @@ function scanConfigFiles(projectDir: string): FoundFormat[] {
     }
     for (const f of files) {
       const k = KNOWLEDGE_BASE[f];
-      if (k) {found.push({ slots: (k.slots as Record<string, string>) || {}, priority: k.priority, frameworks: k.frameworks, fileName: f });}
+      if (!k) {continue;}
+      // Sourced-only gate: manifest.json only asserts the chrome stack when
+      // its CONTENT proves a chrome extension; mcpb/PWA/unknown assert nothing.
+      if (f === 'manifest.json' && classifyManifestJson(join(cur, f)) !== 'chrome') {continue;}
+      found.push({ slots: (k.slots as Record<string, string>) || {}, priority: k.priority, frameworks: k.frameworks, fileName: f });
     }
     if (ownGit && i === 0) {break;}
     const parent = dirname(cur);
