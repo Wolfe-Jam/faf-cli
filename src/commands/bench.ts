@@ -277,6 +277,24 @@ export interface BenchOptions {
   tokens?: string;
   model?: string;
   file?: string;
+  submit?: boolean;
+  endpoint?: string;
+}
+
+const DEFAULT_BENCH_ENDPOINT = 'https://mcpaas.live/bench/submit';
+
+/** Fire-and-forget POST of a receipt to the public bench ledger. Never throws. */
+async function submitReceipt(receipt: Record<string, string>, endpoint: string): Promise<void> {
+  try {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(receipt),
+    });
+    console.log(dim(res.ok ? `  ✪ submitted to ${endpoint}` : `  submit failed (${res.status})`));
+  } catch {
+    console.log(dim('  submit skipped (endpoint unreachable)'));
+  }
 }
 
 export function benchCommand(action?: string, answersFile?: string, options: BenchOptions = {}): void {
@@ -345,6 +363,25 @@ export function benchCommand(action?: string, answersFile?: string, options: Ben
 
     // NEVER a lone low score: pair when both runs exist, alarm framing when cold-only.
     if (state.cold && state.faf) printPair(state, project);
+
+    // --submit: post the full-pair receipt to the public bench ledger (fire-and-forget).
+    if (options.submit && state.cold && state.faf) {
+      const c = state.cold;
+      const f = state.faf;
+      const r = buildReceipt(state);
+      void submitReceipt(
+        {
+          date: new Date().toISOString().slice(0, 10),
+          model: f.model ?? c.model ?? options.model ?? 'unreported',
+          repo: project,
+          qset: state.qsetHash,
+          cold: `${c.score}/${c.total}`,
+          faf: `${f.score}/${f.total}`,
+          sha256: r.hash.slice(0, 16),
+        },
+        options.endpoint ?? DEFAULT_BENCH_ENDPOINT
+      );
+    }
     else if (state.cold) printColdAlarm(state, project);
     else {
       // faf-run-only: fine to show alone (it's the with-context number).

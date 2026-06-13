@@ -86,6 +86,8 @@ program
   .option('--tokens <n>', 'Tokens used in the run (reported by the agent)')
   .option('--model <name>', 'Model that answered (reported)')
   .option('--file <path>', 'Path to project.faf (default: discovered)')
+  .option('--submit', 'Submit the full-pair receipt to the public bench ledger')
+  .option('--endpoint <url>', 'Override the submit endpoint')
   .action((action, answersFile, options) => benchCommand(action, answersFile, options));
 
 program
