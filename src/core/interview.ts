@@ -18,7 +18,7 @@
  * (3-4 words, hard cap <6) — a scannable spec card, not prose.
  */
 
-import { SLOTS, SLOT_BY_PATH } from './slots.js';
+import { SLOTS, SLOT_BY_PATH, isPlaceholder } from './slots.js';
 
 /** Bump when questions/options change — consumers can pin or report it. */
 export const INTERVIEW_VERSION = 'faf-interview/1';
@@ -307,6 +307,19 @@ const WHERE_SIGNALS: Array<[label: string, re: RegExp]> = [
 
 const seedIsGeneric = (s: string): boolean => GENERIC_SEED_BAN.has(s.toLowerCase().trim());
 
+// The 6Ws terse rule: 3-4 words, HARD CAP <6 (max 5) — generous enough for a
+// double-barrel name / compound term, never a sentence. Seeds obey it: take the
+// first ≤5 words, then trim any trailing connective/preposition so a cap never
+// leaves a dangling "with"/"and"/"the".
+const TERSE_TAIL = /^(?:with|and|or|using|for|to|that|who|whom|whose|the|a|an|in|on|of|via|by|&)$/i;
+function tersify(s: string, max = 5): string {
+  const words = s.trim().split(/\s+/).filter(Boolean).slice(0, max);
+  while (words.length && TERSE_TAIL.test(words[words.length - 1].replace(/[.,;:]+$/, ''))) {
+    words.pop();
+  }
+  return words.join(' ');
+}
+
 export interface GoalSeed {
   what?: string;
   where?: string;
@@ -329,9 +342,9 @@ export function seedSixWsFromGoal(goal: string): GoalSeed {
     .replace(/^[^A-Za-z0-9]+/, '')
     .split(/\s+(?:for|that|which|to)\s+|\s+[—–]\s+|\s-\s|:\s|\.\s|,\s/)[0]
     .trim();
-  const leadWords = lead.split(/\s+/).filter(Boolean);
-  if (leadWords.length >= 2 && leadWords.length <= 6 && !seedIsGeneric(lead)) {
-    seed.what = lead;
+  const whatTerse = tersify(lead);                       // 3-4 words, cap <6
+  if (whatTerse.split(/\s+/).filter(Boolean).length >= 2 && !seedIsGeneric(whatTerse)) {
+    seed.what = whatTerse;
   }
 
   // WHERE — every platform/registry/runtime literally named, deduped, terse.
@@ -344,10 +357,100 @@ export function seedSixWsFromGoal(goal: string): GoalSeed {
   // not the audience — too ambiguous to be a fact. Bare role-word (= generic)
   // dropped. Empty beats wrong; the human states the audience.
   const forAud = g.match(/\bfor ((?:[A-Za-z][\w./+-]* )?(?:any |all )?(?:developers?|teams?|engineers?|builders?|users?|integrators?)\b[^.,;:—]*)/i);
-  const whoCand = (forAud?.[1] || '').trim().replace(/\s+/g, ' ');
-  if (whoCand && !seedIsGeneric(whoCand)) {
-    seed.who = whoCand.length > 70 ? whoCand.slice(0, 70).trim() : whoCand;
+  const whoTerse = tersify((forAud?.[1] || '').trim().replace(/\s+/g, ' '));  // cap <6
+  if (whoTerse && !seedIsGeneric(whoTerse)) {
+    seed.who = whoTerse;
   }
 
   return seed;
+}
+
+// ── Table-of-8 (the 8Qs flow keystone) ───────────────────────────────────────
+//
+// The canonical approval table: the 8 questions in flow order, each with its
+// current value, a goal-seeded suggestion where a fact supports one, and a
+// status the consumer renders — filled (already in the .faf), seeded (proposed
+// from a fact, awaiting Tab/Enter approval), or empty (only the human knows).
+// Single-sources the seed→show→approve step so every surface shows the SAME
+// table. Nothing is committed here; the human approves, THEN the .faf is built.
+
+export type BoxStatus = 'filled' | 'seeded' | 'empty';
+
+export interface TableOf8Row {
+  n: number;            // 1-8, flow order
+  path: string;         // e.g. 'human_context.who'
+  header: string;       // e.g. 'Who'
+  question: string;     // the interview prompt
+  value: string;        // current value, or a seeded suggestion, or ''
+  status: BoxStatus;
+  seeded: boolean;      // true when value is a goal-fact suggestion (not yet in the .faf)
+}
+
+export interface TableOf8 {
+  version: string;
+  rows: TableOf8Row[];  // exactly 8
+  filledCount: number;
+  seededCount: number;
+  emptyCount: number;
+  complete: boolean;    // no empty rows
+}
+
+function valueAtPath(data: Record<string, unknown>, path: string): unknown {
+  let cur: unknown = data;
+  for (const part of path.split('.')) {
+    if (cur && typeof cur === 'object' && part in (cur as Record<string, unknown>)) {
+      cur = (cur as Record<string, unknown>)[part];
+    } else {
+      return undefined;
+    }
+  }
+  return cur;
+}
+
+/** A slot is "filled" only with a real value — not empty, not slotignored, not a placeholder. */
+function tableValueFilled(v: unknown): v is string {
+  if (typeof v !== 'string') return false;
+  const t = v.trim();
+  if (!t || t === 'slotignored') return false;
+  return !isPlaceholder(t);
+}
+
+/**
+ * Build the Table-of-8 from a .faf object (any/empty) + an optional goal. The
+ * goal seeds WHO/WHAT/WHERE via seedSixWsFromGoal (facts only); WHY/WHEN/HOW are
+ * never seeded. Rows the .faf already fills are 'filled'; goal-seeded ones are
+ * 'seeded' (suggestions); the rest are 'empty' (ask the human). Pure.
+ */
+export function buildTableOf8(
+  faf: Record<string, unknown>,
+  opts: { goal?: string } = {},
+): TableOf8 {
+  const data = faf && typeof faf === 'object' ? faf : {};
+  const fafGoal = valueAtPath(data, 'project.goal');
+  const goalVal = (tableValueFilled(fafGoal) ? String(fafGoal).trim() : '') || (opts.goal ?? '').trim();
+  const seed = seedSixWsFromGoal(goalVal);
+  const seedByPath: Record<string, string | undefined> = {
+    'project.goal': goalVal || undefined,
+    'human_context.what': seed.what,
+    'human_context.where': seed.where,
+    'human_context.who': seed.who,
+  };
+
+  const rows: TableOf8Row[] = SIX_WS_INTERVIEW.map((q, i) => {
+    const base = { n: i + 1, path: q.path, header: q.header, question: q.question };
+    const cur = valueAtPath(data, q.path);
+    if (tableValueFilled(cur)) {
+      return { ...base, value: String(cur).trim(), status: 'filled', seeded: false };
+    }
+    const s = seedByPath[q.path];
+    if (s) {
+      return { ...base, value: s, status: 'seeded', seeded: true };
+    }
+    return { ...base, value: '', status: 'empty', seeded: false };
+  });
+
+  const filledCount = rows.filter((r) => r.status === 'filled').length;
+  const seededCount = rows.filter((r) => r.status === 'seeded').length;
+  const emptyCount = rows.filter((r) => r.status === 'empty').length;
+  return { version: INTERVIEW_VERSION, rows, filledCount, seededCount, emptyCount, complete: emptyCount === 0 };
 }

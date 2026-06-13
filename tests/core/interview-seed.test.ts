@@ -52,6 +52,22 @@ describe('BRAKE — facts only, generic banned, empty beats wrong', () => {
     expect(seedSixWsFromGoal('Cloud platform for development teams')).toEqual({});
   });
 
+  test('B5 — seeded what/who obey the terse rule: <6 words, no dangling connective', () => {
+    const goals = [
+      'High-performance Rust CLI for Rust developers and xAI integrators who need fast compilation',
+      'Token-Optimized AI Chat for developers building AI apps with Next.js and Vercel',
+      'Universal .faf MCP server for software engineers using many different IDE tools daily',
+    ];
+    for (const goal of goals) {
+      const s = seedSixWsFromGoal(goal);
+      for (const v of [s.what, s.who]) {
+        if (!v) continue;
+        expect(v.split(/\s+/).filter(Boolean).length, `"${v}" <6 words`).toBeLessThan(6);
+        expect(/\b(?:with|and|or|using|for|to|that|the|of|by|via)$/i.test(v), `"${v}" dangling connective`).toBe(false);
+      }
+    }
+  });
+
   test('B3 — WHY/WHEN/HOW are NEVER seeded (the human/sourced slots)', () => {
     for (const [, goal] of FLEET) {
       const s = seedSixWsFromGoal(goal) as Record<string, unknown>;
