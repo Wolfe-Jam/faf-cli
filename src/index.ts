@@ -25,7 +25,7 @@ export { findFafFile, readFaf, readFafRaw } from './interop/faf.js';
 export { generateProjectHtml, writeProjectHtml } from './interop/projecthtml.js';
 // Single-source 6Ws Interview — consumers (claude-faf-mcp's faf_go etc.) MUST
 // import this registry, never reimplement, never copy (kills question drift).
-export type { InterviewQuestion, InterviewOption } from './core/interview.js';
+export type { InterviewQuestion, InterviewOption, GoalSeed } from './core/interview.js';
 export {
   INTERVIEW,
   SIX_WS_INTERVIEW,
@@ -35,6 +35,7 @@ export {
   INTERVIEW_VERSION,
   questionForSlot,
   interviewForMissing,
+  seedSixWsFromGoal,
 } from './core/interview.js';
 // Single-source bench engine (the grounding benchmark) — consumers compose
 // deriveQuestionSet/gradeAnswers/buildReceipt through the bridge (a future

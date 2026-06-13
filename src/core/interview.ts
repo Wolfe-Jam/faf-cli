@@ -257,3 +257,97 @@ export function interviewForMissing(
     return isEmpty(cur);
   });
 }
+
+// ── Goal-seed (the 8Qs flow) ─────────────────────────────────────────────────
+//
+// Box 2 (Goal, the one sentence) is the single generative input. seedSixWsFromGoal
+// extracts ONLY verbatim facts the goal LITERALLY contains — the project's own
+// words — never synthesis, inference, or defaults. What it can't pull from the
+// goal text, it leaves empty (the human fills it). Generic/template values are
+// banned even when matched. Output is a set of SUGGESTIONS for the Table-of-8;
+// the human approves before anything is built.
+//
+//   Facts only · generic banned · empty beats wrong.
+//
+// Seeds WHAT (the leading noun phrase), WHERE (named platforms/registries), and
+// WHO (a `for <audience>` clause) — the three a goal reliably states. WHY, WHEN,
+// HOW are NOT seeded: a goal rarely states them verbatim (why/when are the
+// human's; how is sourced by Turbo-Cat). Empirically tuned against the FAF fleet.
+
+/** Template slop — banned as a seed value even if literally matched. */
+const GENERIC_SEED_BAN = new Set([
+  'developers', 'development teams', 'development team', 'teams', 'development',
+  'cloud platform', 'web platform', 'platform', 'best practices',
+  'improve development efficiency', 'development efficiency',
+  'modern development practices', 'modern development', 'test-driven development',
+  'production/stable', 'production', 'stable', 'app', 'project', 'tool',
+]);
+
+/** Platforms / registries / runtimes — WHERE a project ships or runs. Canonical
+ *  label : the literal token that proves it (word-boundary, case-insensitive). */
+const WHERE_SIGNALS: Array<[label: string, re: RegExp]> = [
+  ['npm', /\bnpm\b/i],
+  ['PyPI', /\bpypi\b/i],
+  ['crates.io', /\bcrates\.io\b/i],
+  ['Homebrew', /\bhomebrew\b/i],
+  ['Docker', /\bdocker\b/i],
+  ['Cloudflare', /\bcloudflare\b/i],
+  ['Vercel', /\bvercel\b/i],
+  ['Netlify', /\bnetlify\b/i],
+  ['AWS', /\baws\b/i],
+  ['Cloud Run', /\bcloud run\b/i],
+  ['edge', /\bedge\b/i],
+  ['browser', /\bbrowser\b/i],
+  ['WASM', /\bwasm\b/i],
+  ['GitHub', /\bgithub\b/i],
+  ['MCP Registry', /\bmcp registry\b/i],
+  ['Chrome Web Store', /\bchrome web store\b/i],
+  ['Smithery', /\bsmithery\b/i],
+];
+
+const seedIsGeneric = (s: string): boolean => GENERIC_SEED_BAN.has(s.toLowerCase().trim());
+
+export interface GoalSeed {
+  what?: string;
+  where?: string;
+  who?: string;
+}
+
+/**
+ * Seed the human-context slots from the Goal sentence — verbatim facts only.
+ * Returns a partial { what?, where?, who? }; absent keys = "no fact, ask the
+ * human". Never returns why/when/how (not verbatim-extractable from a goal).
+ */
+export function seedSixWsFromGoal(goal: string): GoalSeed {
+  const seed: GoalSeed = {};
+  if (!goal || typeof goal !== 'string') return seed;
+  const g = goal.trim();
+
+  // WHAT — the leading noun phrase: drop a leading emoji/symbol, cut at the first
+  // structural delimiter, keep a clean 2-6 word verbatim phrase that isn't generic.
+  const lead = g
+    .replace(/^[^A-Za-z0-9]+/, '')
+    .split(/\s+(?:for|that|which|to)\s+|\s+[—–]\s+|\s-\s|:\s|\.\s|,\s/)[0]
+    .trim();
+  const leadWords = lead.split(/\s+/).filter(Boolean);
+  if (leadWords.length >= 2 && leadWords.length <= 6 && !seedIsGeneric(lead)) {
+    seed.what = lead;
+  }
+
+  // WHERE — every platform/registry/runtime literally named, deduped, terse.
+  const wheres = WHERE_SIGNALS.filter(([, re]) => re.test(g)).map(([label]) => label);
+  if (wheres.length) seed.where = wheres.slice(0, 4).join(', ');
+
+  // WHO — ONLY an explicit audience ROLE: `for developers/teams/engineers/…`,
+  // captured to the sentence boundary, qualifier kept. A bare `for <ProperNoun>`
+  // is NOT seeded: in a goal that names the TARGET it serves (the AI/tool/format),
+  // not the audience — too ambiguous to be a fact. Bare role-word (= generic)
+  // dropped. Empty beats wrong; the human states the audience.
+  const forAud = g.match(/\bfor ((?:[A-Za-z][\w./+-]* )?(?:any |all )?(?:developers?|teams?|engineers?|builders?|users?|integrators?)\b[^.,;:—]*)/i);
+  const whoCand = (forAud?.[1] || '').trim().replace(/\s+/g, ' ');
+  if (whoCand && !seedIsGeneric(whoCand)) {
+    seed.who = whoCand.length > 70 ? whoCand.slice(0, 70).trim() : whoCand;
+  }
+
+  return seed;
+}
