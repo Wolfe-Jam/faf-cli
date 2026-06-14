@@ -7,8 +7,10 @@ import type { FafData } from '../core/types.js';
  *
  * The card is a published discovery manifest. By design it carries the FAF
  * context-block in `_meta["one.faf/context"]` — so every Server Card produced
- * through FAF ships FAF context by default. The block is byte-identical to the
- * one in faf-server-card-ref and to `.fafa` provenance: one context, every door.
+ * through FAF ships FAF context by default. This emitter is the SINGLE SOURCE of
+ * the block — faf-server-card-ref and `.fafa` provenance compose it (never
+ * hand-roll), so every surface is byte-identical by construction: one context,
+ * one source, every door.
  *
  * Honest-first: no score is baked (it would go stale on disk); the block points
  * to the .faf and asserts the score is deterministic. The card omits `remotes`
@@ -16,10 +18,14 @@ import type { FafData } from '../core/types.js';
  */
 
 export interface ServerCardOptions {
-  /** Pointer to the .faf context (default: ./project.faf). */
+  /** Pointer to the .faf context (default: ./project.faf). Pass an absolute URL
+   *  for a remote/served card (e.g. faf-server-card-ref at context.faf.one). */
   fafPointer?: string;
   /** Optional live endpoint; adds a streamable-http remote when set. */
   remoteUrl?: string;
+  /** Optional "verify the score here" URL — makes verify-don't-trust actionable
+   *  (faf-server-card-ref uses https://faf.one). Omitted from the block if unset. */
+  scoreEndpoint?: string;
   /** Override timestamp (tests); otherwise .faf `generated`, else now. */
   now?: string;
 }
@@ -60,6 +66,27 @@ function clampDescription(data: FafData): string {
   return src.length <= 100 ? src : src.slice(0, 97).trimEnd() + '...';
 }
 
+/**
+ * The canonical FAF context-block — the value of `_meta["one.faf/context"]`,
+ * identical across every surface (Server Card, registry `server.json`, `.fafa`):
+ * one context, every door. Honest-first: no score baked (it would go stale on
+ * disk); it points to the .faf and asserts the score is deterministic.
+ */
+export function fafContextBlock(
+  data: FafData,
+  opts: ServerCardOptions = {},
+): Record<string, unknown> {
+  return {
+    faf: opts.fafPointer ?? './project.faf',
+    mediaType: MEDIA_TYPE,
+    iana: `https://www.iana.org/assignments/media-types/${MEDIA_TYPE}`,
+    deterministic: true,
+    ...(opts.scoreEndpoint ? { scoreEndpoint: opts.scoreEndpoint } : {}),
+    generated:
+      (data.generated as string | undefined) ?? opts.now ?? new Date().toISOString(),
+  };
+}
+
 /** Build the Server Card object from .faf data. */
 export function generateServerCard(
   data: FafData,
@@ -85,18 +112,47 @@ export function generateServerCard(
   }
 
   // The canonical FAF context-block — parity with faf-server-card-ref + .fafa.
-  card._meta = {
-    'one.faf/context': {
-      faf: opts.fafPointer ?? './project.faf',
-      mediaType: MEDIA_TYPE,
-      iana: `https://www.iana.org/assignments/media-types/${MEDIA_TYPE}`,
-      deterministic: true,
-      generated:
-        (data.generated as string | undefined) ?? opts.now ?? new Date().toISOString(),
-    },
-  };
+  card._meta = { 'one.faf/context': fafContextBlock(data, opts) };
 
   return card;
+}
+
+export const REGISTRY_PUBLISHER_KEY = 'io.modelcontextprotocol.registry/publisher-provided';
+const REGISTRY_META_CAP = 4096; // official registry cap on publisher-provided JSON (bytes)
+
+/**
+ * Build the `_meta` for an MCP Registry `server.json`.
+ *
+ * The SAME canonical context-block as the Server Card, but nested under
+ * `io.modelcontextprotocol.registry/publisher-provided` — the ONLY `_meta` key
+ * the official registry preserves on publish. Top-level keys (the way the card
+ * carries `one.faf/context`) are silently dropped by the registry. Throws if the
+ * block exceeds the registry's 4KB cap. Merge the result into an existing
+ * `server.json` `_meta`; don't regenerate the manifest (packages/mcpb are tuned).
+ */
+export function registryMeta(
+  data: FafData,
+  opts: ServerCardOptions = {},
+): Record<string, unknown> {
+  const provided = { 'one.faf/context': fafContextBlock(data, opts) };
+  const bytes = new TextEncoder().encode(JSON.stringify(provided)).length;
+  if (bytes > REGISTRY_META_CAP) {
+    throw new Error(
+      `publisher-provided _meta is ${bytes}B — exceeds the registry ${REGISTRY_META_CAP}B cap`,
+    );
+  }
+  return { [REGISTRY_PUBLISHER_KEY]: provided };
+}
+
+/** The canonical reverse-DNS registry name, e.g. `one.faf/claude-faf-mcp`.
+ *
+ *  HOMEPAGE REQUIRED: the namespace is derived from `project.homepage`'s host
+ *  (faf.one -> one.faf). With no homepage/website/url the namespace falls back
+ *  to `local/<name>`. This can't silently ship — the migration is guarded
+ *  (`rewrite-server-json.ts` refuses any name that isn't `one.faf/*`) — but set
+ *  `homepage: https://faf.one` in the .faf to get the correct `one.faf/<name>`. */
+export function registryName(data: FafData): string {
+  return serverName(data);
 }
 
 /** Write the Server Card to a `server-card` file. Returns the path.
