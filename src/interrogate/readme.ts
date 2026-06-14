@@ -9,8 +9,7 @@
 
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
-import type { ExtractedContext } from './types.js';
-import { isValidExtraction } from './types.js';
+import { type ExtractedContext, isValidExtraction } from './types.js';
 
 /** Strip badge / image lines + blank lines from the top of a README */
 function stripPreamble(content: string): string {
