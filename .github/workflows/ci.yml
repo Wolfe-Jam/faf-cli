@@ -139,7 +139,7 @@ jobs:
           npm pack --pack-destination "$TARBALL_DIR" >/dev/null
           TARBALL=$(ls "$TARBALL_DIR"/faf-cli-*.tgz | head -1)
           echo "::group::Tarball contents"
-          tar -tzf "$TARBALL" | head -20
+          tar -tzf "$TARBALL" | sed -n '1,20p'
           echo "::endgroup::"
           # Install globally from the tarball into a fresh prefix
           INSTALL_PREFIX=$(mktemp -d)
