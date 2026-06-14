@@ -7,8 +7,10 @@ import type { FafData } from '../core/types.js';
  *
  * The card is a published discovery manifest. By design it carries the FAF
  * context-block in `_meta["one.faf/context"]` — so every Server Card produced
- * through FAF ships FAF context by default. The block is byte-identical to the
- * one in faf-server-card-ref and to `.fafa` provenance: one context, every door.
+ * through FAF ships FAF context by default. This emitter is the SINGLE SOURCE of
+ * the block — faf-server-card-ref and `.fafa` provenance compose it (never
+ * hand-roll), so every surface is byte-identical by construction: one context,
+ * one source, every door.
  *
  * Honest-first: no score is baked (it would go stale on disk); the block points
  * to the .faf and asserts the score is deterministic. The card omits `remotes`
@@ -16,10 +18,14 @@ import type { FafData } from '../core/types.js';
  */
 
 export interface ServerCardOptions {
-  /** Pointer to the .faf context (default: ./project.faf). */
+  /** Pointer to the .faf context (default: ./project.faf). Pass an absolute URL
+   *  for a remote/served card (e.g. faf-server-card-ref at context.faf.one). */
   fafPointer?: string;
   /** Optional live endpoint; adds a streamable-http remote when set. */
   remoteUrl?: string;
+  /** Optional "verify the score here" URL — makes verify-don't-trust actionable
+   *  (faf-server-card-ref uses https://faf.one). Omitted from the block if unset. */
+  scoreEndpoint?: string;
   /** Override timestamp (tests); otherwise .faf `generated`, else now. */
   now?: string;
 }
@@ -75,6 +81,7 @@ export function fafContextBlock(
     mediaType: MEDIA_TYPE,
     iana: `https://www.iana.org/assignments/media-types/${MEDIA_TYPE}`,
     deterministic: true,
+    ...(opts.scoreEndpoint ? { scoreEndpoint: opts.scoreEndpoint } : {}),
     generated:
       (data.generated as string | undefined) ?? opts.now ?? new Date().toISOString(),
   };
@@ -137,7 +144,13 @@ export function registryMeta(
   return { [REGISTRY_PUBLISHER_KEY]: provided };
 }
 
-/** The canonical reverse-DNS registry name, e.g. `one.faf/claude-faf-mcp`. */
+/** The canonical reverse-DNS registry name, e.g. `one.faf/claude-faf-mcp`.
+ *
+ *  HOMEPAGE REQUIRED: the namespace is derived from `project.homepage`'s host
+ *  (faf.one -> one.faf). With no homepage/website/url the namespace falls back
+ *  to `local/<name>`. This can't silently ship — the migration is guarded
+ *  (`rewrite-server-json.ts` refuses any name that isn't `one.faf/*`) — but set
+ *  `homepage: https://faf.one` in the .faf to get the correct `one.faf/<name>`. */
 export function registryName(data: FafData): string {
   return serverName(data);
 }
