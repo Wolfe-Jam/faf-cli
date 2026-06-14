@@ -23,6 +23,19 @@ export { findFafFile, readFaf, readFafRaw } from './interop/faf.js';
 // Single-source project.html renderer — consumers (faf-mcp etc.) MUST use
 // this, never reimplement, never copy (kills the divergent old display).
 export { generateProjectHtml, writeProjectHtml } from './interop/projecthtml.js';
+// Single-source Server Card + registry `_meta` emitter — consumers (the 5 MCP
+// editions, CFM) MUST compose these, never hand-author the `one.faf/context`
+// block. `registryMeta` nests under publisher-provided (registry-safe);
+// `generateServerCard` is top-level (SEP-2127 card). One context, every door.
+export {
+  generateServerCard,
+  writeServerCard,
+  fafContextBlock,
+  registryMeta,
+  registryName,
+  REGISTRY_PUBLISHER_KEY,
+} from './interop/servercard.js';
+export type { ServerCardOptions } from './interop/servercard.js';
 // Single-source 6Ws Interview — consumers (claude-faf-mcp's faf_go etc.) MUST
 // import this registry, never reimplement, never copy (kills question drift).
 export type { InterviewQuestion, InterviewOption, GoalSeed, TableOf8, TableOf8Row, BoxStatus } from './core/interview.js';
