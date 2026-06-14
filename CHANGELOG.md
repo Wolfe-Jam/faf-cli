@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v6.10.1 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v6.11.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -9,6 +9,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [6.11.0] - 2026-06-13 — The Ledger Edition
+
+`faf bench --submit` posts your cold-vs-grounded receipt to the public ledger — the context bench goes public, one command.
+
+### Added
+
+- **`faf bench --submit`** — posts the full cold-vs-grounded pair receipt to the public bench ledger (`https://mcpaas.live/bench/submit`; `--endpoint <url>` to override). Fire-and-forget and opt-in: the grounding benchmark stops being a private number and becomes a shared, verifiable receipt (`BENCH_VERSION = faf-bench/1`).
+- **`relentlessContext` + `assembleFreshFaf` exported** from the public API — single-sources the seed/build path so consumers compose the relentless context assembly instead of reimplementing it.
+- **`buildTableOf8`** (interview) — the 8Qs-flow keystone: Name + Goal + 6Ws, with the goal seeding the 6W slots (terse, sourced from facts), shown as the Table-of-8 for approval before building.
 
 ## [6.10.1] - 2026-06-12 — The Composed Edition
 

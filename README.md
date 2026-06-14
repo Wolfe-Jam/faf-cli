@@ -4,7 +4,7 @@
 <div style="display: flex; align-items: center; gap: 12px;">
   <img src="https://www.faf.one/orange-smiley.svg" alt="FAF" width="40" />
   <div>
-    <h1 style="margin: 0; color: #000000;">faf-cli — The Composed Edition</h1>
+    <h1 style="margin: 0; color: #000000;">faf-cli — The Ledger Edition</h1>
     <p style="margin: 2px 0 0 0; font-size: 0.85em; letter-spacing: 0.12em; opacity: 0.7; text-transform: uppercase;"><strong>Persistent AI Context Standard</strong></p>
     <p style="margin: 6px 0 0 0;"><strong>Persistent Project Context for AI.</strong></p>
     <p style="margin: 0;"><strong>Define once. Run anywhere.</strong></p>
@@ -62,6 +62,16 @@ Run `faf` with no arguments:
 ![faf](./nelly.png)
 
 ---
+
+## v6.11 — The Ledger Edition
+
+**`faf bench --submit` posts your cold-vs-grounded receipt to the public ledger — the context bench goes public, one command.** Run the grounding benchmark, then submit the full pair receipt:
+
+```bash
+faf bench --submit
+```
+
+The benchmark stops being a private number and becomes a shared, verifiable receipt on the public ledger. Also new: `relentlessContext` / `assembleFreshFaf` and the `buildTableOf8` interview keystone join the public API.
 
 ## v6.10 — The Composed Edition
 
