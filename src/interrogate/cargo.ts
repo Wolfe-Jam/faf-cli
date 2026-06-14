@@ -8,8 +8,7 @@
 
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
-import type { ExtractedContext } from './types.js';
-import { isValidExtraction } from './types.js';
+import { type ExtractedContext, isValidExtraction } from './types.js';
 
 /** Parse a single TOML field from `[package]` table. Naive but adequate for
  *  description / authors / repository / license — fields that don't span

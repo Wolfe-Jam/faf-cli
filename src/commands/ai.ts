@@ -1,6 +1,5 @@
 import { findFafFile, readFaf, readFafRaw, writeFaf } from '../interop/faf.js';
-import { SLOTS } from '../core/slots.js';
-import { isPlaceholder } from '../core/slots.js';
+import { SLOTS, isPlaceholder } from '../core/slots.js';
 import * as kernel from '../wasm/kernel.js';
 import { enrichScore } from '../core/scorer.js';
 import { displayScore } from '../ui/display.js';

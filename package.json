@@ -25,7 +25,8 @@
   ],
   "scripts": {
     "dev": "bun src/cli.ts",
-    "build": "bun build src/cli.ts --outdir dist --target=node --minify --sourcemap=linked --external faf-scoring-kernel --external open && bun build src/index.ts --outdir dist --target=node --minify --sourcemap=linked --external faf-scoring-kernel --external open && tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist",
+    "build": "bun run clean && bun build src/cli.ts --outdir dist --target=node --minify --sourcemap=linked --external faf-scoring-kernel --external open && bun build src/index.ts --outdir dist --target=node --minify --sourcemap=linked --external faf-scoring-kernel --external open && tsc -p tsconfig.build.json",
     "compile": "bun build src/cli.ts --compile --bytecode --minify --outfile faf",
     "compile:all": "bun build src/cli.ts --compile --bytecode --minify --target=bun-darwin-arm64 --outfile faf-darwin-arm64 && bun build src/cli.ts --compile --bytecode --minify --target=bun-darwin-x64 --outfile faf-darwin-x64 && bun build src/cli.ts --compile --bytecode --minify --target=bun-linux-x64 --outfile faf-linux-x64 && bun build src/cli.ts --compile --bytecode --minify --target=bun-windows-x64 --outfile faf-windows-x64.exe",
     "test": "bun test --timeout=120000",
