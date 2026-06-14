@@ -221,10 +221,14 @@ function saveState(dir: string, state: BenchState): void {
   writeFileSync(join(dir, STATE_FILE), JSON.stringify(state, null, 2) + '\n', 'utf-8');
 }
 
-/** ✪ receipt — sha256 over the canonical projection; third-party verifiable. */
-export function buildReceipt(state: BenchState): { projection: string; hash: string } {
+/** ✪ receipt — sha256 over the canonical projection; third-party verifiable.
+ *  Includes `repo` so the receipt attests WHICH project was benched — two repos
+ *  that score identically on the same qset get distinct receipts (bench-only;
+ *  independent of the parity/trust score hash). */
+export function buildReceipt(state: BenchState, repo?: string): { projection: string; hash: string } {
   const projection = JSON.stringify({
     v: state.version,
+    repo: repo ?? null,
     qset: state.qsetHash,
     protocol: state.protocol,
     cold: state.cold ?? null,
@@ -247,7 +251,7 @@ function printPair(state: BenchState, project: string): void {
     console.log(`\n${dim(`The ${gap} missing answer${gap === 1 ? '' : 's'} were already in your repo — unstructured.`)}`);
     console.log(dim('Structured context closes the gap.'));
   }
-  const r = buildReceipt(state);
+  const r = buildReceipt(state, project);
   console.log(`\n${orange('✪ BENCH RECEIPT')}`);
   console.log(dim(`  qset: ${state.qsetHash}   protocol: ${state.protocol}   model: ${f.model ?? c.model ?? 'unreported'}`));
   console.log(dim(`  cold ${c.score}/${c.total} · faf ${f.score}/${f.total} · sha256: ${r.hash.slice(0, 16)}…`));
@@ -356,7 +360,7 @@ export function benchCommand(action?: string, answersFile?: string, options: Ben
     saveState(dir, state);
 
     if (options.json) {
-      const receipt = buildReceipt(state);
+      const receipt = buildReceipt(state, project);
       console.log(JSON.stringify({ ...state, receipt: receipt.hash, perQuestion: graded.perQuestion }, null, 2));
       return;
     }
@@ -368,7 +372,7 @@ export function benchCommand(action?: string, answersFile?: string, options: Ben
     if (options.submit && state.cold && state.faf) {
       const c = state.cold;
       const f = state.faf;
-      const r = buildReceipt(state);
+      const r = buildReceipt(state, project);
       void submitReceipt(
         {
           date: new Date().toISOString().slice(0, 10),
