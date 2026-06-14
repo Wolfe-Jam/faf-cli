@@ -45,6 +45,25 @@ describe('🛡️ server card generator', () => {
     expect(ctx.tier).toBeUndefined();
   });
 
+  test('scoreEndpoint: omitted when unset, present + before `generated` when set', () => {
+    const lean = (generateServerCard(faf) as any)._meta['one.faf/context'];
+    expect(lean.scoreEndpoint).toBeUndefined(); // rig stays lean
+    const ep = (generateServerCard(faf, { scoreEndpoint: 'https://faf.one' }) as any)._meta['one.faf/context'];
+    expect(ep.scoreEndpoint).toBe('https://faf.one');
+    const keys = Object.keys(ep);
+    expect(keys.indexOf('scoreEndpoint')).toBeLessThan(keys.indexOf('generated')); // byte-identity: order matters
+  });
+
+  test('ONE emitter produces the faf-server-card-ref form (absolute faf + scoreEndpoint)', () => {
+    const ctx = (generateServerCard(faf, {
+      fafPointer: 'https://context.faf.one/.well-known/project.faf',
+      scoreEndpoint: 'https://faf.one',
+    }) as any)._meta['one.faf/context'];
+    expect(ctx.faf).toBe('https://context.faf.one/.well-known/project.faf'); // absolute, for a served card
+    expect(ctx.scoreEndpoint).toBe('https://faf.one');
+    expect(ctx.deterministic).toBe(true); // single source, both doors
+  });
+
   test('homepage derives a reverse-DNS namespace', () => {
     const c = generateServerCard({ project: { name: 'context', homepage: 'https://faf.one' } });
     expect(c.name).toBe('one.faf/context');
