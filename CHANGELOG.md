@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v6.11.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v6.12.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -9,6 +9,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [6.12.0] - 2026-06-15 — The Single-Source Edition
+
+faf-cli is now the single source for the registry `_meta` — it emits the `one.faf/context` block every FAF MCP server composes: `registryMeta`/`registryName`/`fafContextBlock`, one deterministic projection, byte-identical, end-to-end across every surface, verifiable by sha, re-derivable instantly on-demand.
+
+### Added
+
+- **Registry-nested `_meta` emitter — `registryMeta` / `registryName` / `REGISTRY_PUBLISHER_KEY` / `fafContextBlock`** (exported from the public API via `src/interop/servercard.ts`). `registryMeta(faf)` nests the canonical `one.faf/context` block under the registry's only preserved key (`io.modelcontextprotocol.registry/publisher-provided`) and enforces its 4 KB cap (throws past it); `registryName(faf)` derives the reverse-DNS `one.faf/<name>` from `project.homepage` (falls back to `local/<name>`, so an un-homepaged server can't squat the namespace). Honest-first — the block is `{ faf, mediaType, iana, deterministic, [scoreEndpoint], generated }`, **no baked score**. Every FAF MCP server now composes ONE block from faf-cli (the Truth) instead of hand-rolling drift-prone `_meta`: the single source behind the `one.faf` migration.
+- **`scoreEndpoint` option + the served-card form** — one emitter produces both the lean rig block and the `faf-server-card-ref` block (absolute faf pointer + `scoreEndpoint`), byte-identical and single-sourced (validated against the live card-ref schema).
+
+### Changed
+
+- **Docs: "Anthropic-approved" → "Anthropic-merged" (#2759)** — corrected at the source (`project.faf` 'what' slot), so it propagates to `package.json` and `CLAUDE.md`; accurate to the merged claude-faf-mcp PR.
+- **`SECURITY.md`** — evergreen refresh.
+
+Deterministic build (clean `dist`, zero duplicate-import warnings). Interop coverage for the single-source block: nested-not-top-level, no-baked-score, 4 KB-cap refusal, byte-identity (card ↔ registry), `scoreEndpoint` ordering.
 
 ## [6.11.0] - 2026-06-13 — The Ledger Edition
 

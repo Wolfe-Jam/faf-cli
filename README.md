@@ -4,7 +4,7 @@
 <div style="display: flex; align-items: center; gap: 12px;">
   <img src="https://www.faf.one/orange-smiley.svg" alt="FAF" width="40" />
   <div>
-    <h1 style="margin: 0; color: #000000;">faf-cli — The Ledger Edition</h1>
+    <h1 style="margin: 0; color: #000000;">faf-cli — The Single-Source Edition</h1>
     <p style="margin: 2px 0 0 0; font-size: 0.85em; letter-spacing: 0.12em; opacity: 0.7; text-transform: uppercase;"><strong>Persistent AI Context Standard</strong></p>
     <p style="margin: 6px 0 0 0;"><strong>Persistent Project Context for AI.</strong></p>
     <p style="margin: 0;"><strong>Define once. Run anywhere.</strong></p>
@@ -60,6 +60,21 @@ brew install faf-cli && faf   # Homebrew
 Run `faf` with no arguments:
 
 ![faf](./nelly.png)
+
+---
+
+## v6.12 — The Single-Source Edition
+
+**faf-cli is now the single source for the registry `_meta`** — it emits the `one.faf/context` block every FAF MCP server composes: `registryMeta`/`registryName`/`fafContextBlock`, one deterministic projection, byte-identical, end-to-end across every surface, verifiable by sha, re-derivable instantly on-demand.
+
+```ts
+import { registryMeta, registryName } from 'faf-cli';
+
+serverJson.name  = registryName(faf);   // → one.faf/<name>, derived from project.homepage
+serverJson._meta = registryMeta(faf);   // nests one.faf/context under publisher-provided (4 KB cap)
+```
+
+Honest-first: the block carries `{ faf, mediaType, iana, deterministic, generated }` — **no baked score**. One emitter, every door, byte-identical.
 
 ---
 
@@ -164,9 +179,9 @@ v6 is a ground-up rewrite. All-in on Bun — same toolchain as Claude Code.
 | **Language** | TypeScript | TypeScript |
 | **Compile** | Bun bytecode | `bun build --compile` |
 
-408 tests in ~13s. 296KB bundle in 2.4s. Single portable binary, 4 platforms. npx backward-compatible.
+880 tests in ~18s. 296KB bundle in 2.4s. Single portable binary, 4 platforms. npx backward-compatible.
 
-26 commands. 408 tests. WJTTC-tested. 93% smaller than v5.
+32 commands. 880 tests. WJTTC-tested. 93% smaller than v5.
 
 ```
 commands → interop → core → wasm
@@ -286,7 +301,7 @@ src/
 > **Robust. Reliable. Next-level WJTTC tested.** — The Foundation Edition.
 
 ```bash
-bun test                       # 408 tests, 42 files, ~13s
+bun test                       # 880 tests, 75 files, ~18s
 ```
 
 - **WJTTC Build Resilience** (13) — every regression class locked.
