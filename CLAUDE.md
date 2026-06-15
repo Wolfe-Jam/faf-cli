@@ -15,7 +15,7 @@ CLI for the `.faf` format — persistent AI context that versions with your code
 ## Context
 
 - **Who:** Developers and teams using AI coding assistants
-- **What:** Persistent AI Context Standard — project DNA for AI. IANA-registered. Anthropic-approved.
+- **What:** Persistent AI Context Standard — project DNA for AI. IANA-registered. Anthropic-merged.
 - **Why:** Eliminates 91% context re-discovery tax — define once, AI remembers forever
 - **Where:** npm registry, Homebrew, GitHub
 - **When:** Production since September 2025, v6.0 March 2026
