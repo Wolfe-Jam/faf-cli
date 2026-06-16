@@ -186,11 +186,14 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   },
   
   'pubspec.yaml': {
-    frameworks: ['Flutter', 'Dart'],
-    slots: { 
+    // Filename-only FALLBACK: assert Dart + pub, NOT Flutter — a pubspec backs
+    // Flutter apps, pure-Dart CLIs/packages/servers, and MCP servers alike.
+    // turbo-cat.ts reads the CONTENT (detectDartProject) and adds the framework
+    // (Flutter / Dart Frog / …) when the deps actually prove it.
+    frameworks: ['Dart'],
+    slots: {
       packageManager: 'pub',
-      mainLanguage: 'Dart',
-      framework: 'Flutter'
+      mainLanguage: 'Dart'
     },
     priority: 35,
     intelligence: 'ultra-high'

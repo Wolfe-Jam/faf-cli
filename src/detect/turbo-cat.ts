@@ -14,6 +14,7 @@
 import { existsSync, readdirSync, readFileSync } from 'fs';
 import { join, dirname, extname, resolve } from 'path';
 import { KNOWLEDGE_BASE } from './turbo-cat-knowledge.js';
+import { detectDartProject } from './dart.js';
 
 const IGNORE = new Set([
   'node_modules', '.git', 'dist', 'build', 'venv', '.venv', '__pycache__',
@@ -146,6 +147,25 @@ function scanConfigFiles(projectDir: string): FoundFormat[] {
       // Sourced-only gate: manifest.json only asserts the chrome stack when
       // its CONTENT proves a chrome extension; mcpb/PWA/unknown assert nothing.
       if (f === 'manifest.json' && classifyManifestJson(join(cur, f)) !== 'chrome') {continue;}
+      // Content-aware: pubspec.yaml backs Flutter apps, Dart CLIs/packages,
+      // servers, and MCP servers — branch by deps instead of asserting Flutter
+      // for everything (the filename-only flattening this engine used to do).
+      if (f === 'pubspec.yaml') {
+        const dp = detectDartProject(cur);
+        if (dp) {
+          const slots: Record<string, string> = { mainLanguage: 'Dart', packageManager: 'pub' };
+          if (dp.isFlutter) {
+            slots.framework = 'Flutter';
+            if (dp.stateManagement) {slots.stateManagement = dp.stateManagement;}
+          } else if (dp.appType === 'backend' && dp.framework) {
+            slots.backend = dp.framework;
+          } else if (dp.appType === 'mcp') {
+            slots.apiType = 'MCP';
+          }
+          found.push({ slots, priority: k.priority, frameworks: dp.isFlutter ? ['Flutter', 'Dart'] : ['Dart'], fileName: f });
+          continue;
+        }
+      }
       found.push({ slots: (k.slots as Record<string, string>) || {}, priority: k.priority, frameworks: k.frameworks, fileName: f });
     }
     if (ownGit && i === 0) {break;}

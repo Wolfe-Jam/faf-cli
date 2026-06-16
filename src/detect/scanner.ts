@@ -2,6 +2,7 @@ import { existsSync, readFileSync, readdirSync } from 'fs';
 import { join } from 'path';
 import type { DetectedFramework, Signal } from '../core/types.js';
 import { FRAMEWORKS } from './frameworks.js';
+import { detectDartProject } from './dart.js';
 
 interface PackageJson {
   name?: string;
@@ -113,7 +114,8 @@ function detectDataScienceSignal(dir: string): string | null {
   return null;
 }
 
-/** Mobile platform signal (React Native / Expo / Capacitor / Ionic / Flutter / native dirs). */
+/** Mobile platform signal — JS mobile (React Native / Expo / Capacitor / Ionic)
+ *  + native ios/android dirs. Flutter/Dart is handled by detectDartProject. */
 function detectMobileSignal(dir: string, pkg: PackageJson | null): string | null {
   const mobileDeps = ['react-native', 'expo', '@capacitor/core', '@ionic/core'];
   if (pkg) {
@@ -123,7 +125,6 @@ function detectMobileSignal(dir: string, pkg: PackageJson | null): string | null
       }
     }
   }
-  if (existsSync(join(dir, 'pubspec.yaml'))) return 'pubspec.yaml (Flutter)';
   if (existsSync(join(dir, 'ios')) && existsSync(join(dir, 'android'))) {
     return 'ios/ + android/ dirs';
   }
@@ -336,6 +337,7 @@ export function detectLanguage(dir: string): string {
   if (existsSync(join(dir, 'pom.xml')) || existsSync(join(dir, 'build.gradle'))) return 'Java';
   if (existsSync(join(dir, 'Package.swift'))) return 'Swift';
   if (existsSync(join(dir, 'build.zig'))) return 'Zig';
+  if (existsSync(join(dir, 'pubspec.yaml'))) return 'Dart';
 
   // Fallback to JS if package.json exists
   if (pkg) return 'JavaScript';
@@ -414,7 +416,17 @@ export function detectProjectTypeWithRationale(dir: string): ProjectTypeDetectio
     return { type: 'wasm', found };
   }
 
-  // ─── 7. mobile — mobile platform deps / native dirs ─────────────────────
+  // ─── 7. dart/flutter — content-aware pubspec classification. The same
+  //        manifest backs Flutter apps, Dart CLIs, packages, servers, and MCP
+  //        servers — branch by deps (Flutter→mobile, Dart MCP→mcp, Dart
+  //        server→backend, CLI→cli, package→library). Unambiguous Dart. ──────
+  const dart = detectDartProject(dir);
+  if (dart) {
+    found.push(dart.found);
+    return { type: dart.appType, found };
+  }
+
+  // ─── 7b. mobile — JS mobile platform deps / native dirs ─────────────────
   const mobileSignal = detectMobileSignal(dir, pkg);
   if (mobileSignal) {
     found.push(mobileSignal);
@@ -562,11 +574,13 @@ export function detectRuntime(dir: string): string {
   if (readPackageJson(dir)) return 'Node.js';
   if (existsSync(join(dir, 'Cargo.toml'))) return 'Rust';
   if (existsSync(join(dir, 'go.mod'))) return 'Go';
+  if (existsSync(join(dir, 'pubspec.yaml'))) return 'Dart';
   return 'Unknown';
 }
 
 /** Detect package manager */
 export function detectPackageManager(dir: string): string {
+  if (existsSync(join(dir, 'pubspec.yaml'))) return 'pub';
   if (existsSync(join(dir, 'bun.lockb')) || existsSync(join(dir, 'bun.lock'))) return 'bun';
   if (existsSync(join(dir, 'pnpm-lock.yaml'))) return 'pnpm';
   if (existsSync(join(dir, 'yarn.lock'))) return 'yarn';
