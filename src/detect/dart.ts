@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, readdirSync } from 'fs';
 import { join } from 'path';
+import spec from './dart-detection.json';
 
 /**
  * Dart/Flutter detection — CONTENT-AWARE pubspec classification.
@@ -31,32 +32,14 @@ export interface DartProject {
   found: string;
 }
 
-/** MCP-server deps (the on-brand special case — a Dart MCP server is `mcp`, not mobile). */
-const MCP_DEPS = ['dart_mcp', 'mcp_server', 'mcp_dart', 'dart_mcp_server', 'mcp'];
-
-/** Server frameworks → [dependency, display name]. Order = priority. */
-const SERVER_FRAMEWORKS: Array<[dep: string, name: string]> = [
-  ['serverpod', 'Serverpod'],
-  ['dart_frog', 'Dart Frog'],
-  ['conduit', 'Conduit'],
-  ['angel3_framework', 'Angel3'],
-  ['alfred', 'Alfred'],
-  ['shelf', 'Shelf'],
-];
-
-/** State management → [dependency, display name]. Order = priority (2026: Riverpod default). */
-const STATE_MGMT: Array<[dep: string, name: string]> = [
-  ['flutter_riverpod', 'Riverpod'],
-  ['hooks_riverpod', 'Riverpod'],
-  ['riverpod', 'Riverpod'],
-  ['flutter_bloc', 'Bloc'],
-  ['bloc', 'Bloc'],
-  ['provider', 'Provider'],
-  ['get', 'GetX'],
-  ['flutter_mobx', 'MobX'],
-  ['mobx', 'MobX'],
-  ['signals', 'Signals'],
-];
+// Detection KNOWLEDGE is sourced from dart-detection.json — the single,
+// language-neutral spec faf-cli imports and faf-python-sdk vendors (A+B hybrid).
+// Bolster Dart/Flutter by editing that JSON; every engine inherits it.
+const FLUTTER_DEPS = spec.flutterDeps as string[];
+const MCP_DEPS = spec.mcpDeps as string[];
+const SERVER_FRAMEWORKS = spec.serverFrameworks as Array<[string, string]>;
+const STATE_MGMT = spec.stateManagement as Array<[string, string]>;
+const ROUTING = spec.routing as Array<[string, string]>;
 
 /** Collect dependency names from a pubspec's dependencies / dev_dependencies sections. */
 function pubspecDeps(content: string): Set<string> {
@@ -92,13 +75,14 @@ export function detectDartProject(dir: string): DartProject | null {
   const has = (d: string) => deps.has(d.toLowerCase());
 
   // Flutter: the `flutter` SDK dep, a top-level `flutter:` section, or `sdk: flutter`.
-  const isFlutter = has('flutter') || /^flutter:\s*$/m.test(content) || /\bsdk:\s*flutter\b/.test(content);
+  const isFlutter = FLUTTER_DEPS.some(has) || /^flutter:\s*$/m.test(content) || /\bsdk:\s*flutter\b/.test(content);
 
   const mcpDep = MCP_DEPS.find(has);
   const server = SERVER_FRAMEWORKS.find(([d]) => has(d));
   const stateEntry = STATE_MGMT.find(([d]) => has(d));
   const stateManagement = stateEntry ? stateEntry[1] : '';
-  const routing = has('go_router') ? 'go_router' : has('auto_route') ? 'auto_route' : '';
+  const routeEntry = ROUTING.find(([d]) => has(d));
+  const routing = routeEntry ? routeEntry[1] : '';
   const testing = has('flutter_test') ? 'flutter_test' : has('test') ? 'test' : '';
 
   // CLI: a top-level `executables:` section, or bin/*.dart entry points.

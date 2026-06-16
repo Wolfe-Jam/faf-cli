@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "_doc": "SINGLE SOURCE of Dart/Flutter detection KNOWLEDGE (A+B hybrid, the Truth-is-faf-cli spec). faf-cli imports this directly; faf-python-sdk vendors a synced copy (phase 2); MCPs consume the SDK (phase 3). To bolster Dart/Flutter support — a new state library, server framework, MCP dep — edit THIS file and every engine inherits it. The thin per-language LOGIC (pubspec parse, app-vs-package heuristic, priority branching) lives in code, not here.",
+  "flutterDeps": ["flutter"],
+  "mcpDeps": ["dart_mcp", "mcp_server", "mcp_dart", "dart_mcp_server", "mcp"],
+  "serverFrameworks": [
+    ["serverpod", "Serverpod"],
+    ["dart_frog", "Dart Frog"],
+    ["conduit", "Conduit"],
+    ["angel3_framework", "Angel3"],
+    ["alfred", "Alfred"],
+    ["shelf", "Shelf"]
+  ],
+  "stateManagement": [
+    ["flutter_riverpod", "Riverpod"],
+    ["hooks_riverpod", "Riverpod"],
+    ["riverpod", "Riverpod"],
+    ["flutter_bloc", "Bloc"],
+    ["bloc", "Bloc"],
+    ["provider", "Provider"],
+    ["get", "GetX"],
+    ["flutter_mobx", "MobX"],
+    ["mobx", "MobX"],
+    ["signals", "Signals"]
+  ],
+  "routing": [
+    ["go_router", "go_router"],
+    ["auto_route", "auto_route"]
+  ]
+}

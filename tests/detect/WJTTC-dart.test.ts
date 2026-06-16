@@ -30,6 +30,7 @@ import {
 } from '../../src/detect/scanner.js';
 import { detectStack } from '../../src/detect/stack.js';
 import { turboCatSlots } from '../../src/detect/turbo-cat.js';
+import dartSpec from '../../src/detect/dart-detection.json';
 
 let dir: string;
 
@@ -346,5 +347,25 @@ dependency_overrides:
   meta: ^1.0.0
 `);
     expect(detectDartProject(dir)?.appType).toBe('library');
+  });
+});
+
+// ============================================================
+// SPEC — dart-detection.json is the single source (A+B hybrid)
+// ============================================================
+describe('WJTTC SPEC: dart-detection.json single source', () => {
+  test('exposes the knowledge keys, non-empty', () => {
+    expect(Array.isArray(dartSpec.flutterDeps) && dartSpec.flutterDeps.length > 0).toBe(true);
+    expect(dartSpec.mcpDeps).toContain('dart_mcp');
+    expect(dartSpec.serverFrameworks.some((e) => e[0] === 'dart_frog')).toBe(true);
+    expect(dartSpec.stateManagement.some((e) => e[1] === 'Riverpod')).toBe(true);
+    expect(dartSpec.routing.some((e) => e[0] === 'go_router')).toBe(true);
+  });
+
+  test('detection is spec-driven (a spec entry classifies)', () => {
+    // serverpod lives in the spec → must classify as backend/Serverpod
+    pubspec('name: api\ndependencies:\n  serverpod: ^2.0.0\n');
+    expect(detectDartProject(dir)?.framework).toBe('Serverpod');
+    expect(dartSpec.serverFrameworks.some((e) => e[1] === 'Serverpod')).toBe(true);
   });
 });
