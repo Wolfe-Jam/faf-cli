@@ -114,9 +114,17 @@ export function detectDartProject(dir: string): DartProject | null {
   let found: string;
 
   if (isFlutter) {
-    appType = 'mobile';
     framework = 'Flutter';
-    found = 'pubspec.yaml (Flutter app)';
+    // App vs package: an app has lib/main.dart (the entry) or `publish_to: none`;
+    // a reusable Flutter package has neither — it's publishable, lib/ exports only.
+    const isApp = existsSync(join(dir, 'lib', 'main.dart')) || /^publish_to:\s*['"]?none\b/m.test(content);
+    if (isApp) {
+      appType = 'mobile';
+      found = 'pubspec.yaml (Flutter app)';
+    } else {
+      appType = 'library';
+      found = 'pubspec.yaml (Flutter package)';
+    }
   } else if (mcpDep) {
     appType = 'mcp';
     found = `pubspec.yaml + ${mcpDep} (Dart MCP server)`;

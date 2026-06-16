@@ -128,10 +128,18 @@ describe('WJTTC ENGINE: mobile type', () => {
     expect(r.type).toBe('mobile');
   });
 
-  test('Flutter pubspec.yaml → mobile', () => {
+  test('Flutter app (pubspec + lib/main.dart) → mobile', () => {
     writeFileSync(join(dir, 'pubspec.yaml'), 'name: test_app\nflutter:\n  uses-material-design: true\n');
+    mkdirSync(join(dir, 'lib'), { recursive: true });
+    writeFileSync(join(dir, 'lib', 'main.dart'), 'void main() {}');
     const r = detectProjectTypeWithRationale(dir);
     expect(r.type).toBe('mobile');
+  });
+
+  test('Flutter package (pubspec, no app entry) → library', () => {
+    writeFileSync(join(dir, 'pubspec.yaml'), 'name: my_widgets\ndependencies:\n  flutter:\n    sdk: flutter\n');
+    const r = detectProjectTypeWithRationale(dir);
+    expect(r.type).toBe('library');
   });
 
   test('ios/ + android/ dirs → mobile', () => {
