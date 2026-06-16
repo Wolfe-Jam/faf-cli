@@ -1,0 +1,310 @@
+{
+  "version": 1,
+  "_doc": "SHARED cross-language parity fixtures for Dart/Flutter detection (A+B hybrid). faf-cli (tests/detect/dart-parity.test.ts) and faf-python-sdk (tests/test_dart_parity.py) run THIS SAME file: identical input pubspecs -> identical expected classification. The expected values are the faf-cli (TypeScript) Truth; the Python detector must reproduce them byte-for-byte. A byte-identical copy is vendored to faf-python-sdk/tests/dart_parity_fixtures.json via faf-python-sdk/scripts/sync-dart-spec.sh. If the two engines ever diverge, one suite goes red. Edit fixtures HERE (faf-cli, the Truth), then re-sync. 'files' maps a relative path to its content ('' = empty file, parent dirs created). 'expected' is the full DartProject projection.",
+  "fixtures": [
+    {
+      "name": "flutter-app-canonical (main.dart + riverpod + go_router + flutter_test)",
+      "files": {
+        "pubspec.yaml": "name: my_app\ndependencies:\n  flutter:\n    sdk: flutter\n  flutter_riverpod: ^2.5.0\n  go_router: ^14.0.0\ndev_dependencies:\n  flutter_test:\n    sdk: flutter\n",
+        "lib/main.dart": ""
+      },
+      "expected": {
+        "appType": "mobile",
+        "isFlutter": true,
+        "framework": "Flutter",
+        "stateManagement": "Riverpod",
+        "routing": "go_router",
+        "testing": "flutter_test",
+        "found": "pubspec.yaml (Flutter app)"
+      }
+    },
+    {
+      "name": "flutter-app-publish-none (no main.dart, bloc)",
+      "files": {
+        "pubspec.yaml": "name: my_app\npublish_to: none\ndependencies:\n  flutter:\n    sdk: flutter\n  flutter_bloc: ^8.1.0\n"
+      },
+      "expected": {
+        "appType": "mobile",
+        "isFlutter": true,
+        "framework": "Flutter",
+        "stateManagement": "Bloc",
+        "routing": "",
+        "testing": "",
+        "found": "pubspec.yaml (Flutter app)"
+      }
+    },
+    {
+      "name": "flutter-package (flutter dep, publishable, provider)",
+      "files": {
+        "pubspec.yaml": "name: my_widgets\ndependencies:\n  flutter:\n    sdk: flutter\n  provider: ^6.1.0\n"
+      },
+      "expected": {
+        "appType": "library",
+        "isFlutter": true,
+        "framework": "Flutter",
+        "stateManagement": "Provider",
+        "routing": "",
+        "testing": "",
+        "found": "pubspec.yaml (Flutter package)"
+      }
+    },
+    {
+      "name": "flutter-section-only (top-level flutter:, no flutter dep)",
+      "files": {
+        "pubspec.yaml": "name: theme_pack\ndependencies:\n  collection: ^1.18.0\nflutter:\n  uses-material-design: true\n"
+      },
+      "expected": {
+        "appType": "library",
+        "isFlutter": true,
+        "framework": "Flutter",
+        "stateManagement": "",
+        "routing": "",
+        "testing": "",
+        "found": "pubspec.yaml (Flutter package)"
+      }
+    },
+    {
+      "name": "flutter-app-getx-autoroute (publish_to none, get + auto_route)",
+      "files": {
+        "pubspec.yaml": "name: shop_app\npublish_to: none\ndependencies:\n  flutter:\n    sdk: flutter\n  get: ^4.6.0\n  auto_route: ^9.0.0\n"
+      },
+      "expected": {
+        "appType": "mobile",
+        "isFlutter": true,
+        "framework": "Flutter",
+        "stateManagement": "GetX",
+        "routing": "auto_route",
+        "testing": "",
+        "found": "pubspec.yaml (Flutter app)"
+      }
+    },
+    {
+      "name": "flutter-app-bloc-precedence (flutter_bloc beats provider)",
+      "files": {
+        "pubspec.yaml": "name: my_app\ndependencies:\n  flutter:\n    sdk: flutter\n  provider: ^6.1.0\n  flutter_bloc: ^8.1.0\ndev_dependencies:\n  flutter_test:\n    sdk: flutter\n",
+        "lib/main.dart": ""
+      },
+      "expected": {
+        "appType": "mobile",
+        "isFlutter": true,
+        "framework": "Flutter",
+        "stateManagement": "Bloc",
+        "routing": "",
+        "testing": "flutter_test",
+        "found": "pubspec.yaml (Flutter app)"
+      }
+    },
+    {
+      "name": "flutter-app-mobx (flutter_mobx beats mobx)",
+      "files": {
+        "pubspec.yaml": "name: my_app\ndependencies:\n  flutter:\n    sdk: flutter\n  flutter_mobx: ^2.2.0\n  mobx: ^2.3.0\n",
+        "lib/main.dart": ""
+      },
+      "expected": {
+        "appType": "mobile",
+        "isFlutter": true,
+        "framework": "Flutter",
+        "stateManagement": "MobX",
+        "routing": "",
+        "testing": "",
+        "found": "pubspec.yaml (Flutter app)"
+      }
+    },
+    {
+      "name": "dart-mcp-server (dart_mcp)",
+      "files": {
+        "pubspec.yaml": "name: my_mcp\ndependencies:\n  dart_mcp: ^0.2.0\n"
+      },
+      "expected": {
+        "appType": "mcp",
+        "isFlutter": false,
+        "framework": "",
+        "stateManagement": "",
+        "routing": "",
+        "testing": "",
+        "found": "pubspec.yaml + dart_mcp (Dart MCP server)"
+      }
+    },
+    {
+      "name": "dart-mcp-server (mcp_server)",
+      "files": {
+        "pubspec.yaml": "name: my_mcp\ndependencies:\n  mcp_server: ^0.1.0\n"
+      },
+      "expected": {
+        "appType": "mcp",
+        "isFlutter": false,
+        "framework": "",
+        "stateManagement": "",
+        "routing": "",
+        "testing": "",
+        "found": "pubspec.yaml + mcp_server (Dart MCP server)"
+      }
+    },
+    {
+      "name": "dart-mcp-server (generic mcp)",
+      "files": {
+        "pubspec.yaml": "name: my_mcp\ndependencies:\n  mcp: ^0.1.0\n"
+      },
+      "expected": {
+        "appType": "mcp",
+        "isFlutter": false,
+        "framework": "",
+        "stateManagement": "",
+        "routing": "",
+        "testing": "",
+        "found": "pubspec.yaml + mcp (Dart MCP server)"
+      }
+    },
+    {
+      "name": "flutter-beats-mcp (Flutter app that deps mcp -> still mobile)",
+      "files": {
+        "pubspec.yaml": "name: my_app\npublish_to: none\ndependencies:\n  flutter:\n    sdk: flutter\n  mcp: ^0.1.0\n"
+      },
+      "expected": {
+        "appType": "mobile",
+        "isFlutter": true,
+        "framework": "Flutter",
+        "stateManagement": "",
+        "routing": "",
+        "testing": "",
+        "found": "pubspec.yaml (Flutter app)"
+      }
+    },
+    {
+      "name": "dart-backend-serverpod",
+      "files": {
+        "pubspec.yaml": "name: my_api\ndependencies:\n  serverpod: ^2.1.0\n"
+      },
+      "expected": {
+        "appType": "backend",
+        "isFlutter": false,
+        "framework": "Serverpod",
+        "stateManagement": "",
+        "routing": "",
+        "testing": "",
+        "found": "pubspec.yaml + serverpod (Dart backend)"
+      }
+    },
+    {
+      "name": "dart-backend-dartfrog-precedence (dart_frog beats shelf)",
+      "files": {
+        "pubspec.yaml": "name: my_api\ndependencies:\n  dart_frog: ^1.1.0\n  shelf: ^1.4.0\n"
+      },
+      "expected": {
+        "appType": "backend",
+        "isFlutter": false,
+        "framework": "Dart Frog",
+        "stateManagement": "",
+        "routing": "",
+        "testing": "",
+        "found": "pubspec.yaml + dart_frog (Dart backend)"
+      }
+    },
+    {
+      "name": "dart-backend-shelf (shelf_router is noise)",
+      "files": {
+        "pubspec.yaml": "name: my_api\ndependencies:\n  shelf: ^1.4.0\n  shelf_router: ^1.1.0\n"
+      },
+      "expected": {
+        "appType": "backend",
+        "isFlutter": false,
+        "framework": "Shelf",
+        "stateManagement": "",
+        "routing": "",
+        "testing": "",
+        "found": "pubspec.yaml + shelf (Dart backend)"
+      }
+    },
+    {
+      "name": "dart-cli-executables",
+      "files": {
+        "pubspec.yaml": "name: mytool\nexecutables:\n  mytool:\ndependencies:\n  args: ^2.5.0\n"
+      },
+      "expected": {
+        "appType": "cli",
+        "isFlutter": false,
+        "framework": "",
+        "stateManagement": "",
+        "routing": "",
+        "testing": "",
+        "found": "pubspec.yaml executables: (Dart CLI)"
+      }
+    },
+    {
+      "name": "dart-cli-bin (bin/*.dart entry, no executables:)",
+      "files": {
+        "pubspec.yaml": "name: mytool\ndependencies:\n  args: ^2.5.0\n",
+        "bin/mytool.dart": ""
+      },
+      "expected": {
+        "appType": "cli",
+        "isFlutter": false,
+        "framework": "",
+        "stateManagement": "",
+        "routing": "",
+        "testing": "",
+        "found": "pubspec.yaml + bin/*.dart (Dart CLI)"
+      }
+    },
+    {
+      "name": "dart-library-plain",
+      "files": {
+        "pubspec.yaml": "name: my_package\ndependencies:\n  meta: ^1.12.0\n"
+      },
+      "expected": {
+        "appType": "library",
+        "isFlutter": false,
+        "framework": "",
+        "stateManagement": "",
+        "routing": "",
+        "testing": "",
+        "found": "pubspec.yaml (Dart package)"
+      }
+    },
+    {
+      "name": "dart-library-with-test (test dev_dep)",
+      "files": {
+        "pubspec.yaml": "name: my_package\ndev_dependencies:\n  test: ^1.25.0\n"
+      },
+      "expected": {
+        "appType": "library",
+        "isFlutter": false,
+        "framework": "",
+        "stateManagement": "",
+        "routing": "",
+        "testing": "test",
+        "found": "pubspec.yaml (Dart package)"
+      }
+    },
+    {
+      "name": "dart-library-dependency-overrides-noise",
+      "files": {
+        "pubspec.yaml": "name: my_package\ndependencies:\n  collection: ^1.18.0\ndependency_overrides:\n  meta: ^1.0.0\n"
+      },
+      "expected": {
+        "appType": "library",
+        "isFlutter": false,
+        "framework": "",
+        "stateManagement": "",
+        "routing": "",
+        "testing": "",
+        "found": "pubspec.yaml (Dart package)"
+      }
+    },
+    {
+      "name": "mcp-beats-cli (dart_mcp dep + executables -> mcp)",
+      "files": {
+        "pubspec.yaml": "name: my_mcp\nexecutables:\n  my_mcp:\ndependencies:\n  dart_mcp: ^0.2.0\n"
+      },
+      "expected": {
+        "appType": "mcp",
+        "isFlutter": false,
+        "framework": "",
+        "stateManagement": "",
+        "routing": "",
+        "testing": "",
+        "found": "pubspec.yaml + dart_mcp (Dart MCP server)"
+      }
+    }
+  ]
+}
