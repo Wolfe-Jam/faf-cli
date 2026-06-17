@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v6.12.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v6.13.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -9,6 +9,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [6.13.0] - 2026-06-17 — The Dart Edition
+
+faf now understands Dart and Flutter projects.
+
+Content-aware `pubspec.yaml` classification — Flutter app vs reusable package · Dart server (Serverpod / Dart Frog / Shelf) / CLI / MCP — pure Dart stays Dart. The single-source engine faf-python-sdk and the MCPs compose, parity-tested across languages.
+
+### Added
+- Content-aware Dart/Flutter detection: `faf auto` reads `pubspec.yaml` and classifies it — Flutter app vs reusable package, Dart server (Serverpod / Dart Frog / Shelf), Dart CLI, Dart MCP server, or library.
+- `src/detect/dart.ts` (content-aware classifier) + `src/detect/dart-detection.json` (single-source detection-knowledge spec; faf-python-sdk vendors a synced copy, the MCPs compose it).
+- WJTTC Dart/Flutter suite + cross-language parity fixtures (`tests/detect/dart-parity-fixtures.json`) — faf-cli and faf-python-sdk run the same 20 fixtures, byte-identical results.
+
+### Changed
+- Turbo-Cat `pubspec.yaml` handling was filename-only (it flattened every pubspec to "Flutter"); now content-aware via the shared spec.
+
+### Fixed
+- A pure-Dart package / CLI / server is no longer misclassified as Flutter (the filename-flattening bug).
 
 ## [6.12.0] - 2026-06-15 — The Single-Source Edition
 

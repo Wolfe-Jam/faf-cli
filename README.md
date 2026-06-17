@@ -63,6 +63,18 @@ Run `faf` with no arguments:
 
 ---
 
+## v6.13 — The Dart Edition
+
+**faf now understands Dart and Flutter projects.** Content-aware `pubspec.yaml` classification — Flutter app vs reusable package · Dart server (Serverpod / Dart Frog / Shelf) / CLI / MCP — pure Dart stays Dart. The single-source engine faf-python-sdk and the MCPs compose, parity-tested across languages.
+
+```bash
+faf auto    # reads pubspec.yaml → Dart/Flutter into project.faf
+```
+
+A pubspec alone no longer means "Flutter": `faf` reads the dependencies and classifies — a Flutter app, a reusable package, a Dart server, a CLI, or a Dart MCP server. The detection knowledge lives in one spec (`dart-detection.json`) that faf-cli, faf-python-sdk, and the MCPs all share.
+
+---
+
 ## v6.12 — The Single-Source Edition
 
 **faf-cli is now the single source for the registry `_meta`** — it emits the `one.faf/context` block every FAF MCP server composes: `registryMeta`/`registryName`/`fafContextBlock`, one deterministic projection, byte-identical, end-to-end across every surface, verifiable by sha, re-derivable instantly on-demand.
