@@ -113,10 +113,14 @@ export function loopVerdict(
   } else {
     status = 'needs-human';
   }
-  const ask = status === 'needs-human'
-    ? gaps.human.map((path) => ({ path, question: questionForSlot(path) }))
-    : [];
+  const ask = status === 'needs-human' ? humanAsk(gaps) : [];
   return { status, score, gaps, ask };
+}
+
+/** The questions to put to the human for a set of gaps — its human slots,
+ *  paired with their interview prompt. The single source for the ask. */
+function humanAsk(gaps: LoopGaps): Array<{ path: string; question: string }> {
+  return gaps.human.map((path) => ({ path, question: questionForSlot(path) }));
 }
 
 // ── Orchestration ────────────────────────────────────────────────────────────
@@ -187,13 +191,15 @@ export function runLoop(deps: LoopDeps, opts: LoopRunOptions = {}): LoopRunResul
     if (history.length >= 2 && score <= history[history.length - 2]) {
       // No progress: the sourceable well is dry (auto can't fill what's left).
       // Defer to the human if there are human gaps; otherwise we're stuck.
+      // Build the ask from gaps.human directly — `verdict.ask` is empty here
+      // (the verdict is 'can-source', which never carries questions).
       return verdict.gaps.human.length
-        ? { status: 'needs-human', score, rounds, history, ask: verdict.ask }
+        ? { status: 'needs-human', score, rounds, history, ask: humanAsk(verdict.gaps) }
         : { status: 'stuck', score, rounds, history, ask: [] };
     }
 
     if (rounds >= maxRounds) {
-      return { status: 'capped', score, rounds, history, ask: verdict.ask };
+      return { status: 'capped', score, rounds, history, ask: humanAsk(verdict.gaps) };
     }
 
     deps.runAuto();
