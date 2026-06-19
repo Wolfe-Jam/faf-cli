@@ -54,6 +54,18 @@ describe('WJTTC ENGINE: Relentless 6-W extractor', () => {
     expect(relentlessContext(dir).why).toContain('eliminate the context tax');
   });
 
+  test('why ← declarative only: bare "goal" in a parenthetical does NOT match (regression)', () => {
+    // The provenance dogfood caught this: "(name + goal + the six Ws)" made the
+    // old heuristic grab the rest of the line as a junk WHY. Declarative-only fixes it.
+    readme('# X\n\nThe table shows the 8 questions (name + goal + the six Ws) plus the stack interview.\n');
+    expect(relentlessContext(dir).why).toBeUndefined();
+  });
+
+  test('why ← "the goal is …" declarative still matches', () => {
+    readme('# X\n\nThe goal is to make every project legible to any AI in one shared format.\n');
+    expect(relentlessContext(dir).why).toContain('make every project legible');
+  });
+
   test('where ← repository.url (strips git+ and .git)', () => {
     pkg({ repository: { url: 'git+https://github.com/Wolfe-Jam/x.git' } });
     expect(relentlessContext(dir).where).toBe('https://github.com/Wolfe-Jam/x');

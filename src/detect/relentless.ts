@@ -180,8 +180,12 @@ function extractWho(readme: string): SourcedValue | null {
 function extractWhy(readme: string): SourcedValue | null {
   const sec = section(readme, 'Why|Mission|Motivation|Rationale|Vision');
   if (sec) {return sv(sec.body, `README:## ${sec.heading}`, 0.8);}
+  // DECLARATIVE only — "our mission is X", "the goal is X", "Mission: X". The
+  // bare noun is NOT enough: "(name + goal + the six Ws)" must not match (it did,
+  // and grabbed the rest of the line — a real bug the provenance dogfood caught).
   const fm = firstMatch(readme, [
-    /(?:our\s+)?(?:mission|purpose|goal)(?:\s+is)?\s*:?\s*([^.\n]{30,})/i,
+    /(?:our\s+|the\s+)?(?:mission|purpose|goal)\s+is\s+([^.\n]{30,})/i,
+    /\b(?:mission|purpose|goal)\s*:\s*([^.\n]{30,})/i,
     /(?:built|created|designed)\s+(?:because|to)\s+([^.\n]{30,})/i,
   ]);
   return fm ? sv(fm, 'README:mission-heuristic', 0.6) : null;
