@@ -12,7 +12,7 @@ import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { relentlessContext } from '../../src/detect/relentless.js';
+import { relentlessContext, relentlessContextDetailed } from '../../src/detect/relentless.js';
 
 let dir: string;
 beforeEach(() => {
@@ -92,5 +92,55 @@ describe('WJTTC BRAKE: Relentless no-guess invariants', () => {
     const what = relentlessContext(dir).what ?? '';
     expect(what).not.toContain('shields.io');
     expect(what).toContain('real one-line description');
+  });
+});
+
+describe('WJTTC ENGINE: Relentless provenance (the auditable form)', () => {
+  test('detailed carries {value, source, confidence} per slot', () => {
+    pkg({ description: 'A tool that transforms project files into AI context for assistants' });
+    const what = relentlessContextDetailed(dir).what;
+    expect(what?.value).toContain('transforms project files');
+    expect(what?.source).toBe('package.json:description');
+    expect(typeof what?.confidence).toBe('number');
+    expect(what!.confidence).toBeGreaterThan(0);
+    expect(what!.confidence).toBeLessThanOrEqual(1);
+  });
+
+  test('source names the artifact + locus (package.json field vs README heading)', () => {
+    pkg({ scripts: { build: 'tsc', start: 'node x' }, repository: { url: 'git+https://github.com/Wolfe-Jam/x.git' } });
+    readme('# X\n\n## Why\nOur mission is to eliminate the context tax that wastes hours every week.\n');
+    const d = relentlessContextDetailed(dir);
+    expect(d.how?.source).toBe('package.json:scripts');
+    expect(d.where?.source).toBe('package.json:repository');
+    expect(d.why?.source).toBe('README:## Why');     // the matched heading rides the label
+  });
+
+  test('confidence ranks by source quality: structured field > named section > heuristic', () => {
+    // structured field
+    pkg({ description: 'A tool that transforms project files into AI context for assistants' });
+    const structured = relentlessContextDetailed(dir).what!.confidence;
+    rmSync(join(dir, 'package.json'), { force: true });
+    // named section
+    readme('# X\n\n## Purpose\nGives AI assistants permanent project memory across every session.\n');
+    const section = relentlessContextDetailed(dir).what!.confidence;
+    rmSync(join(dir, 'README.md'), { force: true });
+    // heuristic match
+    readme('# X\n\nIt solves the problem of context re-discovery on every new chat session.\n');
+    const heuristic = relentlessContextDetailed(dir).what!.confidence;
+    expect(structured).toBeGreaterThan(section);
+    expect(section).toBeGreaterThan(heuristic);
+  });
+
+  test('bare relentlessContext is EXACTLY the value-projection of detailed (no drift)', () => {
+    pkg({ description: 'A tool that transforms project files into AI context for assistants', scripts: { build: 'tsc' } });
+    readme('# X\n\n## Why\nOur mission is to eliminate the context tax across teams everywhere.\n');
+    const bare = relentlessContext(dir);
+    const detailed = relentlessContextDetailed(dir);
+    const projected = Object.fromEntries(Object.entries(detailed).map(([k, v]) => [k, (v as any).value]));
+    expect(bare).toEqual(projected);
+  });
+
+  test('sourced-or-empty holds in the detailed form too (no evidence → {})', () => {
+    expect(relentlessContextDetailed(dir)).toEqual({});
   });
 });
