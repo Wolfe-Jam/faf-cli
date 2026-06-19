@@ -124,3 +124,54 @@ describe('AERO — edges', () => {
     expect(buildTableOf8(faf)).toEqual(buildTableOf8(faf));
   });
 });
+
+describe('PROVENANCE — seeded rows carry their source (auditable confirm)', () => {
+  const get = (t: ReturnType<typeof buildTableOf8>, path: string) => t.rows.find((r) => r.path === path)!;
+
+  test('P1 — goal-seeded rows are sourced to "project goal"', () => {
+    const t = buildTableOf8({ project: { goal: 'A .faf MCP server for developers using Cursor. npm.' } });
+    const who = get(t, 'human_context.who');
+    expect(who.status).toBe('seeded');
+    expect(who.source).toBe('project goal');
+    expect(who.confidence).toBeGreaterThan(0);
+  });
+
+  test('P2 — detailed README extraction seeds WHY/WHEN/HOW with their own provenance', () => {
+    const detailed = {
+      why: { value: 'eliminate the context tax', source: 'README:## Why', confidence: 0.8 },
+      how: { value: 'npm run build', source: 'package.json:scripts', confidence: 0.9 },
+    };
+    const t = buildTableOf8({ project: { goal: 'A tool for developers' } }, { detailed });
+    const why = get(t, 'human_context.why');
+    expect(why.status).toBe('seeded');             // goal never seeds WHY — the README did
+    expect(why.value).toBe('eliminate the context tax');
+    expect(why.source).toBe('README:## Why');
+    expect(why.confidence).toBe(0.8);
+    expect(get(t, 'human_context.how').source).toBe('package.json:scripts');
+  });
+
+  test('P3 — goal wins over README where both have a fact (deliberate sentence beats extraction)', () => {
+    const detailed = { who: { value: 'from the readme', source: 'README:## Audience', confidence: 0.8 } };
+    const t = buildTableOf8({ project: { goal: 'A CLI for developers and teams' } }, { detailed });
+    const who = get(t, 'human_context.who');
+    expect(who.source).toBe('project goal');       // goal-seed, not the README fallback
+    expect(who.value.toLowerCase()).toContain('developers');
+  });
+
+  test('P4 — filled and empty rows carry NO source/confidence', () => {
+    const t = buildTableOf8({ project: { name: 'x', goal: 'A CLI' }, human_context: { who: 'developers' } });
+    const filled = get(t, 'human_context.who');
+    expect(filled.status).toBe('filled');
+    expect(filled.source).toBeUndefined();
+    const empty = get(t, 'human_context.when');
+    expect(empty.status).toBe('empty');
+    expect(empty.source).toBeUndefined();
+  });
+
+  test('P5 — goal-only (no detailed) is unchanged: WHY/WHEN/HOW still never seeded', () => {
+    const t = buildTableOf8({ project: { goal: 'A .faf MCP server for developers. npm, Docker.' } });
+    for (const w of ['human_context.why', 'human_context.when', 'human_context.how']) {
+      expect(get(t, w).status).not.toBe('seeded');
+    }
+  });
+});
