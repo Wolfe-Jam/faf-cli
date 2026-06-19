@@ -118,3 +118,89 @@ export function loopVerdict(
     : [];
   return { status, score, gaps, ask };
 }
+
+// ── Orchestration ────────────────────────────────────────────────────────────
+//
+// runLoop drives the snapshot verdict to a terminal: read → score → verdict →
+// (can-source) run auto → repeat. Dependencies are INJECTED so the driver is
+// pure and testable without real file IO; the CLI `faf loop` wires the real
+// read / score / auto. Two safety rails, because a loop that runs auto must
+// never spin: a hard round cap, and no-progress detection (if a round of auto
+// doesn't lift the score, the sourceable well is dry — stop, don't churn).
+
+export type LoopRunStatus =
+  | 'done'         // reached 100% / no gaps — success
+  | 'needs-human'  // sourceable exhausted; only the human can finish (honest wall)
+  | 'stuck'        // sourceable gaps auto can't fill, and no human gaps to ask
+  | 'capped'       // hit the round cap still making progress
+  | 'no-faf';      // nothing to read — caller must create one first
+
+export interface LoopDeps {
+  /** The current .faf as {data, yaml}, or null when none exists. */
+  read(): { data: Record<string, unknown>; yaml: string } | null;
+  /** Score raw .faf yaml → 0..100 (the termination test). */
+  score(yaml: string): number;
+  /** Source what detection can (auto): fill the stack and WRITE the .faf. */
+  runAuto(): void;
+}
+
+export interface LoopRunOptions {
+  /** Hard cap on auto rounds (default 5). */
+  maxRounds?: number;
+  isEmpty?: (value: unknown) => boolean;
+}
+
+export interface LoopRunResult {
+  status: LoopRunStatus;
+  score: number;
+  /** Auto rounds actually run. */
+  rounds: number;
+  /** Score after each read — the climb, for narration. */
+  history: number[];
+  /** The human questions to put — populated only when status is 'needs-human'. */
+  ask: Array<{ path: string; question: string }>;
+}
+
+export function runLoop(deps: LoopDeps, opts: LoopRunOptions = {}): LoopRunResult {
+  const maxRounds = Math.max(1, opts.maxRounds ?? 5);
+  const isEmpty = opts.isEmpty ?? isEmptyValue;
+  const history: number[] = [];
+  let rounds = 0;
+
+  // One iteration per read; at most maxRounds auto runs between them.
+  for (let i = 0; i <= maxRounds; i++) {
+    const snap = deps.read();
+    if (!snap) return { status: 'no-faf', score: 0, rounds, history, ask: [] };
+
+    const score = deps.score(snap.yaml);
+    history.push(score);
+    const verdict = loopVerdict(score, snap.data, isEmpty);
+
+    if (verdict.status === 'done') {
+      return { status: 'done', score, rounds, history, ask: [] };
+    }
+    if (verdict.status === 'needs-human') {
+      return { status: 'needs-human', score, rounds, history, ask: verdict.ask };
+    }
+
+    // can-source — but did the LAST auto round actually move the score?
+    if (history.length >= 2 && score <= history[history.length - 2]) {
+      // No progress: the sourceable well is dry (auto can't fill what's left).
+      // Defer to the human if there are human gaps; otherwise we're stuck.
+      return verdict.gaps.human.length
+        ? { status: 'needs-human', score, rounds, history, ask: verdict.ask }
+        : { status: 'stuck', score, rounds, history, ask: [] };
+    }
+
+    if (rounds >= maxRounds) {
+      return { status: 'capped', score, rounds, history, ask: verdict.ask };
+    }
+
+    deps.runAuto();
+    rounds++;
+  }
+
+  // Defined fallthrough (the cap check above returns first in practice).
+  const last = history[history.length - 1] ?? 0;
+  return { status: 'capped', score: last, rounds, history, ask: [] };
+}

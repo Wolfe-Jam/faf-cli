@@ -54,8 +54,8 @@ export {
 // The faf_loop decision core — classify gaps (human vs sourceable) + verdict
 // (done / can-source / needs-human). The brain the CLI `faf loop` and the
 // `/faf-loop` skill both decide from; orchestration lives on top.
-export type { LoopStatus, LoopGaps, LoopVerdict } from './core/loop.js';
-export { classifyGaps, loopVerdict, isHumanSlot, isEmptyValue } from './core/loop.js';
+export type { LoopStatus, LoopGaps, LoopVerdict, LoopRunStatus, LoopDeps, LoopRunOptions, LoopRunResult } from './core/loop.js';
+export { classifyGaps, loopVerdict, isHumanSlot, isEmptyValue, runLoop } from './core/loop.js';
 // Single-source bench engine (the grounding benchmark) — consumers compose
 // deriveQuestionSet/gradeAnswers/buildReceipt through the bridge (a future
 // faf_bench tool etc.); grading stays byte-identical across CLI and servers.
