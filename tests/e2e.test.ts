@@ -276,5 +276,6 @@ describe('faf e2e — full lifecycle', () => {
     // 9. Validate
     const out = run('check');
     expect(out).toContain('valid');
-  });
+  }, 60000); // spawns ~10+ cold CLI subprocesses — give it real headroom so it
+             // doesn't flake on bun's default 5s when run without --timeout.
 });
