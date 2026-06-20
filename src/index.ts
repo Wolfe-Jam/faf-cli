@@ -38,7 +38,7 @@ export {
 export type { ServerCardOptions } from './interop/servercard.js';
 // Single-source 6Ws Interview — consumers (claude-faf-mcp's faf_go etc.) MUST
 // import this registry, never reimplement, never copy (kills question drift).
-export type { InterviewQuestion, InterviewOption, GoalSeed, TableOf8, TableOf8Row, BoxStatus } from './core/interview.js';
+export type { InterviewQuestion, InterviewOption, HumanSlotPath, SourcedSlotPath, GoalSeed, TableOf8, TableOf8Row, BoxStatus } from './core/interview.js';
 export {
   INTERVIEW,
   SIX_WS_INTERVIEW,

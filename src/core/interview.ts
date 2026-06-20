@@ -29,9 +29,9 @@ export interface InterviewOption {
   description: string;
 }
 
-export interface InterviewQuestion {
+export interface InterviewQuestion<P extends string = string> {
   /** Canonical slot path (core/slots.ts is the spine). */
-  path: string;
+  path: P;
   question: string;
   /** Short chip/header label (max ~12 chars) for option-UI consumers. */
   header: string;
@@ -40,6 +40,39 @@ export interface InterviewQuestion {
   options?: InterviewOption[];
 }
 
+/**
+ * The human/sourced boundary, as TYPES — the load-bearing line in FAF.
+ *
+ *   HumanSlotPath   = the 8 things only a human knows (name + goal + the 6Ws).
+ *   SourcedSlotPath = the slots detection fills (language + the stack).
+ *
+ * They are DISJOINT by construction. Typing the two interviews against these
+ * makes it a COMPILE error to put a sourced slot in the human interview (or
+ * vice-versa) — the "Interview-16" drift becomes unrepresentable at the Truth,
+ * not merely caught by a downstream test. "I'll remember" is not a fix; a type
+ * is. (claude-faf-mcp's wjttc-faf-go-boundary test is the belt; this is the
+ * braces — the source itself can no longer drift.)
+ */
+export type HumanSlotPath =
+  | 'project.name'
+  | 'project.goal'
+  | 'human_context.who'
+  | 'human_context.what'
+  | 'human_context.why'
+  | 'human_context.where'
+  | 'human_context.when'
+  | 'human_context.how';
+
+export type SourcedSlotPath =
+  | 'project.main_language'
+  | 'stack.frontend'
+  | 'stack.backend'
+  | 'stack.database'
+  | 'stack.runtime'
+  | 'stack.hosting'
+  | 'stack.build'
+  | 'stack.cicd';
+
 const TERSE = '(terse — 3-4 words)';
 
 /**
@@ -47,7 +80,7 @@ const TERSE = '(terse — 3-4 words)';
  * six Ws. Language is deliberately NOT here: detection finds it; humans are
  * only asked what machines cannot derive. The 6Ws are the underivable half.
  */
-export const SIX_WS_INTERVIEW: InterviewQuestion[] = [
+export const SIX_WS_INTERVIEW: InterviewQuestion<HumanSlotPath>[] = [
   {
     path: 'project.name',
     question: 'What is the name of this project?',
@@ -111,7 +144,7 @@ export const SIX_WS_INTERVIEW: InterviewQuestion[] = [
  * empty. Selects where a common vocabulary exists; every select includes
  * Other (specify) and None where absence is legitimate.
  */
-export const STACK_INTERVIEW: InterviewQuestion[] = [
+export const STACK_INTERVIEW: InterviewQuestion<SourcedSlotPath>[] = [
   {
     path: 'project.main_language',
     question: 'What is the primary programming language?',
