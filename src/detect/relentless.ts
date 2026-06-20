@@ -169,8 +169,10 @@ function extractWho(readme: string): SourcedValue | null {
   const fm = firstMatch(
     readme,
     [
-      /\b(?:designed|built|made)\s+for\s+((?:developers?|teams?|engineers?|builders?|founders?)[^.\n]{0,80})/i,
-      /\bfor\s+((?:developers?|teams?|engineers?|builders?|founders?)[^.\n]{0,80})/i,
+      // optional qualifier before the role word, so "for backend teams" /
+      // "for indie developers" match — not just a bare role. Dogfood-caught.
+      /\b(?:designed|built|made)\s+for\s+((?:[a-z][a-z-]*\s+)?(?:developers?|teams?|engineers?|builders?|founders?)[^.\n]{0,80})/i,
+      /\bfor\s+((?:[a-z][a-z-]*\s+)?(?:developers?|teams?|engineers?|builders?|founders?)[^.\n]{0,80})/i,
     ],
     8,
   );
@@ -197,8 +199,10 @@ function extractWhere(pkg: PkgJson | null, readme: string): SourcedValue | null 
   if (pkg?.homepage) {return sv(clean(pkg.homepage), 'package.json:homepage', 0.9);}
   const fm = firstMatch(
     readme,
-    [/\b(?:deployed|hosted|available|published)\s+(?:on|at|via)\s+([^.\n]{4,80})/i],
-    4,
+    // {3,80} + minLen 3 so short platform names ("npm", "AWS") match —
+    // "Published on npm." used to slip past the 4-char floor. Dogfood-caught.
+    [/\b(?:deployed|hosted|available|published)\s+(?:on|at|via)\s+([^.\n]{3,80})/i],
+    3,
   );
   return fm ? sv(fm, 'README:deploy-heuristic', 0.6) : null;
 }

@@ -76,6 +76,19 @@ describe('WJTTC ENGINE: Relentless 6-W extractor', () => {
     expect(relentlessContext(dir).where).toContain('npm');
   });
 
+  test('where ← short platform name alone ("Published on npm.") — regression', () => {
+    // The 4-char floor used to drop "npm" (3 chars). Showcase-dogfood caught it.
+    readme('# X\n\nPublished on npm. Run with npm start.\n');
+    expect(relentlessContext(dir).where).toContain('npm');
+  });
+
+  test('who ← "for <qualifier> teams" matches, not just a bare role — regression', () => {
+    // "for backend teams" used to slip past (role not adjacent to "for").
+    readme('# X\n\nBuilt for backend teams maintaining many internal services.\n');
+    const who = relentlessContext(dir).who ?? '';
+    expect(who).toContain('backend teams');
+  });
+
   test('when ← "production since" pattern (the 6th W v6 was missing)', () => {
     readme('# X\n\nIn production since September 2025, battle-tested across teams.\n');
     expect(relentlessContext(dir).when).toContain('since September 2025');
