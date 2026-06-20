@@ -19,6 +19,7 @@
  */
 
 import { SLOTS, SLOT_BY_PATH, isPlaceholder } from './slots.js';
+import type { SeededContextDetailed } from '../detect/relentless.js';
 
 /** Bump when questions/options change — consumers can pin or report it. */
 export const INTERVIEW_VERSION = 'faf-interview/1';
@@ -417,6 +418,12 @@ export interface TableOf8Row {
   value: string;        // current value, or a seeded suggestion, or ''
   status: BoxStatus;
   seeded: boolean;      // true when value is a goal-fact suggestion (not yet in the .faf)
+  /** Provenance for a SEEDED row — where the suggestion was sourced from, so the
+   *  human confirms informed: 'project goal' or a README locus ('README:## Why').
+   *  Absent on filled/empty rows. */
+  source?: string;
+  /** 0..1 confidence for a seeded row, by source quality. Absent otherwise. */
+  confidence?: number;
 }
 
 export interface TableOf8 {
@@ -449,24 +456,39 @@ function tableValueFilled(v: unknown): v is string {
 }
 
 /**
- * Build the Table-of-8 from a .faf object (any/empty) + an optional goal. The
- * goal seeds WHO/WHAT/WHERE via seedSixWsFromGoal (facts only); WHY/WHEN/HOW are
- * never seeded. Rows the .faf already fills are 'filled'; goal-seeded ones are
- * 'seeded' (suggestions); the rest are 'empty' (ask the human). Pure.
+ * Build the Table-of-8 from a .faf object (any/empty) + an optional goal and an
+ * optional sourced README extraction (relentlessContextDetailed). The goal seeds
+ * WHO/WHAT/WHERE via seedSixWsFromGoal (facts only, source 'project goal'); the
+ * detailed README form covers WHY/WHEN/HOW and any slot the goal didn't reach,
+ * each carrying its own provenance. Rows the .faf already fills are 'filled';
+ * seeded ones carry `source`+`confidence` so the human confirms informed; the
+ * rest are 'empty' (ask the human). Goal wins over README where both have a
+ * fact (the deliberate sentence beats the extraction). Pure.
  */
 export function buildTableOf8(
   faf: Record<string, unknown>,
-  opts: { goal?: string } = {},
+  opts: { goal?: string; detailed?: SeededContextDetailed } = {},
 ): TableOf8 {
   const data = faf && typeof faf === 'object' ? faf : {};
   const fafGoal = valueAtPath(data, 'project.goal');
   const goalVal = (tableValueFilled(fafGoal) ? String(fafGoal).trim() : '') || (opts.goal ?? '').trim();
   const seed = seedSixWsFromGoal(goalVal);
-  const seedByPath: Record<string, string | undefined> = {
+  const detailed = (opts.detailed ?? {}) as Record<string, { value: string; source: string; confidence: number } | undefined>;
+  const goalSeed: Record<string, string | undefined> = {
     'project.goal': goalVal || undefined,
     'human_context.what': seed.what,
     'human_context.where': seed.where,
     'human_context.who': seed.who,
+  };
+
+  // A seed for a path: the goal-fact (deliberate, wins) else the sourced README
+  // extraction (covers why/when/how + fallback). Each carries its provenance.
+  const seedFor = (path: string): { value: string; source: string; confidence: number } | undefined => {
+    const g = goalSeed[path];
+    if (g) return { value: g, source: 'project goal', confidence: 0.9 };
+    const w = path.startsWith('human_context.') ? path.slice('human_context.'.length) : '';
+    const d = w ? detailed[w] : undefined;
+    return d ? { value: d.value, source: d.source, confidence: d.confidence } : undefined;
   };
 
   const rows: TableOf8Row[] = SIX_WS_INTERVIEW.map((q, i) => {
@@ -475,9 +497,9 @@ export function buildTableOf8(
     if (tableValueFilled(cur)) {
       return { ...base, value: String(cur).trim(), status: 'filled', seeded: false };
     }
-    const s = seedByPath[q.path];
+    const s = seedFor(q.path);
     if (s) {
-      return { ...base, value: s, status: 'seeded', seeded: true };
+      return { ...base, value: s.value, status: 'seeded', seeded: true, source: s.source, confidence: s.confidence };
     }
     return { ...base, value: '', status: 'empty', seeded: false };
   });

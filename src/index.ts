@@ -77,7 +77,7 @@ export { turboCatScan, turboCatSlots } from './detect/turbo-cat.js';
 export type { TurboCatResult, DiscoveredFormat } from './detect/turbo-cat.js';
 // Sourced 6W extractor (README + package, no-guess) + fresh .faf assembler —
 // the single source MCPs compose instead of forking their own.
-export { relentlessContext } from './detect/relentless.js';
-export type { SeededContext } from './detect/relentless.js';
+export { relentlessContext, relentlessContextDetailed } from './detect/relentless.js';
+export type { SeededContext, SeededContextDetailed, SourcedValue } from './detect/relentless.js';
 export { assembleFreshFaf } from './detect/assemble.js';
 export * as kernel from './wasm/kernel.js';
