@@ -32,9 +32,18 @@ temp/
 
 # Large media files
 *.jpg
+*.jpeg
 *.png
+*.gif
+*.webp
 *.mp4
 *.pdf
+
+# Archives and binaries
+*.zip
+*.tgz
+*.tar.gz
+*.wasm
 
 # Custom exclusions (add your own below)
 # example: my-large-data-folder/
