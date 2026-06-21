@@ -5,6 +5,7 @@ import { scoreCommand } from './commands/score.js';
 import { initCommand } from './commands/init.js';
 import { dnaCommand } from './commands/dna.js';
 import { autoCommand } from './commands/auto.js';
+import { loopCommand } from './commands/loop.js';
 import { syncCommand } from './commands/sync.js';
 import { compileCommand } from './commands/compile.js';
 import { decompileCommand } from './commands/decompile.js';
@@ -62,6 +63,12 @@ program
   .command('auto')
   .description('Zero to 100% in one command')
   .action(() => autoCommand());
+
+program
+  .command('loop')
+  .description('Drive to 100% — source what we can, then ask only the human')
+  .option('-r, --rounds <n>', 'max auto rounds before stopping', '5')
+  .action((options) => loopCommand(options));
 
 program
   .command('go')
