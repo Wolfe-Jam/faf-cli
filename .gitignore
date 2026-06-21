@@ -7,6 +7,9 @@ build/
 docs-site/
 *.tsbuildinfo
 
+# Test artifacts (never commit)
+test-output.txt
+
 # CRITICAL: No compiled JS in src or tests directories
 src/**/*.js
 src/**/*.js.map
