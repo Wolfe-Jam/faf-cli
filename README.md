@@ -4,7 +4,7 @@
 <div style="display: flex; align-items: center; gap: 12px;">
   <img src="https://www.faf.one/orange-smiley.svg" alt="FAF" width="40" />
   <div>
-    <h1 style="margin: 0; color: #000000;">faf-cli — The Single-Source Edition</h1>
+    <h1 style="margin: 0; color: #000000;">faf-cli — The Loop Edition</h1>
     <p style="margin: 2px 0 0 0; font-size: 0.85em; letter-spacing: 0.12em; opacity: 0.7; text-transform: uppercase;"><strong>Persistent AI Context Standard</strong></p>
     <p style="margin: 6px 0 0 0;"><strong>Persistent Project Context for AI.</strong></p>
     <p style="margin: 0;"><strong>Define once. Run anywhere.</strong></p>
@@ -60,6 +60,18 @@ brew install faf-cli && faf   # Homebrew
 Run `faf` with no arguments:
 
 ![faf](./nelly.png)
+
+---
+
+## v6.14 — The Loop Edition
+
+**`faf loop` drives any repo to 🏆 100% or the honest human wall** — sourcing every slot it can with provenance, asking only what only you know, never inventing.
+
+```bash
+faf loop    # init → auto → score, then ask only the human-only gaps
+```
+
+The loop sources what detection can, then stops at one of three honest terminals: `done` (🏆 100%), `needs-human` (it asks only the slots only you can answer), or `stuck` (it sourced everything sourceable and nothing's left for a human to add). It never fabricates a slot to reach 100% — sourced 6Ws now carry provenance (`{value, source, confidence}`), so every seeded value is a confirm-or-edit suggestion, never an auto-confirmed guess.
 
 ---
 
