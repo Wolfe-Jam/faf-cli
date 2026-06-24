@@ -2,7 +2,7 @@
  * `faf wjttc` — vendor-neutral test-suite audit.
  *
  * Reads tests across TypeScript / Rust / Python / Zig / Go and classifies
- * each by WJTTC tier (BRAKE / ENGINE / AERO / PIT) based on the test name.
+ * each by WJTTC tier (BRAKE / ENGINE / AERO / TYRE / PIT) based on the test name.
  * Tier-balance + untiered-test report. Forward-compatible with TAF receipts.
  *
  * Per the original v6.5.0 brief — "WJTTC moves from doctrine to enforced
@@ -19,7 +19,10 @@ export interface WjttcOptions {
   json?: boolean;
 }
 
-const TIERS = ['BRAKE', 'ENGINE', 'AERO', 'PIT'] as const;
+// The full WJTTC five: BRAKE (safety) · ENGINE (core) · AERO (polish) ·
+// TYRE (live — the real road) · PIT (operational, when needed). TYRE was the
+// historically-dropped fifth; omitting it mislabels every live test as untiered.
+const TIERS = ['BRAKE', 'ENGINE', 'AERO', 'TYRE', 'PIT'] as const;
 type Tier = (typeof TIERS)[number];
 type Language = 'typescript' | 'rust' | 'python' | 'zig' | 'go';
 
@@ -42,7 +45,7 @@ export interface WjttcReport {
 // Match tier word with non-alphabetic boundary on both sides — `\b` treats
 // underscore as a word char, so "engine_test_001" wouldn't match. We want
 // any non-alpha (including _, -, :, space) to count as a boundary.
-const TIER_REGEX = /(?:^|[^A-Za-z])(BRAKE|ENGINE|AERO|PIT)(?:[^A-Za-z]|$)/i;
+const TIER_REGEX = /(?:^|[^A-Za-z])(BRAKE|ENGINE|AERO|TYRE|PIT)(?:[^A-Za-z]|$)/i;
 
 /** Classify a test by name. Returns null if no tier marker is present. */
 export function detectTier(testName: string): Tier | null {
@@ -221,7 +224,7 @@ export function scanTests(rootDir: string): TestFinding[] {
 
 /** Aggregate findings into a tier-balance report. */
 export function aggregateReport(findings: TestFinding[]): WjttcReport {
-  const byTier: Record<Tier, number> = { BRAKE: 0, ENGINE: 0, AERO: 0, PIT: 0 };
+  const byTier: Record<Tier, number> = { BRAKE: 0, ENGINE: 0, AERO: 0, TYRE: 0, PIT: 0 };
   const byLanguage: Record<string, number> = {};
   let untiered = 0;
   const untieredExamples: string[] = [];
@@ -269,6 +272,7 @@ function printReport(report: WjttcReport): void {
       tier === 'BRAKE' ? orange('●') :
       tier === 'ENGINE' ? fafCyan('●') :
       tier === 'AERO' ? dim('●') :
+      tier === 'TYRE' ? fafCyan('◐') :
       dim('○');
     console.log(`    ${indicator} ${tier.padEnd(7)} ${bold(String(count).padStart(4))}  ${dim(`(${pct}%)`)}`);
   }

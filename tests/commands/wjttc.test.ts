@@ -47,6 +47,11 @@ describe('WJTTC ENGINE: detectTier — tier marker recognition', () => {
     expect(detectTier('PIT: setup fixtures')).toBe('PIT');
   });
 
+  test('detects TYRE — the live / real-road tier (the historically-dropped fifth)', () => {
+    expect(detectTier('WJTTC TYRE: live CLI — the real road')).toBe('TYRE');
+    expect(detectTier('tyre-live-001: real clone')).toBe('TYRE');
+  });
+
   test('case-insensitive detection', () => {
     expect(detectTier('brake-S010: detectSvelteAdapter')).toBe('BRAKE');
     expect(detectTier('engine_test_001')).toBe('ENGINE');
@@ -219,6 +224,24 @@ test('untiered top-level', () => {});
     expect(report.byTier.ENGINE).toBe(1);
     expect(report.untiered).toBe(1);
     expect(report.filesScanned).toBe(1);
+  });
+
+  test('counts all five tiers — TYRE + PIT included (no fifth-tier drop)', () => {
+    mkdirSync(join(dir, 'tests'));
+    writeFileSync(join(dir, 'tests', 'five.test.ts'), `
+describe('WJTTC BRAKE: b', () => { test('1', () => {}); });
+describe('WJTTC ENGINE: e', () => { test('2', () => {}); });
+describe('WJTTC AERO: a', () => { test('3', () => {}); });
+describe('WJTTC TYRE: t', () => { test('4', () => {}); });
+describe('WJTTC PIT: p', () => { test('5', () => {}); });
+`);
+    const report = aggregateReport(scanTests(join(dir, 'tests')));
+    expect(report.byTier.BRAKE).toBe(1);
+    expect(report.byTier.ENGINE).toBe(1);
+    expect(report.byTier.AERO).toBe(1);
+    expect(report.byTier.TYRE).toBe(1);
+    expect(report.byTier.PIT).toBe(1);
+    expect(report.untiered).toBe(0);
   });
 
   test('skips node_modules / .git / target / dist', () => {
