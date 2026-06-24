@@ -10,9 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [6.15.0] - 2026-06-24 — ⭐️ The Git Edition
+## [6.15.0] - 2026-06-24 — The Copilot Edition
 
-Context, versioned. FAF speaks Git both ways now — it reads context *out of* any repo (`faf git`), and writes the GitHub Copilot instructions *back into* it (`faf export --copilot`).
+FAF now writes the file GitHub Copilot reads. `faf export --copilot` emits `.github/copilot-instructions.md` — the widest-surface Copilot instruction file — straight from your scored `.faf`. And `faf git` is hardened against URL command injection on the way in.
 
 ### Added
 - `faf export --copilot` — emit `.github/copilot-instructions.md`, GitHub Copilot's repository-wide custom-instructions file and the **widest-surface** instruction file (honored by default across web chat, code review, VS Code, JetBrains, Copilot CLI, and the coding agent). Included in default `export` and `--all`. Non-destructive faf-block injection, idempotent, auto-creates `.github/`.
