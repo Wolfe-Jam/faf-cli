@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v6.14.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v6.15.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -9,6 +9,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [6.15.0] - 2026-06-24 — ⭐️ The Git Edition
+
+Context, versioned. FAF speaks Git both ways now — it reads context *out of* any repo (`faf git`), and writes the GitHub Copilot instructions *back into* it (`faf export --copilot`).
+
+### Added
+- `faf export --copilot` — emit `.github/copilot-instructions.md`, GitHub Copilot's repository-wide custom-instructions file and the **widest-surface** instruction file (honored by default across web chat, code review, VS Code, JetBrains, Copilot CLI, and the coding agent). Included in default `export` and `--all`. Non-destructive faf-block injection, idempotent, auto-creates `.github/`.
+- Exemplary WJTTC Git suite (`tests/wjttc/git.test.ts`) — BRAKE (injection-proof URL + non-destructive emit), ENGINE (URL normalization, `--copilot`, TAF-receipt determinism), AERO (unicode, boundaries), TYRE (a real `git clone` → real `.faf` → real score).
+
+### Security
+- **Hardened `faf git` against URL command injection.** It previously built `git clone … ${url}` and ran it through a shell (`execSync`) — a crafted URL could execute arbitrary commands. Now a strict `normalizeGitUrl` (allowlist, rejects shell metacharacters) plus a no-shell `execFileSync` clone. Injection is structurally impossible.
+
+### Changed
+- `faf wjttc` now recognizes all **five** WJTTC tiers — **TYRE** (live, the real road) was missing, so live tests were mislabeled untiered. The audit reports BRAKE · ENGINE · AERO · TYRE · PIT.
 
 ## [6.14.0] - 2026-06-21 — The Loop Edition
 

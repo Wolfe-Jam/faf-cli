@@ -4,7 +4,7 @@
 <div style="display: flex; align-items: center; gap: 12px;">
   <img src="https://www.faf.one/orange-smiley.svg" alt="FAF" width="40" />
   <div>
-    <h1 style="margin: 0; color: #000000;">faf-cli — The Loop Edition</h1>
+    <h1 style="margin: 0; color: #000000;">faf-cli — ⭐️ The Git Edition</h1>
     <p style="margin: 2px 0 0 0; font-size: 0.85em; letter-spacing: 0.12em; opacity: 0.7; text-transform: uppercase;"><strong>Persistent AI Context Standard</strong></p>
     <p style="margin: 6px 0 0 0;"><strong>Persistent Project Context for AI.</strong></p>
     <p style="margin: 0;"><strong>Define once. Run anywhere.</strong></p>
@@ -60,6 +60,19 @@ brew install faf-cli && faf   # Homebrew
 Run `faf` with no arguments:
 
 ![faf](./nelly.png)
+
+---
+
+## v6.15 — ⭐️ The Git Edition
+
+**Context, versioned.** FAF speaks Git both ways now — it reads context *out of* any repo and writes the GitHub Copilot instructions *back into* it.
+
+```bash
+faf git owner/repo       # instant scored .faf from any GitHub repo
+faf export --copilot     # → .github/copilot-instructions.md (every Copilot surface reads it)
+```
+
+`faf export --copilot` emits GitHub Copilot's repository-wide instruction file — the **widest-surface** one, read by default across web chat, code review, VS Code, JetBrains, the CLI, and the coding agent. `faf git` is now hardened against URL command injection (no-shell `execFileSync` + a strict allowlist). Shipped with an exemplary WJTTC Git suite that adopts the full five tiers — **BRAKE · ENGINE · AERO · TYRE · PIT**.
 
 ---
 
