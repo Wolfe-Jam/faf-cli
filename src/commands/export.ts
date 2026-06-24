@@ -2,6 +2,7 @@ import { findFafFile, readFaf, readFafRaw } from '../interop/faf.js';
 import { writeAgentsMd } from '../interop/agents.js';
 import { writeCursorrules } from '../interop/cursorrules.js';
 import { writeGeminiMd } from '../interop/gemini.js';
+import { writeCopilotInstructions } from '../interop/copilot-instructions.js';
 import { writeGrokConfig } from '../interop/grok.js';
 import { writeProjectHtml } from '../interop/projecthtml.js';
 import { writeServerCard } from '../interop/servercard.js';
@@ -12,6 +13,7 @@ export interface ExportOptions {
   agents?: boolean;
   cursor?: boolean;
   gemini?: boolean;
+  copilot?: boolean;
   grok?: boolean;
   conductor?: boolean;
   html?: boolean;
@@ -33,6 +35,7 @@ export function exportCommand(options: ExportOptions = {}): void {
     (!options.agents &&
       !options.cursor &&
       !options.gemini &&
+      !options.copilot &&
       !options.grok &&
       !options.conductor &&
       !options.html &&
@@ -51,6 +54,11 @@ export function exportCommand(options: ExportOptions = {}): void {
   if (exportAll || options.gemini) {
     writeGeminiMd(dir, data);
     console.log(`  GEMINI.md`);
+  }
+
+  if (exportAll || options.copilot) {
+    writeCopilotInstructions(dir, data);
+    console.log(`  .github/copilot-instructions.md`);
   }
 
   // Opt-in only: wires an MCP server into the user's .grok/ config, so it

@@ -57,5 +57,42 @@ describe('export command', () => {
     expect(existsSync(join(testDir, 'AGENTS.md'))).toBe(true);
     expect(existsSync(join(testDir, '.cursorrules'))).toBe(true);
     expect(existsSync(join(testDir, 'GEMINI.md'))).toBe(true);
+    expect(existsSync(join(testDir, '.github', 'copilot-instructions.md'))).toBe(true);
+  });
+
+  test('exports .github/copilot-instructions.md (nested path, creates .github)', () => {
+    writeFileSync(join(testDir, 'project.faf'), `faf_version: 2.5.0\nproject:\n  name: copilot-test\n  goal: Test copilot\n  main_language: TypeScript\n`);
+
+    const { exportCommand } = require('../../src/commands/export.js');
+    exportCommand({ copilot: true });
+
+    const out = join(testDir, '.github', 'copilot-instructions.md');
+    expect(existsSync(out)).toBe(true);
+    const content = readFileSync(out, 'utf-8');
+    expect(content).toContain('copilot-test');
+    expect(content).toContain('GitHub Copilot Instructions');
+    expect(content).toContain('<!-- faf:start -->');
+  });
+
+  test('--copilot alone does not write the other formats (exportAll guard)', () => {
+    writeFileSync(join(testDir, 'project.faf'), `faf_version: 2.5.0\nproject:\n  name: guard-test\n  goal: Test\n  main_language: TypeScript\n`);
+
+    const { exportCommand } = require('../../src/commands/export.js');
+    exportCommand({ copilot: true });
+
+    expect(existsSync(join(testDir, '.github', 'copilot-instructions.md'))).toBe(true);
+    expect(existsSync(join(testDir, 'AGENTS.md'))).toBe(false);
+    expect(existsSync(join(testDir, 'GEMINI.md'))).toBe(false);
+  });
+
+  test('copilot-instructions.md is idempotent (no duplicate faf block on re-run)', () => {
+    writeFileSync(join(testDir, 'project.faf'), `faf_version: 2.5.0\nproject:\n  name: idem-test\n  goal: Test\n  main_language: TypeScript\n`);
+
+    const { exportCommand } = require('../../src/commands/export.js');
+    exportCommand({ copilot: true });
+    exportCommand({ copilot: true });
+
+    const content = readFileSync(join(testDir, '.github', 'copilot-instructions.md'), 'utf-8');
+    expect(content.split('<!-- faf:start -->').length - 1).toBe(1);
   });
 });

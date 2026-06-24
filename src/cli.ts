@@ -134,6 +134,7 @@ program
   .option('--agents', 'Generate AGENTS.md')
   .option('--cursor', 'Generate .cursorrules')
   .option('--gemini', 'Generate GEMINI.md')
+  .option('--copilot', 'Generate .github/copilot-instructions.md (GitHub Copilot)')
   .option('--grok', 'Wire grok-faf-mcp into .grok/config.toml')
   .option('--conductor', 'Generate conductor config')
   .option('--html', 'Generate project.html (visual render of project.faf)')
