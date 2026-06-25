@@ -133,7 +133,7 @@ function tafSetup(options: TafOptions): void {
 }
 
 // ── faf taf (default) — score snapshot ──────────────────────────────────────
-/** Generate a TAF score snapshot of the current .faf (Test Archive Format). */
+/** Generate a TAF score snapshot of the current .faf — DEPRECATED, use `faf score --json`. */
 function tafSnapshot(options: TafOptions): void {
   console.error(dim('note: `faf taf` (score snapshot) is deprecated — use `faf score --json`. (`faf taf setup` wires the Receipt Printer.)'));
   const fafPath = findFafFile();
