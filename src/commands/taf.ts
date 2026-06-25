@@ -13,7 +13,7 @@ const FAF_TAF_GIT = 'Wolfe-Jam/faf-taf-git@v2.2.0';
 
 /**
  * `faf taf [subcommand]`
- *   (none)  — score snapshot (back-compat; proposed to fold into `faf score --json`)
+ *   (none)  — score snapshot — DEPRECATED, folded into `faf score --json` (alias kept one release)
  *   setup   — write/print the CI step that activates the TAF Receipt Printer
  */
 export function tafCommand(subcommand?: string | TafOptions, options: TafOptions = {}): void {
@@ -135,6 +135,7 @@ function tafSetup(options: TafOptions): void {
 // ── faf taf (default) — score snapshot ──────────────────────────────────────
 /** Generate a TAF score snapshot of the current .faf (Test Archive Format). */
 function tafSnapshot(options: TafOptions): void {
+  console.error(dim('note: `faf taf` (score snapshot) is deprecated — use `faf score --json`. (`faf taf setup` wires the Receipt Printer.)'));
   const fafPath = findFafFile();
   if (!fafPath) {
     console.error("Error: project.faf not found\n\n  Run 'faf init' to create one.");

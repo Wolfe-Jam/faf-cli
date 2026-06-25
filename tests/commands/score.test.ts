@@ -5,6 +5,7 @@ import { join } from 'path';
 import { findFafFile, readFafRaw } from '../../src/interop/faf.js';
 import * as kernel from '../../src/wasm/kernel.js';
 import { enrichScore } from '../../src/core/scorer.js';
+import { scoreCommand } from '../../src/commands/score.js';
 
 describe('score command integration', () => {
   let testDir: string;
@@ -74,5 +75,23 @@ human_context:
     const result = enrichScore(kernel.score(readFafRaw(join(testDir, 'project.faf'))));
     expect(result.score).toBe(100);
     expect(result.tier.name).toBe('TROPHY');
+  });
+
+  test('score --json folds in the snapshot (project + source + faf_version + score)', () => {
+    const faf = join(testDir, 'project.faf');
+    writeFileSync(faf, 'faf_version: 2.5.0\nproject:\n  name: fold-test\n  goal: Test\n  main_language: TypeScript\n');
+    const lines: string[] = [];
+    const orig = console.log;
+    console.log = (...a: unknown[]) => { lines.push(a.join(' ')); };
+    try {
+      scoreCommand(faf, { json: true });
+    } finally {
+      console.log = orig;
+    }
+    const snap = JSON.parse(lines.join('\n'));
+    expect(snap.project).toBe('fold-test');
+    expect(snap.faf_version).toBe('2.5.0');
+    expect(snap.source).toContain('project.faf');
+    expect(snap.score).toBeGreaterThan(0);
   });
 });

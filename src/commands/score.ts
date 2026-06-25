@@ -1,4 +1,4 @@
-import { findFafFile, readFafRaw } from '../interop/faf.js';
+import { findFafFile, readFafRaw, readFaf } from '../interop/faf.js';
 import { scoreFafYaml } from '../core/scorer.js';
 import { displayScore } from '../ui/display.js';
 import { tierBadge } from '../core/tiers.js';
@@ -23,7 +23,17 @@ export function scoreCommand(file?: string, options: ScoreOptions = {}): void {
   const result = scoreFafYaml(yaml);
 
   if (options.json) {
-    console.log(JSON.stringify(result, null, 2));
+    // The score snapshot — folded in from the former `faf taf`. The scorer
+    // result plus self-describing metadata (project/source/faf_version).
+    // Deterministic by design: no timestamp, so the same .faf emits the same JSON.
+    const data = readFaf(fafPath);
+    const snapshot = {
+      faf_version: data.faf_version ?? 'unknown',
+      project: data.project?.name ?? 'unknown',
+      source: fafPath,
+      ...result,
+    };
+    console.log(JSON.stringify(snapshot, null, 2));
     return;
   }
 

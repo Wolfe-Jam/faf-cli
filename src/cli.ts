@@ -238,7 +238,7 @@ program
 
 program
   .command('taf [subcommand]')
-  .description('TAF Receipts — `faf taf setup` wires the CI receipt printer; bare = score snapshot')
+  .description('TAF Receipts — `faf taf setup` wires the CI receipt printer; bare snapshot deprecated → faf score --json')
   .option('--output <path>', 'Write score snapshot to file')
   .option('--write', 'taf setup: create .github/workflows/taf.yml')
   .action((subcommand, options) => tafCommand(subcommand, options));
