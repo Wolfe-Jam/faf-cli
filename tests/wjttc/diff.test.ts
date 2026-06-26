@@ -13,7 +13,7 @@
  *   🛞 TYRE   — real git repo: commit .faf → edit → diff HEAD..worktree
  */
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
-import { execFileSync } from 'child_process';
+import { execFileSync, spawnSync } from 'child_process';
 import { mkdirSync, writeFileSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
@@ -164,6 +164,13 @@ describe('WJTTC — faf diff', () => {
       expect(parsed.base).toBe('HEAD');
       expect(Array.isArray(parsed.changes)).toBe(true);
       expect(parsed.changes.some((c: any) => c.path === 'stack.build')).toBe(true);
+    });
+
+    test('an unknown ref errors clearly, not a misleading all-added diff', () => {
+      const cli = join(import.meta.dir, '../../src/cli.ts');
+      const r = spawnSync(process.execPath, [cli, 'diff', 'totally-bogus-ref'], { cwd: dir, encoding: 'utf-8' });
+      expect(r.status).not.toBe(0); // exits non-zero
+      expect(`${r.stdout}${r.stderr}`).toMatch(/unknown git ref/i);
     });
   });
 

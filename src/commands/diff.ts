@@ -164,6 +164,30 @@ export function renderFafDiff(diff: FafDiff, baseRef: string, targetRef: string)
   return lines.join('\n');
 }
 
+/** Does this ref resolve to a commit? Distinguishes a typo'd ref from a ref where
+ *  the .faf merely didn't exist yet (the latter is a legit "born here" diff). */
+function refExists(ref: string, cwd: string): boolean {
+  try {
+    execFileSync('git', ['rev-parse', '--verify', '--quiet', `${ref}^{commit}`], {
+      cwd,
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Guard an EXPLICIT user-supplied ref — a typo should error, not render a
+ *  misleading "everything added" diff. (The implicit default HEAD stays tolerant
+ *  so `faf diff` works in a repo with no commits yet.) */
+function assertRef(ref: string, cwd: string): void {
+  if (!refExists(ref, cwd)) {
+    console.error(`Error: unknown git ref '${ref}' — use a branch, tag, or commit that exists.`);
+    process.exit(2);
+  }
+}
+
 /** Read project.faf at a git ref via `git show` (no shell). '' if absent at the ref. */
 function readFafAtRef(ref: string, repoRel: string, cwd: string): string {
   try {
@@ -286,18 +310,30 @@ export function diffCommand(range: string | undefined, options: DiffOptions = {}
     targetRaw = readFafRaw(fafPath as string);
   } else if (range.includes('...')) {
     const [a, b] = range.split('...');
-    const mb = execFileSync('git', ['merge-base', a, b], { cwd, encoding: 'utf-8' }).trim();
+    assertRef(a, cwd);
+    assertRef(b, cwd);
+    let mb: string;
+    try {
+      mb = execFileSync('git', ['merge-base', a, b], { cwd, encoding: 'utf-8' }).trim();
+    } catch {
+      console.error(`Error: '${a}' and '${b}' have no common ancestor — can't compute a merge-base diff.`);
+      process.exit(2);
+      return;
+    }
     baseRef = mb.slice(0, 7);
     targetRef = b;
     baseRaw = readFafAtRef(mb, repoRel, cwd);
     targetRaw = readFafAtRef(b, repoRel, cwd);
   } else if (range.includes('..')) {
     const [a, b] = range.split('..');
+    assertRef(a, cwd);
+    assertRef(b, cwd);
     baseRef = a;
     targetRef = b;
     baseRaw = readFafAtRef(a, repoRel, cwd);
     targetRaw = readFafAtRef(b, repoRel, cwd);
   } else {
+    assertRef(range, cwd);
     baseRef = range;
     targetRef = '(working tree)';
     baseRaw = readFafAtRef(range, repoRel, cwd);
