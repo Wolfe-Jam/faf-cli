@@ -14,6 +14,7 @@ import { exportCommand } from './commands/export.js';
 import { showCommand } from './commands/show.js';
 import { gitCommand } from './commands/git.js';
 import { diffCommand, diffDriverCommand } from './commands/diff.js';
+import { logCommand } from './commands/log.js';
 import { infoCommand } from './commands/info.js';
 import { formatsCommand } from './commands/formats.js';
 import { clearCommand } from './commands/clear.js';
@@ -141,6 +142,15 @@ program
   .command('diff-driver [args...]', { hidden: true })
   .description('Internal: GIT_EXTERNAL_DIFF handler invoked by git for diff=faf files')
   .action((args) => diffDriverCommand(args ?? []));
+
+program
+  .command('log')
+  .description('Score timeline across git history — the .faf score at every commit that touched it')
+  .option('-n, --limit <n>', 'Max commits to show (default 20)')
+  .option('--all', 'Show every commit, no cap')
+  .option('--reverse', 'Oldest-first instead of newest-first')
+  .option('--json', 'Emit the timeline as structured JSON')
+  .action((options) => logCommand(options));
 
 program
   .command('export')
