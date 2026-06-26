@@ -15,6 +15,7 @@ import { showCommand } from './commands/show.js';
 import { gitCommand } from './commands/git.js';
 import { diffCommand, diffDriverCommand } from './commands/diff.js';
 import { logCommand } from './commands/log.js';
+import { hooksCommand, hooksRun } from './commands/hooks.js';
 import { infoCommand } from './commands/info.js';
 import { formatsCommand } from './commands/formats.js';
 import { clearCommand } from './commands/clear.js';
@@ -151,6 +152,20 @@ program
   .option('--reverse', 'Oldest-first instead of newest-first')
   .option('--json', 'Emit the timeline as structured JSON')
   .action((options) => logCommand(options));
+
+program
+  .command('hooks')
+  .description('Pre-commit context guard — scores staged .faf vs HEAD, warns (or --strict blocks) on regression')
+  .option('--install', 'Install the pre-commit hook')
+  .option('--uninstall', 'Remove the faf hook block (preserves other hooks)')
+  .option('--strict', 'With --install: block the commit on a score regression (default: warn only)')
+  .action((options) => hooksCommand(options));
+
+program
+  .command('hooks-run', { hidden: true })
+  .description('Internal: the pre-commit context guard the git hook invokes')
+  .option('--strict', 'Exit non-zero on a score regression')
+  .action((options) => hooksRun(options));
 
 program
   .command('export')
