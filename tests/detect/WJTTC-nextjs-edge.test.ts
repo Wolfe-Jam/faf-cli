@@ -20,7 +20,7 @@ import {
   detectPackageManager,
 } from '../../src/detect/scanner.js';
 
-describe('WJTTC — Next.js Edge Cases', () => {
+describe('AERO: WJTTC — Next.js Edge Cases', () => {
   let testDir: string;
 
   beforeEach(() => {

@@ -33,7 +33,7 @@ human_context:
   how: through the bridge
 `;
 
-describe('WJTTC — bench export: present AND populated', () => {
+describe('ENGINE: WJTTC — bench export: present AND populated', () => {
   test('all spec exports present on the public API', () => {
     for (const k of ['BENCH_VERSION', 'deriveQuestionSet', 'publicQuestions', 'gradeAnswers', 'buildReceipt', 'normalizeAnswer', 'answersMatch', 'ALIAS_GROUPS'] as const) {
       expect(k in api).toBe(true);
@@ -54,7 +54,7 @@ describe('WJTTC — bench export: present AND populated', () => {
   });
 });
 
-describe('WJTTC — THE INTEGRITY CLAUSE: the answer key never leaks', () => {
+describe('BRAKE: WJTTC — THE INTEGRITY CLAUSE: the answer key never leaks', () => {
   test('publicQuestions strips `answers` — and carries everything a consumer needs', () => {
     const qset = api.deriveQuestionSet(FAF);
     const pub = api.publicQuestions(qset);
@@ -74,7 +74,7 @@ describe('WJTTC — THE INTEGRITY CLAUSE: the answer key never leaks', () => {
   });
 });
 
-describe('WJTTC — mechanical grading is deterministic (semver-locked)', () => {
+describe('AERO: WJTTC — mechanical grading is deterministic (semver-locked)', () => {
   test('grade twice → identical; perfect key → N/N; empty → 0/N', () => {
     const qset = api.deriveQuestionSet(FAF);
     const perfect: Record<string, string> = {};
@@ -92,7 +92,7 @@ describe('WJTTC — mechanical grading is deterministic (semver-locked)', () => 
   });
 });
 
-describe('WJTTC — ✪ receipt constructible OUTSIDE faf-cli (BenchState/RunRecord promoted)', () => {
+describe('TYRE: WJTTC — ✪ receipt constructible OUTSIDE faf-cli (BenchState/RunRecord promoted)', () => {
   test('a consumer builds state from promoted types and re-derives the hash', () => {
     // This is exactly what a faf_bench MCP tool does — typed, no casts:
     const cold: import('../../src/commands/bench.js').RunRecord = { score: 9, total: 15, tokens: 14200, model: 'claude' };

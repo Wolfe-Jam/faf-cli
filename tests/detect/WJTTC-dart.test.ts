@@ -353,7 +353,7 @@ dependency_overrides:
 // ============================================================
 // SPEC — dart-detection.json is the single source (A+B hybrid)
 // ============================================================
-describe('WJTTC SPEC: dart-detection.json single source', () => {
+describe('PIT: WJTTC SPEC: dart-detection.json single source', () => {
   test('exposes the knowledge keys, non-empty', () => {
     expect(Array.isArray(dartSpec.flutterDeps) && dartSpec.flutterDeps.length > 0).toBe(true);
     expect(dartSpec.mcpDeps).toContain('dart_mcp');

@@ -464,7 +464,7 @@ export default { kit: { adapter: adapter() } };`);
 // 🏗️ FRAMEWORK TYPE - framework → svelte (and future sub-types)
 // ============================================================
 
-describe('🏗️ FRAMEWORK TYPE - framework → svelte', () => {
+describe('ENGINE: 🏗️ FRAMEWORK TYPE - framework → svelte', () => {
   beforeEach(setup);
   afterEach(teardown);
 
@@ -598,7 +598,7 @@ describe('🏗️ FRAMEWORK TYPE - framework → svelte', () => {
 // 🏆 CHAMPIONSHIP SUMMARY
 // ============================================================
 
-describe('🏆 WJTTC CHAMPIONSHIP - Svelte Context Engine', () => {
+describe('TYRE: 🏆 WJTTC CHAMPIONSHIP - Svelte Context Engine', () => {
   test('CHAMP-S001: All tiers defined and passing', () => {
     // Svelte app-type: BRAKE (10) + ENGINE (23) + AERO (15) = 49
     // Framework type: BRAKE (4) + ENGINE (9) + AERO (3) = 16

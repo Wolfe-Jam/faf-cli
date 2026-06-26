@@ -29,7 +29,7 @@ afterEach(() => {
   while (dirs.length) {rmSync(dirs.pop()!, { recursive: true, force: true });}
 });
 
-describe('WJTTC — manifest.json: content decides, never the filename', () => {
+describe('ENGINE: WJTTC — manifest.json: content decides, never the filename', () => {
   test('THE BLOCKER REPRO: TS project + mcpb manifest stays TypeScript, no Chrome', () => {
     const d = project({
       'package.json': '{"devDependencies":{"typescript":"^5"}}',

@@ -108,7 +108,7 @@ describe('ENGINE — verdict + source-first precedence', () => {
   });
 });
 
-describe('ORCHESTRATION — runLoop drives to a terminal (injected deps, no IO)', () => {
+describe('ENGINE: ORCHESTRATION — runLoop drives to a terminal (injected deps, no IO)', () => {
   const empty = { project: { name: 'p' } };
 
   test('already complete → done immediately, zero auto rounds', () => {
