@@ -209,19 +209,36 @@ function readFafAtRef(ref: string, repoRel: string, cwd: string): string {
  * of git's line diff — so `git diff`, `git log -p`, `git show` speak .faf.
  * (A `command` driver, NOT textconv: textconv only ever sees one blob at a time;
  *  a context delta is inherently cross-file.)
+ *
+ * Two edges git actually hands us, both handled here:
+ *  - an UNMERGED path is passed with a SINGLE arg (the path) — there are no two
+ *    sides to diff, so we say so instead of rendering a bogus "(absent)" delta.
+ *  - the whole thing FAILS OPEN: a driver that throws makes `git diff` abort with
+ *    "external diff died". We never let our renderer break the user's `git diff`.
  */
 export function diffDriverCommand(argv: string[]): void {
-  const read = (f?: string): string =>
-    f && f !== '/dev/null' && existsSync(f) ? readFileSync(f, 'utf-8') : '';
-  // Label off the FILE, not the hex: git passes /dev/null for a genuinely
-  // absent side, but an all-zero hash for the (present) uncommitted worktree.
-  const label = (file?: string, hex?: string): string => {
-    if (!file || file === '/dev/null') return '(absent)';
-    if (!hex || /^0+$/.test(hex)) return '(working tree)';
-    return hex.slice(0, 7);
-  };
-  const diff = computeFafDiff(read(argv[1]), read(argv[4]));
-  console.log(renderFafDiff(diff, label(argv[1], argv[2]), label(argv[4], argv[5])));
+  const path = argv[0] ?? 'project.faf';
+  try {
+    // Unmerged path → git passes only <path>. Nothing to compare.
+    if (argv.length < 5) {
+      console.log(`${path} — unmerged (resolve the conflict, then \`faf diff\`)`);
+      return;
+    }
+    const read = (f?: string): string =>
+      f && f !== '/dev/null' && existsSync(f) ? readFileSync(f, 'utf-8') : '';
+    // Label off the FILE, not the hex: git passes /dev/null for a genuinely
+    // absent side, but an all-zero hash for the (present) uncommitted worktree.
+    const label = (file?: string, hex?: string): string => {
+      if (!file || file === '/dev/null') return '(absent)';
+      if (!hex || /^0+$/.test(hex)) return '(working tree)';
+      return hex.slice(0, 7);
+    };
+    const diff = computeFafDiff(read(argv[1]), read(argv[4]));
+    console.log(renderFafDiff(diff, label(argv[1], argv[2]), label(argv[4], argv[5])));
+  } catch (err) {
+    // Fail OPEN — emit a one-liner, exit 0, so `git diff` never errors over us.
+    console.log(`${path} — faf diff unavailable (${err instanceof Error ? err.message : 'error'})`);
+  }
 }
 
 /** The .gitattributes line that opts .faf files into the driver. */
@@ -255,6 +272,7 @@ export function installDriver(cwd: string): void {
   execFileSync('git', ['config', 'diff.faf.command', 'faf diff-driver'], { cwd });
   console.log('✅ git config       diff.faf.command = faf diff-driver');
   console.log('\n→ `git diff`, `git log -p`, `git show` now render the .faf score + slot delta.');
+  console.log('  Note: git runs `faf diff-driver`, so `faf` must be on PATH when git diffs (a global install puts it there).');
 }
 
 /** Remove the driver wiring (git config). Leaves .gitattributes for the user to keep or delete. */

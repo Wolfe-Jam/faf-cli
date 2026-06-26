@@ -14,11 +14,11 @@
  */
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { execFileSync, spawnSync } from 'child_process';
-import { mkdirSync, writeFileSync, rmSync } from 'fs';
+import { mkdirSync, writeFileSync, rmSync, readFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import {
-  diffSlots, computeFafDiff, renderFafDiff, diffCommand, diffDriverCommand, type FafDiff,
+  diffSlots, computeFafDiff, renderFafDiff, diffCommand, diffDriverCommand, installDriver, type FafDiff,
 } from '../../src/commands/diff.js';
 
 const A = {
@@ -208,6 +208,58 @@ describe('WJTTC — faf diff', () => {
         expect(out).toContain('(absent)'); // all-zero hex → absent label
         expect(out).toContain('(added)');
       } finally { rmSync(newF, { force: true }); }
+    });
+
+    test('unmerged path (git passes a single arg) → clear note, no bogus diff', () => {
+      const out = capture(() => diffDriverCommand(['project.faf'])); // git's unmerged invocation
+      expect(out).toMatch(/unmerged/i);
+      expect(out).not.toContain('(absent)'); // not rendered as an empty delta
+    });
+
+    test('fails OPEN when a side is unreadable — never makes `git diff` die', () => {
+      const d = tmp('isdir'); mkdirSync(d, { recursive: true });
+      // a DIRECTORY where git would hand a file → readFileSync throws; must be swallowed
+      const argv = ['project.faf', '/dev/null', '0000', '.', d, 'bbbbbbb2', '100644'];
+      let out = '';
+      try {
+        expect(() => { out = capture(() => diffDriverCommand(argv)); }).not.toThrow();
+        expect(out).toMatch(/unavailable|project\.faf/i);
+      } finally { rmSync(d, { recursive: true, force: true }); }
+    });
+
+    test('install-driver is idempotent — .gitattributes opts in exactly once', () => {
+      const dir = tmp('idem'); mkdirSync(dir, { recursive: true });
+      const g = (a: string[]) => execFileSync('git', a, { cwd: dir, stdio: 'pipe', encoding: 'utf-8' });
+      g(['init', '-q']); g(['config', 'user.email', 't@t.t']); g(['config', 'user.name', 't']);
+      const cwd = process.cwd(); process.chdir(dir);
+      try {
+        capture(() => installDriver(dir));
+        capture(() => installDriver(dir)); // twice
+        const ga = readFileSync(join(dir, '.gitattributes'), 'utf-8');
+        expect(ga.match(/\*\.faf diff=faf/g)).toHaveLength(1); // not duplicated
+        expect(g(['config', '--get', 'diff.faf.command']).trim()).toBe('faf diff-driver');
+      } finally { process.chdir(cwd); rmSync(dir, { recursive: true, force: true }); }
+    });
+
+    test('a REAL merge conflict on project.faf does not break `git diff` with the driver on', () => {
+      const dir = tmp('conflict'); mkdirSync(dir, { recursive: true });
+      const g = (a: string[]) => execFileSync('git', a, { cwd: dir, stdio: 'pipe', encoding: 'utf-8' });
+      const faf = (goal: string) => `project:\n  name: demo\n  goal: ${goal}\n  type: cli\nstack:\n  build: tsc\n`;
+      g(['init', '-q', '-b', 'main']); g(['config', 'user.email', 't@t.t']); g(['config', 'user.name', 't']);
+      writeFileSync(join(dir, 'project.faf'), faf('base')); g(['add', 'project.faf']); g(['commit', '-q', '-m', 'base']);
+      g(['checkout', '-q', '-b', 'feature']);
+      writeFileSync(join(dir, 'project.faf'), faf('the feature direction')); g(['commit', '-q', '-am', 'feat']);
+      g(['checkout', '-q', 'main']);
+      writeFileSync(join(dir, 'project.faf'), faf('the main direction')); g(['commit', '-q', '-am', 'main']);
+      const cli = join(import.meta.dir, '../../src/cli.ts');
+      g(['config', 'diff.faf.command', `${process.execPath} ${cli} diff-driver`]);
+      writeFileSync(join(dir, '.gitattributes'), '*.faf diff=faf\n');
+      spawnSync('git', ['merge', 'feature'], { cwd: dir, encoding: 'utf-8' }); // conflicts (expected)
+      const r = spawnSync('git', ['diff'], { cwd: dir, encoding: 'utf-8' }); // unmerged state
+      try {
+        // the whole point: the driver must not make `git diff` abort during a conflict
+        expect(`${r.stdout}${r.stderr}`).not.toMatch(/external diff died|fatal:/i);
+      } finally { rmSync(dir, { recursive: true, force: true }); }
     });
 
     test('native `git diff` renders the semantic .faf delta via the installed driver', () => {
