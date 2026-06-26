@@ -15,7 +15,8 @@
  * kernel (faf_score is NOT persisted in .faf — each side is scored fresh).
  */
 import { execFileSync } from 'child_process';
-import { relative } from 'path';
+import { readFileSync, existsSync, appendFileSync } from 'fs';
+import { relative, join } from 'path';
 import type { FafData } from '../core/types.js';
 import { SLOTS, readSlotValue, isPlaceholder } from '../core/slots.js';
 import { readFafFromString, readFafRaw, findFafFile } from '../interop/faf.js';
@@ -176,12 +177,86 @@ function readFafAtRef(ref: string, repoRel: string, cwd: string): string {
   }
 }
 
+/**
+ * The 7-arg GIT_EXTERNAL_DIFF protocol handler. When a `.faf` carries the
+ * `diff=faf` attribute and `diff.faf.command` is set, git invokes:
+ *   <name> <old-file> <old-hex> <old-mode> <new-file> <new-hex> <new-mode>
+ * We read BOTH temp files git materialised and emit the semantic delta in place
+ * of git's line diff — so `git diff`, `git log -p`, `git show` speak .faf.
+ * (A `command` driver, NOT textconv: textconv only ever sees one blob at a time;
+ *  a context delta is inherently cross-file.)
+ */
+export function diffDriverCommand(argv: string[]): void {
+  const read = (f?: string): string =>
+    f && f !== '/dev/null' && existsSync(f) ? readFileSync(f, 'utf-8') : '';
+  // Label off the FILE, not the hex: git passes /dev/null for a genuinely
+  // absent side, but an all-zero hash for the (present) uncommitted worktree.
+  const label = (file?: string, hex?: string): string => {
+    if (!file || file === '/dev/null') return '(absent)';
+    if (!hex || /^0+$/.test(hex)) return '(working tree)';
+    return hex.slice(0, 7);
+  };
+  const diff = computeFafDiff(read(argv[1]), read(argv[4]));
+  console.log(renderFafDiff(diff, label(argv[1], argv[2]), label(argv[4], argv[5])));
+}
+
+/** The .gitattributes line that opts .faf files into the driver. */
+const GA_LINE = '*.faf diff=faf';
+
+/** Resolve the git repo root, or exit(2) if not in a repo. */
+function repoRoot(cwd: string): string {
+  try {
+    return execFileSync('git', ['rev-parse', '--show-toplevel'], { cwd, encoding: 'utf-8' }).trim();
+  } catch {
+    console.error('Error: not a git repository.');
+    process.exit(2);
+    throw new Error('unreachable');
+  }
+}
+
+/**
+ * Wire `faf diff` into native git: writes `.gitattributes` (*.faf diff=faf) and
+ * sets `git config diff.faf.command "faf diff-driver"`. Idempotent.
+ */
+export function installDriver(cwd: string): void {
+  const top = repoRoot(cwd);
+  const ga = join(top, '.gitattributes');
+  const existing = existsSync(ga) ? readFileSync(ga, 'utf-8') : '';
+  if (!existing.split('\n').some((l) => l.trim() === GA_LINE)) {
+    appendFileSync(ga, `${existing && !existing.endsWith('\n') ? '\n' : ''}${GA_LINE}\n`);
+    console.log(`✅ .gitattributes  ${GA_LINE}`);
+  } else {
+    console.log(`•  .gitattributes already opts in (${GA_LINE})`);
+  }
+  execFileSync('git', ['config', 'diff.faf.command', 'faf diff-driver'], { cwd });
+  console.log('✅ git config       diff.faf.command = faf diff-driver');
+  console.log('\n→ `git diff`, `git log -p`, `git show` now render the .faf score + slot delta.');
+}
+
+/** Remove the driver wiring (git config). Leaves .gitattributes for the user to keep or delete. */
+export function uninstallDriver(cwd: string): void {
+  repoRoot(cwd);
+  try {
+    execFileSync('git', ['config', '--unset', 'diff.faf.command'], { cwd, stdio: 'pipe' });
+  } catch {
+    /* wasn't set — fine */
+  }
+  console.log('✅ removed diff.faf.command (the .gitattributes line is left for you to keep or delete).');
+}
+
 export interface DiffOptions {
   json?: boolean;
+  installDriver?: boolean;
+  uninstallDriver?: boolean;
 }
 
 export function diffCommand(range: string | undefined, options: DiffOptions = {}): void {
   const cwd = process.cwd();
+
+  // Driver management is a separate verb that lives on the same command.
+  if (options.installDriver) return installDriver(cwd);
+  if (options.uninstallDriver) return uninstallDriver(cwd);
+
   const fafPath = findFafFile(cwd);
   if (!fafPath) {
     console.error("Error: project.faf not found\n\n  Run 'faf init' to create one.");

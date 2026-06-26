@@ -13,7 +13,7 @@ import { checkCommand } from './commands/check.js';
 import { exportCommand } from './commands/export.js';
 import { showCommand } from './commands/show.js';
 import { gitCommand } from './commands/git.js';
-import { diffCommand } from './commands/diff.js';
+import { diffCommand, diffDriverCommand } from './commands/diff.js';
 import { infoCommand } from './commands/info.js';
 import { formatsCommand } from './commands/formats.js';
 import { clearCommand } from './commands/clear.js';
@@ -133,7 +133,14 @@ program
   .command('diff [range]')
   .description('Semantic context diff between two .faf versions (slot deltas + score). git ranges: <ref>, A..B, A...B')
   .option('--json', 'Emit the delta as structured JSON')
+  .option('--install-driver', 'Wire faf diff into native git — `git diff` renders .faf score+slot deltas')
+  .option('--uninstall-driver', 'Remove the native-git diff driver')
   .action((range, options) => diffCommand(range, options));
+
+program
+  .command('diff-driver [args...]', { hidden: true })
+  .description('Internal: GIT_EXTERNAL_DIFF handler invoked by git for diff=faf files')
+  .action((args) => diffDriverCommand(args ?? []));
 
 program
   .command('export')

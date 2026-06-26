@@ -18,7 +18,7 @@ import { mkdirSync, writeFileSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import {
-  diffSlots, computeFafDiff, renderFafDiff, diffCommand, type FafDiff,
+  diffSlots, computeFafDiff, renderFafDiff, diffCommand, diffDriverCommand, type FafDiff,
 } from '../../src/commands/diff.js';
 
 const A = {
@@ -164,6 +164,63 @@ describe('WJTTC — faf diff', () => {
       expect(parsed.base).toBe('HEAD');
       expect(Array.isArray(parsed.changes)).toBe(true);
       expect(parsed.changes.some((c: any) => c.path === 'stack.build')).toBe(true);
+    });
+  });
+
+  // ── 🛞 TYRE — the git diff driver (build #2: native git integration) ─────────
+  describe('🛞 TYRE — git diff-driver (GIT_EXTERNAL_DIFF)', () => {
+    const tmp = (tag: string) => join(tmpdir(), `faf-${tag}-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    const capture = (fn: () => void): string => {
+      const logs: string[] = [];
+      const orig = console.log;
+      console.log = (...a: unknown[]) => { logs.push(a.join(' ')); };
+      try { fn(); } finally { console.log = orig; }
+      return logs.join('\n');
+    };
+
+    test('diffDriverCommand renders the delta from the 7-arg protocol', () => {
+      const oldF = tmp('old'); const newF = tmp('new');
+      writeFileSync(oldF, yaml(A)); writeFileSync(newF, yaml(B));
+      // git calls: <path> <old-file> <old-hex> <old-mode> <new-file> <new-hex> <new-mode>
+      const argv = ['project.faf', oldF, 'aaaaaaa1', '100644', newF, 'bbbbbbb2', '100644'];
+      const out = capture(() => diffDriverCommand(argv));
+      try {
+        expect(out).toContain('Build');   // tsc → vite
+        expect(out).toContain('vite');
+        expect(out).toContain('CI/CD');    // added
+        expect(out).toMatch(/Score:.*→/);
+        expect(out).toContain('aaaaaaa'); // short old hex as the base label
+      } finally { rmSync(oldF, { force: true }); rmSync(newF, { force: true }); }
+    });
+
+    test('diffDriverCommand treats /dev/null (added file) as born-here', () => {
+      const newF = tmp('new'); writeFileSync(newF, yaml(B));
+      const argv = ['project.faf', '/dev/null', '00000000', '.', newF, 'bbbbbbb2', '100644'];
+      const out = capture(() => diffDriverCommand(argv));
+      try {
+        expect(out).toContain('(absent)'); // all-zero hex → absent label
+        expect(out).toContain('(added)');
+      } finally { rmSync(newF, { force: true }); }
+    });
+
+    test('native `git diff` renders the semantic .faf delta via the installed driver', () => {
+      const dir = tmp('repo'); mkdirSync(dir, { recursive: true });
+      const g = (a: string[]) => execFileSync('git', a, { cwd: dir, stdio: 'pipe', encoding: 'utf-8' });
+      g(['init', '-q']); g(['config', 'user.email', 't@t.t']); g(['config', 'user.name', 't']);
+      writeFileSync(join(dir, 'project.faf'), yaml(A));
+      g(['add', 'project.faf']); g(['commit', '-q', '-m', 'a']);
+      // install the driver, pointed at the LOCAL cli (end users get the global `faf`)
+      const cli = join(import.meta.dir, '../../src/cli.ts');
+      g(['config', 'diff.faf.command', `bun ${cli} diff-driver`]);
+      writeFileSync(join(dir, '.gitattributes'), '*.faf diff=faf\n');
+      writeFileSync(join(dir, 'project.faf'), yaml(B)); // uncommitted edit
+      const out = execFileSync('git', ['diff'], { cwd: dir, encoding: 'utf-8' });
+      try {
+        expect(out).toContain('Score:');  // semantic delta, NOT git's line diff
+        expect(out).toContain('Build');
+        expect(out).toContain('vite');
+        expect(out).not.toContain('+  cicd: GitHub Actions'); // the raw line diff is replaced
+      } finally { rmSync(dir, { recursive: true, force: true }); }
     });
   });
 });
