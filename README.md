@@ -65,7 +65,7 @@ Run `faf` with no arguments:
 
 ## v6.16 — Know Your Stack
 
-**Every AI-context file FAF writes labels your stack from one canonical source.**
+**FAF knows your stack — and now labels it identically in every file it writes: CLAUDE.md, AGENTS.md, copilot-instructions.md, GEMINI.md, .cursorrules.**
 
 ```bash
 faf export --all     # CLAUDE.md · AGENTS.md · copilot-instructions.md · GEMINI.md · .cursorrules

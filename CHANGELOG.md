@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [6.16.0] - 2026-06-25 — Know Your Stack
 
-Every AI-context file FAF emits now labels your stack from ONE canonical source — the slot registry. `api_type` → "API", `cicd` → "CI/CD", `frontend` → "Framework", consistently across CLAUDE.md, AGENTS.md, `.github/copilot-instructions.md`, GEMINI.md, and `.cursorrules`. No more raw `api_type` keys, or "Cicd" in one file and a dump in another. Copilot leads with a ground-up Copilot-grade rewrite.
+FAF knows your stack — and now labels it identically in every file it writes: CLAUDE.md, AGENTS.md, copilot-instructions.md, GEMINI.md, .cursorrules. `api_type` → "API", `cicd` → "CI/CD", `frontend` → "Framework", from one canonical source (the slot registry) — no more raw `api_type` keys, or "Cicd" in one file and a dump in another. Copilot leads with a ground-up Copilot-grade rewrite.
 
 ### Added
 - **Slot labels** — every one of the 33 canonical slots now carries a `label` in the registry (`SlotDef.label`); `slotLabel()` is the single source of truth for how a slot is displayed. Registry-first, with an acronym-aware Title-Case fallback for off-registry freeform keys.
