@@ -8,7 +8,7 @@ import {
 } from '../../src/interop/projecthtml.js';
 import type { FafData, ScoreResult } from '../../src/core/types.js';
 
-describe('interop/projecthtml', () => {
+describe('ENGINE: interop/projecthtml', () => {
   let testDir: string;
 
   beforeEach(() => {

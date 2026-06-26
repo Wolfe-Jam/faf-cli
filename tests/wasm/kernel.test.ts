@@ -43,7 +43,7 @@ project:
   name: empty-project
 `;
 
-describe('kernel.score', () => {
+describe('ENGINE: kernel.score', () => {
   test('scores minimal .faf', () => {
     const result = kernel.score(MINIMAL_FAF);
     expect(result.score).toBeGreaterThan(0);
@@ -102,14 +102,14 @@ human_context:
   });
 });
 
-describe('kernel.scoreEnterprise', () => {
+describe('ENGINE: kernel.scoreEnterprise', () => {
   test('scores with 33 slots', () => {
     const result = kernel.scoreEnterprise(MINIMAL_FAF);
     expect(result.total).toBe(33);
   });
 });
 
-describe('kernel.validate', () => {
+describe('BRAKE: kernel.validate', () => {
   test('valid YAML passes', () => {
     expect(kernel.validate(MINIMAL_FAF)).toBe(true);
   });
@@ -119,7 +119,7 @@ describe('kernel.validate', () => {
   });
 });
 
-describe('kernel.compile + decompile', () => {
+describe('ENGINE: kernel.compile + decompile', () => {
   test('roundtrip compile/decompile', () => {
     const binary = kernel.compile(MINIMAL_FAF);
     expect(binary).toBeInstanceOf(Uint8Array);
@@ -131,7 +131,7 @@ describe('kernel.compile + decompile', () => {
   });
 });
 
-describe('kernel.fafbInfo', () => {
+describe('ENGINE: kernel.fafbInfo', () => {
   test('returns metadata from binary', () => {
     const binary = kernel.compile(MINIMAL_FAF);
     const info = kernel.fafbInfo(binary);
@@ -139,7 +139,7 @@ describe('kernel.fafbInfo', () => {
   });
 });
 
-describe('kernel.scoreFafb', () => {
+describe('ENGINE: kernel.scoreFafb', () => {
   test('returns metadata from binary', () => {
     const binary = kernel.compile(FULL_BASE_FAF);
     const result = kernel.scoreFafb(binary);
@@ -149,7 +149,7 @@ describe('kernel.scoreFafb', () => {
   });
 });
 
-describe('kernel.sdkVersion', () => {
+describe('ENGINE: kernel.sdkVersion', () => {
   test('returns version string', () => {
     expect(kernel.sdkVersion()).toMatch(/^\d+\.\d+\.\d+/);
   });

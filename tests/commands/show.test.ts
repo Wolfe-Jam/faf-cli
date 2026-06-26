@@ -12,7 +12,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import { showCommand } from '../../src/commands/show.js';
 
-describe('commands/show', () => {
+describe('TYRE: commands/show', () => {
   let dir: string;
   let cwd: string;
   let priorCI: string | undefined;

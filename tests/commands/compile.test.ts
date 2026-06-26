@@ -4,7 +4,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import * as kernel from '../../src/wasm/kernel.js';
 
-describe('compile/decompile integration', () => {
+describe('TYRE: compile/decompile integration', () => {
   let testDir: string;
 
   beforeEach(() => {

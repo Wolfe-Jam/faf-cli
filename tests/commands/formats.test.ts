@@ -2,7 +2,7 @@ import { describe, test, expect } from 'bun:test';
 import { FORMATS } from '../../src/detect/formats.js';
 import { formatsCommand } from '../../src/commands/formats.js';
 
-describe('formats command', () => {
+describe('ENGINE: formats command', () => {
   test('FORMATS catalog has entries', () => {
     expect(FORMATS.length).toBeGreaterThan(30);
   });

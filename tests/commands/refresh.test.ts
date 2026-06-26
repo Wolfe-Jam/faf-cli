@@ -35,7 +35,7 @@ function captureJson(fn: () => void): any {
   return JSON.parse(out);
 }
 
-describe('WJTTC — faf refresh (re-ground)', () => {
+describe('ENGINE: WJTTC — faf refresh (re-ground)', () => {
   let dir: string;
   let prevCwd: string;
 

@@ -16,7 +16,7 @@ const faf: FafData = {
 
 const NAME_RE = /^[a-zA-Z0-9.-]+\/[a-zA-Z0-9._-]+$/;
 
-describe('🛡️ server card generator', () => {
+describe('ENGINE: 🛡️ server card generator', () => {
   test('emits required Server Card fields', () => {
     const c = generateServerCard(faf);
     expect(String(c.$schema)).toContain('server-card.schema.json');
@@ -81,7 +81,7 @@ describe('🛡️ server card generator', () => {
   });
 });
 
-describe('🛡️ registry server.json _meta emitter', () => {
+describe('ENGINE: 🛡️ registry server.json _meta emitter', () => {
   const PP = 'io.modelcontextprotocol.registry/publisher-provided';
 
   test('nests one.faf/context under publisher-provided — the only key the registry keeps', () => {

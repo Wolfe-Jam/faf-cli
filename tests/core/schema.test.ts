@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'bun:test';
 import { validateFaf } from '../../src/core/schema.js';
 
-describe('validateFaf', () => {
+describe('BRAKE: validateFaf', () => {
   test('valid .faf data passes', () => {
     const result = validateFaf({ faf_version: '2.5.0', project: { name: 'test' } });
     expect(result.valid).toBe(true);
@@ -27,7 +27,7 @@ describe('validateFaf', () => {
   });
 });
 
-describe('validateFaf — About Repo (app_type: about)', () => {
+describe('BRAKE: validateFaf — About Repo (app_type: about)', () => {
   test('valid about with represents passes', () => {
     const result = validateFaf({
       faf_version: '2.5.0',

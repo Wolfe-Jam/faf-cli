@@ -10,7 +10,7 @@ import { execSync } from 'child_process';
  * init → score → auto → sync → export → check → edit → drift → convert →
  * compile → decompile → taf → search → share → recover → migrate → demo → info → formats
  */
-describe('faf e2e — full lifecycle', () => {
+describe('TYRE: faf e2e — full lifecycle', () => {
   let testDir: string;
   let originalCwd: string;
   const cli = join(__dirname, '../src/cli.ts');

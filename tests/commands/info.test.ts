@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'bun:test';
 import * as kernel from '../../src/wasm/kernel.js';
 
-describe('info command', () => {
+describe('ENGINE: info command', () => {
   test('infoCommand runs without error', () => {
     const { infoCommand } = require('../../src/commands/info.js');
     expect(() => infoCommand({})).not.toThrow();

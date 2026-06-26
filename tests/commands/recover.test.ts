@@ -4,7 +4,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import { parse } from 'yaml';
 
-describe('recover command', () => {
+describe('TYRE: recover command', () => {
   let testDir: string;
   let originalCwd: string;
 

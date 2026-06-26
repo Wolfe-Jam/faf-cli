@@ -4,7 +4,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import * as kernel from '../../src/wasm/kernel.js';
 
-describe('decompile command', () => {
+describe('TYRE: decompile command', () => {
   test('compile then decompile roundtrips', () => {
     const yaml = `faf_version: 2.5.0\nproject:\n  name: roundtrip-test\n  goal: Test roundtrip\n  main_language: TypeScript\n`;
     const compiled = kernel.compile(yaml);

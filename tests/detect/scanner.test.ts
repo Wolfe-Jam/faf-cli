@@ -36,7 +36,7 @@ describe('scanner', () => {
     }));
   }
 
-  describe('readPackageJson', () => {
+  describe('ENGINE: readPackageJson', () => {
     test('reads valid package.json', () => {
       writePkg({ react: '^18.0.0' });
       const pkg = readPackageJson(testDir);
@@ -48,7 +48,7 @@ describe('scanner', () => {
     });
   });
 
-  describe('detectFrameworks', () => {
+  describe('ENGINE: detectFrameworks', () => {
     test('detects React', () => {
       writePkg({ react: '^18.0.0' });
       const fws = detectFrameworks(testDir);
@@ -86,7 +86,7 @@ describe('scanner', () => {
     });
   });
 
-  describe('detectLanguage', () => {
+  describe('ENGINE: detectLanguage', () => {
     test('detects TypeScript', () => {
       writePkg({}, { typescript: '^5.0.0' });
       expect(detectLanguage(testDir)).toBe('TypeScript');
@@ -114,7 +114,7 @@ describe('scanner', () => {
     });
   });
 
-  describe('detectProjectType', () => {
+  describe('AERO: detectProjectType', () => {
     test('detects CLI project', () => {
       writePkg({}, {}, { bin: { test: 'dist/cli.js' } });
       expect(detectProjectType(testDir)).toBe('cli');
@@ -180,7 +180,7 @@ describe('scanner', () => {
     });
   });
 
-  describe('detectRuntime', () => {
+  describe('ENGINE: detectRuntime', () => {
     test('detects Bun', () => {
       writePkg();
       writeFileSync(join(testDir, 'bunfig.toml'), '');
@@ -193,7 +193,7 @@ describe('scanner', () => {
     });
   });
 
-  describe('detectPackageManager', () => {
+  describe('ENGINE: detectPackageManager', () => {
     test('detects npm', () => {
       writeFileSync(join(testDir, 'package-lock.json'), '{}');
       expect(detectPackageManager(testDir)).toBe('npm');
@@ -214,7 +214,7 @@ describe('scanner', () => {
     });
   });
 
-  describe('detectCicd', () => {
+  describe('ENGINE: detectCicd', () => {
     test('detects GitHub Actions', () => {
       mkdirSync(join(testDir, '.github/workflows'), { recursive: true });
       expect(detectCicd(testDir)).toBe('GitHub Actions');
@@ -225,7 +225,7 @@ describe('scanner', () => {
     });
   });
 
-  describe('detectHosting', () => {
+  describe('ENGINE: detectHosting', () => {
     test('detects Vercel', () => {
       writeFileSync(join(testDir, 'vercel.json'), '{}');
       expect(detectHosting(testDir)).toBe('Vercel');
@@ -237,7 +237,7 @@ describe('scanner', () => {
     });
   });
 
-  describe('detectBuildTool', () => {
+  describe('ENGINE: detectBuildTool', () => {
     test('detects Vite', () => {
       writePkg({}, { vite: '^5.0.0' });
       expect(detectBuildTool(testDir)).toBe('Vite');

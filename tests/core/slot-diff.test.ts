@@ -6,7 +6,7 @@
 import { describe, test, expect } from 'bun:test';
 import { diffFafSlots } from '../../src/core/slot-diff.js';
 
-describe('core/slot-diff — content drift', () => {
+describe('ENGINE: core/slot-diff — content drift', () => {
   test('no changes for identical data', () => {
     const a = {
       project: { name: 'x', goal: 'ship', main_language: 'TypeScript' },

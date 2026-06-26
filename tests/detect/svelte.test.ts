@@ -39,7 +39,7 @@ export default { kit: { adapter: adapter() } };
 
   // --- Project Type Detection ---
 
-  describe('detectProjectType', () => {
+  describe('ENGINE: detectProjectType', () => {
     test('detects svelte type for SvelteKit projects', () => {
       writePkg({ svelte: '^5.0.0', '@sveltejs/kit': '^2.0.0' });
       writeFileSync(join(testDir, 'svelte.config.js'), 'export default {}');
@@ -59,7 +59,7 @@ export default { kit: { adapter: adapter() } };
 
   // --- Adapter Detection ---
 
-  describe('detectSvelteAdapter', () => {
+  describe('ENGINE: detectSvelteAdapter', () => {
     test('detects adapter-vercel', () => {
       writeSvelteConfig('vercel');
       expect(detectSvelteAdapter(testDir)).toBe('Vercel');
@@ -102,7 +102,7 @@ export default { kit: { adapter: adapter() } };
 
   // --- Framework Detection ---
 
-  describe('detectFrameworks', () => {
+  describe('ENGINE: detectFrameworks', () => {
     test('detects SvelteKit with full confidence', () => {
       writePkg({ '@sveltejs/kit': '^2.0.0', svelte: '^5.0.0' });
       writeFileSync(join(testDir, 'svelte.config.js'), 'export default {}');
@@ -130,7 +130,7 @@ export default { kit: { adapter: adapter() } };
 
   // --- Stack Detection (Smart Defaults) ---
 
-  describe('detectStack — Svelte smart defaults', () => {
+  describe('ENGINE: detectStack — Svelte smart defaults', () => {
     test('sets state_management to Runes for SvelteKit', () => {
       writePkg({ svelte: '^5.0.0', '@sveltejs/kit': '^2.0.0' });
       writeFileSync(join(testDir, 'svelte.config.js'), 'export default {}');
@@ -230,7 +230,7 @@ export default { kit: { adapter: adapter() } };
 
   // --- Full Svelte project simulation ---
 
-  describe('full SvelteKit project', () => {
+  describe('TYRE: full SvelteKit project', () => {
     test('comprehensive SvelteKit + Tailwind + Vercel project', () => {
       writePkg(
         { svelte: '^5.0.0', '@sveltejs/kit': '^2.0.0' },

@@ -24,7 +24,7 @@ project:
 // LARGE INPUT
 // ──────────────────────────────────────────────────────────────────
 
-describe('kernel stress — large YAML inputs', () => {
+describe('AERO: kernel stress — large YAML inputs', () => {
   test('scores a .faf with very long string values (~50KB)', () => {
     const longString = 'x'.repeat(50_000);
     const yaml = `
@@ -63,7 +63,7 @@ project:
 // MALFORMED / EDGE-CASE INPUT
 // ──────────────────────────────────────────────────────────────────
 
-describe('kernel stress — malformed and edge-case YAML', () => {
+describe('BRAKE: kernel stress — malformed and edge-case YAML', () => {
   test('empty string does not crash validate()', () => {
     expect(() => kernel.validate('')).not.toThrow();
   });
@@ -138,7 +138,7 @@ project:
 // CONCURRENT KERNEL CALLS
 // ──────────────────────────────────────────────────────────────────
 
-describe('kernel stress — concurrent calls', () => {
+describe('AERO: kernel stress — concurrent calls', () => {
   test('100 parallel score() calls return consistent results', async () => {
     const calls = Array.from({ length: 100 }, () =>
       Promise.resolve().then(() => kernel.score(MINIMAL_FAF))
@@ -172,7 +172,7 @@ describe('kernel stress — concurrent calls', () => {
 // ROUNDTRIP INTEGRITY
 // ──────────────────────────────────────────────────────────────────
 
-describe('kernel stress — roundtrip integrity', () => {
+describe('AERO: kernel stress — roundtrip integrity', () => {
   test('score → compile → decompile preserves project name', () => {
     const yaml = `
 faf_version: 2.5.0
@@ -217,7 +217,7 @@ project:
 // BINARY CORRUPTION
 // ──────────────────────────────────────────────────────────────────
 
-describe('kernel stress — binary corruption resilience', () => {
+describe('BRAKE: kernel stress — binary corruption resilience', () => {
   test('decompile of empty bytes does not crash the process', () => {
     // The kernel may throw a FafbError, but it must not crash the host process.
     expect(() => {

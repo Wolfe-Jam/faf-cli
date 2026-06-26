@@ -4,7 +4,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import { driftCommand } from '../../src/commands/drift.js';
 
-describe('drift command', () => {
+describe('ENGINE: drift command', () => {
   let testDir: string;
   let origCwd: () => string;
 

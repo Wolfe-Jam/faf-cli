@@ -8,7 +8,7 @@ import * as kernel from '../../src/wasm/kernel.js';
 import { enrichScore } from '../../src/core/scorer.js';
 import { writeFaf } from '../../src/interop/faf.js';
 
-describe('init command integration', () => {
+describe('TYRE: init command integration', () => {
   let testDir: string;
 
   beforeEach(() => {

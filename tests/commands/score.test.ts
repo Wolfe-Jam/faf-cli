@@ -7,7 +7,7 @@ import * as kernel from '../../src/wasm/kernel.js';
 import { enrichScore } from '../../src/core/scorer.js';
 import { scoreCommand } from '../../src/commands/score.js';
 
-describe('score command integration', () => {
+describe('TYRE: score command integration', () => {
   let testDir: string;
 
   beforeEach(() => {

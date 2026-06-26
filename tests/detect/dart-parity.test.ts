@@ -52,7 +52,7 @@ function materialize(files: Record<string, string>): void {
   }
 }
 
-describe('PARITY: Dart detection — shared fixtures (TS engine = the Truth)', () => {
+describe('PIT: PARITY: Dart detection — shared fixtures (TS engine = the Truth)', () => {
   test('fixture set is non-trivial', () => {
     expect(fixtures.length).toBeGreaterThanOrEqual(20);
   });
