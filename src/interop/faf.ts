@@ -15,7 +15,10 @@ export function readFaf(path: string): FafData {
  *  rendered as a `# found: <list>` YAML comment next to the `type:` field —
  *  Glass Hood doctrine: the user sees WHY the cli classified the project as
  *  it did. `_meta` is a runtime hint, never a serialized .faf field. */
-export function writeFaf(path: string, data: FafData): void {
+/** Serialize .faf data to YAML text (the exact bytes writeFaf would write).
+ *  Strips runtime `_meta` and renders its `found` rationale as a `# found:`
+ *  comment by `type:`. Used by writeFaf and by `faf git --stdout`. */
+export function serializeFaf(data: FafData): string {
   const meta = (data as FafData & { _meta?: { found?: string[] } })._meta;
   // Strip _meta before serialization — it's never part of the .faf schema.
   const cleanData: FafData = { ...data };
@@ -36,7 +39,11 @@ export function writeFaf(path: string, data: FafData): void {
     );
   }
 
-  writeFileSync(path, text, 'utf-8');
+  return text;
+}
+
+export function writeFaf(path: string, data: FafData): void {
+  writeFileSync(path, serializeFaf(data), 'utf-8');
 }
 
 /** Read raw YAML text from a .faf file */

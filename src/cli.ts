@@ -128,8 +128,12 @@ program
 
 program
   .command('git <url>')
-  .description('Instant .faf from any GitHub repo')
-  .action((url) => gitCommand(url));
+  .description('Instant scored context from any GitHub repo (any branch/tag with --ref)')
+  .option('--ref <ref>', 'Clone at a specific branch or tag (versioned context)')
+  .option('--output <path>', 'Write to a custom path (default: ./project.faf)')
+  .option('--force', 'Overwrite an existing project.faf')
+  .option('--stdout', 'Print the .faf to stdout instead of writing a file')
+  .action((url, options) => gitCommand(url, options));
 
 program
   .command('diff [range]')
@@ -353,5 +357,22 @@ if (process.argv.length <= 2) {
     console.log(`  ${dim('Run')} ${fafCyan('faf --help')} ${dim('for commands')}`);
   })();
 } else {
+  // Cohesion: present the 7.0 git-native surface as one group in `faf --help`,
+  // so diff / log / hooks / driver / git read as a unit — "feels like git".
+  program.addHelpText(
+    'after',
+    [
+      '',
+      'Git-native (The GIT Version):',
+      '  faf diff [range]            semantic context diff + score delta (A..B, A...B)',
+      '  faf diff --install-driver   make native `git diff` render .faf deltas',
+      '  faf log                     score timeline across history (Proof-Over-Time)',
+      '  faf hooks --install         pre-commit guard against context regression',
+      '  faf git <url> [--ref]       instant scored context from any repo, any branch/tag',
+      '',
+      '  "FAF is to Context what Git is to Versions."',
+      '',
+    ].join('\n'),
+  );
   program.parse(process.argv);
 }
