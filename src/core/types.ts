@@ -27,6 +27,10 @@ export interface SlotDef {
   canonical?: string;
   /** Human description */
   description: string;
+  /** Canonical short display label for emitted AI-context files (CLAUDE / AGENTS /
+   *  copilot-instructions / GEMINI / .cursorrules). The single source of truth for
+   *  how a slot is labelled — e.g. `cicd` → "CI/CD", `api_type` → "API". */
+  label?: string;
   /** Category this slot belongs to */
   category: SlotCategory;
 }

@@ -30,6 +30,36 @@ describe('export command', () => {
     expect(content).toContain('export-test');
   });
 
+  test('AGENTS.md labels are registry-sourced — API, CI/CD, no raw keys', () => {
+    writeFileSync(join(testDir, 'project.faf'), `faf_version: 2.5.0\nproject:\n  name: agents-acro\n  goal: x\n  main_language: TypeScript\nstack:\n  api_type: MCP\n  cicd: GitHub Actions\n  runtime: Node.js\n`);
+    const { exportCommand } = require('../../src/commands/export.js');
+    exportCommand({ agents: true });
+    const content = readFileSync(join(testDir, 'AGENTS.md'), 'utf-8');
+    expect(content).toContain('**API:** MCP');              // registry
+    expect(content).toContain('**CI/CD:** GitHub Actions'); // registry
+    expect(content).toContain('**Runtime:** Node.js');
+    expect(content).not.toContain('**api_type:**');         // never a raw key
+    expect(content).not.toContain('**cicd:**');
+  });
+
+  test('GEMINI.md + .cursorrules use the same registry labels (one source, every format)', () => {
+    const faf = `faf_version: 2.5.0\nproject:\n  name: multi\n  goal: x\n  main_language: TypeScript\nstack:\n  api_type: MCP\n  cicd: GitHub Actions\n`;
+    const { exportCommand } = require('../../src/commands/export.js');
+
+    writeFileSync(join(testDir, 'project.faf'), faf);
+    exportCommand({ gemini: true });
+    const gem = readFileSync(join(testDir, 'GEMINI.md'), 'utf-8');
+    expect(gem).toContain('API: MCP');             // registry label, not "api_type"
+    expect(gem).toContain('CI/CD: GitHub Actions');
+    expect(gem).not.toContain('api_type:');
+
+    exportCommand({ cursor: true });
+    const cur = readFileSync(join(testDir, '.cursorrules'), 'utf-8');
+    expect(cur).toContain('# API: MCP');
+    expect(cur).toContain('# CI/CD: GitHub Actions');
+    expect(cur).not.toContain('# api_type:');
+  });
+
   test('exports .cursorrules', () => {
     writeFileSync(join(testDir, 'project.faf'), `faf_version: 2.5.0\nproject:\n  name: cursor-test\n  goal: Test\n  main_language: TypeScript\n`);
 

@@ -2,6 +2,7 @@ import { readFileSync, existsSync, statSync } from 'fs';
 import { join } from 'path';
 import type { FafData } from '../core/types.js';
 import { injectFafBlock } from './inject.js';
+import { slotLabel } from './labels.js';
 
 const CLAUDE_MD = 'CLAUDE.md';
 const SYNC_MARKER = 'STATUS: BI-SYNC ACTIVE';
@@ -101,8 +102,7 @@ export function generateClaudeMd(data: FafData): string {
   if (lang) stackEntries.push(`**Language:** ${lang}`);
   for (const [key, val] of Object.entries(stack)) {
     if (val && val !== 'slotignored' && String(val).trim()) {
-      const label = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-      stackEntries.push(`**${label}:** ${val}`);
+      stackEntries.push(`**${slotLabel(`stack.${key}`)}:** ${val}`);
     }
   }
   if (stackEntries.length > 0) {
@@ -116,17 +116,17 @@ export function generateClaudeMd(data: FafData): string {
 
   // Context — from human_context (the 6Ws)
   const hc = data.human_context ?? {};
-  const contextEntries: [string, string][] = [
-    ['Who', hc.who], ['What', hc.what], ['Why', hc.why],
-    ['Where', hc.where], ['When', hc.when], ['How', hc.how],
-  ].filter(([_, v]) => v && String(v).trim()) as [string, string][];
+  const contextEntries = ([
+    ['who', hc.who], ['what', hc.what], ['why', hc.why],
+    ['where', hc.where], ['when', hc.when], ['how', hc.how],
+  ] as [string, unknown][])
+    .filter(([, v]) => v && String(v).trim())
+    .map(([k, v]) => `- **${slotLabel(`human_context.${k}`)}:** ${v}`);
 
   if (contextEntries.length > 0) {
     lines.push('## Context');
     lines.push('');
-    for (const [label, val] of contextEntries) {
-      lines.push(`- **${label}:** ${val}`);
-    }
+    lines.push(...contextEntries);
     lines.push('');
   }
 

@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v6.15.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v6.16.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -9,6 +9,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [6.16.0] - 2026-06-25 — Know Your Stack
+
+Every AI-context file FAF emits now labels your stack from ONE canonical source — the slot registry. `api_type` → "API", `cicd` → "CI/CD", `frontend` → "Framework", consistently across CLAUDE.md, AGENTS.md, `.github/copilot-instructions.md`, GEMINI.md, and `.cursorrules`. No more raw `api_type` keys, or "Cicd" in one file and a dump in another. Copilot leads with a ground-up Copilot-grade rewrite.
+
+### Added
+- **Slot labels** — every one of the 33 canonical slots now carries a `label` in the registry (`SlotDef.label`); `slotLabel()` is the single source of truth for how a slot is displayed. Registry-first, with an acronym-aware Title-Case fallback for off-registry freeform keys.
+- **copilot-instructions.md, Copilot-grade** — `.github/copilot-instructions.md` is now GitHub-spec *instructions*, not a metadata dump: a prose project overview, a `## Build & run` section that surfaces build/CI as imperative commands (and lights up test/lint/run when the `.faf` carries them), and "broadly applicable / every request" framing. Built to GitHub's own custom-instructions spec.
+
+### Changed
+- **All 5 AI-context emitters now source labels from the slot registry** — CLAUDE.md, AGENTS.md, copilot-instructions.md, GEMINI.md, .cursorrules. GEMINI.md and .cursorrules were raw-key dumps (`api_type: …`); they now read "API:", "CI/CD:", etc. like the rest. (grok stays TOML — keys are structural there.)
+
+### Fixed
+- **AGENTS.md no longer leaks `slotignored`** — its human_context filter didn't exclude slotignored values, so a slotignored 6W would print the literal word. Now filtered like every other emitter.
 
 ## [6.15.0] - 2026-06-24 — The Copilot Edition
 

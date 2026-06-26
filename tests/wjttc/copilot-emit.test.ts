@@ -7,13 +7,23 @@
  * developer's hand-written instructions, must be idempotent, and must round-trip
  * safely as both the .faf and the user's prose evolve.
  *
+ * v6.16 "Copilot-grade" contract (sourced from GitHub's own custom-instructions
+ * spec — see PLANET-FAF/INTEL/copilot-instructions-spec-2026-06-25.md):
+ *   - INSTRUCTIONS, not a metadata dump: Title-Cased labels, goal as a prose
+ *     overview, build surfaced as a command — never raw snake_case keys.
+ *   - NOT an AGENTS.md clone: copilot-instructions.md outranks AGENTS.md in-repo
+ *     and is meant to be complementary, so the two files must differ.
+ *   - NONE of GitHub's named anti-patterns (tone rules, length rules, external
+ *     references) may appear in the generated boilerplate.
+ *   - Short — it is injected into every Copilot request.
+ *
  * Source of truth = faf-cli (the canonical emitter). The MCP-server fleet
  * (grok/gemini parity) gets its own suites; this locks the engine they compose.
  *
  * Tiers (F1-inspired):
- *   🛑 BRAKE  — data safety: never destroy user prose, never crash, atomic .github
- *   ⚙️ ENGINE — emit correctness: structure, 2-line meta stamp, field mapping, guards
- *   🌬️ AERO   — edge cases & determinism: unicode, slotignored/empty filtering, stable output
+ *   🛑 BRAKE  — data safety: never destroy user prose, never crash, no anti-patterns
+ *   ⚙️ ENGINE — emit correctness: Copilot-grade structure, Title-Case, build command
+ *   🌬️ AERO   — edge cases & determinism: unicode, slotignored/empty filtering, length
  *   🛞 TYRE   — the real road: author → emit → hand-edit → re-emit round-trip
  *   🔧 PIT    — flag-gate eval: --copilot vs --all vs bare export
  */
@@ -54,7 +64,7 @@ describe('WJTTC — copilot-instructions emit', () => {
   const countBlocks = (s: string) => s.split('<!-- faf:start -->').length - 1;
 
   // ── 🛑 BRAKE ──────────────────────────────────────────────────────────────
-  describe('🛑 BRAKE — never destroys, never crashes', () => {
+  describe('🛑 BRAKE — never destroys, never crashes, no anti-patterns', () => {
     test('preserves a hand-authored copilot-instructions.md (user prose survives)', () => {
       writeFaf();
       mkdirSync(join(testDir, '.github'), { recursive: true });
@@ -94,39 +104,122 @@ describe('WJTTC — copilot-instructions emit', () => {
       exportCopilot();
       expect(existsSync(join(testDir, ...COPILOT))).toBe(true);
     });
+
+    test('emits NONE of GitHub’s named anti-patterns (tone / length / external-ref rules)', () => {
+      // Source: GitHub custom-instructions docs — these phrasings "may cause problems".
+      // The generated boilerplate must never bake them in.
+      writeFaf('stack:\n  runtime: Node.js\n  build: tsc\nhuman_context:\n  who: maintainer\n');
+      exportCopilot();
+      const out = read().toLowerCase();
+      expect(out).not.toContain('in the style of');
+      expect(out).not.toContain('respond in');
+      expect(out).not.toContain('less than 1000');
+      expect(out).not.toContain('styleguide.md');
+      expect(out).not.toContain('@terminal');
+    });
+
+    test('never emits raw snake_case / lowercase slot keys (it is instructions, not a dump)', () => {
+      writeFaf('stack:\n  api_type: REST\n  cicd: GitHub Actions\nhuman_context:\n  who: devs\n  why: ship faster\n');
+      exportCopilot();
+      const out = read();
+      // The dump anti-pattern — raw keys as bullet labels — must be gone.
+      expect(out).not.toContain('**api_type:**');
+      expect(out).not.toContain('**cicd:**');
+      expect(out).not.toContain('**who:**');
+      expect(out).not.toContain('**why:**');
+    });
   });
 
   // ── ⚙️ ENGINE ─────────────────────────────────────────────────────────────
-  describe('⚙️ ENGINE — emit correctness', () => {
-    test('emits the canonical structure + 2-line faf meta stamp', () => {
+  describe('⚙️ ENGINE — Copilot-grade emit correctness', () => {
+    test('emits the Copilot-grade structure + 2-line faf meta stamp', () => {
       writeFaf();
       exportCopilot();
       const out = read();
       expect(out).toContain('# GitHub Copilot Instructions — wedge');
-      expect(out).toContain('## Project Context');
-      expect(out).toContain('## Stack');
+      expect(out).toContain('## Tech stack');
       expect(out).toMatch(/<!-- faf: wedge \| TypeScript \|/); // meta stamp line 1
       expect(out).toContain('family=FAF'); // meta stamp line 2
       expect(out).toContain('<!-- faf:start -->');
       expect(out).toContain('<!-- faf:end -->');
     });
 
-    test('maps project fields → labelled bullets', () => {
+    test('leads with the goal as a prose overview (not a `- **Goal:**` bullet)', () => {
       writeFaf();
       exportCopilot();
       const out = read();
-      expect(out).toContain('- **Name:** wedge');
-      expect(out).toContain('- **Goal:** GitHub adoption wedge');
-      expect(out).toContain('- **Language:** TypeScript');
+      expect(out).toContain('GitHub adoption wedge'); // the goal, as prose
+      expect(out).not.toContain('- **Goal:**'); // not a raw key bullet
+      expect(out).not.toContain('- **Name:**'); // name lives in the H1, not a bullet
     });
 
-    test('maps stack + human_context entries', () => {
-      writeFaf('stack:\n  runtime: Node.js\nhuman_context:\n  who: maintainer\n');
+    test('labels are registry-sourced, with acronym fallback (Language first)', () => {
+      writeFaf('stack:\n  runtime: Node.js\n  api_type: REST\n  mcp_sdk: "1.0"\n');
       exportCopilot();
       const out = read();
-      expect(out).toContain('- **runtime:** Node.js');
-      expect(out).toContain('## Human Context');
-      expect(out).toContain('- **who:** maintainer');
+      expect(out).toContain('- **Language:** TypeScript');
+      expect(out).toContain('- **Runtime:** Node.js'); // registry label
+      expect(out).toContain('- **API:** REST');         // registry: api_type → "API"
+      expect(out).not.toContain('- **API Type:**');     // not the old heuristic form
+      expect(out).toContain('- **MCP SDK:** 1.0');       // off-registry key → acronym fallback
+    });
+
+    test('surfaces build & CI as imperative commands (the #1 Copilot section)', () => {
+      writeFaf('stack:\n  build: tsc\n  cicd: GitHub Actions\n');
+      exportCopilot();
+      const out = read();
+      expect(out).toContain('## Build & run');
+      expect(out).toContain('Build with `tsc`'); // command, in backticks, imperative
+      expect(out).toContain('CI runs on GitHub Actions');
+      // build/cicd are surfaced as commands, not duplicated as raw stack bullets
+      expect(out).not.toContain('- **Build:** tsc');
+      expect(out).not.toContain('- **Cicd:**');
+    });
+
+    test('future-proof commands: renders install/test/lint/run when present, omits when absent', () => {
+      // Option B will add these .faf slots; the emitter must light them up with NO rework.
+      writeFaf('stack:\n  install: bun install\n  build: tsc\n  test: bun test\n  lint: eslint .\n  run: node dist/cli.js\n');
+      exportCopilot();
+      const out = read();
+      expect(out).toContain('Install with `bun install`');
+      expect(out).toContain('Build with `tsc`');
+      expect(out).toContain('Test with `bun test`');
+      expect(out).toContain('Lint with `eslint .`');
+      expect(out).toContain('Run with `node dist/cli.js`');
+      // absent command slots produce no line
+      rmSync(join(testDir, '.github'), { recursive: true, force: true });
+      writeFaf('stack:\n  build: tsc\n');
+      exportCopilot();
+      const out2 = read();
+      expect(out2).toContain('Build with `tsc`');
+      expect(out2).not.toContain('Test with');
+      expect(out2).not.toContain('Lint with');
+      expect(out2).not.toContain('Install with');
+    });
+
+    test('Title-Cases the 6Ws under a Project context section', () => {
+      writeFaf('human_context:\n  who: maintainers\n  why: ship faster\n');
+      exportCopilot();
+      const out = read();
+      expect(out).toContain('## Project context');
+      expect(out).toContain('- **Who:** maintainers');
+      expect(out).toContain('- **Why:** ship faster');
+    });
+
+    test('is NOT a byte-identical AGENTS.md clone (complementary, not duplicate)', () => {
+      writeFaf('stack:\n  runtime: Node.js\n  build: tsc\nhuman_context:\n  who: devs\n');
+      const { generateCopilotInstructions } = require('../../src/interop/copilot-instructions.js');
+      const { generateAgentsMd } = require('../../src/interop/agents.js');
+      const data = {
+        project: { name: 'wedge', goal: 'GitHub adoption wedge', main_language: 'TypeScript' },
+        stack: { runtime: 'Node.js', build: 'tsc' },
+        human_context: { who: 'devs' },
+      };
+      const copilot = generateCopilotInstructions(data);
+      const agents = generateAgentsMd(data);
+      expect(copilot).not.toBe(agents); // the clone guard
+      expect(copilot).toContain('# GitHub Copilot Instructions');
+      expect(agents).toContain('# AGENTS.md');
     });
 
     test('--copilot alone respects the exportAll guard (no sibling files)', () => {
@@ -146,7 +239,7 @@ describe('WJTTC — copilot-instructions emit', () => {
   });
 
   // ── 🌬️ AERO ───────────────────────────────────────────────────────────────
-  describe('🌬️ AERO — edge cases & determinism', () => {
+  describe('🌬️ AERO — edge cases, determinism & length', () => {
     test('unicode + emoji in the project name survive verbatim', () => {
       writeFileSync(
         join(testDir, 'project.faf'),
@@ -157,13 +250,13 @@ describe('WJTTC — copilot-instructions emit', () => {
     });
 
     test('slotignored + empty stack values are filtered out', () => {
-      writeFaf('stack:\n  runtime: Node.js\n  build: slotignored\n  blank: ""\n');
+      writeFaf('stack:\n  runtime: Node.js\n  hosting: slotignored\n  blank: ""\n');
       exportCopilot();
       const out = read();
-      expect(out).toContain('- **runtime:** Node.js');
+      expect(out).toContain('- **Runtime:** Node.js');
       expect(out).not.toContain('slotignored');
-      expect(out).not.toContain('- **build:**');
-      expect(out).not.toContain('- **blank:**');
+      expect(out).not.toContain('- **Hosting:**');
+      expect(out).not.toContain('- **Blank:**');
     });
 
     test('deterministic — two fresh emits of the same .faf are byte-identical', () => {
@@ -174,6 +267,16 @@ describe('WJTTC — copilot-instructions emit', () => {
       exportCopilot();
       const b = read();
       expect(a).toBe(b);
+    });
+
+    test('stays short — a full .faf emits a compact file (Copilot injects it every request)', () => {
+      writeFaf(
+        'stack:\n  runtime: Node.js\n  build: tsc\n  cicd: GitHub Actions\n  hosting: npm\n' +
+        'human_context:\n  who: devs\n  what: a tool\n  why: speed\n  where: npm\n  when: ci\n  how: cli\n',
+      );
+      exportCopilot();
+      const fafBlock = read().split('<!-- faf:start -->')[1].split('<!-- faf:end -->')[0];
+      expect(fafBlock.split('\n').length).toBeLessThan(40); // ~well under "2 pages"
     });
   });
 
@@ -189,7 +292,7 @@ describe('WJTTC — copilot-instructions emit', () => {
       exportCopilot();
       const out = read();
       expect(out).toContain('Review every PR.'); // user edit preserved
-      expect(out).toContain('- **runtime:** Bun'); // managed block refreshed
+      expect(out).toContain('- **Runtime:** Bun'); // managed block refreshed, Title-Cased
       expect(countBlocks(out)).toBe(1); // never duplicated
     });
   });
