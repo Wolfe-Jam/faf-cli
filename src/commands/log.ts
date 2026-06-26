@@ -104,8 +104,7 @@ export interface LogOptions {
   json?: boolean;
 }
 
-export function logCommand(options: LogOptions = {}): void {
-  const cwd = process.cwd();
+export function logCommand(options: LogOptions = {}, cwd: string = process.cwd()): void {
   const fafPath = findFafFile(cwd);
   if (!fafPath) {
     console.error("Error: project.faf not found\n\n  Run 'faf init' to create one.");
@@ -125,12 +124,19 @@ export function logCommand(options: LogOptions = {}): void {
   const limit = options.all ? 0 : Math.max(0, parseInt(options.limit ?? '20', 10) || 20);
 
   // All commit metadata that touched the file (newest-first). Cheap — no scoring yet.
-  // \x1f (unit separator) keeps subjects with pipes/spaces intact.
-  const raw = execFileSync(
-    'git',
-    ['log', '--format=%h%x1f%ad%x1f%s', '--date=short', '--', repoRel],
-    { cwd, encoding: 'utf-8' },
-  );
+  // --follow spans renames so the timeline covers the file's whole life, not just
+  // since its current name. \x1f (unit separator) keeps subjects with pipes intact.
+  // Fail-open to an empty history on any git error — never crash the timeline.
+  let raw = '';
+  try {
+    raw = execFileSync(
+      'git',
+      ['log', '--follow', '--format=%h%x1f%ad%x1f%s', '--date=short', '--', repoRel],
+      { cwd, encoding: 'utf-8' },
+    );
+  } catch {
+    raw = '';
+  }
   const all = raw
     .split('\n')
     .filter(Boolean)
@@ -148,9 +154,15 @@ export function logCommand(options: LogOptions = {}): void {
   let entries = limit > 0 ? built.slice(0, limit) : built;
   if (options.reverse) entries = [...entries].reverse();
 
+  const total = all.length;
   if (options.json) {
-    console.log(JSON.stringify({ file: repoRel, count: entries.length, entries }, null, 2));
+    console.log(JSON.stringify({ file: repoRel, total, count: entries.length, entries }, null, 2));
   } else {
-    console.log(renderTimeline(entries, repoRel.split('/').pop() ?? 'project.faf'));
+    let out = renderTimeline(entries, repoRel.split('/').pop() ?? 'project.faf');
+    // No silent truncation — say when the window is capped, and how to see all.
+    if (limit > 0 && total > entries.length) {
+      out += `\n\n  … showing ${entries.length} of ${total} commits — \`faf log --all\` for the full timeline.`;
+    }
+    console.log(out);
   }
 }

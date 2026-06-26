@@ -16,7 +16,7 @@
  */
 import { describe, test, expect } from 'bun:test';
 import { execFileSync, spawnSync } from 'child_process';
-import { mkdirSync, writeFileSync, rmSync, readFileSync, existsSync, statSync, chmodSync } from 'fs';
+import { mkdirSync, writeFileSync, rmSync, readFileSync, existsSync, statSync, chmodSync, realpathSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { installHooks, uninstallHooks, hooksRun, hooksStatus } from '../../src/commands/hooks.js';
@@ -28,8 +28,9 @@ const CLI = join(import.meta.dir, '../../src/cli.ts');
 const LOCAL_RUNNER = `${process.execPath} ${CLI} hooks-run`; // points the hook at THIS cli
 
 const mk = (tag: string) => {
-  const dir = join(tmpdir(), `faf-hooks-${tag}-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  let dir = join(tmpdir(), `faf-hooks-${tag}-${Date.now()}-${Math.random().toString(36).slice(2)}`);
   mkdirSync(dir, { recursive: true });
+  dir = realpathSync(dir); // resolve symlinks so in-process cwd matches git's --show-toplevel
   const g = (a: string[]) => execFileSync('git', a, { cwd: dir, stdio: 'pipe', encoding: 'utf-8' });
   g(['init', '-q']); g(['config', 'user.email', 't@t.t']); g(['config', 'user.name', 't']);
   return { dir, g };
@@ -52,10 +53,8 @@ const capture = (fn: () => void): string => {
   try { fn(); } finally { console.log = ol; console.error = oe; }
   return logs.join('\n');
 };
-const inDir = (dir: string, fn: () => void) => {
-  const cwd = process.cwd(); process.chdir(dir);
-  try { fn(); } finally { process.chdir(cwd); }
-};
+// hooksRun/hooksStatus take an explicit cwd — tests pass it directly rather than
+// mutating global process.cwd() (which races with bun's concurrent file runner).
 
 describe('WJTTC — faf hooks', () => {
   // ── ⚙️ ENGINE — install / uninstall ─────────────────────────────────────────
@@ -130,7 +129,7 @@ describe('WJTTC — faf hooks', () => {
       try {
         writeFileSync(join(dir, 'project.faf'), FULL); // on disk, NOT staged/tracked
         let captured = '';
-        inDir(dir, () => { captured = capture(() => hooksRun({ strict: true })); });
+        captured = capture(() => hooksRun({ strict: true }, dir));
         expect(captured).toBe(''); // not in index → nothing to guard
       } finally { rmSync(dir, { recursive: true, force: true }); }
     });
@@ -141,7 +140,7 @@ describe('WJTTC — faf hooks', () => {
         writeFileSync(join(dir, 'readme.md'), 'x'); g(['add', 'readme.md']); g(['commit', '-q', '-m', 'base']);
         stage(dir, g, FULL); // project.faf added for the first time
         let out = '';
-        inDir(dir, () => { out = capture(() => hooksRun({ strict: true })); });
+        out = capture(() => hooksRun({ strict: true }, dir));
         expect(out).toContain('✓'); // 0% → N%, not a block
       } finally { rmSync(dir, { recursive: true, force: true }); }
     });
@@ -151,7 +150,7 @@ describe('WJTTC — faf hooks', () => {
       writeFileSync(join(dir, 'project.faf'), FULL);
       try {
         let out = '';
-        inDir(dir, () => { out = capture(() => hooksRun({ strict: true })); });
+        out = capture(() => hooksRun({ strict: true }, dir));
         expect(out).toBe('');
       } finally { rmSync(dir, { recursive: true, force: true }); }
     });
@@ -162,7 +161,7 @@ describe('WJTTC — faf hooks', () => {
     test('status reports installed mode + hooksPath conflict', () => {
       const { dir, g } = mk();
       try {
-        let out = capture(() => inDir(dir, () => hooksStatus(dir)));
+        let out = capture(() => hooksStatus(dir));
         expect(out).toMatch(/installed:\s*no/i);
         installHooks(dir, { strict: true, runnerCmd: LOCAL_RUNNER });
         out = capture(() => hooksStatus(dir));

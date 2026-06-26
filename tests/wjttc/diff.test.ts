@@ -14,7 +14,7 @@
  */
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { execFileSync, spawnSync } from 'child_process';
-import { mkdirSync, writeFileSync, rmSync, readFileSync } from 'fs';
+import { mkdirSync, writeFileSync, rmSync, readFileSync, realpathSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import {
@@ -127,27 +127,27 @@ describe('WJTTC — faf diff', () => {
 
   // ── 🛞 TYRE ───────────────────────────────────────────────────────────────
   describe('🛞 TYRE — real git repo (commit → edit → diff)', () => {
+    // diffCommand takes an explicit cwd — tests never mutate global process.cwd()
+    // (which races with the ~20 other chdir-using suites under bun concurrency).
     let dir: string;
-    let cwd: string;
     beforeEach(() => {
       dir = join(tmpdir(), `faf-diff-${Date.now()}-${Math.random().toString(36).slice(2)}`);
       mkdirSync(dir, { recursive: true });
+      dir = realpathSync(dir); // resolve symlinks so repoRel matches git's --show-toplevel
       const g = (args: string[]) => execFileSync('git', args, { cwd: dir, stdio: 'pipe' });
       g(['init', '-q']);
       g(['config', 'user.email', 't@t.t']); g(['config', 'user.name', 't']);
       writeFileSync(join(dir, 'project.faf'), yaml(A));
       g(['add', 'project.faf']); g(['commit', '-q', '-m', 'a']);
       writeFileSync(join(dir, 'project.faf'), yaml(B)); // edit, uncommitted
-      cwd = process.cwd();
-      process.chdir(dir);
     });
-    afterEach(() => { process.chdir(cwd); rmSync(dir, { recursive: true, force: true }); });
+    afterEach(() => { rmSync(dir, { recursive: true, force: true }); });
 
     test('faf diff (HEAD vs working tree) prints the real context delta', () => {
       const logs: string[] = [];
       const orig = console.log;
       console.log = (...a: unknown[]) => { logs.push(a.join(' ')); };
-      try { diffCommand(undefined, {}); } finally { console.log = orig; }
+      try { diffCommand(undefined, {}, dir); } finally { console.log = orig; }
       const out = logs.join('\n');
       expect(out).toContain('Build');           // tsc → vite
       expect(out).toContain('vite');
@@ -159,7 +159,7 @@ describe('WJTTC — faf diff', () => {
       const logs: string[] = [];
       const orig = console.log;
       console.log = (...a: unknown[]) => { logs.push(a.join(' ')); };
-      try { diffCommand(undefined, { json: true }); } finally { console.log = orig; }
+      try { diffCommand(undefined, { json: true }, dir); } finally { console.log = orig; }
       const parsed = JSON.parse(logs.join('\n'));
       expect(parsed.base).toBe('HEAD');
       expect(Array.isArray(parsed.changes)).toBe(true);

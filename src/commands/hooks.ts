@@ -68,9 +68,8 @@ export interface HooksRunOptions {
  * The pre-commit guard. Scores staged project.faf vs HEAD and reports the delta.
  * Fails OPEN on everything except a deliberate strict-mode regression.
  */
-export function hooksRun(options: HooksRunOptions = {}): void {
+export function hooksRun(options: HooksRunOptions = {}, cwd: string = process.cwd()): void {
   try {
-    const cwd = process.cwd();
     let top: string;
     try {
       top = gitTop(cwd);

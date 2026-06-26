@@ -292,9 +292,7 @@ export interface DiffOptions {
   uninstallDriver?: boolean;
 }
 
-export function diffCommand(range: string | undefined, options: DiffOptions = {}): void {
-  const cwd = process.cwd();
-
+export function diffCommand(range: string | undefined, options: DiffOptions = {}, cwd: string = process.cwd()): void {
   // Driver management is a separate verb that lives on the same command.
   if (options.installDriver) return installDriver(cwd);
   if (options.uninstallDriver) return uninstallDriver(cwd);

@@ -14,7 +14,7 @@
  */
 import { describe, test, expect } from 'bun:test';
 import { execFileSync } from 'child_process';
-import { mkdirSync, writeFileSync, rmSync } from 'fs';
+import { mkdirSync, writeFileSync, rmSync, realpathSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { buildTimeline, renderTimeline, logCommand, type LogEntry } from '../../src/commands/log.js';
@@ -86,8 +86,10 @@ describe('WJTTC — faf log', () => {
   // ── 🛞 TYRE ───────────────────────────────────────────────────────────────
   describe('🛞 TYRE — real git repo (3 evolving commits)', () => {
     const setup = (): string => {
-      const dir = tmp('repo');
+      let dir = tmp('repo');
       mkdirSync(dir, { recursive: true });
+      dir = realpathSync(dir); // resolve symlinks (macOS /var → /private/var) so repoRel matches git
+
       const g = (a: string[]) => execFileSync('git', a, { cwd: dir, stdio: 'pipe' });
       g(['init', '-q']); g(['config', 'user.email', 't@t.t']); g(['config', 'user.name', 't']);
       const commit = (body: string, msg: string) => {
@@ -100,38 +102,49 @@ describe('WJTTC — faf log', () => {
       return dir;
     };
 
+    // NB: logCommand takes an explicit cwd — tests never mutate global process.cwd()
+    // (that races with the ~20 other chdir-using suites under bun's concurrency).
     test('renders the real score progression across the 3 commits', () => {
       const dir = setup();
-      const cwd = process.cwd();
-      process.chdir(dir);
       try {
-        const out = capture(() => logCommand({}));
+        const out = capture(() => logCommand({}, dir));
         expect(out).toContain('score timeline');
         expect(out).toContain('add ci + why'); // newest subject
         expect(out).toContain('init context'); // oldest subject
         expect(out).toMatch(/new/i);           // origin marker on the first commit
         expect(out).toMatch(/\d+%/);           // scores present
-      } finally {
-        process.chdir(cwd);
-        rmSync(dir, { recursive: true, force: true });
-      }
+      } finally { rmSync(dir, { recursive: true, force: true }); }
     });
 
-    test('--json emits the structured timeline (newest-first, origin flagged)', () => {
+    test('--json emits the structured timeline (newest-first, origin flagged, total)', () => {
       const dir = setup();
-      const cwd = process.cwd();
-      process.chdir(dir);
       try {
-        const out = capture(() => logCommand({ json: true }));
+        const out = capture(() => logCommand({ json: true }, dir));
         const parsed = JSON.parse(out);
         expect(parsed.count).toBe(3);
+        expect(parsed.total).toBe(3);                               // full history size
         expect(parsed.entries[0].subject).toBe('add ci + why');     // newest first
         expect(parsed.entries[2].first).toBe(true);                 // origin
         expect(parsed.entries[2].delta).toBeNull();
-      } finally {
-        process.chdir(cwd);
-        rmSync(dir, { recursive: true, force: true });
-      }
+      } finally { rmSync(dir, { recursive: true, force: true }); }
+    });
+
+    test('an explicit cap says so — no SILENT truncation', () => {
+      const dir = setup(); // 3 commits
+      try {
+        const out = capture(() => logCommand({ limit: '2' }, dir));
+        expect(out).toMatch(/showing 2 of 3/); // honest about the window
+        expect(out).toContain('--all');        // and how to see the rest
+      } finally { rmSync(dir, { recursive: true, force: true }); }
+    });
+
+    test('a non-numeric -n falls back gracefully, never crashes', () => {
+      const dir = setup();
+      try {
+        let out = '';
+        expect(() => { out = capture(() => logCommand({ limit: 'abc' }, dir)); }).not.toThrow();
+        expect(out).toContain('score timeline');
+      } finally { rmSync(dir, { recursive: true, force: true }); }
     });
   });
 });
