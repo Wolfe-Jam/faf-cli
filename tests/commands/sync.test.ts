@@ -44,6 +44,22 @@ describe('sync command — generateClaudeMd output contract', () => {
     expect(content).toContain('Node.js');
   });
 
+  test('generateClaudeMd labels are registry-sourced (API, CI/CD, Framework), acronym fallback', () => {
+    const data = {
+      faf_version: '2.5.0',
+      project: { name: 'cli-tool', main_language: 'TypeScript' },
+      stack: { api_type: 'MCP', runtime: 'Node.js', cicd: 'GitHub Actions', frontend: 'Svelte', mcp_sdk: '1.0' },
+    };
+    const content = generateClaudeMd(data);
+    expect(content).toContain('**API:** MCP');              // registry: api_type → "API"
+    expect(content).toContain('**CI/CD:** GitHub Actions'); // registry: cicd → "CI/CD" (was "Cicd")
+    expect(content).toContain('**Framework:** Svelte');     // registry: frontend → "Framework"
+    expect(content).toContain('**Runtime:** Node.js');
+    expect(content).toContain('**MCP SDK:** 1.0');          // off-registry key → acronym fallback
+    expect(content).not.toContain('**Api Type:**');
+    expect(content).not.toContain('**Cicd:**');
+  });
+
   test('generateClaudeMd handles empty project gracefully', () => {
     const data = { faf_version: '2.5.0', project: {} };
     expect(() => generateClaudeMd(data)).not.toThrow();

@@ -3,53 +3,53 @@ import type { SlotDef, SlotCategory } from './types.js';
 /** All 33 Mk4 canonical slots */
 export const SLOTS: SlotDef[] = [
   // Project Meta (3)
-  { index: 1, path: 'project.name', description: 'Project name', category: 'project' },
-  { index: 2, path: 'project.goal', description: 'Goal (use case)', category: 'project' },
-  { index: 3, path: 'project.main_language', description: 'Primary language', category: 'project' },
+  { index: 1, path: 'project.name', label: 'Name', description: 'Project name', category: 'project' },
+  { index: 2, path: 'project.goal', label: 'Goal', description: 'Goal (use case)', category: 'project' },
+  { index: 3, path: 'project.main_language', label: 'Language', description: 'Primary language', category: 'project' },
 
   // Human Context (6)
-  { index: 4, path: 'human_context.who', description: 'Who is this for?', category: 'human' },
-  { index: 5, path: 'human_context.what', description: 'What are they building', category: 'human' },
-  { index: 6, path: 'human_context.why', description: 'Why does it exist', category: 'human' },
-  { index: 7, path: 'human_context.where', description: 'Where does it run', category: 'human' },
-  { index: 8, path: 'human_context.when', description: 'When was it started / timeline', category: 'human' },
-  { index: 9, path: 'human_context.how', description: 'How is it built', category: 'human' },
+  { index: 4, path: 'human_context.who', label: 'Who', description: 'Who is this for?', category: 'human' },
+  { index: 5, path: 'human_context.what', label: 'What', description: 'What are they building', category: 'human' },
+  { index: 6, path: 'human_context.why', label: 'Why', description: 'Why does it exist', category: 'human' },
+  { index: 7, path: 'human_context.where', label: 'Where', description: 'Where does it run', category: 'human' },
+  { index: 8, path: 'human_context.when', label: 'When', description: 'When was it started / timeline', category: 'human' },
+  { index: 9, path: 'human_context.how', label: 'How', description: 'How is it built', category: 'human' },
 
   // Frontend Stack (4)
-  { index: 10, path: 'stack.frontend',         canonical: 'stack.framework', description: 'Framework (React, Svelte, etc.)', category: 'frontend' },
-  { index: 11, path: 'stack.css_framework',    canonical: 'stack.css',       description: 'CSS framework',                   category: 'frontend' },
-  { index: 12, path: 'stack.ui_library',                                     description: 'UI component library',            category: 'frontend' },
-  { index: 13, path: 'stack.state_management', canonical: 'stack.state',     description: 'State management',                category: 'frontend' },
+  { index: 10, path: 'stack.frontend',         canonical: 'stack.framework', label: 'Framework',  description: 'Framework (React, Svelte, etc.)', category: 'frontend' },
+  { index: 11, path: 'stack.css_framework',    canonical: 'stack.css',       label: 'CSS',        description: 'CSS framework',                   category: 'frontend' },
+  { index: 12, path: 'stack.ui_library',                                     label: 'UI Library', description: 'UI component library',            category: 'frontend' },
+  { index: 13, path: 'stack.state_management', canonical: 'stack.state',     label: 'State',      description: 'State management',                category: 'frontend' },
 
   // Backend Stack (5)
-  { index: 14, path: 'stack.backend',                                        description: 'Backend framework',                 category: 'backend' },
-  { index: 15, path: 'stack.api_type',         canonical: 'stack.api',       description: 'API style (REST, GraphQL, etc.)',   category: 'backend' },
-  { index: 16, path: 'stack.runtime',                                        description: 'Runtime (Node, Bun, Python, etc.)', category: 'backend' },
-  { index: 17, path: 'stack.database',         canonical: 'stack.db',        description: 'Database',                          category: 'backend' },
-  { index: 18, path: 'stack.connection',                                     description: 'Connection method (Prisma, etc.)',  category: 'backend' },
+  { index: 14, path: 'stack.backend',                                        label: 'Backend',    description: 'Backend framework',                 category: 'backend' },
+  { index: 15, path: 'stack.api_type',         canonical: 'stack.api',       label: 'API',        description: 'API style (REST, GraphQL, etc.)',   category: 'backend' },
+  { index: 16, path: 'stack.runtime',                                        label: 'Runtime',    description: 'Runtime (Node, Bun, Python, etc.)', category: 'backend' },
+  { index: 17, path: 'stack.database',         canonical: 'stack.db',        label: 'Database',   description: 'Database',                          category: 'backend' },
+  { index: 18, path: 'stack.connection',                                     label: 'Connection', description: 'Connection method (Prisma, etc.)',  category: 'backend' },
 
   // Universal Stack (3)
-  { index: 19, path: 'stack.hosting', description: 'Hosting platform', category: 'universal' },
-  { index: 20, path: 'stack.build', description: 'Build tool', category: 'universal' },
-  { index: 21, path: 'stack.cicd', description: 'CI/CD', category: 'universal' },
+  { index: 19, path: 'stack.hosting', label: 'Hosting', description: 'Hosting platform', category: 'universal' },
+  { index: 20, path: 'stack.build', label: 'Build', description: 'Build tool', category: 'universal' },
+  { index: 21, path: 'stack.cicd', label: 'CI/CD', description: 'CI/CD', category: 'universal' },
 
   // Enterprise Infra (5)
-  { index: 22, path: 'stack.monorepo_tool',                                  description: 'Monorepo tool',     category: 'enterprise_infra' },
-  { index: 23, path: 'stack.package_manager',  canonical: 'stack.pkg_manager', description: 'Package manager', category: 'enterprise_infra' },
-  { index: 24, path: 'stack.workspaces', description: 'Workspace configuration', category: 'enterprise_infra' },
-  { index: 25, path: 'monorepo.packages_count', description: 'Number of packages', category: 'enterprise_infra' },
-  { index: 26, path: 'monorepo.build_orchestrator', description: 'Build orchestration tool', category: 'enterprise_infra' },
+  { index: 22, path: 'stack.monorepo_tool',                                  label: 'Monorepo',        description: 'Monorepo tool',     category: 'enterprise_infra' },
+  { index: 23, path: 'stack.package_manager',  canonical: 'stack.pkg_manager', label: 'Package Manager', description: 'Package manager', category: 'enterprise_infra' },
+  { index: 24, path: 'stack.workspaces', label: 'Workspaces', description: 'Workspace configuration', category: 'enterprise_infra' },
+  { index: 25, path: 'monorepo.packages_count', label: 'Packages', description: 'Number of packages', category: 'enterprise_infra' },
+  { index: 26, path: 'monorepo.build_orchestrator', label: 'Build Orchestrator', description: 'Build orchestration tool', category: 'enterprise_infra' },
 
   // Enterprise App (4)
-  { index: 27, path: 'stack.admin', description: 'Admin panel', category: 'enterprise_app' },
-  { index: 28, path: 'stack.cache', description: 'Caching layer', category: 'enterprise_app' },
-  { index: 29, path: 'stack.search', description: 'Search engine', category: 'enterprise_app' },
-  { index: 30, path: 'stack.storage', description: 'Object storage', category: 'enterprise_app' },
+  { index: 27, path: 'stack.admin', label: 'Admin', description: 'Admin panel', category: 'enterprise_app' },
+  { index: 28, path: 'stack.cache', label: 'Cache', description: 'Caching layer', category: 'enterprise_app' },
+  { index: 29, path: 'stack.search', label: 'Search', description: 'Search engine', category: 'enterprise_app' },
+  { index: 30, path: 'stack.storage', label: 'Storage', description: 'Object storage', category: 'enterprise_app' },
 
   // Enterprise Ops (3)
-  { index: 31, path: 'monorepo.versioning_strategy', description: 'Version strategy', category: 'enterprise_ops' },
-  { index: 32, path: 'monorepo.shared_configs', description: 'Shared configs', category: 'enterprise_ops' },
-  { index: 33, path: 'monorepo.remote_cache', description: 'Remote build cache', category: 'enterprise_ops' },
+  { index: 31, path: 'monorepo.versioning_strategy', label: 'Versioning', description: 'Version strategy', category: 'enterprise_ops' },
+  { index: 32, path: 'monorepo.shared_configs', label: 'Shared Configs', description: 'Shared configs', category: 'enterprise_ops' },
+  { index: 33, path: 'monorepo.remote_cache', label: 'Remote Cache', description: 'Remote build cache', category: 'enterprise_ops' },
 ];
 
 /** Slot lookup by path — dual-keyed (current on-wire `path` AND Mk4 `canonical`

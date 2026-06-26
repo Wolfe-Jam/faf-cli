@@ -2,6 +2,7 @@ import { join } from 'path';
 import type { FafData } from '../core/types.js';
 import { fafMetaTag } from './claude.js';
 import { injectFafBlock } from './inject.js';
+import { filled, slotLabel } from './labels.js';
 
 /** Generate GEMINI.md content from .faf data */
 export function generateGeminiMd(data: FafData): string {
@@ -22,8 +23,8 @@ export function generateGeminiMd(data: FafData): string {
     lines.push('');
     lines.push('## Stack');
     for (const [key, value] of Object.entries(data.stack)) {
-      if (value && value !== 'slotignored' && value !== '') {
-        lines.push(`- ${key}: ${value}`);
+      if (filled(value)) {
+        lines.push(`- ${slotLabel(`stack.${key}`)}: ${value.trim()}`);
       }
     }
   }

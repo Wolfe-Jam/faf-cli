@@ -4,7 +4,7 @@
 <div style="display: flex; align-items: center; gap: 12px;">
   <img src="https://www.faf.one/orange-smiley.svg" alt="FAF" width="40" />
   <div>
-    <h1 style="margin: 0; color: #000000;">faf-cli — The Copilot Edition</h1>
+    <h1 style="margin: 0; color: #000000;">faf-cli — Know Your Stack</h1>
     <p style="margin: 2px 0 0 0; font-size: 0.85em; letter-spacing: 0.12em; opacity: 0.7; text-transform: uppercase;"><strong>Persistent AI Context Standard</strong></p>
     <p style="margin: 6px 0 0 0;"><strong>Persistent Project Context for AI.</strong></p>
     <p style="margin: 0;"><strong>Define once. Run anywhere.</strong></p>
@@ -60,6 +60,18 @@ brew install faf-cli && faf   # Homebrew
 Run `faf` with no arguments:
 
 ![faf](./nelly.png)
+
+---
+
+## v6.16 — Know Your Stack
+
+**Every AI-context file FAF writes labels your stack from one canonical source.**
+
+```bash
+faf export --all     # CLAUDE.md · AGENTS.md · copilot-instructions.md · GEMINI.md · .cursorrules
+```
+
+FAF *knows your stack* — all 33 canonical slots now carry their display label in the registry, so `api_type` → **API**, `cicd` → **CI/CD**, `frontend` → **Framework**, the same way in **every** emitted file. GEMINI.md and `.cursorrules` were raw-key dumps; now they read like the rest. And `.github/copilot-instructions.md` gets a ground-up **Copilot-grade** rewrite — a prose overview, a `## Build & run` command section, GitHub-spec framing. Copilot enhancements, and more.
 
 ---
 

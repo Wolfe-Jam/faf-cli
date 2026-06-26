@@ -2,6 +2,7 @@ import { join } from 'path';
 import type { FafData } from '../core/types.js';
 import { fafMetaTag } from './claude.js';
 import { injectFafBlock } from './inject.js';
+import { filled, slotLabel } from './labels.js';
 
 /** Generate AGENTS.md content from .faf data */
 export function generateAgentsMd(data: FafData): string {
@@ -26,8 +27,8 @@ export function generateAgentsMd(data: FafData): string {
 
   if (data.stack) {
     for (const [key, value] of Object.entries(data.stack)) {
-      if (value && value !== 'slotignored' && value !== '') {
-        lines.push(`- **${key}:** ${value}`);
+      if (filled(value)) {
+        lines.push(`- **${slotLabel(`stack.${key}`)}:** ${value.trim()}`);
       }
     }
   }
@@ -37,8 +38,8 @@ export function generateAgentsMd(data: FafData): string {
     lines.push('## Human Context');
     lines.push('');
     for (const [key, value] of Object.entries(data.human_context)) {
-      if (value && value !== '') {
-        lines.push(`- **${key}:** ${value}`);
+      if (filled(value)) {
+        lines.push(`- **${slotLabel(`human_context.${key}`)}:** ${value.trim()}`);
       }
     }
   }
