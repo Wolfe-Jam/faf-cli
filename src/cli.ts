@@ -13,6 +13,7 @@ import { checkCommand } from './commands/check.js';
 import { exportCommand } from './commands/export.js';
 import { showCommand } from './commands/show.js';
 import { gitCommand } from './commands/git.js';
+import { diffCommand } from './commands/diff.js';
 import { infoCommand } from './commands/info.js';
 import { formatsCommand } from './commands/formats.js';
 import { clearCommand } from './commands/clear.js';
@@ -127,6 +128,12 @@ program
   .command('git <url>')
   .description('Instant .faf from any GitHub repo')
   .action((url) => gitCommand(url));
+
+program
+  .command('diff [range]')
+  .description('Semantic context diff between two .faf versions (slot deltas + score). git ranges: <ref>, A..B, A...B')
+  .option('--json', 'Emit the delta as structured JSON')
+  .action((range, options) => diffCommand(range, options));
 
 program
   .command('export')

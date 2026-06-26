@@ -44,6 +44,13 @@ export function readFafRaw(path: string): string {
   return readFileSync(path, 'utf-8');
 }
 
+/** Parse .faf data from a YAML string — e.g. the output of `git show <ref>:project.faf`.
+ *  The readers above are path-only; `faf diff` needs to parse a version that
+ *  lives in git history, never on disk. */
+export function readFafFromString(text: string): FafData {
+  return parse(text) as FafData;
+}
+
 /** Find the .faf file in a directory (walks up) */
 export function findFafFile(dir: string = process.cwd()): string | null {
   const candidates = ['project.faf', '.faf'];
