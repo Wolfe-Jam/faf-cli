@@ -2,7 +2,7 @@ import { describe, test, expect, spyOn } from 'bun:test';
 import { readdirSync } from 'fs';
 import { tmpdir } from 'os';
 
-describe('demo command — execution + side-effect contract', () => {
+describe('BRAKE: demo command — execution + side-effect contract', () => {
   test('demoCommand runs without throwing', async () => {
     const { demoCommand } = await import('../../src/commands/demo.js');
     const logSpy = spyOn(console, 'log').mockImplementation(() => {});
@@ -33,7 +33,7 @@ describe('demo command — execution + side-effect contract', () => {
   });
 });
 
-describe('demo command — output contract', () => {
+describe('ENGINE: demo command — output contract', () => {
   test('demoCommand prints the demo header + completion message', async () => {
     const { demoCommand } = await import('../../src/commands/demo.js');
     const logs: string[] = [];
@@ -79,7 +79,7 @@ describe('demo command — output contract', () => {
   });
 });
 
-describe('demo command — robustness (run twice)', () => {
+describe('AERO: demo command — robustness (run twice)', () => {
   test('demoCommand can be invoked twice in a row without state leak', async () => {
     const { demoCommand } = await import('../../src/commands/demo.js');
     const logSpy = spyOn(console, 'log').mockImplementation(() => {});

@@ -45,7 +45,7 @@ human_context:
   how: faf bench in any repo
 `;
 
-describe('WJTTC — faf bench question derivation', () => {
+describe('ENGINE: WJTTC — faf bench question derivation', () => {
   test('derives questions ONLY from populated active slots', () => {
     const qs = deriveQuestionSet(FAF);
     const paths = qs.questions.map((q) => q.path);
@@ -77,7 +77,7 @@ describe('WJTTC — faf bench question derivation', () => {
   });
 });
 
-describe('WJTTC — mechanical grading', () => {
+describe('ENGINE: WJTTC — mechanical grading', () => {
   test('normalize: case, punctuation, whitespace', () => {
     expect(normalizeAnswer('  TypeScript! ')).toBe('typescript');
     expect(normalizeAnswer('GitHub Actions.')).toBe('github actions');
@@ -120,7 +120,7 @@ describe('WJTTC — mechanical grading', () => {
   });
 });
 
-describe('WJTTC — ✪ receipt (parity discipline)', () => {
+describe('PIT: WJTTC — ✪ receipt (parity discipline)', () => {
   test('sha256 over canonical projection; verifiable by a third party', () => {
     const state = {
       version: BENCH_VERSION,

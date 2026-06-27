@@ -5,7 +5,7 @@ import { join } from 'path';
 import { SLOTS, isPlaceholder } from '../../src/core/slots.js';
 import { writeFaf } from '../../src/interop/faf.js';
 
-describe('go command — slot helpers (contract)', () => {
+describe('ENGINE: go command — slot helpers (contract)', () => {
   test('isPlaceholder detects empty values', () => {
     expect(isPlaceholder(null)).toBe(true);
     expect(isPlaceholder(undefined)).toBe(true);
@@ -33,7 +33,7 @@ describe('go command — slot helpers (contract)', () => {
   });
 });
 
-describe('go command — non-interactive branches', () => {
+describe('BRAKE: go command — non-interactive branches', () => {
   let testDir: string;
   let originalCwd: string;
 
@@ -96,7 +96,7 @@ describe('go command — non-interactive branches', () => {
   });
 });
 
-describe('go command — session resume', () => {
+describe('TYRE: go command — session resume', () => {
   let testDir: string;
   let originalCwd: string;
   const SESSION_FILE = '.faf-session.json';
@@ -175,7 +175,7 @@ describe('go command — session resume', () => {
   });
 });
 
-describe('go command — interactive contract (documented, not exercised)', () => {
+describe('PIT: go command — interactive contract (documented, not exercised)', () => {
   // The interactive prompt loop uses readline against process.stdin/stdout.
   // Testing it deterministically requires piping to stdin or mocking readline,
   // which adds fragility without much marginal value. The contract is:

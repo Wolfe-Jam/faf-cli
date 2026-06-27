@@ -1,7 +1,7 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { isPro } from '../../src/core/pro.js';
 
-describe('pro command', () => {
+describe('PIT: pro command', () => {
   let originalPro: string | undefined;
 
   beforeEach(() => {

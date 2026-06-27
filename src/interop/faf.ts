@@ -15,7 +15,10 @@ export function readFaf(path: string): FafData {
  *  rendered as a `# found: <list>` YAML comment next to the `type:` field —
  *  Glass Hood doctrine: the user sees WHY the cli classified the project as
  *  it did. `_meta` is a runtime hint, never a serialized .faf field. */
-export function writeFaf(path: string, data: FafData): void {
+/** Serialize .faf data to YAML text (the exact bytes writeFaf would write).
+ *  Strips runtime `_meta` and renders its `found` rationale as a `# found:`
+ *  comment by `type:`. Used by writeFaf and by `faf git --stdout`. */
+export function serializeFaf(data: FafData): string {
   const meta = (data as FafData & { _meta?: { found?: string[] } })._meta;
   // Strip _meta before serialization — it's never part of the .faf schema.
   const cleanData: FafData = { ...data };
@@ -30,18 +33,29 @@ export function writeFaf(path: string, data: FafData): void {
     text = text.replace(
       /^(\s+type:\s+\S+)(\s*)$/m,
       (match, prefix: string, trailing: string) => {
-        if (trailing.includes('#')) return match;
+        if (trailing.includes('#')) {return match;}
         return `${prefix}  # found: ${comment}`;
       },
     );
   }
 
-  writeFileSync(path, text, 'utf-8');
+  return text;
+}
+
+export function writeFaf(path: string, data: FafData): void {
+  writeFileSync(path, serializeFaf(data), 'utf-8');
 }
 
 /** Read raw YAML text from a .faf file */
 export function readFafRaw(path: string): string {
   return readFileSync(path, 'utf-8');
+}
+
+/** Parse .faf data from a YAML string — e.g. the output of `git show <ref>:project.faf`.
+ *  The readers above are path-only; `faf diff` needs to parse a version that
+ *  lives in git history, never on disk. */
+export function readFafFromString(text: string): FafData {
+  return parse(text) as FafData;
 }
 
 /** Find the .faf file in a directory (walks up) */
@@ -53,7 +67,7 @@ export function findFafFile(dir: string = process.cwd()): string | null {
   // that path-compared the result.
   for (const name of candidates) {
     const full = join(dir, name);
-    if (existsSync(full)) return full;
+    if (existsSync(full)) {return full;}
   }
   // Walk up one level — use path.dirname for cross-platform parent
   // resolution. The earlier regex `dir.replace(/\/[^/]+$/, '')`
@@ -62,7 +76,7 @@ export function findFafFile(dir: string = process.cwd()): string | null {
   if (parent !== dir) {
     for (const name of candidates) {
       const full = join(parent, name);
-      if (existsSync(full)) return full;
+      if (existsSync(full)) {return full;}
     }
   }
   return null;

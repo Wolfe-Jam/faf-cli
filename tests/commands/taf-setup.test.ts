@@ -8,7 +8,7 @@ import { join } from 'path';
  * Locks: writes a wired workflow, detects the runner, and is NON-DESTRUCTIVE
  * (never clobbers an existing taf.yml) — and needs no .faf to run.
  */
-describe('faf taf setup', () => {
+describe('PIT: faf taf setup', () => {
   let testDir: string;
   let originalCwd: string;
 

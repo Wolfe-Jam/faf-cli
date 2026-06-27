@@ -9,7 +9,7 @@ import {
   writeGrokConfig,
 } from '../../src/interop/grok.js';
 
-describe('interop/grok — .grok/config.toml MCP wiring', () => {
+describe('TYRE: interop/grok — .grok/config.toml MCP wiring', () => {
   let testDir: string;
   const configPath = () => join(testDir, '.grok', 'config.toml');
 

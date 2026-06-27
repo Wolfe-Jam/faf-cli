@@ -6,7 +6,7 @@ import { execSync } from 'child_process';
 import { detectStack } from '../../src/detect/stack.js';
 import { parse } from 'yaml';
 
-describe('git command', () => {
+describe('TYRE: git command', () => {
   let testDir: string;
   let originalCwd: string;
 

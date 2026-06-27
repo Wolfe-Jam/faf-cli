@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v6.16.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v7.0.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -9,6 +9,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.0.0] - 2026-06-27 — The GIT Version
+
+**FAF is to Context what Git is to Versions.** Git gave *code* diff, log, blame, hooks, and CI. v7.0 gives *context* the same: `project.faf` stops merely living in your repo and becomes a git-native artifact you can diff, log, guard, and pull at any ref. Purely additive — every existing command is unchanged; 7.0 is a safe upgrade.
+
+### Added
+- **`faf diff [range]`** — a *semantic* context diff: registry-labelled slot changes (added/changed/removed) plus the deterministic **score delta** between two `.faf` versions. Git-range aware (`<ref>`, `A..B`, `A...B`), `--json`. `85% ● → 100% 🏆` right next to `tsc → vite`.
+- **git diff-driver** — `faf diff --install-driver` wires `.gitattributes` + `diff.faf.command` so native **`git diff` / `git log -p` / `git show`** render the `.faf` delta in place of the raw text diff. (A `command` driver — a context delta is cross-file.)
+- **`faf log`** — the **score timeline** across history: the `.faf` score at every commit that touched it, with per-commit deltas. Proof-Over-Time — the trend can't be gamed.
+- **`faf hooks --install`** — a pre-commit **context guard**: scores the staged `.faf` vs HEAD and warns (or `--strict` blocks) on a score regression. Fails open, husky-safe, never clobbers an existing hook.
+- **`faf git`, deepened** — instant scored context from any repo, now **versioned**: `--ref <branch|tag>`, `--output`, `--stdout`.
+- **`faf --help` git-native group** — diff · driver · log · hooks · git presented as one surface.
+
+### Changed
+- **`faf git` no longer overwrites an existing `project.faf`** — it refuses (use `--force`, `--output <path>`, or `--stdout`). The old behaviour silently clobbered your context; the new default protects it. *(The one behaviour change in 7.0 — everything else is additive.)*
+
+### Quality
+- **WJTTC suite 100% 5-tiered** (was 45% untiered) — every test classified BRAKE/ENGINE/AERO/TYRE/PIT.
+- **Version-ordering guard** — the driver/hooks refuse to wire to a `faf` older than 7.0 (a `--strict` hook against an old `faf` would otherwise block commits).
 
 ## [6.16.0] - 2026-06-25 — Know Your Stack
 

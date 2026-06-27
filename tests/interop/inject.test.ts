@@ -20,7 +20,7 @@ const DATA: any = {
   human_context: { who: 'devs' },
 };
 
-describe('injectFafBlock — non-destructive', () => {
+describe('TYRE: injectFafBlock — non-destructive', () => {
   test('no file → creates it with the block', () => {
     const p = join(tmp(), 'F.md');
     injectFafBlock(p, 'hello');
@@ -83,7 +83,7 @@ describe('injectFafBlock — non-destructive', () => {
   });
 });
 
-describe('interop writers — enhance, never replace', () => {
+describe('TYRE: interop writers — enhance, never replace', () => {
   const MARK = '## HAND-WRITTEN — MUST SURVIVE';
 
   test('writeAgentsMd preserves an existing AGENTS.md', () => {

@@ -14,7 +14,7 @@ function tmpProject(files: Record<string, string>): string {
   return d;
 }
 
-describe('relentlessContext — sourced 6W extractor (public)', () => {
+describe('TYRE: relentlessContext — sourced 6W extractor (public)', () => {
   test('present + populated from a README, sourced (no guess)', () => {
     const dir = tmpProject({
       'package.json': JSON.stringify({ name: 't', description: 'A tool that does a useful thing for many developers.' }),
@@ -38,7 +38,7 @@ describe('relentlessContext — sourced 6W extractor (public)', () => {
   });
 });
 
-describe('assembleFreshFaf — the .faf builder (public)', () => {
+describe('TYRE: assembleFreshFaf — the .faf builder (public)', () => {
   test('present + builds a structured .faf with the core sections', () => {
     const dir = tmpProject({
       'package.json': JSON.stringify({ name: 't', devDependencies: { typescript: '^5' } }),

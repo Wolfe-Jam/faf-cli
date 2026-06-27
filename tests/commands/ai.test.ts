@@ -3,7 +3,7 @@ import { mkdirSync, rmSync, writeFileSync, readFileSync, existsSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 
-describe('ai command', () => {
+describe('BRAKE: ai command', () => {
   let testDir: string;
   let originalCwd: string;
   let originalApiKey: string | undefined;
@@ -156,7 +156,7 @@ describe('ai command', () => {
   });
 });
 
-describe('ai command — internal helpers (behavior contracts)', () => {
+describe('PIT: ai command — internal helpers (behavior contracts)', () => {
   // The internal helpers (getNestedValue, setNestedValue) aren't exported,
   // but their behavior contract IS testable through aiCommand("enhance"):
   // - reads slots via dot-paths

@@ -10,7 +10,7 @@ import { execSync } from 'child_process';
  * init → score → auto → sync → export → check → edit → drift → convert →
  * compile → decompile → taf → search → share → recover → migrate → demo → info → formats
  */
-describe('faf e2e — full lifecycle', () => {
+describe('TYRE: faf e2e — full lifecycle', () => {
   let testDir: string;
   let originalCwd: string;
   const cli = join(__dirname, '../src/cli.ts');
@@ -190,7 +190,7 @@ describe('faf e2e — full lifecycle', () => {
   test('info shows version', () => {
     const out = run('info');
     expect(out).toContain('faf');
-    expect(out).toContain('v6');
+    expect(out).toMatch(/v\d+\.\d+\.\d+/); // shows a semver — version-agnostic (survives major bumps)
   });
 
   test('demo runs full walkthrough', () => {

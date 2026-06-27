@@ -13,6 +13,9 @@ import { checkCommand } from './commands/check.js';
 import { exportCommand } from './commands/export.js';
 import { showCommand } from './commands/show.js';
 import { gitCommand } from './commands/git.js';
+import { diffCommand, diffDriverCommand } from './commands/diff.js';
+import { logCommand } from './commands/log.js';
+import { hooksCommand, hooksRun } from './commands/hooks.js';
 import { infoCommand } from './commands/info.js';
 import { formatsCommand } from './commands/formats.js';
 import { clearCommand } from './commands/clear.js';
@@ -125,8 +128,48 @@ program
 
 program
   .command('git <url>')
-  .description('Instant .faf from any GitHub repo')
-  .action((url) => gitCommand(url));
+  .description('Instant scored context from any GitHub repo (any branch/tag with --ref)')
+  .option('--ref <ref>', 'Clone at a specific branch or tag (versioned context)')
+  .option('--output <path>', 'Write to a custom path (default: ./project.faf)')
+  .option('--force', 'Overwrite an existing project.faf')
+  .option('--stdout', 'Print the .faf to stdout instead of writing a file')
+  .action((url, options) => gitCommand(url, options));
+
+program
+  .command('diff [range]')
+  .description('Semantic context diff between two .faf versions (slot deltas + score). git ranges: <ref>, A..B, A...B')
+  .option('--json', 'Emit the delta as structured JSON')
+  .option('--install-driver', 'Wire faf diff into native git — `git diff` renders .faf score+slot deltas')
+  .option('--uninstall-driver', 'Remove the native-git diff driver')
+  .action((range, options) => diffCommand(range, options));
+
+program
+  .command('diff-driver [args...]', { hidden: true })
+  .description('Internal: GIT_EXTERNAL_DIFF handler invoked by git for diff=faf files')
+  .action((args) => diffDriverCommand(args ?? []));
+
+program
+  .command('log')
+  .description('Score timeline across git history — the .faf score at every commit that touched it')
+  .option('-n, --limit <n>', 'Max commits to show (default 20)')
+  .option('--all', 'Show every commit, no cap')
+  .option('--reverse', 'Oldest-first instead of newest-first')
+  .option('--json', 'Emit the timeline as structured JSON')
+  .action((options) => logCommand(options));
+
+program
+  .command('hooks')
+  .description('Pre-commit context guard — scores staged .faf vs HEAD, warns (or --strict blocks) on regression')
+  .option('--install', 'Install the pre-commit hook')
+  .option('--uninstall', 'Remove the faf hook block (preserves other hooks)')
+  .option('--strict', 'With --install: block the commit on a score regression (default: warn only)')
+  .action((options) => hooksCommand(options));
+
+program
+  .command('hooks-run', { hidden: true })
+  .description('Internal: the pre-commit context guard the git hook invokes')
+  .option('--strict', 'Exit non-zero on a score regression')
+  .action((options) => hooksRun(options));
 
 program
   .command('export')
@@ -314,5 +357,22 @@ if (process.argv.length <= 2) {
     console.log(`  ${dim('Run')} ${fafCyan('faf --help')} ${dim('for commands')}`);
   })();
 } else {
+  // Cohesion: present the 7.0 git-native surface as one group in `faf --help`,
+  // so diff / log / hooks / driver / git read as a unit — "feels like git".
+  program.addHelpText(
+    'after',
+    [
+      '',
+      'Git-native (The GIT Version):',
+      '  faf diff [range]            semantic context diff + score delta (A..B, A...B)',
+      '  faf diff --install-driver   make native `git diff` render .faf deltas',
+      '  faf log                     score timeline across history (Proof-Over-Time)',
+      '  faf hooks --install         pre-commit guard against context regression',
+      '  faf git <url> [--ref]       instant scored context from any repo, any branch/tag',
+      '',
+      '  "FAF is to Context what Git is to Versions."',
+      '',
+    ].join('\n'),
+  );
   program.parse(process.argv);
 }

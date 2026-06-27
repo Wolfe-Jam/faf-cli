@@ -4,7 +4,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import { contextCommand } from '../../src/commands/context.js';
 
-describe('context command', () => {
+describe('ENGINE: context command', () => {
   let testDir: string;
   let origCwd: () => string;
 

@@ -4,7 +4,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import { convertCommand } from '../../src/commands/convert.js';
 
-describe('convert command', () => {
+describe('ENGINE: convert command', () => {
   let testDir: string;
   let origCwd: () => string;
 

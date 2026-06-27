@@ -5,7 +5,7 @@ import { join } from 'path';
 import { gzipSync } from 'zlib';
 import { findFafFile, readFafRaw } from '../../src/interop/faf.js';
 
-describe('share command', () => {
+describe('AERO: share command', () => {
   let testDir: string;
   let originalCwd: string;
 

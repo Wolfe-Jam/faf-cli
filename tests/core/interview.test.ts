@@ -20,7 +20,7 @@ import {
 } from '../../src/core/interview.js';
 import { SLOTS, isPlaceholder } from '../../src/core/slots.js';
 
-describe('WJTTC — the 8-Q core', () => {
+describe('ENGINE: WJTTC — the 8-Q core', () => {
   test('exactly 8 questions: name + goal + the six Ws', () => {
     expect(SIX_WS_INTERVIEW.length).toBe(8);
     const paths = SIX_WS_INTERVIEW.map((q) => q.path);
@@ -53,7 +53,7 @@ describe('WJTTC — the 8-Q core', () => {
   });
 });
 
-describe('WJTTC — registry integrity (slots.ts is the spine)', () => {
+describe('ENGINE: WJTTC — registry integrity (slots.ts is the spine)', () => {
   test('every interview path is a real canonical slot path', () => {
     const slotPaths = new Set(SLOTS.map((s) => s.path));
     for (const q of INTERVIEW) {
@@ -84,7 +84,7 @@ describe('WJTTC — registry integrity (slots.ts is the spine)', () => {
   });
 });
 
-describe('WJTTC — questionForSlot (one voice everywhere)', () => {
+describe('ENGINE: WJTTC — questionForSlot (one voice everywhere)', () => {
   test('registry slots get the registry question', () => {
     expect(questionForSlot('human_context.who')).toBe(INTERVIEW_BY_PATH.get('human_context.who')!.question);
   });
@@ -96,7 +96,7 @@ describe('WJTTC — questionForSlot (one voice everywhere)', () => {
   });
 });
 
-describe('WJTTC — interviewForMissing', () => {
+describe('ENGINE: WJTTC — interviewForMissing', () => {
   const isEmpty = (v: unknown) => isPlaceholder(v);
 
   test('asks only what is empty; slotignored is NEVER interviewed', () => {

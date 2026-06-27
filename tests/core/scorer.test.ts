@@ -2,7 +2,7 @@ import { describe, test, expect } from 'bun:test';
 import { enrichScore, scoreFafYaml } from '../../src/core/scorer.js';
 import type { KernelScoreResult, ScoreResult } from '../../src/core/types.js';
 
-describe('enrichScore', () => {
+describe('ENGINE: enrichScore', () => {
   test('enriches 100% as Trophy', () => {
     const kernel: KernelScoreResult = {
       score: 100, tier: '🏆', populated: 9, empty: 0, ignored: 12,
@@ -34,7 +34,7 @@ describe('enrichScore', () => {
   });
 });
 
-describe('scoreFafYaml — About Repo short-circuit', () => {
+describe('ENGINE: scoreFafYaml — About Repo short-circuit', () => {
   test('app_type: about with source_score: 100 → Trophy, no kernel call', () => {
     const yaml = `
 faf_version: 3.0

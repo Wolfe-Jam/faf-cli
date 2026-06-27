@@ -125,7 +125,7 @@ describe('AERO — edges', () => {
   });
 });
 
-describe('PROVENANCE — seeded rows carry their source (auditable confirm)', () => {
+describe('PIT: PROVENANCE — seeded rows carry their source (auditable confirm)', () => {
   const get = (t: ReturnType<typeof buildTableOf8>, path: string) => t.rows.find((r) => r.path === path)!;
 
   test('P1 — goal-seeded rows are sourced to "project goal"', () => {

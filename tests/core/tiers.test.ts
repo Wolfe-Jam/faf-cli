@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'bun:test';
 import { getTier, getNextTier, TIERS } from '../../src/core/tiers.js';
 
-describe('getTier', () => {
+describe('ENGINE: getTier', () => {
   test('100% = TROPHY', () => {
     expect(getTier(100).name).toBe('TROPHY');
   });
@@ -52,7 +52,7 @@ describe('getTier', () => {
   });
 });
 
-describe('getNextTier', () => {
+describe('ENGINE: getNextTier', () => {
   test('TROPHY has no next tier', () => {
     expect(getNextTier(100)).toBeNull();
   });
@@ -70,7 +70,7 @@ describe('getNextTier', () => {
   });
 });
 
-describe('TIERS', () => {
+describe('PIT: TIERS', () => {
   test('has 8 tiers', () => {
     expect(TIERS).toHaveLength(8);
   });

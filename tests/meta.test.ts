@@ -2,7 +2,7 @@ import { describe, test, expect } from 'bun:test';
 import { readdirSync, readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 
-describe('YOLO Infrastructure Safety', () => {
+describe('PIT: YOLO Infrastructure Safety', () => {
   test('no .test.ts files in src/', () => {
     const find = (dir: string): string[] => {
       const results: string[] = [];
@@ -74,9 +74,9 @@ describe('YOLO Infrastructure Safety', () => {
     }
   });
 
-  test('package.json has correct v6 config', () => {
+  test('package.json has correct config', () => {
     const pkg = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf-8'));
-    expect(pkg.version).toMatch(/^6\./);
+    expect(pkg.version).toMatch(/^\d+\.\d+\.\d+/); // valid semver — version-agnostic (survives major bumps)
     expect(pkg.type).toBe('module');
     expect(pkg.dependencies?.commander).toBeDefined();
     expect(pkg.dependencies?.['faf-scoring-kernel']).toBeDefined();
@@ -106,7 +106,7 @@ describe('YOLO Infrastructure Safety', () => {
   // Bun (and other bundlers) can inline modules and convert __dirname into the
   // build-machine path as a string literal. Source can be clean while dist is poisoned.
   // This test enforces the "No Hardcode" policy on the actual published artifact.
-  describe('build invariants — dist/ is portable', () => {
+  describe('PIT: build invariants — dist/ is portable', () => {
     const distDir = join(__dirname, '../dist');
     const distFiles = ['cli.js', 'index.js'];
     const buildMachinePatterns = [

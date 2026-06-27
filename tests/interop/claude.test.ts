@@ -5,7 +5,7 @@ import { join } from 'path';
 import { fafMetaTag, generateClaudeMd, parseClaudeMd, readClaudeMd, writeClaudeMd } from '../../src/interop/claude.js';
 import type { FafData } from '../../src/core/types.js';
 
-describe('interop/claude', () => {
+describe('ENGINE: interop/claude', () => {
   let testDir: string;
 
   beforeEach(() => {
@@ -57,7 +57,7 @@ describe('interop/claude', () => {
 
   // ─── #64: 2-line FAF stamp (canonical per cross-ai-2-line-meta-stamp.md) ───
 
-  describe('fafMetaTag — canonical 2-line stamp (#64)', () => {
+  describe('ENGINE: fafMetaTag — canonical 2-line stamp (#64)', () => {
     const fullData: FafData = {
       project: {
         name: 'demo',
@@ -140,7 +140,7 @@ describe('interop/claude', () => {
 
   // ─── #62: parseClaudeMd strips trailing vN.N.N from project.name ───
 
-  describe('parseClaudeMd — strip version trailer from heading (#62)', () => {
+  describe('AERO: parseClaudeMd — strip version trailer from heading (#62)', () => {
     test('strips full semver: # CLAUDE.md — faf-agent v0.1.0 → faf-agent', () => {
       const parsed = parseClaudeMd('# CLAUDE.md — faf-agent v0.1.0\n');
       expect(parsed.project?.name).toBe('faf-agent');

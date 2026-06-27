@@ -20,7 +20,7 @@ import { join } from 'path';
 import { tmpdir } from 'os';
 import * as api from '../../src/index.js';
 
-describe('WJTTC — Turbo-Cat export: present AND populated', () => {
+describe('ENGINE: WJTTC — Turbo-Cat export: present AND populated', () => {
   let dir: string;
 
   beforeAll(() => {
@@ -114,7 +114,7 @@ describe('WJTTC — Turbo-Cat export: present AND populated', () => {
   });
 });
 
-describe('WJTTC — INTERVIEW_PATHS serialization companion', () => {
+describe('ENGINE: WJTTC — INTERVIEW_PATHS serialization companion', () => {
   test('plain object, populated, survives JSON (Maps do not)', () => {
     expect(Object.keys(api.INTERVIEW_PATHS).length).toBe(api.INTERVIEW.length);
     const roundTrip = JSON.parse(JSON.stringify(api.INTERVIEW_PATHS));

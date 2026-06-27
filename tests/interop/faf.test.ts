@@ -4,7 +4,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import { readFaf, writeFaf, readFafRaw, findFafFile } from '../../src/interop/faf.js';
 
-describe('interop/faf', () => {
+describe('TYRE: interop/faf', () => {
   let testDir: string;
 
   beforeEach(() => {

@@ -13,7 +13,7 @@ import {
   readSlotValue,
 } from '../../src/core/slots.js';
 
-describe('SLOTS', () => {
+describe('ENGINE: SLOTS', () => {
   test('has 33 slots total', () => {
     expect(SLOTS).toHaveLength(33);
   });
@@ -37,7 +37,7 @@ describe('SLOTS', () => {
   });
 });
 
-describe('BASE_SLOTS', () => {
+describe('ENGINE: BASE_SLOTS', () => {
   test('has 21 slots', () => {
     expect(BASE_SLOTS).toHaveLength(21);
   });
@@ -49,13 +49,13 @@ describe('BASE_SLOTS', () => {
   });
 });
 
-describe('ENTERPRISE_SLOTS', () => {
+describe('ENGINE: ENTERPRISE_SLOTS', () => {
   test('has 33 slots', () => {
     expect(ENTERPRISE_SLOTS).toHaveLength(33);
   });
 });
 
-describe('SLOT_BY_PATH', () => {
+describe('ENGINE: SLOT_BY_PATH', () => {
   test('finds project.name', () => {
     expect(SLOT_BY_PATH.get('project.name')?.index).toBe(1);
   });
@@ -65,7 +65,7 @@ describe('SLOT_BY_PATH', () => {
   });
 });
 
-describe('slotsByCategory', () => {
+describe('ENGINE: slotsByCategory', () => {
   test('project has 3 slots', () => {
     expect(slotsByCategory('project')).toHaveLength(3);
   });
@@ -105,7 +105,7 @@ describe('slotsByCategory', () => {
   });
 });
 
-describe('isPlaceholder', () => {
+describe('ENGINE: isPlaceholder', () => {
   test('null/undefined/empty are placeholders', () => {
     expect(isPlaceholder(null)).toBe(true);
     expect(isPlaceholder(undefined)).toBe(true);
@@ -138,7 +138,7 @@ describe('isPlaceholder', () => {
   });
 });
 
-describe('APP_TYPE_CATEGORIES', () => {
+describe('ENGINE: APP_TYPE_CATEGORIES', () => {
   test('cli has project + human + universal (12 slots — v6.5.0 universal-extension)', () => {
     expect(new Set(APP_TYPE_CATEGORIES.cli)).toEqual(new Set(['project', 'human', 'universal']));
   });
@@ -159,7 +159,7 @@ describe('APP_TYPE_CATEGORIES', () => {
   });
 });
 
-describe('Mk4 canonical alias map (issue #66 — staged prep)', () => {
+describe('PIT: Mk4 canonical alias map (issue #66 — staged prep)', () => {
   test('the 6 legacy slots carry their Mk4 canonical alias', () => {
     const expected = new Map<string, string>([
       ['stack.frontend',         'stack.framework'],

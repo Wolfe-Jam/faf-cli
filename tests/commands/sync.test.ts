@@ -5,7 +5,7 @@ import { join } from 'path';
 import { writeFaf, readFaf, readFafRaw } from '../../src/interop/faf.js';
 import { generateClaudeMd, writeClaudeMd } from '../../src/interop/claude.js';
 
-describe('sync command — generateClaudeMd output contract', () => {
+describe('ENGINE: sync command — generateClaudeMd output contract', () => {
   let testDir: string;
 
   beforeEach(() => {
@@ -87,7 +87,7 @@ describe('sync command — generateClaudeMd output contract', () => {
   });
 });
 
-describe('sync command — error paths', () => {
+describe('BRAKE: sync command — error paths', () => {
   let testDir: string;
   let originalCwd: string;
 
@@ -123,7 +123,7 @@ describe('sync command — error paths', () => {
   });
 });
 
-describe('sync command — direction logic (auto / push / pull)', () => {
+describe('TYRE: sync command — direction logic (auto / push / pull)', () => {
   let testDir: string;
   let originalCwd: string;
 

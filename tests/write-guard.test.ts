@@ -29,7 +29,7 @@ function tsFiles(dir: string, out: string[] = []): string[] {
   return out;
 }
 
-describe('TRUST SEAL — enhance, never replace', () => {
+describe('BRAKE: TRUST SEAL — enhance, never replace', () => {
   test('no raw fs.writeFile to a context/IDE-rule file — use injectFafBlock', () => {
     const violations: string[] = [];
     for (const f of tsFiles('src')) {

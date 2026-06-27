@@ -6,7 +6,7 @@ import { validateFaf } from '../../src/core/schema.js';
 import { readFaf, readFafRaw } from '../../src/interop/faf.js';
 import * as kernel from '../../src/wasm/kernel.js';
 
-describe('check command', () => {
+describe('BRAKE: check command', () => {
   let testDir: string;
 
   beforeEach(() => {

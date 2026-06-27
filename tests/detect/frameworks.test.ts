@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'bun:test';
 import { FRAMEWORKS } from '../../src/detect/frameworks.js';
 
-describe('FRAMEWORKS catalog', () => {
+describe('PIT: FRAMEWORKS catalog', () => {
   test('has frameworks defined', () => {
     expect(FRAMEWORKS.length).toBeGreaterThan(40);
   });

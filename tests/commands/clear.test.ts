@@ -4,7 +4,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import { clearCommand } from '../../src/commands/clear.js';
 
-describe('clear command', () => {
+describe('BRAKE: clear command', () => {
   const dirs: string[] = [];
 
   beforeEach(() => {

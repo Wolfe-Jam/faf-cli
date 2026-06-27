@@ -3,7 +3,7 @@ import { mkdirSync, writeFileSync, rmSync, existsSync, readFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 
-describe('taf command', () => {
+describe('TYRE: taf command', () => {
   let testDir: string;
   let originalCwd: string;
 

@@ -2,7 +2,7 @@ import { describe, test, expect } from 'bun:test';
 import { SLOTS } from '../../src/core/slots.js';
 import { FORMATS } from '../../src/detect/formats.js';
 
-describe('search command', () => {
+describe('ENGINE: search command', () => {
   test('finds slots by keyword', () => {
     const q = 'frontend';
     const matches = SLOTS.filter(s =>

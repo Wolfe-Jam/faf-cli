@@ -5,7 +5,7 @@ import { join } from 'path';
 import { editCommand } from '../../src/commands/edit.js';
 import { readFaf } from '../../src/interop/faf.js';
 
-describe('edit command', () => {
+describe('TYRE: edit command', () => {
   let testDir: string;
   let origCwd: () => string;
 
