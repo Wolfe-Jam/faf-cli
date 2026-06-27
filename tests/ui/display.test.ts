@@ -8,6 +8,9 @@
  */
 
 import { describe, test, expect, spyOn } from 'bun:test';
+import { mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { displayScore } from '../../src/ui/display.js';
 import { getTier } from '../../src/core/tiers.js';
 import type { ScoreResult } from '../../src/core/types.js';
@@ -104,5 +107,45 @@ describe('WJTTC ENGINE: displayScore empty-slot diagnostic', () => {
     expect(output).toContain('project.goal');
     expect(output).toContain('human_context.who');
     expect(output).toContain('human_context.what');
+  });
+});
+
+describe('WJTTC ENGINE: TAF "proof over time" KNOW nudge', () => {
+  const trophy = () => buildResult({ 'project.name': 'populated', 'project.goal': 'populated' });
+  const subTrophy = () => buildResult({ 'project.name': 'populated', 'project.goal': 'empty' });
+
+  function capture(result: ScoreResult, file: string): string {
+    const logs: string[] = [];
+    const spy = spyOn(console, 'log').mockImplementation((...args: unknown[]) => {
+      logs.push(args.join(' '));
+    });
+    displayScore(result, file);
+    spy.mockRestore();
+    return logs.join('\n');
+  }
+
+  test('surfaces the nudge at TROPHY when TAF is not wired', () => {
+    // /tmp/<unique>.faf — no .github/workflows/taf.yml up the tree
+    const output = capture(trophy(), join(tmpdir(), `faf-notaf-${process.pid}.faf`));
+    expect(output).toContain('faf taf setup');
+    expect(output).toMatch(/proof over time/i);
+  });
+
+  test('omits the nudge below TROPHY (Trophy is the funnel moment)', () => {
+    const output = capture(subTrophy(), join(tmpdir(), `faf-notaf-${process.pid}.faf`));
+    expect(output).not.toContain('faf taf setup');
+  });
+
+  test('omits the nudge once taf.yml is wired (no nag)', () => {
+    const dir = join(tmpdir(), `faf-taf-wired-${process.pid}-${process.hrtime.bigint()}`);
+    mkdirSync(join(dir, '.github', 'workflows'), { recursive: true });
+    writeFileSync(join(dir, '.github', 'workflows', 'taf.yml'), 'name: TAF Receipts\n');
+    try {
+      const output = capture(trophy(), join(dir, 'project.faf'));
+      expect(output).toContain('Trophy. AI never has to guess.');
+      expect(output).not.toContain('faf taf setup');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });
