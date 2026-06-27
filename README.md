@@ -4,7 +4,7 @@
 <div style="display: flex; align-items: center; gap: 12px;">
   <img src="https://www.faf.one/orange-smiley.svg" alt="FAF" width="40" />
   <div>
-    <h1 style="margin: 0; color: #000000;">faf-cli — Know Your Stack</h1>
+    <h1 style="margin: 0; color: #000000;">faf-cli — The GIT Version</h1>
     <p style="margin: 2px 0 0 0; font-size: 0.85em; letter-spacing: 0.12em; opacity: 0.7; text-transform: uppercase;"><strong>Persistent AI Context Standard</strong></p>
     <p style="margin: 6px 0 0 0;"><strong>Persistent Project Context for AI.</strong></p>
     <p style="margin: 0;"><strong>Define once. Run anywhere.</strong></p>
@@ -62,6 +62,20 @@ Run `faf` with no arguments:
 ![faf](./nelly.png)
 
 ---
+
+## v7.0 — The GIT Version
+
+**FAF is to Context what Git is to Versions.**
+
+Git gave your *code* diff, log, blame, hooks, CI. v7.0 gives your *context* the same — `project.faf` is now a git-native artifact:
+
+- **`faf diff`** — semantic context diff + score delta between any two refs (`85% ● → 100% 🏆`)
+- **`git diff` speaks .faf** — `faf diff --install-driver` makes native `git diff` / `log -p` / `show` render the delta
+- **`faf log`** — the score timeline across history (Proof-Over-Time)
+- **`faf hooks --install`** — pre-commit guard: warn, or `--strict` block, on a context regression
+- **`faf git owner/repo --ref <tag>`** — instant, *versioned*, scored context from any repo
+
+Purely additive — a safe upgrade. (One change: `faf git` now refuses to overwrite an existing `project.faf` — pass `--force`.)
 
 ## v6.16 — Know Your Stack
 

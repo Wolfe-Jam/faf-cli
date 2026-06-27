@@ -190,7 +190,7 @@ describe('TYRE: faf e2e — full lifecycle', () => {
   test('info shows version', () => {
     const out = run('info');
     expect(out).toContain('faf');
-    expect(out).toContain('v6');
+    expect(out).toMatch(/v\d+\.\d+\.\d+/); // shows a semver — version-agnostic (survives major bumps)
   });
 
   test('demo runs full walkthrough', () => {

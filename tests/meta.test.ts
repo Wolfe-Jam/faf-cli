@@ -74,9 +74,9 @@ describe('PIT: YOLO Infrastructure Safety', () => {
     }
   });
 
-  test('package.json has correct v6 config', () => {
+  test('package.json has correct config', () => {
     const pkg = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf-8'));
-    expect(pkg.version).toMatch(/^6\./);
+    expect(pkg.version).toMatch(/^\d+\.\d+\.\d+/); // valid semver — version-agnostic (survives major bumps)
     expect(pkg.type).toBe('module');
     expect(pkg.dependencies?.commander).toBeDefined();
     expect(pkg.dependencies?.['faf-scoring-kernel']).toBeDefined();
