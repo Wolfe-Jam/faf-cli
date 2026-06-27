@@ -6,7 +6,7 @@
   <div>
     <h1 style="margin: 0; color: #000000;">faf-cli — The GIT Version</h1>
     <p style="margin: 2px 0 0 0; font-size: 0.85em; letter-spacing: 0.12em; opacity: 0.7; text-transform: uppercase;"><strong>Persistent AI Context Standard</strong></p>
-    <p style="margin: 6px 0 0 0;"><strong>Persistent Project Context for AI.</strong></p>
+    <p style="margin: 6px 0 0 0;"><strong>FAF is to Context what Git is to Versions.</strong></p>
     <p style="margin: 0;"><strong>Define once. Run anywhere.</strong></p>
   </div>
 </div>
