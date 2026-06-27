@@ -26,7 +26,7 @@ import { execFileSync } from 'child_process';
 import { existsSync, readFileSync, writeFileSync, chmodSync, mkdirSync } from 'fs';
 import { relative, resolve, dirname } from 'path';
 import { findFafFile } from '../interop/faf.js';
-import { computeFafDiff } from './diff.js';
+import { computeFafDiff, runnerWorks } from './diff.js';
 
 const START = '# >>> faf >>>';
 const END = '# <<< faf <<<';
@@ -149,6 +149,20 @@ export function installHooks(cwd: string, options: InstallOptions = {}): boolean
   void top; // (repo confirmed; path resolved below is worktree-safe)
   const hookFile = preCommitPath(cwd);
   const runner = options.runnerCmd ?? RUNNER;
+
+  // Pre-flight the version-ordering trap: the runner must support `hooks-run`
+  // (faf ≥ 7.0). A --strict hook wired to an older faf would error on every
+  // commit and BLOCK it — refuse that outright. Warn for the harmless warn case.
+  if (!runnerWorks(runner)) {
+    const cmd = runner.trim().split(/\s+/)[0];
+    if (options.strict) {
+      console.error(`Error: \`${cmd}\` on PATH doesn't support \`hooks-run\` yet (needs faf ≥ 7.0).`);
+      console.error('  A --strict hook against an older faf would BLOCK your commits. Upgrade faf, then re-install.');
+      return false;
+    }
+    console.log(`⚠  \`${cmd}\` on PATH doesn't support \`hooks-run\` yet (needs faf ≥ 7.0) — the hook no-ops until you upgrade.`);
+  }
+
   const block = buildBlock(runner, !!options.strict);
 
   let content = existsSync(hookFile) ? readFileSync(hookFile, 'utf-8') : '';

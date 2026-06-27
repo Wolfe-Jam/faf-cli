@@ -113,6 +113,27 @@ describe('WJTTC — faf hooks', () => {
       } finally { rmSync(dir, { recursive: true, force: true }); }
     });
 
+    test('REFUSES a --strict install when the runner lacks hooks-run (would block commits)', () => {
+      const { dir } = mk();
+      try {
+        let ok = true;
+        const out = capture(() => { ok = installHooks(dir, { strict: true, runnerCmd: 'faf-NOPE hooks-run' }); });
+        expect(ok).toBe(false);                       // refused
+        expect(out).toMatch(/BLOCK/i);                // told why
+        expect(existsSync(hookPath(dir))).toBe(false); // no dangerous hook written
+      } finally { rmSync(dir, { recursive: true, force: true }); }
+    });
+
+    test('warn install with an unsupported runner still installs, but warns', () => {
+      const { dir } = mk();
+      try {
+        let ok = false;
+        const out = capture(() => { ok = installHooks(dir, { runnerCmd: 'faf-NOPE hooks-run' }); });
+        expect(ok).toBe(true);                          // warn mode is harmless → still installs
+        expect(out).toMatch(/no-ops until you upgrade/i);
+      } finally { rmSync(dir, { recursive: true, force: true }); }
+    });
+
     test('install outside a git repo returns false, no crash', () => {
       const dir = join(tmpdir(), `faf-norepo-${Date.now()}`); mkdirSync(dir, { recursive: true });
       try {

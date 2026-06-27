@@ -18,7 +18,7 @@ import { mkdirSync, writeFileSync, rmSync, readFileSync, realpathSync } from 'fs
 import { tmpdir } from 'os';
 import { join } from 'path';
 import {
-  diffSlots, computeFafDiff, renderFafDiff, diffCommand, diffDriverCommand, installDriver, type FafDiff,
+  diffSlots, computeFafDiff, renderFafDiff, diffCommand, diffDriverCommand, installDriver, runnerWorks, type FafDiff,
 } from '../../src/commands/diff.js';
 
 const A = {
@@ -208,6 +208,12 @@ describe('WJTTC — faf diff', () => {
         expect(out).toContain('(absent)'); // all-zero hex → absent label
         expect(out).toContain('(added)');
       } finally { rmSync(newF, { force: true }); }
+    });
+
+    test('runnerWorks: true for a 7.0 runner, false for a missing/old one (version-trap guard)', () => {
+      const cli = join(import.meta.dir, '../../src/cli.ts');
+      expect(runnerWorks(`${process.execPath} ${cli} diff-driver`)).toBe(true);   // local 7.0 supports it
+      expect(runnerWorks('faf-DEFINITELY-NOT-INSTALLED diff-driver')).toBe(false); // missing/old → caught
     });
 
     test('unmerged path (git passes a single arg) → clear note, no bogus diff', () => {

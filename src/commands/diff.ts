@@ -244,6 +244,22 @@ export function diffDriverCommand(argv: string[]): void {
 /** The .gitattributes line that opts .faf files into the driver. */
 const GA_LINE = '*.faf diff=faf';
 
+/**
+ * Does the configured runner actually resolve AND support its subcommand?
+ * Catches the version-ordering trap: a driver/hook wired to a `faf` older than
+ * 7.0 (which lacks `diff-driver`/`hooks-run`). Runs it with no args — a safe
+ * no-op that exits 0 on a 7.0+ faf and errors ("unknown command") on an old one.
+ */
+export function runnerWorks(runnerCmd: string): boolean {
+  const [cmd, ...args] = runnerCmd.trim().split(/\s+/);
+  try {
+    execFileSync(cmd, args, { stdio: ['pipe', 'pipe', 'pipe'] });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /** Resolve the git repo root, or exit(2) if not in a repo. */
 function repoRoot(cwd: string): string {
   try {
@@ -272,7 +288,11 @@ export function installDriver(cwd: string): void {
   execFileSync('git', ['config', 'diff.faf.command', 'faf diff-driver'], { cwd });
   console.log('✅ git config       diff.faf.command = faf diff-driver');
   console.log('\n→ `git diff`, `git log -p`, `git show` now render the .faf score + slot delta.');
-  console.log('  Note: git runs `faf diff-driver`, so `faf` must be on PATH when git diffs (a global install puts it there).');
+  // Pre-flight: the `faf` git will invoke must actually support diff-driver (≥ 7.0).
+  if (!runnerWorks('faf diff-driver')) {
+    console.log('\n⚠  the `faf` on your PATH does not support `diff-driver` yet (needs faf ≥ 7.0).');
+    console.log('   `git diff` on .faf files falls back to the raw text diff until you upgrade.');
+  }
 }
 
 /** Remove the driver wiring (git config). Leaves .gitattributes for the user to keep or delete. */
