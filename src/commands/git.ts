@@ -86,7 +86,7 @@ export function resolveGitTarget(
   options: GitCommandOptions,
   cwd: string = process.cwd(),
 ): { outputPath: string | null } {
-  if (options.stdout) return { outputPath: null };
+  if (options.stdout) {return { outputPath: null };}
   const outputPath = options.output ? resolve(cwd, options.output) : join(cwd, 'project.faf');
   if (existsSync(outputPath) && !options.force) {
     throw new Error(

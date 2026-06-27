@@ -32,7 +32,7 @@ export interface LogEntry {
 
 /** Score a raw .faf YAML via the kernel. 0 for empty/unscorable — never throws. */
 function safeScore(raw: string): number {
-  if (!raw.trim()) return 0;
+  if (!raw.trim()) {return 0;}
   try {
     return scoreFafYaml(raw).score ?? 0;
   } catch {
@@ -66,7 +66,7 @@ export function buildTimeline(
 
 /** Render the timeline as a human-readable progression (newest-first by default). */
 export function renderTimeline(entries: LogEntry[], fafName = 'project.faf'): string {
-  if (entries.length === 0) return `${fafName} — no history (no commits touch it yet)`;
+  if (entries.length === 0) {return `${fafName} — no history (no commits touch it yet)`;}
   const lines: string[] = [];
   lines.push(`${fafName} — score timeline (${entries.length} commit${entries.length === 1 ? '' : 's'})`);
   lines.push('');
@@ -152,7 +152,7 @@ export function logCommand(options: LogOptions = {}, cwd: string = process.cwd()
   const withRaw = all.slice(0, fetchN).map((c) => ({ ...c, raw: readFafAtRef(c.hex, repoRel, cwd) }));
   const built = buildTimeline(withRaw);
   let entries = limit > 0 ? built.slice(0, limit) : built;
-  if (options.reverse) entries = [...entries].reverse();
+  if (options.reverse) {entries = [...entries].reverse();}
 
   const total = all.length;
   if (options.json) {

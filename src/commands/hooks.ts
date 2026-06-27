@@ -77,11 +77,11 @@ export function hooksRun(options: HooksRunOptions = {}, cwd: string = process.cw
       return; // not a git repo — nothing to guard
     }
     const fafPath = findFafFile(cwd);
-    if (!fafPath) return; // no context file — nothing to guard
+    if (!fafPath) {return;} // no context file — nothing to guard
 
     const repoRel = relative(top, fafPath).split('\\').join('/');
     const staged = gitShow(`:${repoRel}`, cwd);
-    if (staged === null) return; // project.faf not staged (or staged for deletion) — silent pass
+    if (staged === null) {return;} // project.faf not staged (or staged for deletion) — silent pass
 
     const head = gitShow(`HEAD:${repoRel}`, cwd) ?? ''; // '' on first commit / newly-added file
     const diff = computeFafDiff(head, staged);
@@ -174,7 +174,7 @@ export function installHooks(cwd: string, options: InstallOptions = {}): boolean
     content = content.slice(0, s) + block + after;
   } else if (content.trim()) {
     // Append to an existing user hook — never clobber their content.
-    content = content.endsWith('\n') ? content + '\n' + block : content + '\n\n' + block;
+    content = content.endsWith('\n') ? `${content}\n${block}` : `${content}\n\n${block}`;
   } else {
     content = `#!/bin/sh\n${block}`;
   }
@@ -228,8 +228,8 @@ export function hooksStatus(cwd: string): void {
   const strict = /hooks-run --strict/.test(content);
   console.log('faf pre-commit context guard');
   console.log(`  installed:  ${installed ? `yes (${strict ? 'strict' : 'warn'})` : 'no'}`);
-  if (hooksPath) console.log(`  ⚠ core.hooksPath = ${hooksPath} (a hook manager owns hooks — faf won't install here)`);
-  if (!installed && !hooksPath) console.log('  → `faf hooks --install` (add --strict to block on regression)');
+  if (hooksPath) {console.log(`  ⚠ core.hooksPath = ${hooksPath} (a hook manager owns hooks — faf won't install here)`);}
+  if (!installed && !hooksPath) {console.log('  → `faf hooks --install` (add --strict to block on regression)');}
 }
 
 export interface HooksOptions {
@@ -241,11 +241,11 @@ export interface HooksOptions {
 export function hooksCommand(options: HooksOptions = {}): void {
   const cwd = process.cwd();
   if (options.install) {
-    if (!installHooks(cwd, { strict: options.strict })) process.exit(2);
+    if (!installHooks(cwd, { strict: options.strict })) {process.exit(2);}
     return;
   }
   if (options.uninstall) {
-    if (!uninstallHooks(cwd)) process.exit(2);
+    if (!uninstallHooks(cwd)) {process.exit(2);}
     return;
   }
   hooksStatus(cwd);

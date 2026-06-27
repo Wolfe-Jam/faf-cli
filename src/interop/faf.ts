@@ -33,7 +33,7 @@ export function serializeFaf(data: FafData): string {
     text = text.replace(
       /^(\s+type:\s+\S+)(\s*)$/m,
       (match, prefix: string, trailing: string) => {
-        if (trailing.includes('#')) return match;
+        if (trailing.includes('#')) {return match;}
         return `${prefix}  # found: ${comment}`;
       },
     );
@@ -67,7 +67,7 @@ export function findFafFile(dir: string = process.cwd()): string | null {
   // that path-compared the result.
   for (const name of candidates) {
     const full = join(dir, name);
-    if (existsSync(full)) return full;
+    if (existsSync(full)) {return full;}
   }
   // Walk up one level — use path.dirname for cross-platform parent
   // resolution. The earlier regex `dir.replace(/\/[^/]+$/, '')`
@@ -76,7 +76,7 @@ export function findFafFile(dir: string = process.cwd()): string | null {
   if (parent !== dir) {
     for (const name of candidates) {
       const full = join(parent, name);
-      if (existsSync(full)) return full;
+      if (existsSync(full)) {return full;}
     }
   }
   return null;

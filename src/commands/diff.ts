@@ -79,8 +79,8 @@ export function diffSlots(
     const t = readSlotValue(target as Record<string, unknown>, slot);
     const bFilled = !emptyForDiff(b);
     const tFilled = !emptyForDiff(t);
-    if (bFilled) filledBase++;
-    if (tFilled) filledTarget++;
+    if (bFilled) {filledBase++;}
+    if (tFilled) {filledTarget++;}
 
     const label = slot.label ?? slot.path.split('.').pop() ?? slot.path;
     const meta = { path: slot.path, label, category: String(slot.category) };
@@ -98,7 +98,7 @@ export function diffSlots(
 
 /** Score a raw .faf YAML via the kernel. 0 for empty/unscorable — never throws. */
 function safeScore(raw: string): number {
-  if (!raw.trim()) return 0;
+  if (!raw.trim()) {return 0;}
   try {
     return scoreFafYaml(raw).score ?? 0;
   } catch {
@@ -108,7 +108,7 @@ function safeScore(raw: string): number {
 
 /** Parse a raw .faf YAML, tolerating empty/malformed input (→ {}). */
 function safeParse(raw: string): FafData {
-  if (!raw.trim()) return {} as FafData;
+  if (!raw.trim()) {return {} as FafData;}
   try {
     return readFafFromString(raw) ?? ({} as FafData);
   } catch {
@@ -153,9 +153,9 @@ export function renderFafDiff(diff: FafDiff, baseRef: string, targetRef: string)
       }
       const m = MARK[c.kind];
       const label = c.label.padEnd(16);
-      if (c.kind === 'changed') lines.push(`    ${m} ${label} ${clip(c.from!)} → ${clip(c.to!)}`);
-      else if (c.kind === 'added') lines.push(`    ${m} ${label} ${clip(c.to!)}   (added)`);
-      else lines.push(`    ${m} ${label} ${clip(c.from!)}   (removed)`);
+      if (c.kind === 'changed') {lines.push(`    ${m} ${label} ${clip(c.from!)} → ${clip(c.to!)}`);}
+      else if (c.kind === 'added') {lines.push(`    ${m} ${label} ${clip(c.to!)}   (added)`);}
+      else {lines.push(`    ${m} ${label} ${clip(c.from!)}   (removed)`);}
     }
   }
 
@@ -229,8 +229,8 @@ export function diffDriverCommand(argv: string[]): void {
     // Label off the FILE, not the hex: git passes /dev/null for a genuinely
     // absent side, but an all-zero hash for the (present) uncommitted worktree.
     const label = (file?: string, hex?: string): string => {
-      if (!file || file === '/dev/null') return '(absent)';
-      if (!hex || /^0+$/.test(hex)) return '(working tree)';
+      if (!file || file === '/dev/null') {return '(absent)';}
+      if (!hex || /^0+$/.test(hex)) {return '(working tree)';}
       return hex.slice(0, 7);
     };
     const diff = computeFafDiff(read(argv[1]), read(argv[4]));
@@ -314,8 +314,8 @@ export interface DiffOptions {
 
 export function diffCommand(range: string | undefined, options: DiffOptions = {}, cwd: string = process.cwd()): void {
   // Driver management is a separate verb that lives on the same command.
-  if (options.installDriver) return installDriver(cwd);
-  if (options.uninstallDriver) return uninstallDriver(cwd);
+  if (options.installDriver) {return installDriver(cwd);}
+  if (options.uninstallDriver) {return uninstallDriver(cwd);}
 
   const fafPath = findFafFile(cwd);
   if (!fafPath) {
