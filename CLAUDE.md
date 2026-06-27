@@ -18,10 +18,10 @@ CLI for the `.faf` format — persistent AI context that versions with your code
 - **What:** Persistent AI Context Standard — project DNA for AI. IANA-registered. Anthropic-merged.
 - **Why:** Eliminates 91% context re-discovery tax — define once, AI remembers forever
 - **Where:** npm registry, Homebrew, GitHub
-- **When:** Production since September 2025, v6.0 March 2026
+- **When:** Production since September 2025; v7.0 The GIT Version, June 2026
 - **How:** bunx faf-cli auto, then project.faf versions with your code — faf show renders it human-visible
 
 ---
 
-*STATUS: BI-SYNC ACTIVE — 2026-06-26T01:14:14.984Z*
+*STATUS: BI-SYNC ACTIVE — 2026-06-27T16:14:39.059Z*
 <!-- faf:end -->
