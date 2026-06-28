@@ -16,10 +16,10 @@
  */
 import { execFileSync } from 'child_process';
 import { readFileSync, existsSync, appendFileSync } from 'fs';
-import { relative, join } from 'path';
+import { join } from 'path';
 import type { FafData } from '../core/types.js';
 import { SLOTS, readSlotValue, isPlaceholder } from '../core/slots.js';
-import { readFafFromString, readFafRaw, findFafFile } from '../interop/faf.js';
+import { readFafFromString, readFafRaw, findFafFile, gitRepoRel } from '../interop/faf.js';
 import { scoreFafYaml } from '../core/scorer.js';
 import { getTier, tierBadge } from '../core/tiers.js';
 
@@ -332,7 +332,8 @@ export function diffCommand(range: string | undefined, options: DiffOptions = {}
     process.exit(2);
     return;
   }
-  const repoRel = relative(top, fafPath as string).split('\\').join('/'); // git wants forward slashes
+  void top; // computed above purely as the in-repo guard
+  const repoRel = gitRepoRel(fafPath as string, cwd); // git-computed → Windows 8.3-safe
 
   let baseRef: string;
   let targetRef: string;

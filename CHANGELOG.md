@@ -10,6 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+*(Landed on main, not yet released — rides the next version.)*
+
+### Fixed
+- **Windows path-robustness (git-native repoRel)** — `faf diff` / `log` / `hooks` derive the repo-relative `.faf` path from git (`rev-parse --show-prefix`) instead of `path.relative`, so a Windows 8.3 short-name cwd (e.g. `RUNNER~1`) vs git's long-form root can't yield an "outside repository" path. Runtime-independent (bun/node).
+
+### CI
+- **`release.yml` Windows matrix removed** — mirrors `ci.yml`'s documented Windows exclusion (bun timeouts); closes the split where the badge workflow skipped Windows but the release pipeline gated on it *post-tag*. A real pre-merge Windows gate is a tracked decision.
+
 ## [7.0.0] - 2026-06-27 — The GIT Version
 
 **FAF is to Context what Git is to Versions.** Git gave *code* diff, log, blame, hooks, and CI. v7.0 gives *context* the same: `project.faf` stops merely living in your repo and becomes a git-native artifact you can diff, log, guard, and pull at any ref. Purely additive — every existing command is unchanged; 7.0 is a safe upgrade.

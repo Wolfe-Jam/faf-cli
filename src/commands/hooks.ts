@@ -24,8 +24,8 @@
  */
 import { execFileSync } from 'child_process';
 import { existsSync, readFileSync, writeFileSync, chmodSync, mkdirSync } from 'fs';
-import { relative, resolve, dirname } from 'path';
-import { findFafFile } from '../interop/faf.js';
+import { resolve, dirname } from 'path';
+import { findFafFile, gitRepoRel } from '../interop/faf.js';
 import { computeFafDiff, runnerWorks } from './diff.js';
 
 const START = '# >>> faf >>>';
@@ -79,7 +79,8 @@ export function hooksRun(options: HooksRunOptions = {}, cwd: string = process.cw
     const fafPath = findFafFile(cwd);
     if (!fafPath) {return;} // no context file — nothing to guard
 
-    const repoRel = relative(top, fafPath).split('\\').join('/');
+    void top; // computed above purely as the in-repo guard
+    const repoRel = gitRepoRel(fafPath, cwd); // git-computed → Windows 8.3-safe
     const staged = gitShow(`:${repoRel}`, cwd);
     if (staged === null) {return;} // project.faf not staged (or staged for deletion) — silent pass
 

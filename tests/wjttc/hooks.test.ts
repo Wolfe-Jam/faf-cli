@@ -30,7 +30,7 @@ const LOCAL_RUNNER = `${process.execPath} ${CLI} hooks-run`; // points the hook 
 const mk = (tag: string) => {
   let dir = join(tmpdir(), `faf-hooks-${tag}-${Date.now()}-${Math.random().toString(36).slice(2)}`);
   mkdirSync(dir, { recursive: true });
-  dir = realpathSync(dir); // resolve symlinks so in-process cwd matches git's --show-toplevel
+  dir = realpathSync.native(dir); // resolve symlinks AND Windows 8.3 short names (RUNNER~1) → matches git
   const g = (a: string[]) => execFileSync('git', a, { cwd: dir, stdio: 'pipe', encoding: 'utf-8' });
   g(['init', '-q']); g(['config', 'user.email', 't@t.t']); g(['config', 'user.name', 't']);
   return { dir, g };

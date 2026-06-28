@@ -88,7 +88,7 @@ describe('WJTTC — faf log', () => {
     const setup = (): string => {
       let dir = tmp('repo');
       mkdirSync(dir, { recursive: true });
-      dir = realpathSync(dir); // resolve symlinks (macOS /var → /private/var) so repoRel matches git
+      dir = realpathSync.native(dir); // resolve symlinks AND Windows 8.3 short names (RUNNER~1) → matches git
 
       const g = (a: string[]) => execFileSync('git', a, { cwd: dir, stdio: 'pipe' });
       g(['init', '-q']); g(['config', 'user.email', 't@t.t']); g(['config', 'user.name', 't']);

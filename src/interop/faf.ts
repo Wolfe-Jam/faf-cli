@@ -1,5 +1,6 @@
 import { readFileSync, writeFileSync, existsSync } from 'fs';
-import { join, dirname } from 'path';
+import { join, dirname, basename } from 'path';
+import { execFileSync } from 'child_process';
 import { parse, stringify } from 'yaml';
 import type { FafData } from '../core/types.js';
 
@@ -80,4 +81,18 @@ export function findFafFile(dir: string = process.cwd()): string | null {
     }
   }
   return null;
+}
+
+/** Repo-root-relative path of a .faf, computed BY git — runtime- and OS-independent.
+ *  Replaces `path.relative(top, fafPath)`, which breaks on Windows when git's
+ *  long-form `--show-toplevel` and an 8.3 short-name cwd (e.g. `RUNNER~1`) disagree.
+ *  git resolves both representations internally and emits forward slashes; works for
+ *  tracked AND untracked .faf (it's the cwd's location under the root, not file status).
+ *  Caller must already be inside a git repo. */
+export function gitRepoRel(fafPath: string, cwd: string = process.cwd()): string {
+  const prefix = execFileSync('git', ['-C', dirname(fafPath), 'rev-parse', '--show-prefix'], {
+    cwd,
+    encoding: 'utf-8',
+  }).trim(); // '' at repo root, or 'sub/dir/' (trailing slash)
+  return prefix + basename(fafPath);
 }

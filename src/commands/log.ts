@@ -14,8 +14,7 @@
  * gamed: anyone can score green once; the trend is the asset.
  */
 import { execFileSync } from 'child_process';
-import { relative } from 'path';
-import { findFafFile } from '../interop/faf.js';
+import { findFafFile, gitRepoRel } from '../interop/faf.js';
 import { scoreFafYaml } from '../core/scorer.js';
 import { getTier, tierBadge } from '../core/tiers.js';
 
@@ -119,7 +118,8 @@ export function logCommand(options: LogOptions = {}, cwd: string = process.cwd()
     process.exit(2);
     return;
   }
-  const repoRel = relative(top, fafPath as string).split('\\').join('/');
+  void top; // computed above purely as the in-repo guard
+  const repoRel = gitRepoRel(fafPath as string, cwd); // git-computed → Windows 8.3-safe
 
   const limit = options.all ? 0 : Math.max(0, parseInt(options.limit ?? '20', 10) || 20);
 
