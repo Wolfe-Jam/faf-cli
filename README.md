@@ -309,7 +309,7 @@ bunx faf-cli go                # Interactive interview to gold code
 
 | Tier | Score | Status |
 |------|-------|--------|
-| 🏆 **Trophy** | 100% | AI never has to guess |
+| 🏆 / ✪ **Trophy** | 100% | AI never has to guess |
 | ★ **Gold** | 99%+ | 1 slot from Trophy |
 | ◆ **Silver** | 95%+ | Close — keep going |
 | ◇ **Bronze** | 85%+ | Interim — keep going |
@@ -317,6 +317,8 @@ bunx faf-cli go                # Interactive interview to gold code
 | ● **Yellow** | 55%+ | AI flipping coins |
 | ○ **Red** | <55% | AI working blind |
 | ♡ **White** | 0% | No context at all |
+
+**🏆 and ✪ both mean 100%** — the same top score, shown by surface: **✪** (the Proof Seal) on code surfaces — CLI, skills, docs, the hub — and **🏆** on social: posts, blogs, cards. You'll see both around for a while as the ✪ convention settles in.
 
 ---
 
