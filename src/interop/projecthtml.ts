@@ -149,7 +149,7 @@ footer strong{color:#e6edf3}
 ${
   isTrophy
     ? '<p class="award statline"><span class="awd-pre">✅ All Required slots filled.</span> <span class="awd-win">100% Trophy 🏆 Awarded</span></p>'
-    : `<p class="muted statline">${result.populated}/${result.active} slots populated · ${result.total} total${stackIgnored ? ` · ${stackIgnored} slotignored` : ''}</p>`
+    : `<p class="muted statline">${result.populated}/${result.active} slots populated · ${result.total} total${stackIgnored ? ` · ${stackIgnored} N/A` : ''}</p>`
 }
 
 <section>

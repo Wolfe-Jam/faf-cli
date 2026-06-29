@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - **Windows path-robustness (git-native repoRel)** — `faf diff` / `log` / `hooks` derive the repo-relative `.faf` path from git (`rev-parse --show-prefix`) instead of `path.relative`, so a Windows 8.3 short-name cwd (e.g. `RUNNER~1`) vs git's long-form root can't yield an "outside repository" path. Runtime-independent (bun/node).
+- **Human-facing surfaces render `slotignored` as `N/A`** — the `faf score` slot breakdown and the `faf show` HTML statline now show `N/A` instead of the internal `slotignored` token (e.g. `· 5 N/A`, not `· 5 slotignored`). Display-only: the stored `.faf` value is unchanged (still `slotignored`, the canonical/scored token). `N/A` is the clearer, conventional term for a slot the project's app-type doesn't need.
 
 ### CI
 - **`release.yml` Windows matrix removed** — mirrors `ci.yml`'s documented Windows exclusion (bun timeouts); closes the split where the badge workflow skipped Windows but the release pipeline gated on it *post-tag*. A real pre-merge Windows gate is a tracked decision.
