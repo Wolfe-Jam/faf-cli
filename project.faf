@@ -37,3 +37,11 @@ monorepo:
   versioning_strategy: slotignored
   shared_configs: slotignored
   remote_cache: slotignored
+surfaces:
+  # Distribution map — the machine-checkable form of human_context.where. Score-neutral.
+  auto:                      # derived from manifests; regenerate with `faf surface --sync`
+    - { type: npm,    id: faf-cli,           source: "package.json#name" }
+    - { type: github, id: Wolfe-Jam/faf-cli, source: "package.json#repository" }
+  declared:                  # hand-authored: surfaces the manifests don't carry + targets
+    - { type: npm,      id: faf,     status: live }      # dual-publish alias (faf-cli ⇄ faf)
+    - { type: homebrew, id: faf-cli, status: live }
