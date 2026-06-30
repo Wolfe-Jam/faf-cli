@@ -34,6 +34,7 @@ import { goCommand } from './commands/go.js';
 import { aiCommand } from './commands/ai.js';
 import { conductorCommand } from './commands/conductor.js';
 import { wjttcCommand } from './commands/wjttc.js';
+import { skillScoreCommand } from './commands/skill-score.js';
 import { benchCommand } from './commands/bench.js';
 import { refreshCommand } from './commands/refresh.js';
 
@@ -305,6 +306,12 @@ program
   .option('--strict', 'Exit non-zero if any tests are untiered')
   .option('--json', 'Output as JSON for CI consumption')
   .action((options) => wjttcCommand(options));
+
+program
+  .command('skill-score <path>')
+  .description('Score a SKILL.md against the WJTTC skill standard (static grade + safety gate)')
+  .option('--json', 'Output as JSON')
+  .action((path, options) => skillScoreCommand(path, options));
 
 // === Soft Deprecation Aliases (v5.x compat) ===
 

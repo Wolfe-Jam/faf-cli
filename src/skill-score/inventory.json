@@ -1,0 +1,15 @@
+{
+  "version": "inv-v1-2026-06-26",
+  "note": "Snapshot of the real faf-cli command surface + claude-faf-mcp default tool surface. The ghost-check is deterministic RELATIVE TO this version; skill.fafb records which inv version sealed it. Bump on surface change.",
+  "faf_commands": [
+    "agents","ai","auto","bench","bi-sync","check","clear","compile","conductor","context",
+    "convert","cursor","decompile","demo","diff","diff-driver","dna","drift","edit","export",
+    "formats","gemini","git","go","grok","hooks","hooks-run","info","init","log","loop","migrate",
+    "pro","recover","refresh","score","search","share","show","status","sync","taf","validate","wjttc","yolo"
+  ],
+  "mcp_tools": [
+    "about","agents","auto","bi_sync","chat","check","clear","conductor","context","cursor","debug",
+    "dna","doctor","enhance","formats","friday","gemini","git","go","guide","human_add","init","list",
+    "quick","read","readme","score","status","sync","tri_sync","trust","write"
+  ]
+}
