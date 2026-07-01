@@ -3,6 +3,7 @@ import {
   generateServerCard,
   registryMeta,
   registryName,
+  registryTitle,
   REGISTRY_PUBLISHER_KEY,
 } from '../../src/interop/servercard.js';
 import type { FafData } from '../../src/core/types.js';
@@ -122,5 +123,36 @@ describe('ENGINE: 🛡️ registry server.json _meta emitter', () => {
     expect(
       registryName({ project: { name: 'claude-faf-mcp', homepage: 'https://faf.one' } }),
     ).toBe('one.faf/claude-faf-mcp');
+  });
+});
+
+describe('ENGINE: 🛡️ registry title — the single source (compose-not-fork)', () => {
+  test('returns project.title (the display card name)', () => {
+    expect(registryTitle({ project: { name: 'claude-faf-mcp', title: 'Claude FAF' } as any })).toBe(
+      'Claude FAF',
+    );
+  });
+
+  test('undefined when no title — the field is omitted, never shipped empty', () => {
+    expect(registryTitle(faf)).toBeUndefined(); // faf has name + goal, no title
+  });
+
+  test('undefined when over the 100-char registry cap (never ship invalid)', () => {
+    expect(registryTitle({ project: { name: 'x', title: 'T'.repeat(101) } as any })).toBeUndefined();
+  });
+
+  test('trims surrounding whitespace', () => {
+    expect(registryTitle({ project: { name: 'x', title: '  Grok FAF  ' } as any })).toBe('Grok FAF');
+  });
+
+  test('generateServerCard title prefers project.title over the reverse-DNS name', () => {
+    const c = generateServerCard({
+      project: { name: 'claude-faf-mcp', title: 'Claude FAF', homepage: 'https://faf.one' } as any,
+    });
+    expect(c.title).toBe('Claude FAF'); // the display title, not "claude-faf-mcp"
+  });
+
+  test('generateServerCard falls back to the name when no title (back-compat)', () => {
+    expect(generateServerCard({ project: { name: 'faf-agent' } }).title).toBe('faf-agent');
   });
 });

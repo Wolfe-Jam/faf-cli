@@ -11,6 +11,7 @@ import { compileCommand } from './commands/compile.js';
 import { decompileCommand } from './commands/decompile.js';
 import { checkCommand } from './commands/check.js';
 import { exportCommand } from './commands/export.js';
+import { serverCardCommand } from './commands/server-card.js';
 import { showCommand } from './commands/show.js';
 import { gitCommand } from './commands/git.js';
 import { diffCommand, diffDriverCommand } from './commands/diff.js';
@@ -184,6 +185,17 @@ program
   .option('--card', 'Generate MCP Server Card (.well-known/mcp/server-card) with the FAF context-block')
   .option('--all', 'Generate all formats')
   .action((options) => exportCommand(options));
+
+program
+  .command('server-card')
+  .description('Emit the registry server.json identity (name + title + _meta) from project.faf — the cross-language server-card emitter; patches an existing file')
+  .option('--in <path>', 'Existing server.json to patch (default: ./server.json)')
+  .option('--out <path>', 'Output path (default: same as --in)')
+  .option('--faf <path>', 'project.faf path (default: auto-discover)')
+  .option('--version <version>', 'Set the version field (default: preserve existing)')
+  .option('--generated <iso>', 'Override the _meta generated stamp (default: preserve existing)')
+  .option('--check', 'Print to stdout, do not write (diff/verify — the idempotency-test hook)')
+  .action((options) => serverCardCommand(options));
 
 program
   .command('check [file]')

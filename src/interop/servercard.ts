@@ -99,7 +99,7 @@ export function generateServerCard(
     description: clampDescription(data),
   };
 
-  const title = data.project?.name as string | undefined;
+  const title = registryTitle(data) ?? (data.project?.name as string | undefined);
   if (title && title.length <= 100) card.title = title;
 
   const homepage = (data.project?.homepage ??
@@ -153,6 +153,23 @@ export function registryMeta(
  *  `homepage: https://faf.one` in the .faf to get the correct `one.faf/<name>`. */
 export function registryName(data: FafData): string {
   return serverName(data);
+}
+
+/** The display title for a registry `server.json` — the human-readable card name
+ *  (e.g. "Claude FAF"), sourced from `project.title` in the .faf. This is the
+ *  SINGLE SOURCE of the title across the fleet: JS emitters import it, and the
+ *  `faf server-card` CLI uses it so Python/Rust repos compose the identical
+ *  value (compose-not-fork). Distinct from `registryName` (the reverse-DNS id).
+ *  Returns undefined when unset or >100 chars (the registry cap) so the field is
+ *  omitted rather than shipped invalid — GitHub's registry then derives a name
+ *  from the namespace, so set `project.title` to control the display. */
+export function registryTitle(data: FafData): string | undefined {
+  const raw = (data.project as { title?: unknown } | undefined)?.title;
+  if (typeof raw === 'string') {
+    const t = raw.trim();
+    if (t && t.length <= 100) return t;
+  }
+  return undefined;
 }
 
 /** Write the Server Card to a `server-card` file. Returns the path.
