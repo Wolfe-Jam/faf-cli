@@ -13,7 +13,7 @@ export interface ServerCardCommandOptions {
   in?: string;
   out?: string;
   faf?: string;
-  version?: string;
+  setVersion?: string;
   generated?: string;
   check?: boolean;
 }
@@ -45,7 +45,8 @@ const FIELD_ORDER = [
  *
  * Patch-mode by design: it does NOT invent packages/version/sha (those are
  * per-release and per-registry — npm vs pypi vs cargo vs mcpb). Bump the version
- * with --version; otherwise the existing value is preserved. --check prints to
+ * with --set-version (NOT --version, which is the global CLI-version flag);
+ * otherwise the existing value is preserved. --check prints to
  * stdout without writing (the idempotency-test hook).
  */
 export function serverCardCommand(options: ServerCardCommandOptions = {}): void {
@@ -83,7 +84,7 @@ export function serverCardCommand(options: ServerCardCommandOptions = {}): void 
   const merged: Record<string, unknown> = {
     ...existing,
     name,
-    ...(options.version ? { version: options.version } : {}),
+    ...(options.setVersion ? { version: options.setVersion } : {}),
     _meta: { ...((existing._meta as object) ?? {}), ...emittedMeta },
   };
   if (title) merged.title = title;
