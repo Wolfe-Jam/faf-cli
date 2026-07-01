@@ -192,7 +192,7 @@ program
   .option('--in <path>', 'Existing server.json to patch (default: ./server.json)')
   .option('--out <path>', 'Output path (default: same as --in)')
   .option('--faf <path>', 'project.faf path (default: auto-discover)')
-  .option('--version <version>', 'Set the version field (default: preserve existing)')
+  .option('--set-version <version>', 'Set the version field (default: preserve existing). NOTE: not --version, which is the global CLI-version flag')
   .option('--generated <iso>', 'Override the _meta generated stamp (default: preserve existing)')
   .option('--check', 'Print to stdout, do not write (diff/verify — the idempotency-test hook)')
   .action((options) => serverCardCommand(options));
