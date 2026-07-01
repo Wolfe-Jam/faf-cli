@@ -34,7 +34,7 @@ jobs:
 
     steps:
       - name: 📦 Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -101,7 +101,7 @@ jobs:
 
     steps:
       - name: 📦 Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: ⚡ Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -137,7 +137,7 @@ jobs:
 
     steps:
       - name: 📦 Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: ⚡ Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -184,7 +184,7 @@ jobs:
 
     steps:
       - name: 📦 Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -219,7 +219,7 @@ jobs:
 
     steps:
       - name: 📦 Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: 💾 Download package artifact
         uses: actions/download-artifact@v7
@@ -258,7 +258,7 @@ jobs:
 
     steps:
       - name: 📦 Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: ⚡ Setup Node.js
         uses: actions/setup-node@v6
