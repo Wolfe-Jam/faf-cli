@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v7.0.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v7.0.1 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -10,7 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-*(Landed on main, not yet released — rides the next version.)*
+## [7.0.1] - 2026-07-01
+
+Patch on The GIT Version — a central, cross-language server-card title emitter, plus honest slot rendering and Windows path-robustness.
+
+### Added
+- **`faf server-card` + `registryTitle()` — the central server-card title emitter.** `project.title` is the single source of a registry `server.json`'s display title; `faf server-card` injects `name` + `title` + `_meta` from `project.faf` into an existing server.json (patch-mode — preserving the release-managed half: packages/icons/version/sha), so every FAF MCP repo (TS, Python, or Rust) composes the same identity instead of hand-editing a title. That hand-edited drift is what garbled `one.faf/claude-faf-mcp` into "Faf Claude Faf" on github.com/mcp. `--check` prints without writing (the idempotency-test hook); `--version` / `--generated` for releases. `generateServerCard` now prefers `project.title` (falls back to the name — back-compat).
 
 ### Fixed
 - **Windows path-robustness (git-native repoRel)** — `faf diff` / `log` / `hooks` derive the repo-relative `.faf` path from git (`rev-parse --show-prefix`) instead of `path.relative`, so a Windows 8.3 short-name cwd (e.g. `RUNNER~1`) vs git's long-form root can't yield an "outside repository" path. Runtime-independent (bun/node).
