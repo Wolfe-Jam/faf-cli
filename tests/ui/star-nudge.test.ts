@@ -14,6 +14,7 @@ const ctx = (o: Partial<NudgeContext> = {}): NudgeContext => ({
   isTTY: true,
   isCI: false,
   optedOut: false,
+  shownCount: 0,
   lastShownMs: null,
   nowMs: NOW,
   ...o,
@@ -56,5 +57,21 @@ describe('shouldNudge — throttle window', () => {
   test('custom throttleDays honoured', () => {
     expect(shouldNudge(ctx({ lastShownMs: NOW - 5 * DAY, throttleDays: 3 }))).toBe(true);
     expect(shouldNudge(ctx({ lastShownMs: NOW - 2 * DAY, throttleDays: 3 }))).toBe(false);
+  });
+});
+
+describe('shouldNudge — lifetime cap (we can\'t detect a star, so we stop asking)', () => {
+  test('under the cap → true', () => {
+    expect(shouldNudge(ctx({ shownCount: 2 }))).toBe(true);
+  });
+  test('at the cap (3) → false (retired)', () => {
+    expect(shouldNudge(ctx({ shownCount: 3 }))).toBe(false);
+  });
+  test('over the cap → false', () => {
+    expect(shouldNudge(ctx({ shownCount: 9 }))).toBe(false);
+  });
+  test('custom maxShows honoured', () => {
+    expect(shouldNudge(ctx({ shownCount: 0, maxShows: 1 }))).toBe(true);
+    expect(shouldNudge(ctx({ shownCount: 1, maxShows: 1 }))).toBe(false);
   });
 });
