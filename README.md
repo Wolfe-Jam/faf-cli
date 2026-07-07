@@ -4,7 +4,7 @@
 <div style="display: flex; align-items: center; gap: 12px;">
   <img src="https://www.faf.one/orange-smiley.svg" alt="FAF" width="40" />
   <div>
-    <h1 style="margin: 0; color: #000000;">faf-cli — The GIT Version</h1>
+    <h1 style="margin: 0; color: #000000;">faf-cli — The AGENTS.md Edition</h1>
     <p style="margin: 2px 0 0 0; font-size: 0.85em; letter-spacing: 0.12em; opacity: 0.7; text-transform: uppercase;"><strong>Context, Versioned.</strong></p>
     <p style="margin: 6px 0 0 0;"><strong>FAF is to Context what Git is to Versions.</strong></p>
     <p style="margin: 0;"><strong>Define once. Run anywhere.</strong></p>
@@ -60,6 +60,18 @@ brew install faf-cli && faf   # Homebrew
 Run `faf` with no arguments:
 
 ![faf](./nelly.png)
+
+---
+
+## v7.1 — The AGENTS.md Edition
+
+**`faf export --agents` now generates a complete, best-in-class AGENTS.md for any repo — detected from your code, non-destructive, never stale.**
+
+Point it at any repo and it detects your build/test commands, key files, conventions (ESLint/Prettier/strict/ruff/mypy…), and guardrails — then writes the definitive AGENTS.md: orientation, setup, tests, where-things-live, conventions, three-tier guardrails, a Definition of Done composed from your real commands, and secrets handling. Facts, not bloat. Your hand-written content is preserved.
+
+```bash
+npx faf-cli export --agents
+```
 
 ---
 

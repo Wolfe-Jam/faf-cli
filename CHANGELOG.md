@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v7.0.2 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v7.1.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -9,6 +9,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.1.0] - 2026-07-07 — The AGENTS.md Edition
+
+`faf export --agents` now generates a complete, best-in-class AGENTS.md for any repo — detected from your code, non-destructive, never stale.
+
+### Added
+- **Complete AGENTS.md from detection.** `faf export --agents` detects build/test/lint commands, key files, secrets (`.env` location), and the conventions toolchain (tsconfig strict, ESLint/Prettier, black/ruff/mypy, rustfmt) at export time — so a lean or stale `.faf` still yields a full file. Hand-authored `.faf` values always win; input is never mutated.
+- **The definitive section set** — orientation (type + version) · setup/build · tests · where-things-live · conventions · three-tier guardrails (Always / Ask-first / Never) · **Definition of Done** (composed from the detected verification commands) · security & secrets · commit/PR. Facts-dense: universal safety defaults always render, everything else is data-gated (nothing invented).
+
+### Notes
+- Design pass grounded in the agents.md spec, GitHub's 2,500-repo study, and the Gloaguen 2026 research: emit facts, not bloat. Toolchain-first (points at the config, never restates lint rules). Non-destructive — your hand-written content is preserved.
+- Windows is unverified in CI (matrix is macOS + Ubuntu); the feature has no OS-specific path output.
 
 ## [7.0.2] - 2026-07-01
 
