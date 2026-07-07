@@ -1,5 +1,6 @@
 import { findFafFile, readFaf, readFafRaw } from '../interop/faf.js';
 import { writeAgentsMd } from '../interop/agents.js';
+import { enrichFromRepo } from '../detect/enrich.js';
 import { writeCursorrules } from '../interop/cursorrules.js';
 import { writeGeminiMd } from '../interop/gemini.js';
 import { writeCopilotInstructions } from '../interop/copilot-instructions.js';
@@ -42,7 +43,9 @@ export function exportCommand(options: ExportOptions = {}): void {
       !options.card);
 
   if (exportAll || options.agents) {
-    writeAgentsMd(dir, data);
+    // Enrich with facts detected from the repo (commands/key-files/secrets) so a
+    // lean or stale .faf still yields a complete AGENTS.md. Hand-authored wins.
+    writeAgentsMd(dir, enrichFromRepo(dir, data));
     console.log(`  AGENTS.md`);
   }
 
