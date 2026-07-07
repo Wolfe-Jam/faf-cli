@@ -46,10 +46,12 @@ export function generateAgentsMd(data: FafData): string {
   const keyFiles = data.key_files ?? instant?.key_files;
 
   const entries = commands ? Object.entries(commands).filter(([, v]) => present(v)) : [];
+  // Mutually exclusive so a key like `test:check` classifies ONCE (as a test).
+  // `check` already covers `typecheck` (substring), so it's not listed separately.
   const testCmds = entries.filter(([k]) => /test/i.test(k));
-  const lintCmds = entries.filter(([k]) => /lint|typecheck|check/i.test(k));
-  // Setup = install/build/dev/run — not test or lint (those are verification → Tests / Definition of Done).
-  const setupCmds = entries.filter(([k]) => !/test|lint|typecheck|check/i.test(k));
+  const lintCmds = entries.filter(([k]) => /lint|check/i.test(k) && !/test/i.test(k));
+  // Setup = install/build/dev/run — not test or lint (verification → Tests / Definition of Done).
+  const setupCmds = entries.filter(([k]) => !/test|lint|check/i.test(k));
 
   push(fafMetaTag(data));
   push();
@@ -135,7 +137,7 @@ export function generateAgentsMd(data: FafData): string {
   dod.push('changes committed with a conventional message');
   push('## Definition of Done');
   push();
-  push(`Done when: ${dod.join(' · ')}.`);
+  push(`Done when: ${[...new Set(dod)].join(' · ')}.`); // dedupe: identical gates collapse to one
   push();
 
   // §8 Security & secrets — rendered when detected (never the values)
@@ -174,7 +176,10 @@ export function generateAgentsMd(data: FafData): string {
     }
   }
 
-  // Human Context (the who/why — lean background, kept last)
+  // Human Context (the who/why — lean background, kept last).
+  // NOTE (future): the one section without a length cap — a verbose .faf could
+  // sneak bloat back in here. The fix is upstream authoring/lint (the 4-6-word
+  // rule), NOT truncating curated content in the generator.
   if (data.human_context) {
     const hc: string[] = [];
     for (const [key, value] of Object.entries(data.human_context)) {

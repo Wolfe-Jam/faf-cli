@@ -90,6 +90,21 @@ describe('ENGINE: full data renders every section', () => {
     expect(m).toContain('`cargo test` passes');
     expect(m).not.toContain('exits 0'); // no lint command → no lint gate
   });
+  test('§7 DoD: a test+check key classifies as a test ONLY (no double gate)', () => {
+    const m = generateAgentsMd({
+      project: { name: 'x', goal: 'y', main_language: 'TypeScript' },
+      commands: { 'test:check': 'npm run test:check' },
+    } as any);
+    expect(m).toContain('`npm run test:check` passes');
+    expect(m).not.toContain('exits 0'); // not also classified as lint
+  });
+  test('§7 DoD dedupes identical gates', () => {
+    const m = generateAgentsMd({
+      project: { name: 'x', goal: 'y', main_language: 'TypeScript' },
+      commands: { lint: 'npm run check', typecheck: 'npm run check' },
+    } as any);
+    expect(m.split('`npm run check` exits 0').length - 1).toBe(1);
+  });
   test('§8 Security & secrets', () => {
     expect(md).toContain('## Security & secrets');
     expect(md).toContain('`.env`');
