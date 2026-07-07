@@ -1,81 +1,162 @@
 /**
- * interop/agents — the AGENTS.md exporter must render the actionable sections a
- * good AGENTS.md needs (setup/build · tests · where-things-live · conventions ·
- * commit · guardrails) by PROJECTING slots the .faf already carries. Two guards:
- * (1) a future refactor can't silently drop a section; (2) absent slots must NOT
- * fabricate one.
+ * interop/agents — "The AGENTS.md Edition" exporter. Championship coverage:
+ * (1) full data renders every section with correct values;
+ * (2) universal SAFETY DEFAULTS (Guardrails + Definition of Done) always render;
+ * (3) everything else is DATA-GATED — absent slots omit their section (nothing invented);
+ * (4) curation (facts-not-bloat) — human↔assistant prefs excluded from Conventions,
+ *     context/marketing keys excluded from Stack;
+ * (5) Definition of Done composes from the detected verification commands.
  */
 import { describe, test, expect } from 'bun:test';
 import { generateAgentsMd } from '../../src/interop/agents.js';
 
 const FULL: any = {
-  project: { name: 'demo', goal: 'A small API', main_language: 'Python' },
-  stack: { backend: 'FastAPI', package_manager: 'pip' },
-  commands: {
-    install: 'pip install -e ".[dev]"',
-    test: 'python -m pytest tests/ -v',
+  project: { name: 'demo', goal: 'A small API', main_language: 'Python', type: 'service', version: '2.1.0' },
+  stack: {
+    backend: 'FastAPI',
+    package_manager: 'pip',
+    // context/marketing — must NOT appear in Stack:
+    core_problem: 'AI lacks context',
+    mission_purpose: 'Give AI context',
+    target_user: 'developers',
   },
-  key_files: ['server.py', 'tests/test_api.py'],
+  commands: { install: 'pip install -e ".[dev]"', lint: 'ruff check .', test: 'pytest -v' },
+  key_files: ['app/main.py', 'tests/test_api.py'],
   ai_instructions: {
-    working_style: { code_first: true, quality_bar: 'zero_errors' },
-    warnings: ['Version must match across all files', 'Delegate parsing to the SDK'],
+    working_style: { code_first: true, quality_bar: 'zero_errors', communication: 'direct' },
+    warnings: ['Version must match across files', 'Delegate parsing to the SDK'],
   },
-  preferences: { commit_style: 'conventional', response_style: 'concise' },
-  human_context: { who: 'devs' },
+  preferences: { commit_style: 'conventional', response_style: 'concise_code_first', testing: 'required' },
+  security: { secrets: '.env', example: '.env.example', never: ['.env.local'] },
+  human_context: { who: 'devs', why: 'ship faster' },
+  generated: '2026-07-06T00:00:00Z',
 };
 
-describe('generateAgentsMd — actionable sections render from slots', () => {
+// Bare .faf: orientation only. No commands / key_files / instructions / stack / human_context.
+const BARE: any = { project: { name: 'bare', goal: 'a tiny tool', main_language: 'Go' } };
+
+describe('AGENTS.md — full data renders every section', () => {
   const md = generateAgentsMd(FULL);
 
-  test('§2 Setup & build ← commands (non-test)', () => {
+  test('§1 orientation: goal · language · type · version', () => {
+    expect(md).toContain('A small API');
+    expect(md).toContain('Python');
+    expect(md).toContain('type: service');
+    expect(md).toContain('v2.1.0');
+  });
+  test('§2 Setup & build (install, not lint/test)', () => {
     expect(md).toContain('## Setup & build');
     expect(md).toContain('pip install -e ".[dev]"');
   });
-
-  test('§3 Tests ← commands (test-keyed)', () => {
+  test('§3 Run the tests', () => {
     expect(md).toContain('## Run the tests');
-    expect(md).toContain('python -m pytest tests/ -v');
+    expect(md).toContain('pytest -v');
   });
-
-  test('§4 Where things live ← key_files', () => {
+  test('§4 Where things live', () => {
     expect(md).toContain('## Where things live');
-    expect(md).toContain('`server.py`');
+    expect(md).toContain('`app/main.py`');
   });
-
-  test('§5 Conventions ← working_style + preferences', () => {
+  test('§5 Conventions (real constraints)', () => {
     expect(md).toContain('## Conventions');
     expect(md).toContain('Quality Bar');
     expect(md).toContain('zero_errors');
   });
-
-  test('§6 Commit & PR ← preferences.commit_style', () => {
+  test('§6 Guardrails: project-specific first, then Ask-first + Never', () => {
+    expect(md).toContain('## Guardrails');
+    expect(md).toContain('Version must match across files');
+    expect(md).toContain('Ask first');
+    expect(md).toContain('Never');
+    // project-specific facts must lead the tiers
+    expect(md.indexOf('Version must match')).toBeLessThan(md.indexOf('Ask first'));
+  });
+  test('§7 Definition of Done composed from commands', () => {
+    expect(md).toContain('## Definition of Done');
+    expect(md).toContain('`ruff check .` exits 0');
+    expect(md).toContain('`pytest -v` passes');
+    expect(md).toContain('conventional message');
+  });
+  test('§8 Security & secrets', () => {
+    expect(md).toContain('## Security & secrets');
+    expect(md).toContain('`.env`');
+    expect(md).toContain('.env.example');
+    expect(md).toContain('.env.local');
+  });
+  test('§9 Commit & PR', () => {
     expect(md).toContain('## Commit & PR');
     expect(md).toContain('conventional');
   });
-
-  test('§7 Guardrails ← ai_instructions.warnings', () => {
-    expect(md).toContain('## Guardrails — do NOT');
-    expect(md).toContain('Version must match across all files');
+  test('Stack renders real stack', () => {
+    expect(md).toContain('## Stack');
+    expect(md).toContain('FastAPI');
+  });
+  test('Human Context + freshness footer', () => {
+    expect(md).toContain('## Human Context');
+    expect(md).toContain('Context generated: 2026-07-06');
   });
 });
 
-describe('generateAgentsMd — no fabrication when slots absent', () => {
-  // Minimal .faf: orientation only. The actionable sections have no source slots.
-  const md = generateAgentsMd({
-    project: { name: 'bare', goal: 'x', main_language: 'Go' },
-  } as any);
+describe('AGENTS.md — universal safety defaults ALWAYS render (bare .faf)', () => {
+  const md = generateAgentsMd(BARE);
 
-  test('orientation still renders', () => {
-    expect(md).toContain('## Project Context');
-    expect(md).toContain('bare');
+  test('Guardrails (Ask-first + Never) render even with no warnings', () => {
+    expect(md).toContain('## Guardrails');
+    expect(md).toContain('Ask first');
+    expect(md).toContain('Never');
   });
+  test('Definition of Done always renders', () => {
+    expect(md).toContain('## Definition of Done');
+    expect(md).toContain('conventional message');
+  });
+  test('orientation still renders', () => {
+    expect(md).toContain('bare');
+    expect(md).toContain('a tiny tool');
+  });
+});
 
-  test('absent slots omit their sections (nothing invented)', () => {
-    expect(md).not.toContain('## Setup & build');
-    expect(md).not.toContain('## Run the tests');
-    expect(md).not.toContain('## Where things live');
-    expect(md).not.toContain('## Conventions');
-    expect(md).not.toContain('## Commit & PR');
-    expect(md).not.toContain('## Guardrails');
+describe('AGENTS.md — everything else is data-gated (bare .faf omits it)', () => {
+  const md = generateAgentsMd(BARE);
+  for (const section of [
+    '## Setup & build',
+    '## Run the tests',
+    '## Where things live',
+    '## Conventions',
+    '## Security & secrets',
+    '## Commit & PR',
+    '## Stack',
+    '## Human Context',
+  ]) {
+    test(`omits "${section}" when its data is absent`, () => {
+      expect(md).not.toContain(section);
+    });
+  }
+});
+
+describe('AGENTS.md — curation (facts, not bloat)', () => {
+  const md = generateAgentsMd(FULL);
+
+  test('Conventions EXCLUDES human↔assistant prefs', () => {
+    expect(md).not.toContain('Communication');
+    expect(md).not.toContain('Response Style');
+    expect(md).not.toContain('concise_code_first');
+  });
+  test('Stack EXCLUDES context/marketing keys', () => {
+    expect(md).not.toContain('Core Problem');
+    expect(md).not.toContain('Mission Purpose');
+    expect(md).not.toContain('Target User');
+  });
+});
+
+describe('AGENTS.md — Definition of Done composition', () => {
+  test('with only a test command (no lint)', () => {
+    const md = generateAgentsMd({
+      project: { name: 'x', goal: 'y', main_language: 'Rust' },
+      commands: { test: 'cargo test' },
+    } as any);
+    expect(md).toContain('`cargo test` passes');
+    expect(md).not.toContain('exits 0'); // no lint command → no lint gate
+  });
+  test('bare .faf → DoD is just the commit gate', () => {
+    const md = generateAgentsMd(BARE);
+    expect(md).toContain('Done when: changes committed with a conventional message.');
   });
 });
