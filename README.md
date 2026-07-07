@@ -5,7 +5,7 @@
   <img src="https://www.faf.one/orange-smiley.svg" alt="FAF" width="40" />
   <div>
     <h1 style="margin: 0; color: #000000;">faf-cli — The AGENTS.md Edition</h1>
-    <p style="margin: 2px 0 0 0; font-size: 0.85em; letter-spacing: 0.12em; opacity: 0.7; text-transform: uppercase;"><strong>Context, Versioned.</strong></p>
+    <p style="margin: 4px 0 0 0; font-size: 1.05em;"><strong>AGENTS.md, crafted, generated, optimized for you.</strong></p>
     <p style="margin: 6px 0 0 0;"><strong>FAF is to Context what Git is to Versions.</strong></p>
     <p style="margin: 0;"><strong>Define once. Run anywhere.</strong></p>
   </div>
