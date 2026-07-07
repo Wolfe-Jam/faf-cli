@@ -1,6 +1,7 @@
 import type { ScoreResult, SlotState } from '../core/types.js';
 import { tierBadge } from '../core/tiers.js';
 import { bold, dim, fafCyan, orange } from './colors.js';
+import { maybeStarNudge } from './star-nudge.js';
 
 /** Display a score result to stdout */
 export function displayScore(result: ScoreResult, file: string, verbose = false): void {
@@ -30,6 +31,9 @@ export function displayScore(result: ScoreResult, file: string, verbose = false)
     console.log('');
     displaySlotBreakdown(result);
   }
+
+  // Capture the reservoir: a quiet star ask after a genuine win (gated in star-nudge.ts).
+  maybeStarNudge(result.score);
 }
 
 /** Display individual slot states */
