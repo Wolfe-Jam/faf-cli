@@ -49,7 +49,11 @@
     "model-context-protocol",
     "persistent-context",
     "ai-readiness",
-    "foundational"
+    "foundational",
+    "agents-md",
+    "context-engineering",
+    "codex",
+    "windsurf"
   ],
   "author": "wolfejam <wolfejam@faf.one>",
   "license": "MIT",

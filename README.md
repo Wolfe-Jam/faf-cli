@@ -11,7 +11,7 @@
   </div>
 </div>
 
-[![npm version](https://img.shields.io/npm/v/faf-cli)](https://www.npmjs.com/package/faf-cli)[![npm downloads](https://img.shields.io/npm/dt/faf-cli?color=008B8B&label=downloads)](https://www.npmjs.com/package/faf-cli)
+[![GitHub stars](https://img.shields.io/github/stars/Wolfe-Jam/faf-cli?style=social)](https://github.com/Wolfe-Jam/faf-cli)  [![npm version](https://img.shields.io/npm/v/faf-cli)](https://www.npmjs.com/package/faf-cli)[![npm downloads](https://img.shields.io/npm/dt/faf-cli?color=008B8B&label=downloads)](https://www.npmjs.com/package/faf-cli)
 [![FAF Trophy 100%](https://img.shields.io/badge/FAF-%F0%9F%8F%86%20100%25-000000?labelColor=FF6B35)](https://faf.one)
 [![IANA: vnd.faf+yaml](https://img.shields.io/badge/IANA-vnd.faf%2Byaml-008B8B)](https://www.iana.org/assignments/media-types/application/vnd.faf+yaml)[![IANA: vnd.fafm+yaml](https://img.shields.io/badge/IANA-vnd.fafm%2Byaml-008B8B)](https://www.iana.org/assignments/media-types/application/vnd.fafm+yaml)
 [![DOI: Context paper](https://img.shields.io/badge/DOI-Context%20paper-FF6B35)](https://doi.org/10.5281/zenodo.18251362)[![DOI: Memory paper](https://img.shields.io/badge/DOI-Memory%20paper-FF6B35)](https://doi.org/10.5281/zenodo.20348942)
@@ -48,7 +48,7 @@ project/
 ```bash
 bunx faf                      # Bun — zero install, fastest path
 npx faf                       # npm — works everywhere
-brew install faf-cli && faf   # Homebrew
+brew install wolfe-jam/faf/faf-cli && faf   # Homebrew (auto-taps)
 ```
 
 > `faf` is shorthand for `faf-cli auto` — same behavior, fewer keystrokes.
