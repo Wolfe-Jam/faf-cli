@@ -160,3 +160,15 @@ describe('AGENTS.md — Definition of Done composition', () => {
     expect(md).toContain('Done when: changes committed with a conventional message.');
   });
 });
+
+describe('AGENTS.md — detected conventions render in §5', () => {
+  test('data.conventions bullets appear under Conventions', () => {
+    const md = generateAgentsMd({
+      project: { name: 'x', goal: 'y', main_language: 'TypeScript' },
+      conventions: ['TypeScript strict mode', 'Style enforced by ESLint — obey the configs'],
+    } as any);
+    expect(md).toContain('## Conventions');
+    expect(md).toContain('TypeScript strict mode');
+    expect(md).toContain('obey the configs');
+  });
+});

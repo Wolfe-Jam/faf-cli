@@ -67,7 +67,7 @@ export function generateAgentsMd(data: FafData): string {
     push(orientation);
     push();
   }
-  push('> Auto-generated — do not edit directly; regenerate to refresh.');
+  push('> Auto-generated — do not edit directly; regenerate with `faf export --agents`.');
   push();
 
   // §2 Setup & build
@@ -110,10 +110,12 @@ export function generateAgentsMd(data: FafData): string {
   };
   collect(ai?.working_style);
   collect(prefs);
-  if (conventions.size) {
+  const detectedConv = (data.conventions as string[] | undefined) ?? [];
+  if (conventions.size || detectedConv.length) {
     push('## Conventions');
     push();
     for (const [label, val] of conventions) push(`- **${label}:** ${val}`);
+    for (const c of detectedConv) if (present(c)) push(`- ${c}`);
     push();
   }
 

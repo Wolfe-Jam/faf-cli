@@ -82,3 +82,36 @@ describe('enrichFromRepo — safety', () => {
     expect(out.commands).toBeUndefined();
   });
 });
+
+describe('enrichFromRepo — conventions (toolchain pointers, not restated rules)', () => {
+  test('detects tsconfig strict + ESM + ESLint/Prettier', () => {
+    const d = mkdtempSync(join(tmpdir(), 'faf-conv-'));
+    writeFileSync(
+      join(d, 'package.json'),
+      JSON.stringify({ type: 'module', devDependencies: { eslint: '^9', prettier: '^3' } }),
+    );
+    writeFileSync(join(d, 'tsconfig.json'), JSON.stringify({ compilerOptions: { strict: true } }));
+    const out = enrichFromRepo(d, { project: { name: 'x' } } as never) as { conventions?: string[] };
+    const conv = out.conventions ?? [];
+    expect(conv.some((c) => /strict/i.test(c))).toBe(true);
+    expect(conv.some((c) => /ESM/i.test(c))).toBe(true);
+    expect(conv.some((c) => /ESLint/.test(c) && /Prettier/.test(c))).toBe(true);
+  });
+
+  test('bare repo → no conventions invented', () => {
+    const d = mkdtempSync(join(tmpdir(), 'faf-noconv-'));
+    writeFileSync(join(d, 'package.json'), JSON.stringify({ name: 'x' }));
+    const out = enrichFromRepo(d, { project: { name: 'x' } } as never) as { conventions?: string[] };
+    expect(out.conventions).toBeUndefined();
+  });
+
+  test('hand-authored conventions preserved (fill-if-absent)', () => {
+    const d = mkdtempSync(join(tmpdir(), 'faf-hconv-'));
+    writeFileSync(join(d, 'tsconfig.json'), JSON.stringify({ compilerOptions: { strict: true } }));
+    const out = enrichFromRepo(d, {
+      project: { name: 'x' },
+      conventions: ['custom rule'],
+    } as never) as { conventions?: string[] };
+    expect(out.conventions).toEqual(['custom rule']);
+  });
+});
