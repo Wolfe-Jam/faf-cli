@@ -50,14 +50,7 @@ console.log(`Framework: ${result.context.stack.frontend}`);
 console.log(`Confidence: ${result.confidence}%`);
 ```
 
-**Primary user-facing tool:** faf-cli (v7.1 AGENTS.md Edition) builds on this engine. For agent-ready context:
-
-```bash
-bunx faf export --agents
-```
-
-See the [faf-cli agent guide](docs/faf-cli-for-agents.md).
-```
+**Context for agents:** faf-cli (v7.1) builds on this engine — run `bunx faf export --agents` for agent-ready files. See [the faf-cli agent guide 👀](docs/faf-cli-for-agents.md).
 
 ## 🎯 Platform Integrations
 

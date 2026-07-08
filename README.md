@@ -75,18 +75,13 @@ npx faf-cli export --agents
 
 ---
 
-## Integration with Grok Build, xAI, and Cursor
+## Context for AI agents
 
-FAF-CLI (v7.1 AGENTS.md Edition) is the natural source of high-quality, consistent context for AI coding agents and agentic tools.
+FAF-CLI generates the files agents read (AGENTS.md, CLAUDE.md, .cursorrules) from real project detection — zero-install via `bunx faf`.
 
-**Zero-install entry:** `bunx faf` or `npx faf`
-
-- **For Grok Build and xAI agent sessions**: `bunx faf export --agents` generates AGENTS.md (plus other surfaces) from real project detection. Existing interop (`src/interop/grok.ts`) wires FAF MCP into `.grok/config.toml`. Use `faf git owner/repo` for instant scored context without cloning. `faf score` targets Trophy 100%.
-- **For Cursor multi-agent workflows**: `faf export --agents` produces AGENTS.md, CLAUDE.md, `.cursorrules`, and related files that Cursor agents read. Same command keeps context current for Composer and parallel agents. MCP works identically.
-- **General AI sessions**: Any dev or agent session benefits from the same git-native, non-destructive exports and consistent stack labels.
-
-See the **[faf-cli agent guide](docs/faf-cli-for-agents.md)** for the full walk-through.
-Make it available. Let gravity work. All benefit simultaneously where used.
+- [→ FAF-CLI for Grok, xAI & Cursor 👀](docs/faf-cli-for-agents.md)
+- [→ FAF-CLI for Claude Code 👀](docs/faf-cli-for-claude.md)
+- [→ FAF-CLI for Bun 👀](docs/faf-cli-for-bun.md)
 
 ## v7.0 — The GIT Version
 
