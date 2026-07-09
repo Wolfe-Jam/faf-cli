@@ -3,6 +3,8 @@
 
 <div align="center">
 
+**CONTEXT, versioned.**
+
 <img src="https://www.faf.one/orange-smiley.svg" alt="FAF" width="72" />
 
 # faf-cli
