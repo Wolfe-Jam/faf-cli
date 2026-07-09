@@ -55,7 +55,7 @@ project/
 No setup, no drift, no re-explaining.
 
 > ⭐ **If faf-cli saves you setup time, a star helps other devs find it** —<br>
-> it's the signal ~3 of 4 developers check before adopting.
+> despite all our downloads, ~3 of 4 developers check stars before adopting.
 
 ---
 
