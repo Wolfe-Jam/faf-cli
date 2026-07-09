@@ -124,7 +124,8 @@ export function gitCommand(
   mkdirSync(tmpDir, { recursive: true });
 
   try {
-    console.log(dim(`cloning ${url}${options.ref ? ` @ ${options.ref}` : ''}...`));
+    // Progress → stderr, so `--stdout` (piped .faf) never gets an ANSI-contaminated first line.
+    console.error(dim(`cloning ${url}${options.ref ? ` @ ${options.ref}` : ''}...`));
     try {
       // execFileSync runs git directly — NO shell — so the URL can never be
       // interpreted as a command.
