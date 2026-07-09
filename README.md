@@ -37,7 +37,8 @@ project/
 
 **Git-Native.** `project.faf` versions with your code — every clone, every fork, every checkout gets full AI context. No setup, no drift, no re-explaining.
 
-> ⭐ **If faf-cli saves you setup time, a star helps other devs find it** — it's the signal ~3 of 4 developers check before adopting.
+> ⭐ **If faf-cli saves you setup time, a star helps other devs find it** —<br>
+> it's the signal ~3 of 4 developers check before adopting.
 
 ---
 
