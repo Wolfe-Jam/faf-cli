@@ -19,9 +19,6 @@ detected from your real stack, scored, and versioned with your code. No drift. N
 [![downloads](https://img.shields.io/npm/dt/faf-cli?color=008B8B&label=downloads)](https://www.npmjs.com/package/faf-cli)
 [![npm](https://img.shields.io/npm/v/faf-cli?color=00CCFF)](https://www.npmjs.com/package/faf-cli)
 
-<!-- ② ⭐ the star line -->
-[![GitHub stars](https://img.shields.io/github/stars/Wolfe-Jam/faf-cli?style=social)](https://github.com/Wolfe-Jam/faf-cli)
-
 **115,000+ downloads across the FAF ecosystem · IANA-registered · Anthropic-merged (#2759)**
 
 <!-- ③ FAF · Testing · Trophy -->
