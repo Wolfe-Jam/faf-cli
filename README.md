@@ -21,18 +21,21 @@ detected from your real stack, scored, and versioned with your code. No drift. N
 
 **115,000+ downloads across the FAF ecosystem · IANA-registered · Anthropic-merged (#2759)**
 
-<!-- ③ FAF · Testing · Trophy -->
+⭐ **If faf-cli saves you setup time, a star helps other devs find it** —<br>
+despite all our downloads, ~3 of 4 developers check stars before adopting.
+
+<!-- ② papers · funnel · testing — one line -->
 [![DOI: Context paper](https://img.shields.io/badge/DOI-Context%20paper-FF6B35)](https://doi.org/10.5281/zenodo.18251362)
 [![DOI: Memory paper](https://img.shields.io/badge/DOI-Memory%20paper-FF6B35)](https://doi.org/10.5281/zenodo.20348942)
 [![project.faf → faf](https://img.shields.io/badge/project.faf-inside-008B8B)](https://github.com/Wolfe-Jam/faf)
-
 [![TAF](./badge.svg)](https://github.com/Wolfe-Jam/faf-taf-git)
 [![CI](https://github.com/Wolfe-Jam/faf-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/Wolfe-Jam/faf-cli/actions/workflows/ci.yml)
 
+**[faf.one/cli](https://faf.one/cli)** · FAF defines. MD instructs. AI codes.
+
+<!-- trophy · live-score — bottom of hero -->
 [![FAF Trophy 100%](https://img.shields.io/badge/FAF-%F0%9F%8F%86%20100%25-000000?labelColor=FF6B35)](https://faf.one)
 [![FAF live-score](https://mcpaas.live/badge/Wolfe-Jam/faf-cli.svg)](https://builder.faf.one)
-
-**[faf.one/cli](https://faf.one/cli)** · FAF defines. MD instructs. AI codes.
 
 </div>
 
@@ -50,9 +53,6 @@ project/
 
 **Git-Native.** `project.faf` versions with your code — every clone, every fork, every checkout gets full AI context.<br>
 No setup, no drift, no re-explaining.
-
-> ⭐ **If faf-cli saves you setup time, a star helps other devs find it** —<br>
-> despite all our downloads, ~3 of 4 developers check stars before adopting.
 
 ---
 
