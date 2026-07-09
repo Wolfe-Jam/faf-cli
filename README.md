@@ -1,31 +1,27 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf and .fafm IANA-registered formats — AI context + memory that versions with your code -->
 <!-- faf: doc=readme | canonical=project.faf | score=100 | family=FAF -->
 
-<div style="display: flex; align-items: center; gap: 12px;">
-  <img src="https://www.faf.one/orange-smiley.svg" alt="FAF" width="40" />
-  <div>
-    <h1 style="margin: 0; color: #000000;">faf-cli — The AGENTS.md Edition</h1>
-    <p style="margin: 4px 0 0 0; font-size: 1.05em;"><strong>AGENTS.md, crafted, generated, optimized for you.</strong></p>
-    <p style="margin: 6px 0 0 0;"><strong>FAF is to Context what Git is to Versions.</strong></p>
-    <p style="margin: 0;"><strong>Define once. Run anywhere.</strong></p>
-  </div>
+<div align="center">
+
+<img src="https://www.faf.one/orange-smiley.svg" alt="FAF" width="72" />
+
+# faf-cli
+
+### The context every AI coding agent reads — generated from your repo, not guessed.
+
+**One `.faf` file → `AGENTS.md` · `CLAUDE.md` · `GEMINI.md` · `.cursorrules`, detected from your real stack, scored, and versioned with your code. No drift. No re-explaining.**
+
+[![npm](https://img.shields.io/npm/v/faf-cli?color=00CCFF)](https://www.npmjs.com/package/faf-cli)
+[![downloads](https://img.shields.io/npm/dt/faf-cli?color=008B8B&label=downloads)](https://www.npmjs.com/package/faf-cli)
+[![Anthropic MCP #2759](https://img.shields.io/badge/Anthropic_MCP-merged_%232759-blueviolet)](https://github.com/modelcontextprotocol/servers/pull/2759)
+[![IANA vnd.faf+yaml](https://img.shields.io/badge/IANA-vnd.faf%2Byaml-008B8B)](https://www.iana.org/assignments/media-types/application/vnd.faf+yaml)
+[![MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+**115,000+ downloads across the FAF ecosystem · IANA-registered · Anthropic-merged (#2759)**
+
+**[faf.one/cli](https://faf.one/cli)** · FAF defines. MD instructs. AI codes.
+
 </div>
-
-[![GitHub stars](https://img.shields.io/github/stars/Wolfe-Jam/faf-cli?style=social)](https://github.com/Wolfe-Jam/faf-cli)  [![npm version](https://img.shields.io/npm/v/faf-cli)](https://www.npmjs.com/package/faf-cli)[![npm downloads](https://img.shields.io/npm/dt/faf-cli?color=008B8B&label=downloads)](https://www.npmjs.com/package/faf-cli)
-[![FAF Trophy 100%](https://img.shields.io/badge/FAF-%F0%9F%8F%86%20100%25-000000?labelColor=FF6B35)](https://faf.one)
-[![IANA: vnd.faf+yaml](https://img.shields.io/badge/IANA-vnd.faf%2Byaml-008B8B)](https://www.iana.org/assignments/media-types/application/vnd.faf+yaml)[![IANA: vnd.fafm+yaml](https://img.shields.io/badge/IANA-vnd.fafm%2Byaml-008B8B)](https://www.iana.org/assignments/media-types/application/vnd.fafm+yaml)
-[![DOI: Context paper](https://img.shields.io/badge/DOI-Context%20paper-FF6B35)](https://doi.org/10.5281/zenodo.18251362)[![DOI: Memory paper](https://img.shields.io/badge/DOI-Memory%20paper-FF6B35)](https://doi.org/10.5281/zenodo.20348942)
-
-**Home:** [faf.one/cli](https://faf.one/cli)
-
-**FAF defines. MD instructs. AI codes.**
-
-[![FAF](https://mcpaas.live/badge/Wolfe-Jam/faf-cli.svg)](https://builder.faf.one)
-[![TAF](./badge.svg)](https://github.com/Wolfe-Jam/faf-taf-git)
-[![CI](https://github.com/Wolfe-Jam/faf-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/Wolfe-Jam/faf-cli/actions/workflows/ci.yml)
-[![Homebrew](https://img.shields.io/badge/Homebrew-faf--cli-orange)](https://github.com/Wolfe-Jam/homebrew-faf)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![project.faf](https://img.shields.io/badge/project.faf-inside-008B8B)](https://github.com/Wolfe-Jam/faf)
 
 ```
 project/
@@ -40,6 +36,8 @@ project/
 > You have a `package.json`. AI needs you to add a `project.faf`. Done.
 
 **Git-Native.** `project.faf` versions with your code — every clone, every fork, every checkout gets full AI context. No setup, no drift, no re-explaining.
+
+> ⭐ **If faf-cli saves you setup time, a star helps other devs find it** — it's the signal ~3 of 4 developers check before adopting.
 
 ---
 
