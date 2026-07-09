@@ -90,6 +90,27 @@ describe('TYRE: git command', () => {
     expect(allErr).toContain('this-host-does-not-exist.invalid');
   });
 
+  test('gitCommand() prints "cloning" progress to stderr, never stdout (keeps --stdout clean)', async () => {
+    const { gitCommand } = await import('../../src/commands/git.js');
+    const errs: string[] = [];
+    const logs: string[] = [];
+    const errSpy = spyOn(console, 'error').mockImplementation((s: string) => { errs.push(s); });
+    const logSpy = spyOn(console, 'log').mockImplementation((s: string) => { logs.push(s); });
+    const exitSpy = spyOn(process, 'exit').mockImplementation(((code?: number) => {
+      throw new Error(`__exit_${code}__`);
+    }) as never);
+    try {
+      // .invalid fails fast (no network) — but the progress line prints BEFORE the clone,
+      // so we still capture which stream it took. --stdout reserves stdout for the .faf.
+      gitCommand('https://this-host-does-not-exist.invalid/never/ever', { stdout: true });
+    } catch { /* exits on clone failure — expected; the progress line already printed */ }
+    errSpy.mockRestore();
+    logSpy.mockRestore();
+    exitSpy.mockRestore();
+    expect(errs.join('\n')).toMatch(/cloning/);       // progress → stderr
+    expect(logs.join('\n')).not.toMatch(/cloning/);   // never → stdout (that leak was the bug)
+  });
+
   test('gitCommand() with malformed URL → exits 1 (not a process crash)', async () => {
     const { gitCommand } = await import('../../src/commands/git.js');
     const errSpy = spyOn(console, 'error').mockImplementation(() => {});
