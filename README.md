@@ -9,7 +9,8 @@
 
 ### The context every AI coding agent reads — generated from your repo, not guessed.
 
-**One `.faf` file → `AGENTS.md` · `CLAUDE.md` · `GEMINI.md` · `.cursorrules`, detected from your real stack, scored, and versioned with your code. No drift. No re-explaining.**
+**One `.faf` file → `AGENTS.md` · `CLAUDE.md` · `GEMINI.md` · `.cursorrules`,<br>
+detected from your real stack, scored, and versioned with your code. No drift. No re-explaining.**
 
 [![npm](https://img.shields.io/npm/v/faf-cli?color=00CCFF)](https://www.npmjs.com/package/faf-cli)
 [![downloads](https://img.shields.io/npm/dt/faf-cli?color=008B8B&label=downloads)](https://www.npmjs.com/package/faf-cli)
