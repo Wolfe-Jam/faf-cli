@@ -3,11 +3,11 @@
 
 <div align="center">
 
-**CONTEXT, versioned.**
+# faf-cli
 
 <img src="https://www.faf.one/orange-smiley.svg" alt="FAF" width="72" />
 
-# faf-cli
+**CONTEXT, versioned.**
 
 ### The context every AI coding agent reads — generated from your repo, never guessed.
 
