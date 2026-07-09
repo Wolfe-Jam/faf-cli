@@ -33,9 +33,8 @@ despite all our downloads, ~3 of 4 developers check stars before adopting.
 
 **[faf.one/cli](https://faf.one/cli)** · FAF defines. MD instructs. AI codes.
 
-<!-- trophy · live-score — bottom of hero -->
+<!-- trophy — bottom of hero -->
 [![FAF Trophy 100%](https://img.shields.io/badge/FAF-%F0%9F%8F%86%20100%25-000000?labelColor=FF6B35)](https://faf.one)
-[![FAF live-score](https://mcpaas.live/badge/Wolfe-Jam/faf-cli.svg)](https://builder.faf.one)
 
 </div>
 
