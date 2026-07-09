@@ -7,7 +7,7 @@
 
 # faf-cli
 
-### The context every AI coding agent reads — generated from your repo, not guessed.
+### The context every AI coding agent reads — generated from your repo, never guessed.
 
 **One `.faf` file → `AGENTS.md` · `CLAUDE.md` · `GEMINI.md` · `.cursorrules`,<br>
 detected from your real stack, scored, and versioned with your code. No drift. No re-explaining.**
