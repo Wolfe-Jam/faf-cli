@@ -25,7 +25,7 @@ FAF is Bun-aware end to end — it reads your project the way Bun sees it:
 
 1. **Runs through `bunx`** — zero-install, always the latest release, no global state to manage.
 2. **Detects your Bun runtime** — faf recognizes `bunfig.toml` and `bun.lock` / `bun.lockb` and reports **Bun** as the runtime and package manager, not a generic Node guess.
-3. **Emits bun-based commands** — when faf sees a Bun lockfile it prefers `bun` as the runner, so the generated `AGENTS.md` carries `bun install` / `bun test` / `bun run` — the commands your project actually uses.
+3. **Emits bun-based commands** — when faf sees a Bun lockfile it prefers `bun` as the runner, so the authored `AGENTS.md` carries `bun install` / `bun test` / `bun run` — the commands your project actually uses.
 4. **Same toolchain** — faf-cli is bundled with `bun build`; you're running a tool built on the runtime you ship on.
 
 ## Why context matters on a fast stack

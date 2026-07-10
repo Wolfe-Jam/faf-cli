@@ -159,7 +159,7 @@ faf auto                    # Auto-enhance to Gold Code
 ```
 
 ### Exploring Repos
-**Instantly.** Generate context for ANY GitHub repo WITHOUT cloning:
+**Instantly.** Author context for ANY GitHub repo WITHOUT cloning:
 ```bash
 bunx faf-cli git https://github.com/facebook/react
 # 2 seconds → 95% ◆ Silver score
