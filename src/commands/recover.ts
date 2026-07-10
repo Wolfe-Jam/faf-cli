@@ -4,12 +4,13 @@ import { findFafFile, readFaf, writeFaf } from '../interop/faf.js';
 import { parseClaudeMd } from '../interop/claude.js';
 import { fafCyan, dim, bold } from '../ui/colors.js';
 import type { FafData } from '../core/types.js';
+import { FAF_VERSION } from '../core/version.js';
 
 /** Recover .faf from context files (CLAUDE.md, AGENTS.md, GEMINI.md, .cursorrules) */
 export function recoverCommand(): void {
   const dir = process.cwd();
   const sources: string[] = [];
-  const data: FafData = { faf_version: '2.5.0', project: {} };
+  const data: FafData = { faf_version: FAF_VERSION, project: {} };
 
   // Try CLAUDE.md first (richest source)
   const claudePath = join(dir, 'CLAUDE.md');

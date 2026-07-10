@@ -26,6 +26,7 @@ import {
   detectCicd,
 } from '../../src/detect/scanner.js';
 import { detectStack } from '../../src/detect/stack.js';
+import { FAF_VERSION } from '../../src/core/version.js';
 import { APP_TYPE_CATEGORIES } from '../../src/core/slots.js';
 import { FRAMEWORKS } from '../../src/detect/frameworks.js';
 
@@ -119,7 +120,7 @@ describe('🛑 BRAKE TIER - Svelte Detection Critical Path', () => {
     expect(data.stack).toBeDefined();
     expect(data.human_context).toBeDefined();
     expect(data.monorepo).toBeDefined();
-    expect(data.faf_version).toBe('2.5.0');
+    expect(data.faf_version).toBe(FAF_VERSION);
   });
 
   test('BRAKE-S007: Svelte project type must set project.type to svelte', () => {

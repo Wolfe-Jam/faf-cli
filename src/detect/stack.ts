@@ -1,5 +1,6 @@
 import type { FafData } from '../core/types.js';
 import { APP_TYPE_CATEGORIES, SLOTS } from '../core/slots.js';
+import { FAF_VERSION } from '../core/version.js';
 import {
   detectFrameworks,
   detectLanguage,
@@ -147,7 +148,7 @@ export function detectStack(dir: string): FafData {
   const commands = detectCommands(dir, pkg);
 
   const result: FafData = {
-    faf_version: '2.5.0',
+    faf_version: FAF_VERSION,
     project,
     stack,
     human_context: {

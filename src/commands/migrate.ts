@@ -1,8 +1,9 @@
 import { findFafFile, readFaf, writeFaf } from '../interop/faf.js';
 import { SLOTS } from '../core/slots.js';
 import { fafCyan, dim, bold } from '../ui/colors.js';
+import { FAF_VERSION } from '../core/version.js';
 
-const CURRENT_VERSION = '2.5.0';
+const CURRENT_VERSION = FAF_VERSION;
 
 export interface MigrateOptions {
   dryRun?: boolean;

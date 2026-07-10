@@ -4,6 +4,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import { execSync } from 'child_process';
 import { detectStack } from '../../src/detect/stack.js';
+import { FAF_VERSION } from '../../src/core/version.js';
 import { parse } from 'yaml';
 
 describe('TYRE: git command', () => {
@@ -31,12 +32,12 @@ describe('TYRE: git command', () => {
 
     const data = detectStack(testDir);
     expect(data.project?.name).toBe('git-test-app');
-    expect(data.faf_version).toBe('2.5.0');
+    expect(data.faf_version).toBe(FAF_VERSION);
   });
 
   test('detectStack handles empty directory', () => {
     const data = detectStack(testDir);
-    expect(data.faf_version).toBe('2.5.0');
+    expect(data.faf_version).toBe(FAF_VERSION);
     expect(data.project).toBeDefined();
   });
 

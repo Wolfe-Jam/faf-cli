@@ -4,6 +4,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import { parse } from 'yaml';
 import { execSync } from 'child_process';
+import { FAF_VERSION } from '../src/core/version.js';
 
 /**
  * Full end-to-end test: exercises the entire CLI flow as a user would.
@@ -42,7 +43,7 @@ describe('TYRE: faf e2e — full lifecycle', () => {
     run('init --yolo');
     expect(existsSync(join(testDir, 'project.faf'))).toBe(true);
     const faf = parse(readFileSync(join(testDir, 'project.faf'), 'utf-8'));
-    expect(faf.faf_version).toBe('2.5.0');
+    expect(faf.faf_version).toBe(FAF_VERSION);
     expect(faf.project.name).toBe('e2e-test-app');
   });
 
@@ -50,7 +51,7 @@ describe('TYRE: faf e2e — full lifecycle', () => {
     run('auto');
     const faf = parse(readFileSync(join(testDir, 'project.faf'), 'utf-8'));
     expect(faf.project.name).toBe('e2e-test-app');
-    expect(faf.faf_version).toBe('2.5.0');
+    expect(faf.faf_version).toBe(FAF_VERSION);
   });
 
   // --- Phase 2: Score & Validate ---

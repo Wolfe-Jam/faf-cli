@@ -3,6 +3,7 @@ import { mkdirSync, writeFileSync, rmSync, existsSync, readFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { parse } from 'yaml';
+import { FAF_VERSION } from '../../src/core/version.js';
 
 describe('TYRE: auto command', () => {
   let testDir: string;
@@ -28,7 +29,7 @@ describe('TYRE: auto command', () => {
 
     expect(existsSync(join(testDir, 'project.faf'))).toBe(true);
     const content = parse(readFileSync(join(testDir, 'project.faf'), 'utf-8'));
-    expect(content.faf_version).toBe('2.5.0');
+    expect(content.faf_version).toBe(FAF_VERSION);
   });
 
   test('merges into existing project.faf', () => {
