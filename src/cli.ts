@@ -175,15 +175,15 @@ program
 program
   .command('export')
   .description('Export context files from .faf')
-  .option('--agents', 'Generate AGENTS.md')
-  .option('--cursor', 'Generate .cursorrules')
-  .option('--gemini', 'Generate GEMINI.md')
-  .option('--copilot', 'Generate .github/copilot-instructions.md (GitHub Copilot)')
+  .option('--agents', 'Author AGENTS.md')
+  .option('--cursor', 'Author .cursorrules')
+  .option('--gemini', 'Author GEMINI.md')
+  .option('--copilot', 'Author .github/copilot-instructions.md (GitHub Copilot)')
   .option('--grok', 'Wire grok-faf-mcp into .grok/config.toml')
-  .option('--conductor', 'Generate conductor config')
-  .option('--html', 'Generate project.html (visual render of project.faf)')
-  .option('--card', 'Generate MCP Server Card (.well-known/mcp/server-card) with the FAF context-block')
-  .option('--all', 'Generate all formats')
+  .option('--conductor', 'Author conductor config')
+  .option('--html', 'Author project.html (visual render of project.faf)')
+  .option('--card', 'Author MCP Server Card (.well-known/mcp/server-card) with the FAF context-block')
+  .option('--all', 'Author all formats')
   .action((options) => exportCommand(options));
 
 program
@@ -235,7 +235,7 @@ program
 
 program
   .command('context')
-  .description('Generate context output')
+  .description('Author context output')
   .action(() => contextCommand());
 
 program
