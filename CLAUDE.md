@@ -23,5 +23,5 @@ CLI for the `.faf` format — persistent AI context that versions with your code
 
 ---
 
-*STATUS: BI-SYNC ACTIVE — 2026-07-07T04:44:59.914Z*
+*STATUS: BI-SYNC ACTIVE — 2026-07-10T23:32:23.957Z*
 <!-- faf:end -->

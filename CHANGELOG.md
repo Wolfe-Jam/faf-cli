@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v7.1.2 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v7.1.3 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -9,6 +9,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.1.3] - 2026-07-10
+
+### Fixed
+- **Freshly-authored `.faf` files now stamp the current format series (`3.0`), not a stale `2.5.0`.** The version was hard-coded as a separate `2.5.0` literal across four writers (detect, recover, conductor, migrate) and had drifted stale — so every fresh `.faf` carried the wrong `faf_version`. It's now read from one constant (`src/core/version.ts`), so it can't drift file-to-file again (#103).
+
+### Added
+- **Quiet star nudge.** A one-line, win-only prompt (retires after 3 showings, CI-safe) that surfaces the ⭐ ask without nagging.
+
+### Notes
+- Flagship README rebuilt — receipts-forward hero ("CONTEXT, versioned."), badge tiering, star-ask.
 
 ## [7.1.2] - 2026-07-10
 
