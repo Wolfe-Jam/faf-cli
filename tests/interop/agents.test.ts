@@ -121,7 +121,7 @@ describe('ENGINE: full data renders every section', () => {
   });
   test('Human Context + freshness footer', () => {
     expect(md).toContain('## Human Context');
-    expect(md).toContain('Context generated: 2026-07-06');
+    expect(md).toContain('Context authored: 2026-07-06');
   });
 });
 

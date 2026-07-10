@@ -11,7 +11,7 @@ export function generateCursorrules(data: FafData): string {
   lines.push(fafMetaTag(data));
   lines.push('');
   lines.push('# .cursorrules');
-  lines.push(`# Auto-generated from project.faf — ${data.project?.name ?? 'Project'}`);
+  lines.push(`# Authored from project.faf — ${data.project?.name ?? 'Project'}`);
   lines.push('');
 
   if (data.project?.main_language) {

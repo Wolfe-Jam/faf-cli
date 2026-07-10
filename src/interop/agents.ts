@@ -69,7 +69,7 @@ export function generateAgentsMd(data: FafData): string {
     push(orientation);
     push();
   }
-  push('> Auto-generated — do not edit directly; regenerate with `faf export --agents`.');
+  push('> Authored by faf — do not edit directly; refresh with `faf export --agents`.');
   push();
 
   // §2 Setup & build
@@ -195,7 +195,7 @@ export function generateAgentsMd(data: FafData): string {
 
   // Footer — freshness marker (deterministic: from the .faf's generated stamp)
   const gen = data.generated;
-  if (present(gen)) push(`*Context generated: ${String(gen)}*`);
+  if (present(gen)) push(`*Context authored: ${String(gen)}*`);
 
   return lines.join('\n');
 }

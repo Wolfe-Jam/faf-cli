@@ -12,7 +12,7 @@ export function generateGeminiMd(data: FafData): string {
   lines.push('');
   lines.push(`# GEMINI.md — ${data.project?.name ?? 'Project'}`);
   lines.push('');
-  lines.push('> Auto-generated from project.faf');
+  lines.push('> Authored from project.faf');
   lines.push('');
 
   if (data.project?.name) lines.push(`Project: ${data.project.name}`);
