@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, writeFileSync, readdirSync } from 'fs';
 import { join, basename } from 'path';
 import { findFafFile, readFaf, writeFaf } from '../interop/faf.js';
+import { FAF_VERSION } from '../core/version.js';
 import { parse } from 'yaml';
 import { fafCyan, dim, bold } from '../ui/colors.js';
 import type { FafData } from '../core/types.js';
@@ -29,7 +30,7 @@ function conductorImport(configPath?: string): void {
     process.exit(2);
   }
 
-  const data: FafData = { faf_version: '2.5.0', project: {} };
+  const data: FafData = { faf_version: FAF_VERSION, project: {} };
 
   // Try to read YAML/JSON files from the config directory or file
   if (existsSync(configPath) && configPath.endsWith('.json')) {
