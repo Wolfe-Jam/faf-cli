@@ -14,7 +14,7 @@ export function conductorCommand(subcommand?: string, path?: string): void {
   } else {
     console.log(`${fafCyan('conductor')} ${dim('— conductor integration')}\n`);
     console.log(`  ${bold('faf conductor import <path>')} ${dim('— import conductor config into .faf')}`);
-    console.log(`  ${bold('faf conductor export')} ${dim('— generate conductor config from .faf')}`);
+    console.log(`  ${bold('faf conductor export')} ${dim('— author conductor config from .faf')}`);
   }
 }
 
