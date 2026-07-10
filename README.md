@@ -9,7 +9,7 @@
 
 # faf-cli
 
-### The context every AI coding agent reads — generated from your repo, never guessed.
+### The context every AI coding agent reads — authored from your repo, never guessed.
 
 **One `.faf` file → `AGENTS.md` · `CLAUDE.md` · `GEMINI.md` · `.cursorrules`,<br>
 detected from your real stack, scored, and versioned with your code. No drift. No re-explaining.**
@@ -79,7 +79,7 @@ Run `faf` with no arguments:
 
 ## v7.1 — The AGENTS.md Edition
 
-**`faf export --agents` now generates a complete, best-in-class AGENTS.md for any repo — detected from your code, non-destructive, never stale.**
+**`faf export --agents` now authors a complete, best-in-class AGENTS.md for any repo — detected from your code, non-destructive, never stale.**
 
 Point it at any repo and it detects your build/test commands, key files, conventions (ESLint/Prettier/strict/ruff/mypy…), and guardrails — then writes the definitive AGENTS.md: orientation, setup, tests, where-things-live, conventions, three-tier guardrails, a Definition of Done composed from your real commands, and secrets handling. Facts, not bloat. Your hand-written content is preserved.
 
@@ -91,7 +91,7 @@ npx faf-cli export --agents
 
 ## Context for AI agents
 
-FAF-CLI generates the files agents read (AGENTS.md, CLAUDE.md, .cursorrules) from real project detection — zero-install via `bunx faf`.
+FAF-CLI authors the files agents read (AGENTS.md, CLAUDE.md, .cursorrules) from real project detection — zero-install via `bunx faf`.
 
 - [→ FAF-CLI for Grok, xAI & Cursor 👀](docs/faf-cli-for-agents.md)
 - [→ FAF-CLI for Claude Code 👀](docs/faf-cli-for-claude.md)
@@ -300,12 +300,12 @@ The WASM scoring kernel (`faf-scoring-kernel` 2.0.0) does the math. Bun does the
 | 6 | `faf sync` | `.faf` ↔ CLAUDE.md (bi-sync, mtime auto-direction) |
 | 7 | `faf compile` | `.faf` → `.fafb` binary — sealed, portable, deterministic |
 | 8 | `faf decompile` | `.fafb` → JSON |
-| 9 | `faf export` | Generate AGENTS.md, .cursorrules, GEMINI.md |
+| 9 | `faf export` | Author AGENTS.md, .cursorrules, GEMINI.md |
 | 10 | `faf check` | Validate `.faf` file |
 | 11 | `faf edit` | Edit `.faf` fields inline |
 | 12 | `faf convert` | Convert `.faf` to JSON |
 | 13 | `faf drift` | Check context drift |
-| 14 | `faf context` | Generate context output |
+| 14 | `faf context` | Author context output |
 | 15 | `faf recover` | Recover `.faf` from CLAUDE.md / AGENTS.md |
 | 16 | `faf migrate` | Migrate `.faf` to latest version |
 | 17 | `faf search` | Search slots and formats |

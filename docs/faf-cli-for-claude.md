@@ -27,7 +27,7 @@ CLAUDE.md    → prose for Claude
 project.faf  → structure for any AI  ← the scored source the others project from
 ```
 
-`CLAUDE.md` is Claude's instruction file. `project.faf` is the structured, scored source it's generated from — so instead of hand-maintaining prose that rots the moment the stack changes, you maintain one source and let FAF keep `CLAUDE.md` current.
+`CLAUDE.md` is Claude's instruction file. `project.faf` is the structured, scored source it's authored from — so instead of hand-maintaining prose that rots the moment the stack changes, you maintain one source and let FAF keep `CLAUDE.md` current.
 
 ## Why this fits Claude Code
 
@@ -51,7 +51,7 @@ Static files are the baseline; [claude-faf-mcp](https://www.npmjs.com/package/cl
 
 ## Why it's a natural fit
 
-FAF-CLI isn't another AI wrapper — it's the canonical, versioned, stack-aware source that `CLAUDE.md` should be generated *from*. The bi-sync means the file Claude reads can't quietly fall out of date, and the MCP server means Claude can act on live context, not just a snapshot. One command (`bunx faf`) turns any project into one Claude can actually understand — measurable, versioned, and consistent.
+FAF-CLI isn't another AI wrapper — it's the canonical, versioned, stack-aware source that `CLAUDE.md` should be authored *from*. The bi-sync means the file Claude reads can't quietly fall out of date, and the MCP server means Claude can act on live context, not just a snapshot. One command (`bunx faf`) turns any project into one Claude can actually understand — measurable, versioned, and consistent.
 
 ---
 
