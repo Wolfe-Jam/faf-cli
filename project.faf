@@ -45,3 +45,13 @@ surfaces:
   declared:                  # hand-authored: surfaces the manifests don't carry + targets
     - { type: npm,      id: faf,     status: live }      # dual-publish alias (faf-cli ⇄ faf)
     - { type: homebrew, id: faf-cli, status: live }
+ai_instructions:
+  # faf-cli's own custom rules — dogfooding ai_instructions.warnings.
+  # These land at the top of AGENTS.md Guardrails on `faf export --agents`.
+  warnings:
+    - "Use bun, not npm — this repo is Bun-native (same toolchain as Claude Code)."
+    - "TypeScript strict; zero type errors, zero test failures — always."
+    - "Scoring is a Rust→WASM kernel — compose it, never reimplement scoring in TS."
+    - "FAF authors — never 'generates'. And 'never guessed', not 'not guessed'."
+    - "Never write 'Guaranteed' (any form) — it's banned; it's free software."
+    - "Publish only via /pubpro — never hand-run npm publish."
