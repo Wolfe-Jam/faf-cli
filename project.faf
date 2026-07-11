@@ -55,3 +55,8 @@ ai_instructions:
     - "FAF authors — never 'generates'. And 'never guessed', not 'not guessed'."
     - "Never write 'Guaranteed' (any form) — it's banned; it's free software."
     - "Publish only via /pubpro — never hand-run npm publish."
+  working_style:
+    architecture: Domain-model first; single-source engines composed, never reimplemented.
+    testing: WJTTC — zero errors always; bun test green before any ship.
+    runtime: Bun-native, TypeScript strict, Rust→WASM scoring kernel.
+    releases: Atomic via /pubpro — bump, verify, tag, publish in one motion.

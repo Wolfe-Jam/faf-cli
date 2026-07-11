@@ -2,17 +2,17 @@
 <!-- faf: faf-cli v6 | TypeScript | cli | CLI for the `.faf` format — persistent AI context that versions with your code, and (v6.7, The HTML Edition) renders human-visible on-demand via `faf show`. IANA-registered media type: `application/vnd.faf+yaml`. -->
 <!-- faf: claim=project.faf | family=FAF -->
 
-# CLAUDE.md — faf-cli v6
+# GitHub Copilot Instructions — faf-cli v6
 
-## What This Is
+> Authored from project.faf by FAF. Copilot reads these instructions on every request in this repository — keep them short and broadly applicable.
 
 CLI for the `.faf` format — persistent AI context that versions with your code, and (v6.7, The HTML Edition) renders human-visible on-demand via `faf show`. IANA-registered media type: `application/vnd.faf+yaml`.
 
-## Stack
+## Tech stack
 
 - **Language:** TypeScript
 
-## Context
+## Project context
 
 - **Who:** Developers and teams using AI coding assistants
 - **What:** Persistent AI Context Standard — project DNA for AI. IANA-registered. Anthropic-merged.
@@ -20,8 +20,4 @@ CLI for the `.faf` format — persistent AI context that versions with your code
 - **Where:** npm registry, Homebrew, GitHub
 - **When:** Production since September 2025; v7.0 The GIT Version, June 2026
 - **How:** bunx faf-cli auto, then project.faf versions with your code — faf show renders it human-visible
-
----
-
-*STATUS: BI-SYNC ACTIVE — 2026-07-11T20:48:30.571Z*
 <!-- faf:end -->

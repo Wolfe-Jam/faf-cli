@@ -142,11 +142,11 @@ wrangler.jsonc
 *.fafb
 # Exception: test fixtures (deterministic .fafb checked in for parity-brake test)
 !tests/fixtures/**/*.fafb
-AGENTS.md
-# Rendered project.html — visual view of project.faf (generated, like .fafb/AGENTS.md)
+# AGENTS.md / GEMINI.md are SHIPPED — faf-cli dogfoods its own authored context files.
+# (Regenerate with `faf export --all`; they're tracked via the !AGENTS.md/!GEMINI.md rules above.)
+# Rendered project.html — visual view of project.faf (generated, like .fafb)
 project.html
 !tests/fixtures/**/project.html
-GEMINI.md
 
 # Compile binary + sourcemap outputs (`bun run compile`)
 /faf
