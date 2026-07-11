@@ -135,8 +135,8 @@ Your own rules for the AI — *"use full words in identifiers," "use bun, not np
 ## Sync
 
 ```
-bi-sync:   .faf  ←──→  CLAUDE.md                (free)
-tri-sync:  .faf  ←──→  CLAUDE.md ↔ MEMORY.md    (Pro)
+bi-sync:   .faf  ←──→  CLAUDE.md
+tri-sync:  .faf  ←──→  CLAUDE.md ↔ MEMORY.md
 ```
 
 ---
