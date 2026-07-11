@@ -89,6 +89,14 @@ npx faf-cli export --agents
 
 ---
 
+## Custom instructions
+
+Your own rules for the AI — *"use full words in identifiers," "use bun, not npm"* — go in `project.faf` under `ai_instructions.warnings`. They land at the top of every `AGENTS.md` faf writes, verbatim and non-destructive.
+
+**→ [How to add custom rules](https://docs.faf.one/custom-rules)** · [docs.faf.one](https://docs.faf.one)
+
+---
+
 ## Context for AI agents
 
 FAF-CLI authors the files agents read (AGENTS.md, CLAUDE.md, .cursorrules) from real project detection — zero-install via `bunx faf`.
