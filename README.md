@@ -149,7 +149,7 @@ The full manual lives at **[docs.faf.one](https://docs.faf.one)** — facts for 
 - [Custom rules](https://docs.faf.one/custom-rules) — pin instructions your AI must follow
 - More lands as the manual grows.
 
-For specific agents: [Grok, xAI & Cursor](docs/faf-cli-for-agents.md) · [Claude Code](docs/faf-cli-for-claude.md) · [Bun](docs/faf-cli-for-bun.md)
+For specific agents: [Grok, xAI & Cursor 👀](docs/faf-cli-for-agents.md) · [Claude Code 👀](docs/faf-cli-for-claude.md) · [Bun 👀](docs/faf-cli-for-bun.md)
 
 ---
 
