@@ -23,6 +23,8 @@ detected from your real stack, scored, and versioned with your code. No drift. N
 
 **115,000+ downloads across the FAF ecosystem · IANA-registered · Anthropic-merged (#2759)**
 
+⭐ **A star helps other devs find faf-cli** — despite the downloads, ~3 of 4 devs check stars before adopting.
+
 [![DOI: Context paper](https://img.shields.io/badge/DOI-Context%20paper-FF6B35)](https://doi.org/10.5281/zenodo.18251362)
 [![DOI: Memory paper](https://img.shields.io/badge/DOI-Memory%20paper-FF6B35)](https://doi.org/10.5281/zenodo.20348942)
 [![TAF](./badge.svg)](https://github.com/Wolfe-Jam/faf-taf-git)
