@@ -5,10 +5,9 @@
 
 <h1>
 <img src="https://www.faf.one/orange-smiley.svg" alt="FAF" width="72" /><br>
-faf-cli
+faf-cli<br>
+<sub>CONTEXT, versioned.</sub>
 </h1>
-
-**CONTEXT, versioned.**
 
 ### The context every AI coding agent reads — authored from your repo, never guessed.
 
