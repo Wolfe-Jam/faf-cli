@@ -3,6 +3,7 @@ import { join, resolve } from 'path';
 import { execFileSync } from 'child_process';
 import { tmpdir } from 'os';
 import { assembleFreshFaf } from '../detect/assemble.js';
+import type { FafData } from '../core/types.js';
 import { writeFaf, readFafRaw, serializeFaf } from '../interop/faf.js';
 import * as kernel from '../wasm/kernel.js';
 import { enrichScore } from '../core/scorer.js';
@@ -139,7 +140,9 @@ export function gitCommand(
     }
 
     // Full slot-filling pipeline (shared with `faf auto`) — not detectStack alone.
-    const data = assembleFreshFaf(tmpDir);
+    // assembleFreshFaf returns the loose Record; narrow to FafData here since we
+    // read/write project.name below (the only caller that does).
+    const data = assembleFreshFaf(tmpDir) as FafData;
 
     // Name the project after the REPO, not the throwaway clone dir. Only override
     // the temp-dir fallback — keep a real name assembleFreshFaf found (package.json).
