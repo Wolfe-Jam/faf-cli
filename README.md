@@ -34,7 +34,7 @@ detected from your real stack, scored, and versioned with your code. No drift. N
 [![TAF](./badge.svg)](https://github.com/Wolfe-Jam/faf-taf-git)
 [![CI](https://github.com/Wolfe-Jam/faf-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/Wolfe-Jam/faf-cli/actions/workflows/ci.yml)
 
-**[faf.one/cli](https://faf.one/cli)** · FAF defines. MD instructs. AI codes.
+FAF defines. MD instructs. AI codes.
 
 <!-- trophy — bottom of hero -->
 [![FAF Trophy 100%](https://img.shields.io/badge/FAF-%F0%9F%8F%86%20100%25-000000?labelColor=FF6B35)](https://faf.one)
@@ -272,7 +272,7 @@ MIT — Free and open source
 
 **IANA-registered:** [`application/vnd.faf+yaml`](https://www.iana.org/assignments/media-types/application/vnd.faf+yaml) (Context Layer) · [`application/vnd.fafm+yaml`](https://www.iana.org/assignments/media-types/application/vnd.fafm+yaml) (Memory Layer)
 
-*format | driven 🏎️⚡️ [wolfejam.dev](https://wolfejam.dev)*
+*format | driven 🏎️⚡️ [wolfejam.dev](https://wolfejam.dev) · [faf.one/cli](https://faf.one/cli)*
 
 <div align="center">
 
