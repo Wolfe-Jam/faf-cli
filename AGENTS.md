@@ -1,65 +1,72 @@
-<!-- faf:start -->
-<!-- faf: faf-cli v6 | TypeScript | cli | CLI for the `.faf` format — persistent AI context that versions with your code, and (v6.7, The HTML Edition) renders human-visible on-demand via `faf show`. IANA-registered media type: `application/vnd.faf+yaml`. -->
-<!-- faf: claim=project.faf | family=FAF -->
+# AGENTS.md — faf-cli
 
-# AGENTS.md — faf-cli v6
-
-CLI for the `.faf` format — persistent AI context that versions with your code, and (v6.7, The HTML Edition) renders human-visible on-demand via `faf show`. IANA-registered media type: `application/vnd.faf+yaml`. — TypeScript · type: cli
-
-> Authored by faf — do not edit directly; refresh with `faf export --agents`.
+CLI for the IANA-registered `.faf` format (`application/vnd.faf+yaml`) — TypeScript · Bun-native since v6 · npm package `faf-cli` **v7.1.3**.
 
 ## Setup & build
 
 ```bash
-bun run build    # build
-bun run dev    # dev
+bun install
+bun run build    # clean → bun build cli+index → tsc (dist/)
+bun run dev      # bun src/cli.ts
 ```
 
 ## Run the tests
 
 ```bash
-bun run test
+bun run test     # bun test --timeout=120000 — must pass before a change is done
+bun run lint     # eslint src/**/*.ts
+```
+
+Ship-adjacent (when touching build output or publish path):
+
+```bash
+bun run check:no-hardcode   # fail if machine paths leaked into dist/
 ```
 
 ## Where things live
 
-- `package.json`
-- `src/index.ts`
-- `src/cli.ts`
-- `README.md`
-- `tsconfig.json`
+| Path | Role |
+|------|------|
+| `src/cli.ts` | CLI entry (Commander) |
+| `src/index.ts` | Library entry |
+| `src/commands/` | One file per `faf` subcommand (`init`, `score`, `export`, `sync`, …) |
+| `src/core/` | Domain engines (slots, scorer, types, schema) — compose, don’t fork |
+| `src/detect/` | Stack / project detection |
+| `src/interop/` | Context emitters (`agents.ts`, `claude.ts`, `gemini.ts`, …) |
+| `src/wasm/` | Bridge to `faf-scoring-kernel` (Rust→WASM) — scoring lives here, not reimplemented in TS |
+| `src/ui/` | Terminal UI helpers |
+| `package.json` | Scripts, bin (`faf` / `faf-cli` → `dist/cli.js`) |
+| `project.faf` | Project DNA (keep version/goal honest when they change) |
 
 ## Conventions
 
-- **Architecture:** Domain-model first; single-source engines composed, never reimplemented.
-- **Testing:** WJTTC — zero errors always; bun test green before any ship.
-- **Runtime:** Bun-native, TypeScript strict, Rust→WASM scoring kernel.
-- **Releases:** Atomic via /pubpro — bump, verify, tag, publish in one motion.
-- TypeScript strict mode (tsconfig.json)
-- ESM modules (`type: module`)
-- Style enforced by ESLint · Prettier — obey the configs
+- **Bun-native** — use `bun`, not `npm`, for install/run/test in this repo.
+- **TypeScript strict + ESM** (`"type": "module"`) — obey `tsconfig.json` and ESLint; don’t restyle by hand.
+- **Domain-model first** — single-source engines in `src/core/`; compose them from commands; never reimplement scoring in TypeScript (use the WASM kernel).
+- **Wording (product copy):** FAF **authors** (never “generates”); **never guessed** (not “not guessed”); never write **Guaranteed** (any form) — free software.
+- Match the style of the surrounding file.
 
 ## Guardrails
 
-- Use bun, not npm — this repo is Bun-native (same toolchain as Claude Code).
-- TypeScript strict; zero type errors, zero test failures — always.
-- Scoring is a Rust→WASM kernel — compose it, never reimplement scoring in TS.
-- FAF authors — never 'generates'. And 'never guessed', not 'not guessed'.
-- Never write 'Guaranteed' (any form) — it's banned; it's free software.
-- Publish only via /pubpro — never hand-run npm publish.
-- **Ask first:** dependency installs, deletions, migrations, schema changes.
-- **Never:** force-push, push to `main`, commit secrets.
+- **Always OK:** read the tree · `bun run test` · `bun run lint` · `bun run build` · edit under `src/` with tests.
+- **Ask first:** dependency adds/upgrades · deletions · publish / release / tag · changes to scoring kernel integration · dual-publish (`faf` ↔ `faf-cli`) path.
+- **Never:** force-push · push straight to `main` (branch and open a PR) · commit secrets · hand-run `npm publish` (releases go through **`/pubpro` only**) · reimplement scoring outside `faf-scoring-kernel` / `src/wasm/`.
 
 ## Definition of Done
 
-Done when: `bun run lint` exits 0 · `bun run test` passes · changes committed with a conventional message.
+Done when:
 
-## Human Context
+1. `bun run lint` exits 0  
+2. `bun run test` passes  
+3. If you touched the build/publish surface: `bun run build` and `bun run check:no-hardcode` pass  
+4. Change is on a branch with a clear conventional commit (`feat:`, `fix:`, `chore:`, …)
 
-- **Who:** Developers and teams using AI coding assistants
-- **What:** Persistent AI Context Standard — project DNA for AI. IANA-registered. Anthropic-merged.
-- **Why:** Eliminates 91% context re-discovery tax — define once, AI remembers forever
-- **Where:** npm registry, Homebrew, GitHub
-- **When:** Production since September 2025; v7.0 The GIT Version, June 2026
-- **How:** bunx faf-cli auto, then project.faf versions with your code — faf show renders it human-visible
-<!-- faf:end -->
+## When stuck
+
+Ask a clarifying question, propose a short plan, or open a draft PR with notes — do not push large speculative changes to `main`.
+
+## Commit & PR
+
+- Conventional Commits preferred.
+- One logical change per PR when practical.
+- If you change `package.json` scripts, layout under `src/`, or publish gates — update this file in the **same PR**.
