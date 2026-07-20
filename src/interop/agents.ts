@@ -20,20 +20,20 @@ const HUMAN_PREF = new Set([
 const NON_STACK = new Set(['target_user', 'core_problem', 'mission_purpose']);
 
 /**
- * Generate a best-in-class AGENTS.md from .faf data — "The AGENTS.md Edition".
+ * Author a BETTER-shaped AGENTS.md from .faf data (+ repo enrichment at export).
  *
- * Emits the definitive section set by PROJECTING slots the .faf carries plus a
- * few safe defaults. Deterministic projection from curated TRUTH — facts, not
- * hallucinated prose, not filler imperatives (the Gloaguen finding penalises
- * bloat). An absent slot omits its section; nothing is invented.
+ * Deterministic projection from curated TRUTH — facts, not hallucinated prose
+ * (Gloaguen: LLM freewrite hurts). Sections: orientation · setup · verify ·
+ * map · conventions · three-tier guardrails · DoD · when stuck · security ·
+ * commit. Human Context (who/why marketing) is intentionally omitted — that
+ * belongs in README / project.faf, not agent ops.
  *
- * Design spec: DRAFTS/best-agents-md-definitive-spec-2026-07-06.md
+ * Design: BETTER guide + hand exemplar (faf-cli AGENTS.md) + agents-md-facts.
  */
 export function generateAgentsMd(data: FafData): string {
   const lines: string[] = [];
   const push = (s = '') => lines.push(s);
 
-  // Slot blocks — some typed on FafData, others ride the index signature.
   const ai = data.ai_instructions as
     | { warnings?: string[]; working_style?: Record<string, unknown> }
     | undefined;
@@ -47,11 +47,23 @@ export function generateAgentsMd(data: FafData): string {
 
   const entries = commands ? Object.entries(commands).filter(([, v]) => present(v)) : [];
   // Mutually exclusive so a key like `test:check` classifies ONCE (as a test).
-  // `check` already covers `typecheck` (substring), so it's not listed separately.
   const testCmds = entries.filter(([k]) => /test/i.test(k));
   const lintCmds = entries.filter(([k]) => /lint|check/i.test(k) && !/test/i.test(k));
-  // Setup = install/build/dev/run — not test or lint (verification → Tests / Definition of Done).
-  const setupCmds = entries.filter(([k]) => !/test|lint|check/i.test(k));
+  const setupRaw = entries.filter(([k]) => !/test|lint|check/i.test(k));
+  // Stable setup order: install → build → dev → start → other (enrich merge order is nondeterministic)
+  const setupRank = (k: string): number => {
+    const n = k.toLowerCase();
+    if (/install|deps/.test(n)) return 0;
+    if (/^build$|build/.test(n) && !/rebuild/.test(n)) return 1;
+    if (/^dev$|develop/.test(n)) return 2;
+    if (/^start$|run/.test(n)) return 3;
+    return 4;
+  };
+  const setupCmds = [...setupRaw].sort((a, b) => setupRank(a[0]) - setupRank(b[0]) || a[0].localeCompare(b[0]));
+  // Verify bar: tests first, then lint/typecheck (matches BETTER / agents-md-facts)
+  const verifyCmds = [...testCmds, ...lintCmds];
+  const testCmd = testCmds[0]?.[1];
+  const buildCmd = setupCmds.find(([k]) => /build/i.test(k))?.[1];
 
   push(fafMetaTag(data));
   push();
@@ -69,7 +81,7 @@ export function generateAgentsMd(data: FafData): string {
     push(orientation);
     push();
   }
-  push('> Authored by faf — do not edit directly; refresh with `faf export --agents`.');
+  push('> Authored by faf — do not edit the managed block; refresh with `faf export --agents`. Hand content outside `<!-- faf:start -->` … `<!-- faf:end -->` is preserved.');
   push();
 
   // §2 Setup & build
@@ -82,12 +94,12 @@ export function generateAgentsMd(data: FafData): string {
     push();
   }
 
-  // §3 Run the tests — the truth-check
-  if (testCmds.length) {
+  // §3 Run the tests — verify bar (tests + lint/typecheck)
+  if (verifyCmds.length) {
     push('## Run the tests');
     push();
     push('```bash');
-    for (const [, v] of testCmds) push(v);
+    for (const [, v] of verifyCmds) push(v);
     push('```');
     push();
   }
@@ -121,26 +133,41 @@ export function generateAgentsMd(data: FafData): string {
     push();
   }
 
-  // §6 Guardrails — project-specific facts first (the gold), then tight Ask-first / Never
+  // §6 Guardrails — Always / Ask first / Never (three-tier BETTER)
   const warnings = (ai?.warnings ?? []).filter((w) => present(w));
+  const always: string[] = ['read the tree'];
+  if (testCmd) always.push(`run the tests (\`${testCmd}\`)`);
+  if (buildCmd) always.push('build the project');
+  for (const [, v] of lintCmds.slice(0, 1)) always.push(`\`${v}\``);
+
   push('## Guardrails');
   push();
   for (const w of warnings) push(`- ${w}`);
-  push('- **Ask first:** dependency installs, deletions, migrations, schema changes.');
-  push('- **Never:** force-push, push to `main`, commit secrets.');
+  push(`- **Always OK:** ${[...new Set(always)].join(' · ')}.`);
+  push('- **Ask first:** dependency installs, deletions, migrations, schema changes, publish/release.');
+  // Enable-then-restrict: safe path first, then the landmine
+  push('- **Never:** force-push · push straight to `main` (branch and open a PR) · commit secrets.');
   push();
 
-  // §7 Definition of Done — composed from the detected verification commands
+  // §7 Definition of Done
   const dod: string[] = [];
   for (const [, v] of lintCmds) dod.push(`\`${v}\` exits 0`);
   for (const [, v] of testCmds) dod.push(`\`${v}\` passes`);
   dod.push('changes committed with a conventional message');
   push('## Definition of Done');
   push();
-  push(`Done when: ${[...new Set(dod)].join(' · ')}.`); // dedupe: identical gates collapse to one
+  push(`Done when: ${[...new Set(dod)].join(' · ')}.`);
   push();
 
-  // §8 Security & secrets — rendered when detected (never the values)
+  // §8 When stuck — static BETTER default (cheap, high value)
+  push('## When stuck');
+  push();
+  push(
+    'Ask a clarifying question, propose a short plan, or open a draft PR with notes — do not push large speculative changes to `main`.',
+  );
+  push();
+
+  // §9 Security & secrets — when detected (never the values)
   if (security && (present(security.secrets) || (security.never ?? []).length)) {
     push('## Security & secrets');
     push();
@@ -152,16 +179,19 @@ export function generateAgentsMd(data: FafData): string {
     push();
   }
 
-  // §9 Commit & PR
+  // §10 Commit & PR — always (defaults + optional commit_style)
+  push('## Commit & PR');
+  push();
   if (prefs && present(prefs.commit_style)) {
-    push('## Commit & PR');
-    push();
     push(`- Commit style: ${fmtVal(prefs.commit_style)}`);
-    push('- Branch off `main`; never commit to `main` directly.');
-    push();
+  } else {
+    push('- Conventional Commits preferred (`feat:`, `fix:`, `chore:`, …).');
   }
+  push('- Branch off `main` and open a PR — never commit to `main` directly.');
+  push('- If build/test scripts or layout change, refresh this file in the **same PR** (`faf export --agents`).');
+  push();
 
-  // Stack (reference) — actual stack only; context/marketing keys excluded
+  // Stack (reference) — actual stack only; omit empty / all-slotignored noise
   if (data.stack) {
     const stack: string[] = [];
     for (const [key, value] of Object.entries(data.stack)) {
@@ -176,24 +206,8 @@ export function generateAgentsMd(data: FafData): string {
     }
   }
 
-  // Human Context (the who/why — lean background, kept last).
-  // NOTE (future): the one section without a length cap — a verbose .faf could
-  // sneak bloat back in here. The fix is upstream authoring/lint (the 4-6-word
-  // rule), NOT truncating curated content in the generator.
-  if (data.human_context) {
-    const hc: string[] = [];
-    for (const [key, value] of Object.entries(data.human_context)) {
-      if (filled(value)) hc.push(`- **${slotLabel(`human_context.${key}`)}:** ${value.trim()}`);
-    }
-    if (hc.length) {
-      push('## Human Context');
-      push();
-      for (const h of hc) push(h);
-      push();
-    }
-  }
+  // No Human Context section — who/why marketing is README / .faf DNA, not agent ops (BETTER).
 
-  // Footer — freshness marker (deterministic: from the .faf's generated stamp)
   const gen = data.generated;
   if (present(gen)) push(`*Context authored: ${String(gen)}*`);
 

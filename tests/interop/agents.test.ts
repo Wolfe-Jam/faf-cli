@@ -1,10 +1,10 @@
 /**
- * interop/agents — "The AGENTS.md Edition" exporter. WJTTC tiers:
+ * interop/agents — BETTER-shaped AGENTS.md exporter. WJTTC tiers:
  *   ENGINE — every section renders from data with correct values (the core job).
  *   BRAKE  — the safety contract: universal safety defaults ALWAYS render;
  *            everything else is DATA-GATED (absent slots invent nothing).
  *   AERO   — facts-not-bloat curation (human↔assistant prefs + context/marketing
- *            keys excluded).
+ *            keys excluded; Human Context omitted from agent ops file).
  */
 import { describe, test, expect } from 'bun:test';
 import { generateAgentsMd } from '../../src/interop/agents.js';
@@ -14,7 +14,6 @@ const FULL: any = {
   stack: {
     backend: 'FastAPI',
     package_manager: 'pip',
-    // context/marketing — must NOT appear in Stack:
     core_problem: 'AI lacks context',
     mission_purpose: 'Give AI context',
     target_user: 'developers',
@@ -31,7 +30,6 @@ const FULL: any = {
   generated: '2026-07-06T00:00:00Z',
 };
 
-// Bare .faf: orientation only. No commands / key_files / instructions / stack / human_context.
 const BARE: any = { project: { name: 'bare', goal: 'a tiny tool', main_language: 'Go' } };
 
 describe('ENGINE: full data renders every section', () => {
@@ -47,9 +45,16 @@ describe('ENGINE: full data renders every section', () => {
     expect(md).toContain('## Setup & build');
     expect(md).toContain('pip install -e ".[dev]"');
   });
-  test('§3 Run the tests', () => {
+  test('§3 Run the tests includes lint on the verify bar', () => {
     expect(md).toContain('## Run the tests');
     expect(md).toContain('pytest -v');
+    expect(md).toContain('ruff check .');
+    // lint appears under Run the tests, not only DoD
+    const testsIdx = md.indexOf('## Run the tests');
+    const dodIdx = md.indexOf('## Definition of Done');
+    const ruffInTests = md.indexOf('ruff check .', testsIdx);
+    expect(ruffInTests).toBeGreaterThan(testsIdx);
+    expect(ruffInTests).toBeLessThan(dodIdx);
   });
   test('§4 Where things live', () => {
     expect(md).toContain('## Where things live');
@@ -69,12 +74,15 @@ describe('ENGINE: full data renders every section', () => {
     expect(m).toContain('TypeScript strict mode');
     expect(m).toContain('obey the configs');
   });
-  test('§6 Guardrails: project-specific first, then Ask-first + Never', () => {
+  test('§6 Guardrails: three-tier Always / Ask / Never + project warnings', () => {
     expect(md).toContain('## Guardrails');
     expect(md).toContain('Version must match across files');
+    expect(md).toContain('Always OK');
     expect(md).toContain('Ask first');
     expect(md).toContain('Never');
-    expect(md.indexOf('Version must match')).toBeLessThan(md.indexOf('Ask first'));
+    expect(md).toContain('branch and open a PR');
+    expect(md.indexOf('Version must match')).toBeLessThan(md.indexOf('Always OK'));
+    expect(md.indexOf('Always OK')).toBeLessThan(md.indexOf('Ask first'));
   });
   test('§7 Definition of Done composed from commands', () => {
     expect(md).toContain('## Definition of Done');
@@ -88,7 +96,7 @@ describe('ENGINE: full data renders every section', () => {
       commands: { test: 'cargo test' },
     } as any);
     expect(m).toContain('`cargo test` passes');
-    expect(m).not.toContain('exits 0'); // no lint command → no lint gate
+    expect(m).not.toContain('exits 0');
   });
   test('§7 DoD: a test+check key classifies as a test ONLY (no double gate)', () => {
     const m = generateAgentsMd({
@@ -96,7 +104,7 @@ describe('ENGINE: full data renders every section', () => {
       commands: { 'test:check': 'npm run test:check' },
     } as any);
     expect(m).toContain('`npm run test:check` passes');
-    expect(m).not.toContain('exits 0'); // not also classified as lint
+    expect(m).not.toContain('exits 0');
   });
   test('§7 DoD dedupes identical gates', () => {
     const m = generateAgentsMd({
@@ -105,37 +113,48 @@ describe('ENGINE: full data renders every section', () => {
     } as any);
     expect(m.split('`npm run check` exits 0').length - 1).toBe(1);
   });
-  test('§8 Security & secrets', () => {
+  test('§8 When stuck always renders', () => {
+    expect(md).toContain('## When stuck');
+    expect(md).toContain('clarifying question');
+  });
+  test('§9 Security & secrets', () => {
     expect(md).toContain('## Security & secrets');
     expect(md).toContain('`.env`');
     expect(md).toContain('.env.example');
     expect(md).toContain('.env.local');
   });
-  test('§9 Commit & PR', () => {
+  test('§10 Commit & PR always (with commit_style when present)', () => {
     expect(md).toContain('## Commit & PR');
     expect(md).toContain('conventional');
+    expect(md).toContain('same PR');
   });
   test('Stack renders real stack', () => {
     expect(md).toContain('## Stack');
     expect(md).toContain('FastAPI');
   });
-  test('Human Context + freshness footer', () => {
-    expect(md).toContain('## Human Context');
+  test('freshness footer; Human Context omitted from AGENTS', () => {
     expect(md).toContain('Context authored: 2026-07-06');
+    expect(md).not.toContain('## Human Context');
+    expect(md).not.toContain('ship faster');
   });
 });
 
 describe('BRAKE: safety contract — defaults always render, nothing else invented', () => {
   const md = generateAgentsMd(BARE);
 
-  test('Guardrails (Ask-first + Never) render even with no warnings', () => {
+  test('Guardrails (Always + Ask-first + Never) render even with no warnings', () => {
     expect(md).toContain('## Guardrails');
+    expect(md).toContain('Always OK');
     expect(md).toContain('Ask first');
     expect(md).toContain('Never');
   });
   test('Definition of Done always renders (bare = commit gate only)', () => {
     expect(md).toContain('## Definition of Done');
     expect(md).toContain('Done when: changes committed with a conventional message.');
+  });
+  test('When stuck + Commit & PR always render', () => {
+    expect(md).toContain('## When stuck');
+    expect(md).toContain('## Commit & PR');
   });
   test('orientation still renders', () => {
     expect(md).toContain('bare');
@@ -148,7 +167,6 @@ describe('BRAKE: safety contract — defaults always render, nothing else invent
     '## Where things live',
     '## Conventions',
     '## Security & secrets',
-    '## Commit & PR',
     '## Stack',
     '## Human Context',
   ]) {
@@ -170,5 +188,8 @@ describe('AERO: facts-not-bloat curation', () => {
     expect(md).not.toContain('Core Problem');
     expect(md).not.toContain('Mission Purpose');
     expect(md).not.toContain('Target User');
+  });
+  test('Human Context never emitted (BETTER ops file)', () => {
+    expect(md).not.toContain('## Human Context');
   });
 });

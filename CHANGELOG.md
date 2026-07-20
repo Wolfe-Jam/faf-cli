@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v7.1.3 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v7.1.4 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -9,6 +9,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.1.4] - 2026-07-20
+
+### Changed
+- **`faf export --agents` is BETTER-shaped.** Aligns with the hand AGENTS.md exemplar and agents.md guide:
+  - **Verify bar:** lint/typecheck sit under **Run the tests**, not only Definition of Done.
+  - **Three-tier guardrails:** Always OK · Ask first · Never (enable-then-restrict: branch + PR before bare “never main”).
+  - **When stuck** section (static escalation path).
+  - **Commit & PR** always emitted (defaults + optional `commit_style`).
+  - **Human Context omitted** from AGENTS.md — who/why stays in README / `.faf` DNA, not agent ops (BETTER filter).
+  - Stable setup command order (install → build → dev → start).
+  - Banner clarifies managed block vs preserved hand content outside markers.
+- **project.faf** — explicit `commands` + `key_files` for this repo so export has load-bearing facts without relying only on detection.
+
+### Notes
+- Hand-crafted root `AGENTS.md` remains the craft exemplar; export injects the managed `<!-- faf:start -->` block without wiping hand content outside markers.
+- Version **7.1.4** (patch polish of The AGENTS.md Edition 7.1.0), not a new marketing edition.
 
 ## [7.1.3] - 2026-07-10
 

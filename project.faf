@@ -1,10 +1,35 @@
 faf_version: "3.0"
 project:
   name: faf-cli
-  version: "7.1.3"
-  goal: "CLI for the IANA-registered `.faf` format (`application/vnd.faf+yaml`) — TypeScript, Bun-native since v6. package faf-cli v7.1.3."
+  version: "7.1.4"
+  goal: "CLI for the IANA-registered `.faf` format (`application/vnd.faf+yaml`) — TypeScript, Bun-native since v6. package faf-cli v7.1.4."
   main_language: TypeScript
   type: cli  # found: package.json bin
+# Commands + key_files feed `faf export --agents` (hand values win over detection).
+commands:
+  install: bun install
+  build: bun run build
+  dev: bun run dev
+  test: bun run test
+  lint: bun run lint
+key_files:
+  - src/cli.ts
+  - src/index.ts
+  - src/commands/
+  - src/core/
+  - src/detect/
+  - src/interop/
+  - src/wasm/
+  - package.json
+  - project.faf
+instant_context:
+  what_building: CLI for IANA-registered .faf project DNA
+  tech_stack: TypeScript · Bun-native since v6
+  key_files:
+    - src/cli.ts
+    - src/commands/
+    - src/core/
+    - src/interop/agents.ts
 stack:
   frontend: slotignored
   css_framework: slotignored
@@ -30,7 +55,7 @@ human_context:
   what: Persistent AI Context Standard — project DNA for AI. IANA-registered. Anthropic-merged.
   why: Eliminates 91% context re-discovery tax — define once, AI remembers forever
   where: npm registry, Homebrew, GitHub
-  when: Production since September 2025; Bun-native since v6; current package 7.1.3
+  when: Production since September 2025; Bun-native since v6; current package 7.1.4
   how: bunx faf-cli auto, then project.faf versions with your code — faf show renders it human-visible
 monorepo:
   packages_count: slotignored
