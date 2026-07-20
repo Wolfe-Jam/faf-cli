@@ -90,7 +90,7 @@ Run `faf` with no arguments:
 
 ![faf](./nelly.png)
 
-> **faf-cli dogfoods itself** — this repo's own [AGENTS.md](./AGENTS.md), [GEMINI.md](./GEMINI.md) and [CLAUDE.md](./CLAUDE.md) are authored by `faf` from [project.faf](./project.faf).
+> **faf-cli dogfoods itself** — [project.faf](./project.faf) is source DNA; [CLAUDE.md](./CLAUDE.md) and [GEMINI.md](./GEMINI.md) are authored from it via `faf`. [AGENTS.md](./AGENTS.md) is the **BETTER** ops briefing (hand-kept for agents; `faf export --agents` still authors AGENTS.md for other repos).
 
 ---
 
@@ -196,9 +196,9 @@ Ship `faf` as a single binary for CI/CD, Docker, or air-gapped environments.
 
 ```
 src/
-├── cli.ts              ← Entry point, 26 command registrations
-├── commands/           ← 26 command files (1 per command)
-├── core/               ← Types, slots (33 Mk4), tiers, scorer, schema
+├── cli.ts              ← Entry point (Commander registrations)
+├── commands/           ← one file per faf subcommand
+├── core/               ← Types, slots (Mk4), tiers, scorer, schema
 ├── detect/             ← Framework detection, stack scanner
 ├── interop/            ← YAML I/O, CLAUDE.md, AGENTS.md, GEMINI.md
 ├── ui/                 ← Colors (#00D4D4), display
@@ -214,12 +214,12 @@ src/
 > **Robust. Reliable. Next-level WJTTC tested.** — The Foundation Edition.
 
 ```bash
-bun test                       # 880 tests, 75 files, ~18s
+bun test                       # extensive WJTTC + e2e suite
 ```
 
-- **WJTTC Build Resilience** (13) — every regression class locked.
-- **WJTTC Kernel Stress** (19) — WASM kernel boundary tests.
-- **e2e lifecycle** — every command in sequence.
+- **WJTTC Build Resilience** — regression classes locked.
+- **WJTTC Kernel Stress** — WASM kernel boundary tests.
+- **e2e lifecycle** — commands in sequence.
 
 Test reports in `reports/`.
 
