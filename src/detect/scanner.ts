@@ -186,11 +186,21 @@ function detectDocumentationSignal(dir: string, pkg: PackageJson | null): string
   if (pkg?.keywords?.some(k => /^(specification|format-spec|standard)$/i.test(k))) {
     return 'package keywords contains "specification"';
   }
+  // A publishable CLI/bin package is never "docs-only" — even if `files` is
+  // npm-publish-narrow (e.g. ["dist", "README.md"]). Bare `dist`/`src`/`bin`
+  // without a trailing slash is still source, not documentation.
+  // (agents-md-facts false positive: bin present + files:["dist","README.md","LICENSE"]
+  // classified as documentation before the cli check could run.)
+  if (pkg?.bin) {
+    return null;
+  }
   // pkg.files contains only md / examples / assets (no dist/, no src/)
   if (pkg?.files && pkg.files.length > 0) {
-    const sourcePatterns = /^(dist|src|lib|build|bin)\/|\.(js|ts|tsx|jsx|mjs|cjs|py|rs|go)$/;
+    // Match "dist", "dist/", "src/cli.ts", "*.js", etc. — bare publish dirs count as source
+    const sourcePatterns =
+      /^(dist|src|lib|build|bin)(\/|$)|\/(dist|src|lib|build|bin)(\/|$)|(\.|\/)(js|ts|tsx|jsx|mjs|cjs|py|rs|go)$/;
     const hasSource = pkg.files.some(f => sourcePatterns.test(f));
-    const hasDocs = pkg.files.some(f => /\.(md|MD)|examples?\//.test(f));
+    const hasDocs = pkg.files.some(f => /\.(md|MD)$|examples?\//.test(f) || f === 'README.md' || f === 'docs' || f === 'docs/');
     if (!hasSource && hasDocs) {
       return 'package.json files = docs/examples only (no source)';
     }

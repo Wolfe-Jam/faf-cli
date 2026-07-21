@@ -120,6 +120,33 @@ describe('scanner', () => {
       expect(detectProjectType(testDir)).toBe('cli');
     });
 
+    // agents-md-facts regression: documentation heuristic ran before cli and
+    // treated npm `files: ["dist", "README.md"]` as docs-only (bare "dist"
+    // failed the old dist/ regex), even when package.json bin was present.
+    test('CLI with npm-publish files (bare dist + README) stays cli — not documentation', () => {
+      writePkg({}, {}, {
+        bin: { 'agents-md-facts': 'dist/cli.js' },
+        files: ['dist', 'README.md', 'LICENSE'],
+      });
+      expect(detectProjectType(testDir)).toBe('cli');
+    });
+
+    test('docs-only package.files without bin → documentation', () => {
+      writePkg({}, {}, {
+        files: ['README.md', 'docs/', 'examples/'],
+      });
+      expect(detectProjectType(testDir)).toBe('documentation');
+    });
+
+    test('package.files bare dist without bin is still source (not documentation)', () => {
+      writePkg({}, {}, {
+        main: 'dist/index.js',
+        files: ['dist', 'README.md'],
+      });
+      // Not documentation; falls through to library (main present, no bin)
+      expect(detectProjectType(testDir)).toBe('library');
+    });
+
     test('detects library', () => {
       writePkg({}, {}, { main: 'dist/index.js' });
       expect(detectProjectType(testDir)).toBe('library');
