@@ -23,7 +23,7 @@ function readPackageField(content: string, field: string): string | null {
       inPackageSection = trimmed === '[package]';
       continue;
     }
-    if (!inPackageSection) continue;
+    if (!inPackageSection) {continue;}
     // Match `field = "value"` or `field="value"`
     const m = trimmed.match(new RegExp(`^${field}\\s*=\\s*(.+)$`));
     if (m) {
@@ -32,7 +32,7 @@ function readPackageField(content: string, field: string): string | null {
       value = value.replace(/\s*#.*$/, '').trim();
       // Strip surrounding quotes (double or single)
       const quoted = value.match(/^"((?:[^"\\]|\\.)*)"$/) || value.match(/^'((?:[^'\\]|\\.)*)'$/);
-      if (quoted) return quoted[1];
+      if (quoted) {return quoted[1];}
       return value;
     }
   }
@@ -42,7 +42,7 @@ function readPackageField(content: string, field: string): string | null {
 /** Read Cargo.toml and extract per-slot content. Returns {} if no Cargo.toml. */
 export function interrogateCargo(dir: string): ExtractedContext {
   const path = join(dir, 'Cargo.toml');
-  if (!existsSync(path)) return {};
+  if (!existsSync(path)) {return {};}
 
   let content: string;
   try {

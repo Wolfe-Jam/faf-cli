@@ -50,7 +50,7 @@ const TIER_REGEX = /(?:^|[^A-Za-z])(BRAKE|ENGINE|AERO|TYRE|PIT)(?:[^A-Za-z]|$)/i
 /** Classify a test by name. Returns null if no tier marker is present. */
 export function detectTier(testName: string): Tier | null {
   const m = testName.match(TIER_REGEX);
-  if (!m) return null;
+  if (!m) {return null;}
   return m[1].toUpperCase() as Tier;
 }
 
@@ -68,13 +68,13 @@ export function classifyTestFile(filename: string): { ok: boolean; lang?: Langua
   ) {
     return { ok: true, lang: 'typescript' };
   }
-  if (lower.endsWith('.rs')) return { ok: true, lang: 'rust' };
-  if (lower.endsWith('_test.go')) return { ok: true, lang: 'go' };
+  if (lower.endsWith('.rs')) {return { ok: true, lang: 'rust' };}
+  if (lower.endsWith('_test.go')) {return { ok: true, lang: 'go' };}
   if ((lower.startsWith('test_') || lower.endsWith('_test.py')) && lower.endsWith('.py')) {
     return { ok: true, lang: 'python' };
   }
   // Zig: any .zig file MAY have test blocks; we still scan, but most won't
-  if (lower.endsWith('.zig')) return { ok: true, lang: 'zig' };
+  if (lower.endsWith('.zig')) {return { ok: true, lang: 'zig' };}
   return { ok: false };
 }
 
@@ -146,28 +146,28 @@ export function extractTestNames(content: string, lang: Language): string[] {
       // #[test] on its own line, then `fn name()` — function name IS the test name.
       const re = /#\[test\]\s*(?:\r?\n)\s*(?:pub\s+)?fn\s+([a-zA-Z_][a-zA-Z_0-9]*)/g;
       let m: RegExpExecArray | null;
-      while ((m = re.exec(content)) !== null) names.push(m[1]);
+      while ((m = re.exec(content)) !== null) {names.push(m[1]);}
       break;
     }
     case 'python': {
       // def test_name(...) — function name IS the test name.
       const re = /^\s*def\s+(test_[a-zA-Z_0-9]+)\s*\(/gm;
       let m: RegExpExecArray | null;
-      while ((m = re.exec(content)) !== null) names.push(m[1]);
+      while ((m = re.exec(content)) !== null) {names.push(m[1]);}
       break;
     }
     case 'zig': {
       // test "name" { ... }
       const re = /\btest\s+"((?:\\.|[^"\\])+)"/g;
       let m: RegExpExecArray | null;
-      while ((m = re.exec(content)) !== null) names.push(m[1]);
+      while ((m = re.exec(content)) !== null) {names.push(m[1]);}
       break;
     }
     case 'go': {
       // func TestName(t *testing.T)
       const re = /\bfunc\s+(Test[A-Z][a-zA-Z_0-9]*)\s*\(/g;
       let m: RegExpExecArray | null;
-      while ((m = re.exec(content)) !== null) names.push(m[1]);
+      while ((m = re.exec(content)) !== null) {names.push(m[1]);}
       break;
     }
   }
@@ -184,11 +184,11 @@ function walk(dir: string, results: string[] = []): string[] {
     return results;
   }
   for (const entry of entries) {
-    if (SKIP_DIRS.has(entry.name)) continue;
-    if (entry.name.startsWith('.') && entry.name !== '.') continue;
+    if (SKIP_DIRS.has(entry.name)) {continue;}
+    if (entry.name.startsWith('.') && entry.name !== '.') {continue;}
     const full = join(dir, entry.name);
-    if (entry.isDirectory()) walk(full, results);
-    else if (entry.isFile()) results.push(full);
+    if (entry.isDirectory()) {walk(full, results);}
+    else if (entry.isFile()) {results.push(full);}
   }
   return results;
 }
@@ -196,18 +196,18 @@ function walk(dir: string, results: string[] = []): string[] {
 /** Scan a directory tree and return findings. Pure / testable. */
 export function scanTests(rootDir: string): TestFinding[] {
   const findings: TestFinding[] = [];
-  if (!existsSync(rootDir)) return findings;
+  if (!existsSync(rootDir)) {return findings;}
   const allFiles = walk(rootDir);
   for (const file of allFiles) {
     const filename = file.split('/').pop() ?? '';
     const cls = classifyTestFile(filename);
-    if (!cls.ok || !cls.lang) continue;
+    if (!cls.ok || !cls.lang) {continue;}
     let content: string;
     try { content = readFileSync(file, 'utf-8'); } catch { continue; }
     // Filter Rust files that don't actually contain #[test] — most src/ files
-    if (cls.lang === 'rust' && !/#\[test\]/.test(content)) continue;
+    if (cls.lang === 'rust' && !/#\[test\]/.test(content)) {continue;}
     // Filter Zig files that don't have test blocks
-    if (cls.lang === 'zig' && !/\btest\s+"/.test(content)) continue;
+    if (cls.lang === 'zig' && !/\btest\s+"/.test(content)) {continue;}
     const names = extractTestNames(content, cls.lang);
     const relFile = file.replace(`${rootDir}/`, '');
     for (const name of names) {
@@ -233,7 +233,7 @@ export function aggregateReport(findings: TestFinding[]): WjttcReport {
   for (const f of findings) {
     files.add(f.file);
     byLanguage[f.language] = (byLanguage[f.language] ?? 0) + 1;
-    if (f.tier) byTier[f.tier]++;
+    if (f.tier) {byTier[f.tier]++;}
     else {
       untiered++;
       if (untieredExamples.length < 5) {

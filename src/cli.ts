@@ -362,7 +362,7 @@ if (process.argv.length <= 2) {
     // IIFE wrap copied an older line). Pinning the canonical here.
     console.log(`${DB}${G}▀${GB}${DF}▀${DB} ${GB}${G}██${DB}  ${GB}${G}██${DB} ${RS}  ${dim('Nelly Never Forgets')}`);
     console.log(`${GR}▔▔▔▔▔▔▔▔▔▔▔▔${RS}`);
-    console.log(`${dim('  ' + cwd)}`);
+    console.log(`${dim(`  ${  cwd}`)}`);
     console.log('');
     try { await scoreCommand(undefined, { status: true }); } catch {}
     console.log('');

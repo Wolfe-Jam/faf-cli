@@ -28,7 +28,7 @@ function detectConventions(dir: string, pkg: Pkg): string[] {
   if (has('tsconfig.json') && /"strict"\s*:\s*true/.test(read('tsconfig.json'))) {
     conv.push('TypeScript strict mode (tsconfig.json)');
   }
-  if (pkg?.type === 'module') conv.push('ESM modules (`type: module`)');
+  if (pkg?.type === 'module') {conv.push('ESM modules (`type: module`)');}
 
   const tools: string[] = [];
   const dev = pkg?.devDependencies ?? {};
@@ -42,11 +42,11 @@ function detectConventions(dir: string, pkg: Pkg): string[] {
     tools.push('Prettier');
   }
   const py = has('pyproject.toml') ? read('pyproject.toml') : '';
-  if (/\[tool\.black\]/.test(py)) tools.push('black');
-  if (/\[tool\.ruff\]/.test(py)) tools.push('ruff');
-  if (/\[tool\.mypy\]/.test(py)) tools.push('mypy');
-  if (has('rustfmt.toml') || has('.rustfmt.toml')) tools.push('rustfmt');
-  if (tools.length) conv.push(`Style enforced by ${tools.join(' · ')} — obey the configs`);
+  if (/\[tool\.black\]/.test(py)) {tools.push('black');}
+  if (/\[tool\.ruff\]/.test(py)) {tools.push('ruff');}
+  if (/\[tool\.mypy\]/.test(py)) {tools.push('mypy');}
+  if (has('rustfmt.toml') || has('.rustfmt.toml')) {tools.push('rustfmt');}
+  if (tools.length) {conv.push(`Style enforced by ${tools.join(' · ')} — obey the configs`);}
 
   return conv;
 }
@@ -84,7 +84,7 @@ export function enrichFromRepo(dir: string, data: FafData): FafData {
     data.key_files ?? (data.instant_context as { key_files?: string[] } | undefined)?.key_files;
   if (!existing || existing.length === 0) {
     const files = detectKeyFiles(dir);
-    if (files.length) out.key_files = files;
+    if (files.length) {out.key_files = files;}
   }
 
   // Security: detect a secrets file (.env), keep hand-authored if present.
@@ -102,7 +102,7 @@ export function enrichFromRepo(dir: string, data: FafData): FafData {
   // Conventions: detect the governing toolchain (fill-if-absent).
   if (!data.conventions) {
     const conv = detectConventions(dir, pkg as Pkg);
-    if (conv.length) out.conventions = conv;
+    if (conv.length) {out.conventions = conv;}
   }
 
   return out;

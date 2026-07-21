@@ -67,8 +67,8 @@ export function generateCopilotInstructions(data: FafData): string {
     stackEntries.push(`- **Language:** ${data.project!.main_language!.trim()}`);
   }
   for (const [key, val] of Object.entries(stack)) {
-    if (COMMAND_SLOTS.has(key)) continue;
-    if (filled(val)) stackEntries.push(`- **${slotLabel(`stack.${key}`)}:** ${val.trim()}`);
+    if (COMMAND_SLOTS.has(key)) {continue;}
+    if (filled(val)) {stackEntries.push(`- **${slotLabel(`stack.${key}`)}:** ${val.trim()}`);}
   }
   if (stackEntries.length > 0) {
     lines.push('## Tech stack', '', ...stackEntries, '');
@@ -78,9 +78,9 @@ export function generateCopilotInstructions(data: FafData): string {
   const cmds: string[] = [];
   for (const [slot, verb] of COMMAND_VERBS) {
     const val = (stack as Record<string, unknown>)[slot];
-    if (filled(val)) cmds.push(`- ${verb} \`${val.trim()}\`.`);
+    if (filled(val)) {cmds.push(`- ${verb} \`${val.trim()}\`.`);}
   }
-  if (filled(stack.cicd)) cmds.push(`- CI runs on ${stack.cicd.trim()}.`);
+  if (filled(stack.cicd)) {cmds.push(`- CI runs on ${stack.cicd.trim()}.`);}
   if (cmds.length > 0) {
     lines.push('## Build & run', '', ...cmds, '');
   }

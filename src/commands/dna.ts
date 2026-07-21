@@ -26,7 +26,7 @@ export function dnaCommand(): void {
   if (log.length > 1) {
     console.log();
     console.log(dim('   history:'));
-    for (const line of log) console.log(dim(`   ${line}`));
+    for (const line of log) {console.log(dim(`   ${line}`));}
   }
   console.log();
 }

@@ -26,7 +26,7 @@ export function titleLabel(key: string): string {
   return key
     .split('_')
     .map((w) => {
-      if (!w) return w;
+      if (!w) {return w;}
       const up = w.toUpperCase();
       return ACRONYMS.has(up) ? up : w.charAt(0).toUpperCase() + w.slice(1);
     })
@@ -46,7 +46,7 @@ export function filled(v: unknown): v is string {
  */
 export function slotLabel(path: string): string {
   const slot = SLOT_BY_PATH.get(path);
-  if (slot?.label) return slot.label;
+  if (slot?.label) {return slot.label;}
   const key = path.includes('.') ? path.slice(path.lastIndexOf('.') + 1) : path;
   return titleLabel(key);
 }

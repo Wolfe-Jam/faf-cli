@@ -27,7 +27,7 @@ export interface SlotChange {
 }
 
 function valuesEqual(a: unknown, b: unknown): boolean {
-  if (a === b) return true;
+  if (a === b) {return true;}
   // Slot values are scalars or simple lists in practice; normalized JSON keeps
   // the comparison stable across arrays/objects without a deep-equal dependency.
   return JSON.stringify(a) === JSON.stringify(b);

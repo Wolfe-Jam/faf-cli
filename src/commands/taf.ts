@@ -39,9 +39,9 @@ export function tafCommand(subcommand?: string | TafOptions, options: TafOptions
 type Runner = 'bun' | 'pnpm' | 'yarn' | 'npm';
 
 function detectRunner(dir: string): Runner {
-  if (existsSync(join(dir, 'bun.lockb')) || existsSync(join(dir, 'bun.lock'))) return 'bun';
-  if (existsSync(join(dir, 'pnpm-lock.yaml'))) return 'pnpm';
-  if (existsSync(join(dir, 'yarn.lock'))) return 'yarn';
+  if (existsSync(join(dir, 'bun.lockb')) || existsSync(join(dir, 'bun.lock'))) {return 'bun';}
+  if (existsSync(join(dir, 'pnpm-lock.yaml'))) {return 'pnpm';}
+  if (existsSync(join(dir, 'yarn.lock'))) {return 'yarn';}
   return 'npm';
 }
 

@@ -37,7 +37,7 @@ const NAME_RE = /^[a-zA-Z0-9.-]+\/[a-zA-Z0-9._-]+$/;
 /** Derive a reverse-DNS `namespace/name` for the card. */
 function serverName(data: FafData): string {
   const raw = String(data.project?.name ?? 'project').trim();
-  if (raw.includes('/') && NAME_RE.test(raw)) return raw; // already namespaced
+  if (raw.includes('/') && NAME_RE.test(raw)) {return raw;} // already namespaced
 
   const homepage = (data.project?.homepage ??
     data.project?.website ??
@@ -62,8 +62,8 @@ function clampDescription(data: FafData): string {
   )
     .replace(/\s+/g, ' ')
     .trim();
-  if (!src) return 'MCP server';
-  return src.length <= 100 ? src : src.slice(0, 97).trimEnd() + '...';
+  if (!src) {return 'MCP server';}
+  return src.length <= 100 ? src : `${src.slice(0, 97).trimEnd()  }...`;
 }
 
 /**
@@ -100,12 +100,12 @@ export function generateServerCard(
   };
 
   const title = registryTitle(data) ?? (data.project?.name as string | undefined);
-  if (title && title.length <= 100) card.title = title;
+  if (title && title.length <= 100) {card.title = title;}
 
   const homepage = (data.project?.homepage ??
     data.project?.website ??
     data.project?.url) as string | undefined;
-  if (homepage) card.websiteUrl = homepage;
+  if (homepage) {card.websiteUrl = homepage;}
 
   if (opts.remoteUrl) {
     card.remotes = [{ type: 'streamable-http', url: opts.remoteUrl }];
@@ -167,7 +167,7 @@ export function registryTitle(data: FafData): string | undefined {
   const raw = (data.project as { title?: unknown } | undefined)?.title;
   if (typeof raw === 'string') {
     const t = raw.trim();
-    if (t && t.length <= 100) return t;
+    if (t && t.length <= 100) {return t;}
   }
   return undefined;
 }
@@ -183,6 +183,6 @@ export function writeServerCard(
 ): string {
   const card = generateServerCard(data, opts);
   const out = join(dir, 'server-card');
-  writeFileSync(out, JSON.stringify(card, null, 2) + '\n', 'utf-8');
+  writeFileSync(out, `${JSON.stringify(card, null, 2)  }\n`, 'utf-8');
   return out;
 }

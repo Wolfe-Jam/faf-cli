@@ -10,7 +10,7 @@ const SYNC_MARKER = 'STATUS: BI-SYNC ACTIVE';
 /** Read CLAUDE.md from a directory */
 export function readClaudeMd(dir: string): string | null {
   const path = join(dir, CLAUDE_MD);
-  if (!existsSync(path)) return null;
+  if (!existsSync(path)) {return null;}
   return readFileSync(path, 'utf-8');
 }
 
@@ -22,7 +22,7 @@ export function writeClaudeMd(dir: string, content: string): void {
 /** Get mtime of CLAUDE.md */
 export function claudeMdMtime(dir: string): number | null {
   const path = join(dir, CLAUDE_MD);
-  if (!existsSync(path)) return null;
+  if (!existsSync(path)) {return null;}
   return statSync(path).mtimeMs;
 }
 
@@ -63,7 +63,7 @@ export function fafMetaTag(data: FafData, opts: FafMetaOpts = {}): string {
   } else {
     kv.push(`claim=${opts.claim ?? 'project.faf'}`);
   }
-  if (typeof opts.score === 'number') kv.push(`score=${opts.score}`);
+  if (typeof opts.score === 'number') {kv.push(`score=${opts.score}`);}
   kv.push(`family=${opts.family ?? 'FAF'}`);
   if (opts.siblings && opts.siblings.length > 0) {
     kv.push(`siblings=${opts.siblings.join(',')}`);
@@ -99,7 +99,7 @@ export function generateClaudeMd(data: FafData): string {
   // Stack — only non-ignored slots
   const stack = data.stack ?? {};
   const stackEntries: string[] = [];
-  if (lang) stackEntries.push(`**Language:** ${lang}`);
+  if (lang) {stackEntries.push(`**Language:** ${lang}`);}
   for (const [key, val] of Object.entries(stack)) {
     if (val && val !== 'slotignored' && String(val).trim()) {
       stackEntries.push(`**${slotLabel(`stack.${key}`)}:** ${val}`);
@@ -152,32 +152,32 @@ export function parseClaudeMd(content: string): Partial<FafData> {
 
   // New format: "# CLAUDE.md — project-name"
   const titleMatch = content.match(/^# CLAUDE\.md\s*[—–-]\s*(.+)$/m);
-  if (titleMatch) data.project!.name = stripVersionTrailer(titleMatch[1].trim());
+  if (titleMatch) {data.project!.name = stripVersionTrailer(titleMatch[1].trim());}
 
   // Old format fallback: "**Name:** value"
   if (!data.project!.name) {
     const nameMatch = content.match(/\*\*Name:\*\*\s*(.+)/);
-    if (nameMatch) data.project!.name = stripVersionTrailer(nameMatch[1].trim());
+    if (nameMatch) {data.project!.name = stripVersionTrailer(nameMatch[1].trim());}
   }
 
   // New format: paragraph after "## What This Is"
   const whatMatch = content.match(/## What This Is\s*\n\s*\n(.+)/);
-  if (whatMatch) data.project!.goal = whatMatch[1].trim();
+  if (whatMatch) {data.project!.goal = whatMatch[1].trim();}
 
   // Old format fallback: "**What Building:** value"
   if (!data.project!.goal) {
     const goalMatch = content.match(/\*\*What Building:\*\*\s*(.+)/);
-    if (goalMatch) data.project!.goal = goalMatch[1].trim();
+    if (goalMatch) {data.project!.goal = goalMatch[1].trim();}
   }
 
   // New format: "**Language:** value" under Stack
   const langMatch = content.match(/\*\*Language:\*\*\s*(.+)/);
-  if (langMatch) data.project!.main_language = langMatch[1].trim();
+  if (langMatch) {data.project!.main_language = langMatch[1].trim();}
 
   // Old format fallback: "**Main Language:** value"
   if (!data.project!.main_language) {
     const oldLangMatch = content.match(/\*\*Main Language:\*\*\s*(.+)/);
-    if (oldLangMatch) data.project!.main_language = oldLangMatch[1].trim();
+    if (oldLangMatch) {data.project!.main_language = oldLangMatch[1].trim();}
   }
 
   return data;

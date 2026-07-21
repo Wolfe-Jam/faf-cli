@@ -41,13 +41,13 @@ export interface NudgeContext {
  * so every gate is unit-testable without the filesystem, the clock, or the TTY.
  */
 export function shouldNudge(c: NudgeContext): boolean {
-  if (c.score < WIN_SCORE) return false; // only a real win earns the ask
-  if (!c.isTTY) return false; // never when piped/redirected
-  if (c.isCI || c.optedOut) return false; // never in CI; honour opt-out
-  if (c.shownCount >= (c.maxShows ?? MAX_SHOWS)) return false; // retired — never nag forever
-  if (c.lastShownMs != null) {
+  if (c.score < WIN_SCORE) {return false;} // only a real win earns the ask
+  if (!c.isTTY) {return false;} // never when piped/redirected
+  if (c.isCI || c.optedOut) {return false;} // never in CI; honour opt-out
+  if (c.shownCount >= (c.maxShows ?? MAX_SHOWS)) {return false;} // retired — never nag forever
+  if (c.lastShownMs !== null && c.lastShownMs !== undefined) {
     const windowMs = (c.throttleDays ?? THROTTLE_DAYS) * 86_400_000;
-    if (c.nowMs - c.lastShownMs < windowMs) return false; // throttled
+    if (c.nowMs - c.lastShownMs < windowMs) {return false;} // throttled
   }
   return true;
 }
@@ -59,7 +59,7 @@ interface NudgeState {
 
 function readState(): NudgeState {
   try {
-    if (!existsSync(STATE_FILE)) return { shown: 0, lastShownMs: null };
+    if (!existsSync(STATE_FILE)) {return { shown: 0, lastShownMs: null };}
     const raw = readFileSync(STATE_FILE, 'utf-8').trim();
     if (raw.startsWith('{')) {
       const j = JSON.parse(raw) as { shown?: number; last?: string };
@@ -99,7 +99,7 @@ export function maybeStarNudge(score: number): void {
     lastShownMs: state.lastShownMs,
     nowMs,
   });
-  if (!show) return;
+  if (!show) {return;}
   console.log('');
   console.log(`  ${orange('★')} ${dim('Enjoying faf-cli? A star helps others find it:')} ${REPO}`);
   record(state.shown, nowMs);

@@ -24,8 +24,8 @@ function mergeFillEmpty(a: ExtractedContext, b: ExtractedContext): ExtractedCont
     human_context: { ...(b.human_context ?? {}), ...(a.human_context ?? {}) },
   };
   // Strip empties for clean equality semantics
-  if (out.project && Object.keys(out.project).length === 0) delete out.project;
-  if (out.human_context && Object.keys(out.human_context).length === 0) delete out.human_context;
+  if (out.project && Object.keys(out.project).length === 0) {delete out.project;}
+  if (out.human_context && Object.keys(out.human_context).length === 0) {delete out.human_context;}
   return out;
 }
 

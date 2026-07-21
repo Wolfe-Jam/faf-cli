@@ -262,7 +262,7 @@ export const INTERVIEW_PATHS: Record<string, InterviewQuestion> = Object.fromEnt
  */
 export function questionForSlot(path: string): string {
   const q = INTERVIEW_BY_PATH.get(path);
-  if (q) return q.question;
+  if (q) {return q.question;}
   const slot = SLOT_BY_PATH.get(path) ?? SLOTS.find((s) => s.canonical === path);
   return slot ? `${slot.description}?`.replace(/\?\?$/, '?') : `${path}?`;
 }
@@ -287,7 +287,7 @@ export function interviewForMissing(
         break;
       }
     }
-    if (cur === 'slotignored') return false;
+    if (cur === 'slotignored') {return false;}
     return isEmpty(cur);
   });
 }
@@ -367,7 +367,7 @@ export interface GoalSeed {
  */
 export function seedSixWsFromGoal(goal: string): GoalSeed {
   const seed: GoalSeed = {};
-  if (!goal || typeof goal !== 'string') return seed;
+  if (!goal || typeof goal !== 'string') {return seed;}
   const g = goal.trim();
 
   // WHAT — the leading noun phrase: drop a leading emoji/symbol, cut at the first
@@ -383,7 +383,7 @@ export function seedSixWsFromGoal(goal: string): GoalSeed {
 
   // WHERE — every platform/registry/runtime literally named, deduped, terse.
   const wheres = WHERE_SIGNALS.filter(([, re]) => re.test(g)).map(([label]) => label);
-  if (wheres.length) seed.where = wheres.slice(0, 4).join(', ');
+  if (wheres.length) {seed.where = wheres.slice(0, 4).join(', ');}
 
   // WHO — ONLY an explicit audience ROLE: `for developers/teams/engineers/…`,
   // captured to the sentence boundary, qualifier kept. A bare `for <ProperNoun>`
@@ -449,9 +449,9 @@ function valueAtPath(data: Record<string, unknown>, path: string): unknown {
 
 /** A slot is "filled" only with a real value — not empty, not slotignored, not a placeholder. */
 function tableValueFilled(v: unknown): v is string {
-  if (typeof v !== 'string') return false;
+  if (typeof v !== 'string') {return false;}
   const t = v.trim();
-  if (!t || t === 'slotignored') return false;
+  if (!t || t === 'slotignored') {return false;}
   return !isPlaceholder(t);
 }
 
@@ -485,7 +485,7 @@ export function buildTableOf8(
   // extraction (covers why/when/how + fallback). Each carries its provenance.
   const seedFor = (path: string): { value: string; source: string; confidence: number } | undefined => {
     const g = goalSeed[path];
-    if (g) return { value: g, source: 'project goal', confidence: 0.9 };
+    if (g) {return { value: g, source: 'project goal', confidence: 0.9 };}
     const w = path.startsWith('human_context.') ? path.slice('human_context.'.length) : '';
     const d = w ? detailed[w] : undefined;
     return d ? { value: d.value, source: d.source, confidence: d.confidence } : undefined;

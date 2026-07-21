@@ -6,7 +6,7 @@ import { filled, slotLabel, titleLabel } from './labels.js';
 
 /** A value carrying real content — non-empty, not slotignored, non-empty array. */
 const present = (v: unknown): boolean =>
-  v != null && v !== '' && v !== 'slotignored' && !(Array.isArray(v) && v.length === 0);
+  v !== null && v !== undefined && v !== '' && v !== 'slotignored' && !(Array.isArray(v) && v.length === 0);
 
 /** Render a slot value for inline display (arrays → comma list). */
 const fmtVal = (v: unknown): string => (Array.isArray(v) ? v.join(', ') : String(v));
@@ -53,10 +53,10 @@ export function generateAgentsMd(data: FafData): string {
   // Stable setup order: install → build → dev → start → other (enrich merge order is nondeterministic)
   const setupRank = (k: string): number => {
     const n = k.toLowerCase();
-    if (/install|deps/.test(n)) return 0;
-    if (/^build$|build/.test(n) && !/rebuild/.test(n)) return 1;
-    if (/^dev$|develop/.test(n)) return 2;
-    if (/^start$|run/.test(n)) return 3;
+    if (/install|deps/.test(n)) {return 0;}
+    if (/^build$|build/.test(n) && !/rebuild/.test(n)) {return 1;}
+    if (/^dev$|develop/.test(n)) {return 2;}
+    if (/^start$|run/.test(n)) {return 3;}
     return 4;
   };
   const setupCmds = [...setupRaw].sort((a, b) => setupRank(a[0]) - setupRank(b[0]) || a[0].localeCompare(b[0]));
@@ -72,11 +72,11 @@ export function generateAgentsMd(data: FafData): string {
 
   // §1 Orientation — one line: what it is · language · type · version
   const bits: string[] = [];
-  if (data.project?.main_language) bits.push(String(data.project.main_language));
-  if (present(data.project?.type)) bits.push(`type: ${String(data.project?.type)}`);
-  if (present(data.project?.version)) bits.push(`v${String(data.project?.version)}`);
+  if (data.project?.main_language) {bits.push(String(data.project.main_language));}
+  if (present(data.project?.type)) {bits.push(`type: ${String(data.project?.type)}`);}
+  if (present(data.project?.version)) {bits.push(`v${String(data.project?.version)}`);}
   let orientation = data.project?.goal ? String(data.project.goal) : '';
-  if (bits.length) orientation += (orientation ? ' — ' : '') + bits.join(' · ');
+  if (bits.length) {orientation += (orientation ? ' — ' : '') + bits.join(' · ');}
   if (orientation) {
     push(orientation);
     push();
@@ -89,7 +89,7 @@ export function generateAgentsMd(data: FafData): string {
     push('## Setup & build');
     push();
     push('```bash');
-    for (const [k, v] of setupCmds) push(`${v}    # ${k}`);
+    for (const [k, v] of setupCmds) {push(`${v}    # ${k}`);}
     push('```');
     push();
   }
@@ -99,7 +99,7 @@ export function generateAgentsMd(data: FafData): string {
     push('## Run the tests');
     push();
     push('```bash');
-    for (const [, v] of verifyCmds) push(v);
+    for (const [, v] of verifyCmds) {push(v);}
     push('```');
     push();
   }
@@ -108,18 +108,18 @@ export function generateAgentsMd(data: FafData): string {
   if (keyFiles && keyFiles.length) {
     push('## Where things live');
     push();
-    for (const f of keyFiles) push(`- \`${f}\``);
+    for (const f of keyFiles) {push(`- \`${f}\``);}
     push();
   }
 
   // §5 Conventions — real repo constraints only (human↔assistant prefs excluded)
   const conventions = new Map<string, string>();
   const collect = (obj: Record<string, unknown> | undefined) => {
-    if (!obj) return;
+    if (!obj) {return;}
     for (const [k, v] of Object.entries(obj)) {
-      if (HUMAN_PREF.has(k) || !present(v)) continue;
+      if (HUMAN_PREF.has(k) || !present(v)) {continue;}
       const label = titleLabel(k);
-      if (!conventions.has(label)) conventions.set(label, fmtVal(v));
+      if (!conventions.has(label)) {conventions.set(label, fmtVal(v));}
     }
   };
   collect(ai?.working_style);
@@ -128,21 +128,21 @@ export function generateAgentsMd(data: FafData): string {
   if (conventions.size || detectedConv.length) {
     push('## Conventions');
     push();
-    for (const [label, val] of conventions) push(`- **${label}:** ${val}`);
-    for (const c of detectedConv) if (present(c)) push(`- ${c}`);
+    for (const [label, val] of conventions) {push(`- **${label}:** ${val}`);}
+    for (const c of detectedConv) {if (present(c)) {push(`- ${c}`);}}
     push();
   }
 
   // §6 Guardrails — Always / Ask first / Never (three-tier BETTER)
   const warnings = (ai?.warnings ?? []).filter((w) => present(w));
   const always: string[] = ['read the tree'];
-  if (testCmd) always.push(`run the tests (\`${testCmd}\`)`);
-  if (buildCmd) always.push('build the project');
-  for (const [, v] of lintCmds.slice(0, 1)) always.push(`\`${v}\``);
+  if (testCmd) {always.push(`run the tests (\`${testCmd}\`)`);}
+  if (buildCmd) {always.push('build the project');}
+  for (const [, v] of lintCmds.slice(0, 1)) {always.push(`\`${v}\``);}
 
   push('## Guardrails');
   push();
-  for (const w of warnings) push(`- ${w}`);
+  for (const w of warnings) {push(`- ${w}`);}
   push(`- **Always OK:** ${[...new Set(always)].join(' · ')}.`);
   push('- **Ask first:** dependency installs, deletions, migrations, schema changes, publish/release.');
   // Enable-then-restrict: safe path first, then the landmine
@@ -151,8 +151,8 @@ export function generateAgentsMd(data: FafData): string {
 
   // §7 Definition of Done
   const dod: string[] = [];
-  for (const [, v] of lintCmds) dod.push(`\`${v}\` exits 0`);
-  for (const [, v] of testCmds) dod.push(`\`${v}\` passes`);
+  for (const [, v] of lintCmds) {dod.push(`\`${v}\` exits 0`);}
+  for (const [, v] of testCmds) {dod.push(`\`${v}\` passes`);}
   dod.push('changes committed with a conventional message');
   push('## Definition of Done');
   push();
@@ -175,7 +175,7 @@ export function generateAgentsMd(data: FafData): string {
       const ex = present(security.example) ? ` (see \`${security.example}\`)` : '';
       push(`- Secrets live in \`${security.secrets}\`${ex}. Never read or commit them.`);
     }
-    for (const n of security.never ?? []) if (present(n)) push(`- Never read or commit \`${n}\`.`);
+    for (const n of security.never ?? []) {if (present(n)) {push(`- Never read or commit \`${n}\`.`);}}
     push();
   }
 
@@ -195,13 +195,13 @@ export function generateAgentsMd(data: FafData): string {
   if (data.stack) {
     const stack: string[] = [];
     for (const [key, value] of Object.entries(data.stack)) {
-      if (NON_STACK.has(key)) continue;
-      if (filled(value)) stack.push(`- **${slotLabel(`stack.${key}`)}:** ${value.trim()}`);
+      if (NON_STACK.has(key)) {continue;}
+      if (filled(value)) {stack.push(`- **${slotLabel(`stack.${key}`)}:** ${value.trim()}`);}
     }
     if (stack.length) {
       push('## Stack');
       push();
-      for (const s of stack) push(s);
+      for (const s of stack) {push(s);}
       push();
     }
   }
@@ -209,7 +209,7 @@ export function generateAgentsMd(data: FafData): string {
   // No Human Context section — who/why marketing is README / .faf DNA, not agent ops (BETTER).
 
   const gen = data.generated;
-  if (present(gen)) push(`*Context authored: ${String(gen)}*`);
+  if (present(gen)) {push(`*Context authored: ${String(gen)}*`);}
 
   return lines.join('\n');
 }

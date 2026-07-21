@@ -93,9 +93,9 @@ export class FafDNAManager {
 
   /** Record growth — a new score on the journey. Returns null if no DNA yet. */
   recordGrowth(newScore: number, changes: string[]): FafDNA | null {
-    if (!this.dna && !this.load()) return null;
+    if (!this.dna && !this.load()) {return null;}
     const dna = this.dna!;
-    if (newScore === dna.current.score) return dna; // no change, no new version
+    if (newScore === dna.current.score) {return dna;} // no change, no new version
 
     const now = new Date().toISOString();
     const birthDNA = dna.birthCertificate.birthDNA;
@@ -113,7 +113,7 @@ export class FafDNAManager {
 
   /** The one-line journey: e.g. "22% → 85% → 99% ← 92%". */
   getJourney(): string {
-    if (!this.dna && !this.load()) return '';
+    if (!this.dna && !this.load()) {return '';}
     const dna = this.dna!;
     const birth = dna.birthCertificate.birthDNA;
     const peak = dna.growth.milestones.find((m) => m.type === 'peak');
@@ -122,7 +122,7 @@ export class FafDNAManager {
     let journey = `${birth}%`;
     if (peak && peak.score !== birth) {
       journey += ` → ${peak.score}%`;
-      if (current < peak.score) journey += ` ← ${current}%`;
+      if (current < peak.score) {journey += ` ← ${current}%`;}
     } else if (current !== birth) {
       journey += ` → ${current}%`;
     }
@@ -130,7 +130,7 @@ export class FafDNAManager {
   }
 
   getBirthDNADisplay(): { current: number; birthDNA: number; growth: number; born: string } | null {
-    if (!this.dna && !this.load()) return null;
+    if (!this.dna && !this.load()) {return null;}
     const dna = this.dna!;
     return {
       current: dna.current.score,
@@ -142,7 +142,7 @@ export class FafDNAManager {
 
   /** Complete version history, newest last. */
   getLog(): string[] {
-    if (!this.dna && !this.load()) return [];
+    if (!this.dna && !this.load()) {return [];}
     return this.dna!.versions.map((v) => {
       const emoji = v.growth > 50 ? '🚀' : v.growth > 20 ? '📈' : '📊';
       return `${v.version} — ${v.score}% ${emoji} (${v.timestamp.split('T')[0]}) ${v.changes.join(', ')}`;
@@ -150,8 +150,8 @@ export class FafDNAManager {
   }
 
   load(): FafDNA | null {
-    if (this.dna) return this.dna;
-    if (!existsSync(this.dnaPath)) return null;
+    if (this.dna) {return this.dna;}
+    if (!existsSync(this.dnaPath)) {return null;}
     try {
       this.dna = JSON.parse(readFileSync(this.dnaPath, 'utf-8')) as FafDNA;
       return this.dna;
@@ -161,9 +161,9 @@ export class FafDNAManager {
   }
 
   private save(): void {
-    if (!this.dna) return;
+    if (!this.dna) {return;}
     this.dna.lastModified = new Date().toISOString();
-    writeFileSync(this.dnaPath, JSON.stringify(this.dna, null, 2) + '\n', 'utf-8');
+    writeFileSync(this.dnaPath, `${JSON.stringify(this.dna, null, 2)  }\n`, 'utf-8');
   }
 
   private generateProjectDNA(): string {
@@ -190,24 +190,24 @@ export class FafDNAManager {
   }
 
   private updateMilestones(score: number, version: string, now: string): void {
-    if (!this.dna) return;
+    if (!this.dna) {return;}
     const ms = this.dna.growth.milestones;
     const has = (t: Milestone['type']) => ms.some((m) => m.type === t);
     const add = (type: Milestone['type'], label: string, emoji: string) =>
       ms.push({ type, score, date: now, version, label, emoji });
 
-    if (score >= this.dna.birthCertificate.birthDNA * 2 && score > 0 && !has('doubled')) add('doubled', 'Doubled', '2️⃣');
-    if (score >= 70 && !has('championship')) add('championship', 'Championship', '🏆');
-    if (score >= 85 && !has('elite')) add('elite', 'Elite', '◆');
-    if (score >= 100 && !has('perfect')) add('perfect', 'Perfect', '🏆');
+    if (score >= this.dna.birthCertificate.birthDNA * 2 && score > 0 && !has('doubled')) {add('doubled', 'Doubled', '2️⃣');}
+    if (score >= 70 && !has('championship')) {add('championship', 'Championship', '🏆');}
+    if (score >= 85 && !has('elite')) {add('elite', 'Elite', '◆');}
+    if (score >= 100 && !has('perfect')) {add('perfect', 'Perfect', '🏆');}
 
     const peak = ms.find((m) => m.type === 'peak');
     if (!peak || score > peak.score) {
-      if (peak) ms.splice(ms.indexOf(peak), 1);
+      if (peak) {ms.splice(ms.indexOf(peak), 1);}
       add('peak', 'Peak', '🏔️');
     }
     const cur = ms.findIndex((m) => m.type === 'current');
-    if (cur >= 0) ms.splice(cur, 1);
+    if (cur >= 0) {ms.splice(cur, 1);}
     add('current', 'Current', '📍');
   }
 }

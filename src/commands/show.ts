@@ -17,7 +17,7 @@ import { dim, fafCyan } from '../ui/colors.js';
  *  (externalized by the build — never reinvent platform opener logic).
  *  Returns false (no throw) when skipped or it fails — graceful by design. */
 function openInBrowser(file: string): boolean {
-  if (process.env.CI) return false; // headless/CI — don't launch a browser
+  if (process.env.CI) {return false;} // headless/CI — don't launch a browser
   try {
     void open(file).catch(() => undefined); // best-effort, never throws
     return true;

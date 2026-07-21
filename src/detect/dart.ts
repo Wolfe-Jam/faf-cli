@@ -51,10 +51,10 @@ function pubspecDeps(content: string): Set<string> {
       continue;
     }
     // A new top-level key (no leading whitespace) ends the dependency section.
-    if (/^\S/.test(line)) inDeps = false;
+    if (/^\S/.test(line)) {inDeps = false;}
     if (inDeps) {
       const m = line.match(/^\s{2}([a-zA-Z0-9_]+):/);
-      if (m) deps.add(m[1].toLowerCase());
+      if (m) {deps.add(m[1].toLowerCase());}
     }
   }
   return deps;
@@ -63,7 +63,7 @@ function pubspecDeps(content: string): Set<string> {
 /** Classify a Dart/Flutter project from its pubspec.yaml. Returns null if not Dart. */
 export function detectDartProject(dir: string): DartProject | null {
   const path = join(dir, 'pubspec.yaml');
-  if (!existsSync(path)) return null;
+  if (!existsSync(path)) {return null;}
   let content: string;
   try {
     content = readFileSync(path, 'utf-8');

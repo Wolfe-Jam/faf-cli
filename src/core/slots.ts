@@ -97,8 +97,8 @@ export function readSlotValue(
     return cur;
   };
   const primary = tryPath(slot.path);
-  if (primary !== undefined) return primary;
-  if (slot.canonical) return tryPath(slot.canonical);
+  if (primary !== undefined) {return primary;}
+  if (slot.canonical) {return tryPath(slot.canonical);}
   return undefined;
 }
 
@@ -127,12 +127,12 @@ export const PLACEHOLDERS = new Set([
 
 /** Check if a value is a placeholder (empty) */
 export function isPlaceholder(value: unknown): boolean {
-  if (value === null || value === undefined || value === '') return true;
+  if (value === null || value === undefined || value === '') {return true;}
   if (typeof value === 'string') {
     return PLACEHOLDERS.has(value.toLowerCase().trim());
   }
-  if (Array.isArray(value) && value.length === 0) return true;
-  if (typeof value === 'object' && Object.keys(value as object).length === 0) return true;
+  if (Array.isArray(value) && value.length === 0) {return true;}
+  if (typeof value === 'object' && Object.keys(value as object).length === 0) {return true;}
   return false;
 }
 

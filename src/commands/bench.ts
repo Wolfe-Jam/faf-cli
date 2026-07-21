@@ -106,15 +106,15 @@ function significantTokens(s: string): string[] {
 export function answersMatch(expected: string, given: string): boolean {
   const e = normalizeAnswer(expected);
   const g = normalizeAnswer(given);
-  if (!e || !g) return false;
-  if (e === g) return true;
+  if (!e || !g) {return false;}
+  if (e === g) {return true;}
   const ea = ALIAS_LOOKUP.get(e);
-  if (ea !== undefined && ALIAS_LOOKUP.get(g) === ea) return true;
+  if (ea !== undefined && ALIAS_LOOKUP.get(g) === ea) {return true;}
   const need = significantTokens(expected);
-  if (need.length === 0) return false;
+  if (need.length === 0) {return false;}
   const have = new Set(significantTokens(given));
   return need.every((t) => {
-    if (have.has(t)) return true;
+    if (have.has(t)) {return true;}
     const ta = ALIAS_LOOKUP.get(t);
     return ta !== undefined && [...have].some((h) => ALIAS_LOOKUP.get(h) === ta);
   });
@@ -139,11 +139,11 @@ export function deriveQuestionSet(yaml: string): QuestionSet {
 
   for (const slot of SLOTS) {
     // Active + populated only — slotignored is the What-Not, never a quiz topic.
-    if (result.slots[slot.path] !== 'populated') continue;
+    if (result.slots[slot.path] !== 'populated') {continue;}
     const value = readSlotValue(data, slot);
-    if (typeof value !== 'string') continue;
+    if (typeof value !== 'string') {continue;}
     const v = value.trim();
-    if (!v || PLACEHOLDERS.has(v.toLowerCase())) continue;
+    if (!v || PLACEHOLDERS.has(v.toLowerCase())) {continue;}
     n += 1;
     questions.push({ n, path: slot.path, question: questionFor(slot.path, slot.description) });
     answers[n] = v;
@@ -209,7 +209,7 @@ const STATE_FILE = '.faf-bench.json';
 
 function loadState(dir: string): BenchState | null {
   const p = join(dir, STATE_FILE);
-  if (!existsSync(p)) return null;
+  if (!existsSync(p)) {return null;}
   try {
     return JSON.parse(readFileSync(p, 'utf-8')) as BenchState;
   } catch {
@@ -218,7 +218,7 @@ function loadState(dir: string): BenchState | null {
 }
 
 function saveState(dir: string, state: BenchState): void {
-  writeFileSync(join(dir, STATE_FILE), JSON.stringify(state, null, 2) + '\n', 'utf-8');
+  writeFileSync(join(dir, STATE_FILE), `${JSON.stringify(state, null, 2)  }\n`, 'utf-8');
 }
 
 /** ✪ receipt — sha256 over the canonical projection; third-party verifiable.
@@ -324,7 +324,7 @@ export function benchCommand(action?: string, answersFile?: string, options: Ben
       return;
     }
     console.log(`\n${bold(`faf bench — ${qset.questions.length} questions`)}  ${dim(`qset ${qset.qsetHash}`)}\n`);
-    for (const q of qset.questions) console.log(`  ${String(q.n).padStart(2)}. ${q.question}`);
+    for (const q of qset.questions) {console.log(`  ${String(q.n).padStart(2)}. ${q.question}`);}
     console.log(`\n${dim('Answer terse — the value, not a sentence. Save as JSON: {"1": "...", "2": "..."}')}`);
     return;
   }
@@ -351,8 +351,8 @@ export function benchCommand(action?: string, answersFile?: string, options: Ben
         ? prior
         : { version: qset.version, qsetHash: qset.qsetHash, protocol: 'in-session' };
 
-    if (options.cold) state.cold = run;
-    else if (options.faf) state.faf = run;
+    if (options.cold) {state.cold = run;}
+    else if (options.faf) {state.faf = run;}
     else {
       console.error('Error: specify the run mode — --cold (no context) or --faf (after reading project.faf).');
       process.exit(2);
@@ -366,7 +366,7 @@ export function benchCommand(action?: string, answersFile?: string, options: Ben
     }
 
     // NEVER a lone low score: pair when both runs exist, alarm framing when cold-only.
-    if (state.cold && state.faf) printPair(state, project);
+    if (state.cold && state.faf) {printPair(state, project);}
 
     // --submit: post the full-pair receipt to the public bench ledger (fire-and-forget).
     if (options.submit && state.cold && state.faf) {
@@ -386,7 +386,7 @@ export function benchCommand(action?: string, answersFile?: string, options: Ben
         options.endpoint ?? DEFAULT_BENCH_ENDPOINT
       );
     }
-    else if (state.cold) printColdAlarm(state, project);
+    else if (state.cold) {printColdAlarm(state, project);}
     else {
       // faf-run-only: fine to show alone (it's the with-context number).
       console.log(`\n${bold(`faf bench — ${project}`)}   ${fafCyan('with .faf')}: ${bold(`${run.score}/${run.total}`)}  ${dim(`tokens ${tok(run.tokens)}`)}`);

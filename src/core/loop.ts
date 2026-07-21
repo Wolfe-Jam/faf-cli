@@ -45,7 +45,7 @@ export interface LoopVerdict {
 /** Default empty test: null/undefined, blank, or a placeholder token. The
  *  What-Not (`slotignored`) is handled separately — it is never a gap. */
 export function isEmptyValue(value: unknown): boolean {
-  if (value === null || value === undefined) return true;
+  if (value === null || value === undefined) {return true;}
   if (typeof value === 'string') {
     const t = value.trim();
     return t === '' || isPlaceholder(t);
@@ -69,7 +69,7 @@ function valueAtPath(data: Record<string, unknown>, path: string): unknown {
  *  its slot category is 'human' (the 6Ws). Everything else — name, language,
  *  the stack — is sourceable by detection. */
 export function isHumanSlot(path: string): boolean {
-  if (path === 'project.goal') return true;
+  if (path === 'project.goal') {return true;}
   return SLOT_BY_PATH.get(path)?.category === 'human';
 }
 
@@ -86,8 +86,8 @@ export function classifyGaps(
   const sourceable: string[] = [];
   for (const q of INTERVIEW) {
     const v = valueAtPath(data, q.path);
-    if (v === 'slotignored') continue; // the What-Not is never interviewed
-    if (!isEmpty(v)) continue; // already filled
+    if (v === 'slotignored') {continue;} // the What-Not is never interviewed
+    if (!isEmpty(v)) {continue;} // already filled
     (isHumanSlot(q.path) ? human : sourceable).push(q.path);
   }
   return { human, sourceable };
@@ -174,7 +174,7 @@ export function runLoop(deps: LoopDeps, opts: LoopRunOptions = {}): LoopRunResul
   // One iteration per read; at most maxRounds auto runs between them.
   for (let i = 0; i <= maxRounds; i++) {
     const snap = deps.read();
-    if (!snap) return { status: 'no-faf', score: 0, rounds, history, ask: [] };
+    if (!snap) {return { status: 'no-faf', score: 0, rounds, history, ask: [] };}
 
     const score = deps.score(snap.yaml);
     history.push(score);

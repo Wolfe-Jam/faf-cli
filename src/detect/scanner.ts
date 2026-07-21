@@ -25,7 +25,7 @@ interface PackageJson {
 /** Read [package].name field from Cargo.toml — naive but adequate. */
 function readCargoName(dir: string): string | null {
   const path = join(dir, 'Cargo.toml');
-  if (!existsSync(path)) return null;
+  if (!existsSync(path)) {return null;}
   try {
     const content = readFileSync(path, 'utf-8');
     const m = content.match(/^\s*\[package\][\s\S]*?^\s*name\s*=\s*"([^"]+)"/m);
@@ -38,7 +38,7 @@ function readCargoName(dir: string): string | null {
 /** True if Cargo.toml declares one or more `[[bin]]` sections — Rust cli marker. */
 function hasCargoBin(dir: string): boolean {
   const path = join(dir, 'Cargo.toml');
-  if (!existsSync(path)) return false;
+  if (!existsSync(path)) {return false;}
   try {
     const content = readFileSync(path, 'utf-8');
     return /^\s*\[\[bin\]\]/m.test(content);
@@ -51,7 +51,7 @@ function hasCargoBin(dir: string): boolean {
  *  Returns the matched evidence string, or null if no SDK signal. */
 function detectSdkSignal(dir: string, pkg: PackageJson | null): string | null {
   // pkg.keywords contains 'sdk'
-  if (pkg?.keywords?.some(k => /^sdk(?:\s|-|$)|\-sdk$/i.test(k))) {
+  if (pkg?.keywords?.some(k => /^sdk(?:\s|-|$)|-sdk$/i.test(k))) {
     return 'package.json keywords contains "sdk"';
   }
   // pkg.name contains 'sdk' or '-sdk' suffix
@@ -81,7 +81,7 @@ function detectExtensionSignal(dir: string): string | null {
   ];
   for (const rel of candidates) {
     const path = join(dir, rel);
-    if (!existsSync(path)) continue;
+    if (!existsSync(path)) {continue;}
     try {
       const parsed = JSON.parse(readFileSync(path, 'utf-8')) as { manifest_version?: unknown };
       if (typeof parsed.manifest_version === 'number') {
@@ -100,7 +100,7 @@ function detectDataScienceSignal(dir: string): string | null {
     try {
       const content = readFileSync(pyproject, 'utf-8');
       const match = content.match(dsPatterns);
-      if (match) return `pyproject.toml depends on ${match[1]}`;
+      if (match) {return `pyproject.toml depends on ${match[1]}`;}
     } catch { /* fall through */ }
   }
   const reqs = join(dir, 'requirements.txt');
@@ -108,7 +108,7 @@ function detectDataScienceSignal(dir: string): string | null {
     try {
       const content = readFileSync(reqs, 'utf-8');
       const match = content.match(dsPatterns);
-      if (match) return `requirements.txt contains ${match[1]}`;
+      if (match) {return `requirements.txt contains ${match[1]}`;}
     } catch { /* fall through */ }
   }
   return null;
@@ -167,12 +167,12 @@ function detectWasmSignal(dir: string, pkg: PackageJson | null): string | null {
 /** Bare HTML / vanilla site detection. */
 function detectHtmlSignal(dir: string, pkg: PackageJson | null): string | null {
   // Must have index.html at root
-  if (!existsSync(join(dir, 'index.html'))) return null;
+  if (!existsSync(join(dir, 'index.html'))) {return null;}
   // Must NOT have any frontend deps (those would classify as frontend/website/etc)
   if (pkg?.dependencies || pkg?.devDependencies) {
     const allDeps = { ...(pkg.dependencies ?? {}), ...(pkg.devDependencies ?? {}) };
     const frontendDeps = ['react', 'vue', 'svelte', '@sveltejs/kit', 'next', 'nuxt', 'astro', 'gatsby', 'solid-js', 'qwik'];
-    if (frontendDeps.some(d => allDeps[d])) return null;
+    if (frontendDeps.some(d => allDeps[d])) {return null;}
   }
   return 'index.html (vanilla, no frontend framework)';
 }
@@ -202,7 +202,7 @@ function detectDocumentationSignal(dir: string, pkg: PackageJson | null): string
 function detectWebsiteSignal(dir: string, pkg: PackageJson | null, frameworks: DetectedFramework[]): string | null {
   // Astro/Gatsby are typically used for content/marketing sites
   const astroOrGatsby = frameworks.find(f => f.slug === 'astro' || f.slug === 'gatsby');
-  if (astroOrGatsby) return `${astroOrGatsby.name} (static-site framework)`;
+  if (astroOrGatsby) {return `${astroOrGatsby.name} (static-site framework)`;}
   // pkg.keywords explicitly marketing
   if (pkg?.keywords?.some(k => /^(website|marketing|landing|brochure|portfolio)$/i.test(k))) {
     return 'package keywords contains "website"/"marketing"/"landing"';
@@ -212,7 +212,7 @@ function detectWebsiteSignal(dir: string, pkg: PackageJson | null, frameworks: D
 
 /** SAAS shape — auth + payments + database + dashboard. */
 function detectSaasSignal(dir: string, pkg: PackageJson | null): string | null {
-  if (!pkg) return null;
+  if (!pkg) {return null;}
   const allDeps = { ...(pkg.dependencies ?? {}), ...(pkg.devDependencies ?? {}) };
   const authDeps = ['@clerk/nextjs', '@clerk/clerk-react', 'next-auth', '@auth/core', 'auth0', '@auth0/nextjs-auth0'];
   const paymentDeps = ['stripe', '@stripe/stripe-js', 'lemonsqueezy'];
@@ -245,16 +245,16 @@ function detectMcpaasSignal(dir: string, pkg: PackageJson | null, frameworks: De
 
 /** Monorepo-root — private workspace with multiple packages, no single dominant FW. */
 function detectMonorepoRootSignal(dir: string, pkg: PackageJson | null): string | null {
-  if (!pkg?.private) return null;
+  if (!pkg?.private) {return null;}
   const hasWorkspaces = !!pkg.workspaces || existsSync(join(dir, 'pnpm-workspace.yaml'));
-  if (!hasWorkspaces) return null;
+  if (!hasWorkspaces) {return null;}
   return 'private workspace + multi-package';
 }
 
 /** Read and parse package.json from a directory */
 export function readPackageJson(dir: string): PackageJson | null {
   const pkgPath = join(dir, 'package.json');
-  if (!existsSync(pkgPath)) return null;
+  if (!existsSync(pkgPath)) {return null;}
   try {
     return JSON.parse(readFileSync(pkgPath, 'utf-8'));
   } catch {
@@ -326,21 +326,21 @@ export function detectLanguage(dir: string): string {
   const pkg = readPackageJson(dir);
 
   // Check for TypeScript
-  if (pkg?.devDependencies?.typescript || pkg?.dependencies?.typescript) return 'TypeScript';
-  if (existsSync(join(dir, 'tsconfig.json'))) return 'TypeScript';
+  if (pkg?.devDependencies?.typescript || pkg?.dependencies?.typescript) {return 'TypeScript';}
+  if (existsSync(join(dir, 'tsconfig.json'))) {return 'TypeScript';}
 
   // Check for common language indicators
-  if (existsSync(join(dir, 'Cargo.toml'))) return 'Rust';
-  if (existsSync(join(dir, 'go.mod'))) return 'Go';
-  if (existsSync(join(dir, 'pyproject.toml')) || existsSync(join(dir, 'setup.py'))) return 'Python';
-  if (existsSync(join(dir, 'Gemfile'))) return 'Ruby';
-  if (existsSync(join(dir, 'pom.xml')) || existsSync(join(dir, 'build.gradle'))) return 'Java';
-  if (existsSync(join(dir, 'Package.swift'))) return 'Swift';
-  if (existsSync(join(dir, 'build.zig'))) return 'Zig';
-  if (existsSync(join(dir, 'pubspec.yaml'))) return 'Dart';
+  if (existsSync(join(dir, 'Cargo.toml'))) {return 'Rust';}
+  if (existsSync(join(dir, 'go.mod'))) {return 'Go';}
+  if (existsSync(join(dir, 'pyproject.toml')) || existsSync(join(dir, 'setup.py'))) {return 'Python';}
+  if (existsSync(join(dir, 'Gemfile'))) {return 'Ruby';}
+  if (existsSync(join(dir, 'pom.xml')) || existsSync(join(dir, 'build.gradle'))) {return 'Java';}
+  if (existsSync(join(dir, 'Package.swift'))) {return 'Swift';}
+  if (existsSync(join(dir, 'build.zig'))) {return 'Zig';}
+  if (existsSync(join(dir, 'pubspec.yaml'))) {return 'Dart';}
 
   // Fallback to JS if package.json exists
-  if (pkg) return 'JavaScript';
+  if (pkg) {return 'JavaScript';}
 
   return 'Unknown';
 }
@@ -569,49 +569,49 @@ export function detectProjectType(dir: string): string {
 
 /** Detect the runtime */
 export function detectRuntime(dir: string): string {
-  if (existsSync(join(dir, 'bunfig.toml'))) return 'Bun';
-  if (existsSync(join(dir, 'deno.json')) || existsSync(join(dir, 'deno.jsonc'))) return 'Deno';
-  if (readPackageJson(dir)) return 'Node.js';
-  if (existsSync(join(dir, 'Cargo.toml'))) return 'Rust';
-  if (existsSync(join(dir, 'go.mod'))) return 'Go';
-  if (existsSync(join(dir, 'pubspec.yaml'))) return 'Dart';
+  if (existsSync(join(dir, 'bunfig.toml'))) {return 'Bun';}
+  if (existsSync(join(dir, 'deno.json')) || existsSync(join(dir, 'deno.jsonc'))) {return 'Deno';}
+  if (readPackageJson(dir)) {return 'Node.js';}
+  if (existsSync(join(dir, 'Cargo.toml'))) {return 'Rust';}
+  if (existsSync(join(dir, 'go.mod'))) {return 'Go';}
+  if (existsSync(join(dir, 'pubspec.yaml'))) {return 'Dart';}
   return 'Unknown';
 }
 
 /** Detect package manager */
 export function detectPackageManager(dir: string): string {
-  if (existsSync(join(dir, 'pubspec.yaml'))) return 'pub';
-  if (existsSync(join(dir, 'bun.lockb')) || existsSync(join(dir, 'bun.lock'))) return 'bun';
-  if (existsSync(join(dir, 'pnpm-lock.yaml'))) return 'pnpm';
-  if (existsSync(join(dir, 'yarn.lock'))) return 'yarn';
-  if (existsSync(join(dir, 'package-lock.json'))) return 'npm';
+  if (existsSync(join(dir, 'pubspec.yaml'))) {return 'pub';}
+  if (existsSync(join(dir, 'bun.lockb')) || existsSync(join(dir, 'bun.lock'))) {return 'bun';}
+  if (existsSync(join(dir, 'pnpm-lock.yaml'))) {return 'pnpm';}
+  if (existsSync(join(dir, 'yarn.lock'))) {return 'yarn';}
+  if (existsSync(join(dir, 'package-lock.json'))) {return 'npm';}
   return 'npm';
 }
 
 /** Detect CI/CD */
 export function detectCicd(dir: string): string | null {
-  if (existsSync(join(dir, '.github/workflows'))) return 'GitHub Actions';
-  if (existsSync(join(dir, '.gitlab-ci.yml'))) return 'GitLab CI';
-  if (existsSync(join(dir, '.circleci'))) return 'CircleCI';
-  if (existsSync(join(dir, 'Jenkinsfile'))) return 'Jenkins';
+  if (existsSync(join(dir, '.github/workflows'))) {return 'GitHub Actions';}
+  if (existsSync(join(dir, '.gitlab-ci.yml'))) {return 'GitLab CI';}
+  if (existsSync(join(dir, '.circleci'))) {return 'CircleCI';}
+  if (existsSync(join(dir, 'Jenkinsfile'))) {return 'Jenkins';}
   return null;
 }
 
 /** Detect hosting platform */
 export function detectHosting(dir: string): string | null {
-  if (existsSync(join(dir, 'vercel.json'))) return 'Vercel';
-  if (existsSync(join(dir, 'netlify.toml'))) return 'Netlify';
-  if (existsSync(join(dir, 'wrangler.toml'))) return 'Cloudflare';
-  if (existsSync(join(dir, 'Dockerfile'))) return 'Docker';
-  if (existsSync(join(dir, 'fly.toml'))) return 'Fly.io';
-  if (existsSync(join(dir, 'render.yaml'))) return 'Render';
+  if (existsSync(join(dir, 'vercel.json'))) {return 'Vercel';}
+  if (existsSync(join(dir, 'netlify.toml'))) {return 'Netlify';}
+  if (existsSync(join(dir, 'wrangler.toml'))) {return 'Cloudflare';}
+  if (existsSync(join(dir, 'Dockerfile'))) {return 'Docker';}
+  if (existsSync(join(dir, 'fly.toml'))) {return 'Fly.io';}
+  if (existsSync(join(dir, 'render.yaml'))) {return 'Render';}
   return null;
 }
 
 /** Detect SvelteKit adapter from svelte.config.js */
 export function detectSvelteAdapter(dir: string): string | null {
   const configPath = join(dir, 'svelte.config.js');
-  if (!existsSync(configPath)) return null;
+  if (!existsSync(configPath)) {return null;}
   try {
     const content = readFileSync(configPath, 'utf-8');
     // Match adapter imports: import adapter from '@sveltejs/adapter-vercel'
@@ -639,10 +639,10 @@ export function detectSvelteAdapter(dir: string): string | null {
 /** Detect build tool */
 export function detectBuildTool(dir: string): string | null {
   const pkg = readPackageJson(dir);
-  if (pkg?.devDependencies?.vite || pkg?.dependencies?.vite) return 'Vite';
-  if (pkg?.devDependencies?.webpack || pkg?.dependencies?.webpack) return 'webpack';
-  if (pkg?.devDependencies?.esbuild || pkg?.dependencies?.esbuild) return 'esbuild';
-  if (existsSync(join(dir, 'tsconfig.json')) && pkg?.devDependencies?.typescript) return 'TypeScript (tsc)';
+  if (pkg?.devDependencies?.vite || pkg?.dependencies?.vite) {return 'Vite';}
+  if (pkg?.devDependencies?.webpack || pkg?.dependencies?.webpack) {return 'webpack';}
+  if (pkg?.devDependencies?.esbuild || pkg?.dependencies?.esbuild) {return 'esbuild';}
+  if (existsSync(join(dir, 'tsconfig.json')) && pkg?.devDependencies?.typescript) {return 'TypeScript (tsc)';}
   return null;
 }
 
@@ -699,26 +699,26 @@ export function detectCommands(dir: string, pkg: PackageJson | null): Record<str
 
   // Cargo defaults (Rust)
   if (existsSync(join(dir, 'Cargo.toml'))) {
-    if (!commands.build) commands.build = 'cargo build --release';
-    if (!commands.test) commands.test = 'cargo test';
-    if (!commands.lint) commands.lint = 'cargo clippy';
+    if (!commands.build) {commands.build = 'cargo build --release';}
+    if (!commands.test) {commands.test = 'cargo test';}
+    if (!commands.lint) {commands.lint = 'cargo clippy';}
   }
 
   // Zig defaults
   if (existsSync(join(dir, 'build.zig'))) {
-    if (!commands.build) commands.build = 'zig build';
-    if (!commands.test) commands.test = 'zig build test';
+    if (!commands.build) {commands.build = 'zig build';}
+    if (!commands.test) {commands.test = 'zig build test';}
   }
 
   // Go defaults
   if (existsSync(join(dir, 'go.mod'))) {
-    if (!commands.build) commands.build = 'go build ./...';
-    if (!commands.test) commands.test = 'go test ./...';
+    if (!commands.build) {commands.build = 'go build ./...';}
+    if (!commands.test) {commands.test = 'go test ./...';}
   }
 
   // Python defaults (if pytest is detectable)
   if (existsSync(join(dir, 'pyproject.toml')) || existsSync(join(dir, 'pytest.ini'))) {
-    if (!commands.test) commands.test = 'pytest';
+    if (!commands.test) {commands.test = 'pytest';}
   }
 
   return commands;
@@ -736,7 +736,7 @@ export function detectTechStack(
   const stack: string[] = [];
 
   // Language goes first
-  if (language && language !== 'Unknown') stack.push(language);
+  if (language && language !== 'Unknown') {stack.push(language);}
 
   // Notable frameworks (frontend / backend / database / build)
   const notableCategories = new Set(['frontend', 'backend', 'database', 'build', 'css', 'state', 'monorepo']);
@@ -747,8 +747,8 @@ export function detectTechStack(
   }
 
   // Runtime if non-trivial (Node.js by default for JS — only call out Bun/Deno/etc.)
-  if (existsSync(join(dir, 'bunfig.toml'))) stack.push('Bun');
-  else if (existsSync(join(dir, 'deno.json')) || existsSync(join(dir, 'deno.jsonc'))) stack.push('Deno');
+  if (existsSync(join(dir, 'bunfig.toml'))) {stack.push('Bun');}
+  else if (existsSync(join(dir, 'deno.json')) || existsSync(join(dir, 'deno.jsonc'))) {stack.push('Deno');}
 
   // Top deps from package.json/Cargo.toml — only if stack is still sparse
   if (stack.length < 3 && pkg?.dependencies) {

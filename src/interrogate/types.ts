@@ -60,11 +60,11 @@ export const SLOP_PATTERNS: readonly RegExp[] = [
 /** Validate extracted text against the no-guess/no-slop doctrine */
 export function isValidExtraction(text: string): boolean {
   const trimmed = text.trim();
-  if (trimmed.length < EXTRACTION_LIMITS.MIN_LENGTH) return false;
-  if (trimmed.length > EXTRACTION_LIMITS.MAX_LENGTH) return false;
-  if (SLOP_PATTERNS.some((re) => re.test(trimmed))) return false;
+  if (trimmed.length < EXTRACTION_LIMITS.MIN_LENGTH) {return false;}
+  if (trimmed.length > EXTRACTION_LIMITS.MAX_LENGTH) {return false;}
+  if (SLOP_PATTERNS.some((re) => re.test(trimmed))) {return false;}
   // Reject if text is mostly markdown structure (links, lists, tables)
-  if (/^[\s|\-*+]/.test(trimmed)) return false;
-  if (trimmed.split('\n').length > 4) return false; // multi-paragraph blob
+  if (/^[\s|\-*+]/.test(trimmed)) {return false;}
+  if (trimmed.split('\n').length > 4) {return false;} // multi-paragraph blob
   return true;
 }

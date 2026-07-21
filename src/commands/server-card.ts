@@ -87,20 +87,20 @@ export function serverCardCommand(options: ServerCardCommandOptions = {}): void 
     ...(options.setVersion ? { version: options.setVersion } : {}),
     _meta: { ...((existing._meta as object) ?? {}), ...emittedMeta },
   };
-  if (title) merged.title = title;
-  else delete merged.title; // omit when unset — never ship an empty title
+  if (title) {merged.title = title;}
+  else {delete merged.title;} // omit when unset — never ship an empty title
 
   // Rebuild in canonical order (identity slots land in the right place even if the
   // source file lacked a title); carry any repo-specific extra keys after.
   const ordered: Record<string, unknown> = {};
   for (const k of FIELD_ORDER) {
-    if (k in merged && merged[k] !== undefined) ordered[k] = merged[k];
+    if (k in merged && merged[k] !== undefined) {ordered[k] = merged[k];}
   }
   for (const k of Object.keys(merged)) {
-    if (!(k in ordered) && merged[k] !== undefined) ordered[k] = merged[k];
+    if (!(k in ordered) && merged[k] !== undefined) {ordered[k] = merged[k];}
   }
 
-  const json = JSON.stringify(ordered, null, 2) + '\n';
+  const json = `${JSON.stringify(ordered, null, 2)  }\n`;
   if (options.check) {
     process.stdout.write(json);
     return;

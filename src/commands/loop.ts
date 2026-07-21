@@ -48,7 +48,7 @@ function renderLoopResult(r: LoopRunResult): void {
     case 'needs-human': {
       const n = r.ask.length;
       console.log(`${bold('Sourced everything detection can.')} ${n} question${n === 1 ? '' : 's'} only you can answer:`);
-      for (const a of r.ask) console.log(`  ${dim('•')} ${a.question}`);
+      for (const a of r.ask) {console.log(`  ${dim('•')} ${a.question}`);}
       console.log(dim(`\n  Answer with ${bold("'faf go'")}, or fill them in project.faf directly.`));
       break;
     }

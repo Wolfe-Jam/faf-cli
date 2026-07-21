@@ -167,9 +167,9 @@ export function detectStack(dir: string): FafData {
   };
 
   // Only emit FAFB top-level keys if non-empty (no slop / empty-list pollution)
-  if (techStack.length > 0) result.tech_stack = techStack;
-  if (keyFiles.length > 0) result.key_files = keyFiles;
-  if (Object.keys(commands).length > 0) result.commands = commands;
+  if (techStack.length > 0) {result.tech_stack = techStack;}
+  if (keyFiles.length > 0) {result.key_files = keyFiles;}
+  if (Object.keys(commands).length > 0) {result.commands = commands;}
 
   return result;
 }

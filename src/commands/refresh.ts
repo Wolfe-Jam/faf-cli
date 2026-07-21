@@ -53,8 +53,8 @@ export function refreshCommand(options: RefreshOptions = {}): void {
   const dna = new FafDNAManager(process.cwd());
   const baseline = dna.load() ? dna.getBirthDNADisplay() : null;
   const prevScore = baseline ? baseline.current : null;
-  const delta = prevScore != null ? result.score - prevScore : 0;
-  const drifted = prevScore != null && delta !== 0;
+  const delta = prevScore !== null && prevScore !== undefined ? result.score - prevScore : 0;
+  const drifted = prevScore !== null && prevScore !== undefined && delta !== 0;
 
   // 3. Keep the .fafb binary tier current (the 412× tier). Only if one exists —
   //    don't force a binary on YAML-only projects. Rust authors via the kernel.
@@ -76,7 +76,7 @@ export function refreshCommand(options: RefreshOptions = {}): void {
           baseline: prevScore,
           delta,
           drifted,
-          fafb: fafbBytes != null ? { reCompiled: true, bytes: fafbBytes } : { reCompiled: false },
+          fafb: fafbBytes !== null && fafbBytes !== undefined ? { reCompiled: true, bytes: fafbBytes } : { reCompiled: false },
           journey: dna.getJourney() || null,
         },
         null,
@@ -90,12 +90,12 @@ export function refreshCommand(options: RefreshOptions = {}): void {
       console.log(
         `  drift: ${dim(`${prevScore}%`)} ${arrow} ${bold(`${result.score}%`)} ${dim(`(${delta > 0 ? '+' : ''}${delta})`)}`,
       );
-    } else if (prevScore != null) {
+    } else if (prevScore !== null && prevScore !== undefined) {
       console.log(`  no drift ${dim(`— steady at ${result.score}%`)}`);
     } else {
       console.log(`  baseline set ${dim(`— ${result.score}%`)}`);
     }
-    if (fafbBytes != null) {
+    if (fafbBytes !== null && fafbBytes !== undefined) {
       console.log(`  .fafb re-compiled ${dim(`(${fafbBytes} bytes — fast tier current)`)}`);
     }
     console.log(`  re-grounded: ${tierBadge(result.tier)} ${bold(`${result.score}%`)}`);

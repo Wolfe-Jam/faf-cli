@@ -18,7 +18,7 @@ export function contextCommand(): void {
     const sectionData = data[section] as Record<string, unknown> | undefined;
     const value = sectionData?.[field];
 
-    if (isPlaceholder(value) || value === 'slotignored') continue;
+    if (isPlaceholder(value) || value === 'slotignored') {continue;}
     lines.push(`${slot.path}: ${value}`);
   }
 

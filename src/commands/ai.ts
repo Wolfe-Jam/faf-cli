@@ -24,9 +24,9 @@ export const AI_SLOP_PATTERNS: readonly RegExp[] = [
 ];
 
 export function isValidAiExtraction(v: unknown): v is string {
-  if (typeof v !== 'string') return false;
+  if (typeof v !== 'string') {return false;}
   const trimmed = v.trim();
-  if (trimmed.length < 4 || trimmed.length > 280) return false;
+  if (trimmed.length < 4 || trimmed.length > 280) {return false;}
   return !AI_SLOP_PATTERNS.some(re => re.test(trimmed));
 }
 
@@ -35,7 +35,7 @@ function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
   const parts = path.split('.');
   let current: unknown = obj;
   for (const part of parts) {
-    if (current === null || current === undefined || typeof current !== 'object') return undefined;
+    if (current === null || current === undefined || typeof current !== 'object') {return undefined;}
     current = (current as Record<string, unknown>)[part];
   }
   return current;
@@ -146,7 +146,7 @@ Respond with ONLY valid JSON, no markdown fences. Each value is either a short s
 
     for (const slot of emptySlots) {
       const value = suggestions[slot.path];
-      if (value === null || value === undefined) continue; // honest empty
+      if (value === null || value === undefined) {continue;} // honest empty
       if (isValidAiExtraction(value)) {
         setNestedValue(data as Record<string, unknown>, slot.path, value);
         console.log(`  ${fafCyan('●')} ${slot.path} ${dim('←')} ${value}`);
