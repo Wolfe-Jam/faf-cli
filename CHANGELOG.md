@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [7.2.0] - 2026-07-22 — The Memory Edition
 
-`.faf` was context. **`.fafm` is memory.** One CLI, both IANA-registered formats — INTEROP-aligned with [claude-fafm-sdk 1.0](https://pypi.org/project/claude-fafm-sdk/).
+`.faf` is context. **`.fafm` is memory.** One CLI, both IANA-registered formats — INTEROP-aligned with [claude-fafm-sdk 1.0](https://pypi.org/project/claude-fafm-sdk/).
 
 ### Added
 - **`faf memory`** — knowledge-profile `.fafm` soul ops:
