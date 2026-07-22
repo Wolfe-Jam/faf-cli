@@ -1,0 +1,11 @@
+# §10 conformance: unknown fields are permitted and MUST be ignored by consumers.
+version: "1.1"
+profile: voice
+namepoint: "@demo"
+created: 2026-05-21T00:00:00Z
+last_etched: 2026-05-21T00:00:00Z
+future_root_field: "a consumer MUST ignore this, not reject it"
+memory:
+  facts:
+    - text: "fact with an unknown attribute"
+      experimental_attr: 123

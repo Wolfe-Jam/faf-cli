@@ -36,6 +36,17 @@ export {
   REGISTRY_PUBLISHER_KEY,
 } from './interop/servercard.js';
 export type { ServerCardOptions } from './interop/servercard.js';
+// .fafm knowledge-profile library (TS) — INTEROP with claude-fafm-sdk 1.0
+export {
+  Soul as FafmSoul,
+  fromClaudeDir,
+  canonicalPriority,
+  utcNow,
+  PRIORITY_ORDER,
+  PRIORITY_RANK,
+  KNOWLEDGE_TYPES,
+} from './fafm/index.js';
+export type { Fact as FafmFact, SoulDoc, Profile as FafmProfile } from './fafm/index.js';
 // Single-source 6Ws Interview — consumers (claude-faf-mcp's faf_go etc.) MUST
 // import this registry, never reimplement, never copy (kills question drift).
 export type { InterviewQuestion, InterviewOption, HumanSlotPath, SourcedSlotPath, GoalSeed, TableOf8, TableOf8Row, BoxStatus } from './core/interview.js';

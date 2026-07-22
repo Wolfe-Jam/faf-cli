@@ -1,0 +1,15 @@
+version: "1.1"
+profile: knowledge
+namepoint: "@claude-code:demo"
+created: 2026-05-21T00:00:00Z
+last_etched: 2026-05-21T00:00:00Z
+index:
+  - "stack: TypeScript + Bun"
+memory:
+  facts:
+    - id: f1
+      text: "The project uses Bun"
+      type: project
+      priority: high
+      confidence_score: 0.9
+      verification_status: verified

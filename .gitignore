@@ -95,6 +95,9 @@ test-*.faf
 !project-*.faf
 # Exception: test fixtures
 !tests/fixtures/**/*.faf
+!tests/fixtures/**/*.fafm
+!tests/fixtures/**/*.md
+tests/.tmp-fafm/
 
 # Internal documents - ALL .md files go to FAF-GOLD/PLANET-FAF
 *.md
@@ -115,6 +118,7 @@ test-*.faf
 !commands/**/*.md
 !skills/**/*.md
 !reports/**/*.md
+!tests/fixtures/**/*.md
 
 # Temporary files
 *.tmp
@@ -152,3 +156,4 @@ project.html
 /faf
 /cli.js.map
 .faf-bench.json
+tests/.tmp-fafm/

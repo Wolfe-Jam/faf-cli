@@ -37,6 +37,7 @@ import { conductorCommand } from './commands/conductor.js';
 import { wjttcCommand } from './commands/wjttc.js';
 import { benchCommand } from './commands/bench.js';
 import { refreshCommand } from './commands/refresh.js';
+import { memoryCommand } from './commands/memory.js';
 
 const { version: VERSION } = require('../package.json');
 
@@ -317,6 +318,20 @@ program
   .option('--strict', 'Exit non-zero if any tests are untiered')
   .option('--json', 'Output as JSON for CI consumption')
   .action((options) => wjttcCommand(options));
+
+program
+  .command('memory [subcommand] [arg]')
+  .description('.fafm soul ops — convert Claude memory, etch, recall, ls, show')
+  .option('-f, --file <path>', 'Soul file (default: ./soul.fafm)')
+  .option('-o, --output <path>', 'Output path (convert)')
+  .option('--namepoint <handle>', 'Namepoint for new/converted soul')
+  .option('--id <id>', 'Fact id (etch)')
+  .option('--type <type>', 'Fact type filter / etch type')
+  .option('--tag <tags>', 'Comma-separated tags (recall)')
+  .option('--priority <level>', 'Min priority floor (recall) or etch priority')
+  .option('--limit <n>', 'Max recall hits')
+  .option('--json', 'JSON output')
+  .action((subcommand, arg, options) => memoryCommand(subcommand, arg, options));
 
 // === Soft Deprecation Aliases (v5.x compat) ===
 
