@@ -1,12 +1,12 @@
 <!-- faf:start -->
-<!-- faf: faf-cli | TypeScript | cli | CLI for the IANA-registered `.faf` format (`application/vnd.faf+yaml`) — TypeScript, Bun-native since v6. package faf-cli v7.1.4. -->
+<!-- faf: faf-cli | TypeScript | cli | CLI for IANA-registered `.faf` + `.fafm` — context DNA and portable agent memory. TypeScript, Bun-native since v6. package faf-cli v7.2.0 The Memory Edition. -->
 <!-- faf: claim=project.faf | family=FAF -->
 
 # CLAUDE.md — faf-cli
 
 ## What This Is
 
-CLI for the IANA-registered `.faf` format (`application/vnd.faf+yaml`) — TypeScript, Bun-native since v6. package faf-cli v7.1.4.
+CLI for IANA-registered `.faf` + `.fafm` — context DNA and portable agent memory. TypeScript, Bun-native since v6. package faf-cli v7.2.0 The Memory Edition.
 
 ## Stack
 
@@ -23,5 +23,5 @@ CLI for the IANA-registered `.faf` format (`application/vnd.faf+yaml`) — TypeS
 
 ---
 
-*STATUS: BI-SYNC ACTIVE — 2026-07-20T21:08:37.629Z*
+*STATUS: BI-SYNC ACTIVE — 2026-07-22T15:05:55.124Z*
 <!-- faf:end -->

@@ -97,7 +97,7 @@ test-*.faf
 !tests/fixtures/**/*.faf
 !tests/fixtures/**/*.fafm
 !tests/fixtures/**/*.md
-tests/.tmp-fafm/
+tests/.tmp-fafm*/
 
 # Internal documents - ALL .md files go to FAF-GOLD/PLANET-FAF
 *.md
@@ -156,4 +156,4 @@ project.html
 /faf
 /cli.js.map
 .faf-bench.json
-tests/.tmp-fafm/
+tests/.tmp-fafm*/

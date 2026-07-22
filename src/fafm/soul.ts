@@ -18,10 +18,14 @@ export function utcNow(): string {
   return new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
 }
 
+function isNil(v: unknown): v is null | undefined {
+  return v === null || v === undefined;
+}
+
 export function canonicalPriority(p: string | null | undefined): string {
-  if (p == null) return 'standard';
-  if (LEGACY_PRIORITY[p]) return LEGACY_PRIORITY[p];
-  if (p in PRIORITY_RANK) return p;
+  if (isNil(p)) {return 'standard';}
+  if (LEGACY_PRIORITY[p]) {return LEGACY_PRIORITY[p];}
+  if (p in PRIORITY_RANK) {return p;}
   return 'standard';
 }
 
@@ -56,7 +60,7 @@ export function factFromObj(obj: unknown): Fact {
   const o = obj as Record<string, unknown>;
   const extra: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(o)) {
-    if (!KNOWN_FACT.has(k)) extra[k] = v;
+    if (!KNOWN_FACT.has(k)) {extra[k] = v;}
   }
   return {
     text: String(o.text),
@@ -73,23 +77,23 @@ export function factFromObj(obj: unknown): Fact {
 
 export function factToObj(f: Fact): unknown {
   const bare =
-    f.id == null &&
-    f.type == null &&
+    isNil(f.id) &&
+    isNil(f.type) &&
     f.tags.length === 0 &&
     f.links.length === 0 &&
-    f.timestamp == null &&
-    f.source == null &&
+    isNil(f.timestamp) &&
+    isNil(f.source) &&
     Object.keys(f.extra).length === 0 &&
     f.priority === 'standard';
-  if (bare) return f.text;
+  if (bare) {return f.text;}
   const out: Record<string, unknown> = { text: f.text };
-  if (f.id != null) out.id = f.id;
-  if (f.type != null) out.type = f.type;
+  if (!isNil(f.id)) {out.id = f.id;}
+  if (!isNil(f.type)) {out.type = f.type;}
   out.priority = f.priority;
-  if (f.tags.length) out.tags = f.tags;
-  if (f.links.length) out.links = f.links;
-  if (f.timestamp != null) out.timestamp = f.timestamp;
-  if (f.source != null) out.source = f.source;
+  if (f.tags.length) {out.tags = f.tags;}
+  if (f.links.length) {out.links = f.links;}
+  if (!isNil(f.timestamp)) {out.timestamp = f.timestamp;}
+  if (!isNil(f.source)) {out.source = f.source;}
   Object.assign(out, f.extra);
   return out;
 }
@@ -132,7 +136,7 @@ export class Soul {
     this._facts = opts.facts ? opts.facts.slice() : [];
     this._byId = new Map();
     this._facts.forEach((f, i) => {
-      if (f.id != null) this._byId.set(f.id, i);
+      if (!isNil(f.id)) {this._byId.set(f.id, i);}
     });
     this._index = opts.index ? opts.index.slice() : [];
     this._sessions = opts.sessions ? structuredClone(opts.sessions) : [];
@@ -186,11 +190,11 @@ export class Soul {
     const factsRaw = Array.isArray(memory.facts) ? memory.facts : [];
     const docExtra: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(doc)) {
-      if (!KNOWN_DOC_KEYS.has(k)) docExtra[k] = structuredClone(v);
+      if (!KNOWN_DOC_KEYS.has(k)) {docExtra[k] = structuredClone(v);}
     }
     const memoryExtra: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(memory)) {
-      if (!KNOWN_MEMORY_KEYS.has(k)) memoryExtra[k] = structuredClone(v);
+      if (!KNOWN_MEMORY_KEYS.has(k)) {memoryExtra[k] = structuredClone(v);}
     }
     const soul = new Soul(String(doc.namepoint ?? path.replace(/.*\//, '').replace(/\.fafm$/, '')), {
       profile: String(doc.profile ?? 'voice'),
@@ -226,7 +230,7 @@ export class Soul {
       custom: structuredClone(this._custom),
     };
     for (const [k, v] of Object.entries(this._memoryExtra)) {
-      if (!KNOWN_MEMORY_KEYS.has(k)) memory[k] = structuredClone(v);
+      if (!KNOWN_MEMORY_KEYS.has(k)) {memory[k] = structuredClone(v);}
     }
     const doc: SoulDoc = {
       version: '1.1',
@@ -239,7 +243,7 @@ export class Soul {
       memory,
     };
     for (const [k, v] of Object.entries(this._extra)) {
-      if (!KNOWN_DOC_KEYS.has(k)) doc[k] = structuredClone(v);
+      if (!KNOWN_DOC_KEYS.has(k)) {doc[k] = structuredClone(v);}
     }
     return doc;
   }
@@ -257,7 +261,7 @@ export class Soul {
 
   save(path: string, opts: { reindex?: boolean } = {}): string {
     const reindex = opts.reindex !== false;
-    if (reindex) this.rebuildIndex();
+    if (reindex) {this.rebuildIndex();}
     writeFileSync(path, this.toYaml(), 'utf-8');
     return path;
   }
@@ -267,11 +271,14 @@ export class Soul {
   }
 
   add(fact: Fact): Fact {
-    if (fact.id != null && this._byId.has(fact.id)) {
-      this._facts[this._byId.get(fact.id)!] = fact;
+    if (!isNil(fact.id) && this._byId.has(fact.id)) {
+      const idx = this._byId.get(fact.id);
+      if (idx !== undefined) {
+        this._facts[idx] = fact;
+      }
     } else {
       this._facts.push(fact);
-      if (fact.id != null) this._byId.set(fact.id, this._facts.length - 1);
+      if (!isNil(fact.id)) {this._byId.set(fact.id, this._facts.length - 1);}
     }
     if (fact.timestamp && fact.timestamp > (this.last_etched || '')) {
       this.last_etched = fact.timestamp;
@@ -317,23 +324,23 @@ export class Soul {
     const wantTags = new Set(opts.tags ?? []);
     const indexed: Array<[number, Fact]> = [];
     this._facts.forEach((f, i) => {
-      if (q && !f.text.toLowerCase().includes(q)) return;
-      if (wantTags.size > 0 && ![...wantTags].some((t) => f.tags.includes(t))) return;
-      if (opts.type != null && f.type !== opts.type) return;
-      if ((PRIORITY_RANK[f.priority] ?? 1) < floor) return;
+      if (q && !f.text.toLowerCase().includes(q)) {return;}
+      if (wantTags.size > 0 && ![...wantTags].some((t) => f.tags.includes(t))) {return;}
+      if (!isNil(opts.type) && f.type !== opts.type) {return;}
+      if ((PRIORITY_RANK[f.priority] ?? 1) < floor) {return;}
       indexed.push([i, f]);
     });
     indexed.sort((a, b) => {
       const pa = PRIORITY_RANK[a[1].priority] ?? 1;
       const pb = PRIORITY_RANK[b[1].priority] ?? 1;
-      if (pb !== pa) return pb - pa;
+      if (pb !== pa) {return pb - pa;}
       const ta = a[1].timestamp ?? '';
       const tb = b[1].timestamp ?? '';
-      if (tb !== ta) return tb < ta ? -1 : tb > ta ? 1 : 0;
+      if (tb !== ta) {return tb < ta ? -1 : tb > ta ? 1 : 0;}
       return b[0] - a[0]; // insertion index desc
     });
     const results = indexed.map(([, f]) => f);
-    if (opts.limit != null) return results.slice(0, opts.limit);
+    if (!isNil(opts.limit)) {return results.slice(0, opts.limit);}
     return results;
   }
 
@@ -344,11 +351,11 @@ export class Soul {
 
   deleteFact(id: string): boolean {
     const i = this._byId.get(id);
-    if (i === undefined) return false;
+    if (i === undefined) {return false;}
     this._facts.splice(i, 1);
     this._byId.clear();
     this._facts.forEach((f, j) => {
-      if (f.id != null) this._byId.set(f.id, j);
+      if (!isNil(f.id)) {this._byId.set(f.id, j);}
     });
     return true;
   }

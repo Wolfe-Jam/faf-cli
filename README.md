@@ -105,6 +105,7 @@ Run `faf` with no arguments:
 | `faf score` | Check AI-readiness (0–100%) |
 | `faf export` | Author `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.cursorrules` |
 | `faf sync` | Bi-directional `.faf` ↔ `CLAUDE.md` |
+| `faf memory` | `.fafm` soul ops — convert Claude memory, etch, recall, ls, show |
 | `faf diff` / `log` | Semantic context diff + score timeline across git history |
 | `faf hooks --install` | Pre-commit guard against context regression |
 | `faf compile` / `decompile` | `.faf` ↔ `.fafb` sealed binary |
@@ -114,6 +115,20 @@ Run `faf` with no arguments:
 | `faf formats` | List supported stacks and formats |
 
 Run `faf --help` for the full command set and options.
+
+### Memory (`.fafm`) — new in 7.2.0
+
+Portable agent memory in the IANA-registered [`.fafm`](https://www.iana.org/assignments/media-types/application/vnd.fafm+yaml) format. Same INTEROP as [claude-fafm-sdk 1.0](https://pypi.org/project/claude-fafm-sdk/).
+
+```bash
+# Claude Code memory dir → soul.fafm
+faf memory convert ~/.claude/projects/.../memory -o soul.fafm
+
+faf memory ls                    # ranked facts
+faf memory recall "your query"   # deterministic filter + rank
+faf memory etch "a durable fact" --id my-fact
+faf memory show
+```
 
 ---
 

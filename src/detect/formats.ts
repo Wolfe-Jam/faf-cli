@@ -63,6 +63,7 @@ export const FORMATS: FormatEntry[] = [
   // FAF
   { name: 'FAF', extensions: ['.faf'], category: 'faf' },
   { name: 'FAFb', extensions: ['.fafb'], category: 'faf' },
+  { name: 'FAFm', extensions: ['.fafm'], category: 'faf' },
 ];
 
 /** Get format by extension */

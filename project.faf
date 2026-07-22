@@ -1,8 +1,8 @@
 faf_version: "3.0"
 project:
   name: faf-cli
-  version: "7.1.4"
-  goal: "CLI for the IANA-registered `.faf` format (`application/vnd.faf+yaml`) — TypeScript, Bun-native since v6. package faf-cli v7.1.4."
+  version: "7.2.0"
+  goal: "CLI for IANA-registered `.faf` + `.fafm` — context DNA and portable agent memory. TypeScript, Bun-native since v6. package faf-cli v7.2.0 The Memory Edition."
   main_language: TypeScript
   type: cli  # found: package.json bin
 # Commands + key_files feed `faf export --agents` (hand values win over detection).
@@ -16,18 +16,21 @@ key_files:
   - src/cli.ts
   - src/index.ts
   - src/commands/
+  - src/commands/memory.ts
   - src/core/
   - src/detect/
+  - src/fafm/
   - src/interop/
   - src/wasm/
   - package.json
   - project.faf
 instant_context:
-  what_building: CLI for IANA-registered .faf project DNA
+  what_building: CLI for IANA-registered .faf context + .fafm memory
   tech_stack: TypeScript · Bun-native since v6
   key_files:
     - src/cli.ts
     - src/commands/
+    - src/fafm/
     - src/core/
     - src/interop/agents.ts
 stack:

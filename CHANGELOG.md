@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v7.1.4 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v7.2.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -9,6 +9,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.2.0] - 2026-07-22 — The Memory Edition
+
+`.faf` was context. **`.fafm` is memory.** One CLI, both IANA-registered formats — INTEROP-aligned with [claude-fafm-sdk 1.0](https://pypi.org/project/claude-fafm-sdk/).
+
+### Added
+- **`faf memory`** — knowledge-profile `.fafm` soul ops:
+  - `convert <dir>` — Claude Code memory directory → `soul.fafm` (schema-constrained; type gate; provenance in fact extras)
+  - `etch` / `ls` / `recall` / `show` — write, list, deterministic recall, summary
+  - Options: `--file`, `--output`, `--namepoint`, `--id`, `--type`, `--tag`, `--priority`, `--limit`, `--json`
+- **TS library** (`src/fafm/`) — `Soul`, `fromClaudeDir`, load/save fidelity, residual unknown-field preserve, recall SoT (priority → timestamp → insertion index). Exported as `FafmSoul` / `fromClaudeDir` from the package root.
+- **Formats:** `.fafm` listed under `faf formats` (FAFm).
+- **Tests:** ENGINE suite golden-pinned to Python 1.0 fixtures + TYRE live CLI convert.
+
+### Changed
+- **package description** — context + memory; keywords include `fafm`, `ai-memory`.
+
+### Notes
+- INTEROP bar matches claude-fafm-sdk 1.0 (not the proof `memory.entries` anti-pattern).
+- `interop/memory.ts` (MEMORY.md tri-sync stub) is unrelated and unchanged.
 
 ## [7.1.4] - 2026-07-20
 

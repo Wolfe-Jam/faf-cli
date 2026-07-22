@@ -45,7 +45,7 @@ const program = new Command();
 
 program
   .name('faf')
-  .description('Foundational AI-Context Format — project DNA for any AI')
+  .description('Foundational AI context + memory — .faf and .fafm for any AI')
   .version(VERSION, '-v, --version');
 
 // === Core Commands (Top 6) ===

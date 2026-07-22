@@ -1,6 +1,6 @@
 # AGENTS.md — faf-cli
 
-CLI for the IANA-registered `.faf` format (`application/vnd.faf+yaml`) — TypeScript · Bun-native since v6 · npm package `faf-cli` **v7.1.4**.
+CLI for IANA-registered `.faf` + `.fafm` (`application/vnd.faf+yaml` · `vnd.fafm+yaml`) — TypeScript · Bun-native since v6 · npm package `faf-cli` **v7.2.0** (The Memory Edition).
 
 ## Setup & build
 
@@ -29,7 +29,8 @@ bun run check:no-hardcode   # fail if machine paths leaked into dist/
 |------|------|
 | `src/cli.ts` | CLI entry (Commander) |
 | `src/index.ts` | Library entry |
-| `src/commands/` | One file per `faf` subcommand (`init`, `score`, `export`, `sync`, …) |
+| `src/commands/` | One file per `faf` subcommand (`init`, `score`, `export`, `sync`, `memory`, …) |
+| `src/fafm/` | `.fafm` library (Soul, fromClaudeDir) — INTEROP with claude-fafm-sdk 1.0 |
 | `src/core/` | Domain engines (slots, scorer, types, schema) — compose, don’t fork |
 | `src/detect/` | Stack / project detection |
 | `src/interop/` | Context emitters (`agents.ts`, `claude.ts`, `gemini.ts`, …) |

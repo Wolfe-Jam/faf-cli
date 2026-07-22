@@ -20,12 +20,12 @@ function isoMtime(path: string): string {
 }
 
 function parseFrontmatter(text: string): { fm: Record<string, unknown> | null; body: string } {
-  if (!text.startsWith('---')) return { fm: null, body: text };
+  if (!text.startsWith('---')) {return { fm: null, body: text };}
   const parts = text.split('---');
-  if (parts.length < 3) return { fm: null, body: text };
+  if (parts.length < 3) {return { fm: null, body: text };}
   try {
     const fm = parseYaml(parts[1]);
-    if (!fm || typeof fm !== 'object') return { fm: null, body: parts.slice(2).join('---').trim() };
+    if (!fm || typeof fm !== 'object') {return { fm: null, body: parts.slice(2).join('---').trim() };}
     return { fm: fm as Record<string, unknown>, body: parts.slice(2).join('---').trim() };
   } catch {
     return { fm: null, body: text };
@@ -33,17 +33,17 @@ function parseFrontmatter(text: string): { fm: Record<string, unknown> | null; b
 }
 
 function factFromTopic(path: string, body: string, fm: Record<string, unknown>): Fact | null {
-  if (!fm.name) return null;
+  if (!fm.name) {return null;}
   const meta =
     fm.metadata && typeof fm.metadata === 'object'
       ? (fm.metadata as Record<string, unknown>)
       : {};
   const mtype = meta.type;
-  if (typeof mtype !== 'string' || !KNOWLEDGE_TYPES.has(mtype)) return null;
+  if (typeof mtype !== 'string' || !KNOWLEDGE_TYPES.has(mtype)) {return null;}
 
   const name = String(fm.name).trim();
   const description =
-    fm.description != null && String(fm.description).trim()
+    fm.description !== undefined && fm.description !== null && String(fm.description).trim()
       ? String(fm.description).trim()
       : '';
   const text = description || name;
@@ -92,7 +92,7 @@ export function fromClaudeDir(
     .sort();
 
   for (const file of files) {
-    if (skip.has(file)) continue;
+    if (skip.has(file)) {continue;}
     const full = join(root, file);
     let text: string;
     try {
@@ -101,9 +101,9 @@ export function fromClaudeDir(
       continue;
     }
     const { fm, body } = parseFrontmatter(text);
-    if (!fm) continue;
+    if (!fm) {continue;}
     const fact = factFromTopic(full, body, fm);
-    if (fact) facts.push(fact);
+    if (fact) {facts.push(fact);}
   }
 
   const stamps = facts.map((f) => f.timestamp).filter(Boolean) as string[];

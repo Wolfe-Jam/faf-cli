@@ -75,14 +75,16 @@ function lsCmd(options: MemoryOptions): void {
     const id = f.id ? bold(f.id) : dim('(no-id)');
     const meta = [f.type, f.priority].filter(Boolean).join(' · ');
     console.log(`  ${id}  ${f.text.slice(0, 80)}`);
-    if (meta) console.log(dim(`         ${meta}`));
+    if (meta) {console.log(dim(`         ${meta}`));}
   }
 }
 
 function recallCmd(query: string | undefined, options: MemoryOptions): void {
   const soul = loadSoul(options.file);
   const tags = options.tag ? options.tag.split(',').map((t) => t.trim()) : undefined;
-  const limit = options.limit != null ? parseInt(options.limit, 10) : undefined;
+  const limit = options.limit !== undefined && options.limit !== null
+    ? parseInt(options.limit, 10)
+    : undefined;
   const hits = soul.recall(query ?? null, {
     tags,
     type: options.type,
@@ -136,7 +138,7 @@ function showCmd(options: MemoryOptions): void {
     for (const line of soul.index.slice(0, 20)) {
       console.log(dim(`    ${line}`));
     }
-    if (soul.index.length > 20) console.log(dim(`    … +${soul.index.length - 20} more`));
+    if (soul.index.length > 20) {console.log(dim(`    … +${soul.index.length - 20} more`));}
   }
 }
 

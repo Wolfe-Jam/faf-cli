@@ -1,7 +1,7 @@
 {
   "name": "faf-cli",
-  "version": "7.1.4",
-  "description": "Persistent AI Context Standard — project DNA for AI. IANA-registered. Anthropic-merged.",
+  "version": "7.2.0",
+  "description": "Persistent AI context + memory — .faf and .fafm, IANA-registered. Anthropic-merged.",
   "type": "module",
   "icon": "https://faf.one/orange-smiley.svg",
   "logo": "https://faf.one/orange-smiley.svg",
@@ -53,7 +53,10 @@
     "agents-md",
     "context-engineering",
     "codex",
-    "windsurf"
+    "windsurf",
+    "fafm",
+    "ai-memory",
+    "agents"
   ],
   "author": "wolfejam <wolfejam@faf.one>",
   "license": "MIT",
