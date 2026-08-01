@@ -2,7 +2,7 @@
 
 **One command. Every agent in your session gets the same accurate, versioned context.**
 
-FAF-CLI (v7.1, "The AGENTS.md Edition") is the canonical tool for the [`.faf` format](https://faf.one): persistent, versioned, AI-readable project context. It authors exactly the instruction files agentic tools are built to read — `AGENTS.md`, `.cursorrules`, `CLAUDE.md`, `GEMINI.md`, `copilot-instructions.md` — from a single source of truth, and exposes live tools over MCP. Part of the FAF ecosystem — [live downloads](https://faf.one/downloads) (hard floor · 100,000+).
+FAF-CLI (v7.1, "The AGENTS.md Edition") is the canonical tool for the [`.faf` format](https://faf.one): persistent, versioned, AI-readable project context. It authors exactly the instruction files agentic tools are built to read — `AGENTS.md`, `.cursorrules`, `CLAUDE.md`, `GEMINI.md`, `copilot-instructions.md` — from a single source of truth, and exposes live tools over MCP. Part of the FAF ecosystem — over 100k downloads; see [faf.one/downloads](https://faf.one/downloads) for latest stats.
 
 ---
 
