@@ -3,6 +3,7 @@ import { join } from 'path';
 import type { DetectedFramework, Signal } from '../core/types.js';
 import { FRAMEWORKS } from './frameworks.js';
 import { detectDartProject } from './dart.js';
+import { detectGoProject } from './go.js';
 
 interface PackageJson {
   name?: string;
@@ -436,6 +437,14 @@ export function detectProjectTypeWithRationale(dir: string): ProjectTypeDetectio
     return { type: dart.appType, found };
   }
 
+  // ─── 7a. go — content-aware go.mod classification (same composition as Dart).
+  //        go.mod alone ≠ backend: MCP · Gin/Echo/… · Cobra/cmd · library. ───
+  const go = detectGoProject(dir);
+  if (go) {
+    found.push(go.found);
+    return { type: go.appType, found };
+  }
+
   // ─── 7b. mobile — JS mobile platform deps / native dirs ─────────────────
   const mobileSignal = detectMobileSignal(dir, pkg);
   if (mobileSignal) {
@@ -591,6 +600,7 @@ export function detectRuntime(dir: string): string {
 /** Detect package manager */
 export function detectPackageManager(dir: string): string {
   if (existsSync(join(dir, 'pubspec.yaml'))) {return 'pub';}
+  if (existsSync(join(dir, 'go.mod'))) {return 'go modules';}
   if (existsSync(join(dir, 'bun.lockb')) || existsSync(join(dir, 'bun.lock'))) {return 'bun';}
   if (existsSync(join(dir, 'pnpm-lock.yaml'))) {return 'pnpm';}
   if (existsSync(join(dir, 'yarn.lock'))) {return 'yarn';}

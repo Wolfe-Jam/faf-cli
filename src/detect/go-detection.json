@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "_doc": "SINGLE SOURCE of Go detection KNOWLEDGE (A+B hybrid, Truth-is-faf-cli). faf-cli imports this directly; SDKs/MCPs compose it. Bolster Go by editing THIS file. Logic stays in go.ts. Content-aware: go.mod ≠ one bucket — backend · CLI · MCP · library. 2026-08-01 initial (Dart composition pattern).",
+  "mcpModules": [
+    "github.com/mark3labs/mcp-go",
+    "github.com/modelcontextprotocol/go-sdk",
+    "github.com/metoro-io/mcp-golang",
+    "github.com/ThinkInAIXYZ/go-mcp"
+  ],
+  "serverFrameworks": [
+    ["github.com/gin-gonic/gin", "Gin"],
+    ["github.com/labstack/echo", "Echo"],
+    ["github.com/labstack/echo/v4", "Echo"],
+    ["github.com/gofiber/fiber", "Fiber"],
+    ["github.com/gofiber/fiber/v2", "Fiber"],
+    ["github.com/go-chi/chi", "Chi"],
+    ["github.com/go-chi/chi/v5", "Chi"],
+    ["github.com/gorilla/mux", "Gorilla Mux"],
+    ["github.com/gofiber/fiber/v3", "Fiber"],
+    ["google.golang.org/grpc", "gRPC"],
+    ["connectrpc.com/connect", "Connect"],
+    ["github.com/go-kratos/kratos", "Kratos"],
+    ["github.com/go-kratos/kratos/v2", "Kratos"],
+    ["github.com/zeromicro/go-zero", "go-zero"],
+    ["github.com/cloudwego/hertz", "Hertz"]
+  ],
+  "cliFrameworks": [
+    ["github.com/spf13/cobra", "Cobra"],
+    ["github.com/urfave/cli", "urfave/cli"],
+    ["github.com/urfave/cli/v2", "urfave/cli"],
+    ["github.com/alecthomas/kingpin", "Kingpin"],
+    ["github.com/alecthomas/kong", "Kong"]
+  ]
+}

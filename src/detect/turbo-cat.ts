@@ -15,6 +15,7 @@ import { existsSync, readdirSync, readFileSync } from 'fs';
 import { join, dirname, extname, resolve } from 'path';
 import { KNOWLEDGE_BASE } from './turbo-cat-knowledge.js';
 import { detectDartProject } from './dart.js';
+import { detectGoProject } from './go.js';
 
 const IGNORE = new Set([
   'node_modules', '.git', 'dist', 'build', 'venv', '.venv', '__pycache__',
@@ -163,6 +164,27 @@ function scanConfigFiles(projectDir: string): FoundFormat[] {
             slots.apiType = 'MCP';
           }
           found.push({ slots, priority: k.priority, frameworks: dp.isFlutter ? ['Flutter', 'Dart'] : ['Dart'], fileName: f });
+          continue;
+        }
+      }
+      // Content-aware: go.mod backs libraries, backends, CLIs, MCP — not one bucket.
+      if (f === 'go.mod') {
+        const gp = detectGoProject(cur);
+        if (gp) {
+          const slots: Record<string, string> = {
+            mainLanguage: 'Go',
+            packageManager: 'go modules',
+            buildTool: 'go build',
+          };
+          if (gp.appType === 'backend' && gp.framework) {
+            slots.backend = gp.framework;
+          } else if (gp.appType === 'cli' && gp.framework) {
+            slots.framework = gp.framework;
+          } else if (gp.appType === 'mcp') {
+            slots.apiType = 'MCP';
+          }
+          const frameworks = gp.framework ? [gp.framework, 'Go'] : ['Go'];
+          found.push({ slots, priority: k.priority, frameworks, fileName: f });
           continue;
         }
       }

@@ -1,0 +1,201 @@
+{
+  "version": 1,
+  "_doc": "SHARED parity fixtures for Go detection (content-aware go.mod). faf-cli (tests/detect/go-parity.test.ts) is the Truth. SDKs may vendor a synced copy later. Same input → same expected classification.",
+  "fixtures": [
+    {
+      "name": "go-library-minimal",
+      "files": {
+        "go.mod": "module github.com/acme/lib\n\ngo 1.22\n"
+      },
+      "expected": {
+        "appType": "library",
+        "modulePath": "github.com/acme/lib",
+        "framework": "",
+        "found": "go.mod (Go module)"
+      }
+    },
+    {
+      "name": "go-library-with-deps",
+      "files": {
+        "go.mod": "module github.com/acme/pkg\n\ngo 1.22\n\nrequire golang.org/x/sync v0.7.0\n"
+      },
+      "expected": {
+        "appType": "library",
+        "modulePath": "github.com/acme/pkg",
+        "framework": "",
+        "found": "go.mod (Go module)"
+      }
+    },
+    {
+      "name": "go-backend-gin",
+      "files": {
+        "go.mod": "module github.com/acme/api\n\ngo 1.22\n\nrequire (\n\tgithub.com/gin-gonic/gin v1.10.0\n)\n"
+      },
+      "expected": {
+        "appType": "backend",
+        "modulePath": "github.com/acme/api",
+        "framework": "Gin",
+        "found": "go.mod + github.com/gin-gonic/gin (Go backend)"
+      }
+    },
+    {
+      "name": "go-backend-echo-v4",
+      "files": {
+        "go.mod": "module github.com/acme/svc\n\ngo 1.22\n\nrequire github.com/labstack/echo/v4 v4.12.0\n"
+      },
+      "expected": {
+        "appType": "backend",
+        "modulePath": "github.com/acme/svc",
+        "framework": "Echo",
+        "found": "go.mod + github.com/labstack/echo/v4 (Go backend)"
+      }
+    },
+    {
+      "name": "go-backend-fiber-v2",
+      "files": {
+        "go.mod": "module github.com/acme/web\n\ngo 1.22\n\nrequire github.com/gofiber/fiber/v2 v2.52.0\n"
+      },
+      "expected": {
+        "appType": "backend",
+        "modulePath": "github.com/acme/web",
+        "framework": "Fiber",
+        "found": "go.mod + github.com/gofiber/fiber/v2 (Go backend)"
+      }
+    },
+    {
+      "name": "go-backend-chi-v5",
+      "files": {
+        "go.mod": "module github.com/acme/chiapi\n\ngo 1.22\n\nrequire github.com/go-chi/chi/v5 v5.1.0\n"
+      },
+      "expected": {
+        "appType": "backend",
+        "modulePath": "github.com/acme/chiapi",
+        "framework": "Chi",
+        "found": "go.mod + github.com/go-chi/chi/v5 (Go backend)"
+      }
+    },
+    {
+      "name": "go-backend-grpc",
+      "files": {
+        "go.mod": "module github.com/acme/rpc\n\ngo 1.22\n\nrequire google.golang.org/grpc v1.64.0\n"
+      },
+      "expected": {
+        "appType": "backend",
+        "modulePath": "github.com/acme/rpc",
+        "framework": "gRPC",
+        "found": "go.mod + google.golang.org/grpc (Go backend)"
+      }
+    },
+    {
+      "name": "go-cli-cobra",
+      "files": {
+        "go.mod": "module github.com/acme/tool\n\ngo 1.22\n\nrequire github.com/spf13/cobra v1.8.1\n"
+      },
+      "expected": {
+        "appType": "cli",
+        "modulePath": "github.com/acme/tool",
+        "framework": "Cobra",
+        "found": "go.mod + github.com/spf13/cobra (Go CLI)"
+      }
+    },
+    {
+      "name": "go-cli-urfave-v2",
+      "files": {
+        "go.mod": "module github.com/acme/cli\n\ngo 1.22\n\nrequire github.com/urfave/cli/v2 v2.27.0\n"
+      },
+      "expected": {
+        "appType": "cli",
+        "modulePath": "github.com/acme/cli",
+        "framework": "urfave/cli",
+        "found": "go.mod + github.com/urfave/cli/v2 (Go CLI)"
+      }
+    },
+    {
+      "name": "go-cli-cmd-layout",
+      "files": {
+        "go.mod": "module github.com/acme/cmds\n\ngo 1.22\n",
+        "cmd/root/main.go": "package main\n\nfunc main() {}\n"
+      },
+      "expected": {
+        "appType": "cli",
+        "modulePath": "github.com/acme/cmds",
+        "framework": "",
+        "found": "go.mod + cmd/ (Go CLI layout)"
+      }
+    },
+    {
+      "name": "go-cli-root-main",
+      "files": {
+        "go.mod": "module github.com/acme/tool2\n\ngo 1.22\n",
+        "main.go": "package main\n\nfunc main() {}\n"
+      },
+      "expected": {
+        "appType": "cli",
+        "modulePath": "github.com/acme/tool2",
+        "framework": "",
+        "found": "go.mod + main.go package main (Go CLI)"
+      }
+    },
+    {
+      "name": "go-mcp-mark3labs",
+      "files": {
+        "go.mod": "module github.com/acme/mcp-srv\n\ngo 1.22\n\nrequire github.com/mark3labs/mcp-go v0.20.0\n"
+      },
+      "expected": {
+        "appType": "mcp",
+        "modulePath": "github.com/acme/mcp-srv",
+        "framework": "",
+        "found": "go.mod + github.com/mark3labs/mcp-go (Go MCP server)"
+      }
+    },
+    {
+      "name": "go-mcp-beats-gin",
+      "files": {
+        "go.mod": "module github.com/acme/mcp-http\n\ngo 1.22\n\nrequire (\n\tgithub.com/gin-gonic/gin v1.10.0\n\tgithub.com/mark3labs/mcp-go v0.20.0\n)\n"
+      },
+      "expected": {
+        "appType": "mcp",
+        "modulePath": "github.com/acme/mcp-http",
+        "framework": "",
+        "found": "go.mod + github.com/mark3labs/mcp-go (Go MCP server)"
+      }
+    },
+    {
+      "name": "go-backend-beats-cobra",
+      "files": {
+        "go.mod": "module github.com/acme/svccli\n\ngo 1.22\n\nrequire (\n\tgithub.com/gin-gonic/gin v1.10.0\n\tgithub.com/spf13/cobra v1.8.1\n)\n"
+      },
+      "expected": {
+        "appType": "backend",
+        "modulePath": "github.com/acme/svccli",
+        "framework": "Gin",
+        "found": "go.mod + github.com/gin-gonic/gin (Go backend)"
+      }
+    },
+    {
+      "name": "go-mcp-official-sdk",
+      "files": {
+        "go.mod": "module github.com/acme/official-mcp\n\ngo 1.22\n\nrequire github.com/modelcontextprotocol/go-sdk v0.1.0\n"
+      },
+      "expected": {
+        "appType": "mcp",
+        "modulePath": "github.com/acme/official-mcp",
+        "framework": "",
+        "found": "go.mod + github.com/modelcontextprotocol/go-sdk (Go MCP server)"
+      }
+    },
+    {
+      "name": "go-library-not-cli-without-main",
+      "files": {
+        "go.mod": "module github.com/acme/onlylib\n\ngo 1.22\n",
+        "lib.go": "package onlylib\n"
+      },
+      "expected": {
+        "appType": "library",
+        "modulePath": "github.com/acme/onlylib",
+        "framework": "",
+        "found": "go.mod (Go module)"
+      }
+    }
+  ]
+}

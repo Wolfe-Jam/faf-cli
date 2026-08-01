@@ -175,6 +175,9 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   },
 
   'go.mod': {
+    // Filename-only FALLBACK: assert Go + modules, NOT "backend" —
+    // a go.mod backs libraries, Gin/Echo servers, Cobra CLIs, and MCP servers.
+    // turbo-cat.ts reads CONTENT (detectGoProject) and fills framework/backend.
     frameworks: ['Go'],
     slots: {
       packageManager: 'go modules',

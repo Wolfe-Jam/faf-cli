@@ -10,6 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Go detection** (`src/detect/go.ts` + `src/detect/go-detection.json`) — content-aware `go.mod` classification (Dart composition pattern). `go.mod` alone ≠ backend:
+  - **MCP** — `mcp-go`, official go-sdk, …
+  - **Backend** — Gin, Echo, Fiber, Chi, gRPC, Connect, …
+  - **CLI** — Cobra, urfave/cli, `cmd/` layout, root `package main`
+  - **Library** — pure module (no server/CLI/MCP signal)
+  - Single-source JSON; scanner + Turbo-Cat compose. Parity fixtures + WJTTC Go suite.
+
 ## [7.2.1] - 2026-08-01 — The Memory Edition
 
 **Dart/Flutter knowledge v2** — community receipt on top of the 6.13.0 Dart Edition. Same architecture; fresher detection knowledge.
