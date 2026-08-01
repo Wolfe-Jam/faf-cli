@@ -43,7 +43,7 @@ function renderLoopResult(r: LoopRunResult): void {
 
   switch (r.status) {
     case 'done':
-      console.log(`${fafCyan('done')} — 🏆 100% AI-readiness. The .faf is complete.`);
+      console.log(`${fafCyan('done')} — ✪ 100% AI-readiness. The .faf is complete.`);
       break;
     case 'needs-human': {
       const n = r.ask.length;

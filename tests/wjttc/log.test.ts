@@ -2,7 +2,7 @@
  * WJTTC — `faf log` (faf-cli 7.0 "The GIT Version", build #3)
  *
  * The score TIMELINE: walk every commit that touched project.faf, score each
- * version, render the progression (81% → 92% → 100% 🏆) with the per-commit
+ * version, render the progression (81% → 92% → 100% ✪) with the per-commit
  * delta. Proof-Over-Time for the context score — the TAF-family idea applied to
  * the .faf score itself. The append-only git history can't be gamed.
  *

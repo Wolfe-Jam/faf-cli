@@ -60,10 +60,10 @@ interface ShowcaseResults {
 function parseFafGitOutput(output: string): { currentScore: number; newScore: number; improvement: number; tier: string } | null {
   // v4.3.0 format:
   // Current:  No .faf file ⚠️
-  // With FAF: 100% 🏆 Trophy
+  // With FAF: 100% ✪ Trophy  (work glyph; also accept legacy 🏆)
 
   const currentMatch = output.match(/Current:\s+No \.faf file/);
-  const withFafMatch = output.match(/With FAF:\s+(\d+)%\s+([🏆🥇🥈🥉🟢🟡🔴🤍⚠️]+)\s*(\w+)?/);
+  const withFafMatch = output.match(/With FAF:\s+(\d+)%\s+([✪🏆★◆◇●○♡⚠️]+)\s*(\w+)?/);
 
   if (!withFafMatch) {
     return null;

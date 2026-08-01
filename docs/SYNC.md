@@ -23,7 +23,7 @@ faf bi-sync --watch      # Continuous sync
 
 ```bash
 $ faf sync --pull
-× sync --pull blocked: requires 🏆 Trophy (currently 81%)
+× sync --pull blocked: requires ✪ Trophy (currently 81%)
   MD → .faf backfill only runs at 100%. Reach Trophy with 'faf go', then retry.
 ```
 

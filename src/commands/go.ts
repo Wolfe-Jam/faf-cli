@@ -74,13 +74,13 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
   });
 
   if (emptySlots.length === 0) {
-    console.log(`${fafCyan('◆')} go  all slots populated — 🏆 Trophy`);
+    console.log(`${fafCyan('◆')} go  all slots populated — ✪ Trophy`);
     const result = enrichScore(kernel.score(readFafRaw(fafPath)));
     displayScore(result, fafPath);
     return;
   }
 
-  console.log(`${fafCyan('go')} ${dim('— guided interview to 🏆 Trophy')}`);
+  console.log(`${fafCyan('go')} ${dim('— guided interview to ✪ Trophy')}`);
   const noun = emptySlots.length === 1 ? 'slot' : 'slots';
   console.log(dim(`  ${emptySlots.length} ${noun} from Trophy. Enter a value, "skip" to skip, or "quit" to stop.\n`));
 

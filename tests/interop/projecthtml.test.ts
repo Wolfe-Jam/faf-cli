@@ -107,11 +107,11 @@ describe('ENGINE: interop/projecthtml', () => {
     const trophy: ScoreResult = {
       ...result,
       score: 100,
-      tier: { name: 'TROPHY', threshold: 100, indicator: '🏆 TROPHY' },
+      tier: { name: 'TROPHY', threshold: 100, indicator: '✪ TROPHY' },
     };
     const t = generateProjectHtml(data, trophy, '/x/project.faf');
     expect(t).toContain('✅ All Required slots filled.');
-    expect(t).toContain('100% Trophy 🏆 Awarded');
+    expect(t).toContain('100% Trophy ✪ Awarded');
     expect(t).toContain('class="awd-win"');
     expect(t).not.toContain('slots populated ·');
 

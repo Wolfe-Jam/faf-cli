@@ -2,11 +2,11 @@
 
 ## Tier System — Trophy is the target
 
-**🏆 Trophy 100% — all or nothing.** From v6.6.0 onward, faf-cli recommends only Trophy. 100% on the FCL is what makes the layers above (MD instructions, Agents, AI tooling) work properly. Sub-Trophy tiers below are honest interim states on the way to Trophy, not endpoints we recommend.
+**✪ Trophy 100% — all or nothing.** From v6.6.0 onward, faf-cli recommends only Trophy. On **work** surfaces (CLI · docs · receipts) the glyph is **✪** (Proof Seal). Social still uses 🏆; brand pixels use the Trophy Mark. Same meaning: 100%. Sub-Trophy tiers below are honest interim states on the way to Trophy, not endpoints we recommend.
 
 | Tier | Score | Status |
 |------|-------|--------|
-| 🏆 **Trophy** | 100% | AI never has to guess — Gold Code |
+| ✪ **Trophy** | 100% | AI never has to guess — Gold Code (work glyph; social 🏆) |
 | ★ **Gold** | 99%+ | 1 slot from Trophy |
 | ◆ **Silver** | 95%+ | Close — keep going |
 | ◇ **Bronze** | 85%+ | Interim — keep going |
@@ -17,7 +17,7 @@
 
 **At 55%, AI is guessing half the time.** At 100%, AI never guesses.
 
-🏆 is the only emoji. Sub-Trophy tiers use geometric Unicode symbols (★ ◆ ◇ ● ○ ♡) — the source-of-truth lives in [`src/core/tiers.ts`](../src/core/tiers.ts).
+Work surfaces use ✪ for Trophy (not the social emoji 🏆). Sub-Trophy tiers use geometric Unicode (★ ◆ ◇ ● ○ ♡) — source of truth: [`src/core/tiers.ts`](../src/core/tiers.ts).
 
 ---
 
@@ -35,7 +35,7 @@ stack:
   backend: Node.js         # ✅ Filled (has value)
   # ... other slots
 
-Score: (Filled + Ignored) / 21 = 100% 🏆
+Score: (Filled + Ignored) / 21 = 100% ✪
 ```
 
 **The formula:**

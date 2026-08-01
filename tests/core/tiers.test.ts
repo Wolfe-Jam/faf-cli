@@ -4,6 +4,9 @@ import { getTier, getNextTier, TIERS } from '../../src/core/tiers.js';
 describe('ENGINE: getTier', () => {
   test('100% = TROPHY', () => {
     expect(getTier(100).name).toBe('TROPHY');
+    // Work glyph = Proof Seal (social still uses 🏆; brand uses Trophy Mark PNG)
+    expect(getTier(100).indicator).toContain('✪');
+    expect(getTier(100).indicator).not.toContain('🏆');
   });
 
   test('99% = GOLD', () => {

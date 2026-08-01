@@ -65,7 +65,7 @@ function parseFafGitOutput(output: string): { currentScore: number; newScore: nu
   // With FAF: 100% 🏆 Trophy
 
   const currentMatch = cleanOutput.match(/Current:\s+No \.faf file/);
-  const withFafMatch = cleanOutput.match(/With FAF:\s+(\d+)%\s+([🏆🥇🥈🥉🟢🟡🔴🤍⚠️]+)\s*(\w+)?/);
+  const withFafMatch = cleanOutput.match(/With FAF:\s+(\d+)%\s+([✪🏆★◆◇●○♡⚠️🥇🥈🥉🟢🟡🔴🤍]+)\s*(\w+)?/);
 
   if (!withFafMatch) {
     return null;

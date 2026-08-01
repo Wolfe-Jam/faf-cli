@@ -5,7 +5,7 @@
  * kernel, and renders the score progression with the per-commit delta:
  *
  *   project.faf — score timeline (3 commits)
- *      100%   +19   2026-06-26  ccc0000  🏆 TROPHY  add ci + why
+ *      100%   +19   2026-06-26  ccc0000  ✪ TROPHY  add ci + why
  *       81%    +7   2026-06-20  bbb0000  ● GREEN    add build
  *       74%   new   2026-06-18  aaa0000  ● GREEN    init context
  *

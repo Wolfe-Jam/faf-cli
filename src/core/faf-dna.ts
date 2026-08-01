@@ -34,8 +34,11 @@ export interface VersionEntry {
   growth: number; // points above Birth DNA
 }
 
+/** Journey markers only — not score tiers.
+ *  Tiers live solely in tiers.ts (Trophy 100 · Gold 99 · Silver 95 · Bronze 85 · …).
+ *  There is no championship / elite / perfect milestone. */
 export interface Milestone {
-  type: 'birth' | 'doubled' | 'championship' | 'elite' | 'peak' | 'perfect' | 'current';
+  type: 'birth' | 'doubled' | 'peak' | 'current';
   score: number;
   date: string; // ISO
   version: string;
@@ -197,9 +200,6 @@ export class FafDNAManager {
       ms.push({ type, score, date: now, version, label, emoji });
 
     if (score >= this.dna.birthCertificate.birthDNA * 2 && score > 0 && !has('doubled')) {add('doubled', 'Doubled', '2️⃣');}
-    if (score >= 70 && !has('championship')) {add('championship', 'Championship', '🏆');}
-    if (score >= 85 && !has('elite')) {add('elite', 'Elite', '◆');}
-    if (score >= 100 && !has('perfect')) {add('perfect', 'Perfect', '🏆');}
 
     const peak = ms.find((m) => m.type === 'peak');
     if (!peak || score > peak.score) {

@@ -5,7 +5,7 @@ import type { KernelScoreResult, ScoreResult } from '../../src/core/types.js';
 describe('ENGINE: enrichScore', () => {
   test('enriches 100% as Trophy', () => {
     const kernel: KernelScoreResult = {
-      score: 100, tier: '🏆', populated: 9, empty: 0, ignored: 12,
+      score: 100, tier: 'TROPHY', populated: 9, empty: 0, ignored: 12,
       active: 9, total: 21, slots: { 'project.name': 'populated' },
     };
     const result = enrichScore(kernel);

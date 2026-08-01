@@ -28,7 +28,7 @@ Claude Code runs `faf score` in the background while you're coding. No context s
 ```
 You: "check the score"
 Claude: runs /faf-score in background, continues helping you code
-Claude: "100/100 🏆 — Trophy. Born at 33%, now 100% over 59 days."
+Claude: "100/100 ✪ — Trophy. Born at 33%, now 100% over 59 days."
 ```
 
 Skills are defined in your Claude Code config. [Learn more about Claude Code skills](https://code.claude.com/docs/en/skills). Publish and discover skills on the [Anthropic Skills Registry](https://github.com/anthropics/skills).

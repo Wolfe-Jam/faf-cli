@@ -28,11 +28,11 @@ async function testProject(projectPath: string, projectName: string) {
     // Show each detected integration
     detected.forEach((integration, index) => {
       const emoji = {
-        trophy: '🏆',
-        gold: '🥇',
-        silver: '🥈',
-        bronze: '🥉',
-      }[integration.tier] || '⚪';
+        trophy: '✪',
+        gold: '★',
+        silver: '◆',
+        bronze: '◇',
+      }[integration.tier] || '○';
 
       console.log(`${index + 1}. ${emoji} ${integration.displayName}`);
       console.log(`   Tier: ${integration.tier} (${integration.qualityScore} quality score)`);
@@ -56,7 +56,7 @@ async function testProject(projectPath: string, projectName: string) {
 }
 
 async function main() {
-  console.log('🏆 FAF Integration Detection System - Test Suite\n');
+  console.log('✪ FAF Integration Detection System - Test Suite\n');
   console.log('Championship Standard: Auto-detect stacks and generate optimized .faf context\n');
 
   const testProjects = [

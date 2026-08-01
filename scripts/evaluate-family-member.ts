@@ -9,7 +9,8 @@
  * - MCP server availability
  * - .faf context contribution (slots filled)
  *
- * Championship Standard: 85% minimum quality score required
+ * Quality floor = Bronze (85) on the faf-cli ladder; target = Trophy (100).
+ * Tier names/glyphs: src/core/tiers.ts only — no medal emoji ladder.
  */
 
 import https from 'https';
@@ -26,15 +27,16 @@ interface IntegrationQuality {
   mcpServers: string[];
   contextSlotsFilled: number;
   totalScore: number;
-  tier: 'trophy' | 'gold' | 'silver' | 'bronze' | 'yellow' | 'red';
+  tier: 'trophy' | 'gold' | 'silver' | 'bronze' | 'green' | 'yellow' | 'red' | 'white';
   approved: boolean;
   reasoning: string;
 }
 
 // Minimum quality thresholds for FAF integration approval
+// Ladder: tiers.ts — Trophy 100 · Gold 99 · Silver 95 · Bronze 85 · Green 70 · …
 const INTEGRATION_REQUIREMENTS = {
   weeklyDownloads: 100_000,      // 100k+ shows real developer adoption
-  qualityScore: 85,              // Bronze tier minimum (Championship standard)
+  qualityScore: 85,              // Bronze floor (approval gate); seek Trophy 100 for FAF context
   maxDaysSincePublish: 90,       // Active maintenance within 3 months
   minContextSlots: 2,            // Must contribute to 2+ .faf context fields
 };
@@ -135,25 +137,31 @@ const CONTEXT_CONTRIBUTION: Record<string, string[]> = {
   'yargs': ['cli_framework', 'argument_parsing'],
 };
 
+/** Match faf-cli src/core/tiers.ts thresholds exactly. */
 function getTier(score: number): IntegrationQuality['tier'] {
-  if (score >= 99) return 'trophy';
-  if (score >= 95) return 'gold';
-  if (score >= 90) return 'silver';
+  if (score >= 100) return 'trophy';
+  if (score >= 99) return 'gold';
+  if (score >= 95) return 'silver';
   if (score >= 85) return 'bronze';
-  if (score >= 70) return 'yellow';
-  return 'red';
+  if (score >= 70) return 'green';
+  if (score >= 55) return 'yellow';
+  if (score >= 1) return 'red';
+  return 'white';
 }
 
+/** Work-surface glyphs (tiers.ts) — no medal/circle emoji ladder. */
 function getEmoji(tier: IntegrationQuality['tier']): string {
-  const emojis = {
-    trophy: '🏆',
-    gold: '🥇',
-    silver: '🥈',
-    bronze: '🥉',
-    yellow: '🟡',
-    red: '🔴'
+  const glyphs: Record<IntegrationQuality['tier'], string> = {
+    trophy: '✪',
+    gold: '★',
+    silver: '◆',
+    bronze: '◇',
+    green: '●',
+    yellow: '●',
+    red: '○',
+    white: '♡',
   };
-  return emojis[tier];
+  return glyphs[tier];
 }
 
 async function evaluateIntegration(pkg: string): Promise<IntegrationQuality> {
@@ -226,7 +234,7 @@ async function evaluateIntegration(pkg: string): Promise<IntegrationQuality> {
 
 async function main() {
   console.log('🔗 FAF Integration Quality Assessment\n');
-  console.log('Championship Standard: 85+ quality score required\n');
+  console.log('Approval floor: Bronze 85+ · Target: Trophy 100 (tiers.ts)\n');
   console.log('='.repeat(60));
 
   const candidates = [

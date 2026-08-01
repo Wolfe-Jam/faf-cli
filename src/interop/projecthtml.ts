@@ -31,7 +31,7 @@ const ERROR = '#FF3B30'; // --faf-error (status: danger)
 const NEUTRAL_BRIGHT = '#E6EDF3'; // theme grey — "good, not done, no alarm"
 const NEUTRAL_DIM = '#6E7681'; // theme grey — empty
 const TIER_VIS: Record<string, { glyph: string; color: string }> = {
-  TROPHY: { glyph: '🏆', color: ORANGE },
+  TROPHY: { glyph: '✪', color: ORANGE },
   GOLD: { glyph: '★', color: ORANGE },
   SILVER: { glyph: '◆', color: CYAN },
   BRONZE: { glyph: '◇', color: CYAN_DEEP },
@@ -148,7 +148,7 @@ footer strong{color:#e6edf3}
 <div class="meter"><span></span></div>
 ${
   isTrophy
-    ? '<p class="award statline"><span class="awd-pre">✅ All Required slots filled.</span> <span class="awd-win">100% Trophy 🏆 Awarded</span></p>'
+    ? '<p class="award statline"><span class="awd-pre">✅ All Required slots filled.</span> <span class="awd-win">100% Trophy ✪ Awarded</span></p>'
     : `<p class="muted statline">${result.populated}/${result.active} slots populated · ${result.total} total${stackIgnored ? ` · ${stackIgnored} N/A` : ''}</p>`
 }
 

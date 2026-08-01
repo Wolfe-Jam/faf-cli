@@ -3,17 +3,20 @@ import { bold, dim, fafCyan, fafCyanDeep, orange } from '../ui/colors.js';
 
 /** Tier boundaries — ordered from highest to lowest
  *
- * Indicators:
- *   🏆 trophy (earned at 100%)
+ * Indicators (work surfaces — CLI · code · docs · receipts):
+ *   ✪ Proof Seal (Trophy 100% — work glyph; social still uses 🏆; brand uses Trophy Mark PNG)
  *   ★ filled star (gold — orange)
  *   ◆ filled diamond (silver — cyan)
  *   ◇ open diamond (bronze — deep cyan, one rung below silver)
  *   ● filled circle (mid tiers)
  *   ○ open circle (low — dim)
  *   ♡ heart (empty — good luck)
+ *
+ * All three 100% glyphs mean the same score: ✪ work · 🏆 social · Trophy Mark (PNG) visual.
+ * See PLANET-FAF/memory/trophy-three-glyphs-one-meaning.md
  */
 export const TIERS: TierInfo[] = [
-  { name: 'TROPHY', indicator: `${orange('🏆')} ${orange('TROPHY')}`, threshold: 100 },
+  { name: 'TROPHY', indicator: `${orange('✪')} ${orange('TROPHY')}`, threshold: 100 },
   { name: 'GOLD',   indicator: `${orange(bold('★'))} ${orange('GOLD')}`,    threshold: 99 },
   { name: 'SILVER', indicator: `${fafCyan('◆')} ${fafCyan('SILVER')}`, threshold: 95 },
   { name: 'BRONZE', indicator: `${fafCyanDeep('◇')} ${fafCyanDeep('BRONZE')}`, threshold: 85 },

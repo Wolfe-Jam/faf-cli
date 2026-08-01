@@ -44,6 +44,6 @@ export function autoCommand(): void {
   displayScore(result, fafPath);
 
   if (result.score < 100) {
-    console.log(dim(`\n  run ${bold("'faf go'")} to reach 🏆 Trophy`));
+    console.log(dim(`\n  run ${bold("'faf go'")} to reach ✪ Trophy`));
   }
 }
