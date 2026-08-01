@@ -1,12 +1,12 @@
 <!-- faf:start -->
-<!-- faf: faf-cli | TypeScript | cli | CLI for IANA-registered `.faf` + `.fafm` — context DNA and portable agent memory. TypeScript, Bun-native since v6. package faf-cli v7.2.0 The Memory Edition. -->
+<!-- faf: faf-cli | TypeScript | cli | CLI for IANA-registered `.faf` + `.fafm` — context DNA and portable agent memory. TypeScript, Bun-native since v6. package faf-cli v7.3.0 The Go Edition. -->
 <!-- faf: claim=project.faf | family=FAF -->
 
 # CLAUDE.md — faf-cli
 
 ## What This Is
 
-CLI for IANA-registered `.faf` + `.fafm` — context DNA and portable agent memory. TypeScript, Bun-native since v6. package faf-cli v7.2.0 The Memory Edition.
+CLI for IANA-registered `.faf` + `.fafm` — context DNA and portable agent memory. TypeScript, Bun-native since v6. package faf-cli v7.3.0 The Go Edition.
 
 ## Stack
 

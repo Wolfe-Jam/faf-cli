@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v7.2.1 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v7.3.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -10,8 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.3.0] - 2026-08-01 — The Go Edition
+
+**Content-aware Go** — `go.mod` alone ≠ backend. Same composition pattern as the Dart Edition: single-source knowledge JSON + classifier; scanner and Turbo-Cat compose.
+
 ### Added
-- **Go detection** (`src/detect/go.ts` + `src/detect/go-detection.json`) — content-aware `go.mod` classification (Dart composition pattern). `go.mod` alone ≠ backend:
+- **Go detection** (`src/detect/go.ts` + `src/detect/go-detection.json`) — content-aware `go.mod` classification:
   - **MCP** — `mcp-go`, official go-sdk, …
   - **Backend** — Gin, Echo, Fiber, Chi, gRPC, Connect, …
   - **CLI** — Cobra, urfave/cli, `cmd/` layout, root `package main`
@@ -21,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **Work-surface Trophy glyph** — 100% renders **✪** (Proof Seal) on CLI · docs · receipts. Social still uses 🏆; meaning unchanged (Trophy = 100%).
 
-### Notes / non-claims (this cut)
+### Notes / non-claims
 - **Claim:** content-aware Go project-type classification from `go.mod` (+ light layout), proven by `tests/detect/go-parity-fixtures.json` + WJTTC Go suite.
 - **Do NOT claim:** full Go SDK rewrite · byte-identical parity with a Go implementation yet (fixtures are TS Truth; SDK vendoring is later) · that every Go module path is known · that `package main` alone proves production service shape.
 - **Do NOT claim:** ✪ changes scoring math — glyph only on work surfaces.
