@@ -3,6 +3,12 @@ name: Championship CI/CD
 on:
   push:
     branches: [ main, develop ]
+    # Docs-only: skip full championship suite (saves minutes; avoids noise).
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'LICENSE*'
+      - '.gitignore'
   pull_request:
     branches: [ main ]
 
