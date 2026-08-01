@@ -23,5 +23,5 @@ CLI for IANA-registered `.faf` + `.fafm` — context DNA and portable agent memo
 
 ---
 
-*STATUS: BI-SYNC ACTIVE — 2026-07-22T15:05:55.124Z*
+*STATUS: BI-SYNC ACTIVE — 2026-08-01T18:44:55.685Z*
 <!-- faf:end -->

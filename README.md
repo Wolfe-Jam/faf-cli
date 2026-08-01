@@ -130,6 +130,10 @@ faf memory etch "a durable fact" --id my-fact
 faf memory show
 ```
 
+### Dart/Flutter — knowledge v2 in 7.2.1
+
+Same content-aware detection as the [Dart Edition](https://faf.one/blog/claude-dart-edition) (Flutter ≠ every `pubspec`). **7.2.1** refreshes the single-source knowledge table: Riverpod annotation, Flutter Hooks, Beamer, Routemaster, Jaspr, Relic, and more MCP package names — still **one classifier**, composed by the MCPs.
+
 ---
 
 ## Custom instructions
@@ -142,20 +146,20 @@ Your own rules for the AI — *"use full words in identifiers," "use bun, not np
 
 ## Scoring
 
-**🏆 Trophy 100% — all or nothing.** From v6.6.0 onward, faf-cli recommends only Trophy. 100% on the FCL is what makes the layers above (MD instructions, Agents, AI tooling) work — sub-Trophy leaves gaps that AI guesses on. Sub-Trophy tiers are honest interim states on the way to Trophy, not endpoints.
+**✪ Trophy 100% — all or nothing.** From v6.6.0 onward, faf-cli recommends only Trophy. 100% on the FCL is what makes the layers above (MD instructions, Agents, AI tooling) work — sub-Trophy leaves gaps that AI guesses on. Sub-Trophy tiers (including Bronze 85) remain on the ladder as honest interim states — they are not deleted; we just no longer *aim* for 85 as the goal.
 
 | Tier | Score | Status |
 |------|-------|--------|
-| 🏆 / ✪ **Trophy** | 100% | AI never has to guess |
+| ✪ **Trophy** | 100% | AI never has to guess — target |
 | ★ **Gold** | 99%+ | 1 slot from Trophy |
 | ◆ **Silver** | 95%+ | Close — keep going |
-| ◇ **Bronze** | 85%+ | Interim — keep going |
+| ◇ **Bronze** | 85%+ | On the ladder (was the old recommend-min; not the target) |
 | ● **Green** | 70%+ | Interim — keep going |
 | ● **Yellow** | 55%+ | AI flipping coins |
 | ○ **Red** | <55% | AI working blind |
 | ♡ **White** | 0% | No context at all |
 
-**🏆 and ✪ both mean 100%** — the same top score, shown by surface: **✪** (the Proof Seal) on code surfaces — CLI, skills, docs, the hub — and **🏆** on social: posts, blogs, cards. You'll see both around for a while as the ✪ convention settles in.
+**One score, three glyphs:** ✪ work (CLI · docs · receipts) · 🏆 social (X · blogs) · Trophy Mark PNG (brand). Source of truth: `src/core/tiers.ts`.
 
 ---
 
@@ -187,7 +191,7 @@ Pivotal releases — full history in [CHANGELOG.md](./CHANGELOG.md):
 - **v7.0 — GIT** — context goes git-native: `faf diff` / `log` / `hooks`.
 - **v6.16 — Know Your Stack** — every emitted file labels your stack identically.
 - **v6.15 — Copilot** — `faf export --copilot` writes the file GitHub Copilot reads.
-- **v6.14 — Loop** — `faf loop` drives any repo to 🏆 100% or the honest human wall.
+- **v6.14 — Loop** — `faf loop` drives any repo to ✪ 100% or the honest human wall.
 - **v6.7 — HTML** — `faf show` renders a `.faf` to a browsable page. *(FAF defines. MD instructs. AI codes. HTML shows.)*
 - **v6.6 — Trophy** — 100% or nothing.
 - **v6.0 — Bun** — ground-up rewrite; single portable binary, four platforms.

@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v7.2.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v7.2.1 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -10,13 +10,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.2.1] - 2026-08-01 — The Memory Edition
+
+**Dart/Flutter knowledge v2** — community receipt on top of the 6.13.0 Dart Edition. Same architecture; fresher detection knowledge.
+
 ### Changed
-- **Dart/Flutter detection knowledge v2** (`src/detect/dart-detection.json`) — Aug 2026 refresh on top of the 6.13.0 Dart Edition. Same content-aware architecture (pubspec ≠ Flutter by default); knowledge adds high-signal deps the community actually uses:
+- **Dart/Flutter detection knowledge v2** (`src/detect/dart-detection.json`) — Aug 2026 refresh. Content-aware architecture unchanged (pubspec ≠ Flutter by default). Knowledge adds high-signal deps:
   - State: `riverpod_annotation`, `flutter_hooks`
   - Routing: `beamer`, `routemaster`
-  - Servers: `shelf_router`, `jaspr`, `relic`
+  - Servers: `jaspr`, `relic`
   - MCP: `dart_mcpserver`
-  - Still single-source: edit the JSON, every composed surface inherits. No forked parsers.
+  - Single-source: edit the JSON; composed surfaces inherit. No forked parsers.
 
 ## [7.2.0] - 2026-07-22 — The Memory Edition
 
