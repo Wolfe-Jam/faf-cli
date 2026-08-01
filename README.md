@@ -138,7 +138,7 @@ faf memory show
 
 ### Dart/Flutter — knowledge v2 in 7.2.1
 
-Same content-aware detection as the [Dart Edition](https://faf.one/blog/claude-dart-edition) (Flutter ≠ every `pubspec`). **7.2.1** refreshes the single-source knowledge table: Riverpod annotation, Flutter Hooks, Beamer, Routemaster, Jaspr, Relic, and more MCP package names — still **one classifier**, composed by the MCPs.
+**pubspec ≠ Flutter — pure Dart stays Dart.** Same content-aware detection as the [Dart Edition](https://faf.one/blog/dart-edition). **7.2.1** refreshes the single-source knowledge table: Riverpod annotation, Flutter Hooks, Beamer, Routemaster, Jaspr, Relic, and more MCP package names — still **one classifier**, composed by the MCPs.
 
 ---
 

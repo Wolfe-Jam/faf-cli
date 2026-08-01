@@ -40,7 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [7.2.1] - 2026-08-01 — The Memory Edition
 
-**Dart/Flutter knowledge v2** — community receipt on top of the 6.13.0 Dart Edition. Same architecture; fresher detection knowledge.
+**Dart/Flutter knowledge v2** — community receipt on the Dart Edition (**pubspec ≠ Flutter**). Same architecture; fresher detection knowledge.
 
 ### Changed
 - **Dart/Flutter detection knowledge v2** (`src/detect/dart-detection.json`) — Aug 2026 refresh. Content-aware architecture unchanged (pubspec ≠ Flutter by default). Knowledge adds high-signal deps:
@@ -210,9 +210,9 @@ FAF now writes the file GitHub Copilot reads. `faf export --copilot` emits `.git
 
 ## [6.13.0] - 2026-06-17 — The Dart Edition
 
-faf now understands Dart and Flutter projects.
+**pubspec ≠ Flutter — pure Dart stays Dart.**
 
-Content-aware `pubspec.yaml` classification — Flutter app vs reusable package · Dart server (Serverpod / Dart Frog / Shelf) / CLI / MCP — pure Dart stays Dart. The single-source engine faf-python-sdk and the MCPs compose, parity-tested across languages.
+Content-aware `pubspec.yaml` classification — Flutter app vs reusable package · Dart server (Serverpod / Dart Frog / Shelf) / CLI / MCP. The single-source engine faf-python-sdk and the MCPs compose, parity-tested across languages.
 
 ### Added
 - Content-aware Dart/Flutter detection: `faf auto` reads `pubspec.yaml` and classifies it — Flutter app vs reusable package, Dart server (Serverpod / Dart Frog / Shelf), Dart CLI, Dart MCP server, or library.
