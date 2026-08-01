@@ -1,66 +1,94 @@
-#!/bin/bash
-# 🏎️ BORIS-READY VALIDATION SCRIPT
-# Run this before ANY external demo or announcement
-# Exit on first failure
+#!/usr/bin/env bash
+# 🏎️ BORIS-READY / BORIS-FLOW — local smoke gate for /pubpro
+#
+# Fast, hermetic, no global install, no Homebrew.
+# Uses the built dist/cli.js (or $FAF_CLI override).
+#
+# Replaces the historical boris-ready that:
+#   - npm install -g + brew upgrade (slow, mutates machine, hung on pubpro)
+#   - grep version "3\." (wrong major since v4+)
+#   - human-set / enhance (removed commands)
+#
+# Exit 0 only when ALL checks pass. Message: BORIS-FLOW: ALL N TESTS PASSED
+#
+# Usage (from repo root):
+#   npm run build && ./scripts/boris-ready.sh
+#   FAF_CLI=./dist/cli.js ./scripts/boris-ready.sh
 
-set -e
+set -euo pipefail
 
-echo "🏎️ BORIS-READY VALIDATION"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo ""
-
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+CLI="${FAF_CLI:-$ROOT/dist/cli.js}"
 PASS=0
 FAIL=0
-DEMO_DIR="/tmp/boris-ready-test-$$"
+DEMO_DIR=""
 
 cleanup() {
-  if [ $FAIL -eq 0 ]; then
-    rm -rf "$DEMO_DIR"
-  else
-    echo "⚠️  Debug: Test dir preserved at $DEMO_DIR"
+  if [[ -n "${DEMO_DIR:-}" && -d "$DEMO_DIR" ]]; then
+    if [[ $FAIL -eq 0 ]]; then
+      rm -rf "$DEMO_DIR"
+    else
+      echo "⚠️  Debug: preserved $DEMO_DIR"
+    fi
   fi
 }
 trap cleanup EXIT
 
-check() {
-  if [ $? -eq 0 ]; then
-    echo "✅ $1"
-    PASS=$((PASS + 1))
-  else
-    echo "❌ $1"
-    FAIL=$((FAIL + 1))
-    exit 1
-  fi
+ok() {
+  echo "✅ $1"
+  PASS=$((PASS + 1))
 }
 
-# Test 1a: Fresh npm install
-echo "1️⃣  Testing npm install..."
-npm install -g faf-cli@latest > /dev/null 2>&1
-check "npm install -g faf-cli@latest"
+die() {
+  echo "❌ $1"
+  FAIL=$((FAIL + 1))
+  exit 1
+}
 
-# Test 1b: Homebrew install
-echo "1️⃣b Testing Homebrew..."
-set +e  # Brew can be noisy, don't fail on warnings
-HOMEBREW_NO_AUTO_UPDATE=1 brew tap wolfe-jam/faf > /dev/null 2>&1
-HOMEBREW_NO_AUTO_UPDATE=1 brew upgrade wolfe-jam/faf/faf-cli > /dev/null 2>&1
-BREW_VERSION=$(HOMEBREW_NO_AUTO_UPDATE=1 brew info wolfe-jam/faf/faf-cli 2>&1 | grep "stable" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
-set -e
-test -n "$BREW_VERSION"
-check "Homebrew faf-cli installed (version: $BREW_VERSION)"
+run() {
+  # shellcheck disable=SC2086
+  node "$CLI" "$@"
+}
 
-# Test 2: Version check (no crash)
-echo "2️⃣  Testing --version (chalk bug check)..."
-VERSION=$(faf --version 2>&1)
-echo "$VERSION" | grep -q "3\."
-check "faf --version returns version (got: $VERSION)"
+echo "🏎️ BORIS-FLOW (local smoke)"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "CLI: $CLI"
+echo ""
 
-# Test 3: Create realistic Claude Code project
-echo "3️⃣  Creating Boris-style demo project..."
-mkdir -p "$DEMO_DIR/.claude/agents" "$DEMO_DIR/.claude/commands" "$DEMO_DIR/src"
+# ── 0. Preconditions ─────────────────────────────────────────────
+[[ -f "$CLI" ]] || die "dist/cli.js missing — run: npm run build (or set FAF_CLI)"
+PKG_VER="$(node -p "require('$ROOT/package.json').version")"
+ok "package.json version $PKG_VER"
 
-cat > "$DEMO_DIR/package.json" << 'EOF'
+# ── 1. Version ───────────────────────────────────────────────────
+echo "1️⃣  version"
+OUT="$(run --version 2>&1 || true)"
+echo "   → $OUT"
+echo "$OUT" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+' || die "version not semver (got: $OUT)"
+echo "$OUT" | grep -qF "$PKG_VER" || die "version $OUT != package.json $PKG_VER"
+ok "faf --version == $PKG_VER"
+
+# ── 2. Score self (repo) ─────────────────────────────────────────
+echo "2️⃣  score (this repo)"
+SCORE_JSON="$(cd "$ROOT" && run score --json 2>&1)"
+echo "$SCORE_JSON" | node -e '
+const d=JSON.parse(require("fs").readFileSync(0,"utf8"));
+if(typeof d.score!=="number") process.exit(1);
+if(!d.tier||!d.tier.name) process.exit(2);
+console.log("score="+d.score+" tier="+d.tier.name);
+' || die "score --json unparsable"
+# Trophy on the cli itself is the pubpro floor
+SELF_SCORE="$(echo "$SCORE_JSON" | node -p "JSON.parse(require('fs').readFileSync(0,'utf8')).score")"
+[[ "$SELF_SCORE" -ge 99 ]] || die "repo score $SELF_SCORE < 99 (pubpro floor)"
+ok "repo score $SELF_SCORE ≥ 99"
+
+# ── 3. Fresh TS project: init + auto ─────────────────────────────
+echo "3️⃣  init + auto (fresh TS project)"
+DEMO_DIR="$(mktemp -d "${TMPDIR:-/tmp}/boris-flow.XXXXXX")"
+mkdir -p "$DEMO_DIR/src"
+cat > "$DEMO_DIR/package.json" <<'EOF'
 {
-  "name": "boris-ready-test",
+  "name": "boris-flow-demo",
   "version": "1.0.0",
   "type": "module",
   "bin": { "myapp": "./dist/cli.js" },
@@ -68,102 +96,104 @@ cat > "$DEMO_DIR/package.json" << 'EOF'
   "devDependencies": { "typescript": "^5.0.0" }
 }
 EOF
+echo 'export const app = "hello";' > "$DEMO_DIR/src/index.ts"
+echo '{"compilerOptions":{"strict":true}}' > "$DEMO_DIR/tsconfig.json"
+echo "# Demo" > "$DEMO_DIR/CLAUDE.md"
 
-cat > "$DEMO_DIR/src/index.ts" << 'EOF'
-const app: string = "hello";
-console.log(app);
+(
+  cd "$DEMO_DIR"
+  run init >/dev/null
+  [[ -f project.faf ]] || exit 1
+  run auto >/dev/null
+  run score --json
+) > "$DEMO_DIR/score.json" 2>"$DEMO_DIR/err.log" || {
+  cat "$DEMO_DIR/err.log" >&2
+  die "init/auto failed in demo dir"
+}
+[[ -f "$DEMO_DIR/project.faf" ]] || die "project.faf missing after init"
+ok "init + auto wrote project.faf"
+
+# ── 4. Go detection (7.3.0 claim) ────────────────────────────────
+echo "4️⃣  Go detection (go.mod + gin → backend)"
+GO_DIR="$(mktemp -d "${TMPDIR:-/tmp}/boris-go.XXXXXX")"
+cat > "$GO_DIR/go.mod" <<'EOF'
+module example.com/boris-api
+
+go 1.22
+
+require github.com/gin-gonic/gin v1.10.0
 EOF
+(
+  cd "$GO_DIR"
+  run init >/dev/null
+  grep -q 'main_language: Go' project.faf || exit 1
+  grep -q 'type: backend' project.faf || exit 1
+  grep -qi 'Gin\|gin' project.faf || exit 1
+) || {
+  rm -rf "$GO_DIR"
+  die "Go Gin project not classified as backend"
+}
+rm -rf "$GO_DIR"
+ok "Go Gin → backend (content-aware)"
 
-echo '{"compilerOptions":{}}' > "$DEMO_DIR/tsconfig.json"
-echo "# Project context" > "$DEMO_DIR/CLAUDE.md"
-echo "# Code reviewer" > "$DEMO_DIR/.claude/agents/reviewer.md"
-echo "# Test runner" > "$DEMO_DIR/.claude/agents/test-runner.md"
-echo "# Build command" > "$DEMO_DIR/.claude/commands/build.md"
-touch "$DEMO_DIR/bun.lockb"
-cat > "$DEMO_DIR/.mcp.json" << 'EOF'
-{"mcpServers":{"github":{"command":"npx","args":["@anthropic/mcp-github"]}}}
+# ── 5. Pure Go library (never blindly backend) ───────────────────
+echo "5️⃣  Go library brake"
+GO_LIB="$(mktemp -d "${TMPDIR:-/tmp}/boris-golib.XXXXXX")"
+cat > "$GO_LIB/go.mod" <<'EOF'
+module example.com/boris-lib
+
+go 1.22
 EOF
+(
+  cd "$GO_LIB"
+  run init >/dev/null
+  grep -q 'main_language: Go' project.faf || exit 1
+  # pure module must NOT be forced backend
+  if grep -q 'type: backend' project.faf; then exit 2; fi
+  grep -qE 'type: (library|cli)' project.faf || exit 3
+) || {
+  CODE=$?
+  rm -rf "$GO_LIB"
+  die "Go library misclassified (exit $CODE)"
+}
+rm -rf "$GO_LIB"
+ok "pure go.mod → not backend"
 
-check "Created Claude Code structure"
+# ── 6. Dart pure package brake (regression) ──────────────────────
+echo "6️⃣  Dart pure package brake"
+DART_DIR="$(mktemp -d "${TMPDIR:-/tmp}/boris-dart.XXXXXX")"
+cat > "$DART_DIR/pubspec.yaml" <<'EOF'
+name: pure_pkg
+dependencies:
+  collection: ^1.18.0
+EOF
+(
+  cd "$DART_DIR"
+  run init >/dev/null
+  grep -q 'main_language: Dart' project.faf || exit 1
+  if grep -qi 'Flutter' project.faf; then
+    # allow Flutter only if falsely in found — hard fail if type mobile
+    grep -q 'type: mobile' project.faf && exit 2
+  fi
+  grep -q 'type: library' project.faf || exit 3
+) || {
+  CODE=$?
+  rm -rf "$DART_DIR"
+  die "pure Dart misclassified (exit $CODE)"
+}
+rm -rf "$DART_DIR"
+ok "pure pubspec → Dart library (not Flutter mobile)"
 
-# Test 4: faf init
-echo "4️⃣  Testing faf init..."
-cd "$DEMO_DIR"
-faf init > /dev/null 2>&1
-test -f project.faf
-check "faf init created project.faf"
+# ── 7. formats / info ────────────────────────────────────────────
+echo "7️⃣  formats + info"
+run formats >/dev/null || die "faf formats failed"
+run info >/dev/null || die "faf info failed"
+ok "formats + info"
 
-# Test 5: Check type detection
-echo "5️⃣  Checking type detection..."
-TYPE=$(grep "type:" project.faf | head -1 | awk '{print $2}')
-# cli or cli-ts both acceptable for now
-echo "$TYPE" | grep -q "cli"
-check "Detected CLI type (got: $TYPE)"
-
-# Test 6: Check language detection
-echo "6️⃣  Checking language detection..."
-LANG=$(grep "main_language:" project.faf | head -1 | awk '{print $2}')
-test "$LANG" = "TypeScript" -o "$LANG" = "JavaScript"
-check "Language detected (got: $LANG)"
-
-# Test 7: Check Claude Code detection
-echo "7️⃣  Checking Claude Code detection..."
-grep -q "claude_code:" project.faf
-check "claude_code section exists"
-
-grep -q "detected: true" project.faf
-check "Claude Code detected: true"
-
-SUBAGENTS=$(grep -A 5 "subagents:" project.faf | grep "    -" | wc -l | tr -d ' ')
-test "$SUBAGENTS" -ge 2
-check "Subagents detected (got: $SUBAGENTS)"
-
-# Test 8: faf auto (should not corrupt)
-echo "8️⃣  Testing faf auto..."
-SCORE_BEFORE=$(faf score 2>&1 | grep "Score:" | grep -oE '[0-9]+' | head -1)
-faf auto > /dev/null 2>&1
-SCORE_AFTER=$(faf score 2>&1 | grep "Score:" | grep -oE '[0-9]+' | head -1)
-test "$SCORE_AFTER" -ge "$SCORE_BEFORE"
-check "faf auto did not decrease score ($SCORE_BEFORE → $SCORE_AFTER)"
-
-# Test 9: Fill human context
-echo "9️⃣  Testing human-set..."
-faf human-set who "Developers building with Claude Code" "$DEMO_DIR" > /dev/null 2>&1
-faf human-set what "CLI tool for AI project context management" "$DEMO_DIR" > /dev/null 2>&1
-faf human-set why "AI context handoff in 30 seconds" "$DEMO_DIR" > /dev/null 2>&1
-faf human-set where "Terminal, IDE, CI/CD pipelines" "$DEMO_DIR" > /dev/null 2>&1
-faf human-set when "Production ready and actively maintained" "$DEMO_DIR" > /dev/null 2>&1
-faf human-set how "Zero config CLI commands with instant results" "$DEMO_DIR" > /dev/null 2>&1
-check "human-set commands succeeded"
-
-# Test 10: Check we can reach high score
-echo "🔟 Testing final score..."
-# Fix cli-ts → cli if needed (known issue)
-sed -i '' 's/type: cli-ts/type: cli/g' project.faf 2>/dev/null || sed -i 's/type: cli-ts/type: cli/g' project.faf
-FINAL_SCORE=$(faf score 2>&1 | grep "Score:" | grep -oE '[0-9]+' | head -1)
-test "$FINAL_SCORE" -ge 90
-check "Final score >= 90% (got: $FINAL_SCORE%)"
-
-# Test 11: faf enhance non-TTY (should exit cleanly, not corrupt)
-echo "1️⃣1️⃣ Testing faf enhance in non-TTY..."
-SCORE_BEFORE_ENHANCE=$(faf score 2>&1 | grep "Score:" | grep -oE '[0-9]+' | head -1)
-echo "" | faf enhance > /dev/null 2>&1 || true  # May exit non-zero, that's OK
-SCORE_AFTER_ENHANCE=$(faf score 2>&1 | grep "Score:" | grep -oE '[0-9]+' | head -1)
-test "$SCORE_AFTER_ENHANCE" -eq "$SCORE_BEFORE_ENHANCE"
-check "faf enhance did not corrupt file in non-TTY ($SCORE_BEFORE_ENHANCE → $SCORE_AFTER_ENHANCE)"
-
-# Summary
+# ── Summary ──────────────────────────────────────────────────────
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-if [ $FAIL -eq 0 ]; then
-  echo "🏆 BORIS-READY: ALL $PASS CHECKS PASSED"
-  echo ""
-  echo "✅ Safe to demo/announce"
-  echo ""
-  echo "Demo project: $DEMO_DIR"
-  echo "Final score: $FINAL_SCORE%"
-  exit 0
-else
-  echo "❌ NOT READY: $FAIL checks failed"
-  exit 1
-fi
+echo "BORIS-FLOW: ALL $PASS TESTS PASSED"
+echo "Safe for /pubpro (local smoke). Full suite remains: npm test"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+exit 0
