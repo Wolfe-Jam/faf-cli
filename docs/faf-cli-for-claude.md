@@ -2,7 +2,7 @@
 
 **One command. Every agent in your session gets the same accurate, versioned context.**
 
-FAF-CLI (v7.1, "The AGENTS.md Edition") is the canonical tool for the [`.faf` format](https://faf.one): persistent, versioned, AI-readable project context. For Claude it does two things a hand-written file can't: it **bi-syncs `CLAUDE.md` with a single scored source of truth** (`project.faf`), and it exposes live FAF tools to Claude over MCP. Part of the FAF ecosystem — [100,000+ downloads](https://faf.one/blog/hundred-thousand).
+FAF-CLI (v7.1, "The AGENTS.md Edition") is the canonical tool for the [`.faf` format](https://faf.one): persistent, versioned, AI-readable project context. For Claude it does two things a hand-written file can't: it **bi-syncs `CLAUDE.md` with a single scored source of truth** (`project.faf`), and it exposes live FAF tools to Claude over MCP. Part of the FAF ecosystem — [live downloads](https://faf.one/downloads) (hard floor · 100,000+).
 
 ---
 
