@@ -10,6 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Dart/Flutter detection knowledge v2** (`src/detect/dart-detection.json`) — Aug 2026 refresh on top of the 6.13.0 Dart Edition. Same content-aware architecture (pubspec ≠ Flutter by default); knowledge adds high-signal deps the community actually uses:
+  - State: `riverpod_annotation`, `flutter_hooks`
+  - Routing: `beamer`, `routemaster`
+  - Servers: `shelf_router`, `jaspr`, `relic`
+  - MCP: `dart_mcpserver`
+  - Still single-source: edit the JSON, every composed surface inherits. No forked parsers.
+
 ## [7.2.0] - 2026-07-22 — The Memory Edition
 
 `.faf` is context. **`.fafm` is memory.** One CLI, both IANA-registered formats — INTEROP-aligned with [claude-fafm-sdk 1.0](https://pypi.org/project/claude-fafm-sdk/).
