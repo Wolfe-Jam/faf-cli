@@ -29,7 +29,7 @@ const COMMAND_SLOTS = new Set<string>([...COMMAND_VERBS.map(([k]) => k), 'cicd']
  * instruction surface (web chat, code review, VS Code, JetBrains, Visual Studio,
  * Eclipse, Xcode, Copilot CLI, coding agent), injected into EVERY request.
  *
- * Built to GitHub's own spec (PLANET-FAF/INTEL/copilot-instructions-spec-2026-06-25.md):
+ * Built to GitHub's published custom-instructions guidance:
  * short, self-contained, imperative INSTRUCTIONS — not a metadata dump. So we lead
  * with the goal as a prose overview, Title-Case labels (acronym-aware), surface the
  * build/run steps as copy-pasteable commands, keep it compact, and avoid every named

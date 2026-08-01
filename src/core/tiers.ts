@@ -13,7 +13,6 @@ import { bold, dim, fafCyan, fafCyanDeep, orange } from '../ui/colors.js';
  *   ♡ heart (empty — good luck)
  *
  * All three 100% glyphs mean the same score: ✪ work · 🏆 social · Trophy Mark (PNG) visual.
- * See PLANET-FAF/memory/trophy-three-glyphs-one-meaning.md
  */
 export const TIERS: TierInfo[] = [
   { name: 'TROPHY', indicator: `${orange('✪')} ${orange('TROPHY')}`, threshold: 100 },

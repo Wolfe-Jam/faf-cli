@@ -18,6 +18,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Library** — pure module (no server/CLI/MCP signal)
   - Single-source JSON; scanner + Turbo-Cat compose. Parity fixtures + WJTTC Go suite.
 
+### Changed
+- **Work-surface Trophy glyph** — 100% renders **✪** (Proof Seal) on CLI · docs · receipts. Social still uses 🏆; meaning unchanged (Trophy = 100%).
+
+### Notes / non-claims (this cut)
+- **Claim:** content-aware Go project-type classification from `go.mod` (+ light layout), proven by `tests/detect/go-parity-fixtures.json` + WJTTC Go suite.
+- **Do NOT claim:** full Go SDK rewrite · byte-identical parity with a Go implementation yet (fixtures are TS Truth; SDK vendoring is later) · that every Go module path is known · that `package main` alone proves production service shape.
+- **Do NOT claim:** ✪ changes scoring math — glyph only on work surfaces.
+
+### Verification (claim inventory)
+| Claim | Evidence command |
+|-------|------------------|
+| Go classification (16 fixtures) | `bun test tests/detect/go-parity.test.ts` |
+| Go WJTTC brake/engine/aero | `bun test tests/detect/WJTTC-go.test.ts` |
+| Trophy work glyph ✪ | `bun test tests/core/tiers.test.ts` |
+| project.html Trophy glyph | `bun test tests/interop/projecthtml.test.ts` |
+
 ## [7.2.1] - 2026-08-01 — The Memory Edition
 
 **Dart/Flutter knowledge v2** — community receipt on top of the 6.13.0 Dart Edition. Same architecture; fresher detection knowledge.

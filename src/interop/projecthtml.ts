@@ -18,9 +18,9 @@ import { FAF_HEX } from '../ui/colors.js';
 
 // Tier glyph + accent. Glyphs = canonical tier symbols (core/tiers.ts).
 // BRAND colors DERIVE from ui/colors.ts FAF_HEX (single source — change there,
-// propagates to CLI + here). STATUS colors are canon-sourced from
-// PLANET-FAF/website-docs/FAF-BRAND-STYLE-GUIDE.md (--faf-warning/--faf-error).
-// Two registers: brand (orange Trophy/Gold · cyan Silver · deep-cyan Bronze)
+// propagates to CLI + here). STATUS: warning/error hex for HTML (CLI has no
+// status band colors). Two registers: brand (orange Trophy/Gold · cyan Silver ·
+// deep-cyan Bronze)
 // + status (HTML affords color the CLI can't). Green #00BF63 reserved for the
 // GO/✅ all-pass state, never a tier band. Neutral = theme grey, not brand.
 const ORANGE = FAF_HEX.orange; // brand — derived
