@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v7.3.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v7.4.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -9,6 +9,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.4.0] - 2026-08-01 — The C# Edition
+
+**Content-aware C#** — `.csproj alone ≠ type`. Sdk-first classification: MCP · ASP.NET Core · Worker · CLI · class library. Classlibs stay classlibs.
+
+### Added
+- **C# /.NET detection** (`src/detect/csharp.ts` + `src/detect/csharp-detection.json`) — content-aware `.csproj` classification:
+  - **Sdk first** — `Microsoft.NET.Sdk.Web` → ASP.NET Core host · `.Worker` · Blazor WASM · MSTest · Aspire
+  - **MCP** — `ModelContextProtocol` / `.AspNetCore` / `.Core` (Tier-1 official SDK)
+  - **CLI** — System.CommandLine, Spectre.Console, McMaster; bare `OutputType=Exe` → console/cli
+  - **Library** — base Sdk, no host signals (never forced to web)
+  - **MAUI** → mobile; FrameworkReference AspNetCore on library stays web-lib
+  - Scanner + Turbo-Cat compose. Parity fixtures + WJTTC C# suite.
+
+### Notes / non-claims
+- **Claim:** content-aware C# project-type classification from root-level `.csproj` (Sdk + props + PackageReference + FrameworkReference), proven by `tests/detect/csharp-parity-fixtures.json` + WJTTC C# suite.
+- **Do NOT claim:** every `.csproj` is Web API by default in other tools · full solution-graph roll-up (multi-project pick is priority-based at root only) · every NuGet path known · byte-identical C# SDK port yet.
+- **Kill line (Doc Gate):** `.csproj alone ≠ type`.
+
+### Verification (claim inventory)
+| Claim | Evidence command |
+|-------|------------------|
+| C# classification (14 fixtures) | `bun test tests/detect/csharp-parity.test.ts` |
+| C# WJTTC brake/engine/aero | `bun test tests/detect/WJTTC-csharp.test.ts` |
 
 ## [7.3.0] - 2026-08-01 — The Go Edition
 

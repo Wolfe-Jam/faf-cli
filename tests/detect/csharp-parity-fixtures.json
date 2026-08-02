@@ -1,0 +1,203 @@
+{
+  "version": 1,
+  "_doc": "SHARED parity fixtures for C# detection (content-aware .csproj). faf-cli (tests/detect/csharp-parity.test.ts) is the Truth. Kill line: .csproj alone ≠ type.",
+  "fixtures": [
+    {
+      "name": "cs-library-minimal",
+      "files": {
+        "Acme.Lib.csproj": "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <TargetFramework>net9.0</TargetFramework>\n  </PropertyGroup>\n</Project>\n"
+      },
+      "expected": {
+        "appType": "library",
+        "projectName": "Acme.Lib",
+        "targetFramework": "net9.0",
+        "sdk": "Microsoft.NET.Sdk",
+        "framework": "",
+        "found": "Acme.Lib.csproj (C# class library)"
+      }
+    },
+    {
+      "name": "cs-backend-web-sdk",
+      "files": {
+        "Acme.Api.csproj": "<Project Sdk=\"Microsoft.NET.Sdk.Web\">\n  <PropertyGroup>\n    <TargetFramework>net9.0</TargetFramework>\n  </PropertyGroup>\n</Project>\n"
+      },
+      "expected": {
+        "appType": "backend",
+        "projectName": "Acme.Api",
+        "targetFramework": "net9.0",
+        "sdk": "Microsoft.NET.Sdk.Web",
+        "framework": "ASP.NET Core",
+        "found": "Acme.Api.csproj + Sdk=Microsoft.NET.Sdk.Web (ASP.NET Core)"
+      }
+    },
+    {
+      "name": "cs-backend-worker",
+      "files": {
+        "Acme.Worker.csproj": "<Project Sdk=\"Microsoft.NET.Sdk.Worker\">\n  <PropertyGroup>\n    <TargetFramework>net9.0</TargetFramework>\n  </PropertyGroup>\n  <ItemGroup>\n    <PackageReference Include=\"Microsoft.Extensions.Hosting\" Version=\"9.0.0\" />\n  </ItemGroup>\n</Project>\n"
+      },
+      "expected": {
+        "appType": "backend",
+        "projectName": "Acme.Worker",
+        "targetFramework": "net9.0",
+        "sdk": "Microsoft.NET.Sdk.Worker",
+        "framework": "Worker",
+        "found": "Acme.Worker.csproj + Sdk=Microsoft.NET.Sdk.Worker (Worker)"
+      }
+    },
+    {
+      "name": "cs-cli-system-commandline",
+      "files": {
+        "Acme.Tool.csproj": "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <OutputType>Exe</OutputType>\n    <TargetFramework>net9.0</TargetFramework>\n  </PropertyGroup>\n  <ItemGroup>\n    <PackageReference Include=\"System.CommandLine\" Version=\"2.0.0\" />\n  </ItemGroup>\n</Project>\n"
+      },
+      "expected": {
+        "appType": "cli",
+        "projectName": "Acme.Tool",
+        "targetFramework": "net9.0",
+        "sdk": "Microsoft.NET.Sdk",
+        "framework": "System.CommandLine",
+        "found": "Acme.Tool.csproj + system.commandline (C# CLI)"
+      }
+    },
+    {
+      "name": "cs-cli-console-exe",
+      "files": {
+        "Acme.Console.csproj": "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <OutputType>Exe</OutputType>\n    <TargetFramework>net9.0</TargetFramework>\n  </PropertyGroup>\n</Project>\n"
+      },
+      "expected": {
+        "appType": "cli",
+        "projectName": "Acme.Console",
+        "targetFramework": "net9.0",
+        "sdk": "Microsoft.NET.Sdk",
+        "framework": "",
+        "found": "Acme.Console.csproj + OutputType=Exe (C# console)"
+      }
+    },
+    {
+      "name": "cs-mcp-official",
+      "files": {
+        "Acme.Mcp.csproj": "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <OutputType>Exe</OutputType>\n    <TargetFramework>net9.0</TargetFramework>\n  </PropertyGroup>\n  <ItemGroup>\n    <PackageReference Include=\"ModelContextProtocol\" Version=\"2.0.0\" />\n  </ItemGroup>\n</Project>\n"
+      },
+      "expected": {
+        "appType": "mcp",
+        "projectName": "Acme.Mcp",
+        "targetFramework": "net9.0",
+        "sdk": "Microsoft.NET.Sdk",
+        "framework": "MCP",
+        "found": "Acme.Mcp.csproj + modelcontextprotocol (C# MCP server)"
+      }
+    },
+    {
+      "name": "cs-mcp-beats-web",
+      "files": {
+        "Acme.McpHttp.csproj": "<Project Sdk=\"Microsoft.NET.Sdk.Web\">\n  <PropertyGroup>\n    <TargetFramework>net9.0</TargetFramework>\n  </PropertyGroup>\n  <ItemGroup>\n    <PackageReference Include=\"ModelContextProtocol.AspNetCore\" Version=\"2.0.0\" />\n  </ItemGroup>\n</Project>\n"
+      },
+      "expected": {
+        "appType": "mcp",
+        "projectName": "Acme.McpHttp",
+        "targetFramework": "net9.0",
+        "sdk": "Microsoft.NET.Sdk.Web",
+        "framework": "MCP",
+        "found": "Acme.McpHttp.csproj + modelcontextprotocol.aspnetcore (C# MCP server)"
+      }
+    },
+    {
+      "name": "cs-grpc-server",
+      "files": {
+        "Acme.Grpc.csproj": "<Project Sdk=\"Microsoft.NET.Sdk.Web\">\n  <PropertyGroup>\n    <TargetFramework>net9.0</TargetFramework>\n  </PropertyGroup>\n  <ItemGroup>\n    <PackageReference Include=\"Grpc.AspNetCore\" Version=\"2.60.0\" />\n  </ItemGroup>\n</Project>\n"
+      },
+      "expected": {
+        "appType": "backend",
+        "projectName": "Acme.Grpc",
+        "targetFramework": "net9.0",
+        "sdk": "Microsoft.NET.Sdk.Web",
+        "framework": "gRPC",
+        "found": "Acme.Grpc.csproj + Sdk=Microsoft.NET.Sdk.Web + Grpc.AspNetCore (ASP.NET Core)"
+      }
+    },
+    {
+      "name": "cs-web-lib-frameworkref",
+      "files": {
+        "Acme.WebLib.csproj": "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <TargetFramework>net9.0</TargetFramework>\n  </PropertyGroup>\n  <ItemGroup>\n    <FrameworkReference Include=\"Microsoft.AspNetCore.App\" />\n  </ItemGroup>\n</Project>\n"
+      },
+      "expected": {
+        "appType": "library",
+        "projectName": "Acme.WebLib",
+        "targetFramework": "net9.0",
+        "sdk": "Microsoft.NET.Sdk",
+        "framework": "ASP.NET Core",
+        "found": "Acme.WebLib.csproj + FrameworkReference Microsoft.AspNetCore.App (web library)"
+      }
+    },
+    {
+      "name": "cs-test-xunit",
+      "files": {
+        "Acme.Tests.csproj": "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <TargetFramework>net9.0</TargetFramework>\n    <IsTestProject>true</IsTestProject>\n  </PropertyGroup>\n  <ItemGroup>\n    <PackageReference Include=\"Microsoft.NET.Test.Sdk\" Version=\"17.11.0\" />\n    <PackageReference Include=\"xunit\" Version=\"2.9.0\" />\n  </ItemGroup>\n</Project>\n"
+      },
+      "expected": {
+        "appType": "library",
+        "projectName": "Acme.Tests",
+        "targetFramework": "net9.0",
+        "sdk": "Microsoft.NET.Sdk",
+        "framework": "VSTest",
+        "found": "Acme.Tests.csproj + test (VSTest)"
+      }
+    },
+    {
+      "name": "cs-spectre-cli",
+      "files": {
+        "Acme.Spectre.csproj": "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <OutputType>Exe</OutputType>\n    <TargetFramework>net9.0</TargetFramework>\n  </PropertyGroup>\n  <ItemGroup>\n    <PackageReference Include=\"Spectre.Console.Cli\" Version=\"0.49.0\" />\n  </ItemGroup>\n</Project>\n"
+      },
+      "expected": {
+        "appType": "cli",
+        "projectName": "Acme.Spectre",
+        "targetFramework": "net9.0",
+        "sdk": "Microsoft.NET.Sdk",
+        "framework": "Spectre.Console",
+        "found": "Acme.Spectre.csproj + spectre.console.cli (C# CLI)"
+      }
+    },
+    {
+      "name": "cs-maui",
+      "files": {
+        "Acme.App.csproj": "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <TargetFramework>net9.0-android</TargetFramework>\n    <UseMaui>true</UseMaui>\n    <OutputType>Exe</OutputType>\n  </PropertyGroup>\n</Project>\n"
+      },
+      "expected": {
+        "appType": "mobile",
+        "projectName": "Acme.App",
+        "targetFramework": "net9.0-android",
+        "sdk": "Microsoft.NET.Sdk",
+        "framework": "MAUI",
+        "found": "Acme.App.csproj + UseMaui (MAUI)"
+      }
+    },
+    {
+      "name": "cs-blazor-wasm",
+      "files": {
+        "Acme.Client.csproj": "<Project Sdk=\"Microsoft.NET.Sdk.BlazorWebAssembly\">\n  <PropertyGroup>\n    <TargetFramework>net9.0</TargetFramework>\n  </PropertyGroup>\n</Project>\n"
+      },
+      "expected": {
+        "appType": "backend",
+        "projectName": "Acme.Client",
+        "targetFramework": "net9.0",
+        "sdk": "Microsoft.NET.Sdk.BlazorWebAssembly",
+        "framework": "Blazor WebAssembly",
+        "found": "Acme.Client.csproj + Sdk=Microsoft.NET.Sdk.BlazorWebAssembly (Blazor WASM)"
+      }
+    },
+    {
+      "name": "cs-multi-root-mcp-wins",
+      "files": {
+        "Acme.Lib.csproj": "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <TargetFramework>net9.0</TargetFramework>\n  </PropertyGroup>\n</Project>\n",
+        "Acme.Mcp.csproj": "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <OutputType>Exe</OutputType>\n    <TargetFramework>net9.0</TargetFramework>\n  </PropertyGroup>\n  <ItemGroup>\n    <PackageReference Include=\"ModelContextProtocol\" Version=\"2.0.0\" />\n  </ItemGroup>\n</Project>\n"
+      },
+      "expected": {
+        "appType": "mcp",
+        "projectName": "Acme.Mcp",
+        "targetFramework": "net9.0",
+        "sdk": "Microsoft.NET.Sdk",
+        "framework": "MCP",
+        "found": "Acme.Mcp.csproj + modelcontextprotocol (C# MCP server)"
+      }
+    }
+  ]
+}

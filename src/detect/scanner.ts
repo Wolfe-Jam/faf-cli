@@ -4,6 +4,7 @@ import type { DetectedFramework, Signal } from '../core/types.js';
 import { FRAMEWORKS } from './frameworks.js';
 import { detectDartProject } from './dart.js';
 import { detectGoProject } from './go.js';
+import { detectCsharpProject, listRootCsprojs } from './csharp.js';
 
 interface PackageJson {
   name?: string;
@@ -343,6 +344,7 @@ export function detectLanguage(dir: string): string {
   // Check for common language indicators
   if (existsSync(join(dir, 'Cargo.toml'))) {return 'Rust';}
   if (existsSync(join(dir, 'go.mod'))) {return 'Go';}
+  if (listRootCsprojs(dir).length > 0) {return 'C#';}
   if (existsSync(join(dir, 'pyproject.toml')) || existsSync(join(dir, 'setup.py'))) {return 'Python';}
   if (existsSync(join(dir, 'Gemfile'))) {return 'Ruby';}
   if (existsSync(join(dir, 'pom.xml')) || existsSync(join(dir, 'build.gradle'))) {return 'Java';}
@@ -443,6 +445,14 @@ export function detectProjectTypeWithRationale(dir: string): ProjectTypeDetectio
   if (go) {
     found.push(go.found);
     return { type: go.appType, found };
+  }
+
+  // ─── 7a2. csharp — content-aware .csproj classification.
+  //        .csproj alone ≠ type: Sdk first · MCP · web/worker · CLI · library. ─
+  const csharp = detectCsharpProject(dir);
+  if (csharp) {
+    found.push(csharp.found);
+    return { type: csharp.appType, found };
   }
 
   // ─── 7b. mobile — JS mobile platform deps / native dirs ─────────────────
@@ -593,6 +603,7 @@ export function detectRuntime(dir: string): string {
   if (readPackageJson(dir)) {return 'Node.js';}
   if (existsSync(join(dir, 'Cargo.toml'))) {return 'Rust';}
   if (existsSync(join(dir, 'go.mod'))) {return 'Go';}
+  if (listRootCsprojs(dir).length > 0) {return '.NET';}
   if (existsSync(join(dir, 'pubspec.yaml'))) {return 'Dart';}
   return 'Unknown';
 }
@@ -601,6 +612,7 @@ export function detectRuntime(dir: string): string {
 export function detectPackageManager(dir: string): string {
   if (existsSync(join(dir, 'pubspec.yaml'))) {return 'pub';}
   if (existsSync(join(dir, 'go.mod'))) {return 'go modules';}
+  if (listRootCsprojs(dir).length > 0) {return 'NuGet';}
   if (existsSync(join(dir, 'bun.lockb')) || existsSync(join(dir, 'bun.lock'))) {return 'bun';}
   if (existsSync(join(dir, 'pnpm-lock.yaml'))) {return 'pnpm';}
   if (existsSync(join(dir, 'yarn.lock'))) {return 'yarn';}

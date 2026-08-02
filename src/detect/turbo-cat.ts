@@ -16,6 +16,7 @@ import { join, dirname, extname, resolve } from 'path';
 import { KNOWLEDGE_BASE } from './turbo-cat-knowledge.js';
 import { detectDartProject } from './dart.js';
 import { detectGoProject } from './go.js';
+import { detectCsharpProject } from './csharp.js';
 
 const IGNORE = new Set([
   'node_modules', '.git', 'dist', 'build', 'venv', '.venv', '__pycache__',
@@ -143,6 +144,34 @@ function scanConfigFiles(projectDir: string): FoundFormat[] {
       break;
     }
     for (const f of files) {
+      // Content-aware: any *.csproj (names vary — not in KNOWLEDGE_BASE by basename).
+      // .csproj alone ≠ type: Sdk + packages via detectCsharpProject.
+      if (f.toLowerCase().endsWith('.csproj')) {
+        const cp = detectCsharpProject(cur);
+        if (cp) {
+          const slots: Record<string, string> = {
+            mainLanguage: 'C#',
+            packageManager: 'NuGet',
+            buildTool: 'dotnet',
+          };
+          if (cp.appType === 'backend' && cp.framework) {
+            slots.backend = cp.framework;
+          } else if (cp.appType === 'cli' && cp.framework) {
+            slots.framework = cp.framework;
+          } else if (cp.appType === 'mcp') {
+            slots.apiType = 'MCP';
+          } else if (cp.appType === 'mobile' && cp.framework) {
+            slots.framework = cp.framework;
+          }
+          if (cp.targetFramework) {
+            slots.runtime = cp.targetFramework;
+          }
+          const frameworks = cp.framework ? [cp.framework, 'C#', '.NET'] : ['C#', '.NET'];
+          found.push({ slots, priority: 36, frameworks, fileName: f });
+        }
+        continue;
+      }
+
       const k = KNOWLEDGE_BASE[f];
       if (!k) {continue;}
       // Sourced-only gate: manifest.json only asserts the chrome stack when

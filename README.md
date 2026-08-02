@@ -130,11 +130,11 @@ faf memory etch "a durable fact" --id my-fact
 faf memory show
 ```
 
-### What's New in v7.3.0 — The Go Edition
+### What's New in v7.4.0 — The C# Edition
 
-- **Content-aware Go** — `go.mod` alone is never “backend.” FAF classifies MCP · Gin/Echo/Fiber/Chi · Cobra/cmd CLI · pure library.
-- **Same pattern as Dart** — one knowledge file, one classifier; composed across surfaces.
-- **Work-surface Trophy glyph ✪** — 100% Proof Seal on CLI/docs (social still 🏆).
+- **Content-aware C#** — `.csproj alone ≠ type.` Sdk-first: ASP.NET Core · Worker · MCP · CLI · class library. Classlibs stay classlibs.
+- **MCP first-class** — `ModelContextProtocol*` on NuGet (official C# SDK).
+- **Go (7.3.0)** — `go.mod alone ≠ backend` still ships.
 
 ### Dart/Flutter — knowledge v2 in 7.2.1
 

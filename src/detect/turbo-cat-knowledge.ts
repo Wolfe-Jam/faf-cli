@@ -187,6 +187,20 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
     priority: 36,
     intelligence: 'ultra-high'
   },
+
+  // Note: real projects use Named.csproj — turbo-cat.ts handles any *.csproj
+  // via content-aware detectCsharpProject. This key is documentation-only
+  // fallback if a literal file named "*.csproj" ever appears (it won't).
+  '*.csproj': {
+    frameworks: ['C#', '.NET'],
+    slots: {
+      packageManager: 'NuGet',
+      mainLanguage: 'C#',
+      buildTool: 'dotnet'
+    },
+    priority: 36,
+    intelligence: 'ultra-high'
+  },
   
   'pubspec.yaml': {
     // Filename-only FALLBACK: assert Dart + pub, NOT Flutter — a pubspec backs

@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "_doc": "SINGLE SOURCE of C# /.NET detection KNOWLEDGE (Truth-is-faf-cli). faf-cli imports this; SDKs/MCPs compose it. Bolster C# by editing THIS file. Logic stays in csharp.ts. Content-aware: .csproj alone ≠ type — Sdk first, then props/packages. Kill line: .csproj alone ≠ type. 2026-08-01 initial (intel brief csharp-detection-2026-08-01).",
+  "mcpPackages": [
+    "ModelContextProtocol",
+    "ModelContextProtocol.AspNetCore",
+    "ModelContextProtocol.Core",
+    "ModelContextProtocol.Extensions.Tasks",
+    "ModelContextProtocol.Extensions.Apps"
+  ],
+  "cliPackages": [
+    ["System.CommandLine", "System.CommandLine"],
+    ["Spectre.Console.Cli", "Spectre.Console"],
+    ["Spectre.Console", "Spectre.Console"],
+    ["McMaster.Extensions.CommandLineUtils", "McMaster"]
+  ],
+  "testPackages": [
+    ["Microsoft.NET.Test.Sdk", "VSTest"],
+    ["xunit.v3", "xUnit"],
+    ["xunit", "xUnit"],
+    ["NUnit", "NUnit"],
+    ["MSTest.TestFramework", "MSTest"],
+    ["MSTest", "MSTest"]
+  ],
+  "grpcServerPackages": [
+    "Grpc.AspNetCore"
+  ],
+  "specializedSdks": [
+    ["Microsoft.NET.Sdk.Web", "web", "ASP.NET Core"],
+    ["Microsoft.NET.Sdk.Worker", "worker", "Worker"],
+    ["Microsoft.NET.Sdk.BlazorWebAssembly", "blazor-wasm", "Blazor WebAssembly"],
+    ["Microsoft.NET.Sdk.Razor", "razor-lib", "Razor Class Library"],
+    ["MSTest.Sdk", "test", "MSTest"],
+    ["Aspire.AppHost.Sdk", "aspire", "Aspire AppHost"]
+  ],
+  "baseSdk": "Microsoft.NET.Sdk"
+}
