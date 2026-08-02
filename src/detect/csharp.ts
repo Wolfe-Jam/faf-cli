@@ -11,8 +11,6 @@ import spec from './csharp-detection.json';
  *
  * Same composition pattern as go.ts / dart.ts: knowledge in csharp-detection.json,
  * logic here. Turbo-Cat + scanner both call detectCsharpProject so they agree.
- *
- * Intel: ~/PLANET-FAF/INTEL/csharp-detection-2026-08-01.md
  */
 
 /** FAF project types we emit (aligned with Go + mobile for MAUI). */

@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Notes / non-claims
 - **Claim:** content-aware C# project-type classification from root-level `.csproj` (Sdk + props + PackageReference + FrameworkReference), proven by `tests/detect/csharp-parity-fixtures.json` + WJTTC C# suite.
 - **Do NOT claim:** every `.csproj` is Web API by default in other tools · full solution-graph roll-up (multi-project pick is priority-based at root only) · every NuGet path known · byte-identical C# SDK port yet.
-- **Kill line (Doc Gate):** `.csproj alone ≠ type`.
+- **Kill line:** `.csproj alone ≠ type`.
 
 ### Verification (claim inventory)
 | Claim | Evidence command |

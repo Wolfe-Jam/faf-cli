@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "_doc": "SINGLE SOURCE of C# /.NET detection KNOWLEDGE (Truth-is-faf-cli). faf-cli imports this; SDKs/MCPs compose it. Bolster C# by editing THIS file. Logic stays in csharp.ts. Content-aware: .csproj alone ≠ type — Sdk first, then props/packages. Kill line: .csproj alone ≠ type. 2026-08-01 initial (intel brief csharp-detection-2026-08-01).",
+  "_doc": "SINGLE SOURCE of C# /.NET detection KNOWLEDGE (Truth-is-faf-cli). faf-cli imports this; SDKs/MCPs compose it. Bolster C# by editing THIS file. Logic stays in csharp.ts. Content-aware: .csproj alone ≠ type — Sdk first, then props/packages. Kill line: .csproj alone ≠ type. 2026-08-01 initial.",
   "mcpPackages": [
     "ModelContextProtocol",
     "ModelContextProtocol.AspNetCore",
