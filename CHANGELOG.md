@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v7.5.1 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v7.6.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -9,6 +9,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.6.0] - 2026-08-03 — The Ruby Edition
+
+**Content-aware Ruby** — `Gemfile alone ≠ Rails`. Static gem parse + layout: MCP · Rails · Sinatra/Roda/Grape/Hanami · CLI · library. Pure gems stay pure gems.
+
+### Added
+- **Ruby detection** (`src/detect/ruby.ts` + `src/detect/ruby-detection.json`) — content-aware Gemfile / lock / gemspec classification:
+  - **MCP** — gem `mcp` · fast-mcp · rails-mcp-server · related clients (Tier-1 knowledge)
+  - **Backend** — Rails (`gem rails` and/or classic layout) · Sinatra · Roda · Grape · Hanami
+  - **CLI** — Thor · GLI · Commander · gemspec executables
+  - **Library** — bare Gemfile / pure gemspec (never forced to Rails)
+  - Scanner + Turbo-Cat compose. Parity fixtures (12) + WJTTC Ruby suite
+
+### Fixed
+- **Turbo-Cat** — no longer stamps `Rails` from `Gemfile` filename alone
+- **FRAMEWORKS** — Rails requires content/layout signals (not bare Gemfile)
+
+### Notes / non-claims
+- **Claim:** content-aware Ruby project-type classification from static Gemfile/lock/gemspec + light layout, proven by `tests/detect/ruby-parity-fixtures.json` + WJTTC Ruby suite.
+- **Do NOT claim:** execute Gemfile (Ruby DSL) · every gem path known · full monorepo/engine graph · byte-identical Ruby SDK port yet.
+- **Kill line:** `Gemfile alone ≠ Rails`.
+
+### Verification (claim inventory)
+| Claim | Evidence command |
+|-------|------------------|
+| Ruby classification (12 fixtures) | `bun test tests/detect/ruby-parity.test.ts` |
+| Ruby WJTTC brake/engine/aero | `bun test tests/detect/WJTTC-ruby.test.ts` |
 
 ## [7.5.1] - 2026-08-03 — The JVM Edition
 

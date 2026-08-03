@@ -130,13 +130,12 @@ faf memory etch "a durable fact" --id my-fact
 faf memory show
 ```
 
-### What's New in v7.5.1 — The JVM Edition (patch)
+### What's New in v7.6.0 — The Ruby Edition
 
-**Content-aware JVM** — `pom` / `gradle` alone ≠ type. **Also:** bare build files ≠ Spring Boot on `tech_stack` (7.5.1 closes the stranger-smoke gap).
+**Content-aware Ruby** — `Gemfile alone ≠ Rails`. Pure gems stay pure gems.
 
-- **7.5.1** — Spring Boot only when the file *says* Boot (`spring-boot` / `springframework.boot` in body).
-- **7.5.0** — plugins · parents · catalogs · multi-module: Spring · Quarkus · MCP · CLI · library · Android / KMP facets.
-- **Still shipping** — C# (7.4.0) `.csproj alone ≠ type` · Go (7.3.0) `go.mod alone ≠ backend`.
+- **Gems + layout** — Rails · Sinatra · Roda · Grape · Hanami · MCP · CLI · library (static parse — does not execute Gemfile).
+- **Still shipping** — JVM (7.5.x) `pom`/`gradle` alone ≠ type · C# (7.4.0) `.csproj alone ≠ type` · Go (7.3.0) `go.mod alone ≠ backend`.
 
 ### Dart/Flutter — knowledge v2 in 7.2.1
 
