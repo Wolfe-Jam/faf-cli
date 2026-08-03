@@ -217,8 +217,11 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   },
   
   'pom.xml': {
-    frameworks: ['Java', 'Spring', 'Maven'],
-    slots: { 
+    // Filename-only FALLBACK: assert Java + Maven, NOT Spring —
+    // a pom backs libraries, Boot apps, aggregators/BOMs, MCP servers.
+    // turbo-cat.ts reads CONTENT (detectJvmProject) for appType/framework.
+    frameworks: ['Java'],
+    slots: {
       packageManager: 'maven',
       mainLanguage: 'Java',
       buildTool: 'maven'
@@ -226,16 +229,40 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
     priority: 35,
     intelligence: 'ultra-high'
   },
-  
+
   'build.gradle': {
-    frameworks: ['Java', 'Kotlin', 'Spring', 'Gradle'],
-    slots: { 
+    // Filename-only FALLBACK: assert JVM + Gradle, NOT Spring/Android.
+    // Content-aware detectJvmProject fills Spring / Android / KMP / MCP.
+    frameworks: ['Java', 'Gradle'],
+    slots: {
       packageManager: 'gradle',
-      mainLanguage: 'Java/Kotlin',
+      mainLanguage: 'Java',
       buildTool: 'gradle'
     },
     priority: 35,
     intelligence: 'ultra-high'
+  },
+
+  'settings.gradle': {
+    frameworks: ['Java', 'Gradle'],
+    slots: {
+      packageManager: 'gradle',
+      mainLanguage: 'Java',
+      buildTool: 'gradle'
+    },
+    priority: 34,
+    intelligence: 'high'
+  },
+
+  'settings.gradle.kts': {
+    frameworks: ['Kotlin', 'Gradle'],
+    slots: {
+      packageManager: 'gradle',
+      mainLanguage: 'Kotlin',
+      buildTool: 'gradle'
+    },
+    priority: 34,
+    intelligence: 'high'
   },
 
   // ============================================
@@ -1631,15 +1658,15 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   },
 
   'build.gradle.kts': {
-    frameworks: ['Gradle Kotlin DSL', 'Android', 'Kotlin'],
+    // Filename-only FALLBACK: Kotlin DSL ≠ Android. Content-aware detectJvmProject.
+    frameworks: ['Kotlin', 'Gradle'],
     slots: {
-      packageManager: 'Gradle',
+      packageManager: 'gradle',
       mainLanguage: 'Kotlin',
-      buildTool: 'Gradle Kotlin DSL',
-      framework: 'Android'
+      buildTool: 'gradle'
     },
-    priority: 30,
-    intelligence: 'high'
+    priority: 35,
+    intelligence: 'ultra-high'
   },
 
   // ============================================

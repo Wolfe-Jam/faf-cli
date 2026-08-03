@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "_doc": "SINGLE SOURCE of JVM (Java/Kotlin) detection KNOWLEDGE (Truth-is-faf-cli). faf-cli imports this; SDKs/MCPs compose it. Bolster JVM by editing THIS file. Logic stays in jvm.ts. Kill line: pom / gradle alone ≠ type. Content-aware: plugins · parents · packaging · deps · version catalogs. One brand JVM — Android/KMP are facets, not a second Kotlin Edition. 2026-08-03 initial (post-intel).",
+  "mcpArtifacts": [
+    "io.modelcontextprotocol.sdk:mcp",
+    "io.modelcontextprotocol.sdk:mcp-core",
+    "io.modelcontextprotocol.sdk:mcp-spring-webflux",
+    "io.modelcontextprotocol.sdk:mcp-spring-webmvc",
+    "org.springframework.ai:spring-ai-starter-mcp-server",
+    "org.springframework.ai:spring-ai-starter-mcp-server-webmvc",
+    "org.springframework.ai:spring-ai-starter-mcp-server-webflux",
+    "org.springframework.ai:spring-ai-starter-mcp-client",
+    "org.springframework.ai:spring-ai-mcp-server-spring-boot-starter",
+    "org.springframework.ai:spring-ai-mcp-client-spring-boot-starter",
+    "io.modelcontextprotocol:kotlin-sdk",
+    "io.modelcontextprotocol.kotlin:mcp"
+  ],
+  "webPlugins": [
+    ["org.springframework.boot", "Spring Boot"],
+    ["io.quarkus", "Quarkus"],
+    ["io.quarkus.gradle.plugin", "Quarkus"],
+    ["io.micronaut.application", "Micronaut"],
+    ["io.micronaut.library", "Micronaut"]
+  ],
+  "webParents": [
+    ["org.springframework.boot:spring-boot-starter-parent", "Spring Boot"],
+    ["io.quarkus.platform:quarkus-bom", "Quarkus"],
+    ["io.micronaut.platform:micronaut-parent", "Micronaut"]
+  ],
+  "webArtifacts": [
+    ["org.springframework.boot:spring-boot-starter-web", "Spring Boot"],
+    ["org.springframework.boot:spring-boot-starter-webflux", "Spring Boot"],
+    ["org.springframework.boot:spring-boot-starter", "Spring Boot"],
+    ["io.quarkus:quarkus-core", "Quarkus"],
+    ["io.micronaut:micronaut-http-server-netty", "Micronaut"],
+    ["io.ktor:ktor-server-core", "Ktor"],
+    ["io.ktor:ktor-server-netty", "Ktor"],
+    ["io.ktor:ktor-server-cio", "Ktor"]
+  ],
+  "androidPlugins": [
+    "com.android.application",
+    "com.android.library",
+    "com.android.kotlin.multiplatform.library"
+  ],
+  "kmpPlugins": [
+    "org.jetbrains.kotlin.multiplatform",
+    "kotlin-multiplatform"
+  ],
+  "jvmKotlinPlugins": [
+    "org.jetbrains.kotlin.jvm",
+    "kotlin-jvm",
+    "org.jetbrains.kotlin.android",
+    "kotlin-android"
+  ],
+  "cliPlugins": [
+    ["org.gradle.application", "application"],
+    ["application", "application"]
+  ],
+  "cliArtifacts": [
+    ["info.picocli:picocli", "Picocli"],
+    ["com.github.ajalt.clikt:clikt", "Clikt"],
+    ["com.github.ajalt.clikt:clikt-jvm", "Clikt"]
+  ],
+  "libraryPlugins": [
+    "java-library",
+    "org.gradle.java-library"
+  ]
+}

@@ -136,6 +136,10 @@ faf memory show
 - **MCP first-class** — `ModelContextProtocol*` on NuGet (official C# SDK).
 - **Go (7.3.0)** — `go.mod alone ≠ backend` still ships.
 
+### JVM content-aware detection (next Edition rail)
+
+**`pom` / `gradle` alone ≠ type.** One brand **JVM** (Java + Kotlin/JVM) — not a separate Kotlin Edition. Plugins · parents · packaging · version catalogs · multi-module: Spring Boot · Quarkus · MCP · Android (AGP 9, no `kotlin-android` required) · KMP as facet · CLI · library/aggregator. Knowledge: `src/detect/jvm-detection.json`.
+
 ### Dart/Flutter — knowledge v2 in 7.2.1
 
 **pubspec ≠ Flutter — pure Dart stays Dart.** Same content-aware detection as the [Dart Edition](https://faf.one/blog/dart-edition). **7.2.1** refreshes the single-source knowledge table: Riverpod annotation, Flutter Hooks, Beamer, Routemaster, Jaspr, Relic, and more MCP package names — still **one classifier**, composed by the MCPs.

@@ -17,6 +17,7 @@ import { KNOWLEDGE_BASE } from './turbo-cat-knowledge.js';
 import { detectDartProject } from './dart.js';
 import { detectGoProject } from './go.js';
 import { detectCsharpProject } from './csharp.js';
+import { detectJvmProject } from './jvm.js';
 
 const IGNORE = new Set([
   'node_modules', '.git', 'dist', 'build', 'venv', '.venv', '__pycache__',
@@ -136,6 +137,8 @@ function scanConfigFiles(projectDir: string): FoundFormat[] {
   const found: FoundFormat[] = [];
   let cur = resolve(projectDir);
   const ownGit = existsSync(join(projectDir, '.git'));
+  /** One JVM classification per directory (pom + gradle + settings would triple-fire). */
+  const jvmDirsDone = new Set<string>();
   for (let i = 0; i < 10; i++) {
     let files: string[];
     try {
@@ -214,6 +217,48 @@ function scanConfigFiles(projectDir: string): FoundFormat[] {
           }
           const frameworks = gp.framework ? [gp.framework, 'Go'] : ['Go'];
           found.push({ slots, priority: k.priority, frameworks, fileName: f });
+          continue;
+        }
+      }
+      // Content-aware: pom / gradle alone ≠ type (JVM Edition). One brand JVM;
+      // Android/KMP are facets. Version catalogs + multi-module via detectJvmProject.
+      if (
+        f === 'pom.xml' ||
+        f === 'build.gradle' ||
+        f === 'build.gradle.kts' ||
+        f === 'settings.gradle' ||
+        f === 'settings.gradle.kts'
+      ) {
+        if (jvmDirsDone.has(cur)) {continue;}
+        jvmDirsDone.add(cur);
+        const jv = detectJvmProject(cur);
+        if (jv) {
+          const slots: Record<string, string> = {
+            mainLanguage: jv.mainLanguage === 'Java/Kotlin' ? 'Kotlin' : jv.mainLanguage,
+            packageManager: jv.buildTool === 'maven' ? 'maven' : 'gradle',
+            buildTool: jv.buildTool,
+          };
+          if (jv.appType === 'backend' && jv.framework) {
+            slots.backend = jv.framework;
+          } else if (jv.appType === 'cli' && jv.framework) {
+            slots.framework = jv.framework;
+          } else if (jv.appType === 'mcp') {
+            slots.apiType = 'MCP';
+          } else if (jv.appType === 'mobile') {
+            slots.framework = jv.framework || 'Android';
+          }
+          if (jv.facets.includes('multiplatform')) {
+            slots.framework = jv.framework || 'Kotlin Multiplatform';
+          }
+          const frameworks = jv.framework
+            ? [jv.framework, 'JVM', jv.mainLanguage === 'Kotlin' ? 'Kotlin' : 'Java']
+            : ['JVM', jv.mainLanguage === 'Kotlin' ? 'Kotlin' : 'Java'];
+          found.push({
+            slots,
+            priority: k.priority ?? 35,
+            frameworks,
+            fileName: f,
+          });
           continue;
         }
       }

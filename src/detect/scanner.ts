@@ -5,6 +5,7 @@ import { FRAMEWORKS } from './frameworks.js';
 import { detectDartProject } from './dart.js';
 import { detectGoProject } from './go.js';
 import { detectCsharpProject, listRootCsprojs } from './csharp.js';
+import { detectJvmProject, isJvmRoot } from './jvm.js';
 
 interface PackageJson {
   name?: string;
@@ -347,7 +348,11 @@ export function detectLanguage(dir: string): string {
   if (listRootCsprojs(dir).length > 0) {return 'C#';}
   if (existsSync(join(dir, 'pyproject.toml')) || existsSync(join(dir, 'setup.py'))) {return 'Python';}
   if (existsSync(join(dir, 'Gemfile'))) {return 'Ruby';}
-  if (existsSync(join(dir, 'pom.xml')) || existsSync(join(dir, 'build.gradle'))) {return 'Java';}
+  if (isJvmRoot(dir)) {
+    const jvm = detectJvmProject(dir);
+    if (jvm) {return jvm.mainLanguage === 'Java/Kotlin' ? 'Kotlin' : jvm.mainLanguage;}
+    return 'Java';
+  }
   if (existsSync(join(dir, 'Package.swift'))) {return 'Swift';}
   if (existsSync(join(dir, 'build.zig'))) {return 'Zig';}
   if (existsSync(join(dir, 'pubspec.yaml'))) {return 'Dart';}
@@ -453,6 +458,14 @@ export function detectProjectTypeWithRationale(dir: string): ProjectTypeDetectio
   if (csharp) {
     found.push(csharp.found);
     return { type: csharp.appType, found };
+  }
+
+  // ─── 7a3. jvm — content-aware pom/gradle classification.
+  //        pom/gradle alone ≠ type: plugins · parents · catalogs · MCP · Android/KMP. ─
+  const jvm = detectJvmProject(dir);
+  if (jvm) {
+    found.push(jvm.found);
+    return { type: jvm.appType, found };
   }
 
   // ─── 7b. mobile — JS mobile platform deps / native dirs ─────────────────
@@ -613,6 +626,13 @@ export function detectPackageManager(dir: string): string {
   if (existsSync(join(dir, 'pubspec.yaml'))) {return 'pub';}
   if (existsSync(join(dir, 'go.mod'))) {return 'go modules';}
   if (listRootCsprojs(dir).length > 0) {return 'NuGet';}
+  if (existsSync(join(dir, 'pom.xml'))) {return 'maven';}
+  if (
+    existsSync(join(dir, 'build.gradle')) ||
+    existsSync(join(dir, 'build.gradle.kts')) ||
+    existsSync(join(dir, 'settings.gradle')) ||
+    existsSync(join(dir, 'settings.gradle.kts'))
+  ) {return 'gradle';}
   if (existsSync(join(dir, 'bun.lockb')) || existsSync(join(dir, 'bun.lock'))) {return 'bun';}
   if (existsSync(join(dir, 'pnpm-lock.yaml'))) {return 'pnpm';}
   if (existsSync(join(dir, 'yarn.lock'))) {return 'yarn';}

@@ -1,0 +1,154 @@
+{
+  "version": 1,
+  "_doc": "SHARED parity fixtures for JVM detection (content-aware pom/gradle). faf-cli is the Truth. Kill line: pom/gradle alone ≠ type.",
+  "fixtures": [
+    {
+      "name": "maven-library-minimal",
+      "files": {
+        "pom.xml": "<project><modelVersion>4.0.0</modelVersion><groupId>com.acme</groupId><artifactId>lib</artifactId><version>1.0</version></project>\n"
+      },
+      "expected": {
+        "appType": "library",
+        "framework": "",
+        "buildTool": "maven",
+        "facets": []
+      }
+    },
+    {
+      "name": "maven-aggregator-pom",
+      "files": {
+        "pom.xml": "<project><modelVersion>4.0.0</modelVersion><groupId>com.acme</groupId><artifactId>parent</artifactId><version>1.0</version><packaging>pom</packaging><modules><module>core</module></modules></project>\n"
+      },
+      "expected": {
+        "appType": "library",
+        "framework": "",
+        "buildTool": "maven",
+        "facets": []
+      }
+    },
+    {
+      "name": "maven-spring-boot-parent",
+      "files": {
+        "pom.xml": "<project><modelVersion>4.0.0</modelVersion><parent><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-parent</artifactId><version>3.3.0</version></parent><artifactId>api</artifactId><dependencies><dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-web</artifactId></dependency></dependencies></project>\n"
+      },
+      "expected": {
+        "appType": "backend",
+        "framework": "Spring Boot",
+        "buildTool": "maven",
+        "facets": []
+      }
+    },
+    {
+      "name": "maven-mcp-sdk",
+      "files": {
+        "pom.xml": "<project><modelVersion>4.0.0</modelVersion><groupId>com.acme</groupId><artifactId>mcp-srv</artifactId><version>1.0</version><dependencies><dependency><groupId>io.modelcontextprotocol.sdk</groupId><artifactId>mcp</artifactId><version>0.10.0</version></dependency></dependencies></project>\n"
+      },
+      "expected": {
+        "appType": "mcp",
+        "framework": "MCP",
+        "buildTool": "maven",
+        "facets": ["mcp"]
+      }
+    },
+    {
+      "name": "gradle-java-library",
+      "files": {
+        "build.gradle.kts": "plugins {\n  `java-library`\n}\n"
+      },
+      "expected": {
+        "appType": "library",
+        "framework": "",
+        "buildTool": "gradle",
+        "facets": []
+      }
+    },
+    {
+      "name": "gradle-spring-boot-plugin",
+      "files": {
+        "build.gradle.kts": "plugins {\n  id(\"org.springframework.boot\") version \"3.3.0\"\n  java\n}\n"
+      },
+      "expected": {
+        "appType": "backend",
+        "framework": "Spring Boot",
+        "buildTool": "gradle",
+        "facets": []
+      }
+    },
+    {
+      "name": "gradle-catalog-spring-boot",
+      "files": {
+        "settings.gradle.kts": "rootProject.name = \"svc\"\n",
+        "gradle/libs.versions.toml": "[plugins]\nspring-boot = { id = \"org.springframework.boot\", version = \"3.3.0\" }\n\n[libraries]\nspring-boot-starter-web = { module = \"org.springframework.boot:spring-boot-starter-web\", version = \"3.3.0\" }\n",
+        "build.gradle.kts": "plugins {\n  alias(libs.plugins.spring.boot)\n  java\n}\ndependencies {\n  implementation(libs.spring.boot.starter.web)\n}\n"
+      },
+      "expected": {
+        "appType": "backend",
+        "framework": "Spring Boot",
+        "buildTool": "gradle",
+        "facets": []
+      }
+    },
+    {
+      "name": "gradle-android-app-no-kotlin-android",
+      "files": {
+        "build.gradle.kts": "plugins {\n  id(\"com.android.application\")\n}\n"
+      },
+      "expected": {
+        "appType": "mobile",
+        "framework": "Android",
+        "buildTool": "gradle",
+        "facets": ["android"]
+      }
+    },
+    {
+      "name": "gradle-kmp-library",
+      "files": {
+        "build.gradle.kts": "plugins {\n  kotlin(\"multiplatform\")\n}\n"
+      },
+      "expected": {
+        "appType": "library",
+        "framework": "Kotlin Multiplatform",
+        "buildTool": "gradle",
+        "facets": ["multiplatform"]
+      }
+    },
+    {
+      "name": "gradle-application-cli",
+      "files": {
+        "build.gradle.kts": "plugins {\n  application\n  java\n}\napplication {\n  mainClass.set(\"com.acme.Main\")\n}\n"
+      },
+      "expected": {
+        "appType": "cli",
+        "framework": "application",
+        "buildTool": "gradle",
+        "facets": []
+      }
+    },
+    {
+      "name": "gradle-picocli-cli",
+      "files": {
+        "build.gradle.kts": "plugins {\n  java\n}\ndependencies {\n  implementation(\"info.picocli:picocli:4.7.5\")\n}\n"
+      },
+      "expected": {
+        "appType": "cli",
+        "framework": "Picocli",
+        "buildTool": "gradle",
+        "facets": []
+      }
+    },
+    {
+      "name": "gradle-multimodule-spring-child-wins",
+      "files": {
+        "settings.gradle.kts": "include(\"lib\", \"api\")\n",
+        "lib/build.gradle.kts": "plugins { `java-library` }\n",
+        "api/build.gradle.kts": "plugins {\n  id(\"org.springframework.boot\") version \"3.3.0\"\n  java\n}\n"
+      },
+      "expected": {
+        "appType": "backend",
+        "framework": "Spring Boot",
+        "buildTool": "gradle",
+        "facets": []
+      }
+    }
+  ]
+}
