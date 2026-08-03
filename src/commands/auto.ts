@@ -11,8 +11,10 @@ import { enrichScore } from '../core/scorer.js';
 import { FafDNAManager } from '../core/faf-dna.js';
 import { displayScore } from '../ui/display.js';
 import { bold, dim, fafCyan } from '../ui/colors.js';
+import { assertProjectCwd } from '../core/cwd-guard.js';
 
 export function autoCommand(): void {
+  assertProjectCwd(process.cwd(), 'faf auto');
   const dir = process.cwd();
   const fafPath = join(dir, 'project.faf');
 

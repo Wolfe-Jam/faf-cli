@@ -8,6 +8,7 @@ import * as kernel from '../wasm/kernel.js';
 import { enrichScore } from '../core/scorer.js';
 import { displayScore } from '../ui/display.js';
 import { bold, dim, fafCyan } from '../ui/colors.js';
+import { assertProjectCwd } from '../core/cwd-guard.js';
 
 export interface GoOptions {
   resume?: boolean;
@@ -46,6 +47,7 @@ function setNestedValue(obj: Record<string, unknown>, path: string, value: strin
 
 /** Guided interview to gold code */
 export async function goCommand(options: GoOptions = {}): Promise<void> {
+  assertProjectCwd(process.cwd(), 'faf go');
   const fafPath = findFafFile();
   if (!fafPath) {
     console.error("Error: project.faf not found\n\n  Run 'faf init' to create one.");

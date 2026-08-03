@@ -6,6 +6,7 @@ import { scoreFafYaml } from '../core/scorer.js';
 import { FafDNAManager } from '../core/faf-dna.js';
 import { displayScore } from '../ui/display.js';
 import { bold, dim, fafCyan } from '../ui/colors.js';
+import { assertProjectCwd } from '../core/cwd-guard.js';
 
 export interface InitOptions {
   yolo?: boolean;
@@ -15,6 +16,7 @@ export interface InitOptions {
 }
 
 export function initCommand(options: InitOptions = {}): void {
+  assertProjectCwd(process.cwd(), 'faf init');
   const dir = process.cwd();
   const outputPath = options.output
     ? (options.output.endsWith('.faf') ? options.output : join(dir, options.output))
