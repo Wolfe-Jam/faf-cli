@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v7.4.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v7.5.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -9,6 +9,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.5.0] - 2026-08-03 — The JVM Edition
+
+**Content-aware JVM** — `pom` / `gradle` alone ≠ type. One brand JVM (Java + Kotlin/JVM). Plugins · parents · packaging · version catalogs · multi-module: Spring Boot · Quarkus · MCP · CLI · library · Android facet.
+
+### Added
+- **JVM (Java / Kotlin) detection** (`src/detect/jvm.ts` + `src/detect/jvm-detection.json`) — content-aware `pom` / Gradle classification:
+  - **MCP** — `io.modelcontextprotocol.sdk` · Spring AI MCP starters · Kotlin MCP SDK
+  - **Backend** — Spring Boot (plugin / parent / starters) · Quarkus · Micronaut · Ktor server
+  - **CLI** — Gradle `application` + mainClass · Picocli · Clikt
+  - **Library** — bare jar / aggregator `pom` / `java-library` (never forced to web)
+  - **Mobile** — `com.android.application` (AGP 9; no `kotlin-android` required) as facet
+  - **KMP** — multiplatform as facet, not a second product brand
+  - Version catalogs (`libs.versions.toml`) · settings multi-module walk · scanner + Turbo-Cat compose
+  - Parity fixtures (12) + WJTTC JVM suite
+
+### Notes / non-claims
+- **Claim:** content-aware JVM project-type classification from root Maven/Gradle + modules + version catalogs (static parse), proven by `tests/detect/jvm-parity-fixtures.json` + WJTTC JVM suite.
+- **Do NOT claim:** every `pom` / `gradle` is Spring by default · full Gradle Tooling API · every `build-logic` convention resolve · every GAV on Maven Central · a separate “Kotlin Edition.”
+- **Kill line:** `pom` / `gradle` alone ≠ type.
+
+### Verification (claim inventory)
+| Claim | Evidence command |
+|-------|------------------|
+| JVM classification (12 fixtures) | `bun test tests/detect/jvm-parity.test.ts` |
+| JVM WJTTC brake/engine/aero | `bun test tests/detect/WJTTC-jvm.test.ts` |
 
 ## [7.4.0] - 2026-08-01 — The C# Edition
 

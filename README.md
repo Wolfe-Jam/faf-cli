@@ -130,15 +130,13 @@ faf memory etch "a durable fact" --id my-fact
 faf memory show
 ```
 
-### What's New in v7.4.0 — The C# Edition
+### What's New in v7.5.0 — The JVM Edition
 
-- **Content-aware C#** — `.csproj alone ≠ type.` Sdk-first: ASP.NET Core · Worker · MCP · CLI · class library. Classlibs stay classlibs.
-- **MCP first-class** — `ModelContextProtocol*` on NuGet (official C# SDK).
-- **Go (7.3.0)** — `go.mod alone ≠ backend` still ships.
+**Content-aware JVM** — `pom` / `gradle` alone ≠ type. One brand **JVM** (Java + Kotlin/JVM) — not a separate Kotlin Edition.
 
-### JVM content-aware detection (next Edition rail)
-
-**`pom` / `gradle` alone ≠ type.** One brand **JVM** (Java + Kotlin/JVM) — not a separate Kotlin Edition. Plugins · parents · packaging · version catalogs · multi-module: Spring Boot · Quarkus · MCP · Android (AGP 9, no `kotlin-android` required) · KMP as facet · CLI · library/aggregator. Knowledge: `src/detect/jvm-detection.json`.
+- **Plugins · parents · packaging · version catalogs · multi-module** — Spring Boot · Quarkus · MCP · CLI · library/aggregator · Android facet (AGP 9) · KMP facet.
+- **Zero new config** — reads the build you already ship; unknown → library, not a fake backend.
+- **Still shipping** — C# (7.4.0) `.csproj alone ≠ type` · Go (7.3.0) `go.mod alone ≠ backend`.
 
 ### Dart/Flutter — knowledge v2 in 7.2.1
 
