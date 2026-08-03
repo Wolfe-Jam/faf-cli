@@ -6,6 +6,7 @@ import { detectDartProject } from './dart.js';
 import { detectGoProject } from './go.js';
 import { detectCsharpProject, listRootCsprojs } from './csharp.js';
 import { detectJvmProject, isJvmRoot } from './jvm.js';
+import { detectRubyProject } from './ruby.js';
 
 interface PackageJson {
   name?: string;
@@ -484,6 +485,14 @@ export function detectProjectTypeWithRationale(dir: string): ProjectTypeDetectio
   if (jvm) {
     found.push(jvm.found);
     return { type: jvm.appType, found };
+  }
+
+  // ─── 7a4. ruby — content-aware Gemfile classification.
+  //        Gemfile alone ≠ Rails: gem names · layout · MCP · CLI · library. ─
+  const ruby = detectRubyProject(dir);
+  if (ruby) {
+    found.push(ruby.found);
+    return { type: ruby.appType, found };
   }
 
   // ─── 7b. mobile — JS mobile platform deps / native dirs ─────────────────

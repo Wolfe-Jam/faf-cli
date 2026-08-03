@@ -143,14 +143,24 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
     intelligence: 'ultra-high'
   },
   
+  // Content-aware via detectRubyProject in turbo-cat.ts — Gemfile alone ≠ Rails.
   'Gemfile': {
-    frameworks: ['Ruby', 'Rails'],
-    slots: { 
+    frameworks: ['Ruby'],
+    slots: {
       packageManager: 'bundler',
       mainLanguage: 'Ruby'
     },
     priority: 35,
     intelligence: 'ultra-high'
+  },
+  'Gemfile.lock': {
+    frameworks: ['Ruby'],
+    slots: {
+      packageManager: 'bundler',
+      mainLanguage: 'Ruby'
+    },
+    priority: 34,
+    intelligence: 'high'
   },
   
   'composer.json': {

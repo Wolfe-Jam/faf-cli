@@ -140,8 +140,11 @@ export const FRAMEWORKS: FrameworkSignature[] = [
   { name: 'FastAPI', slug: 'fastapi', category: 'backend', signals: [
     { type: 'file', pattern: 'main.py' },
   ]},
+  // Content-aware — Gemfile alone ≠ Rails (Ruby Edition kill line).
   { name: 'Rails', slug: 'rails', category: 'backend', signals: [
-    { type: 'file', pattern: 'Gemfile' },
+    { type: 'content', pattern: 'Gemfile', key: 'rails' },
+    { type: 'content', pattern: 'Gemfile.lock', key: 'rails (' },
+    { type: 'file', pattern: 'config/application.rb' },
     { type: 'file', pattern: 'config/routes.rb' },
   ]},
   // Content-aware — pom.xml / build.gradle alone ≠ Spring Boot (JVM Edition kill line).

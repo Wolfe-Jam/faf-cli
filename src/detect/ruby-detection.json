@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "_doc": "SINGLE SOURCE of Ruby detection KNOWLEDGE (Truth-is-faf-cli). faf-cli imports this; SDKs/MCPs compose it. Kill line: Gemfile alone ≠ Rails. Content-aware: gem names + light layout. 2026-08-03 initial (post-intel ruby-edition).",
+  "mcpGems": [
+    "mcp",
+    "fast-mcp",
+    "fast_mcp",
+    "rails-mcp-server",
+    "rails_mcp_server",
+    "ruby-mcp-client",
+    "ruby_mcp_client",
+    "ruby_llm-mcp",
+    "ruby_llm_mcp"
+  ],
+  "webGems": [
+    ["rails", "Rails"],
+    ["railties", "Rails"],
+    ["sinatra", "Sinatra"],
+    ["sinatra-contrib", "Sinatra"],
+    ["roda", "Roda"],
+    ["grape", "Grape"],
+    ["hanami", "Hanami"],
+    ["hanami-controller", "Hanami"],
+    ["rack", "Rack"]
+  ],
+  "cliGems": [
+    ["thor", "Thor"],
+    ["gli", "GLI"],
+    ["commander", "Commander"],
+    ["slop", "Slop"]
+  ],
+  "railsLayoutFiles": [
+    "config/application.rb",
+    "config/routes.rb",
+    "bin/rails",
+    "config/environment.rb"
+  ]
+}

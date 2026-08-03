@@ -18,6 +18,7 @@ import { detectDartProject } from './dart.js';
 import { detectGoProject } from './go.js';
 import { detectCsharpProject } from './csharp.js';
 import { detectJvmProject } from './jvm.js';
+import { detectRubyProject } from './ruby.js';
 
 const IGNORE = new Set([
   'node_modules', '.git', 'dist', 'build', 'venv', '.venv', '__pycache__',
@@ -217,6 +218,31 @@ function scanConfigFiles(projectDir: string): FoundFormat[] {
           }
           const frameworks = gp.framework ? [gp.framework, 'Go'] : ['Go'];
           found.push({ slots, priority: k.priority, frameworks, fileName: f });
+          continue;
+        }
+      }
+      // Content-aware: Gemfile alone ≠ Rails (Ruby Edition).
+      if (f === 'Gemfile' || f === 'Gemfile.lock' || f === 'gems.rb') {
+        const rp = detectRubyProject(cur);
+        if (rp) {
+          const slots: Record<string, string> = {
+            mainLanguage: 'Ruby',
+            packageManager: rp.packageManager,
+          };
+          if (rp.appType === 'backend' && rp.framework) {
+            slots.backend = rp.framework;
+          } else if (rp.appType === 'cli' && rp.framework) {
+            slots.framework = rp.framework;
+          } else if (rp.appType === 'mcp') {
+            slots.apiType = 'MCP';
+          }
+          const frameworks = rp.framework ? [rp.framework, 'Ruby'] : ['Ruby'];
+          found.push({
+            slots,
+            priority: k.priority ?? 35,
+            frameworks,
+            fileName: f,
+          });
           continue;
         }
       }

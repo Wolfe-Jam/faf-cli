@@ -1,0 +1,140 @@
+{
+  "version": 1,
+  "_doc": "SHARED parity fixtures for Ruby detection. Kill line: Gemfile alone ≠ Rails.",
+  "fixtures": [
+    {
+      "name": "gemfile-rake-only",
+      "files": {
+        "Gemfile": "source 'https://rubygems.org'\ngem 'rake'\n"
+      },
+      "expected": {
+        "appType": "library",
+        "framework": "",
+        "packageManager": "bundler"
+      }
+    },
+    {
+      "name": "gemfile-rails",
+      "files": {
+        "Gemfile": "source 'https://rubygems.org'\ngem 'rails', '~> 7.1'\n"
+      },
+      "expected": {
+        "appType": "backend",
+        "framework": "Rails",
+        "packageManager": "bundler"
+      }
+    },
+    {
+      "name": "rails-layout-without-gem-line",
+      "files": {
+        "Gemfile": "source 'https://rubygems.org'\ngem 'puma'\n",
+        "config/application.rb": "require 'rails'\nmodule App\n  class Application < Rails::Application\n  end\nend\n"
+      },
+      "expected": {
+        "appType": "backend",
+        "framework": "Rails",
+        "packageManager": "bundler"
+      }
+    },
+    {
+      "name": "gemfile-sinatra",
+      "files": {
+        "Gemfile": "source 'https://rubygems.org'\ngem 'sinatra'\n"
+      },
+      "expected": {
+        "appType": "backend",
+        "framework": "Sinatra",
+        "packageManager": "bundler"
+      }
+    },
+    {
+      "name": "gemfile-mcp",
+      "files": {
+        "Gemfile": "source 'https://rubygems.org'\ngem 'mcp'\ngem 'rails'\n"
+      },
+      "expected": {
+        "appType": "mcp",
+        "framework": "MCP",
+        "packageManager": "bundler"
+      }
+    },
+    {
+      "name": "gemfile-thor-cli",
+      "files": {
+        "Gemfile": "source 'https://rubygems.org'\ngem 'thor'\n"
+      },
+      "expected": {
+        "appType": "cli",
+        "framework": "Thor",
+        "packageManager": "bundler"
+      }
+    },
+    {
+      "name": "gemfile-lock-rails",
+      "files": {
+        "Gemfile": "source 'https://rubygems.org'\n",
+        "Gemfile.lock": "GEM\n  remote: https://rubygems.org/\n  specs:\n    rails (7.1.0)\n      railties (= 7.1.0)\n    railties (7.1.0)\n\nPLATFORMS\n  ruby\n"
+      },
+      "expected": {
+        "appType": "backend",
+        "framework": "Rails",
+        "packageManager": "bundler"
+      }
+    },
+    {
+      "name": "gemspec-library",
+      "files": {
+        "mylib.gemspec": "Gem::Specification.new do |s|\n  s.name = 'mylib'\n  s.version = '1.0.0'\n  s.add_dependency 'json'\nend\n"
+      },
+      "expected": {
+        "appType": "library",
+        "framework": "",
+        "packageManager": "rubygems"
+      }
+    },
+    {
+      "name": "gemfile-roda",
+      "files": {
+        "Gemfile": "gem 'roda'\n"
+      },
+      "expected": {
+        "appType": "backend",
+        "framework": "Roda",
+        "packageManager": "bundler"
+      }
+    },
+    {
+      "name": "gemfile-grape",
+      "files": {
+        "Gemfile": "gem \"grape\"\n"
+      },
+      "expected": {
+        "appType": "backend",
+        "framework": "Grape",
+        "packageManager": "bundler"
+      }
+    },
+    {
+      "name": "gemfile-hanami",
+      "files": {
+        "Gemfile": "gem 'hanami'\n"
+      },
+      "expected": {
+        "appType": "backend",
+        "framework": "Hanami",
+        "packageManager": "bundler"
+      }
+    },
+    {
+      "name": "rack-only-library",
+      "files": {
+        "Gemfile": "gem 'rack'\n"
+      },
+      "expected": {
+        "appType": "library",
+        "framework": "",
+        "packageManager": "bundler"
+      }
+    }
+  ]
+}
