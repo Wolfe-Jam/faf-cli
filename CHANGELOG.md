@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v7.5.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v7.5.1 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -9,6 +9,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.5.1] - 2026-08-03 — The JVM Edition
+
+**Patch** — `pom` / `gradle` alone ≠ Spring Boot on `tech_stack` either. Content-aware framework signals close the stranger-smoke gap from 7.5.0.
+
+### Fixed
+- **Spring Boot detection** (`frameworks.ts` + `content` signal type) — no longer matches bare `pom.xml` / `build.gradle` filename alone. Requires `spring-boot` / `springframework.boot` in file body. Bare library → `tech_stack: [Java]` only; Boot parent still lists Spring Boot.
+- WJTTC brake tests for tech_stack + catalog signal-type coverage.
+
+### Notes / non-claims
+- **Claim:** bare Maven/Gradle without Boot markers does not assert Spring Boot in `detectFrameworks` / `tech_stack`.
+- **Kill line (extended):** `pom` / `gradle` alone ≠ type **and** ≠ Spring on tech_stack.
+- Inherits **The JVM Edition** (7.5.0).
+
+### Verification
+| Claim | Evidence |
+|-------|----------|
+| Bare pom tech_stack | `bun test tests/detect/WJTTC-jvm.test.ts` |
+| Content signals | `bun test tests/detect/frameworks.test.ts` |
 
 ## [7.5.0] - 2026-08-03 — The JVM Edition
 

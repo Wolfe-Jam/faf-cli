@@ -130,12 +130,12 @@ faf memory etch "a durable fact" --id my-fact
 faf memory show
 ```
 
-### What's New in v7.5.0 — The JVM Edition
+### What's New in v7.5.1 — The JVM Edition (patch)
 
-**Content-aware JVM** — `pom` / `gradle` alone ≠ type. One brand **JVM** (Java + Kotlin/JVM) — not a separate Kotlin Edition.
+**Content-aware JVM** — `pom` / `gradle` alone ≠ type. **Also:** bare build files ≠ Spring Boot on `tech_stack` (7.5.1 closes the stranger-smoke gap).
 
-- **Plugins · parents · packaging · version catalogs · multi-module** — Spring Boot · Quarkus · MCP · CLI · library/aggregator · Android facet (AGP 9) · KMP facet.
-- **Zero new config** — reads the build you already ship; unknown → library, not a fake backend.
+- **7.5.1** — Spring Boot only when the file *says* Boot (`spring-boot` / `springframework.boot` in body).
+- **7.5.0** — plugins · parents · catalogs · multi-module: Spring · Quarkus · MCP · CLI · library · Android / KMP facets.
 - **Still shipping** — C# (7.4.0) `.csproj alone ≠ type` · Go (7.3.0) `go.mod alone ≠ backend`.
 
 ### Dart/Flutter — knowledge v2 in 7.2.1
