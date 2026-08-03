@@ -15,7 +15,9 @@ import {
   detectProjectType,
   detectProjectTypeWithRationale,
   detectPackageManager,
+  detectFrameworks,
 } from '../../src/detect/scanner.js';
+import { detectStack } from '../../src/detect/stack.js';
 import { turboCatSlots } from '../../src/detect/turbo-cat.js';
 import jvmSpec from '../../src/detect/jvm-detection.json';
 
@@ -167,6 +169,35 @@ dependencies { implementation("io.modelcontextprotocol.sdk:mcp:0.10.0") }
 `,
     );
     expect(detectJvmProject(dir)?.appType).toBe('mcp');
+  });
+
+  test('tech_stack does not assert Spring Boot from bare pom', () => {
+    // Stranger-smoke /dev-notes receipt: type was library but tech_stack listed Spring Boot.
+    // Root cause: frameworks.ts matched pom.xml alone. Content-aware signals close the lie.
+    file(
+      'pom.xml',
+      '<project><modelVersion>4.0.0</modelVersion><groupId>com.acme</groupId><artifactId>lib</artifactId><version>1.0</version></project>\n',
+    );
+    expect(detectFrameworks(dir).some(f => f.slug === 'spring')).toBe(false);
+    const data = detectStack(dir);
+    expect(data.project?.type).toMatch(/library/);
+    expect(data.tech_stack ?? []).not.toContain('Spring Boot');
+    expect(data.tech_stack ?? []).toContain('Java');
+  });
+
+  test('tech_stack includes Spring Boot when parent is Boot', () => {
+    file(
+      'pom.xml',
+      `<project><modelVersion>4.0.0</modelVersion>
+      <parent><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-parent</artifactId><version>3.3.0</version></parent>
+      <artifactId>api</artifactId>
+      <dependencies><dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-web</artifactId></dependency></dependencies>
+      </project>\n`,
+    );
+    expect(detectFrameworks(dir).some(f => f.slug === 'spring')).toBe(true);
+    const data = detectStack(dir);
+    expect(data.project?.type).toBe('backend');
+    expect(data.tech_stack ?? []).toContain('Spring Boot');
   });
 
   test('Turbo-Cat does not assert Spring from bare pom', () => {

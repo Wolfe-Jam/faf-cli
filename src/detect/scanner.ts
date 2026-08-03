@@ -315,6 +315,24 @@ function matchSignal(signal: Signal, pkg: PackageJson | null, dir: string): bool
       return !!(pkg?.devDependencies?.[signal.key!]);
     case 'file':
       return fileExists(dir, signal.pattern!);
+    case 'content': {
+      // File must exist AND contain key (case-insensitive). Used so pom/gradle
+      // alone never claim Spring Boot — JVM Edition kill line for tech_stack.
+      if (!signal.pattern || !signal.key) {return false;}
+      if (!fileExists(dir, signal.pattern)) {return false;}
+      try {
+        // Resolve first match for globs like next.config.* via existing helper path
+        const path = join(dir, signal.pattern);
+        if (!existsSync(path)) {
+          // pattern may be a simple relative path that fileExists handled via glob
+          return false;
+        }
+        const body = readFileSync(path, 'utf-8').toLowerCase();
+        return body.includes(signal.key.toLowerCase());
+      } catch {
+        return false;
+      }
+    }
     default:
       return false;
   }

@@ -159,12 +159,17 @@ export interface DetectedFramework {
 }
 
 /** Signal types for framework detection */
-export type SignalType = 'dependency' | 'file' | 'devDependency';
+export type SignalType = 'dependency' | 'file' | 'devDependency' | 'content';
 
 export interface Signal {
   type: SignalType;
   key?: string;
+  /** File glob/name for `file`/`content`, or package key for dependency types. */
   pattern?: string;
+  /**
+   * For `content`: substring that must appear in the matched file (case-insensitive).
+   * Kill-line fix: pom.xml alone ≠ Spring Boot — content must say so.
+   */
 }
 
 export interface FrameworkSignature {

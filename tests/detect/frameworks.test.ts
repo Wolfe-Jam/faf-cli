@@ -21,7 +21,7 @@ describe('PIT: FRAMEWORKS catalog', () => {
   });
 
   test('all signals have valid types', () => {
-    const validTypes = new Set(['dependency', 'devDependency', 'file']);
+    const validTypes = new Set(['dependency', 'devDependency', 'file', 'content']);
     for (const fw of FRAMEWORKS) {
       for (const signal of fw.signals) {
         expect(validTypes.has(signal.type)).toBe(true);
@@ -31,8 +31,19 @@ describe('PIT: FRAMEWORKS catalog', () => {
         if (signal.type === 'file') {
           expect(signal.pattern).toBeTruthy();
         }
+        if (signal.type === 'content') {
+          expect(signal.pattern).toBeTruthy();
+          expect(signal.key).toBeTruthy();
+        }
       }
     }
+  });
+
+  test('Spring Boot is content-aware (not pom/gradle filename alone)', () => {
+    const spring = FRAMEWORKS.find(f => f.slug === 'spring');
+    expect(spring).toBeTruthy();
+    expect(spring!.signals.every(s => s.type === 'content')).toBe(true);
+    expect(spring!.signals.some(s => s.type === 'file')).toBe(false);
   });
 
   test('has key frameworks', () => {

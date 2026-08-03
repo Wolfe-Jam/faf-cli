@@ -144,9 +144,13 @@ export const FRAMEWORKS: FrameworkSignature[] = [
     { type: 'file', pattern: 'Gemfile' },
     { type: 'file', pattern: 'config/routes.rb' },
   ]},
+  // Content-aware — pom.xml / build.gradle alone ≠ Spring Boot (JVM Edition kill line).
+  // `content` signals require the needle in the file body (see matchSignal).
   { name: 'Spring Boot', slug: 'spring', category: 'backend', signals: [
-    { type: 'file', pattern: 'pom.xml' },
-    { type: 'file', pattern: 'build.gradle' },
+    { type: 'content', pattern: 'pom.xml', key: 'spring-boot' },
+    { type: 'content', pattern: 'build.gradle', key: 'springframework.boot' },
+    { type: 'content', pattern: 'build.gradle.kts', key: 'springframework.boot' },
+    { type: 'content', pattern: 'gradle/libs.versions.toml', key: 'springframework.boot' },
   ]},
 
   // Databases
