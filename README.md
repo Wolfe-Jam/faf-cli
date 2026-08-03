@@ -130,12 +130,12 @@ faf memory etch "a durable fact" --id my-fact
 faf memory show
 ```
 
-### What's New in v7.6.0 — The Ruby Edition
+### What's New in v7.7.0 — The Swift Edition
 
-**Content-aware Ruby** — `Gemfile alone ≠ Rails`. Pure gems stay pure gems.
+**Content-aware Swift** — `Package.swift alone ≠ app`. Libraries stay libraries.
 
-- **Gems + layout** — Rails · Sinatra · Roda · Grape · Hanami · MCP · CLI · library (static parse — does not execute Gemfile).
-- **Still shipping** — JVM (7.5.x) `pom`/`gradle` alone ≠ type · C# (7.4.0) `.csproj alone ≠ type` · Go (7.3.0) `go.mod alone ≠ backend`.
+- **Products + deps** — MCP · Vapor · Hummingbird · CLI · Xcode app · library (static parse — does not run `swift build`).
+- **Still shipping** — Ruby (7.6.0) `Gemfile alone ≠ Rails` · JVM (7.5.x) `pom`/`gradle` alone ≠ type · C# (7.4.0) `.csproj alone ≠ type` · Go (7.3.0) `go.mod alone ≠ backend`.
 
 ### Dart/Flutter — knowledge v2 in 7.2.1
 

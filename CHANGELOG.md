@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v7.6.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v7.7.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -9,6 +9,37 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.7.0] - 2026-08-03 — The Swift Edition
+
+**Content-aware Swift** — `Package.swift alone ≠ app`. Static product/dep scan + light Xcode: MCP · Vapor/Hummingbird · CLI · app · library. Bare packages stay libraries.
+
+### Added
+- **Swift detection** (`src/detect/swift.ts` + `src/detect/swift-detection.json`) — content-aware Package.swift / Xcode classification:
+  - **MCP** — `modelcontextprotocol/swift-sdk` · product `MCP`
+  - **Backend** — Vapor · Hummingbird (package URL / product + light layout)
+  - **CLI** — `.executable` / `.executableTarget` · ArgumentParser
+  - **App** — `.xcodeproj` + `com.apple.product-type.application` (light pbxproj grep)
+  - **Library** — library product only (never forced to iOS app)
+  - Scanner slot 7a5 + Turbo-Cat compose. Parity fixtures (12) + WJTTC Swift suite
+- **`app` project type** slot categories (Apple client apps — not mobile-only)
+
+### Fixed
+- **Under-claim regression** — Vapor / bare executable no longer fall through to `library` + “no classifying signals”
+- **Podfile** knowledge — CocoaPods multi-platform (not iOS-only stamp)
+- **formats** — `.swift` category is multi-shape (`systems`), not mobile-only
+- **FRAMEWORKS** — Vapor / Hummingbird require Package.swift content (not filename alone)
+
+### Notes / non-claims
+- **Claim:** content-aware Swift project-type classification from static Package.swift products/deps + light Xcode productType, proven by `tests/detect/swift-parity-fixtures.json` + WJTTC Swift suite.
+- **Do NOT claim:** execute Package.swift / `swift build` · full pbxproj AST · Tuist/XcodeGen first-class · every Apple extension target · MCP Tier-1 process maturity (official SDK is Tier 3).
+- **Kill line:** `Package.swift alone ≠ app`.
+
+### Verification (claim inventory)
+| Claim | Evidence command |
+|-------|------------------|
+| Swift classification (12 fixtures) | `bun test tests/detect/swift-parity.test.ts` |
+| Swift WJTTC brake/engine/aero | `bun test tests/detect/WJTTC-swift.test.ts` |
 
 ## [7.6.0] - 2026-08-03 — The Ruby Edition
 
