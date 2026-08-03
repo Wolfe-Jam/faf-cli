@@ -19,6 +19,7 @@ import { detectGoProject } from './go.js';
 import { detectCsharpProject } from './csharp.js';
 import { detectJvmProject } from './jvm.js';
 import { detectRubyProject } from './ruby.js';
+import { detectSwiftProject } from './swift.js';
 
 const IGNORE = new Set([
   'node_modules', '.git', 'dist', 'build', 'venv', '.venv', '__pycache__',
@@ -176,6 +177,31 @@ function scanConfigFiles(projectDir: string): FoundFormat[] {
         continue;
       }
 
+      // Content-aware: *.xcodeproj (directory) — light productType via detectSwiftProject.
+      // Prefer Package.swift when both exist (handled below); xcodeproj covers app-only trees.
+      if (f.endsWith('.xcodeproj')) {
+        const sp = detectSwiftProject(cur);
+        if (sp) {
+          const slots: Record<string, string> = {
+            mainLanguage: 'Swift',
+            packageManager: sp.packageManager === 'spm' ? 'spm' : 'Xcode',
+            buildTool: sp.packageManager.includes('spm') ? 'swift build' : 'xcodebuild',
+          };
+          if (sp.appType === 'backend' && sp.framework) {
+            slots.backend = sp.framework;
+          } else if (sp.appType === 'cli' && sp.framework) {
+            slots.framework = sp.framework;
+          } else if (sp.appType === 'mcp') {
+            slots.apiType = 'MCP';
+          } else if (sp.appType === 'app') {
+            slots.framework = sp.framework || 'Swift App';
+          }
+          const frameworks = sp.framework ? [sp.framework, 'Swift'] : ['Swift'];
+          found.push({ slots, priority: 36, frameworks, fileName: f });
+        }
+        continue;
+      }
+
       const k = KNOWLEDGE_BASE[f];
       if (!k) {continue;}
       // Sourced-only gate: manifest.json only asserts the chrome stack when
@@ -240,6 +266,34 @@ function scanConfigFiles(projectDir: string): FoundFormat[] {
           found.push({
             slots,
             priority: k.priority ?? 35,
+            frameworks,
+            fileName: f,
+          });
+          continue;
+        }
+      }
+      // Content-aware: Package.swift alone ≠ app (Swift Edition).
+      if (f === 'Package.swift') {
+        const sp = detectSwiftProject(cur);
+        if (sp) {
+          const slots: Record<string, string> = {
+            mainLanguage: 'Swift',
+            packageManager: sp.packageManager === 'xcode' ? 'Xcode' : 'spm',
+            buildTool: 'swift build',
+          };
+          if (sp.appType === 'backend' && sp.framework) {
+            slots.backend = sp.framework;
+          } else if (sp.appType === 'cli' && sp.framework) {
+            slots.framework = sp.framework;
+          } else if (sp.appType === 'mcp') {
+            slots.apiType = 'MCP';
+          } else if (sp.appType === 'app') {
+            slots.framework = sp.framework || 'SwiftUI/App';
+          }
+          const frameworks = sp.framework ? [sp.framework, 'Swift'] : ['Swift'];
+          found.push({
+            slots,
+            priority: k.priority ?? 36,
             frameworks,
             fileName: f,
           });

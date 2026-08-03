@@ -7,6 +7,7 @@ import { detectGoProject } from './go.js';
 import { detectCsharpProject, listRootCsprojs } from './csharp.js';
 import { detectJvmProject, isJvmRoot } from './jvm.js';
 import { detectRubyProject } from './ruby.js';
+import { detectSwiftProject } from './swift.js';
 
 interface PackageJson {
   name?: string;
@@ -493,6 +494,14 @@ export function detectProjectTypeWithRationale(dir: string): ProjectTypeDetectio
   if (ruby) {
     found.push(ruby.found);
     return { type: ruby.appType, found };
+  }
+
+  // ─── 7a5. swift — content-aware Package.swift / Xcode classification.
+  //        Package.swift alone ≠ app: products · deps · MCP · Vapor · CLI · library. ─
+  const swift = detectSwiftProject(dir);
+  if (swift) {
+    found.push(swift.found);
+    return { type: swift.appType, found };
   }
 
   // ─── 7b. mobile — JS mobile platform deps / native dirs ─────────────────

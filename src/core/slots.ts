@@ -192,6 +192,9 @@ export const APP_TYPE_CATEGORIES: Record<string, SlotCategory[]> = {
   frontend: ['project', 'frontend', 'human', 'universal'],
   website: ['project', 'frontend', 'human', 'universal'],
   mobile: ['project', 'frontend', 'human', 'universal'],
+  // Swift / Apple client apps (iOS/macOS/…) — same ladder as mobile; name is
+  // `app` so SPM libraries/servers/CLIs are not forced into "mobile".
+  app: ['project', 'frontend', 'human', 'universal'],
   // browser/chrome extension — popup/content-script UI + build/CI/store
   // (manifest_version), NO backend. Detected via manifest_version in scanner.ts.
   extension: ['project', 'frontend', 'human', 'universal'],

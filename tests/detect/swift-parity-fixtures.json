@@ -1,0 +1,139 @@
+{
+  "version": 1,
+  "_doc": "SHARED parity fixtures for Swift detection. Kill line: Package.swift alone ≠ app.",
+  "fixtures": [
+    {
+      "name": "package-library-only",
+      "files": {
+        "Package.swift": "// swift-tools-version: 5.9\nimport PackageDescription\n\nlet package = Package(\n    name: \"MyLib\",\n    products: [\n        .library(name: \"MyLib\", targets: [\"MyLib\"]),\n    ],\n    targets: [\n        .target(name: \"MyLib\"),\n    ]\n)\n"
+      },
+      "expected": {
+        "appType": "library",
+        "framework": "",
+        "packageManager": "spm"
+      }
+    },
+    {
+      "name": "package-vapor-backend",
+      "files": {
+        "Package.swift": "// swift-tools-version: 5.9\nimport PackageDescription\n\nlet package = Package(\n    name: \"MyAPI\",\n    platforms: [.macOS(.v13)],\n    dependencies: [\n        .package(url: \"https://github.com/vapor/vapor.git\", from: \"4.0.0\"),\n    ],\n    targets: [\n        .executableTarget(\n            name: \"App\",\n            dependencies: [\n                .product(name: \"Vapor\", package: \"vapor\"),\n            ]\n        ),\n    ]\n)\n"
+      },
+      "expected": {
+        "appType": "backend",
+        "framework": "Vapor",
+        "packageManager": "spm"
+      }
+    },
+    {
+      "name": "package-hummingbird-backend",
+      "files": {
+        "Package.swift": "// swift-tools-version: 5.9\nimport PackageDescription\n\nlet package = Package(\n    name: \"HBApp\",\n    dependencies: [\n        .package(url: \"https://github.com/hummingbird-project/hummingbird.git\", from: \"2.0.0\"),\n    ],\n    targets: [\n        .executableTarget(\n            name: \"App\",\n            dependencies: [\n                .product(name: \"Hummingbird\", package: \"hummingbird\"),\n            ]\n        ),\n    ]\n)\n"
+      },
+      "expected": {
+        "appType": "backend",
+        "framework": "Hummingbird",
+        "packageManager": "spm"
+      }
+    },
+    {
+      "name": "package-executable-cli",
+      "files": {
+        "Package.swift": "// swift-tools-version: 5.9\nimport PackageDescription\n\nlet package = Package(\n    name: \"MyCLI\",\n    products: [\n        .executable(name: \"mycli\", targets: [\"MyCLI\"]),\n    ],\n    targets: [\n        .executableTarget(name: \"MyCLI\"),\n    ]\n)\n"
+      },
+      "expected": {
+        "appType": "cli",
+        "framework": "",
+        "packageManager": "spm"
+      }
+    },
+    {
+      "name": "package-argument-parser-cli",
+      "files": {
+        "Package.swift": "// swift-tools-version: 5.9\nimport PackageDescription\n\nlet package = Package(\n    name: \"Tool\",\n    dependencies: [\n        .package(url: \"https://github.com/apple/swift-argument-parser.git\", from: \"1.3.0\"),\n    ],\n    targets: [\n        .executableTarget(\n            name: \"Tool\",\n            dependencies: [\n                .product(name: \"ArgumentParser\", package: \"swift-argument-parser\"),\n            ]\n        ),\n    ]\n)\n"
+      },
+      "expected": {
+        "appType": "cli",
+        "framework": "ArgumentParser",
+        "packageManager": "spm"
+      }
+    },
+    {
+      "name": "package-mcp",
+      "files": {
+        "Package.swift": "// swift-tools-version: 6.0\nimport PackageDescription\n\nlet package = Package(\n    name: \"MyMcp\",\n    dependencies: [\n        .package(url: \"https://github.com/modelcontextprotocol/swift-sdk.git\", from: \"0.11.0\"),\n    ],\n    targets: [\n        .executableTarget(\n            name: \"Server\",\n            dependencies: [\n                .product(name: \"MCP\", package: \"swift-sdk\"),\n            ]\n        ),\n    ]\n)\n"
+      },
+      "expected": {
+        "appType": "mcp",
+        "framework": "MCP",
+        "packageManager": "spm"
+      }
+    },
+    {
+      "name": "package-mcp-wins-over-vapor",
+      "files": {
+        "Package.swift": "import PackageDescription\nlet package = Package(\n    name: \"Both\",\n    dependencies: [\n        .package(url: \"https://github.com/modelcontextprotocol/swift-sdk.git\", from: \"0.11.0\"),\n        .package(url: \"https://github.com/vapor/vapor.git\", from: \"4.0.0\"),\n    ],\n    targets: [\n        .executableTarget(name: \"App\", dependencies: [\n            .product(name: \"MCP\", package: \"swift-sdk\"),\n            .product(name: \"Vapor\", package: \"vapor\"),\n        ]),\n    ]\n)\n"
+      },
+      "expected": {
+        "appType": "mcp",
+        "framework": "MCP",
+        "packageManager": "spm"
+      }
+    },
+    {
+      "name": "package-hybrid-lib-and-exe",
+      "files": {
+        "Package.swift": "import PackageDescription\nlet package = Package(\n    name: \"Hybrid\",\n    products: [\n        .library(name: \"Core\", targets: [\"Core\"]),\n        .executable(name: \"tool\", targets: [\"Tool\"]),\n    ],\n    targets: [\n        .target(name: \"Core\"),\n        .executableTarget(name: \"Tool\", dependencies: [\"Core\"]),\n    ]\n)\n"
+      },
+      "expected": {
+        "appType": "cli",
+        "framework": "",
+        "packageManager": "spm"
+      }
+    },
+    {
+      "name": "xcode-application",
+      "files": {
+        "Demo.xcodeproj/project.pbxproj": "// !$*UTF8*$!\n{\n  productType = \"com.apple.product-type.application\";\n}\n"
+      },
+      "expected": {
+        "appType": "app",
+        "framework": "",
+        "packageManager": "xcode"
+      }
+    },
+    {
+      "name": "xcode-tool-cli",
+      "files": {
+        "Tool.xcodeproj/project.pbxproj": "productType = \"com.apple.product-type.tool\";\n"
+      },
+      "expected": {
+        "appType": "cli",
+        "framework": "",
+        "packageManager": "xcode"
+      }
+    },
+    {
+      "name": "vapor-layout-without-dep-line",
+      "files": {
+        "Package.swift": "import PackageDescription\nlet package = Package(\n    name: \"Legacy\",\n    products: [.executable(name: \"Run\", targets: [\"App\"])],\n    targets: [.executableTarget(name: \"App\")]\n)\n",
+        "Sources/App/configure.swift": "import Vapor\npublic func configure(_ app: Application) throws {}\n"
+      },
+      "expected": {
+        "appType": "backend",
+        "framework": "Vapor",
+        "packageManager": "spm"
+      }
+    },
+    {
+      "name": "commented-vapor-url-ignored",
+      "files": {
+        "Package.swift": "import PackageDescription\nlet package = Package(\n    name: \"Clean\",\n    // .package(url: \"https://github.com/vapor/vapor.git\", from: \"4.0.0\"),\n    products: [.library(name: \"Clean\", targets: [\"Clean\"])],\n    targets: [.target(name: \"Clean\")]\n)\n"
+      },
+      "expected": {
+        "appType": "library",
+        "framework": "",
+        "packageManager": "spm"
+      }
+    }
+  ]
+}

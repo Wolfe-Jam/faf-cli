@@ -198,6 +198,20 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
     intelligence: 'ultra-high'
   },
 
+  'Package.swift': {
+    // Filename-only FALLBACK: assert Swift + SPM, NOT app/iOS/Vapor —
+    // Package.swift alone ≠ app (library · executable · plugin · server · MCP).
+    // turbo-cat.ts reads CONTENT (detectSwiftProject) and fills appType signals.
+    frameworks: ['Swift'],
+    slots: {
+      packageManager: 'spm',
+      mainLanguage: 'Swift',
+      buildTool: 'swift build'
+    },
+    priority: 36,
+    intelligence: 'ultra-high'
+  },
+
   // Note: real projects use Named.csproj — turbo-cat.ts handles any *.csproj
   // via content-aware detectCsharpProject. This key is documentation-only
   // fallback if a literal file named "*.csproj" ever appears (it won't).
@@ -1657,11 +1671,12 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   // ============================================
 
   'Podfile': {
-    frameworks: ['CocoaPods', 'iOS'],
+    // Softened 2026-08-03 (Swift Edition honesty): CocoaPods is multi-platform
+    // (iOS / macOS / tvOS / watchOS) — not iOS-only. Do not stamp appType here.
+    frameworks: ['CocoaPods', 'Swift'],
     slots: {
       packageManager: 'CocoaPods',
-      mainLanguage: 'Swift/Objective-C',
-      framework: 'iOS Native'
+      mainLanguage: 'Swift/Objective-C'
     },
     priority: 30,
     intelligence: 'high'

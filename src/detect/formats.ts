@@ -51,8 +51,9 @@ export const FORMATS: FormatEntry[] = [
   { name: 'C#', extensions: ['.cs'], category: 'dotnet' },
   { name: 'F#', extensions: ['.fs'], category: 'dotnet' },
 
+  // Swift is multi-shape (SPM library · CLI · server · app) — not mobile-only
+  { name: 'Swift', extensions: ['.swift'], category: 'systems' },
   // Mobile
-  { name: 'Swift', extensions: ['.swift'], category: 'mobile' },
   { name: 'Dart', extensions: ['.dart'], category: 'mobile' },
 
   // Docs

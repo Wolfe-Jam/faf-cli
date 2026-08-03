@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "_doc": "SINGLE SOURCE of Swift detection KNOWLEDGE (Truth-is-faf-cli). Kill line: Package.swift alone ≠ app. Static parse of products + package URLs + product names + light xcodeproj productType. Never execute Package.swift / swift build. 2026-08-03 post-intel swift-edition.",
+  "mcpPackageUrls": [
+    "modelcontextprotocol/swift-sdk",
+    "github.com/modelcontextprotocol/swift-sdk"
+  ],
+  "mcpProducts": [
+    "MCP"
+  ],
+  "serverPackageUrls": [
+    ["vapor/vapor", "Vapor"],
+    ["github.com/vapor/vapor", "Vapor"],
+    ["hummingbird-project/hummingbird", "Hummingbird"],
+    ["github.com/hummingbird-project/hummingbird", "Hummingbird"]
+  ],
+  "serverProducts": [
+    ["Vapor", "Vapor"],
+    ["Hummingbird", "Hummingbird"]
+  ],
+  "cliPackageUrls": [
+    ["apple/swift-argument-parser", "ArgumentParser"],
+    ["github.com/apple/swift-argument-parser", "ArgumentParser"]
+  ],
+  "cliProducts": [
+    ["ArgumentParser", "ArgumentParser"]
+  ],
+  "appProductTypes": [
+    "com.apple.product-type.application"
+  ],
+  "cliProductTypes": [
+    "com.apple.product-type.tool"
+  ],
+  "vaporLayoutFiles": [
+    "Sources/App/configure.swift",
+    "Sources/App/routes.swift",
+    "Sources/App/entrypoint.swift"
+  ]
+}

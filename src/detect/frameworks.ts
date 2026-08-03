@@ -155,6 +155,18 @@ export const FRAMEWORKS: FrameworkSignature[] = [
     { type: 'content', pattern: 'build.gradle.kts', key: 'springframework.boot' },
     { type: 'content', pattern: 'gradle/libs.versions.toml', key: 'springframework.boot' },
   ]},
+  // Content-aware — Package.swift alone ≠ app / Vapor (Swift Edition kill line).
+  { name: 'Vapor', slug: 'vapor', category: 'backend', signals: [
+    { type: 'content', pattern: 'Package.swift', key: 'vapor/vapor' },
+    { type: 'content', pattern: 'Package.swift', key: 'product(name: "Vapor"' },
+    { type: 'content', pattern: 'Package.swift', key: "product(name: 'Vapor'" },
+    { type: 'file', pattern: 'Sources/App/configure.swift' },
+  ]},
+  { name: 'Hummingbird', slug: 'hummingbird', category: 'backend', signals: [
+    { type: 'content', pattern: 'Package.swift', key: 'hummingbird-project/hummingbird' },
+    { type: 'content', pattern: 'Package.swift', key: 'product(name: "Hummingbird"' },
+    { type: 'content', pattern: 'Package.swift', key: "product(name: 'Hummingbird'" },
+  ]},
 
   // Databases
   { name: 'Prisma', slug: 'prisma', category: 'database', signals: [
