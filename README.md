@@ -23,7 +23,7 @@ detected from your real stack, scored, and versioned with your code. No drift. N
 
 <br>
 
-**Over 100k downloads** · see [faf.one/downloads](https://faf.one/downloads) for latest stats · **IANA-registered · Anthropic-merged (#2759)**
+**Over 110k+ downloads** · see [faf.one/downloads](https://faf.one/downloads) for latest stats · **IANA-registered · Anthropic-merged (#2759)**
 
 ⭐ **A star helps other devs find faf-cli** — despite the downloads, ~3 of 4 devs check stars.
 
