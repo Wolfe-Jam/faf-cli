@@ -4,7 +4,7 @@ Your `project.faf` stays synchronized with everything in milliseconds.
 
 ```
 bi-sync:   project.faf  ←── 8ms ──→  CLAUDE.md            (free)
-tri-sync:  project.faf  ←── 8ms ──→  CLAUDE.md ←→ MEMORY.md  (Pro)
+tri-sync:  project.faf  ←── 8ms ──→  CLAUDE.md ←→ MEMORY.md  (free)
 ```
 
 ## bi-sync — free forever
@@ -29,7 +29,7 @@ $ faf sync --pull
 
 Reach Trophy (`faf go`) first; then `--pull` unlocks for legacy bootstrap.
 
-## tri-sync — Pro (ROM meets RAM)
+## tri-sync — free forever (ROM meets RAM)
 
 ```bash
 faf tri-sync             # .faf ↔ CLAUDE.md ↔ MEMORY.md
@@ -41,10 +41,10 @@ faf ram status           # Check RAM path and line count
 |------|--------|--------|
 | bi-sync | `.faf` ↔ CLAUDE.md | Free forever |
 | bi-sync | `.faf` ↔ AGENTS.md, .cursorrules, GEMINI.md | Free forever |
-| **tri-sync** | `.faf` ↔ CLAUDE.md ↔ **MEMORY.md** | **Pro** |
+| **tri-sync** | `.faf` ↔ CLAUDE.md ↔ **MEMORY.md** | **Free forever** |
 
-14-day free trial, no signup, no credit card. Early-bird: $3/mo · $19/yr (normally $10/mo — 70% off).
-**[Purchase at faf.one/pro](https://faf.one/pro)**
+No trial, no license, no catch. `.faf` relies on tri-sync now, so it has to be free.
+Pro features (the Rust `.fafb` compiler suite) live in a separate package — **[faf.one/pro](https://faf.one/pro)**
 
 ---
 
