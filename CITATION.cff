@@ -13,9 +13,11 @@ url: "https://faf.one"
 keywords:
   - .faf
   - .fafm
+  - .fafa
   - CLI
   - AI agent context
   - AI agent memory
+  - AI agent identity
   - IANA-registered format
 preferred-citation:
   type: article
@@ -43,5 +45,18 @@ references:
     month: 5
     doi: 10.5281/zenodo.20348942
     url: "https://doi.org/10.5281/zenodo.20348942"
+    publisher:
+      name: "Zenodo"
+  - type: article
+    title: "Why Agents Need a Passport: .fafa — Portable Identity for the Agentic Era"
+    authors:
+      - family-names: Wolfe
+        given-names: James
+        orcid: "https://orcid.org/0009-0007-0801-3841"
+        affiliation: "FAF Foundation"
+    year: 2026
+    month: 8
+    doi: 10.5281/zenodo.21951641
+    url: "https://doi.org/10.5281/zenodo.21951641"
     publisher:
       name: "Zenodo"
