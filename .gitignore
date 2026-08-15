@@ -89,6 +89,8 @@ temp/
 # Test files
 test-*.faf
 
+# FAF files live in git (project.faf · .fafm · .fafa · .fafi · .faf-dna).
+# Do not ignore the format family or .faf-dna. Named reason required.
 # Generated .faf files (from `faf git` etc) — only project.faf / project*.faf are valid for bi-sync
 *.faf
 !project.faf

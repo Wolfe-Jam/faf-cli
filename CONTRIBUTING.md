@@ -5,6 +5,12 @@
 
 Thank you for your interest in contributing to faf-cli, the command-line tool for .faf (Foundational AI-context Format). This document provides guidelines for contributing to the project.
 
+## FAF files live in git
+
+If it is FAF, it lives in git unless there is a named reason it cannot.
+
+Track `project.faf`, `.fafm`, `.fafa`, `.fafi`, and `.faf-dna`. `.faf-dna` is the birth certificate `faf init` writes — lineage, not junk. Do not add those names to `.gitignore` to clean `git status`. Named exceptions (generated `faf git` scratch `*.faf`, `project.html`, personal `soul.fafm`) stay next to the ignore line.
+
 ## Development Philosophy
 
 faf-cli follows F1-inspired engineering standards:

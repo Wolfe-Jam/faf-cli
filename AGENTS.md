@@ -52,6 +52,7 @@ bun run check:no-hardcode   # fail if machine paths leaked into dist/
 - **Always OK:** read the tree · `bun run test` · `bun run lint` · `bun run build` · edit under `src/` with tests.
 - **Ask first:** dependency adds/upgrades · deletions · publish / release / tag · changes to scoring kernel integration · dual-publish (`faf` ↔ `faf-cli`) path.
 - **Never:** force-push · push straight to `main` (branch and open a PR) · commit secrets · hand-run `npm publish` (releases go through **`/pubpro` only**) · reimplement scoring outside `faf-scoring-kernel` / `src/wasm/`.
+- **FAF files live in git.** `project.faf` · `.fafm` · `.fafa` · `.fafi` · `.faf-dna` stay tracked unless there is a **named** reason (secrets, personal soul, generated scratch). Gitignore is for caches and installer lockfiles, not the format family. `.faf-dna` is the birth certificate — do not hide it to clean status.
 
 ## Definition of Done
 
