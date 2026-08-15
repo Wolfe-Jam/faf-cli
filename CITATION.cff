@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 type: software
-message: "If you use faf-cli or the .faf / .fafm IANA-registered formats in your work, please cite the format papers in `preferred-citation` and `references` below."
-title: "faf-cli — CLI for the .faf and .fafm IANA-registered formats"
+message: "If you use faf-cli or the .faf / .fafm / .fafa IANA-registered formats in your work, please cite the format papers in `preferred-citation` and `references` below."
+title: "faf-cli — CLI for the .faf, .fafm, and .fafa IANA-registered formats"
 authors:
   - family-names: Wolfe
     given-names: James
