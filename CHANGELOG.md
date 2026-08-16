@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **`about` is not an `app_type`.** About is a repo role. Signal is the `about:` block (`about.represents`). Scorer short-circuits on that block only. `app_type: about` is a schema error. Removed from `APP_TYPE_CATEGORIES` (ladder is 24 app types).
+
 ## [7.7.0] - 2026-08-03 — The Swift Edition
 
 **Content-aware Swift** — `Package.swift alone ≠ app`. Static product/dep scan + light Xcode: MCP · Vapor/Hummingbird · CLI · app · library. Bare packages stay libraries.

@@ -397,8 +397,8 @@ export interface ProjectTypeDetection {
  *  positive signal that contributed to the classification — used downstream
  *  by `writeFaf` to render `# found: <list>` next to `type:` in the .faf.
  *
- *  Priority order per v6.6.md doctrine (most-specific first). `about` is
- *  owner-declared, not auto-detected — never matches in this function.
+ *  Priority order per v6.6.md doctrine (most-specific first). About is a
+ *  repo role (`about.represents`), not an app_type — never matches here.
  *  Rule: SDK keyword takes priority (sdk wins over library/cli/wasm). */
 export function detectProjectTypeWithRationale(dir: string): ProjectTypeDetection {
   const pkg = readPackageJson(dir);

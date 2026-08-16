@@ -27,24 +27,33 @@ describe('BRAKE: validateFaf', () => {
   });
 });
 
-describe('BRAKE: validateFaf — About Repo (app_type: about)', () => {
-  test('valid about with represents passes', () => {
+describe('BRAKE: validateFaf — About Repo (about.represents, not an app_type)', () => {
+  test('valid about with represents passes (no app_type)', () => {
     const result = validateFaf({
       faf_version: '2.5.0',
-      project: { name: 'mcpaas-cf' },
-      app_type: 'about',
+      project: { name: 'mcpaas-cf', type: 'about' },
       about: { represents: 'Wolfe-Jam/faf-mcpaas', source_score: 100 },
     });
     expect(result.valid).toBe(true);
     expect(result.errors).toHaveLength(0);
   });
 
-  test('about without represents fails', () => {
+  test('app_type: about is rejected — about is not an app_type', () => {
     const result = validateFaf({
       faf_version: '2.5.0',
       project: { name: 'mcpaas-cf' },
       app_type: 'about',
-      // about block missing entirely
+      about: { represents: 'Wolfe-Jam/faf-mcpaas', source_score: 100 },
+    });
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.includes('not an app_type'))).toBe(true);
+  });
+
+  test('about block without represents fails', () => {
+    const result = validateFaf({
+      faf_version: '2.5.0',
+      project: { name: 'mcpaas-cf' },
+      about: {},
     });
     expect(result.valid).toBe(false);
     expect(result.errors.some((e) => e.includes('about.represents'))).toBe(true);
@@ -54,7 +63,6 @@ describe('BRAKE: validateFaf — About Repo (app_type: about)', () => {
     const result = validateFaf({
       faf_version: '2.5.0',
       project: { name: 'x' },
-      app_type: 'about',
       about: { represents: '' },
     });
     expect(result.valid).toBe(false);
@@ -65,7 +73,6 @@ describe('BRAKE: validateFaf — About Repo (app_type: about)', () => {
     const result = validateFaf({
       faf_version: '2.5.0',
       project: { name: 'x' },
-      app_type: 'about',
       about: { represents: 'just-a-name-no-slash' },
     });
     expect(result.valid).toBe(false);
@@ -76,7 +83,6 @@ describe('BRAKE: validateFaf — About Repo (app_type: about)', () => {
     const result = validateFaf({
       faf_version: '2.5.0',
       project: { name: 'x' },
-      app_type: 'about',
       about: { represents: 'owner/repo' },
     });
     expect(result.valid).toBe(true);
@@ -86,7 +92,6 @@ describe('BRAKE: validateFaf — About Repo (app_type: about)', () => {
     const tooHigh = validateFaf({
       faf_version: '2.5.0',
       project: { name: 'x' },
-      app_type: 'about',
       about: { represents: 'owner/repo', source_score: 150 },
     });
     expect(tooHigh.valid).toBe(false);
@@ -95,7 +100,6 @@ describe('BRAKE: validateFaf — About Repo (app_type: about)', () => {
     const negative = validateFaf({
       faf_version: '2.5.0',
       project: { name: 'x' },
-      app_type: 'about',
       about: { represents: 'owner/repo', source_score: -5 },
     });
     expect(negative.valid).toBe(false);

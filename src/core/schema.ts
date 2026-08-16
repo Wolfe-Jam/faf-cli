@@ -1,4 +1,5 @@
 import type { FafData } from './types.js';
+import { REPRESENTS_RE, isAboutFaf } from './about.js';
 
 /** Validate a parsed .faf object */
 export function validateFaf(data: unknown): { valid: boolean; errors: string[] } {
@@ -19,19 +20,19 @@ export function validateFaf(data: unknown): { valid: boolean; errors: string[] }
     errors.push('Missing required field: project.name');
   }
 
-  // About Repo validation — when app_type is 'about', about.represents is
-  // required. Without it, the About says "I'm about something" but doesn't
-  // tell anyone WHAT — useless to AI consumers who can't trace back to the
-  // source codebase. See memory/private-source-public-about-pattern.md.
+  // about is a repo role, not an app_type.
   if (faf.app_type === 'about') {
-    if (!faf.about?.represents) {
-      errors.push("app_type 'about' requires about.represents (owner/repo of the source codebase)");
-    } else if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(faf.about.represents)) {
+    errors.push("about is not an app_type — declare about.represents (owner/repo) instead");
+  }
+
+  // About Repo: the about: block is the signal. represents is required.
+  if (faf.about !== undefined) {
+    if (!isAboutFaf(faf) || typeof faf.about.represents !== 'string') {
+      errors.push('about.represents is required (owner/repo of the source codebase)');
+    } else if (!REPRESENTS_RE.test(faf.about.represents)) {
       errors.push(`about.represents must be "owner/repo" format (got: ${faf.about.represents})`);
     }
-    // source_score is optional — missing renders as "—" (White ♡). When
-    // present, must be 0-100.
-    if (faf.about?.source_score !== undefined) {
+    if (faf.about.source_score !== undefined) {
       const s = faf.about.source_score;
       if (typeof s !== 'number' || s < 0 || s > 100) {
         errors.push(`about.source_score must be a number 0-100 (got: ${s})`);

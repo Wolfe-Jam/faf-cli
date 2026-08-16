@@ -88,7 +88,7 @@ v6.6.0 ships a 21-type canonical ladder — 19 detectable + 1 owner-attested + 1
 
 **Detectable:** documentation · cli · library · sdk · wasm · html · frontend · website · mobile · mcp · backend · data-science · fullstack · svelte · framework · monorepo-root · mcpaas · saas · enterprise
 
-**Owner-attested (non-app):** `about` — represents another codebase (public About Repo for a private source). Inherits the source's Trophy via owner attestation.
+**About (not an app_type):** declare `about.represents: owner/repo`. Inherits `about.source_score`. Do not set `app_type: about`.
 
 **Curated knowledge:** `encyclopedia` — structured, git-versioned knowledge surface (FAFipedia and similar). Project + human slots, 9 active. Content is `.fafi` files (inclusion markers, same parser as `.faf`).
 

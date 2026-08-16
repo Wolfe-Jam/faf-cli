@@ -35,12 +35,12 @@ describe('ENGINE: enrichScore', () => {
 });
 
 describe('ENGINE: scoreFafYaml — About Repo short-circuit', () => {
-  test('app_type: about with source_score: 100 → Trophy, no kernel call', () => {
+  test('about.represents + source_score: 100 → Trophy, no kernel call (no app_type)', () => {
     const yaml = `
 faf_version: 3.0
 project:
   name: mcpaas-cf
-app_type: about
+  type: about
 about:
   represents: Wolfe-Jam/faf-mcpaas
   source_score: 100
@@ -48,18 +48,15 @@ about:
     const result = scoreFafYaml(yaml);
     expect(result.score).toBe(100);
     expect(result.tier.name).toBe('TROPHY');
-    // About Repos don't have scored slots — counts should be zero.
     expect(result.populated).toBe(0);
     expect(result.active).toBe(0);
     expect(result.total).toBe(0);
-    // TAF-downstream signal — distinguishes inherited from calculated.
     expect(result.inherited).toBe(true);
     expect(result.represents).toBe('Wolfe-Jam/faf-mcpaas');
   });
 
-  test('app_type: about with source_score: 85 → Bronze', () => {
+  test('about.represents + source_score: 85 → Bronze', () => {
     const yaml = `
-app_type: about
 about:
   represents: Wolfe-Jam/some-bronze-repo
   source_score: 85
@@ -69,34 +66,25 @@ about:
     expect(result.tier.name).toBe('BRONZE');
   });
 
-  test('app_type: about WITHOUT source_score → score -1 (renders "—")', () => {
+  test('about.represents WITHOUT source_score → score -1 (renders "—")', () => {
     const yaml = `
-app_type: about
 about:
   represents: Wolfe-Jam/somewhere
 `;
     const result = scoreFafYaml(yaml);
     expect(result.score).toBe(-1);
-    // Tier falls back to WHITE (last in TIERS) when score is unknown.
     expect(result.tier.name).toBe('WHITE');
   });
 
-  test('app_type: about with out-of-range source_score → score -1', () => {
-    // Owner-declared score must be 0-100. Anything else is rejected as malformed.
-    const yamlHigh = 'app_type: about\nabout:\n  represents: x/y\n  source_score: 250\n';
-    const yamlNegative = 'app_type: about\nabout:\n  represents: x/y\n  source_score: -5\n';
-    // The regex only matches /\d+/ so negative numbers don't match — score: -1.
+  test('about.represents with out-of-range source_score → score -1', () => {
+    const yamlHigh = 'about:\n  represents: x/y\n  source_score: 250\n';
+    const yamlNegative = 'about:\n  represents: x/y\n  source_score: -5\n';
     expect(scoreFafYaml(yamlNegative).score).toBe(-1);
-    // 250 matches \d+ but is > 100 — caught by the range check.
     expect(scoreFafYaml(yamlHigh).score).toBe(-1);
   });
 
-  test('app_type: about result carries inherited: true marker (TAF downstream)', () => {
-    // Per memory/private-source-public-about-pattern.md — TAF receipts and
-    // display logic distinguish inherited scores from calculated ones. The
-    // ScoreResult must carry `inherited: true` and `represents` for about.
+  test('about result carries inherited: true marker (TAF downstream)', () => {
     const yaml = `
-app_type: about
 about:
   represents: anthropics/claude-code
   source_score: 100
@@ -104,6 +92,26 @@ about:
     const result = scoreFafYaml(yaml);
     expect(result.inherited).toBe(true);
     expect(result.represents).toBe('anthropics/claude-code');
+  });
+
+  test('app_type: about alone is NOT About — about is not an app_type', () => {
+    const yaml = `
+app_type: about
+project:
+  name: fake-about
+faf_version: 2.5.0
+`;
+    let result: ScoreResult | null = null;
+    let kernelLoaded = true;
+    try {
+      result = scoreFafYaml(yaml);
+    } catch {
+      kernelLoaded = false;
+    }
+    if (kernelLoaded && result) {
+      expect(result.inherited).toBeUndefined();
+      expect(result.represents).toBeUndefined();
+    }
   });
 
   test('non-about result does NOT carry inherited marker', () => {
@@ -120,11 +128,8 @@ about:
   });
 
   test('non-about types do NOT short-circuit — result has no inherited marker', () => {
-    // The key behavioural invariant for the fallthrough path: when the
-    // input is NOT app_type: about, the result must NOT carry the
-    // inherited marker. Whether the kernel succeeds or fails to load is
-    // environment-dependent and not what we're testing here — we're
-    // testing the about-detection logic, not the kernel.
+    // Fallthrough: no about: block → not inherited. Kernel load is
+    // environment-dependent; we only assert the about-path was skipped.
     const yaml = `
 app_type: cli
 project:

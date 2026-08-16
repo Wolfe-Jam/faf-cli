@@ -59,11 +59,10 @@ export interface ScoreResult {
   slots: Record<string, SlotState>;
   /**
    * When true, the score is INHERITED from a source codebase (declared via
-   * `app_type: about` + `about.source_score` in project.faf). The scorer
-   * did NOT calculate this — the owner attested to it. About Repos are
-   * documentation surfaces, not apps.
+   * the `about:` block + `about.source_score`). The scorer did NOT calculate
+   * this — the owner attested to it. About is a repo role, not an app_type.
    *
-   * Set by scoreFafYaml when the input declares `app_type: about`.
+   * Set by scoreFafYaml when the input has `about.represents`.
    * Consumers (TAF receipt generation, display logic) should distinguish
    * inherited scores from calculated ones — they're qualitatively different
    * artifacts. See memory/private-source-public-about-pattern.md.
@@ -97,13 +96,13 @@ export interface FafData {
   };
   /**
    * Top-level app_type — drives slot selection in APP_TYPE_CATEGORIES.
-   * Special value `'about'` is a non-app representation (see `about` block).
+   * Must be a real app (cli, library, mcp, …). `about` is not an app_type.
    */
   app_type?: string;
   /**
-   * About Repo declaration block. Present when `app_type: about`. Lets the
-   * repo represent a private codebase: scorer short-circuits and emits
-   * `source_score` as the score. See memory/private-source-public-about-pattern.md.
+   * About Repo declaration. The `about:` block is the role signal
+   * (`about.represents` required). Scorer short-circuits and emits
+   * `source_score`. See memory/private-source-public-about-pattern.md.
    */
   about?: {
     /** Required: "owner/repo" pointing at the private source codebase. */

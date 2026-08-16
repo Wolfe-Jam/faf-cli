@@ -18,8 +18,8 @@ export function scoreCommand(file?: string, options: ScoreOptions = {}): void {
   }
 
   const yaml = readFafRaw(fafPath);
-  // scoreFafYaml short-circuits when app_type: about — see core/scorer.ts.
-  // About Repos display the source's Trophy; they aren't scored themselves.
+  // scoreFafYaml short-circuits on about.represents — see core/scorer.ts.
+  // About is a repo role, not an app_type.
   const result = scoreFafYaml(yaml);
 
   if (options.json) {

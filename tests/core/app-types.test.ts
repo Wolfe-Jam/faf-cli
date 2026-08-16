@@ -5,11 +5,8 @@
  *         category extension to small types (cli/library/mcp/frontend/
  *         data-science).
  *
- * v6.6.0 — Added `about` as the first non-app type (0 slots; score is
- * INHERITED from the source codebase, not calculated). About Repos are
- * documentation surfaces for private codebases — they DISPLAY the source's
- * Trophy badge, they don't earn one. Per
- * memory/private-source-public-about-pattern.md.
+ * About is a repo role (`about.represents`), not an app_type — it is
+ * not on this ladder. Per memory/private-source-public-about-pattern.md.
  *
  * Per v6.6.md doctrine memory.
  */
@@ -32,16 +29,13 @@ const CATEGORY_SIZES: Record<SlotCategory, number> = {
   enterprise_ops: 3,
 };
 
-describe('WJTTC ENGINE: app-types canonical ladder (25 types)', () => {
-  test('exactly 25 types defined', () => {
-    expect(Object.keys(APP_TYPE_CATEGORIES).length).toBe(25);
+describe('WJTTC ENGINE: app-types canonical ladder (24 types)', () => {
+  test('exactly 24 types defined', () => {
+    expect(Object.keys(APP_TYPE_CATEGORIES).length).toBe(24);
   });
 
   test('all canonical types present', () => {
     const expected = [
-      // 0 slots — non-app representation (v6.6.0)
-      'about',
-      // 9 slots — minimal
       'intent',
       'documentation',
       'encyclopedia',
@@ -57,8 +51,8 @@ describe('WJTTC ENGINE: app-types canonical ladder (25 types)', () => {
     }
   });
 
-  test('about type has zero slot categories (non-app, score is inherited)', () => {
-    expect(APP_TYPE_CATEGORIES.about).toEqual([]);
+  test('about is not an app_type', () => {
+    expect(APP_TYPE_CATEGORIES).not.toHaveProperty('about');
   });
 });
 

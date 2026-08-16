@@ -137,9 +137,8 @@ export function isPlaceholder(value: unknown): boolean {
 }
 
 /** App-type to active category mapping. The canonical 24-type ladder —
- *  21 detectable apps + `about` (non-app, 0 slots, owner-attested)
- *  + `encyclopedia` (curated knowledge surface, FAFipedia and similar)
- *  + `intent` (human-intent seed from builder.faf.one, not auto-detected).
+ *  detectable apps + `encyclopedia` (curated knowledge) + `intent` (seed).
+ *  About is NOT an app_type — it is a repo role (`about.represents`).
  *  (See v6.6.md doctrine memory + fafipedia-vs-grokipedia-architecture.)
  *  Sorted ascending by active slot count for readability.
  *
@@ -151,15 +150,6 @@ export function isPlaceholder(value: unknown): boolean {
  *  - Order is by ascending slot count, not insertion order.
  */
 export const APP_TYPE_CATEGORIES: Record<string, SlotCategory[]> = {
-  // 0 slots — non-app representation surface. Score is INHERITED, not calculated.
-  // About Repos are public faces of private codebases (private source / public
-  // about pattern, same shape as Anthropic's claude-code repo). They display
-  // the source's Trophy badge; they don't earn one. Required: about.represents
-  // (Wolfe-Jam/<source>). Optional: about.source_score (number). Scorer
-  // short-circuits when app_type === 'about' — see scorer.ts.
-  // Doctrine: memory/private-source-public-about-pattern.md.
-  about: [],
-
   // 9 slots — minimal (project meta + human only)
   documentation: ['project', 'human'],
   // intent: the human-intent SEED type, produced by builder.faf.one — a human
