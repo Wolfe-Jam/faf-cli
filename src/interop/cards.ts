@@ -54,6 +54,8 @@ export interface FafaDoc {
 export interface ProjectCardsOptions extends ServerCardOptions {
   /** Public URL of the emitted A2A card (catalog row). */
   a2aCardUrl?: string;
+  /** Caller-supplied A2A door when `.fafa` has no `endpoints[].protocol: a2a`. */
+  doorUrl?: string;
 }
 
 export interface ProjectedA2A {
@@ -142,13 +144,24 @@ export function a2aEndpoints(fafa: FafaDoc): FafaEndpoint[] {
   );
 }
 
+/** Authored A2A endpoints, else a single `doorUrl`. Never invents a door. */
+export function a2aDoors(fafa: FafaDoc, opts: ProjectCardsOptions = {}): FafaEndpoint[] {
+  const fromDoc = a2aEndpoints(fafa);
+  if (fromDoc.length > 0) {return fromDoc;}
+  const door = opts.doorUrl?.trim();
+  if (door) {
+    return [{ protocol: 'a2a', location: door, version: A2A_PROTOCOL_VERSION }];
+  }
+  return [];
+}
+
 export function generateA2ACard(
   fafa: FafaDoc,
   faf: FafData,
   opts: ProjectCardsOptions = {},
 ): ProjectedA2A {
   const agent = fafa.agent ?? {};
-  const doors = a2aEndpoints(fafa);
+  const doors = a2aDoors(fafa, opts);
   if (doors.length === 0) {
     throw new Error(
       "No A2A endpoint in .fafa (need endpoints[].protocol: a2a + location). Will not invent a door.",
@@ -240,7 +253,7 @@ export function catalogEntriesFor(
   const now = opts.now ?? (faf.generated as string | undefined) ?? new Date().toISOString();
   const entries: CatalogEntry[] = [];
 
-  if (a2aEndpoints(fafa).length > 0) {
+  if (a2aDoors(fafa, opts).length > 0) {
     entries.push({
       identifier: `urn:air:${host}:a2a:${slug}`,
       displayName: String(agent.displayName ?? agent.name ?? 'A2A Agent Card'),
@@ -346,7 +359,7 @@ export function projectCards(input: {
   }
 
   if (wanted.has('a2a') && input.fafa) {
-    if (a2aEndpoints(input.fafa).length === 0) {
+    if (a2aDoors(input.fafa, opts).length === 0) {
       if (input.targets?.includes('a2a')) {
         throw new Error(
           "No A2A endpoint in .fafa (need endpoints[].protocol: a2a + location). Will not invent a door.",

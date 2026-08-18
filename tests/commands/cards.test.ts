@@ -80,6 +80,36 @@ describe('TYRE: faf cards command', () => {
     expect(existsSync(join(testDir, 'server-card'))).toBe(false);
   });
 
+  test('--door-url projects A2A when .fafa has no a2a endpoint', () => {
+    writeFileSync(join(testDir, 'project.faf'), readFileSync(join(FIX, 'project.faf'), 'utf-8'));
+    writeFileSync(
+      join(testDir, 'agent.fafa'),
+      readFileSync(join(FIX, 'agent.fafa'), 'utf-8').replace(
+        /  - protocol: a2a\n    transport: http\n    location: https:\/\/faf-voice\.vercel\.app\/api\/a2a\n    version: "1.0"\n/,
+        '',
+      ),
+    );
+    const chunks: string[] = [];
+    const outSpy = spyOn(process.stdout, 'write').mockImplementation(((s: string) => {
+      chunks.push(s);
+      return true;
+    }) as never);
+    const errSpy = spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      cardsCommand({
+        dir: testDir,
+        target: 'a2a',
+        check: true,
+        doorUrl: 'https://mcpaas.live/claude/a2a',
+      });
+    } finally {
+      outSpy.mockRestore();
+      errSpy.mockRestore();
+    }
+    const printed = JSON.parse(chunks.join(''));
+    expect(printed.a2a.supportedInterfaces[0].url).toBe('https://mcpaas.live/claude/a2a');
+  });
+
   test('--target a2a writes .well-known/agent-card.json', () => {
     seed(testDir);
     const errSpy = spyOn(console, 'error').mockImplementation(() => {});

@@ -114,6 +114,25 @@ describe('ENGINE: 🛡️ one projector — faf cards', () => {
     expect(p.mcp).toBeDefined();
   });
 
+  test('doorUrl supplies the door when .fafa has no a2a endpoint', () => {
+    const dry: FafaDoc = { ...fafa, endpoints: [{ protocol: 'mcp', location: 'uvx x' }] };
+    const card = generateA2ACard(dry, faf, { doorUrl: 'https://mcpaas.live/claude/a2a' });
+    expect(card.supportedInterfaces).toEqual([
+      {
+        url: 'https://mcpaas.live/claude/a2a',
+        protocolBinding: 'JSONRPC',
+        protocolVersion: '1.0',
+      },
+    ]);
+    expect(card.capabilities.extensions[0].uri).toBe(A2A_CONTEXT_URI);
+    expect(card.capabilities.extensions[0].params.version).toBeUndefined();
+  });
+
+  test('authored a2a endpoint wins over doorUrl', () => {
+    const card = generateA2ACard(fafa, faf, { doorUrl: 'https://example.com/ignored' });
+    expect(card.supportedInterfaces[0].url).toBe('https://faf-voice.vercel.app/api/a2a');
+  });
+
   test('A2A params omit .fafa provenance.version (block only)', () => {
     const dirty: FafaDoc = {
       ...fafa,
