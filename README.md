@@ -147,7 +147,12 @@ faf cards --check          # print, do not write
 
 **Recent sprint** — 6 ships, 4 days
 
-🐦 [7.7.0 Swift](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.7.0) · 💎 [7.6.0 Ruby](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.6.0) · ☕ [7.5.1 JVM](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.5.1) · 💠 [7.4.0 C#](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.4.0) · 🐹 [7.3.0 Go](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.3.0) · 🎯 [7.2.1 Dart/Flutter](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.2.1)
+- 🐦 [7.7.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.7.0) The Swift Edition
+- 💎 [7.6.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.6.0) The Ruby Edition
+- ☕ [7.5.1](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.5.1) The JVM Edition
+- 💠 [7.4.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.4.0) The C# Edition
+- 🐹 [7.3.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.3.0) The Go Edition
+- 🎯 [7.2.1](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.2.1) Dart/Flutter knowledge v2
 
 ---
 
