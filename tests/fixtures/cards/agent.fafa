@@ -25,4 +25,7 @@ endpoints:
 provenance:
   faf: https://github.com/Wolfe-Jam/faf-agent/blob/main/project.faf
   mediaType: application/vnd.faf+yaml
+  iana: https://www.iana.org/assignments/media-types/application/vnd.faf+yaml
+  deterministic: true
+  generated: 2026-05-04T18:00:00.000Z
   version: "2.5.2"
