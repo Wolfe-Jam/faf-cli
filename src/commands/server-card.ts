@@ -1,12 +1,8 @@
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
 import { findFafFile, readFaf } from '../interop/faf.js';
-import {
-  registryName,
-  registryTitle,
-  registryMeta,
-  REGISTRY_PUBLISHER_KEY,
-} from '../interop/servercard.js';
+import { REGISTRY_PUBLISHER_KEY } from '../interop/servercard.js';
+import { projectCards } from '../interop/cards.js';
 import { dim, fafCyan } from '../ui/colors.js';
 
 export interface ServerCardCommandOptions {
@@ -75,10 +71,15 @@ export function serverCardCommand(options: ServerCardCommandOptions = {}): void 
     existingMeta?.[REGISTRY_PUBLISHER_KEY]?.['one.faf/context']?.generated;
   const now = options.generated ?? existingGenerated;
 
-  // Compose the identity from faf-cli's single source.
-  const name = registryName(data);
-  const title = registryTitle(data);
-  const emittedMeta = registryMeta(data, { fafPointer: './project.faf', now });
+  // Compose the identity from the one projector (registry target).
+  const projected = projectCards({
+    faf: data,
+    targets: ['registry'],
+    opts: { fafPointer: './project.faf', now },
+  });
+  const name = projected.registry!.name;
+  const title = projected.registry!.title;
+  const emittedMeta = projected.registry!._meta;
 
   // Merge: identity from faf-cli; every other field preserved from the live file.
   const merged: Record<string, unknown> = {

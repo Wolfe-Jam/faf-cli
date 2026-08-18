@@ -36,6 +36,15 @@ export {
   REGISTRY_PUBLISHER_KEY,
 } from './interop/servercard.js';
 export type { ServerCardOptions } from './interop/servercard.js';
+export {
+  projectCards,
+  readFafa,
+  findFafaFile,
+  generateA2ACard,
+  upsertCatalog,
+  A2A_CONTEXT_URI,
+} from './interop/cards.js';
+export type { FafaDoc, CardTarget, ProjectedCards } from './interop/cards.js';
 // .fafm knowledge-profile library (TS) — INTEROP with claude-fafm-sdk 1.0
 export {
   Soul as FafmSoul,

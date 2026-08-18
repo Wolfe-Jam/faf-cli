@@ -12,6 +12,7 @@ import { decompileCommand } from './commands/decompile.js';
 import { checkCommand } from './commands/check.js';
 import { exportCommand } from './commands/export.js';
 import { serverCardCommand } from './commands/server-card.js';
+import { cardsCommand } from './commands/cards.js';
 import { showCommand } from './commands/show.js';
 import { gitCommand } from './commands/git.js';
 import { diffCommand, diffDriverCommand } from './commands/diff.js';
@@ -197,6 +198,17 @@ program
   .option('--generated <iso>', 'Override the _meta generated stamp (default: preserve existing)')
   .option('--check', 'Print to stdout, do not write (diff/verify — the idempotency-test hook)')
   .action((options) => serverCardCommand(options));
+
+program
+  .command('cards')
+  .description('Project .faf + .fafa onto A2A / MCP / registry / catalog cards — one context block, every door')
+  .option('--target <list>', 'Comma list: a2a,mcp,registry,catalog (default: whatever inputs allow)')
+  .option('--faf <path>', 'project.faf path (default: auto-discover)')
+  .option('--fafa <path>', 'agent.fafa path (default: auto-discover)')
+  .option('--dir <path>', 'Working directory (default: cwd)')
+  .option('--a2a-url <url>', 'Public URL of the A2A card (catalog row)')
+  .option('--check', 'Print projected cards to stdout, do not write')
+  .action((options) => cardsCommand(options));
 
 program
   .command('check [file]')
