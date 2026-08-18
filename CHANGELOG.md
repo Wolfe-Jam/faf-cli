@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v7.7.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v7.8.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -10,11 +10,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.8.0] - 2026-08-18 — The Projector Edition
+
+**`faf cards` projects `.faf` + `.fafa` onto A2A, MCP, registry, and catalog — one context block, every door.**
+
 ### Added
-- **`faf cards`** — one projector. `.faf` + `.fafa` → A2A Agent Card · MCP Server Card · registry `server.json` · AI Catalog. Same `fafContextBlock()` on every door. `faf server-card` now wraps the registry target. `--faf-pointer` for served cards. Command + fixture tests in `tests/commands/cards.test.ts`.
+- **`faf cards`** — one projector. `.faf` + `.fafa` → A2A Agent Card · MCP Server Card · registry `server.json` · AI Catalog. Same `fafContextBlock()` on every door. Does not invent a door or an agent.
+- **`--door-url`** — caller-supplied A2A door when `.fafa` has no `endpoints[].protocol: a2a`. Authored endpoints still win.
+- **`--faf-pointer`** — absolute `.faf` pointer for served cards (default: `./project.faf`).
+- **`--check`** — print projected cards, do not write (CI idempotency hook).
+- **`faf server-card`** now wraps `projectCards({ targets: ['registry'] })`.
+- Public exports: `projectCards`, `generateA2ACard`, `readFafa`, `A2A_CONTEXT_URI`.
 
 ### Fixed
 - **`about` is not an `app_type`.** About is a repo role. Signal is the `about:` block (`about.represents`). Scorer short-circuits on that block only. `app_type: about` is a schema error. Removed from `APP_TYPE_CATEGORIES` (ladder is 24 app types).
+
+### Notes / non-claims
+- **Claim:** one projector emits the same `fafContextBlock()` on A2A `extensions[].params`, MCP `_meta["one.faf/context"]`, and registry `publisher-provided`. A2A URI is `https://faf.one/context`.
+- **Do NOT claim:** invents a door when none is authored and no `--door-url` · replaces A2A or MCP cards · Windows (CI matrix is ubuntu + macos only).
+- **Kill line:** one projector, every door.
+
+### Verification (claim inventory)
+| Claim | Evidence command |
+|-------|------------------|
+| Block identical on A2A · MCP · registry | `bun test tests/interop/cards.test.ts` |
+| `faf cards` CLI + fixture golden | `bun test tests/commands/cards.test.ts` |
 
 ## [7.7.0] - 2026-08-03 — The Swift Edition
 

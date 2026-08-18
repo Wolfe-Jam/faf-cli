@@ -130,12 +130,22 @@ faf memory etch "a durable fact" --id my-fact
 faf memory show
 ```
 
-### What's New in v7.7.0 — The Swift Edition
+### What's New in v7.8.0 — The Projector Edition
 
-**Content-aware Swift** — `Package.swift alone ≠ app`. Libraries stay libraries.
+**`faf cards` projects `.faf` + `.fafa` onto A2A, MCP, registry, and catalog — one context block, every door.**
 
-- **Products + deps** — MCP · Vapor · Hummingbird · CLI · Xcode app · library (static parse — does not run `swift build`).
-- **Still shipping** — Ruby (7.6.0) `Gemfile alone ≠ Rails` · JVM (7.5.x) `pom`/`gradle` alone ≠ type · C# (7.4.0) `.csproj alone ≠ type` · Go (7.3.0) `go.mod alone ≠ backend`.
+```bash
+faf cards                  # emit whatever inputs allow
+faf cards --target a2a     # A2A Agent Card only
+faf cards --check          # print, do not write
+```
+
+- **One projector** — same `fafContextBlock()` on every door. Does not invent a door or an agent.
+- **Still shipping** — Swift (7.7.0) `Package.swift alone ≠ app` · Ruby (7.6.0) `Gemfile alone ≠ Rails` · JVM (7.5.x) `pom`/`gradle` alone ≠ type.
+
+## v7.8.0 — The Projector Edition
+
+`faf cards` is the projector. Author `.faf` (context) and `.fafa` (identity + skills + endpoints). The CLI writes the host cards. Complementary — it does not replace A2A or MCP.
 
 ### Dart/Flutter — knowledge v2 in 7.2.1
 
