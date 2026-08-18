@@ -286,10 +286,14 @@ function catalogMatchIndex(entries: CatalogEntry[], row: CatalogEntry): number {
         String(e.url ?? '').includes('agent-card.json'),
     );
   }
+  if (row.type === 'application/vnd.fafa+yaml') {
+    return entries.findIndex((e) => e.type === 'application/vnd.fafa+yaml');
+  }
   return -1;
 }
 
-/** Upsert projector entries into an existing catalog. Leaves unknown rows alone. */
+/** Upsert projector entries into an existing catalog. Leaves unknown rows alone.
+ *  On match, only url / type / updatedAt move — host copy (title, tags) stays. */
 export function upsertCatalog(existing: AiCatalog | undefined, incoming: CatalogEntry[]): AiCatalog {
   const base: AiCatalog = existing
     ? { ...existing, entries: [...(existing.entries ?? [])] }
@@ -297,7 +301,12 @@ export function upsertCatalog(existing: AiCatalog | undefined, incoming: Catalog
   for (const row of incoming) {
     const i = catalogMatchIndex(base.entries, row);
     if (i >= 0) {
-      base.entries[i] = { ...base.entries[i], ...row, identifier: base.entries[i].identifier };
+      base.entries[i] = {
+        ...base.entries[i],
+        url: row.url,
+        type: row.type,
+        ...(row.updatedAt ? { updatedAt: row.updatedAt } : {}),
+      };
     } else {
       base.entries.push(row);
     }

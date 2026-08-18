@@ -20,6 +20,7 @@ export interface CardsCommandOptions {
   check?: boolean;
   dir?: string;
   a2aUrl?: string;
+  fafPointer?: string;
 }
 
 /**
@@ -52,7 +53,7 @@ export function cardsCommand(options: CardsCommandOptions = {}): void {
       faf,
       fafa,
       targets,
-      opts: { a2aCardUrl: options.a2aUrl },
+      opts: { a2aCardUrl: options.a2aUrl, fafPointer: options.fafPointer },
     });
   } catch (e) {
     console.error(`Error: ${(e as Error).message}`);

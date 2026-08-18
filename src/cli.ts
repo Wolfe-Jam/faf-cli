@@ -207,6 +207,7 @@ program
   .option('--fafa <path>', 'agent.fafa path (default: auto-discover)')
   .option('--dir <path>', 'Working directory (default: cwd)')
   .option('--a2a-url <url>', 'Public URL of the A2A card (catalog row)')
+  .option('--faf-pointer <url>', 'Absolute .faf pointer for served cards (default: ./project.faf)')
   .option('--check', 'Print projected cards to stdout, do not write')
   .action((options) => cardsCommand(options));
 
