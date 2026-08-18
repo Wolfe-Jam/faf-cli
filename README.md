@@ -144,11 +144,10 @@ faf cards --check          # print, do not write
 ```
 
 - **One projector** — same `fafContextBlock()` on every door. Does not invent a door or an agent.
-- **Still shipping** — Swift (7.7.0) `Package.swift alone ≠ app` · Ruby (7.6.0) `Gemfile alone ≠ Rails` · JVM (7.5.x) `pom`/`gradle` alone ≠ type.
 
-### Dart/Flutter — knowledge v2 in 7.2.1
+**Recent sprint** — 6 ships, 4 days
 
-**pubspec ≠ Flutter — pure Dart stays Dart.** Same content-aware detection as the [Dart Edition](https://faf.one/blog/dart-edition). **7.2.1** refreshes the single-source knowledge table: Riverpod annotation, Flutter Hooks, Beamer, Routemaster, Jaspr, Relic, and more MCP package names — still **one classifier**, composed by the MCPs.
+🐦 [7.7.0 Swift](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.7.0) · 💎 [7.6.0 Ruby](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.6.0) · ☕ [7.5.1 JVM](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.5.1) · 💠 [7.4.0 C#](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.4.0) · 🐹 [7.3.0 Go](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.3.0) · 🎯 [7.2.1 Dart/Flutter](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.2.1)
 
 ---
 
