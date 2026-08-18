@@ -135,6 +135,8 @@ faf memory show
 
 **`faf cards` projects `.faf` + `.fafa` onto A2A, MCP, registry, and catalog — one context block, every door.**
 
+Author `.faf` (context) and `.fafa` (identity + skills + endpoints). The CLI writes the host cards. Complementary — it does not replace A2A or MCP.
+
 ```bash
 faf cards                  # emit whatever inputs allow
 faf cards --target a2a     # A2A Agent Card only
@@ -143,10 +145,6 @@ faf cards --check          # print, do not write
 
 - **One projector** — same `fafContextBlock()` on every door. Does not invent a door or an agent.
 - **Still shipping** — Swift (7.7.0) `Package.swift alone ≠ app` · Ruby (7.6.0) `Gemfile alone ≠ Rails` · JVM (7.5.x) `pom`/`gradle` alone ≠ type.
-
-## v7.8.0 — The Projector Edition
-
-`faf cards` is the projector. Author `.faf` (context) and `.fafa` (identity + skills + endpoints). The CLI writes the host cards. Complementary — it does not replace A2A or MCP.
 
 ### Dart/Flutter — knowledge v2 in 7.2.1
 
