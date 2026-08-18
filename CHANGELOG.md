@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **`faf cards`** — one projector. `.faf` + `.fafa` → A2A Agent Card · MCP Server Card · registry `server.json` · AI Catalog. Same `fafContextBlock()` on every door. `faf server-card` now wraps the registry target. `--faf-pointer` for served cards.
+- **`faf cards`** — one projector. `.faf` + `.fafa` → A2A Agent Card · MCP Server Card · registry `server.json` · AI Catalog. Same `fafContextBlock()` on every door. `faf server-card` now wraps the registry target. `--faf-pointer` for served cards. Command + fixture tests in `tests/commands/cards.test.ts`.
 
 ### Fixed
 - **`about` is not an `app_type`.** About is a repo role. Signal is the `about:` block (`about.represents`). Scorer short-circuits on that block only. `app_type: about` is a schema error. Removed from `APP_TYPE_CATEGORIES` (ladder is 24 app types).

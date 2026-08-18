@@ -1,0 +1,28 @@
+version: "1.0"
+agent:
+  name: faf-agent
+  displayName: "FAFA — the Voice of FAF"
+  vendor: WolfeJAM
+  version: "0.1.4"
+  description: >-
+    Narrow-domain, citation-mandatory agent for the .faf family.
+  homepage: https://faf.one/agent
+capabilities:
+  - name: ask
+    description: Answer a FAF question.
+    tags: ["faf", "rag"]
+  - name: cite
+    description: Return a citation.
+    tags: ["faf", "citation"]
+endpoints:
+  - protocol: mcp
+    transport: stdio
+    location: uvx faf-agent-mcp
+  - protocol: a2a
+    transport: http
+    location: https://faf-voice.vercel.app/api/a2a
+    version: "1.0"
+provenance:
+  faf: https://github.com/Wolfe-Jam/faf-agent/blob/main/project.faf
+  mediaType: application/vnd.faf+yaml
+  version: "2.5.2"

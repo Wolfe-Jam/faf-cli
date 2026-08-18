@@ -1,0 +1,8 @@
+faf_version: 2.5.2
+generated: 2026-05-04T18:00:00.000Z
+project:
+  name: faf-agent
+  title: FAFA
+  goal: The Voice of FAF
+  homepage: https://faf.one
+  main_language: Python
