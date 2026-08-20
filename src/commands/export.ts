@@ -55,7 +55,9 @@ export function exportCommand(options: ExportOptions = {}): void {
   }
 
   if (exportAll || options.gemini) {
-    writeGeminiMd(dir, data);
+    // Same repo-enrichment AGENTS.md gets — a lean/stale .faf still yields a
+    // complete GEMINI.md (commands/key-files detected from the repo).
+    writeGeminiMd(dir, enrichFromRepo(dir, data));
     console.log(`  GEMINI.md`);
   }
 
