@@ -134,11 +134,16 @@ export const FRAMEWORKS: FrameworkSignature[] = [
     { type: 'file', pattern: 'manage.py' },
     { type: 'file', pattern: 'settings.py' },
   ]},
+  // Content-aware — app.py/main.py alone ≠ Flask/FastAPI (generic entry-point
+  // filenames; same false-positive shape as the Rails/Spring/Vapor kill lines
+  // below). Verified live: gemini-faf-mcp's main.py is a Cloud Functions
+  // entry point (functions-framework), not FastAPI — bare-file detection
+  // misclassified it before this fix.
   { name: 'Flask', slug: 'flask', category: 'backend', signals: [
-    { type: 'file', pattern: 'app.py' },
+    { type: 'content', pattern: 'app.py', key: 'flask' },
   ]},
   { name: 'FastAPI', slug: 'fastapi', category: 'backend', signals: [
-    { type: 'file', pattern: 'main.py' },
+    { type: 'content', pattern: 'main.py', key: 'fastapi' },
   ]},
   // Content-aware — Gemfile alone ≠ Rails (Ruby Edition kill line).
   { name: 'Rails', slug: 'rails', category: 'backend', signals: [

@@ -46,6 +46,24 @@ describe('PIT: FRAMEWORKS catalog', () => {
     expect(spring!.signals.some(s => s.type === 'file')).toBe(false);
   });
 
+  // Regression: a bare `file: main.py`/`app.py` signal false-positived FastAPI/
+  // Flask on any Python project using those generic entry-point names — hit
+  // live on gemini-faf-mcp (main.py is a Cloud Functions entry point, not
+  // FastAPI). Same false-positive shape as the Spring Boot case above.
+  test('FastAPI is content-aware (not main.py filename alone)', () => {
+    const fastapi = FRAMEWORKS.find(f => f.slug === 'fastapi');
+    expect(fastapi).toBeTruthy();
+    expect(fastapi!.signals.every(s => s.type === 'content')).toBe(true);
+    expect(fastapi!.signals.some(s => s.type === 'file')).toBe(false);
+  });
+
+  test('Flask is content-aware (not app.py filename alone)', () => {
+    const flask = FRAMEWORKS.find(f => f.slug === 'flask');
+    expect(flask).toBeTruthy();
+    expect(flask!.signals.every(s => s.type === 'content')).toBe(true);
+    expect(flask!.signals.some(s => s.type === 'file')).toBe(false);
+  });
+
   test('has key frameworks', () => {
     const slugs = new Set(FRAMEWORKS.map(f => f.slug));
     expect(slugs.has('react')).toBe(true);
