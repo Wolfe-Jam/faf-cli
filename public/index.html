@@ -3,543 +3,380 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>faf-cli - Foundational AI-Context Format | THE Context File for AI</title>
+    <title>faf-cli — The command-line tool for the Foundational AI-Context Format</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="apple-touch-icon" href="/favicon.png">
-    <meta name="description" content="Generate perfect AI context files for any project. More important than package.json to AI. package.json gives a static list, .faf shows what to do! 20x faster AI onboarding.">
-    
-    <!-- SEO & AI Discovery -->
-    <meta name="keywords" content="AI context, artificial intelligence, code context, project documentation, AI assistant, Claude AI, ChatGPT, developer tools, TypeScript, Python, React, Vue, Node.js, package.json alternative, project DNA, AI collaboration">
+
+    <meta name="description" content="faf-cli reads a real project and writes a structured project.faf file — the single source of truth for AI coding agents. Generates AGENTS.md, CLAUDE.md, .cursorrules, and GEMINI.md from it.">
+
+    <meta name="keywords" content="faf-cli, .faf format, AI context, AGENTS.md, CLAUDE.md, MCP, IANA, project context, AI coding agents">
     <meta name="author" content="🏎️⚡️_wolfejam.dev">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://fafcli.dev">
-    
-    <!-- Open Graph / Facebook -->
+
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://fafcli.dev">
-    <meta property="og:title" content="faf-cli - Foundational AI-Context Format | THE Context File for AI">
-    <meta property="og:description" content="THE context file more important than package.json to AI. Generate perfect AI context files for any project. 20x faster AI onboarding with F1-inspired performance.">
+    <meta property="og:title" content="faf-cli — The command-line tool for the Foundational AI-Context Format">
+    <meta property="og:description" content="Reads a real project and writes a structured project.faf file — the single source of truth for AI coding agents.">
     <meta property="og:image" content="https://fafcli.dev/og-image.png">
     <meta property="og:site_name" content="faf-cli">
-    
-    <!-- Twitter -->
+
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://fafcli.dev">
-    <meta property="twitter:title" content="faf-cli - THE Context File for AI">
-    <meta property="twitter:description" content="package.json gives a static list, .faf shows what to do! 20x faster AI onboarding.">
-    <meta property="twitter:image" content="https://fafcli.dev/twitter-image.png">
-    
-    <!-- Structured Data for AI Discovery -->
+    <meta property="twitter:title" content="faf-cli">
+    <meta property="twitter:description" content="The command-line tool for the Foundational AI-Context Format (.faf).">
+    <meta property="twitter:image" content="https://fafcli.dev/og-image.png">
+
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
         "name": "faf-cli",
-        "alternateName": "Foundational AI-Context Format CLI",
-        "description": "Command-line interface for generating AI context files more important than package.json. Transforms any project into perfect AI context with validation, scoring, and sync capabilities.",
         "url": "https://fafcli.dev",
-        "downloadUrl": "https://www.npmjs.com/package/faf-cli",
-        "softwareVersion": "3.4.7",
-        "operatingSystem": "macOS, Linux, Windows",
-        "applicationCategory": "DeveloperTool",
-        "programmingLanguage": ["TypeScript", "JavaScript", "Python"],
-        "keywords": "AI context, artificial intelligence, code documentation, developer tools, project DNA, AI assistant helper",
-        "author": {
-            "@type": "Person",
-            "name": "🏎️⚡️_wolfejam.dev"
-        },
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD"
-        },
-        "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": "4.8",
-            "ratingCount": "100"
-        },
-        "featureList": [
-            "Lightning-fast generation <20ms",
-            "AI/Human YinYang Balance - 50/50 context weighting", 
-            "Smart project detection - 153+ patterns",
-            "Quality scoring 0-100% with actionable feedback",
-            ".fafignore support for file exclusion",
-            "RAW tested with Claude AI (85% score) and Gemini",
-            "F1-inspired software engineering"
+        "description": "Reads a real project and writes a structured project.faf file — the single source of truth for AI coding agents. Generates AGENTS.md, CLAUDE.md, .cursorrules, and GEMINI.md from it.",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Any",
+        "sameAs": [
+            "https://github.com/Wolfe-Jam/faf-cli",
+            "https://www.npmjs.com/package/faf-cli",
+            "https://faf.one"
         ]
     }
     </script>
-    
-    <!-- Additional AI-specific metadata -->
-    <meta name="ai-context" content="This tool generates AI context files that are more important than package.json for AI assistants. It provides instant project understanding that normally takes 20+ minutes to gather manually.">
-    <meta name="ai-use-case" content="Perfect for AI collaboration, code handoffs, project onboarding, documentation, and helping AI assistants understand your codebase instantly.">
-    <meta name="project-types" content="TypeScript, JavaScript, Python, React, Vue, Svelte, Node.js, FastAPI, Django, Flask, Next.js, Nuxt.js">
-    <meta name="performance" content="Generation <20ms, Scoring <100ms, Validation <50ms, F1-inspired performance standards">
-    
+
     <style>
-        /* CSS Variables for theme switching */
         :root {
-            --bg-primary: #fefcf8;
-            --bg-secondary: #f9f6f1;
-            --text-primary: #1a1a1a;
-            --text-secondary: #4a4a4a;
-            --text-muted: #7a7a7a;
-            --accent: #00bf63;
-            --accent-hover: #00a855;
-            --border: #e5e5e5;
-            --code-bg: #f5f5f5;
-            --shadow: rgba(0, 0, 0, 0.08);
-        }
-        
-        [data-theme="dark"] {
-            --bg-primary: #0f0f0f;
-            --bg-secondary: #1a1a1a;
-            --text-primary: #f5f5f5;
-            --text-secondary: #d0d0d0;
-            --text-muted: #a0a0a0;
+            --bg: #0d1117;
+            --bg-card: #0a0a0a;
+            --fg: #e6edf3;
+            --dim: #8b949e;
+            --border: #21262d;
             --accent: #00bf63;
             --accent-hover: #00ff88;
-            --border: #333333;
-            --code-bg: #262626;
-            --shadow: rgba(0, 0, 0, 0.3);
         }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
-            color: var(--text-primary);
-            background: var(--bg-primary);
-            transition: background 0.2s ease, color 0.2s ease;
+            color: var(--fg);
+            background: var(--bg);
         }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 24px;
+
+        code, pre, .mono {
+            font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
         }
-        
-        /* Header */
-        header {
-            padding: 24px 0;
-            border-bottom: 1px solid var(--border);
-            background: var(--bg-primary);
-            position: sticky;
-            top: 0;
-            z-index: 100;
+
+        .container { max-width: 980px; margin: 0 auto; padding: 0 24px; }
+
+        a { color: var(--accent); }
+        a:hover { color: var(--accent-hover); }
+
+        code.inline {
+            background: rgba(0, 191, 99, 0.12);
+            color: var(--accent);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
         }
-        
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .logo {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--text-primary);
-            text-decoration: none;
-        }
-        
-        .theme-toggle {
-            background: none;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 8px 12px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 14px;
-        }
-        
-        .theme-toggle:hover {
-            background: var(--bg-secondary);
-            border-color: var(--accent);
-        }
-        
-        /* Hero Section */
+
+        /* Hero */
         .hero {
-            padding: 120px 0 80px;
-            text-align: center;
+            padding: 100px 0 70px;
         }
-        
-        .hero h1 {
-            font-size: clamp(48px, 6vw, 72px);
-            font-weight: 700;
-            margin-bottom: 24px;
-            line-height: 1.1;
-        }
-        
-        .hero .tagline {
-            font-size: 24px;
-            color: var(--text-secondary);
-            margin-bottom: 16px;
-            font-weight: 400;
-        }
-        
-        .hero .subtitle {
-            font-size: 18px;
-            color: var(--text-muted);
-            margin-bottom: 48px;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        
-        /* CTA Buttons */
-        .cta-container {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-bottom: 64px;
-        }
-        
-        .btn {
-            padding: 12px 32px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 16px;
-            transition: all 0.2s ease;
-            border: none;
-            cursor: pointer;
-        }
-        
-        .btn-primary {
-            background: var(--accent);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: var(--accent-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px var(--shadow);
-        }
-        
-        .btn-secondary {
-            background: var(--text-primary);
-            color: var(--bg-primary);
-            border: 1px solid var(--text-primary);
-        }
-        
-        .btn-secondary:hover {
-            background: #333333;
-            border-color: #333333;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px var(--shadow);
-        }
-        
-        /* Demo Section */
-        .demo {
-            background: var(--bg-secondary);
-            padding: 80px 0;
-            border-radius: 16px;
-            margin: 0 24px 80px;
-        }
-        
-        .demo-content {
-            max-width: 800px;
-            margin: 0 auto;
-            text-align: center;
-        }
-        
-        .demo h2 {
-            font-size: 36px;
-            margin-bottom: 24px;
-            font-weight: 600;
-        }
-        
-        .demo p {
-            font-size: 18px;
-            color: var(--text-secondary);
-            margin-bottom: 48px;
-        }
-        
-        .demo-placeholder {
-            background: var(--code-bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 40px;
-            font-family: 'Monaco', 'Menlo', monospace;
-            font-size: 14px;
-            color: var(--text-secondary);
-            margin-bottom: 24px;
-        }
-        
-        /* Features Grid */
-        .features {
-            padding: 80px 0;
-        }
-        
-        .features h2 {
-            text-align: center;
-            font-size: 36px;
-            margin-bottom: 64px;
-            font-weight: 600;
-        }
-        
-        .features-grid {
+
+        .hero-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 40px;
+            grid-template-columns: 1.1fr 1fr;
+            gap: 48px;
+            align-items: start;
         }
-        
-        .feature {
-            text-align: left;
+
+        @media (max-width: 860px) {
+            .hero-grid { grid-template-columns: 1fr; }
         }
-        
-        .feature-icon {
-            font-size: 32px;
-            margin-bottom: 16px;
-            display: block;
+
+        .hero h1 {
+            font-size: clamp(40px, 6vw, 64px);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 20px;
         }
-        
-        .feature h3 {
-            font-size: 20px;
-            margin-bottom: 12px;
+
+        .hero .tagline {
+            font-size: 19px;
+            color: var(--dim);
+            max-width: 480px;
+            margin-bottom: 32px;
+        }
+
+        .hero .tagline .inline-link { color: var(--fg); text-decoration: underline; text-underline-offset: 3px; }
+
+        .cta-row { display: flex; gap: 12px; flex-wrap: wrap; }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 22px;
+            border-radius: 999px;
             font-weight: 600;
+            font-size: 15px;
+            text-decoration: none;
+            transition: all 0.15s ease;
         }
-        
-        .feature p {
-            color: var(--text-secondary);
-            line-height: 1.6;
+
+        .btn-primary {
+            background: var(--fg);
+            color: var(--bg);
         }
-        
-        /* Code Block */
-        .code-block {
-            background: var(--code-bg);
+        .btn-primary:hover { background: var(--accent-hover); color: var(--bg); }
+
+        .btn-outline {
             border: 1px solid var(--border);
-            border-radius: 8px;
+            color: var(--fg);
+        }
+        .btn-outline:hover { border-color: var(--dim); color: var(--fg); }
+
+        /* Code card */
+        .code-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
             padding: 24px;
-            font-family: 'Monaco', 'Menlo', monospace;
             font-size: 14px;
-            overflow-x: auto;
-            margin: 32px 0;
         }
-        
-        .code-block pre {
-            margin: 0;
+
+        .code-card .title {
+            color: var(--dim);
+            margin-bottom: 16px;
         }
-        
-        /* Footer */
-        footer {
-            padding: 40px 0;
+
+        .code-card .section-label {
+            color: var(--fg);
+            font-weight: 700;
+            margin: 16px 0 8px;
+        }
+        .code-card .section-label:first-of-type { margin-top: 0; }
+
+        .code-card .line {
+            color: var(--dim);
+            margin-bottom: 4px;
+        }
+
+        /* Content sections */
+        .section {
+            padding: 48px 0;
             border-top: 1px solid var(--border);
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 14px;
         }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .hero {
-                padding: 80px 0 60px;
-            }
-            
-            .cta-container {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .btn {
-                width: 200px;
-            }
-            
-            .demo {
-                margin: 0 0 60px;
-            }
-            
-            .features {
-                padding: 60px 0;
-            }
-            
-            .features-grid {
-                gap: 32px;
-            }
+
+        .section h2 {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .section p {
+            color: var(--dim);
+            max-width: 720px;
+            margin-bottom: 12px;
+        }
+
+        .section p:last-child { margin-bottom: 0; }
+
+        .who-list {
+            list-style: none;
+            max-width: 640px;
+        }
+
+        .who-list li {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            color: var(--dim);
+            margin-bottom: 14px;
+        }
+
+        .who-list li svg { flex-shrink: 0; margin-top: 3px; color: var(--accent); }
+
+        pre.block {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 18px 20px;
+            overflow-x: auto;
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        pre.block .comment { color: var(--dim); }
+        pre.block .cmd { color: var(--fg); }
+
+        .how-heading {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--fg);
+        }
+
+        .links-list { list-style: none; }
+
+        .links-list li {
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .links-list li:last-child { border-bottom: none; }
+
+        .links-list a { font-weight: 600; text-decoration: none; }
+        .links-list a:hover { text-decoration: underline; }
+
+        footer {
+            padding: 40px 0 60px;
+            color: var(--dim);
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
-    <header>
-        <nav class="container">
-            <a href="#" class="logo">🏎️⚡️ faf-cli</a>
-            <button class="theme-toggle" id="themeToggle">
-                <span id="themeText">🌙 Dark</span>
-            </button>
-        </nav>
-    </header>
-
     <main>
         <section class="hero">
             <div class="container">
-                <h1>Foundational AI-Context Format</h1>
-                <p class="tagline"><strong>STOP faffing About!</strong></p>
-                <p class="subtitle">THE context file - more important than package.json to AI. Your project's DNA in a format AI actually understands.</p>
-
-                <p id="download-count" style="font-size: 14px; color: var(--accent); font-weight: 600; margin-bottom: 24px;">120,000+ npm downloads across the FAF ecosystem</p>
-
-                <div style="text-align: center; margin: 40px 0;">
-                    <p style="font-size: 22px; color: var(--text-primary); font-weight: 600; margin-bottom: 12px;">
-                        "package.json wasn't built for this, .faf was!"
-                    </p>
-                    <p style="font-size: 18px; color: var(--text-secondary); font-style: italic;">
-                        package.json gives me a static list. .faf shows me what to do!
-                    </p>
-                </div>
-                
-                <div class="cta-container">
-                    <a href="#install" class="btn btn-primary">Install Now</a>
-                    <a href="https://github.com/Wolfe-Jam/faf-cli" class="btn btn-secondary">View on GitHub</a>
+                <div class="hero-grid">
+                    <div>
+                        <h1>faf-cli</h1>
+                        <p class="tagline">The command-line tool for the Foundational AI-context Format (<code class="inline">.faf</code>).</p>
+                        <div class="cta-row">
+                            <a href="#how-to-use-it" class="btn btn-primary">Get Started</a>
+                            <a href="https://github.com/Wolfe-Jam/faf-cli" class="btn btn-outline" target="_blank" rel="noopener">View on GitHub</a>
+                        </div>
+                    </div>
+                    <div class="code-card">
+                        <div class="title mono"># one-off, no install</div>
+                        <div class="line mono">bunx faf-cli init</div>
+                        <div class="line mono">bunx faf-cli auto</div>
+                        <div class="line mono">bunx faf-cli export --agents</div>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <section class="demo">
-            <div class="demo-content">
-                <h2>The Magic Moment</h2>
-                <p>Watch how faf-cli transforms any project into perfect AI context in seconds</p>
-                
-                <div style="max-width: 600px; margin: 0 auto;">
-                    <img src="/boris-flow.gif" alt="Boris-Flow Integration Test" style="width: 100%; border-radius: 8px; border: 1px solid var(--border);">
-                </div>
-
-                <p style="font-size: 14px; color: var(--text-muted); margin-top: 24px;">
-                    Boris-Flow: 12-test integration suite validating the complete Claude Code ecosystem
-                </p>
-            </div>
-        </section>
-
-        <section class="features" id="features">
+        <section class="section" id="what-is-faf-cli">
             <div class="container">
-                <h2>F1-Inspired Performance</h2>
-                
-                <div class="features-grid">
-                    <div class="feature">
-                        <span class="feature-icon">⚡</span>
-                        <h3>Lightning Fast</h3>
-                        <p>Generation in <20ms. Scoring in <100ms. Validation in <50ms. Every millisecond matters.</p>
-                    </div>
-                    
-                    <div class="feature">
-                        <span class="feature-icon">🎯</span>
-                        <h3>AI/Human YinYang Balance</h3>
-                        <p>Revolutionary 50/50 context weighting. Human identity drives the project, technical excellence enables it.</p>
-                    </div>
-                    
-                    <div class="feature">
-                        <span class="feature-icon">🔍</span>
-                        <h3>Smart Detection</h3>
-                        <p>Supports 153+ project patterns. TypeScript, Python, React, Vue, Node.js - all detected automatically.</p>
-                    </div>
-                    
-                    <div class="feature">
-                        <span class="feature-icon">📊</span>
-                        <h3>Quality Scoring</h3>
-                        <p>0-100% completeness score with actionable feedback. Know exactly what's missing for better AI context.</p>
-                    </div>
-                    
-                    <div class="feature">
-                        <span class="feature-icon">🚫</span>
-                        <h3>.fafignore Support</h3>
-                        <p>Exclude what you don't need. Built-in security patterns plus full user customization.</p>
-                    </div>
-                    
-                    <div class="feature">
-                        <span class="feature-icon">🏁</span>
-                        <h3>RAW Tested</h3>
-                        <p>85% score from Claude AI, positive from Gemini. Tested with real AI assistants, not synthetic data.</p>
-                    </div>
-                </div>
+                <h2>What is faf-cli?</h2>
+                <p><code class="inline">faf-cli</code> reads a real project and writes a structured <code class="inline">project.faf</code> file — the single source of truth for AI coding agents.</p>
+                <p>From that file it can generate the instruction files agents actually read (AGENTS.md, CLAUDE.md, .cursorrules, GEMINI.md).</p>
+                <p>It is also the engine behind the FAF MCP servers.</p>
             </div>
         </section>
 
-        <section class="hero" id="install">
+        <section class="section" id="what-is-faf">
             <div class="container">
-                <h2>Get Started in 30 Seconds</h2>
-                <div class="code-block">
-                    <pre># Install globally
-npm install -g faf-cli
+                <h2>What is .faf?</h2>
+                <p><code class="inline">.faf</code> is an open, IANA-registered format (<code class="inline">application/vnd.faf+yaml</code>) for persistent project context.</p>
+                <p>It holds the facts an agent needs — language, stack, commands, structure, and constraints — in a versioned file that travels with the code.</p>
+            </div>
+        </section>
 
-# Generate .faf file for your project
-faf init
+        <section class="section" id="why-it-exists">
+            <div class="container">
+                <h2>Why it exists</h2>
+                <p>Human READMEs and hand-written agent instruction files drift. Agents then re-discover the same project facts on every session.</p>
+                <p><code class="inline">faf-cli</code> creates and maintains the structured context file so the facts stay accurate and the agent files can be regenerated from them.</p>
+            </div>
+        </section>
 
-# See your score and get AI-ready
-faf score --details</pre>
-                </div>
-                
-                <div class="cta-container">
-                    <a href="https://github.com/Wolfe-Jam/faf-cli" class="btn btn-primary">Start Building</a>
-                </div>
+        <section class="section" id="who-it-is-for">
+            <div class="container">
+                <h2>Who it is for</h2>
+                <ul class="who-list">
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        Developers who use AI coding agents (Claude Code, Cursor, Codex, Gemini, and others)
+                    </li>
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        Teams that want consistent context across multiple agents
+                    </li>
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        Anyone maintaining MCP servers that need reliable project context
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="section" id="how-to-use-it">
+            <div class="container">
+                <h2>How to use it</h2>
+
+                <p class="how-heading">One-off (no install)</p>
+                <pre class="block mono"><span class="cmd">bunx faf-cli init
+bunx faf-cli auto
+bunx faf-cli export --agents</span></pre>
+
+                <p class="how-heading">Installed (regular terminal use)</p>
+                <pre class="block mono"><span class="cmd">npm install -g faf-cli
+<span class="comment"># or</span>
+bun add -g faf-cli
+<span class="comment"># or</span>
+brew install wolfe-jam/faf/faf-cli</span></pre>
+
+                <p>Then run <code class="inline">faf</code> in any project.</p>
+            </div>
+        </section>
+
+        <section class="section" id="mcp">
+            <div class="container">
+                <h2>MCP</h2>
+                <p><code class="inline">faf-cli</code> is the authoring and maintenance engine for the FAF MCP servers.</p>
+                <p>The same <code class="inline">project.faf</code> file that the CLI produces is what the MCP tools read and expose to agents.</p>
+            </div>
+        </section>
+
+        <section class="section" id="links">
+            <div class="container">
+                <h2>Links</h2>
+                <ul class="links-list">
+                    <li><a href="https://github.com/Wolfe-Jam/faf" target="_blank" rel="noopener">Format specification →</a> <span style="color: var(--dim);">github.com/Wolfe-Jam/faf</span></li>
+                    <li><a href="https://github.com/Wolfe-Jam/faf-cli" target="_blank" rel="noopener">CLI source →</a> <span style="color: var(--dim);">github.com/Wolfe-Jam/faf-cli</span></li>
+                    <li><a href="https://www.npmjs.com/package/faf-cli" target="_blank" rel="noopener">npm →</a> <span style="color: var(--dim);">faf-cli</span></li>
+                    <li><a href="https://faf.one" target="_blank" rel="noopener">Format home →</a> <span style="color: var(--dim);">faf.one</span></li>
+                </ul>
             </div>
         </section>
     </main>
 
     <footer>
         <div class="container">
-            <p>&copy; 2025-2026 faf-cli. F1-Inspired Software Engineering. MIT License.</p>
+            <p>&copy; 2025-2026 faf-cli. MIT License.</p>
         </div>
     </footer>
 
     <script>
-        // Theme toggle functionality
-        const themeToggle = document.getElementById('themeToggle');
-        const themeText = document.getElementById('themeText');
-        const html = document.documentElement;
-        
-        // Check for saved theme preference or default to light
-        const currentTheme = localStorage.getItem('theme') || 'light';
-        html.setAttribute('data-theme', currentTheme);
-        updateThemeText(currentTheme);
-        
-        themeToggle.addEventListener('click', () => {
-            const currentTheme = html.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            
-            html.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateThemeText(newTheme);
-        });
-        
-        function updateThemeText(theme) {
-            themeText.textContent = theme === 'dark' ? '☀️ Light' : '🌙 Dark';
-        }
-
-        // Live npm download count — faf-cli moves fast, a hardcoded number
-        // goes stale within weeks. Sums the FAF ecosystem's npm packages via
-        // npm's public, CORS-open downloads API. Falls back to the static
-        // text above (last known-good figure) if the fetch fails for any
-        // reason — never shows an error or a blank state to a visitor.
-        (function updateDownloadCount() {
+        // Live npm download count — dormant on this page by design (the
+        // 2026-08-22 content rewrite deliberately dropped vanity-metric
+        // callouts in favor of plain facts), kept here in case a future
+        // pass wants it back as a single inline mention near the npm link,
+        // agents.md-style ("used by over 60k open-source projects").
+        //
+        // No hardcoded fallback number: faf-cli moves fast enough that any
+        // static figure is wrong within weeks. If re-enabled, wire this to
+        // an element and only set visible text on a successful fetch.
+        function fetchLiveNpmDownloadTotal() {
             const packages = [
                 'faf-cli', 'faf', 'claude-faf-mcp', 'faf-mcp', 'faf-scoring-kernel',
                 'bun-sticky', 'slash-tokens', 'wjttc', 'grok-faf-mcp',
                 'faf-wasm-core', 'faf-wasm-sdk', 'faf-wasm', 'faf-wasm-gen'
             ];
-            const el = document.getElementById('download-count');
-            if (!el) return;
-
-            Promise.all(packages.map((pkg) =>
+            return Promise.all(packages.map((pkg) =>
                 fetch(`https://api.npmjs.org/downloads/point/2000-01-01:2099-12-31/${pkg}`)
                     .then((r) => r.ok ? r.json() : { downloads: 0 })
                     .then((d) => d.downloads || 0)
                     .catch(() => 0)
-            )).then((counts) => {
-                const total = counts.reduce((sum, n) => sum + n, 0);
-                if (total <= 0) return; // keep static fallback text
-                const floor = Math.floor(total / 1000) * 1000;
-                el.textContent = `${floor.toLocaleString()}+ npm downloads across the FAF ecosystem`;
-            }).catch(() => {
-                // Network/API unavailable — static fallback text stands as-is.
-            });
-        })();
+            )).then((counts) => counts.reduce((sum, n) => sum + n, 0));
+        }
     </script>
 </body>
 </html>
