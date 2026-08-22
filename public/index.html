@@ -221,6 +221,24 @@
             color: var(--fg);
         }
 
+        .faq-list { max-width: 720px; }
+
+        .faq-item {
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .faq-item:last-child { border-bottom: none; }
+
+        .faq-item dt {
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .faq-item dd {
+            color: var(--dim);
+            margin: 0;
+        }
+
         .links-list { list-style: none; }
 
         .links-list li {
@@ -296,6 +314,25 @@ constraints:
             </div>
         </section>
 
+        <section class="section" id="human-context">
+            <div class="container">
+                <h2>The human context</h2>
+                <p>Most of what's in <code class="inline">project.faf</code> is mechanical — language, stack, commands. AGENTS.md and its siblings cover that ground well.</p>
+                <p>The facts an agent usually can't infer are intent: who a project is for, why it exists, when it's likely to change. <code class="inline">.faf</code> has a dedicated slot for exactly that — six questions, one answer each.</p>
+
+                <p class="how-heading">The same project, with intent</p>
+                <pre class="block mono"><span class="comment"># project.faf (excerpt, continued)</span>
+<span class="cmd">human_context:
+  who: backend developers on the payments team
+  what: the internal API that issues and refunds payments
+  why: replace three undocumented internal scripts
+  where: runs on the Kubernetes cluster, staging and prod
+  when: active development, weekly releases
+  how: request &rarr; validate &rarr; charge provider &rarr; record ledger entry</span></pre>
+                <p>AGENTS.md makes a start on context. The six-W slots finish the job — instructions plus intent, in one file.</p>
+            </div>
+        </section>
+
         <section class="section" id="why-it-exists">
             <div class="container">
                 <h2>Why it exists</h2>
@@ -350,6 +387,30 @@ brew install wolfe-jam/faf/faf-cli</span></pre>
                 <h2>MCP</h2>
                 <p><code class="inline">faf-cli</code> is the authoring and maintenance engine for the FAF MCP servers.</p>
                 <p>The same <code class="inline">project.faf</code> file that the CLI produces is what the MCP tools read and expose to agents.</p>
+            </div>
+        </section>
+
+        <section class="section" id="faq">
+            <div class="container">
+                <h2>FAQ</h2>
+                <dl class="faq-list">
+                    <div class="faq-item">
+                        <dt>Does it replace AGENTS.md?</dt>
+                        <dd>No — it enhances it. <code class="inline">.faf</code> fills the gaps AGENTS.md leaves open: structured facts, versioning, and the human-context (who/what/why/where/when/how) fields most instruction files never capture.</dd>
+                    </div>
+                    <div class="faq-item">
+                        <dt>Does it work with CLAUDE.md, GEMINI.md, and others?</dt>
+                        <dd>Yes — <code class="inline">faf-cli export --agents</code> generates AGENTS.md, CLAUDE.md, .cursorrules, and GEMINI.md from the same <code class="inline">project.faf</code> source, so every agent reads the same facts.</dd>
+                    </div>
+                    <div class="faq-item">
+                        <dt>Do I have to write the YAML by hand?</dt>
+                        <dd>No — <code class="inline">faf-cli auto</code> scans the project and drafts it. Anything it can't verify from the code is left blank rather than guessed.</dd>
+                    </div>
+                    <div class="faq-item">
+                        <dt>What happens to my existing AGENTS.md?</dt>
+                        <dd>faf-cli writes it as a managed block. Anything outside the <code class="inline">&lt;!-- faf:start --&gt;</code> / <code class="inline">&lt;!-- faf:end --&gt;</code> markers is left untouched.</dd>
+                    </div>
+                </dl>
             </div>
         </section>
 
