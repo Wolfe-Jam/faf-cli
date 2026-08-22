@@ -267,7 +267,7 @@
                 <h2>What is faf-cli?</h2>
                 <p><code class="inline">faf-cli</code> reads a real project and writes a structured <code class="inline">project.faf</code> file — the single source of truth for AI coding agents.</p>
                 <p>From that file it can generate the instruction files agents actually read (AGENTS.md, CLAUDE.md, .cursorrules, GEMINI.md).</p>
-                <p>It is also the engine behind the FAF MCP servers.</p>
+                <p>It is also the authoring engine for the FAF MCP servers.</p>
             </div>
         </section>
 
@@ -276,6 +276,23 @@
                 <h2>What is .faf?</h2>
                 <p><code class="inline">.faf</code> is an open, IANA-registered format (<code class="inline">application/vnd.faf+yaml</code>) for persistent project context.</p>
                 <p>It holds the facts an agent needs — language, stack, commands, structure, and constraints — in a versioned file that travels with the code.</p>
+
+                <p class="how-heading">A minimal example</p>
+                <pre class="block mono"><span class="comment"># project.faf (excerpt)</span>
+<span class="cmd">project:
+  name: my-api
+  language: typescript
+  runtime: node
+commands:
+  test: npm test
+  build: npm run build
+  lint: npm run lint
+stack:
+  - express
+  - postgres
+constraints:
+  - never commit .env</span></pre>
+                <p>This is the single source. Agent instruction files are generated from it.</p>
             </div>
         </section>
 
@@ -315,6 +332,7 @@
                 <pre class="block mono"><span class="cmd">bunx faf-cli init
 bunx faf-cli auto
 bunx faf-cli export --agents</span></pre>
+                <p>Produces a versioned <code class="inline">project.faf</code> and regenerates the agent instruction files (AGENTS.md, CLAUDE.md, .cursorrules, GEMINI.md) from it.</p>
 
                 <p class="how-heading">Installed (regular terminal use)</p>
                 <pre class="block mono"><span class="cmd">npm install -g faf-cli
