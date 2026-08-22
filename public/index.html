@@ -384,7 +384,7 @@
                 <p class="tagline"><strong>STOP faffing About!</strong></p>
                 <p class="subtitle">THE context file - more important than package.json to AI. Your project's DNA in a format AI actually understands.</p>
 
-                <p style="font-size: 14px; color: var(--accent); font-weight: 600; margin-bottom: 24px;">20,000+ npm downloads across the FAF ecosystem</p>
+                <p id="download-count" style="font-size: 14px; color: var(--accent); font-weight: 600; margin-bottom: 24px;">120,000+ npm downloads across the FAF ecosystem</p>
 
                 <div style="text-align: center; margin: 40px 0;">
                     <p style="font-size: 22px; color: var(--text-primary); font-weight: 600; margin-bottom: 12px;">
@@ -511,6 +511,35 @@ faf score --details</pre>
         function updateThemeText(theme) {
             themeText.textContent = theme === 'dark' ? '☀️ Light' : '🌙 Dark';
         }
+
+        // Live npm download count — faf-cli moves fast, a hardcoded number
+        // goes stale within weeks. Sums the FAF ecosystem's npm packages via
+        // npm's public, CORS-open downloads API. Falls back to the static
+        // text above (last known-good figure) if the fetch fails for any
+        // reason — never shows an error or a blank state to a visitor.
+        (function updateDownloadCount() {
+            const packages = [
+                'faf-cli', 'faf', 'claude-faf-mcp', 'faf-mcp', 'faf-scoring-kernel',
+                'bun-sticky', 'slash-tokens', 'wjttc', 'grok-faf-mcp',
+                'faf-wasm-core', 'faf-wasm-sdk', 'faf-wasm', 'faf-wasm-gen'
+            ];
+            const el = document.getElementById('download-count');
+            if (!el) return;
+
+            Promise.all(packages.map((pkg) =>
+                fetch(`https://api.npmjs.org/downloads/point/2000-01-01:2099-12-31/${pkg}`)
+                    .then((r) => r.ok ? r.json() : { downloads: 0 })
+                    .then((d) => d.downloads || 0)
+                    .catch(() => 0)
+            )).then((counts) => {
+                const total = counts.reduce((sum, n) => sum + n, 0);
+                if (total <= 0) return; // keep static fallback text
+                const floor = Math.floor(total / 1000) * 1000;
+                el.textContent = `${floor.toLocaleString()}+ npm downloads across the FAF ecosystem`;
+            }).catch(() => {
+                // Network/API unavailable — static fallback text stands as-is.
+            });
+        })();
     </script>
 </body>
 </html>
