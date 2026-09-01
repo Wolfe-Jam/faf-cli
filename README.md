@@ -131,28 +131,34 @@ faf memory etch "a durable fact" --id my-fact
 faf memory show
 ```
 
-### What's New in v7.8.0 — The Projector Edition
+### What's New in v7.9.0 — The Git-Flow Edition
 
-**`faf cards` projects `.faf` + `.fafa` onto A2A, MCP, registry, and catalog — one context block, every door.**
+**`faf export` respects your repo's branch model — `project.default_branch` drives the `AGENTS.md` PR base instead of a hardcoded `main`.**
 
-Author `.faf` (context) and `.fafa` (identity + skills + endpoints). The CLI writes the host cards. Complementary — it does not replace A2A or MCP.
+Set it once in `project.faf`; git-flow repos that PR into `dev` / `develop` get the right base everywhere `faf export` writes it. Default stays `main` when the field is absent.
 
-```bash
-faf cards                  # emit whatever inputs allow
-faf cards --target a2a     # A2A Agent Card only
-faf cards --check          # print, do not write
+```yaml
+# project.faf
+project:
+  default_branch: dev
 ```
 
-- **One projector** — same `fafContextBlock()` on every door. Does not invent a door or an agent.
+```bash
+faf export --agents --output docs/context   # write anywhere, not just cwd
+faf check --verbose                          # per-slot breakdown with validation
+```
 
-**Recent sprint** — 6 ships, 4 days
+- **`key_files` annotations** — write `src/ — entrypoint` and it renders as a `Path | Role` table in "Where things live".
+- Surfaced by the first external `AGENTS.md` deployment (future-agi, base `dev`).
 
+**Recent sprint** — 7 ships
+
+- 🎬 [7.8.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.8.0) The Projector Edition
 - 🐦 [7.7.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.7.0) The Swift Edition
 - 💎 [7.6.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.6.0) The Ruby Edition
 - ☕ [7.5.1](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.5.1) The JVM Edition
 - 💠 [7.4.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.4.0) The C# Edition
 - 🐹 [7.3.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.3.0) The Go Edition
-- 🎯 [7.2.1](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.2.1) Dart/Flutter knowledge v2
 
 ---
 

@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v7.8.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v7.9.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -9,6 +9,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.9.0] - 2026-09-01 — The Git-Flow Edition
+
+**`faf export` respects your repo's branch model — `project.default_branch` drives the `AGENTS.md` PR base instead of a hardcoded `main`.**
+
+### Added
+- **`project.default_branch`** — `faf export --agents` (and `--gemini`) reads it for the Guardrails / When-stuck / Commit-&-PR branch lines. Git-flow repos that PR into `dev` / `develop` now get the right base in their `AGENTS.md`; default stays `main` when the field is absent — no change for anyone not using it.
+- **`faf export --output <path>`** — write exported files to that directory (created recursively) instead of always the current one. `project.faf` is still discovered and read from the working directory.
+- **`faf check --verbose`** — show the per-slot breakdown (populated / slotignored / empty) alongside validation. `displayScore()` already supported it; `faf score --verbose` had the flag, `faf check` didn't.
+- **`key_files` annotations** — an entry written `path — role` now renders as a `Path | Role` table in `AGENTS.md` "Where things live"; bare paths stay a plain list.
+
+### Fixed
+- **`faf cards` A2A catalog row** now emits `application/a2a-agent-card+json` (was the generic `application/json`) so the AI Catalog types the row correctly.
+- **`AGENTS.md` orientation line** — `project.goal` is trimmed before the language/type suffix (a multi-line YAML `>` scalar was leaking a trailing newline).
+
+### Notes / non-claims
+- **Surfaced by the first external `AGENTS.md` deployment** — future-agi/future-agi#2482 (Django + React + Go, base `dev`). faf-cli's own repo never hit the branch bug because its own branch is `main`.
+- **Do NOT claim:** detects the branch model automatically (it reads the field you set) · Windows (CI matrix is ubuntu + macos only).
+- **Kill line:** faf export fits the repo it runs in.
+
+### Verification (claim inventory)
+| Claim | Evidence command |
+|-------|------------------|
+| `default_branch` drives the AGENTS.md branch lines | `bun test tests/interop/agents.test.ts` |
+| `key_files` table vs list | `bun test tests/interop/agents.test.ts` |
+| `--output` writes elsewhere, creates the dir | `bun test tests/commands/export.test.ts` |
+| `check --verbose` prints the slot breakdown | `bun test tests/commands/check.test.ts` |
 
 ## [7.8.0] - 2026-08-18 — The Projector Edition
 
