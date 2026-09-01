@@ -1,10 +1,11 @@
-import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
+import { describe, test, expect, beforeEach, afterEach, spyOn } from 'bun:test';
 import { mkdirSync, writeFileSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { validateFaf } from '../../src/core/schema.js';
 import { readFaf, readFafRaw } from '../../src/interop/faf.js';
 import * as kernel from '../../src/wasm/kernel.js';
+import { checkCommand } from '../../src/commands/check.js';
 
 describe('BRAKE: check command', () => {
   let testDir: string;
@@ -49,5 +50,26 @@ describe('BRAKE: check command', () => {
     writeFileSync(fafPath, `faf_version: 2.5.0\nproject:\n  name: test\n  goal: Test\n  main_language: TypeScript\n`);
     const yaml = readFafRaw(fafPath);
     expect(kernel.validate(yaml)).toBe(true);
+  });
+
+  test('--verbose prints the per-slot breakdown; default run does not', () => {
+    const fafPath = join(testDir, 'project.faf');
+    writeFileSync(fafPath, `faf_version: 2.5.0\nproject:\n  name: verbose-test\n  goal: Test\n  main_language: TypeScript\n`);
+
+    const logSpy = spyOn(console, 'log');
+
+    logSpy.mockClear();
+    checkCommand(fafPath, {});
+    const quiet = logSpy.mock.calls.map((c) => String(c[0])).join('\n');
+
+    logSpy.mockClear();
+    checkCommand(fafPath, { verbose: true });
+    const verbose = logSpy.mock.calls.map((c) => String(c[0])).join('\n');
+
+    logSpy.mockRestore();
+
+    expect(verbose).toContain('project.name');
+    expect(quiet).not.toContain('project.name');
+    expect(verbose.length).toBeGreaterThan(quiet.length);
   });
 });

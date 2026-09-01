@@ -115,6 +115,27 @@ describe('TYRE: export command', () => {
     expect(existsSync(join(testDir, 'GEMINI.md'))).toBe(false);
   });
 
+  test('--output writes to another directory; project.faf stays read from cwd', () => {
+    writeFileSync(join(testDir, 'project.faf'), `faf_version: 2.5.0\nproject:\n  name: output-test\n  goal: Test\n  main_language: TypeScript\n`);
+
+    const { exportCommand } = require('../../src/commands/export.js');
+    exportCommand({ agents: true, output: 'dist/context' });
+
+    const out = join(testDir, 'dist', 'context', 'AGENTS.md');
+    expect(existsSync(out)).toBe(true);
+    expect(readFileSync(out, 'utf-8')).toContain('output-test');
+    expect(existsSync(join(testDir, 'AGENTS.md'))).toBe(false);
+  });
+
+  test('--output creates a nested directory that does not exist yet', () => {
+    writeFileSync(join(testDir, 'project.faf'), `faf_version: 2.5.0\nproject:\n  name: output-mkdir-test\n  goal: Test\n  main_language: TypeScript\n`);
+
+    const { exportCommand } = require('../../src/commands/export.js');
+    exportCommand({ all: true, output: 'a/b/c' });
+
+    expect(existsSync(join(testDir, 'a', 'b', 'c', 'AGENTS.md'))).toBe(true);
+  });
+
   test('copilot-instructions.md is idempotent (no duplicate faf block on re-run)', () => {
     writeFileSync(join(testDir, 'project.faf'), `faf_version: 2.5.0\nproject:\n  name: idem-test\n  goal: Test\n  main_language: TypeScript\n`);
 

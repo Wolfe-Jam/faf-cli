@@ -1,3 +1,5 @@
+import { mkdirSync } from 'fs';
+import { resolve } from 'path';
 import { findFafFile, readFaf, readFafRaw } from '../interop/faf.js';
 import { writeAgentsMd } from '../interop/agents.js';
 import { enrichFromRepo } from '../detect/enrich.js';
@@ -20,6 +22,8 @@ export interface ExportOptions {
   html?: boolean;
   card?: boolean;
   all?: boolean;
+  /** Write exported files here instead of the current directory. project.faf is still read from cwd. */
+  output?: string;
 }
 
 export function exportCommand(options: ExportOptions = {}): void {
@@ -29,7 +33,8 @@ export function exportCommand(options: ExportOptions = {}): void {
     process.exit(2);
   }
 
-  const dir = process.cwd();
+  const dir = options.output ? resolve(process.cwd(), options.output) : process.cwd();
+  if (options.output) {mkdirSync(dir, { recursive: true });}
   const data = readFaf(fafPath);
   const exportAll =
     options.all ||
