@@ -92,6 +92,8 @@ export interface FafData {
     goal?: string;
     main_language?: string;
     type?: string;
+    /** Integration branch agents PR into — `dev`/`develop` for git-flow repos. Default `main`. */
+    default_branch?: string;
     [key: string]: unknown;
   };
   /**

@@ -44,6 +44,9 @@ export function generateAgentsMd(data: FafData): string {
     | undefined;
   const commands = data.commands;
   const keyFiles = data.key_files ?? instant?.key_files;
+  // Integration branch — git-flow repos PR into `dev`/`develop`, not `main`.
+  // Read from project.default_branch; default `main`.
+  const branch = present(data.project?.default_branch) ? String(data.project?.default_branch) : 'main';
 
   const entries = commands ? Object.entries(commands).filter(([, v]) => present(v)) : [];
   // Mutually exclusive so a key like `test:check` classifies ONCE (as a test).
@@ -75,7 +78,7 @@ export function generateAgentsMd(data: FafData): string {
   if (data.project?.main_language) {bits.push(String(data.project.main_language));}
   if (present(data.project?.type)) {bits.push(`type: ${String(data.project?.type)}`);}
   if (present(data.project?.version)) {bits.push(`v${String(data.project?.version)}`);}
-  let orientation = data.project?.goal ? String(data.project.goal) : '';
+  let orientation = data.project?.goal ? String(data.project.goal).trim() : '';
   if (bits.length) {orientation += (orientation ? ' — ' : '') + bits.join(' · ');}
   if (orientation) {
     push(orientation);
@@ -104,11 +107,23 @@ export function generateAgentsMd(data: FafData): string {
     push();
   }
 
-  // §4 Where things live
+  // §4 Where things live — a `Path | Role` table when any entry carries a
+  // " — role" annotation; a plain list when they're all bare paths.
   if (keyFiles && keyFiles.length) {
     push('## Where things live');
     push();
-    for (const f of keyFiles) {push(`- \`${f}\``);}
+    const rows = keyFiles.map((f) => {
+      const s = String(f);
+      const at = s.indexOf(' — ');
+      return at > 0 ? { path: s.slice(0, at), role: s.slice(at + 3) } : { path: s, role: '' };
+    });
+    if (rows.some((r) => r.role)) {
+      push('| Path | Role |');
+      push('|------|------|');
+      for (const r of rows) {push(`| \`${r.path}\` | ${r.role} |`);}
+    } else {
+      for (const r of rows) {push(`- \`${r.path}\``);}
+    }
     push();
   }
 
@@ -146,7 +161,7 @@ export function generateAgentsMd(data: FafData): string {
   push(`- **Always OK:** ${[...new Set(always)].join(' · ')}.`);
   push('- **Ask first:** dependency installs, deletions, migrations, schema changes, publish/release.');
   // Enable-then-restrict: safe path first, then the landmine
-  push('- **Never:** force-push · push straight to `main` (branch and open a PR) · commit secrets.');
+  push(`- **Never:** force-push · push straight to \`${branch}\` (branch and open a PR) · commit secrets.`);
   push();
 
   // §7 Definition of Done
@@ -163,7 +178,7 @@ export function generateAgentsMd(data: FafData): string {
   push('## When stuck');
   push();
   push(
-    'Ask a clarifying question, propose a short plan, or open a draft PR with notes — do not push large speculative changes to `main`.',
+    `Ask a clarifying question, propose a short plan, or open a draft PR with notes — do not push large speculative changes to \`${branch}\`.`,
   );
   push();
 
@@ -187,7 +202,7 @@ export function generateAgentsMd(data: FafData): string {
   } else {
     push('- Conventional Commits preferred (`feat:`, `fix:`, `chore:`, …).');
   }
-  push('- Branch off `main` and open a PR — never commit to `main` directly.');
+  push(`- Branch off \`${branch}\` and open a PR — never commit to \`${branch}\` directly.`);
   push('- If build/test scripts or layout change, refresh this file in the **same PR** (`faf export --agents`).');
   push();
 

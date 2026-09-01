@@ -60,6 +60,23 @@ describe('ENGINE: full data renders every section', () => {
     expect(md).toContain('## Where things live');
     expect(md).toContain('`app/main.py`');
   });
+  test('§4 Where things live: `Path | Role` table when any entry has a " — role" annotation', () => {
+    const m = generateAgentsMd({
+      project: { name: 'x', goal: 'y', main_language: 'Go' },
+      key_files: ['cmd/ — entrypoint', 'internal/', 'go.mod'],
+    } as any);
+    expect(m).toContain('| Path | Role |');
+    expect(m).toContain('| `cmd/` | entrypoint |');
+    expect(m).toContain('| `internal/` |  |');
+  });
+  test('§4 Where things live: plain list when every entry is a bare path', () => {
+    const m = generateAgentsMd({
+      project: { name: 'x', goal: 'y', main_language: 'Go' },
+      key_files: ['cmd/', 'internal/', 'go.mod'],
+    } as any);
+    expect(m).not.toContain('| Path | Role |');
+    expect(m).toContain('- `cmd/`');
+  });
   test('§5 Conventions (real constraints)', () => {
     expect(md).toContain('## Conventions');
     expect(md).toContain('Quality Bar');
@@ -127,6 +144,20 @@ describe('ENGINE: full data renders every section', () => {
     expect(md).toContain('## Commit & PR');
     expect(md).toContain('conventional');
     expect(md).toContain('same PR');
+  });
+  test('§6/§8/§10 branch defaults to `main`', () => {
+    expect(md).toContain('Branch off `main`');
+    expect(md).toContain('push straight to `main`');
+    expect(md).toContain('speculative changes to `main`');
+  });
+  test('§6/§8/§10 branch follows project.default_branch (git-flow)', () => {
+    const m = generateAgentsMd({
+      project: { name: 'x', goal: 'y', main_language: 'Python', default_branch: 'dev' },
+    } as any);
+    expect(m).toContain('Branch off `dev` and open a PR — never commit to `dev` directly.');
+    expect(m).toContain('push straight to `dev` (branch and open a PR)');
+    expect(m).toContain('speculative changes to `dev`.');
+    expect(m).not.toContain('`main`');
   });
   test('Stack renders real stack', () => {
     expect(md).toContain('## Stack');
