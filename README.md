@@ -131,34 +131,31 @@ faf memory etch "a durable fact" --id my-fact
 faf memory show
 ```
 
-### What's New in v7.9.0 — The Git-Flow Edition
+### What's New in v7.10.0 — The Full-Facts Edition
 
-**`faf export` respects your repo's branch model — `project.default_branch` drives the `AGENTS.md` PR base instead of a hardcoded `main`.**
-
-Set it once in `project.faf`; git-flow repos that PR into `dev` / `develop` get the right base everywhere `faf export` writes it. Default stays `main` when the field is absent.
-
-```yaml
-# project.faf
-project:
-  default_branch: dev
-```
+**`faf git` reads the tree it clones — docker-compose services, Makefile targets, sibling app dirs — instead of leaning on the README.**
 
 ```bash
-faf export --agents --output docs/context   # write anywhere, not just cwd
-faf check --verbose                          # per-slot breakdown with validation
+faf git future-agi/future-agi
 ```
 
-- **`key_files` annotations** — write `src/ — entrypoint` and it renders as a `Path | Role` table in "Where things live".
-- Surfaced by the first external `AGENTS.md` deployment (future-agi, base `dev`).
+A polyglot repo (Django + React + Go, no npm workspace) used to report `type: library` / `main_language: JavaScript` / no stack. Now:
 
-**Recent sprint** — 7 ships
+- **`type: fullstack`** with `main_language: "Python (Django · backend); Go (backend); TypeScript (React · frontend)"` and a `# found: polyglot: …` rationale
+- **`stack.database: PostgreSQL · ClickHouse`** — read from `docker-compose.yml` service images (`redis` → cache, `minio` → storage, `kafka`/`temporal` → runtime)
+- **`commands.test: cd futureagi && make test`** — read from the nested `Makefile`
+- **`security`** — from `.env.example`
 
+File-facts beat README guesses. README extraction now strips `<!-- -->` comment blocks and rejects link-list rows.
+
+**Recent sprint**
+
+- 🌱 [7.9.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.9.0) The Git-Flow Edition
 - 🎬 [7.8.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.8.0) The Projector Edition
 - 🐦 [7.7.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.7.0) The Swift Edition
 - 💎 [7.6.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.6.0) The Ruby Edition
 - ☕ [7.5.1](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.5.1) The JVM Edition
 - 💠 [7.4.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.4.0) The C# Edition
-- 🐹 [7.3.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.3.0) The Go Edition
 
 ---
 
