@@ -257,7 +257,7 @@ export function catalogEntriesFor(
     entries.push({
       identifier: `urn:air:${host}:a2a:${slug}`,
       displayName: String(agent.displayName ?? agent.name ?? 'A2A Agent Card'),
-      type: 'application/json',
+      type: 'application/a2a-agent-card+json',
       description: 'A2A v1.0 Agent Card. Projected from .fafa.',
       url: catalogA2AUrl(fafa, opts),
       updatedAt: now,
@@ -292,10 +292,15 @@ function homepageWellKnown(fafa: FafaDoc, name: string): string | undefined {
 function catalogMatchIndex(entries: CatalogEntry[], row: CatalogEntry): number {
   const exact = entries.findIndex((e) => e.identifier === row.identifier);
   if (exact >= 0) {return exact;}
-  if (row.type === 'application/json' || row.identifier.includes(':a2a:')) {
+  if (
+    row.type === 'application/a2a-agent-card+json' ||
+    row.type === 'application/json' ||
+    row.identifier.includes(':a2a:')
+  ) {
     return entries.findIndex(
       (e) =>
         e.identifier.includes(':a2a:') ||
+        e.type === 'application/a2a-agent-card+json' ||
         String(e.url ?? '').includes('agent-card.json'),
     );
   }

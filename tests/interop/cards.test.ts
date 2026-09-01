@@ -169,7 +169,7 @@ describe('ENGINE: 🛡️ one projector — faf cards', () => {
     const next = upsertCatalog(existing, p.catalog!);
     const a2a = next.entries.find((e) => e.identifier === 'urn:air:faf.one:a2a:fafa')!;
     expect(a2a.url).toBe('https://faf.one/.well-known/agent-card.json');
-    expect(a2a.type).toBe('application/json');
+    expect(a2a.type).toBe('application/a2a-agent-card+json');
     expect(a2a.displayName).toBeUndefined();
     expect(next.entries.find((e) => e.identifier.endsWith(':zeph'))!.url).toContain('zeph');
   });
