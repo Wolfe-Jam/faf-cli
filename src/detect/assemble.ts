@@ -16,12 +16,27 @@ import { APP_TYPE_CATEGORIES, SLOTS, isPlaceholder } from '../core/slots.js';
 /** Build a fresh .faf for `dir` using the full slot-filling pipeline. */
 export function assembleFreshFaf(dir: string): Record<string, unknown> {
   const detected = detectStack(dir) as Record<string, unknown>;
-  const interrogated = interrogateRepo(dir) as Record<string, unknown>;
+  const facts = interrogateRepo(dir);
 
-  const seeded = fillEmpties(detected, interrogated);
+  // File-facts (stack / commands / security — docker-compose, Makefile, .env)
+  // are ground truth: they WIN over detectStack's root-only presence guesses.
+  const factLayer: Record<string, unknown> = {};
+  if (facts.stack) {factLayer.stack = facts.stack;}
+  if (facts.commands) {factLayer.commands = facts.commands;}
+  if (facts.security) {factLayer.security = facts.security;}
+  // Prose (goal / 6Ws — README, Cargo.toml) fills empties only.
+  const proseLayer: Record<string, unknown> = {};
+  if (facts.project) {proseLayer.project = facts.project;}
+  if (facts.human_context) {proseLayer.human_context = facts.human_context;}
+
+  const seeded = fillEmpties(fillEmpties(factLayer, detected), proseLayer);
   applySlotIgnore(seeded);
+  // Polyglot repos: the root package.json is a tooling shell — don't let its
+  // description/scripts seed the product's 6Ws.
+  const found = (detected._meta as { found?: string[] } | undefined)?.found ?? [];
+  const toolingRoot = found.some(f => f.startsWith('polyglot:'));
   const withFormats = fillEmpties(seeded, turboCatSlots(dir) as Record<string, unknown>);
-  return fillEmpties(withFormats, { human_context: relentlessContext(dir) } as Record<string, unknown>);
+  return fillEmpties(withFormats, { human_context: relentlessContext(dir, { toolingRoot }) } as Record<string, unknown>);
 }
 
 /** Mark slots outside the app-type's active categories as `slotignored`. */

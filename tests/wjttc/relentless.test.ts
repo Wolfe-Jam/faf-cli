@@ -169,3 +169,41 @@ describe('WJTTC ENGINE: Relentless provenance (the auditable form)', () => {
     expect(relentlessContextDetailed(dir)).toEqual({});
   });
 });
+
+describe('WJTTC BRAKE: README noise is not prose (Facts Edition)', () => {
+  test('HTML comment blocks never seed a slot', () => {
+    readme([
+      '<!--',
+      '  MARKETING NOTES: asset budget < 12 MB. Ship light + dark variants.',
+      '  All images live under .github/assets/.',
+      '-->',
+      '# My Project',
+      '',
+      '## About',
+      '',
+      'A real description of what the project actually does for its users.',
+    ].join('\n'));
+    const ctx = relentlessContext(dir);
+    expect(ctx.what ?? '').not.toMatch(/asset budget|MARKETING NOTES/);
+  });
+
+  test('link-list section body (roadmap link row) is rejected for `when`', () => {
+    readme([
+      '# P', '',
+      '## Roadmap', '',
+      '[Vote on the roadmap](https://x.com/roadmap) · [Discussions](https://x.com/d) · [Releases](https://x.com/r) · [Changelog](https://x.com/c)',
+    ].join('\n'));
+    const ctx = relentlessContext(dir);
+    expect(ctx.when ?? '').not.toMatch(/https?:\/\//);
+  });
+
+  test('toolingRoot skips package.json-sourced context (polyglot repo)', () => {
+    pkg({ description: 'Repo-level tooling (husky + lint-staged). App code lives in frontend/ and backend/.' });
+    readme('# P\n\n## Why\n\nBecause production agents need a shared definition of done.\n');
+    const withPkg = relentlessContext(dir);
+    const noPkg = relentlessContext(dir, { toolingRoot: true });
+    expect(withPkg.what ?? '').toMatch(/husky/);
+    expect(noPkg.what ?? '').not.toMatch(/husky/);
+    expect(noPkg.why ?? '').toMatch(/shared definition/); // README still flows
+  });
+});

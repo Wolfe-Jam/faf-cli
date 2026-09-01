@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, readdirSync } from 'fs';
+import { existsSync, readFileSync, readdirSync, type Dirent } from 'fs';
 import { join } from 'path';
 import type { DetectedFramework, Signal } from '../core/types.js';
 import { FRAMEWORKS } from './frameworks.js';
@@ -264,6 +264,124 @@ function detectMonorepoRootSignal(dir: string, pkg: PackageJson | null): string 
   const hasWorkspaces = !!pkg.workspaces || existsSync(join(dir, 'pnpm-workspace.yaml'));
   if (!hasWorkspaces) {return null;}
   return 'private workspace + multi-package';
+}
+
+/** Top-level dirs that never hold an app component. */
+const SUBDIR_IGNORE = new Set([
+  'node_modules', 'dist', 'build', 'out', 'vendor', 'target', 'coverage',
+  'docs', 'doc', 'e2e', 'tests', 'test', '__tests__', 'scripts', 'deploy',
+  'bin', 'public', 'examples', 'example', 'fixtures', 'assets', 'static',
+  'migrations', 'config', 'contracts', 'proto', 'protos',
+]);
+
+const BACKEND_LANG_RE = /^(Python|Go|Rust|Ruby|Java|Kotlin)$/;
+
+/** One app component discovered directly under the repo root. */
+export interface SubdirStack {
+  /** basename */
+  name: string;
+  /** detectLanguage() of the subdir */
+  language: string;
+  /** highest-confidence real-stack framework in the subdir (never Docker/CI/etc.) */
+  topFramework: string | null;
+  frontend: boolean;
+  backend: boolean;
+  /** a real-stack framework (not infra) was detected — ranks it as the "primary" */
+  hasFramework: boolean;
+  /** a "this dir IS the app" marker (manage.py / config.ru / bin/rails) */
+  appRoot: boolean;
+}
+
+/** Framework categories that describe the app's own stack (not infra/tooling). */
+const STACK_FW_CATEGORIES = new Set(['frontend', 'backend', 'database', 'css', 'ui', 'state']);
+
+/** A directory carries a real language manifest (not just tooling/config). */
+function hasLanguageManifest(d: string): boolean {
+  if (
+    existsSync(join(d, 'pyproject.toml')) || existsSync(join(d, 'manage.py')) ||
+    existsSync(join(d, 'setup.py')) || fileExists(d, 'requirements*.txt')
+  ) {return true;}
+  if (existsSync(join(d, 'go.mod'))) {return true;}
+  if (existsSync(join(d, 'Cargo.toml'))) {return true;}
+  if (existsSync(join(d, 'Gemfile'))) {return true;}
+  if (existsSync(join(d, 'pom.xml')) || fileExists(d, 'build.gradle*')) {return true;}
+  if (listRootCsprojs(d).length > 0) {return true;}
+  const pkg = readPackageJson(d);
+  if (pkg && Object.keys(pkg.dependencies ?? {}).length > 0) {return true;}
+  return false;
+}
+
+/** Shallow (depth-1) scan for per-subdirectory app stacks. Feeds the polyglot
+ *  classifier + `main_language` aggregation. A dir counts only when it carries a
+ *  real language manifest. This is NOT monorepo tooling — it only exists to stop
+ *  a repo whose real stack lives in subdirs from falling to the `library` lie. */
+export function detectSubdirStacks(dir: string): SubdirStack[] {
+  let entries: Dirent[];
+  try {
+    entries = readdirSync(dir, { withFileTypes: true });
+  } catch {
+    return [];
+  }
+  const out: SubdirStack[] = [];
+  for (const e of entries) {
+    if (!e.isDirectory() || e.name.startsWith('.') || SUBDIR_IGNORE.has(e.name)) {continue;}
+    const sub = join(dir, e.name);
+    if (!hasLanguageManifest(sub)) {continue;}
+    const language = detectLanguage(sub);
+    if (language === 'Unknown') {continue;}
+    const fws = detectFrameworks(sub).filter(f => STACK_FW_CATEGORIES.has(f.category));
+    const fe = fws.find(f => f.category === 'frontend');
+    const be = fws.find(f => f.category === 'backend');
+    const top = fe ?? be ?? fws[0] ?? null;
+    out.push({
+      name: e.name,
+      language,
+      topFramework: top?.name ?? null,
+      frontend: !!fe,
+      backend: !!be || BACKEND_LANG_RE.test(language),
+      hasFramework: !!top,
+      appRoot:
+        existsSync(join(sub, 'manage.py')) ||
+        existsSync(join(sub, 'config.ru')) ||
+        existsSync(join(sub, 'bin/rails')) ||
+        existsSync(join(sub, 'artisan')),
+    });
+  }
+  return out;
+}
+
+/** Polyglot signal — ≥2 sibling app dirs, ≥2 distinct languages, a frontend AND
+ *  a backend among them. Returns the `# found:` evidence string, or null. */
+export function detectPolyglotSignal(dir: string, pkg: PackageJson | null): string | null {
+  if (pkg?.workspaces || existsSync(join(dir, 'pnpm-workspace.yaml'))) {return null;}
+  const subs = detectSubdirStacks(dir);
+  const langs = new Set(subs.map(s => s.language));
+  if (subs.length < 2 || langs.size < 2) {return null;}
+  if (!subs.some(s => s.frontend) || !subs.some(s => s.backend)) {return null;}
+  return `polyglot: ${subs.map(s => `${s.name}/ (${s.language})`).join(', ')}`;
+}
+
+/** Aggregate the polyglot `main_language` string — primary first (a framework-
+ *  bearing backend dir wins), deduped by language, roles annotated.
+ *  e.g. "Python (Django · backend); JavaScript (React · frontend); Go (service)" */
+export function detectPolyglotLanguage(dir: string): string | null {
+  const subs = detectSubdirStacks(dir);
+  if (subs.length < 2) {return null;}
+  const score = (s: SubdirStack): number =>
+    (s.appRoot ? 2 : 0) +
+    (BACKEND_LANG_RE.test(s.language) ? 2 : 0) +
+    (s.hasFramework ? 1 : 0) +
+    (s.frontend ? 0.5 : 0);
+  const ranked = [...subs].sort((a, b) => score(b) - score(a));
+  const seen = new Set<string>();
+  const parts: string[] = [];
+  for (const s of ranked) {
+    if (seen.has(s.language)) {continue;}
+    seen.add(s.language);
+    const role = s.frontend ? 'frontend' : s.backend ? 'backend' : 'service';
+    parts.push(s.topFramework ? `${s.language} (${s.topFramework} · ${role})` : `${s.language} (${role})`);
+  }
+  return parts.join('; ');
 }
 
 /** Read and parse package.json from a directory */
@@ -625,6 +743,16 @@ export function detectProjectTypeWithRationale(dir: string): ProjectTypeDetectio
   if (htmlSignal) {
     found.push(htmlSignal);
     return { type: 'html', found };
+  }
+
+  // ─── 19b. polyglot — real stack lives in sibling app dirs (FE + BE, ≥2
+  //          languages). NOT a monorepo tool (that's xai-faf-rust) — this only
+  //          rescues the repo from the `library` fallback lie below. Uses the
+  //          existing `fullstack` type (21 slots); no new app_type. ──────────
+  const polyglotSignal = detectPolyglotSignal(dir, pkg);
+  if (polyglotSignal) {
+    found.push(polyglotSignal);
+    return { type: 'fullstack', found };
   }
 
   // ─── 20. library — fallback (has main/exports but no bin) ──────────────

@@ -4,6 +4,8 @@ import { FAF_VERSION } from '../core/version.js';
 import {
   detectFrameworks,
   detectLanguage,
+  detectPolyglotLanguage,
+  detectSubdirStacks,
   detectProjectTypeWithRationale,
   detectRuntime,
   detectPackageManager,
@@ -21,9 +23,12 @@ import {
 export function detectStack(dir: string): FafData {
   const pkg = readPackageJson(dir);
   const frameworks = detectFrameworks(dir);
-  const language = detectLanguage(dir);
   const detection = detectProjectTypeWithRationale(dir);
   const projectType = detection.type;
+  // Polyglot repos (real stack in sibling dirs) get an aggregated language
+  // string instead of the misleading root-only detectLanguage() fallback.
+  const isPolyglot = detection.found.some(f => f.startsWith('polyglot:'));
+  const language = (isPolyglot && detectPolyglotLanguage(dir)) || detectLanguage(dir);
   const runtime = detectRuntime(dir);
   const pkgManager = detectPackageManager(dir);
   const cicd = detectCicd(dir);
@@ -129,7 +134,9 @@ export function detectStack(dir: string): FafData {
   // Build project section
   const project: Record<string, string> = {
     name: pkg?.name ?? dir.split('/').pop() ?? 'project',
-    goal: pkg?.description ?? '',
+    // A polyglot repo's root package.json describes the tooling shell, not the
+    // product — leave goal for the README interrogator / the human to fill.
+    goal: isPolyglot ? '' : (pkg?.description ?? ''),
     main_language: language,
     type: projectType,
   };
@@ -143,7 +150,17 @@ export function detectStack(dir: string): FafData {
   // tech_stack/key_files/commands auto-populate from observable signals;
   // architecture/context stay empty (user fill — architecture overlaps with
   // human_context.how, context is free-form additional signal).
-  const techStack = detectTechStack(dir, pkg, frameworks, language);
+  // Feed detectTechStack the ROOT language (a single token), never the polyglot
+  // summary string — that belongs only in project.main_language.
+  const techStack = detectTechStack(dir, pkg, frameworks, isPolyglot ? detectLanguage(dir) : language);
+  if (isPolyglot) {
+    // Add each sibling component's language + top framework (deduped, order-stable).
+    for (const s of detectSubdirStacks(dir)) {
+      for (const t of [s.language, s.topFramework]) {
+        if (t && !techStack.includes(t)) {techStack.push(t);}
+      }
+    }
+  }
   const keyFiles = detectKeyFiles(dir);
   const commands = detectCommands(dir, pkg);
 
@@ -153,7 +170,9 @@ export function detectStack(dir: string): FafData {
     stack,
     human_context: {
       who: '',
-      what: pkg?.description ?? '',
+      // A polyglot root's package.json describes the tooling shell, not the
+      // product — leave `what` for the README interrogator / the human.
+      what: isPolyglot ? '' : (pkg?.description ?? ''),
       why: '',
       where: '',
       when: '',

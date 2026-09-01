@@ -382,3 +382,64 @@ describe('WJTTC ENGINE: Cargo [[bin]] cli detection (xai-faf-rust shape)', () =>
     expect(r.type).not.toBe('cli');
   });
 });
+
+describe('WJTTC ENGINE: polyglot — sibling app dirs (Facts Edition)', () => {
+  function mkSub(name: string, files: Record<string, string>): void {
+    mkdirSync(join(dir, name), { recursive: true });
+    for (const [f, body] of Object.entries(files)) {
+      const p = join(dir, name, f);
+      mkdirSync(join(p, '..'), { recursive: true });
+      writeFileSync(p, body);
+    }
+  }
+
+  test('Django + React + Go siblings → fullstack, found lists the dirs', () => {
+    pkg({ private: true, devDependencies: { husky: '^9' } }); // tooling-only root
+    mkSub('backend', { 'manage.py': '# django', 'pyproject.toml': '[project]\nname="be"\ndependencies=["django"]\n' });
+    mkSub('web', { 'package.json': JSON.stringify({ name: 'web', dependencies: { react: '^18', 'react-dom': '^18' } }) });
+    mkSub('gateway', { 'go.mod': 'module gateway\n\ngo 1.23\n' });
+    const r = detectProjectTypeWithRationale(dir);
+    expect(r.type).toBe('fullstack');
+    expect(r.found.join(' ')).toMatch(/polyglot:/);
+    expect(r.found.join(' ')).toMatch(/backend\/ \(Python\)/);
+    expect(r.found.join(' ')).toMatch(/gateway\/ \(Go\)/);
+  });
+
+  test('Rails api + Vue client → fullstack', () => {
+    pkg({ private: true });
+    mkSub('api', { 'Gemfile': "source 'https://rubygems.org'\ngem 'rails'\n", 'config.ru': 'run App' });
+    mkSub('client', { 'package.json': JSON.stringify({ name: 'client', dependencies: { vue: '^3' } }) });
+    const r = detectProjectTypeWithRationale(dir);
+    expect(r.type).toBe('fullstack');
+  });
+
+  test('NEG — npm workspaces root is NOT polyglot (existing stages own it)', () => {
+    pkg({ private: true, workspaces: ['packages/*'] });
+    mkSub('services', { 'pyproject.toml': '[project]\nname="s"\ndependencies=["fastapi"]\n' });
+    mkSub('ui', { 'package.json': JSON.stringify({ name: 'ui', dependencies: { react: '^18' } }) });
+    const r = detectProjectTypeWithRationale(dir);
+    expect(r.found.join(' ')).not.toMatch(/polyglot:/);
+  });
+
+  test('NEG — single backend dir only → not polyglot', () => {
+    pkg({ private: true });
+    mkSub('server', { 'pyproject.toml': '[project]\nname="s"\ndependencies=["fastapi"]\n' });
+    const r = detectProjectTypeWithRationale(dir);
+    expect(r.found.join(' ')).not.toMatch(/polyglot:/);
+  });
+
+  test('NEG — two dirs, same language, no frontend → not polyglot', () => {
+    pkg({ private: true });
+    mkSub('svc-a', { 'go.mod': 'module a\n\ngo 1.23\n' });
+    mkSub('svc-b', { 'go.mod': 'module b\n\ngo 1.23\n' });
+    const r = detectProjectTypeWithRationale(dir);
+    expect(r.found.join(' ')).not.toMatch(/polyglot:/);
+  });
+
+  test('NEG — bare husky-only root, no sibling manifests → library fallback', () => {
+    pkg({ private: true, devDependencies: { husky: '^9', 'lint-staged': '^15' } });
+    mkdirSync(join(dir, 'scripts'), { recursive: true });
+    const r = detectProjectTypeWithRationale(dir);
+    expect(r.type).toBe('library');
+  });
+});

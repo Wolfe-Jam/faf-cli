@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v7.9.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v7.10.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -9,6 +9,36 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.10.0] - 2026-09-02 — The Full-Facts Edition
+
+**`faf git` reads the tree it clones — docker-compose services, Makefile targets, sibling app dirs — instead of leaning on the README. A polyglot repo stops reporting `library` / `JavaScript`.**
+
+### Added
+- **Polyglot detection** — a repo whose real stack lives in sibling dirs (a frontend AND a backend, ≥2 languages, no npm workspace) now classifies as **`fullstack`** with an aggregated `main_language` (`"Python (Django · backend); Go (backend); TypeScript (React · frontend)"`) and a `# found: polyglot: dir/ (Lang), …` rationale — instead of falling to `type: library` / `main_language: JavaScript`. No new app-type; monorepo/enterprise slot work is out of scope.
+- **`docker-compose` fact-extraction** — service images map onto stack slots: `postgres`/`clickhouse`/`mysql` → `stack.database`, `redis` → `cache`, `minio` → `storage`, `elasticsearch`/`qdrant`/`weaviate` → `search`, `kafka`/`rabbitmq`/`temporal` → `stack.runtime`. Found at the repo root and one directory deep.
+- **Build-file commands** — `Makefile` / `justfile` / `Taskfile` targets → `commands.{test,build,lint}`, nested-dir aware (`cd futureagi && make test`). `check-all` wins the lint slot.
+- **`.env.example`** → `security.secrets` + `security.example`.
+
+### Changed
+- **File-facts beat prose.** The new interrogators' `stack` / `commands` / `security` output takes precedence over README guesses and presence-only detectors.
+- A polyglot repo's tooling-shell root `package.json` no longer seeds `project.goal` or `human_context.what`.
+
+### Fixed
+- README extraction strips `<!-- … -->` comment blocks (asset notes, TODO markers) before reading — their text could seed a slot.
+- Link-list section bodies (a roadmap row of markdown links) are rejected as prose — no longer land in `human_context.when`.
+
+### Notes / non-claims
+- **Do NOT claim:** monorepo/enterprise support (that's a separate tool) · full YAML parsing of compose (image-name regex) · Windows (CI matrix is ubuntu + macos only).
+- **Kill line:** faf git reads the repo, not the README.
+
+### Verification (claim inventory)
+| Claim | Evidence command |
+|-------|------------------|
+| polyglot repo → `fullstack` + aggregated language | `bun test tests/detect/new-types.test.ts` |
+| compose services → stack slots | `bun test tests/interrogate/compose.test.ts` |
+| Makefile targets → commands (nested-aware) | `bun test tests/interrogate/build-files.test.ts` |
+| README noise (comments / link rows) rejected | `bun test tests/wjttc/relentless.test.ts` |
 
 ## [7.9.0] - 2026-09-01 — The Git-Flow Edition
 
