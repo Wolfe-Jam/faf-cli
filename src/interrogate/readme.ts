@@ -156,6 +156,9 @@ export function interrogateReadme(dir: string): ExtractedContext {
   } catch {
     return {};
   }
+  // HTML comment blocks (asset notes, TODO markers, marketing briefs) are not
+  // prose — strip before any extraction so their text can't seed a slot.
+  content = content.replace(/<!--[\s\S]*?-->/g, '');
 
   const result: ExtractedContext = {};
 

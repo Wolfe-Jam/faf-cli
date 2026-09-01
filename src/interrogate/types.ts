@@ -36,6 +36,23 @@ export interface ExtractedContext {
     /** Approach — "## Architecture" / "## How it works" */
     how?: string;
   };
+  /** Stack facts pulled from real config files (docker-compose services, …).
+   *  Higher-precedence than README prose or presence-only guesses for these. */
+  stack?: {
+    database?: string;
+    cache?: string;
+    search?: string;
+    storage?: string;
+    hosting?: string;
+    runtime?: string;
+  };
+  /** Real project commands from Makefile / justfile / Taskfile targets. */
+  commands?: Record<string, string>;
+  /** Secrets handling — from .env.example / .env.sample presence. */
+  security?: {
+    secrets?: string;
+    example?: string;
+  };
 }
 
 /** Confidence threshold rules for extracted text — empty if violated */

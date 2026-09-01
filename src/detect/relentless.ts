@@ -63,8 +63,13 @@ const sv = (value: string, source: string, confidence: number): SourcedValue => 
  * confidence}. This is the auditable form: the seeded/confirm UI can show the
  * human WHERE a value was relocated from before they accept it.
  */
-export function relentlessContextDetailed(dir: string): SeededContextDetailed {
-  const pkg = readPkg(dir);
+/** `toolingRoot`: the repo root's package.json is a tooling shell (polyglot repo
+ *  — real code is in sibling dirs), so its description/repo/scripts describe the
+ *  tooling, not the product. Skip package.json-sourced context; README only. */
+export interface RelentlessOpts { toolingRoot?: boolean }
+
+export function relentlessContextDetailed(dir: string, opts: RelentlessOpts = {}): SeededContextDetailed {
+  const pkg = opts.toolingRoot ? null : readPkg(dir);
   const readme = cleanReadme(dir);
   const out: SeededContextDetailed = {};
   const set = (k: keyof SeededContextDetailed, v: SourcedValue | null): void => {
@@ -87,8 +92,8 @@ export function relentlessContextDetailed(dir: string): SeededContextDetailed {
  * the pre-provenance version). Existing consumers (claude-faf-mcp's faf_auto)
  * keep working unchanged; opt into provenance via the Detailed form.
  */
-export function relentlessContext(dir: string): SeededContext {
-  const detailed = relentlessContextDetailed(dir);
+export function relentlessContext(dir: string, opts: RelentlessOpts = {}): SeededContext {
+  const detailed = relentlessContextDetailed(dir, opts);
   const seed: SeededContext = {};
   (Object.keys(detailed) as (keyof SeededContextDetailed)[]).forEach((k) => {
     const sourced = detailed[k];
@@ -118,6 +123,7 @@ function cleanReadme(dir: string): string {
     return '';
   }
   return txt
+    .replace(/<!--[\s\S]*?-->/g, '') // HTML comment blocks (asset notes, TODOs — not prose)
     .split('\n')
     .filter((l) => !/^\s*\[!\[/.test(l) && !/^\s*!\[/.test(l)) // badge lines
     .join('\n')
@@ -130,12 +136,21 @@ function clean(text: string): string {
   return text.replace(/\s+/g, ' ').replace(/[#*`>]/g, '').trim().slice(0, 280);
 }
 
+/** Share of a string's characters that sit inside markdown/inline links. */
+function linkDensity(s: string): number {
+  if (!s) {return 0;}
+  const linked = (s.match(/\[[^\]]*\]\([^)]*\)/g) ?? []).join('').length;
+  return linked / s.length;
+}
+
 /** First `## Section` body matching any of the pipe-listed names (min 20 chars).
- *  Returns the cleaned body AND the matched heading (for provenance labels). */
+ *  Returns the cleaned body AND the matched heading (for provenance labels).
+ *  Rejects link-list bodies (nav / roadmap-link rows are not prose). */
 function section(readme: string, names: string): { body: string; heading: string } | null {
   const re = new RegExp(`##?\\s+(${names})\\s*\\n+([\\s\\S]+?)(?:\\n\\n|\\n##?|$)`, 'i');
   const m = readme.match(re);
-  return m && m[2] && m[2].trim().length > 20 ? { body: clean(m[2]), heading: m[1].trim() } : null;
+  if (!m || !m[2] || m[2].trim().length <= 20 || linkDensity(m[2]) > 0.4) {return null;}
+  return { body: clean(m[2]), heading: m[1].trim() };
 }
 
 /** First capturing-group match across patterns whose capture meets minLen. */
