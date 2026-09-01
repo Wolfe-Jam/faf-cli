@@ -10,6 +10,7 @@ export interface CheckOptions {
   fix?: boolean;
   doctor?: boolean;
   trust?: boolean;
+  verbose?: boolean;
 }
 
 export function checkCommand(file?: string, options: CheckOptions = {}): void {
@@ -39,7 +40,7 @@ export function checkCommand(file?: string, options: CheckOptions = {}): void {
   console.log(`${fafCyan('valid')} ${fafPath}`);
 
   const result = scoreFafYaml(yaml);
-  displayScore(result, fafPath);
+  displayScore(result, fafPath, options.verbose);
 
   if (options.strict && result.score < 100) {
     console.log(dim('\n  --strict requires 100%'));

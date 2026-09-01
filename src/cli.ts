@@ -186,6 +186,7 @@ program
   .option('--html', 'Author project.html (visual render of project.faf)')
   .option('--card', 'Author MCP Server Card (.well-known/mcp/server-card) with the FAF context-block')
   .option('--all', 'Author all formats')
+  .option('--output <path>', 'Write exported files to this directory instead of the current one')
   .action((options) => exportCommand(options));
 
 program
@@ -219,6 +220,7 @@ program
   .option('--fix', 'Auto-fix issues')
   .option('--doctor', 'Full diagnostic')
   .option('--trust', 'Verify trust chain')
+  .option('--verbose', 'Show slot breakdown')
   .action((file, options) => checkCommand(file, options));
 
 program
