@@ -30,7 +30,10 @@ import { computeFafDiff, runnerWorks } from './diff.js';
 
 const START = '# >>> faf >>>';
 const END = '# <<< faf <<<';
-const RUNNER = 'faf hooks-run';
+// Canonical bin name, never the `faf` alias — a `faf` on PATH can be shadowed by
+// another tool of the same name (a Rust `faf`, etc.); `faf-cli` is unambiguous
+// and is installed alongside `faf` by the same package.
+const RUNNER = 'faf-cli hooks-run';
 
 const signed = (n: number): string => (n > 0 ? `+${n}` : `${n}`);
 
@@ -123,7 +126,7 @@ function buildBlock(runnerCmd: string, strict: boolean): string {
 
 export interface InstallOptions {
   strict?: boolean;
-  /** Internal: the command the hook calls. Defaults to `faf hooks-run`. Tests override. */
+  /** Internal: the command the hook calls. Defaults to `faf-cli hooks-run`. Tests override. */
   runnerCmd?: string;
 }
 
@@ -152,16 +155,16 @@ export function installHooks(cwd: string, options: InstallOptions = {}): boolean
   const runner = options.runnerCmd ?? RUNNER;
 
   // Pre-flight the version-ordering trap: the runner must support `hooks-run`
-  // (faf ≥ 7.0). A --strict hook wired to an older faf would error on every
-  // commit and BLOCK it — refuse that outright. Warn for the harmless warn case.
+  // (faf-cli ≥ 7.0). A --strict hook wired to an older faf-cli would error on
+  // every commit and BLOCK it — refuse that outright. Warn for the harmless case.
   if (!runnerWorks(runner)) {
     const cmd = runner.trim().split(/\s+/)[0];
     if (options.strict) {
-      console.error(`Error: \`${cmd}\` on PATH doesn't support \`hooks-run\` yet (needs faf ≥ 7.0).`);
-      console.error('  A --strict hook against an older faf would BLOCK your commits. Upgrade faf, then re-install.');
+      console.error(`Error: \`${cmd}\` on PATH doesn't support \`hooks-run\` yet (needs faf-cli ≥ 7.0).`);
+      console.error('  A --strict hook against an older faf-cli would BLOCK your commits. Upgrade, then re-install.');
       return false;
     }
-    console.log(`⚠  \`${cmd}\` on PATH doesn't support \`hooks-run\` yet (needs faf ≥ 7.0) — the hook no-ops until you upgrade.`);
+    console.log(`⚠  \`${cmd}\` on PATH doesn't support \`hooks-run\` yet (needs faf-cli ≥ 7.0) — the hook no-ops until you upgrade.`);
   }
 
   const block = buildBlock(runner, !!options.strict);

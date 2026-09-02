@@ -243,7 +243,7 @@ describe('WJTTC — faf diff', () => {
         capture(() => installDriver(dir)); // twice
         const ga = readFileSync(join(dir, '.gitattributes'), 'utf-8');
         expect(ga.match(/\*\.faf diff=faf/g)).toHaveLength(1); // not duplicated
-        expect(g(['config', '--get', 'diff.faf.command']).trim()).toBe('faf diff-driver');
+        expect(g(['config', '--get', 'diff.faf.command']).trim()).toBe('faf-cli diff-driver');
       } finally { process.chdir(cwd); rmSync(dir, { recursive: true, force: true }); }
     });
 

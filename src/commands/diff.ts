@@ -273,7 +273,7 @@ function repoRoot(cwd: string): string {
 
 /**
  * Wire `faf diff` into native git: writes `.gitattributes` (*.faf diff=faf) and
- * sets `git config diff.faf.command "faf diff-driver"`. Idempotent.
+ * sets `git config diff.faf.command "faf-cli diff-driver"`. Idempotent.
  */
 export function installDriver(cwd: string): void {
   const top = repoRoot(cwd);
@@ -285,12 +285,14 @@ export function installDriver(cwd: string): void {
   } else {
     console.log(`•  .gitattributes already opts in (${GA_LINE})`);
   }
-  execFileSync('git', ['config', 'diff.faf.command', 'faf diff-driver'], { cwd });
-  console.log('✅ git config       diff.faf.command = faf diff-driver');
+  // Canonical bin name, never the `faf` alias — a `faf` on PATH can be shadowed
+  // by another tool; `faf-cli` is unambiguous (installed alongside `faf`).
+  execFileSync('git', ['config', 'diff.faf.command', 'faf-cli diff-driver'], { cwd });
+  console.log('✅ git config       diff.faf.command = faf-cli diff-driver');
   console.log('\n→ `git diff`, `git log -p`, `git show` now render the .faf score + slot delta.');
-  // Pre-flight: the `faf` git will invoke must actually support diff-driver (≥ 7.0).
-  if (!runnerWorks('faf diff-driver')) {
-    console.log('\n⚠  the `faf` on your PATH does not support `diff-driver` yet (needs faf ≥ 7.0).');
+  // Pre-flight: the `faf-cli` git will invoke must actually support diff-driver (≥ 7.0).
+  if (!runnerWorks('faf-cli diff-driver')) {
+    console.log('\n⚠  the `faf-cli` on your PATH does not support `diff-driver` yet (needs faf-cli ≥ 7.0).');
     console.log('   `git diff` on .faf files falls back to the raw text diff until you upgrade.');
   }
 }

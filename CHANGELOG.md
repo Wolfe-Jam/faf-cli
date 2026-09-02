@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **`faf hooks --install` and `faf diff --install` wire `faf-cli`, not the `faf` alias.** The generated pre-commit hook and `diff.faf.command` now call `faf-cli hooks-run` / `faf-cli diff-driver` — `faf-cli` is the canonical bin (installed alongside `faf` by the same package) and can't be shadowed by another `faf` on PATH.
+
 ## [7.10.1] - 2026-09-01
 
 Follow-up to the Full-Facts Edition — honesty on the prose extraction and the compose surface.
