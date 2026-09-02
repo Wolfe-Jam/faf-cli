@@ -153,6 +153,24 @@ function section(readme: string, names: string): { body: string; heading: string
   return { body: clean(m[2]), heading: m[1].trim() };
 }
 
+/**
+ * True when a README intro paragraph is a callout / nav row / pre-release
+ * banner rather than a description. These sit above the real first prose on
+ * many repos (future-agi opens with a `> ⚠️ Nightly release…` blockquote) and
+ * must not seed `human_context.what`.
+ */
+function isNonProseIntro(p: string): boolean {
+  const t = p.trim();
+  // Blockquote callout — GitHub admonitions (> [!NOTE] / > [!WARNING]) included
+  if (/^>/.test(t)) {return true;}
+  // Pre-release / status banner phrasing
+  if (/\b(nightly (release|build)|pre-?release|work[-\s]in[-\s]progress|rough edges|early (access|testing|preview)|use at your own risk|not (yet )?production[-\s]?ready|expect (rough|breaking)|experimental release)\b/i.test(t)) {return true;}
+  // Nav / link row: 3+ short fragments split on · or |
+  const frags = t.split(/[·|]/).map((s) => s.trim()).filter(Boolean);
+  if (frags.length >= 3 && frags.every((f) => f.length <= 24)) {return true;}
+  return false;
+}
+
 /** First capturing-group match across patterns whose capture meets minLen. */
 function firstMatch(text: string, patterns: RegExp[], minLen = 30): string | null {
   for (const re of patterns) {
@@ -168,8 +186,8 @@ function extractWhat(pkg: PkgJson | null, readme: string): SourcedValue | null {
   if (sec) {return sv(sec.body, `README:## ${sec.heading}`, 0.8);}
   const firstReal = readme
     .split(/\n\s*\n/)
-    .map((p) => p.trim())
-    .find((p) => p.length > 30 && !p.startsWith('#'));
+    .map((p) => p.replace(/\s+/g, ' ').trim())
+    .find((p) => p.length > 30 && !p.startsWith('#') && !isNonProseIntro(p));
   if (firstReal) {return sv(clean(firstReal), 'README:first-paragraph', 0.5);}
   const fm = firstMatch(readme, [
     /(?:core|main|primary)\s+(?:problem|challenge)(?:\s+is)?\s*:?\s*([^.\n]{30,})/i,

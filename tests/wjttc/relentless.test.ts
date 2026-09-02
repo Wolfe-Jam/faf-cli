@@ -197,6 +197,32 @@ describe('WJTTC BRAKE: README noise is not prose (Facts Edition)', () => {
     expect(ctx.when ?? '').not.toMatch(/https?:\/\//);
   });
 
+  test('pre-release blockquote banner never seeds `what` — real prose wins', () => {
+    readme([
+      '> ⚠️ **Nightly release for early testing.** Expect rough edges. Stable version coming soon — please open an issue if you hit anything.',
+      '',
+      '<a href="x"><img src="logo.png"></a>',
+      '',
+      '# Fix agents faster',
+      '',
+      '**The open-source platform for shipping self-improving AI agents.** Evaluations, tracing, guardrails — one platform, one feedback loop.',
+    ].join('\n'));
+    const what = relentlessContext(dir, { toolingRoot: true }).what ?? '';
+    expect(what).not.toMatch(/nightly|rough edges|early testing/i);
+    expect(what).toMatch(/open-source platform for shipping self-improving/);
+  });
+
+  test('nav / link row is not a description', () => {
+    readme([
+      '# P', '',
+      'Try Cloud (Free) · Self-Host · Docs · Blog · Discord', '',
+      '**A platform for evaluating and guardrailing production AI agents at scale.**',
+    ].join('\n'));
+    const what = relentlessContext(dir, { toolingRoot: true }).what ?? '';
+    expect(what).not.toMatch(/Try Cloud|Self-Host|Discord/);
+    expect(what).toMatch(/evaluating and guardrailing/);
+  });
+
   test('toolingRoot skips package.json-sourced context (polyglot repo)', () => {
     pkg({ description: 'Repo-level tooling (husky + lint-staged). App code lives in frontend/ and backend/.' });
     readme('# P\n\n## Why\n\nBecause production agents need a shared definition of done.\n');
