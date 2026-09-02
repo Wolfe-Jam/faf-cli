@@ -1,6 +1,6 @@
 {
   "name": "faf-cli",
-  "version": "7.10.0",
+  "version": "7.10.1",
   "description": "Persistent AI context + memory — .faf and .fafm, IANA-registered. Anthropic-merged.",
   "type": "module",
   "icon": "https://faf.one/orange-smiley.svg",

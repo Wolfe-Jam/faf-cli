@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v7.10.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v7.10.1 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -9,6 +9,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.10.1] - 2026-09-01
+
+Follow-up to the Full-Facts Edition — honesty on the prose extraction and the compose surface.
+
+### Fixed
+- **Pre-release banners no longer seed `human_context.what`.** A repo that opens with a `> ⚠️ Nightly release…` blockquote or a `Docs · Blog · Discord` nav row had that line land in `what`. The README first-paragraph fallback now skips blockquote callouts, pre-release/status banner phrasing, and short link rows — the first real prose paragraph wins. (`future-agi/future-agi` now reports "The open-source platform for shipping self-improving AI agents…" instead of the nightly-build warning.)
+
+### Changed
+- **Compose bullet, corrected.** 7.10.0's changelog listed `redis → cache`, `minio → storage`, `elasticsearch → search` — those slots are `enterprise_app` category and slot-ignored on the `fullstack` type the polyglot path assigns. `docker-compose` fact-extraction reaches `stack.database`, `stack.runtime`, and `stack.hosting` on a `fullstack` repo; the cache/search/storage mapping only surfaces on an `enterprise` app-type (a separate tool). Docs now say what the CLI emits.
+
+### Verification
+| Claim | Evidence command |
+|-------|------------------|
+| banner / nav row rejected for `what` | `bun test tests/wjttc/relentless.test.ts` |
 
 ## [7.10.0] - 2026-09-02 — The Full-Facts Edition
 

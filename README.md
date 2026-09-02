@@ -131,7 +131,7 @@ faf memory etch "a durable fact" --id my-fact
 faf memory show
 ```
 
-### What's New in v7.10.0 — The Full-Facts Edition
+### What's New in v7.10.1 — The Full-Facts Edition
 
 **`faf git` grounds every slot in the repo's own files — docker-compose services, Makefile targets, the sibling app dirs where the real stack lives. A polyglot repo stops reporting `library` / `JavaScript`.**
 
@@ -142,11 +142,13 @@ faf git future-agi/future-agi
 A polyglot repo (Django + React + Go, no npm workspace) used to report `type: library` / `main_language: JavaScript` / no stack. Now:
 
 - **`type: fullstack`** with `main_language: "Python (Django · backend); Go (backend); TypeScript (React · frontend)"` and a `# found: polyglot: …` rationale
-- **`stack.database: PostgreSQL · ClickHouse`** — read from `docker-compose.yml` service images (`redis` → cache, `minio` → storage, `kafka`/`temporal` → runtime)
+- **`stack.database: PostgreSQL · ClickHouse`** — read from `docker-compose.yml` service images (`kafka` / `temporal` → `stack.runtime`, Docker Compose → `stack.hosting`)
 - **`commands.test: cd futureagi && make test`** — read from the nested `Makefile`
 - **`security`** — from `.env.example`
 
 Every slot is backed by a file you can open. The README still fills `goal` and the 6 Ws — the human story a manifest doesn't hold.
+
+**7.10.1** — a repo that opens with a `> ⚠️ Nightly release…` blockquote or a `Docs · Blog · Discord` nav row no longer has that line seed `human_context.what`; the first real prose paragraph wins.
 
 **Recent sprint**
 
