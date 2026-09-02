@@ -182,6 +182,7 @@ program
   .option('--gemini', 'Author GEMINI.md')
   .option('--copilot', 'Author .github/copilot-instructions.md (GitHub Copilot)')
   .option('--grok', 'Wire grok-faf-mcp into .grok/config.toml')
+  .option('--llms', 'Author llms.txt (llmstxt.org view of authored 6Ws — opt-in)')
   .option('--conductor', 'Author conductor config')
   .option('--html', 'Author project.html (visual render of project.faf)')
   .option('--card', 'Author MCP Server Card (.well-known/mcp/server-card) with the FAF context-block')
@@ -357,6 +358,7 @@ program.command('agents', { hidden: true }).action(() => exportCommand({ agents:
 program.command('cursor', { hidden: true }).action(() => exportCommand({ cursor: true }));
 program.command('gemini', { hidden: true }).action(() => exportCommand({ gemini: true }));
 program.command('grok', { hidden: true }).action(() => exportCommand({ grok: true }));
+program.command('llms', { hidden: true }).action(() => exportCommand({ llms: true }));
 program.command('validate', { hidden: true }).action((file: string) => checkCommand(file));
 program.command('yolo', { hidden: true }).action(() => initCommand({ yolo: true }));
 
