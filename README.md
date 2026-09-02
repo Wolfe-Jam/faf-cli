@@ -35,7 +35,7 @@ detected from your real stack, scored, and versioned with your code. No drift. N
 [![TAF](./badge.svg)](https://github.com/Wolfe-Jam/faf-taf-git)
 [![CI](https://github.com/Wolfe-Jam/faf-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/Wolfe-Jam/faf-cli/actions/workflows/ci.yml)
 
-FAF defines. MD instructs. AI codes.
+FAF defines. AGENTS.md instructs. AI codes.
 
 <!-- trophy — bottom of hero -->
 [![FAF Trophy 100%](https://img.shields.io/badge/FAF-%F0%9F%8F%86%20100%25-000000?labelColor=FF6B35)](https://faf.one)
@@ -215,7 +215,7 @@ Pivotal releases — full history in [CHANGELOG.md](./CHANGELOG.md):
 - **v6.16 — Know Your Stack** — every emitted file labels your stack identically.
 - **v6.15 — Copilot** — `faf export --copilot` writes the file GitHub Copilot reads.
 - **v6.14 — Loop** — `faf loop` drives any repo to ✪ 100% or the honest human wall.
-- **v6.7 — HTML** — `faf show` renders a `.faf` to a browsable page. *(FAF defines. MD instructs. AI codes. HTML shows.)*
+- **v6.7 — HTML** — `faf show` renders a `.faf` to a browsable page. *(FAF defines. AGENTS.md instructs. AI codes. HTML shows.)*
 - **v6.6 — Trophy** — 100% or nothing.
 - **v6.0 — Bun** — ground-up rewrite; single portable binary, four platforms.
 

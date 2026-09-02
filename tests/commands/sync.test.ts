@@ -247,7 +247,7 @@ describe('TYRE: sync command — direction logic (auto / push / pull)', () => {
   });
 
   // ─── #63: auto sync is one-way push (.faf → CLAUDE.md), regardless of mtime ───
-  // Doctrine: "FAF defines. MD instructs." — .faf is the FCL canonical truth;
+  // Doctrine: "FAF defines. AGENTS.md instructs." — .faf is the FCL canonical truth;
   // CLAUDE.md is a downstream prose surface that READS .faf. mtime-based "newer
   // wins" silently overwrote canonical .faf content (issue #63).
   // Use `faf sync --pull` for the explicit legacy bootstrap case.

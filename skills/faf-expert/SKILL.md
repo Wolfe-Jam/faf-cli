@@ -14,7 +14,7 @@ The `.faf` file is **Persistent Project Context for AI** — a single source of 
 - **Git-native:** `project.faf` versions with your code; every clone gets full AI context
 - **The CLI behind the FCL** — the Foundational Context Layer for AI
 
-The credo: **FAF defines. MD instructs. AI codes.**
+The credo: **FAF defines. AGENTS.md instructs. AI codes.**
 
 ## When to activate this skill
 
@@ -170,5 +170,5 @@ v6.6.0 uses **Mk4 canonical slot names** in user-facing docs: `db` (was `databas
 
 ---
 
-**FAF defines. MD instructs. AI codes.**
+**FAF defines. AGENTS.md instructs. AI codes.**
 *v6.6.0 — The Trophy Edition. How no-score became a score.*

@@ -16,4 +16,4 @@ This package resolves [`faf-cli`](https://npmjs.com/package/faf-cli) at install 
 - **Issues:** https://github.com/Wolfe-Jam/faf-cli/issues
 - **Format:** IANA-registered `application/vnd.faf+yaml`
 
-> FAF defines. MD instructs. AI codes.
+> FAF defines. AGENTS.md instructs. AI codes.
