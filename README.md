@@ -133,7 +133,7 @@ faf memory show
 
 ### What's New in v7.10.0 — The Full-Facts Edition
 
-**`faf git` reads the tree it clones — docker-compose services, Makefile targets, sibling app dirs — instead of leaning on the README. A polyglot repo stops reporting `library` / `JavaScript`.**
+**`faf git` grounds every slot in the repo's own files — docker-compose services, Makefile targets, the sibling app dirs where the real stack lives. A polyglot repo stops reporting `library` / `JavaScript`.**
 
 ```bash
 faf git future-agi/future-agi
@@ -146,7 +146,7 @@ A polyglot repo (Django + React + Go, no npm workspace) used to report `type: li
 - **`commands.test: cd futureagi && make test`** — read from the nested `Makefile`
 - **`security`** — from `.env.example`
 
-File-facts beat README guesses. README extraction now strips `<!-- -->` comment blocks and rejects link-list rows.
+Every slot is backed by a file you can open. The README still fills `goal` and the 6 Ws — the human story a manifest doesn't hold.
 
 **Recent sprint**
 

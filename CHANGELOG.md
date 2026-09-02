@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [7.10.0] - 2026-09-02 — The Full-Facts Edition
 
-**`faf git` reads the tree it clones — docker-compose services, Makefile targets, sibling app dirs — instead of leaning on the README. A polyglot repo stops reporting `library` / `JavaScript`.**
+**`faf git` grounds every slot in the repo's own files — docker-compose services, Makefile targets, the sibling app dirs where the real stack lives. A polyglot repo stops reporting `library` / `JavaScript`.**
 
 ### Added
 - **Polyglot detection** — a repo whose real stack lives in sibling dirs (a frontend AND a backend, ≥2 languages, no npm workspace) now classifies as **`fullstack`** with an aggregated `main_language` (`"Python (Django · backend); Go (backend); TypeScript (React · frontend)"`) and a `# found: polyglot: dir/ (Lang), …` rationale — instead of falling to `type: library` / `main_language: JavaScript`. No new app-type; monorepo/enterprise slot work is out of scope.
@@ -21,16 +21,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`.env.example`** → `security.secrets` + `security.example`.
 
 ### Changed
-- **File-facts beat prose.** The new interrogators' `stack` / `commands` / `security` output takes precedence over README guesses and presence-only detectors.
-- A polyglot repo's tooling-shell root `package.json` no longer seeds `project.goal` or `human_context.what`.
+- **File-facts lead.** The new interrogators' `stack` / `commands` / `security` output takes precedence over presence-only detectors; the README still fills `goal` and the 6 Ws.
+- A polyglot repo's tooling-shell root `package.json` no longer seeds `project.goal` or `human_context.what` — those fall to the README.
 
 ### Fixed
-- README extraction strips `<!-- … -->` comment blocks (asset notes, TODO markers) before reading — their text could seed a slot.
-- Link-list section bodies (a roadmap row of markdown links) are rejected as prose — no longer land in `human_context.when`.
+- Prose extraction strips `<!-- … -->` comment blocks (asset notes, TODO markers) before reading — their text could seed a slot.
+- Rows of nav / roadmap links are rejected as prose — no longer land in `human_context.when`.
 
 ### Notes / non-claims
-- **Do NOT claim:** monorepo/enterprise support (that's a separate tool) · full YAML parsing of compose (image-name regex) · Windows (CI matrix is ubuntu + macos only).
-- **Kill line:** faf git reads the repo, not the README.
+- **Do NOT claim:** the README is unused — it still fills `goal` + the 6 Ws · monorepo/enterprise support (that's a separate tool) · full YAML parsing of compose (image-name regex) · Windows (CI matrix is ubuntu + macos only).
+- **Kill line:** every slot, grounded in the actual repo.
 
 ### Verification (claim inventory)
 | Claim | Evidence command |
