@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`faf export --llms`** — writes `llms.txt` from `project.faf` (llmstxt.org shape). Opt-in, like `--grok` — not on bare `faf export` / `--all`. Filled 6Ws only; stack, commands, and empty who/why are omitted. A view, not a format.
+
 ### Changed
 - **`faf hooks --install` and `faf diff --install` wire `faf-cli`, not the `faf` alias.** The generated pre-commit hook and `diff.faf.command` now call `faf-cli hooks-run` / `faf-cli diff-driver` — `faf-cli` is the canonical bin (installed alongside `faf` by the same package) and can't be shadowed by another `faf` on PATH.
 

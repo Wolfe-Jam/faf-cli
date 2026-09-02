@@ -12,6 +12,7 @@ import { writeAgentsMd } from '../../src/interop/agents.js';
 import { writeGeminiMd } from '../../src/interop/gemini.js';
 import { writeCursorrules } from '../../src/interop/cursorrules.js';
 import { writeClaudeMd, generateClaudeMd } from '../../src/interop/claude.js';
+import { writeLlmsTxt } from '../../src/interop/llms.js';
 
 function tmp(): string { return mkdtempSync(join(tmpdir(), 'faf-inject-')); }
 const DATA: any = {
@@ -119,5 +120,14 @@ describe('TYRE: interop writers — enhance, never replace', () => {
     writeClaudeMd(d, generateClaudeMd(DATA));
     const out = readFileSync(join(d, 'CLAUDE.md'), 'utf-8');
     expect(out).toContain(MARK);
+  });
+
+  test('writeLlmsTxt preserves an existing llms.txt', () => {
+    const d = tmp();
+    writeFileSync(join(d, 'llms.txt'), `# Mine\n${MARK}\nnotes\n`);
+    writeLlmsTxt(d, DATA);
+    const out = readFileSync(join(d, 'llms.txt'), 'utf-8');
+    expect(out).toContain(MARK);
+    expect(out).toContain('demo');
   });
 });

@@ -7,6 +7,7 @@ import { writeCursorrules } from '../interop/cursorrules.js';
 import { writeGeminiMd } from '../interop/gemini.js';
 import { writeCopilotInstructions } from '../interop/copilot-instructions.js';
 import { writeGrokConfig } from '../interop/grok.js';
+import { writeLlmsTxt } from '../interop/llms.js';
 import { writeProjectHtml } from '../interop/projecthtml.js';
 import { writeServerCard } from '../interop/servercard.js';
 import { scoreFafYaml } from '../core/scorer.js';
@@ -18,6 +19,7 @@ export interface ExportOptions {
   gemini?: boolean;
   copilot?: boolean;
   grok?: boolean;
+  llms?: boolean;
   conductor?: boolean;
   html?: boolean;
   card?: boolean;
@@ -43,6 +45,7 @@ export function exportCommand(options: ExportOptions = {}): void {
       !options.gemini &&
       !options.copilot &&
       !options.grok &&
+      !options.llms &&
       !options.conductor &&
       !options.html &&
       !options.card);
@@ -76,6 +79,14 @@ export function exportCommand(options: ExportOptions = {}): void {
   if (options.grok) {
     const status = writeGrokConfig(dir, data);
     console.log(`  .grok/config.toml (${status})`);
+  }
+
+  // Opt-in only: project llms.txt (llmstxt.org view of authored 6Ws).
+  // Origin crawlers vs repo agents are different rooms — never a side effect
+  // of bare `faf export` / `--all`.
+  if (options.llms) {
+    writeLlmsTxt(dir, data);
+    console.log(`  llms.txt`);
   }
 
   if (exportAll || options.html) {
