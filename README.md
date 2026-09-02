@@ -133,7 +133,7 @@ faf memory show
 
 ### What's New in v7.10.0 — The Full-Facts Edition
 
-**`faf git` reads the tree it clones — docker-compose services, Makefile targets, sibling app dirs — instead of leaning on the README.**
+**`faf git` reads the tree it clones — docker-compose services, Makefile targets, sibling app dirs — instead of leaning on the README. A polyglot repo stops reporting `library` / `JavaScript`.**
 
 ```bash
 faf git future-agi/future-agi
