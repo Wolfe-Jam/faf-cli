@@ -236,10 +236,20 @@ describe('WJTTC AERO: drift detection', () => {
       execSync('npm audit --audit-level=moderate --omit=dev', {
         cwd: ROOT,
         stdio: 'pipe',
-        timeout: 60_000,
+        timeout: 90_000, // under the 120s bun --timeout so the inconclusive path can run
       });
     } catch (err) {
-      const stdout = (err as { stdout?: Buffer }).stdout?.toString() ?? '';
+      const e = err as { status?: number | null; signal?: string | null; stdout?: Buffer; stderr?: Buffer };
+      const stdout = e.stdout?.toString() ?? '';
+      const stderr = e.stderr?.toString() ?? '';
+      // A registry timeout or network failure kills npm with a signal / no exit
+      // status and no report. That is inconclusive, not a finding — the
+      // dedicated Security Audit CI job is the hard gate for that case.
+      const inconclusive = e.status == null || e.signal != null || /ETIMEDOUT|ECONNRESET|ENOTFOUND|EAI_AGAIN|network/i.test(stderr);
+      if (inconclusive && !stdout.trim()) {
+        console.warn(`L8: npm audit did not complete (signal=${e.signal ?? 'none'}, status=${e.status ?? 'none'}) — skipping, not a vulnerability finding.`);
+        return;
+      }
       throw new Error(
         `npm audit found vulnerabilities at moderate+ level.\n` +
         `Run \`npm audit fix\`. Output:\n${stdout.slice(0, 1500)}`
