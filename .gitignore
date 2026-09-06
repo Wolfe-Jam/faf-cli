@@ -95,6 +95,9 @@ test-*.faf
 *.faf
 !project.faf
 !project-*.faf
+
+# Named reason: runtime state cache, not a format file. (Was tracked + stale — swept 2026-09.)
+.faf-state.json
 # Exception: test fixtures
 !tests/fixtures/**/*.faf
 !tests/fixtures/**/*.fafm
