@@ -1,45 +1,63 @@
-# Monorepo Example
-# Full-stack e-commerce platform
+# Monorepo — headless e-commerce platform (Turborepo)
+# Copy to project.faf and edit for your project. Run `faf score` to check completeness.
 
-faf_version: 4.0.0
-generated: 2025-01-24
-
+faf_version: "3.0"
 project:
-  name: "shopfront"
-  goal: "Modern e-commerce platform with headless architecture"
-  main_language: typescript
-
+  name: shopfront
+  version: "3.1.0"
+  goal: "Headless commerce with custom storefronts, one codebase per client theme"
+  main_language: TypeScript
+  type: monorepo
+commands:
+  install: pnpm install
+  dev: pnpm dev
+  build: pnpm build
+  test: pnpm test
+  lint: pnpm lint
+key_files:
+  - apps/web/
+  - apps/admin/
+  - apps/api/
+  - packages/ui/
+  - packages/db/
+  - turbo.json
+instant_context:
+  what_building: Headless e-commerce platform, multi-app monorepo
+  tech_stack: Turborepo · pnpm · Next.js · Fastify · Postgres
+  key_files:
+    - apps/web/
+    - packages/ui/
+    - packages/db/
 stack:
+  frontend: nextjs
+  css_framework: tailwind
+  ui_library: shadcn
+  state_management: zustand
+  backend: fastify
+  api_type: rest
+  runtime: node
+  database: postgres
+  connection: prisma
+  hosting: vercel
+  build: turbo
+  cicd: github_actions
   monorepo_tool: turborepo
   package_manager: pnpm
-  workspaces:
-    - apps/web (nextjs storefront)
-    - apps/admin (react admin panel)
-    - apps/api (fastify backend)
-    - packages/ui (shared components)
-    - packages/db (prisma schema)
-    - packages/config (shared configs)
-  frontend: nextjs
+  workspaces: apps/*, packages/*
   admin: react
-  backend: fastify
-  database: postgres
   cache: redis
   search: meilisearch
-  storage: cloudflare_r2
-  hosting: vercel
-  ci: github_actions
-
+  storage: r2
+monorepo:
+  packages_count: 6
+  build_orchestrator: turborepo
+  versioning_strategy: fixed
+  shared_configs: "packages/config (eslint, tsconfig, tailwind)"
+  remote_cache: vercel
 human_context:
-  who: "E-commerce agency building platforms for fashion brands"
-  what: "Headless commerce with custom storefronts for each client"
-  why: "Shopify too limiting, custom builds too expensive to maintain"
-  where: "Vercel (apps), Railway (services), Cloudflare (assets)"
-  when: "3 clients live, 2 in development, targeting 10 by EOY"
-  how: "Shared core, client-specific themes, white-label admin"
-
-preferences:
-  quality_bar: production_grade
-  commit_style: conventional
-  testing: required_for_core
-
-# Score: 100% - All slots filled
+  who: "An e-commerce agency building platforms for fashion brands"
+  what: "Headless commerce with a custom storefront per client, one shared core"
+  why: "Shopify was too limiting; fully custom builds were too expensive to maintain"
+  where: "Vercel (apps), a managed Postgres, Cloudflare R2 (assets)"
+  when: "A handful of clients live, more in development"
+  how: "Shared core packages, client-specific themes, a white-label admin"

@@ -1,36 +1,54 @@
-# Python ML Project Example
-# Document classification and extraction pipeline
+# Python ML pipeline — document classification + extraction
+# Copy to project.faf and edit for your project. Run `faf score` to check completeness.
 
-faf_version: 4.0.0
-generated: 2025-01-24
-
+faf_version: "3.0"
 project:
-  name: "doc-classifier"
-  goal: "Classify and extract structured data from uploaded documents"
-  main_language: python
-
+  name: doc-classifier
+  version: "0.4.0"
+  goal: "Classify legal documents and extract key clauses from uploaded files"
+  main_language: Python
+  type: data-science
+commands:
+  install: uv sync
+  dev: uv run uvicorn app.main:app --reload
+  test: uv run pytest
+  train: uv run python -m app.train
+key_files:
+  - app/main.py
+  - app/classify/
+  - app/extract/
+  - app/train.py
+  - pyproject.toml
+instant_context:
+  what_building: Legal-document classifier + clause extractor
+  tech_stack: FastAPI · PyTorch · sentence-transformers · Qdrant · Modal
+  key_files:
+    - app/classify/
+    - app/extract/
 stack:
-  framework: fastapi
-  ml_framework: pytorch
-  embeddings: sentence_transformers
-  vector_db: qdrant
-  task_queue: celery
-  broker: redis
-  storage: s3
+  frontend: slotignored
+  css_framework: slotignored
+  ui_library: slotignored
+  state_management: slotignored
+  backend: fastapi
+  api_type: rest
+  runtime: python
+  database: postgres
+  connection: sqlalchemy
   hosting: modal
-
+  build: uv
+  cicd: github_actions
+  monorepo_tool: slotignored
+  package_manager: uv
+  workspaces: slotignored
+  admin: slotignored
+  cache: redis
+  search: qdrant
+  storage: s3
 human_context:
-  who: "ML engineering team at legal tech company (2 ML engineers, 1 backend)"
-  what: "Classify legal documents (contracts, NDAs, amendments) and extract key clauses"
-  why: "Lawyers spend 40% of time on document review. Automate the obvious parts."
+  who: "ML engineering team at a legal-tech company (2 ML engineers, 1 backend)"
+  what: "Classify contracts / NDAs / amendments and extract key clauses"
+  why: "Lawyers spend ~40% of their time on document review — automate the obvious parts"
   where: "Modal for inference, S3 for storage, on-prem for training"
-  when: "Beta with 5 law firms, targeting GA in Q2"
-  how: "Fine-tuned BERT for classification, GPT-4 for extraction, human review for edge cases"
-
-preferences:
-  quality_bar: reproducible_results
-  testing: pytest
-  environment: conda
-  gpu: a100
-
-# Score: 100% - All slots filled
+  when: "In beta with a handful of firms, targeting GA next quarter"
+  how: "Fine-tuned encoder for classification, an LLM for extraction, human review on edge cases"

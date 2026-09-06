@@ -1,36 +1,53 @@
-# React Dashboard Example
-# A real-time metrics dashboard for engineering teams
+# React dashboard — real-time engineering-metrics app
+# Copy to project.faf and edit for your project. Run `faf score` to check completeness.
 
-faf_version: 4.0.0
-generated: 2025-01-24
-
+faf_version: "3.0"
 project:
-  name: "team-metrics"
+  name: team-metrics
+  version: "1.0.0"
   goal: "Real-time dashboard showing engineering team velocity and sprint progress"
-  main_language: typescript
-
+  main_language: TypeScript
+  type: website
+commands:
+  install: npm install
+  dev: npm run dev
+  build: npm run build
+  test: npm run test
+key_files:
+  - src/routes/
+  - src/lib/
+  - src/lib/api/
+  - package.json
+instant_context:
+  what_building: Real-time engineering-velocity dashboard
+  tech_stack: React · Vite · Tailwind · Postgres · Vercel
+  key_files:
+    - src/routes/
+    - src/lib/api/
 stack:
   frontend: react
-  state_management: zustand
   css_framework: tailwind
-  build: vite
+  ui_library: radix
+  state_management: zustand
   backend: node
+  api_type: rest
+  runtime: node
   database: postgres
-  orm: prisma
+  connection: prisma
   hosting: vercel
-  auth: clerk
-
+  build: vite
+  cicd: github_actions
+  monorepo_tool: slotignored
+  package_manager: npm
+  workspaces: slotignored
+  admin: slotignored
+  cache: slotignored
+  search: slotignored
+  storage: slotignored
 human_context:
-  who: "Engineering team at a B2B SaaS startup (12 developers)"
+  who: "Engineering team at a B2B SaaS startup (~12 developers)"
   what: "Internal dashboard replacing spreadsheet-based sprint tracking"
-  why: "Manual reporting takes 10+ hours/week. Need real-time visibility."
-  where: "Vercel (frontend) + Railway (database)"
-  when: "MVP in 2 weeks, v1.0 in 6 weeks"
-  how: "GitHub Issues integration, JIRA sync, automated daily snapshots"
-
-preferences:
-  quality_bar: strict_typescript
-  commit_style: conventional
-  testing: vitest
-
-# Score: 100% - All slots filled
+  why: "Manual reporting took 10+ hours a week — the team needed real-time visibility"
+  where: "Vercel (app) + a managed Postgres"
+  when: "MVP in 2 weeks, v1.0 in 6"
+  how: "GitHub Issues + project-board sync, automated daily snapshots"

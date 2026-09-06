@@ -1,36 +1,55 @@
-# Node.js REST API Example
-# Payment processing service with Stripe integration
+# Node REST API — payment / billing service
+# Copy to project.faf and edit for your project. Run `faf score` to check completeness.
 
-faf_version: 4.0.0
-generated: 2025-01-24
-
+faf_version: "3.0"
 project:
-  name: "payments-api"
-  goal: "Handle subscription billing, invoices, and payment processing"
-  main_language: typescript
-
+  name: payments-api
+  version: "2.3.0"
+  goal: "Subscription billing, invoicing, and payment processing with multi-currency support"
+  main_language: TypeScript
+  type: api
+commands:
+  install: npm install
+  dev: npm run dev
+  build: npm run build
+  test: npm run test
+  migrate: npm run db:migrate
+key_files:
+  - src/routes/
+  - src/billing/
+  - src/webhooks/
+  - src/db/schema.ts
+  - package.json
+instant_context:
+  what_building: Payment service — subscriptions, invoices, webhooks
+  tech_stack: Fastify · Postgres · Redis · BullMQ · AWS Lambda
+  key_files:
+    - src/billing/
+    - src/webhooks/
 stack:
-  runtime: node
-  framework: fastify
-  database: postgres
-  cache: redis
-  queue: bullmq
-  hosting: aws_lambda
+  frontend: slotignored
+  css_framework: slotignored
+  ui_library: slotignored
+  state_management: slotignored
+  backend: fastify
   api_type: rest
-  documentation: swagger
-
+  runtime: node
+  database: postgres
+  connection: drizzle
+  hosting: aws_lambda
+  build: tsup
+  cicd: github_actions
+  monorepo_tool: slotignored
+  package_manager: npm
+  workspaces: slotignored
+  admin: slotignored
+  cache: redis
+  search: slotignored
+  storage: s3
 human_context:
-  who: "Backend team at fintech startup (3 developers)"
-  what: "Payment service handling $2M+ monthly recurring revenue"
-  why: "Outgrew Stripe-only setup. Need custom billing logic and multi-currency support."
-  where: "AWS (us-east-1, eu-west-1)"
-  when: "Production since Q2 2024, processing 50k+ transactions/month"
-  how: "Stripe for payments, custom logic for invoicing, webhooks for real-time sync"
-
-preferences:
-  quality_bar: zero_runtime_errors
-  testing: required
-  logging: structured_json
-  security: pci_compliant
-
-# Score: 100% - All slots filled
+  who: "Backend team at a fintech startup (3 developers)"
+  what: "Payment service handling multi-currency subscription billing and invoicing"
+  why: "Outgrew a Stripe-only setup — needed custom billing logic and reconciliation"
+  where: "AWS, multi-region (us-east-1, eu-west-1)"
+  when: "In production, ~50k transactions/month"
+  how: "Stripe for card processing, custom logic for invoicing, webhooks for real-time sync"

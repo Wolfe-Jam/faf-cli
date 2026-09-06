@@ -1,36 +1,54 @@
-# SvelteKit SaaS Example
-# Multi-tenant project management application
+# SvelteKit SaaS — multi-tenant project management app
+# Copy to project.faf and edit for your project. Run `faf score` to check completeness.
 
-faf_version: 4.0.0
-generated: 2025-01-24
-
+faf_version: "3.0"
 project:
-  name: "projecthub"
-  goal: "Lightweight project management tool for small teams"
-  main_language: typescript
-
+  name: projecthub
+  version: "1.6.2"
+  goal: "Lightweight project management — boards, time tracking, client portals, invoicing"
+  main_language: TypeScript
+  type: website
+commands:
+  install: pnpm install
+  dev: pnpm dev
+  build: pnpm build
+  test: pnpm test
+key_files:
+  - src/routes/
+  - src/lib/server/
+  - src/lib/db/schema.ts
+  - src/hooks.server.ts
+  - package.json
+instant_context:
+  what_building: Multi-tenant project-management SaaS
+  tech_stack: SvelteKit · Tailwind · Drizzle · Postgres · Cloudflare
+  key_files:
+    - src/routes/
+    - src/lib/server/
 stack:
   frontend: sveltekit
   css_framework: tailwind
-  ui_library: shadcn-svelte
-  backend: sveltekit_server
+  ui_library: bits-ui
+  state_management: svelte-stores
+  backend: sveltekit
+  api_type: rpc
+  runtime: cloudflare-workers
   database: postgres
-  orm: drizzle
-  auth: lucia
+  connection: drizzle
   hosting: cloudflare_pages
-  edge: cloudflare_workers
-
+  build: vite
+  cicd: github_actions
+  monorepo_tool: slotignored
+  package_manager: pnpm
+  workspaces: slotignored
+  admin: slotignored
+  cache: slotignored
+  search: slotignored
+  storage: r2
 human_context:
-  who: "Solo founder building for small creative agencies (5-20 people)"
-  what: "Kanban boards, time tracking, client portals, invoicing"
-  why: "Existing tools are too complex or too expensive for small teams"
-  where: "Cloudflare (global edge)"
-  when: "Launched 6 months ago, 200 paying customers, $8k MRR"
-  how: "Freemium model, self-serve onboarding, Stripe for billing"
-
-preferences:
-  quality_bar: fast_first
-  commit_style: conventional
-  deploy: continuous
-
-# Score: 100% - All slots filled
+  who: "Solo founder building for small creative agencies (5–20 people)"
+  what: "Kanban boards, time tracking, client portals, invoicing in one tool"
+  why: "Existing tools are too complex or too expensive for teams this size"
+  where: "Cloudflare — global edge, Postgres via a managed provider"
+  when: "Launched, a few hundred paying customers, growing month over month"
+  how: "Freemium, self-serve onboarding, Stripe for billing"
