@@ -1,72 +1,50 @@
-# FAF Examples
+# FAF examples
 
-Real-world `project.faf` examples for common project types.
-
-## Examples
+Worked `project.faf` files for common project shapes. Each one is current-schema
+(`faf_version: "3.0"`) and scores **Trophy (100%)** — copy one, swap in your own
+values, and `faf score` tells you what's still missing.
 
 | File | Type | Stack |
 |------|------|-------|
-| `react-dashboard.faf` | React app | React + Vite + Postgres + Vercel |
-| `node-api.faf` | REST API | Fastify + Postgres + Redis + AWS |
-| `python-ml.faf` | ML pipeline | FastAPI + PyTorch + Qdrant + Modal |
-| `svelte-saas.faf` | SaaS app | SvelteKit + Postgres + Cloudflare |
-| `cli-tool.faf` | CLI tool | Go + Homebrew |
-| `monorepo.faf` | Monorepo | Turborepo + Next.js + Fastify |
+| `react-dashboard.faf` | Web app | React · Vite · Tailwind · Postgres · Vercel |
+| `node-api.faf` | REST API | Fastify · Postgres · Redis · S3 · AWS Lambda |
+| `python-ml.faf` | ML pipeline | FastAPI · PyTorch · Qdrant · Modal |
+| `svelte-saas.faf` | SaaS app | SvelteKit · Tailwind · Drizzle · Postgres · Cloudflare |
+| `cli-tool.faf` | CLI tool | Go · Homebrew (frontend/backend slots `slotignored`) |
+| `monorepo.faf` | Monorepo | Turborepo · pnpm · Next.js · Fastify · Postgres |
 
-## Using These Examples
-
-Copy and customize for your project:
+## Using an example
 
 ```bash
-# Copy an example
-cp examples/react-dashboard.faf project.faf
-
-# Edit for your project
-# (update name, goal, stack, human_context)
-
-# Verify your score
-faf score
-
-# Sync with CLAUDE.md
-faf bi-sync
+cp examples/react-dashboard.faf project.faf   # pick the closest shape
+# edit name / version / goal / stack / human_context for your project
+faf score                                     # see how complete it is
+faf sync                                      # keep it in step with CLAUDE.md
 ```
 
-## Structure
+## Shape
 
-Every `project.faf` has three core sections:
+Current `project.faf` (`3.0`) — the examples show all of it:
 
 ```yaml
-project:
-  name: "your-project"
-  goal: "What this project does"
-  main_language: typescript
-
-stack:
-  # Your technology choices
-  frontend: react
-  backend: node
-  database: postgres
-
-human_context:
-  # The information only you know
-  who: "Who is building this"
-  what: "What you're building"
-  why: "Why it matters"
-  where: "Where it runs"
-  when: "Timeline and milestones"
-  how: "How it works"
+faf_version: "3.0"
+project:            # name, version, goal, main_language, type
+commands:           # install / build / dev / test / lint
+key_files:          # the paths an agent should read first
+instant_context:    # a one-glance summary — what / stack / key files
+stack:              # the 21 slots — a real value, or `slotignored` when it genuinely doesn't apply
+human_context:      # the six Ws — who / what / why / where / when / how (only you know these)
 ```
 
-## Creating Your Own
+A `slotignored` slot counts as answered — a CLI with no frontend still scores Trophy.
+
+## Starting from your own repo instead
 
 ```bash
-# Auto-detect your stack
-faf auto
-
-# Or start from scratch
-faf init
+faf auto     # detect the stack, fill what's observable
+faf init     # or start from a blank interview
 ```
 
 ---
 
-*.faf is the format. `project.faf` is the file. 100% AI Readiness is the result.*
+*`.faf` is the format. `project.faf` is the file. 100% AI readiness is the result.*

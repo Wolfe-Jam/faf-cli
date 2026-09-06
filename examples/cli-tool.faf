@@ -1,35 +1,55 @@
-# CLI Tool Example
-# Database migration management tool
+# CLI tool — database migration manager (Go)
+# Copy to project.faf and edit for your project. Run `faf score` to check completeness.
+# A CLI has no frontend/backend/hosting — `slotignored` is the honest value, and it still scores Trophy.
 
-faf_version: 4.0.0
-generated: 2025-01-24
-
+faf_version: "3.0"
 project:
-  name: "migrator"
-  goal: "Zero-downtime database migrations with rollback support"
-  main_language: go
-
+  name: migrator
+  version: "0.9.0"
+  goal: "Zero-downtime database migrations with automatic rollback"
+  main_language: Go
+  type: cli
+commands:
+  build: go build ./...
+  test: go test ./...
+  lint: golangci-lint run
+  install: go install .
+key_files:
+  - main.go
+  - cmd/
+  - internal/migrate/
+  - internal/rollback/
+  - go.mod
+instant_context:
+  what_building: Database schema-migration CLI with rollback
+  tech_stack: Go · Postgres / MySQL / SQLite · distributed via Homebrew
+  key_files:
+    - cmd/
+    - internal/migrate/
 stack:
-  build: go_modules
-  distribution: homebrew
-  ci: github_actions
-  supported_dbs:
-    - postgres
-    - mysql
-    - sqlite
-  config_format: yaml
-
+  frontend: slotignored
+  css_framework: slotignored
+  ui_library: slotignored
+  state_management: slotignored
+  backend: slotignored
+  api_type: slotignored
+  runtime: slotignored
+  database: slotignored
+  connection: slotignored
+  hosting: slotignored
+  build: go
+  cicd: github_actions
+  monorepo_tool: slotignored
+  package_manager: go-modules
+  workspaces: slotignored
+  admin: slotignored
+  cache: slotignored
+  search: slotignored
+  storage: slotignored
 human_context:
-  who: "Platform engineering team at mid-size company"
-  what: "CLI tool for managing database schema changes across environments"
-  why: "Existing tools don't support our multi-region, multi-tenant setup"
+  who: "Platform engineering team at a mid-size company"
+  what: "CLI for managing database schema changes across environments"
+  why: "Existing tools don't support the team's multi-region, multi-tenant setup"
   where: "Distributed via Homebrew and direct binary downloads"
-  when: "Internal use for 2 years, now open-sourcing"
+  when: "Internal for ~2 years, now being open-sourced"
   how: "Version-controlled migrations, dry-run mode, automatic rollback on failure"
-
-preferences:
-  quality_bar: zero_data_loss
-  testing: table_driven
-  release: semantic_versioning
-
-# Score: 100% - All slots filled
