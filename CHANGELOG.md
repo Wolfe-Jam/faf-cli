@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v7.10.1 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v7.11.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -8,11 +8,13 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [7.11.0] - 2026-09-07 — The VS Code Edition
+
+faf-cli becomes a library a VS Code extension can import — `computeDrift()` joins the public API and `faf drift --json` mirrors it on the CLI. Plus `faf export --llms`.
 
 ### Added
+- **`faf drift --json` + exported `computeDrift(fafPath, dir?)`** — the context-drift check moves to a pure function in `src/core/drift.ts`, exported from the package index alongside `scoreFafYaml` / `findFafFile` / `generateProjectHtml`. Programmatic consumers (a VS Code extension) call it directly instead of shelling out. `faf drift --json` is the CLI mirror: a self-describing `faf_version` / `project` / `source` header over the report, raw `*_ms` mtimes and deltas (no `Date.now()` in the payload — the consumer formats its own "5d ago"). With no `project.faf`, `--json` emits `{ error, hint }` JSON (exit 2), never a stderr string. Bare `faf drift` output is unchanged.
 - **`faf export --llms`** — writes `llms.txt` from `project.faf` (llmstxt.org shape). Opt-in, like `--grok` — not on bare `faf export` / `--all`. Filled 6Ws only; stack, commands, and empty who/why are omitted. A view, not a format.
-- **`faf drift --json`** — structured output for the context-drift check, parity with `faf score --json`: a self-describing `faf_version` / `project` / `source` header spread over the report, raw `*_ms` mtimes and deltas (no `Date.now()` in the payload — the consumer formats its own "5d ago"). With no `project.faf`, `--json` emits a JSON `{ error, hint }` (exit 2) rather than a stderr string — a `--json` consumer always gets JSON. The comparison moves to a pure `computeDrift(fafPath, dir?)` in `src/core/drift.ts`, exported from the package index — programmatic consumers (the VS Code extension) import it as a library instead of shelling out. Bare `faf drift` output is unchanged.
 
 ### Changed
 - **`faf hooks --install` and `faf diff --install` wire `faf-cli`, not the `faf` alias.** The generated pre-commit hook and `diff.faf.command` now call `faf-cli hooks-run` / `faf-cli diff-driver` — `faf-cli` is the canonical bin (installed alongside `faf` by the same package) and can't be shadowed by another `faf` on PATH.

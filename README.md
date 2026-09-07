@@ -132,33 +132,27 @@ faf memory etch "a durable fact" --id my-fact
 faf memory show
 ```
 
-### What's New in v7.10.1 — The Full-Facts Edition
+### What's New in v7.11.0 — The VS Code Edition
 
-**`faf git` grounds every slot in the repo's own files — docker-compose services, Makefile targets, the sibling app dirs where the real stack lives. A polyglot repo stops reporting `library` / `JavaScript`.**
+**faf-cli becomes a library a VS Code extension can import — `computeDrift()` joins the public API and `faf drift --json` mirrors it on the CLI. Plus `faf export --llms`.**
 
-```bash
-faf git future-agi/future-agi
+```ts
+import { computeDrift, scoreFafYaml, findFafFile, generateProjectHtml } from 'faf-cli';
 ```
 
-A polyglot repo (Django + React + Go, no npm workspace) used to report `type: library` / `main_language: JavaScript` / no stack. Now:
-
-- **`type: fullstack`** with `main_language: "Python (Django · backend); Go (backend); TypeScript (React · frontend)"` and a `# found: polyglot: …` rationale
-- **`stack.database: PostgreSQL · ClickHouse`** — read from `docker-compose.yml` service images (`kafka` / `temporal` → `stack.runtime`, Docker Compose → `stack.hosting`)
-- **`commands.test: cd futureagi && make test`** — read from the nested `Makefile`
-- **`security`** — from `.env.example`
-
-Every slot is backed by a file you can open. The README still fills `goal` and the 6 Ws — the human story a manifest doesn't hold.
-
-**7.10.1** — a repo that opens with a `> ⚠️ Nightly release…` blockquote or a `Docs · Blog · Discord` nav row no longer has that line seed `human_context.what`; the first real prose paragraph wins.
+- **`computeDrift(fafPath, dir?)`** — the context-drift check is now a pure exported function, not just a command. A VS Code extension reads the mtime relationship between `project.faf` and its `CLAUDE.md` / `AGENTS.md` / `.cursorrules` / `GEMINI.md` directly, in process.
+- **`faf drift --json`** — the CLI mirror: a `faf_version` / `project` / `source` header over the report, raw `*_ms` mtimes and deltas (the consumer formats its own "5d ago"). No `project.faf` → `{ error, hint }` JSON, exit 2. Bare `faf drift` is unchanged.
+- **`faf export --llms`** — writes `llms.txt` (llmstxt.org shape) from the authored 6 Ws. Opt-in, like `--grok`.
 
 **Recent sprint**
 
+- 🖥️ [7.11.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.11.0) The VS Code Edition
+- 📚 [7.10.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.10.0) The Full-Facts Edition
 - 🌱 [7.9.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.9.0) The Git-Flow Edition
 - 🎬 [7.8.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.8.0) The Projector Edition
 - 🐦 [7.7.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.7.0) The Swift Edition
 - 💎 [7.6.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.6.0) The Ruby Edition
 - ☕ [7.5.1](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.5.1) The JVM Edition
-- 💠 [7.4.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.4.0) The C# Edition
 
 ---
 
