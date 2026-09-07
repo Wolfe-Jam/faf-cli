@@ -59,6 +59,29 @@ describe('ENGINE: drift command', () => {
     expect(output).toContain('newer');
   });
 
+  test('--json emits a JSON error (not a stderr string) when there is no project.faf', () => {
+    const logs: string[] = [];
+    const origLog = console.log;
+    const origExit = process.exit;
+    let exitCode: number | undefined;
+    console.log = (...args: unknown[]) => logs.push(args.join(' '));
+    // @ts-expect-error — stub for the test
+    process.exit = (code?: number) => { exitCode = code; throw new Error('__exit__'); };
+    try {
+      driftCommand({ json: true });
+    } catch (e) {
+      if ((e as Error).message !== '__exit__') throw e;
+    } finally {
+      console.log = origLog;
+      process.exit = origExit;
+    }
+
+    expect(exitCode).toBe(2);
+    const report = JSON.parse(logs.join('\n'));
+    expect(report.error).toContain('project.faf not found');
+    expect(report.hint).toContain('faf init');
+  });
+
   test('--json emits a parseable report with the metadata header', () => {
     const fafPath = join(testDir, 'project.faf');
     writeFileSync(fafPath, 'faf_version: 3.0.0\nproject:\n  name: drift-json-test\n');

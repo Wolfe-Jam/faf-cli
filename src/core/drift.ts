@@ -56,8 +56,10 @@ export interface DriftReport {
  *
  * @param fafPath  path to `project.faf`
  * @param dir      directory holding the context files; defaults to the .faf's
- *                 own directory (never `process.cwd()` — a caller such as the
- *                 VS Code extension passes an explicit workspace root)
+ *                 own directory. Never `process.cwd()` — the CLI passes it
+ *                 explicitly, and a library caller (the VS Code extension)
+ *                 passes the .faf's directory, which for a monorepo sub-package
+ *                 is the package dir, not the workspace root.
  */
 export function computeDrift(fafPath: string, dir: string = dirname(fafPath)): DriftReport {
   const sourceMtimeMs = statSync(fafPath).mtimeMs;

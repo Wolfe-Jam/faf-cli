@@ -10,17 +10,25 @@ export interface DriftOptions {
 export function driftCommand(options: DriftOptions = {}): void {
   const fafPath = findFafFile();
   if (!fafPath) {
-    console.error("Error: project.faf not found\n\n  Run 'faf init' to create one.");
+    // `--json` means JSON on every path — a consumer that asked for it should
+    // never have to parse a stderr string. Exit 2 still signals the failure.
+    if (options.json) {
+      console.log(
+        JSON.stringify({ error: 'project.faf not found', hint: "run 'faf init' to create one" }, null, 2),
+      );
+    } else {
+      console.error("Error: project.faf not found\n\n  Run 'faf init' to create one.");
+    }
     process.exit(2);
   }
 
   const report = computeDrift(fafPath, process.cwd());
 
   if (options.json) {
-    // Mirror `faf score --json`: the drift report plus a self-describing
-    // metadata header (project / source / faf_version). `report` already
-    // carries `source`. Raw *_ms numbers only — the consumer formats its own
-    // "5d ago" so the payload stays deterministic (no Date.now()).
+    // The drift report plus a self-describing metadata header (project /
+    // source / faf_version), the same shape `faf score --json` uses. `report`
+    // already carries `source`. Raw *_ms numbers only — the consumer formats
+    // its own "5d ago" so the payload stays deterministic (no Date.now()).
     const data = readFaf(fafPath);
     const snapshot = {
       faf_version: data.faf_version ?? 'unknown',
