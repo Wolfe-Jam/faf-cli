@@ -265,7 +265,8 @@ program
 program
   .command('drift')
   .description('Check context drift')
-  .action(() => driftCommand());
+  .option('--json', 'Emit the drift report as structured JSON')
+  .action((options) => driftCommand(options));
 
 program
   .command('edit <path> <value>')

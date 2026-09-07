@@ -20,6 +20,11 @@ export { FAF_HEX } from './ui/colors.js';
 export { enrichScore, scoreFafYaml } from './core/scorer.js';
 export { validateFaf } from './core/schema.js';
 export { findFafFile, readFaf, readFafRaw } from './interop/faf.js';
+// Context-drift engine — the mtime comparison behind `faf drift` / `faf drift
+// --json`. Pure; programmatic consumers (the VS Code extension) call
+// `computeDrift(fafPath, workspaceRoot)` directly instead of shelling out.
+export { computeDrift } from './core/drift.js';
+export type { DriftReport, DriftTarget, DriftStatus } from './core/drift.js';
 // Single-source project.html renderer — consumers (faf-mcp etc.) MUST use
 // this, never reimplement, never copy (kills the divergent old display).
 export { generateProjectHtml, writeProjectHtml } from './interop/projecthtml.js';

@@ -1,48 +1,69 @@
-import { existsSync, statSync } from 'fs';
-import { join } from 'path';
-import { findFafFile } from '../interop/faf.js';
+import { findFafFile, readFaf } from '../interop/faf.js';
+import { computeDrift, type DriftReport } from '../core/drift.js';
 import { bold, dim, fafCyan } from '../ui/colors.js';
 
-const CONTEXT_FILES = ['CLAUDE.md', 'AGENTS.md', '.cursorrules', 'GEMINI.md'];
+export interface DriftOptions {
+  json?: boolean;
+}
 
 /** Check context drift between .faf and context files */
-export function driftCommand(): void {
+export function driftCommand(options: DriftOptions = {}): void {
   const fafPath = findFafFile();
   if (!fafPath) {
-    console.error("Error: project.faf not found\n\n  Run 'faf init' to create one.");
+    // `--json` means JSON on every path — a consumer that asked for it should
+    // never have to parse a stderr string. Exit 2 still signals the failure.
+    if (options.json) {
+      console.log(
+        JSON.stringify({ error: 'project.faf not found', hint: "run 'faf init' to create one" }, null, 2),
+      );
+    } else {
+      console.error("Error: project.faf not found\n\n  Run 'faf init' to create one.");
+    }
     process.exit(2);
   }
 
-  const dir = process.cwd();
-  const fafMtime = statSync(fafPath).mtimeMs;
+  const report = computeDrift(fafPath, process.cwd());
 
+  if (options.json) {
+    // The drift report plus a self-describing metadata header (project /
+    // source / faf_version), the same shape `faf score --json` uses. `report`
+    // already carries `source`. Raw *_ms numbers only — the consumer formats
+    // its own "5d ago" so the payload stays deterministic (no Date.now()).
+    const data = readFaf(fafPath);
+    const snapshot = {
+      faf_version: data.faf_version ?? 'unknown',
+      project: data.project?.name ?? 'unknown',
+      ...report,
+    };
+    console.log(JSON.stringify(snapshot, null, 2));
+    return;
+  }
+
+  printDriftTable(report);
+}
+
+/** The human view — the formatted mtime table (unchanged output). */
+function printDriftTable(report: DriftReport): void {
   console.log(`${fafCyan('drift')} ${dim('— context file sync status')}\n`);
-  console.log(`  ${bold('.faf')} ${dim(formatAge(fafMtime))}`);
+  console.log(`  ${bold('.faf')} ${dim(formatAge(report.source_mtime_ms))}`);
 
-  let drifted = 0;
-
-  for (const file of CONTEXT_FILES) {
-    const path = join(dir, file);
-    if (!existsSync(path)) {
-      console.log(`  ${dim('○')} ${file} ${dim('missing')}`);
+  for (const target of report.targets) {
+    if (target.status === 'missing' || target.mtime_ms === null) {
+      console.log(`  ${dim('○')} ${target.file} ${dim('missing')}`);
       continue;
     }
 
-    const mtime = statSync(path).mtimeMs;
-    const delta = mtime - fafMtime;
-
-    if (Math.abs(delta) < 1000) {
-      console.log(`  ${fafCyan('●')} ${file} ${dim('in sync')}`);
-    } else if (delta > 0) {
-      console.log(`  ${bold('!')} ${file} ${bold('newer')} ${dim(formatAge(mtime))}`);
-      drifted++;
+    const age = dim(formatAge(target.mtime_ms));
+    if (target.status === 'in-sync') {
+      console.log(`  ${fafCyan('●')} ${target.file} ${dim('in sync')}`);
+    } else if (target.status === 'newer') {
+      console.log(`  ${bold('!')} ${target.file} ${bold('newer')} ${age}`);
     } else {
-      console.log(`  ${dim('○')} ${file} ${dim('older')} ${dim(formatAge(mtime))}`);
-      drifted++;
+      console.log(`  ${dim('○')} ${target.file} ${dim('older')} ${age}`);
     }
   }
 
-  if (drifted > 0) {
+  if (report.drifted > 0) {
     console.log(dim(`\n  run ${bold("'faf sync'")} to resolve drift`));
   }
 }
