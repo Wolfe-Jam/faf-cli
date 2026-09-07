@@ -58,4 +58,31 @@ describe('ENGINE: drift command', () => {
     const output = logs.join('\n');
     expect(output).toContain('newer');
   });
+
+  test('--json emits a parseable report with the metadata header', () => {
+    const fafPath = join(testDir, 'project.faf');
+    writeFileSync(fafPath, 'faf_version: 3.0.0\nproject:\n  name: drift-json-test\n');
+    const past = new Date(Date.now() - 60000);
+    utimesSync(fafPath, past, past);
+    writeFileSync(join(testDir, 'CLAUDE.md'), '# CLAUDE.md'); // newer -> drift
+
+    const logs: string[] = [];
+    const orig = console.log;
+    console.log = (...args: unknown[]) => logs.push(args.join(' '));
+    try {
+      driftCommand({ json: true });
+    } finally {
+      console.log = orig;
+    }
+
+    const report = JSON.parse(logs.join('\n'));
+    expect(report.faf_version).toBe('3.0.0');
+    expect(report.project).toBe('drift-json-test');
+    expect(report.source).toContain('project.faf');
+    expect(typeof report.source_mtime_ms).toBe('number');
+    expect(report.targets).toHaveLength(4);
+    expect(report.drifted).toBe(1);
+    const claude = report.targets.find((t: { file: string }) => t.file === 'CLAUDE.md');
+    expect(claude.status).toBe('newer');
+  });
 });
