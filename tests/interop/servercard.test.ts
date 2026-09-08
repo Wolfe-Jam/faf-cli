@@ -1,5 +1,6 @@
 import { describe, test, expect } from 'bun:test';
 import {
+  buildServerCard,
   generateServerCard,
   registryMeta,
   registryName,
@@ -19,7 +20,7 @@ const NAME_RE = /^[a-zA-Z0-9.-]+\/[a-zA-Z0-9._-]+$/;
 
 describe('ENGINE: 🛡️ server card generator', () => {
   test('emits required Server Card fields', () => {
-    const c = generateServerCard(faf);
+    const c = buildServerCard(faf);
     expect(String(c.$schema)).toContain('server-card.schema.json');
     expect(typeof c.name).toBe('string');
     expect(c.version).toBeDefined();
@@ -28,11 +29,11 @@ describe('ENGINE: 🛡️ server card generator', () => {
   });
 
   test('name matches MCP reverse-DNS pattern', () => {
-    expect(String(generateServerCard(faf).name)).toMatch(NAME_RE);
+    expect(String(buildServerCard(faf).name)).toMatch(NAME_RE);
   });
 
   test('carries the canonical FAF context-block', () => {
-    const c = generateServerCard(faf) as { _meta: Record<string, any> };
+    const c = buildServerCard(faf) as { _meta: Record<string, any> };
     const ctx = c._meta['one.faf/context'];
     expect(ctx.mediaType).toBe('application/vnd.faf+yaml');
     expect(ctx.deterministic).toBe(true);
@@ -41,22 +42,22 @@ describe('ENGINE: 🛡️ server card generator', () => {
   });
 
   test('does NOT bake a score (FAF don\'t lie)', () => {
-    const ctx = (generateServerCard(faf) as any)._meta['one.faf/context'];
+    const ctx = (buildServerCard(faf) as any)._meta['one.faf/context'];
     expect(ctx.score).toBeUndefined();
     expect(ctx.tier).toBeUndefined();
   });
 
   test('scoreEndpoint: omitted when unset, present + before `generated` when set', () => {
-    const lean = (generateServerCard(faf) as any)._meta['one.faf/context'];
+    const lean = (buildServerCard(faf) as any)._meta['one.faf/context'];
     expect(lean.scoreEndpoint).toBeUndefined(); // rig stays lean
-    const ep = (generateServerCard(faf, { scoreEndpoint: 'https://faf.one' }) as any)._meta['one.faf/context'];
+    const ep = (buildServerCard(faf, { scoreEndpoint: 'https://faf.one' }) as any)._meta['one.faf/context'];
     expect(ep.scoreEndpoint).toBe('https://faf.one');
     const keys = Object.keys(ep);
     expect(keys.indexOf('scoreEndpoint')).toBeLessThan(keys.indexOf('generated')); // byte-identity: order matters
   });
 
   test('ONE emitter produces the faf-server-card-ref form (absolute faf + scoreEndpoint)', () => {
-    const ctx = (generateServerCard(faf, {
+    const ctx = (buildServerCard(faf, {
       fafPointer: 'https://context.faf.one/.well-known/project.faf',
       scoreEndpoint: 'https://faf.one',
     }) as any)._meta['one.faf/context'];
@@ -66,18 +67,18 @@ describe('ENGINE: 🛡️ server card generator', () => {
   });
 
   test('homepage derives a reverse-DNS namespace', () => {
-    const c = generateServerCard({ project: { name: 'context', homepage: 'https://faf.one' } });
+    const c = buildServerCard({ project: { name: 'context', homepage: 'https://faf.one' } });
     expect(c.name).toBe('one.faf/context');
   });
 
   test('omits remotes unless an endpoint is supplied (no false claim)', () => {
-    expect(generateServerCard(faf).remotes).toBeUndefined();
-    const withRemote = generateServerCard(faf, { remoteUrl: 'https://card.faf.one/mcp' });
+    expect(buildServerCard(faf).remotes).toBeUndefined();
+    const withRemote = buildServerCard(faf, { remoteUrl: 'https://card.faf.one/mcp' });
     expect((withRemote.remotes as any[])[0].url).toBe('https://card.faf.one/mcp');
   });
 
   test('clamps an over-long description to <=100', () => {
-    const long = generateServerCard({ project: { name: 'x', goal: 'g'.repeat(250) } });
+    const long = buildServerCard({ project: { name: 'x', goal: 'g'.repeat(250) } });
     expect((long.description as string).length).toBeLessThanOrEqual(100);
   });
 });
@@ -98,7 +99,7 @@ describe('ENGINE: 🛡️ registry server.json _meta emitter', () => {
   });
 
   test('block is byte-identical to the Server Card block (one context, every door)', () => {
-    const cardCtx = (generateServerCard(faf) as any)._meta['one.faf/context'];
+    const cardCtx = (buildServerCard(faf) as any)._meta['one.faf/context'];
     const regCtx = (registryMeta(faf) as any)[PP]['one.faf/context'];
     expect(JSON.stringify(regCtx)).toBe(JSON.stringify(cardCtx));
   });
@@ -145,14 +146,18 @@ describe('ENGINE: 🛡️ registry title — the single source (compose-not-fork
     expect(registryTitle({ project: { name: 'x', title: '  Grok FAF  ' } as any })).toBe('Grok FAF');
   });
 
-  test('generateServerCard title prefers project.title over the reverse-DNS name', () => {
-    const c = generateServerCard({
+  test('buildServerCard title prefers project.title over the reverse-DNS name', () => {
+    const c = buildServerCard({
       project: { name: 'claude-faf-mcp', title: 'Claude FAF', homepage: 'https://faf.one' } as any,
     });
     expect(c.title).toBe('Claude FAF'); // the display title, not "claude-faf-mcp"
   });
 
-  test('generateServerCard falls back to the name when no title (back-compat)', () => {
-    expect(generateServerCard({ project: { name: 'faf-agent' } }).title).toBe('faf-agent');
+  test('buildServerCard falls back to the name when no title (back-compat)', () => {
+    expect(buildServerCard({ project: { name: 'faf-agent' } }).title).toBe('faf-agent');
+  });
+
+  test('generateServerCard is a deprecated alias for buildServerCard', () => {
+    expect(generateServerCard(faf)).toEqual(buildServerCard(faf));
   });
 });

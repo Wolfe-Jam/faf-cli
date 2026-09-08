@@ -1,5 +1,6 @@
 import { writeFileSync } from 'fs';
 import { join } from 'path';
+import { deprecate } from 'node:util';
 import type { FafData, ScoreResult } from '../core/types.js';
 import { FAF_HEX } from '../ui/colors.js';
 
@@ -10,7 +11,7 @@ import { FAF_HEX } from '../ui/colors.js';
  * browser, zero deps, self-contained. NOT a format, NOT a mime-type, NOT an
  * IANA application — a derived view that registers nothing and adds zero spec
  * surface. The inverse of style-source.html (that one is authored; this is
- * rendered). Deterministic on purpose: no timestamps, so a regenerate only
+ * rendered). Deterministic on purpose: no timestamps, so a re-run only
  * diffs when project.faf actually changed (versioned like .fafb).
  *
  * Humans like visuals. We gave them one.
@@ -64,7 +65,7 @@ function rows(entries: [string, unknown][]): string {
 }
 
 /** Render project.faf data + its score into a self-contained HTML string. */
-export function generateProjectHtml(
+export function renderProjectHtml(
   data: FafData,
   result: ScoreResult,
   fafPath = 'project.faf',
@@ -191,7 +192,14 @@ export function writeProjectHtml(
 ): void {
   writeFileSync(
     join(dir, 'project.html'),
-    generateProjectHtml(data, result, fafPath),
+    renderProjectHtml(data, result, fafPath),
     'utf-8',
   );
 }
+
+/** @deprecated Use {@link renderProjectHtml}. Removed in the next major. */
+export const generateProjectHtml = deprecate(
+  renderProjectHtml,
+  'faf-cli: generateProjectHtml is deprecated, use renderProjectHtml',
+  'FAF0001',
+);

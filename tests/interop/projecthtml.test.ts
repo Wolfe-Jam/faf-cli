@@ -3,6 +3,7 @@ import { mkdirSync, rmSync, readFileSync, existsSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import {
+  renderProjectHtml,
   generateProjectHtml,
   writeProjectHtml,
 } from '../../src/interop/projecthtml.js';
@@ -51,7 +52,7 @@ describe('ENGINE: interop/projecthtml', () => {
   };
 
   test('renders project name, score, and canonical tier glyph', () => {
-    const html = generateProjectHtml(data, result);
+    const html = renderProjectHtml(data, result);
     expect(html).toContain('demo-project');
     expect(html).toContain('87%');
     expect(html).toContain('◇'); // BRONZE canonical glyph
@@ -61,8 +62,8 @@ describe('ENGINE: interop/projecthtml', () => {
   });
 
   test('is deterministic — no timestamps, same input → identical output', () => {
-    expect(generateProjectHtml(data, result)).toBe(
-      generateProjectHtml(data, result),
+    expect(renderProjectHtml(data, result)).toBe(
+      renderProjectHtml(data, result),
     );
   });
 
@@ -71,13 +72,13 @@ describe('ENGINE: interop/projecthtml', () => {
       ...data,
       project: { ...data.project, name: '<script>alert(1)</script>' },
     };
-    const html = generateProjectHtml(hostile, result);
+    const html = renderProjectHtml(hostile, result);
     expect(html).not.toContain('<script>alert(1)</script>');
     expect(html).toContain('&lt;script&gt;');
   });
 
   test('zero external dependencies — fully self-contained', () => {
-    const html = generateProjectHtml(data, result);
+    const html = renderProjectHtml(data, result);
     expect(html).not.toMatch(/https?:\/\//);
     expect(html).not.toContain('@import');
     expect(html).not.toContain('<script');
@@ -90,15 +91,15 @@ describe('ENGINE: interop/projecthtml', () => {
       inherited: true,
       represents: 'Wolfe-Jam/private-src',
     };
-    const html = generateProjectHtml(data, inherited);
+    const html = renderProjectHtml(data, inherited);
     expect(html).toContain('inherited from Wolfe-Jam/private-src');
   });
 
   test('includes the source faf path (HTML-escaped)', () => {
-    const html = generateProjectHtml(data, result, '/repo/project.faf');
+    const html = renderProjectHtml(data, result, '/repo/project.faf');
     expect(html).toContain('Rendered on-demand from your current');
     expect(html).toContain('/repo/project.faf');
-    const evil = generateProjectHtml(data, result, '/x/<b>p</b>.faf');
+    const evil = renderProjectHtml(data, result, '/x/<b>p</b>.faf');
     expect(evil).not.toContain('<b>p</b>');
     expect(evil).toContain('&lt;b&gt;');
   });
@@ -109,13 +110,13 @@ describe('ENGINE: interop/projecthtml', () => {
       score: 100,
       tier: { name: 'TROPHY', threshold: 100, indicator: '✪ TROPHY' },
     };
-    const t = generateProjectHtml(data, trophy, '/x/project.faf');
+    const t = renderProjectHtml(data, trophy, '/x/project.faf');
     expect(t).toContain('✅ All Required slots filled.');
     expect(t).toContain('100% Trophy ✪ Awarded');
     expect(t).toContain('class="awd-win"');
     expect(t).not.toContain('slots populated ·');
 
-    const bronze = generateProjectHtml(data, result, '/x/project.faf');
+    const bronze = renderProjectHtml(data, result, '/x/project.faf');
     expect(bronze).toContain('slots populated');
     expect(bronze).not.toContain('Awarded');
 
@@ -125,7 +126,7 @@ describe('ENGINE: interop/projecthtml', () => {
       inherited: true,
       represents: 'Wolfe-Jam/src',
     };
-    expect(generateProjectHtml(data, inherited, '/x/project.faf')).not.toContain(
+    expect(renderProjectHtml(data, inherited, '/x/project.faf')).not.toContain(
       'Awarded',
     );
   });
@@ -135,5 +136,9 @@ describe('ENGINE: interop/projecthtml', () => {
     const out = join(testDir, 'project.html');
     expect(existsSync(out)).toBe(true);
     expect(readFileSync(out, 'utf-8')).toContain('demo-project');
+  });
+
+  test('generateProjectHtml is a deprecated alias for renderProjectHtml', () => {
+    expect(generateProjectHtml(data, result)).toBe(renderProjectHtml(data, result));
   });
 });

@@ -137,7 +137,7 @@ faf memory show
 **faf-cli becomes a library a VS Code extension can import — `computeDrift()` joins the public API and `faf drift --json` mirrors it on the CLI. Plus `faf export --llms`.**
 
 ```ts
-import { computeDrift, scoreFafYaml, findFafFile, generateProjectHtml } from 'faf-cli';
+import { computeDrift, scoreFafYaml, findFafFile, renderProjectHtml } from 'faf-cli';
 ```
 
 - **`computeDrift(fafPath, dir?)`** — the context-drift check is now a pure exported function, not just a command. A VS Code extension reads the mtime relationship between `project.faf` and its `CLAUDE.md` / `AGENTS.md` / `.cursorrules` / `GEMINI.md` directly, in process.

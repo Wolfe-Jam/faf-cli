@@ -1,9 +1,10 @@
 import { writeFileSync } from 'fs';
 import { join } from 'path';
+import { deprecate } from 'node:util';
 import type { FafData } from '../core/types.js';
 
 /**
- * Generate an MCP Server Card (SEP-2127) from a .faf.
+ * Build an MCP Server Card (SEP-2127) from a .faf.
  *
  * The card is a published discovery manifest. By design it carries the FAF
  * context-block in `_meta["one.faf/context"]` — so every Server Card produced
@@ -88,7 +89,7 @@ export function fafContextBlock(
 }
 
 /** Build the Server Card object from .faf data. */
-export function generateServerCard(
+export function buildServerCard(
   data: FafData,
   opts: ServerCardOptions = {},
 ): Record<string, unknown> {
@@ -181,8 +182,15 @@ export function writeServerCard(
   data: FafData,
   opts: ServerCardOptions = {},
 ): string {
-  const card = generateServerCard(data, opts);
+  const card = buildServerCard(data, opts);
   const out = join(dir, 'server-card');
   writeFileSync(out, `${JSON.stringify(card, null, 2)  }\n`, 'utf-8');
   return out;
 }
+
+/** @deprecated Use {@link buildServerCard}. Removed in the next major. */
+export const generateServerCard = deprecate(
+  buildServerCard,
+  'faf-cli: generateServerCard is deprecated, use buildServerCard',
+  'FAF0002',
+);

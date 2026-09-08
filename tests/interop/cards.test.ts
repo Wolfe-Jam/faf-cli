@@ -3,6 +3,7 @@ import type { FafData } from '../../src/core/types.js';
 import {
   A2A_CONTEXT_URI,
   assertSameBlock,
+  buildA2ACard,
   generateA2ACard,
   projectCards,
   upsertCatalog,
@@ -62,17 +63,17 @@ describe('ENGINE: 🛡️ one projector — faf cards', () => {
   });
 
   test('A2A extension URI is the dereference, not the MCP key', () => {
-    const card = generateA2ACard(fafa, faf);
+    const card = buildA2ACard(fafa, faf);
     expect(card.capabilities.extensions[0].uri).toBe(A2A_CONTEXT_URI);
     expect(A2A_CONTEXT_URI).toBe('https://faf.one/context');
   });
 
   test('A2A name prefers displayName', () => {
-    expect(generateA2ACard(fafa, faf).name).toBe('FAFA — the Voice of FAF');
+    expect(buildA2ACard(fafa, faf).name).toBe('FAFA — the Voice of FAF');
   });
 
   test('A2A has proto REQUIRED fields + skill tags', () => {
-    const c = generateA2ACard(fafa, faf);
+    const c = buildA2ACard(fafa, faf);
     expect(c.name).toBeTruthy();
     expect(c.description).toBeTruthy();
     expect(c.version).toBe('0.1.4');
@@ -116,7 +117,7 @@ describe('ENGINE: 🛡️ one projector — faf cards', () => {
 
   test('doorUrl supplies the door when .fafa has no a2a endpoint', () => {
     const dry: FafaDoc = { ...fafa, endpoints: [{ protocol: 'mcp', location: 'uvx x' }] };
-    const card = generateA2ACard(dry, faf, { doorUrl: 'https://mcpaas.live/claude/a2a' });
+    const card = buildA2ACard(dry, faf, { doorUrl: 'https://mcpaas.live/claude/a2a' });
     expect(card.supportedInterfaces).toEqual([
       {
         url: 'https://mcpaas.live/claude/a2a',
@@ -129,7 +130,7 @@ describe('ENGINE: 🛡️ one projector — faf cards', () => {
   });
 
   test('authored a2a endpoint wins over doorUrl', () => {
-    const card = generateA2ACard(fafa, faf, { doorUrl: 'https://example.com/ignored' });
+    const card = buildA2ACard(fafa, faf, { doorUrl: 'https://example.com/ignored' });
     expect(card.supportedInterfaces[0].url).toBe('https://faf-voice.vercel.app/api/a2a');
   });
 
@@ -138,7 +139,7 @@ describe('ENGINE: 🛡️ one projector — faf cards', () => {
       ...fafa,
       provenance: { faf: 'x', mediaType: 'application/vnd.faf+yaml', version: '2.5.2' },
     };
-    const params = generateA2ACard(dirty, faf).capabilities.extensions[0].params;
+    const params = buildA2ACard(dirty, faf).capabilities.extensions[0].params;
     expect(params.version).toBeUndefined();
     expect(params.mediaType).toBe('application/vnd.faf+yaml');
     expect(params.deterministic).toBe(true);
@@ -175,8 +176,13 @@ describe('ENGINE: 🛡️ one projector — faf cards', () => {
   });
 
   test('same .faf + same now → deterministic A2A', () => {
-    const a = JSON.stringify(generateA2ACard(fafa, faf, { now: '2026-08-17T00:00:00.000Z' }));
-    const b = JSON.stringify(generateA2ACard(fafa, faf, { now: '2026-08-17T00:00:00.000Z' }));
+    const a = JSON.stringify(buildA2ACard(fafa, faf, { now: '2026-08-17T00:00:00.000Z' }));
+    const b = JSON.stringify(buildA2ACard(fafa, faf, { now: '2026-08-17T00:00:00.000Z' }));
     expect(a).toBe(b);
+  });
+
+  test('generateA2ACard is a deprecated alias for buildA2ACard', () => {
+    const opts = { now: '2026-08-17T00:00:00.000Z' };
+    expect(generateA2ACard(fafa, faf, opts)).toEqual(buildA2ACard(fafa, faf, opts));
   });
 });

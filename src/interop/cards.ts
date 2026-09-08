@@ -1,10 +1,11 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { dirname, join } from 'path';
+import { deprecate } from 'node:util';
 import { parse } from 'yaml';
 import type { FafData } from '../core/types.js';
 import {
   fafContextBlock,
-  generateServerCard,
+  buildServerCard,
   registryMeta,
   registryName,
   registryTitle,
@@ -155,7 +156,8 @@ export function a2aDoors(fafa: FafaDoc, opts: ProjectCardsOptions = {}): FafaEnd
   return [];
 }
 
-export function generateA2ACard(
+/** Build the A2A Agent Card (JSON) from a .fafa + .faf. */
+export function buildA2ACard(
   fafa: FafaDoc,
   faf: FafData,
   opts: ProjectCardsOptions = {},
@@ -220,6 +222,13 @@ export function generateA2ACard(
     skills,
   };
 }
+
+/** @deprecated Use {@link buildA2ACard}. Removed in the next major. */
+export const generateA2ACard = deprecate(
+  buildA2ACard,
+  'faf-cli: generateA2ACard is deprecated, use buildA2ACard',
+  'FAF0003',
+);
 
 function catalogHost(fafa: FafaDoc): string {
   const homepage = fafa.agent?.homepage;
@@ -344,7 +353,7 @@ export function projectCards(input: {
   const out: ProjectedCards = { block };
 
   if (wanted.has('mcp')) {
-    out.mcp = generateServerCard(input.faf, opts);
+    out.mcp = buildServerCard(input.faf, opts);
   }
   if (wanted.has('registry')) {
     const title = registryTitle(input.faf);
@@ -371,7 +380,7 @@ export function projectCards(input: {
         );
       }
     } else {
-      out.a2a = generateA2ACard(input.fafa, input.faf, opts);
+      out.a2a = buildA2ACard(input.fafa, input.faf, opts);
     }
   }
 

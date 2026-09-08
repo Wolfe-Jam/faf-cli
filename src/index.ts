@@ -27,12 +27,15 @@ export { computeDrift } from './core/drift.js';
 export type { DriftReport, DriftTarget, DriftStatus } from './core/drift.js';
 // Single-source project.html renderer — consumers (faf-mcp etc.) MUST use
 // this, never reimplement, never copy (kills the divergent old display).
-export { generateProjectHtml, writeProjectHtml } from './interop/projecthtml.js';
+// `generateProjectHtml` is a deprecated alias — use `renderProjectHtml`.
+export { renderProjectHtml, generateProjectHtml, writeProjectHtml } from './interop/projecthtml.js';
 // Single-source Server Card + registry `_meta` emitter — consumers (the 5 MCP
 // editions, CFM) MUST compose these, never hand-author the `one.faf/context`
 // block. `registryMeta` nests under publisher-provided (registry-safe);
-// `generateServerCard` is top-level (SEP-2127 card). One context, every door.
+// `buildServerCard` is top-level (SEP-2127 card). One context, every door.
+// `generateServerCard` is a deprecated alias — use `buildServerCard`.
 export {
+  buildServerCard,
   generateServerCard,
   writeServerCard,
   fafContextBlock,
@@ -41,10 +44,12 @@ export {
   REGISTRY_PUBLISHER_KEY,
 } from './interop/servercard.js';
 export type { ServerCardOptions } from './interop/servercard.js';
+// `generateA2ACard` is a deprecated alias — use `buildA2ACard`.
 export {
   projectCards,
   readFafa,
   findFafaFile,
+  buildA2ACard,
   generateA2ACard,
   upsertCatalog,
   A2A_CONTEXT_URI,
