@@ -3,9 +3,9 @@ import { mkdirSync, writeFileSync, rmSync, readFileSync, existsSync, utimesSync,
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { writeFaf, readFaf, readFafRaw } from '../../src/interop/faf.js';
-import { generateClaudeMd, writeClaudeMd } from '../../src/interop/claude.js';
+import { renderClaudeMd, writeClaudeMd } from '../../src/interop/claude.js';
 
-describe('ENGINE: sync command — generateClaudeMd output contract', () => {
+describe('ENGINE: sync command — renderClaudeMd output contract', () => {
   let testDir: string;
 
   beforeEach(() => {
@@ -24,7 +24,7 @@ describe('ENGINE: sync command — generateClaudeMd output contract', () => {
     });
 
     const data = { faf_version: '2.5.0', project: { name: 'sync-test', goal: 'Testing sync', main_language: 'TypeScript' } };
-    const content = generateClaudeMd(data);
+    const content = renderClaudeMd(data);
     writeClaudeMd(testDir, content);
 
     expect(existsSync(join(testDir, 'CLAUDE.md'))).toBe(true);
@@ -33,24 +33,24 @@ describe('ENGINE: sync command — generateClaudeMd output contract', () => {
     expect(md).toContain('BI-SYNC ACTIVE');
   });
 
-  test('generateClaudeMd skips slotignored values', () => {
+  test('renderClaudeMd skips slotignored values', () => {
     const data = {
       faf_version: '2.5.0',
       project: { name: 'cli-tool', main_language: 'TypeScript' },
       stack: { frontend: 'slotignored', backend: 'slotignored', runtime: 'Node.js' },
     };
-    const content = generateClaudeMd(data);
+    const content = renderClaudeMd(data);
     expect(content).not.toContain('slotignored');
     expect(content).toContain('Node.js');
   });
 
-  test('generateClaudeMd labels are registry-sourced (API, CI/CD, Framework), acronym fallback', () => {
+  test('renderClaudeMd labels are registry-sourced (API, CI/CD, Framework), acronym fallback', () => {
     const data = {
       faf_version: '2.5.0',
       project: { name: 'cli-tool', main_language: 'TypeScript' },
       stack: { api_type: 'MCP', runtime: 'Node.js', cicd: 'GitHub Actions', frontend: 'Svelte', mcp_sdk: '1.0' },
     };
-    const content = generateClaudeMd(data);
+    const content = renderClaudeMd(data);
     expect(content).toContain('**API:** MCP');              // registry: api_type → "API"
     expect(content).toContain('**CI/CD:** GitHub Actions'); // registry: cicd → "CI/CD" (was "Cicd")
     expect(content).toContain('**Framework:** Svelte');     // registry: frontend → "Framework"
@@ -60,16 +60,16 @@ describe('ENGINE: sync command — generateClaudeMd output contract', () => {
     expect(content).not.toContain('**Cicd:**');
   });
 
-  test('generateClaudeMd handles empty project gracefully', () => {
+  test('renderClaudeMd handles empty project gracefully', () => {
     const data = { faf_version: '2.5.0', project: {} };
-    expect(() => generateClaudeMd(data)).not.toThrow();
-    const content = generateClaudeMd(data);
+    expect(() => renderClaudeMd(data)).not.toThrow();
+    const content = renderClaudeMd(data);
     expect(typeof content).toBe('string');
     expect(content.length).toBeGreaterThan(0);
   });
 
-  test('generateClaudeMd output is stable across calls (modulo timestamp)', () => {
-    // generateClaudeMd embeds a `Last Sync: <ISO timestamp>` line, so byte-
+  test('renderClaudeMd output is stable across calls (modulo timestamp)', () => {
+    // renderClaudeMd embeds a `Last Sync: <ISO timestamp>` line, so byte-
     // identical determinism is not a real invariant. What IS invariant is
     // that the structural content (project metadata, sync marker, body) stays
     // the same — only the timestamp moves. Strip the timestamp line and
@@ -81,8 +81,8 @@ describe('ENGINE: sync command — generateClaudeMd output contract', () => {
     // Strip ISO 8601 timestamps (the only non-deterministic content). Robust
     // to which marker text the implementation uses around the timestamp.
     const stripTimestamp = (s: string) => s.replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z/g, '<TS>');
-    const a = stripTimestamp(generateClaudeMd(data));
-    const b = stripTimestamp(generateClaudeMd(data));
+    const a = stripTimestamp(renderClaudeMd(data));
+    const b = stripTimestamp(renderClaudeMd(data));
     expect(a).toBe(b);
   });
 });
@@ -187,7 +187,7 @@ describe('TYRE: sync command — direction logic (auto / push / pull)', () => {
       project: { name: 'old-name' }, // sub-Trophy by design
     });
     const newData = { faf_version: '2.5.0', project: { name: 'new-name', goal: 'pulled goal' } };
-    writeFileSync(join(testDir, 'CLAUDE.md'), generateClaudeMd(newData));
+    writeFileSync(join(testDir, 'CLAUDE.md'), renderClaudeMd(newData));
 
     const { syncCommand } = await import('../../src/commands/sync.js');
     const errs: string[] = [];
@@ -264,7 +264,7 @@ describe('TYRE: sync command — direction logic (auto / push / pull)', () => {
 
     // Author a CLAUDE.md (newer mtime) with divergent prose
     const drift = { faf_version: '2.5.0', project: { name: 'drifted-md-name', goal: 'rephrased prose' } };
-    writeFileSync(join(testDir, 'CLAUDE.md'), generateClaudeMd(drift));
+    writeFileSync(join(testDir, 'CLAUDE.md'), renderClaudeMd(drift));
 
     const { syncCommand } = await import('../../src/commands/sync.js');
     const logSpy = spyOn(console, 'log').mockImplementation(() => {});

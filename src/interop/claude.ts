@@ -73,8 +73,8 @@ export function fafMetaTag(data: FafData, opts: FafMetaOpts = {}): string {
   return `${line1}\n${line2}`;
 }
 
-/** Generate CLAUDE.md content from .faf data */
-export function generateClaudeMd(data: FafData): string {
+/** Render CLAUDE.md content from .faf data */
+export function renderClaudeMd(data: FafData): string {
   const lines: string[] = [];
   const name = data.project?.name ?? 'Project';
   const lang = data.project?.main_language ?? '';

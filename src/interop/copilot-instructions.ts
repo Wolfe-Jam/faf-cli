@@ -23,7 +23,7 @@ const COMMAND_VERBS: ReadonlyArray<readonly [string, string]> = [
 const COMMAND_SLOTS = new Set<string>([...COMMAND_VERBS.map(([k]) => k), 'cicd']);
 
 /**
- * Generate `.github/copilot-instructions.md` content from .faf data.
+ * Render `.github/copilot-instructions.md` content from .faf data.
  *
  * GitHub Copilot's repository-wide custom-instructions file — the WIDEST-supported
  * instruction surface (web chat, code review, VS Code, JetBrains, Visual Studio,
@@ -41,7 +41,7 @@ const COMMAND_SLOTS = new Set<string>([...COMMAND_VERBS.map(([k]) => k), 'cicd']
  * already consume the richer slots Option B will add (test/lint/run, …), so this
  * emitter is built once and grows with the data.
  */
-export function generateCopilotInstructions(data: FafData): string {
+export function renderCopilotInstructions(data: FafData): string {
   const lines: string[] = [];
   const name = data.project?.name ?? 'Project';
 
@@ -105,5 +105,5 @@ export function generateCopilotInstructions(data: FafData): string {
  */
 export function writeCopilotInstructions(dir: string, data: FafData): void {
   mkdirSync(join(dir, '.github'), { recursive: true });
-  injectFafBlock(join(dir, '.github', 'copilot-instructions.md'), generateCopilotInstructions(data));
+  injectFafBlock(join(dir, '.github', 'copilot-instructions.md'), renderCopilotInstructions(data));
 }

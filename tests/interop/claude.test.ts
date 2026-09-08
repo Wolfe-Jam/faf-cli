@@ -2,7 +2,7 @@ import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { mkdirSync, writeFileSync, rmSync, readFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { fafMetaTag, generateClaudeMd, parseClaudeMd, readClaudeMd, writeClaudeMd } from '../../src/interop/claude.js';
+import { fafMetaTag, renderClaudeMd, parseClaudeMd, readClaudeMd, writeClaudeMd } from '../../src/interop/claude.js';
 import type { FafData } from '../../src/core/types.js';
 
 describe('ENGINE: interop/claude', () => {
@@ -31,15 +31,15 @@ describe('ENGINE: interop/claude', () => {
     },
   };
 
-  test('generateClaudeMd includes project name', () => {
-    const content = generateClaudeMd(sampleData);
+  test('renderClaudeMd includes project name', () => {
+    const content = renderClaudeMd(sampleData);
     expect(content).toContain('test-project');
     expect(content).toContain('BI-SYNC ACTIVE');
     expect(content).toContain('TypeScript');
   });
 
   test('parseClaudeMd extracts fields', () => {
-    const content = generateClaudeMd(sampleData);
+    const content = renderClaudeMd(sampleData);
     const parsed = parseClaudeMd(content);
     expect(parsed.project?.name).toBe('test-project');
     expect(parsed.project?.main_language).toBe('TypeScript');
@@ -131,8 +131,8 @@ describe('ENGINE: interop/claude', () => {
     });
   });
 
-  test('generateClaudeMd output starts with the 2-line stamp (#64)', () => {
-    const content = generateClaudeMd(sampleData);
+  test('renderClaudeMd output starts with the 2-line stamp (#64)', () => {
+    const content = renderClaudeMd(sampleData);
     const firstTwoLines = content.split('\n').slice(0, 2);
     expect(firstTwoLines[0]).toMatch(/^<!-- faf: .* -->$/);
     expect(firstTwoLines[1]).toMatch(/^<!-- faf: .* -->$/);

@@ -27,13 +27,13 @@ function scalar(map: Record<string, unknown> | undefined, key: string): string |
 }
 
 /**
- * Generate `llms.txt` from project.faf — llmstxt.org shape (H1, optional
+ * Render `llms.txt` from project.faf — llmstxt.org shape (H1, optional
  * blockquote, optional sections). A view, not a format.
  *
  * Filled 6Ws only. Stack, commands, score, and empty human slots are omitted.
  * Blank who/why stay blank — never paraphrased from the README.
  */
-export function generateLlmsTxt(data: FafData): string {
+export function renderLlmsTxt(data: FafData): string {
   const lines: string[] = [];
   const name = humanFact(data.project?.name) ?? 'Project';
   const goal = humanFact(data.project?.goal);
@@ -70,5 +70,5 @@ export function generateLlmsTxt(data: FafData): string {
 
 /** Write llms.txt — non-destructive: injects/updates the faf block, preserves the rest. */
 export function writeLlmsTxt(dir: string, data: FafData): void {
-  injectFafBlock(join(dir, 'llms.txt'), generateLlmsTxt(data));
+  injectFafBlock(join(dir, 'llms.txt'), renderLlmsTxt(data));
 }

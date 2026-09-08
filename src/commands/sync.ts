@@ -1,7 +1,7 @@
 import { existsSync, statSync } from 'fs';
 import { join, dirname } from 'path';
 import { findFafFile, readFaf, readFafRaw, writeFaf } from '../interop/faf.js';
-import { readClaudeMd, writeClaudeMd, generateClaudeMd, parseClaudeMd } from '../interop/claude.js';
+import { readClaudeMd, writeClaudeMd, renderClaudeMd, parseClaudeMd } from '../interop/claude.js';
 import { readMemoryMd, writeMemoryMd } from '../interop/memory.js';
 import * as kernel from '../wasm/kernel.js';
 import { enrichScore } from '../core/scorer.js';
@@ -59,7 +59,7 @@ function autoSync(fafPath: string, claudePath: string, dir: string): void {
 
 function pushSync(fafPath: string, dir: string): void {
   const data = readFaf(fafPath);
-  const content = generateClaudeMd(data);
+  const content = renderClaudeMd(data);
   writeClaudeMd(dir, content);
   console.log(`${fafCyan('◆')} sync  .faf → CLAUDE.md   ${dim('← bi-sync')}`);
 

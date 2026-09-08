@@ -208,15 +208,15 @@ describe('WJTTC — copilot-instructions emit', () => {
 
     test('is NOT a byte-identical AGENTS.md clone (complementary, not duplicate)', () => {
       writeFaf('stack:\n  runtime: Node.js\n  build: tsc\nhuman_context:\n  who: devs\n');
-      const { generateCopilotInstructions } = require('../../src/interop/copilot-instructions.js');
-      const { generateAgentsMd } = require('../../src/interop/agents.js');
+      const { renderCopilotInstructions } = require('../../src/interop/copilot-instructions.js');
+      const { renderAgentsMd } = require('../../src/interop/agents.js');
       const data = {
         project: { name: 'wedge', goal: 'GitHub adoption wedge', main_language: 'TypeScript' },
         stack: { runtime: 'Node.js', build: 'tsc' },
         human_context: { who: 'devs' },
       };
-      const copilot = generateCopilotInstructions(data);
-      const agents = generateAgentsMd(data);
+      const copilot = renderCopilotInstructions(data);
+      const agents = renderAgentsMd(data);
       expect(copilot).not.toBe(agents); // the clone guard
       expect(copilot).toContain('# GitHub Copilot Instructions');
       expect(agents).toContain('# AGENTS.md');

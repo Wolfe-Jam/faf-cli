@@ -30,7 +30,7 @@ const NON_STACK = new Set(['target_user', 'core_problem', 'mission_purpose']);
  *
  * Design: BETTER guide + hand exemplar (faf-cli AGENTS.md) + agents-md-facts.
  */
-export function generateAgentsMd(data: FafData): string {
+export function renderAgentsMd(data: FafData): string {
   const lines: string[] = [];
   const push = (s = '') => lines.push(s);
 
@@ -231,5 +231,5 @@ export function generateAgentsMd(data: FafData): string {
 
 /** Write AGENTS.md — non-destructive: injects/updates the faf block, preserves the rest. */
 export function writeAgentsMd(dir: string, data: FafData): void {
-  injectFafBlock(join(dir, 'AGENTS.md'), generateAgentsMd(data));
+  injectFafBlock(join(dir, 'AGENTS.md'), renderAgentsMd(data));
 }

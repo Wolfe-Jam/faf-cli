@@ -4,8 +4,8 @@ import { fafMetaTag } from './claude.js';
 import { injectFafBlock } from './inject.js';
 import { filled, slotLabel } from './labels.js';
 
-/** Generate .cursorrules content from .faf data */
-export function generateCursorrules(data: FafData): string {
+/** Render .cursorrules content from .faf data */
+export function renderCursorrules(data: FafData): string {
   const lines: string[] = [];
 
   lines.push(fafMetaTag(data));
@@ -34,5 +34,5 @@ export function generateCursorrules(data: FafData): string {
 
 /** Write .cursorrules — non-destructive: injects/updates the faf block (hash-comment markers), preserves the rest. */
 export function writeCursorrules(dir: string, data: FafData): void {
-  injectFafBlock(join(dir, '.cursorrules'), generateCursorrules(data), '# faf:start', '# faf:end');
+  injectFafBlock(join(dir, '.cursorrules'), renderCursorrules(data), '# faf:start', '# faf:end');
 }

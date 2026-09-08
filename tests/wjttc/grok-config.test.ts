@@ -20,7 +20,7 @@ import { execSync } from 'child_process';
 import {
   GROK_FAF_MCP_URL,
   GROK_MCP_TABLE,
-  generateGrokConfig,
+  renderGrokConfig,
   writeGrokConfig,
 } from '../../src/interop/grok.js';
 
@@ -65,8 +65,8 @@ describe('WJTTC BRAKE: .grok/config.toml is non-destructive', () => {
 });
 
 describe('WJTTC ENGINE: canonical block + file creation', () => {
-  test('generateGrokConfig emits the canonical [mcp_servers.grok-faf-mcp] block', () => {
-    const block = generateGrokConfig();
+  test('renderGrokConfig emits the canonical [mcp_servers.grok-faf-mcp] block', () => {
+    const block = renderGrokConfig();
     expect(block).toContain(TABLE);
     expect(block).toContain(`url = "${GROK_FAF_MCP_URL}"`);
   });

@@ -8,7 +8,7 @@
  *   AERO   — facts-not-bloat curation (marketing/context stack keys excluded).
  */
 import { describe, test, expect } from 'bun:test';
-import { generateGeminiMd } from '../../src/interop/gemini.js';
+import { renderGeminiMd } from '../../src/interop/gemini.js';
 
 const FULL: any = {
   project: { name: 'demo', goal: 'A small API', main_language: 'Python' },
@@ -27,7 +27,7 @@ const FULL: any = {
 const BARE: any = { project: { name: 'bare', goal: 'a tiny tool', main_language: 'Go' } };
 
 describe('ENGINE: full data renders every section', () => {
-  const md = generateGeminiMd(FULL);
+  const md = renderGeminiMd(FULL);
 
   test('orientation: project · goal · language', () => {
     expect(md).toContain('demo');
@@ -59,7 +59,7 @@ describe('ENGINE: full data renders every section', () => {
 });
 
 describe('BRAKE: safety contract — defaults always render, nothing else invented', () => {
-  const md = generateGeminiMd(BARE);
+  const md = renderGeminiMd(BARE);
 
   test('"Before changing things" renders even with no commands/stack/key_files', () => {
     expect(md).toContain('## Before changing things');
@@ -79,7 +79,7 @@ describe('BRAKE: safety contract — defaults always render, nothing else invent
 });
 
 describe('AERO: facts-not-bloat curation', () => {
-  const md = generateGeminiMd(FULL);
+  const md = renderGeminiMd(FULL);
 
   test('Stack EXCLUDES context/marketing keys', () => {
     expect(md).not.toContain('Core Problem');
@@ -91,7 +91,7 @@ describe('AERO: facts-not-bloat curation', () => {
 
 describe('faf meta tag + refresh hint', () => {
   test('includes the refresh command', () => {
-    const md = generateGeminiMd(BARE);
+    const md = renderGeminiMd(BARE);
     expect(md).toContain('faf export --gemini');
   });
 });

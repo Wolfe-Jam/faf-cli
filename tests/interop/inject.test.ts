@@ -11,7 +11,7 @@ import { injectFafBlock, FAF_START, FAF_END } from '../../src/interop/inject.js'
 import { writeAgentsMd } from '../../src/interop/agents.js';
 import { writeGeminiMd } from '../../src/interop/gemini.js';
 import { writeCursorrules } from '../../src/interop/cursorrules.js';
-import { writeClaudeMd, generateClaudeMd } from '../../src/interop/claude.js';
+import { writeClaudeMd, renderClaudeMd } from '../../src/interop/claude.js';
 import { writeLlmsTxt } from '../../src/interop/llms.js';
 
 function tmp(): string { return mkdtempSync(join(tmpdir(), 'faf-inject-')); }
@@ -117,7 +117,7 @@ describe('TYRE: interop writers — enhance, never replace', () => {
   test('writeClaudeMd preserves an existing CLAUDE.md', () => {
     const d = tmp();
     writeFileSync(join(d, 'CLAUDE.md'), `# Mine\n${MARK}\nnotes\n`);
-    writeClaudeMd(d, generateClaudeMd(DATA));
+    writeClaudeMd(d, renderClaudeMd(DATA));
     const out = readFileSync(join(d, 'CLAUDE.md'), 'utf-8');
     expect(out).toContain(MARK);
   });

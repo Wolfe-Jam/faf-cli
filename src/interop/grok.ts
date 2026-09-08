@@ -17,7 +17,7 @@ export const GROK_MCP_TABLE = 'mcp_servers.grok-faf-mcp';
  * `.grok/config.toml`. This is machine-readable wiring, not a rule file:
  * CLAUDE.md *instructs* an AI to read context; this *connects* the FAF MCP.
  */
-export function generateGrokConfig(_data?: FafData): string {
+export function renderGrokConfig(_data?: FafData): string {
   return [`[${GROK_MCP_TABLE}]`, `url = "${GROK_FAF_MCP_URL}"`, ''].join('\n');
 }
 
@@ -35,7 +35,7 @@ export type GrokWriteStatus = 'created' | 'merged' | 'unchanged';
 export function writeGrokConfig(dir: string, data?: FafData): GrokWriteStatus {
   const grokDir = join(dir, '.grok');
   const configPath = join(grokDir, 'config.toml');
-  const block = generateGrokConfig(data);
+  const block = renderGrokConfig(data);
 
   if (!existsSync(configPath)) {
     mkdirSync(grokDir, { recursive: true });

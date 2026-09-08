@@ -5,7 +5,7 @@ import { join } from 'path';
 import {
   GROK_FAF_MCP_URL,
   GROK_MCP_TABLE,
-  generateGrokConfig,
+  renderGrokConfig,
   writeGrokConfig,
 } from '../../src/interop/grok.js';
 
@@ -24,8 +24,8 @@ describe('TYRE: interop/grok — .grok/config.toml MCP wiring', () => {
 
   // --- generate ---
 
-  test('generateGrokConfig emits the canonical [mcp_servers.grok-faf-mcp] block', () => {
-    const block = generateGrokConfig();
+  test('renderGrokConfig emits the canonical [mcp_servers.grok-faf-mcp] block', () => {
+    const block = renderGrokConfig();
     expect(block).toContain(`[${GROK_MCP_TABLE}]`);
     expect(block).toContain(`url = "${GROK_FAF_MCP_URL}"`);
   });

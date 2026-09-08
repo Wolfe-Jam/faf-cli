@@ -7,7 +7,7 @@
  *            keys excluded; Human Context omitted from agent ops file).
  */
 import { describe, test, expect } from 'bun:test';
-import { generateAgentsMd } from '../../src/interop/agents.js';
+import { renderAgentsMd } from '../../src/interop/agents.js';
 
 const FULL: any = {
   project: { name: 'demo', goal: 'A small API', main_language: 'Python', type: 'service', version: '2.1.0' },
@@ -33,7 +33,7 @@ const FULL: any = {
 const BARE: any = { project: { name: 'bare', goal: 'a tiny tool', main_language: 'Go' } };
 
 describe('ENGINE: full data renders every section', () => {
-  const md = generateAgentsMd(FULL);
+  const md = renderAgentsMd(FULL);
 
   test('§1 orientation: goal · language · type · version', () => {
     expect(md).toContain('A small API');
@@ -61,7 +61,7 @@ describe('ENGINE: full data renders every section', () => {
     expect(md).toContain('`app/main.py`');
   });
   test('§4 Where things live: `Path | Role` table when any entry has a " — role" annotation', () => {
-    const m = generateAgentsMd({
+    const m = renderAgentsMd({
       project: { name: 'x', goal: 'y', main_language: 'Go' },
       key_files: ['cmd/ — entrypoint', 'internal/', 'go.mod'],
     } as any);
@@ -70,7 +70,7 @@ describe('ENGINE: full data renders every section', () => {
     expect(m).toContain('| `internal/` |  |');
   });
   test('§4 Where things live: plain list when every entry is a bare path', () => {
-    const m = generateAgentsMd({
+    const m = renderAgentsMd({
       project: { name: 'x', goal: 'y', main_language: 'Go' },
       key_files: ['cmd/', 'internal/', 'go.mod'],
     } as any);
@@ -83,7 +83,7 @@ describe('ENGINE: full data renders every section', () => {
     expect(md).toContain('zero_errors');
   });
   test('§5 Conventions also renders detected toolchain (data.conventions)', () => {
-    const m = generateAgentsMd({
+    const m = renderAgentsMd({
       project: { name: 'x', goal: 'y', main_language: 'TypeScript' },
       conventions: ['TypeScript strict mode', 'Style enforced by ESLint — obey the configs'],
     } as any);
@@ -108,7 +108,7 @@ describe('ENGINE: full data renders every section', () => {
     expect(md).toContain('conventional message');
   });
   test('§7 DoD with only a test command (no lint)', () => {
-    const m = generateAgentsMd({
+    const m = renderAgentsMd({
       project: { name: 'x', goal: 'y', main_language: 'Rust' },
       commands: { test: 'cargo test' },
     } as any);
@@ -116,7 +116,7 @@ describe('ENGINE: full data renders every section', () => {
     expect(m).not.toContain('exits 0');
   });
   test('§7 DoD: a test+check key classifies as a test ONLY (no double gate)', () => {
-    const m = generateAgentsMd({
+    const m = renderAgentsMd({
       project: { name: 'x', goal: 'y', main_language: 'TypeScript' },
       commands: { 'test:check': 'npm run test:check' },
     } as any);
@@ -124,7 +124,7 @@ describe('ENGINE: full data renders every section', () => {
     expect(m).not.toContain('exits 0');
   });
   test('§7 DoD dedupes identical gates', () => {
-    const m = generateAgentsMd({
+    const m = renderAgentsMd({
       project: { name: 'x', goal: 'y', main_language: 'TypeScript' },
       commands: { lint: 'npm run check', typecheck: 'npm run check' },
     } as any);
@@ -151,7 +151,7 @@ describe('ENGINE: full data renders every section', () => {
     expect(md).toContain('speculative changes to `main`');
   });
   test('§6/§8/§10 branch follows project.default_branch (git-flow)', () => {
-    const m = generateAgentsMd({
+    const m = renderAgentsMd({
       project: { name: 'x', goal: 'y', main_language: 'Python', default_branch: 'dev' },
     } as any);
     expect(m).toContain('Branch off `dev` and open a PR — never commit to `dev` directly.');
@@ -171,7 +171,7 @@ describe('ENGINE: full data renders every section', () => {
 });
 
 describe('BRAKE: safety contract — defaults always render, nothing else invented', () => {
-  const md = generateAgentsMd(BARE);
+  const md = renderAgentsMd(BARE);
 
   test('Guardrails (Always + Ask-first + Never) render even with no warnings', () => {
     expect(md).toContain('## Guardrails');
@@ -208,7 +208,7 @@ describe('BRAKE: safety contract — defaults always render, nothing else invent
 });
 
 describe('AERO: facts-not-bloat curation', () => {
-  const md = generateAgentsMd(FULL);
+  const md = renderAgentsMd(FULL);
 
   test('Conventions EXCLUDES human↔assistant prefs', () => {
     expect(md).not.toContain('Communication');

@@ -15,7 +15,7 @@ import { mkdtempSync, rmSync, writeFileSync, readFileSync, existsSync } from 'fs
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { execSync } from 'child_process';
-import { generateLlmsTxt, writeLlmsTxt } from '../../src/interop/llms.js';
+import { renderLlmsTxt, writeLlmsTxt } from '../../src/interop/llms.js';
 import { FAF_START } from '../../src/interop/inject.js';
 import type { FafData } from '../../src/core/types.js';
 
@@ -42,7 +42,7 @@ const DATA: FafData = {
 
 describe('WJTTC BRAKE: llms.txt does not invent or dump HOW', () => {
   test('empty 6Ws are omitted — not none, not paraphrased', () => {
-    const out = generateLlmsTxt({
+    const out = renderLlmsTxt({
       project: { name: 'blank', goal: 'Has a goal' },
       human_context: { who: '', why: 'slotignored', what: 'none', how: 'N/A' },
     });
@@ -58,7 +58,7 @@ describe('WJTTC BRAKE: llms.txt does not invent or dump HOW', () => {
   });
 
   test('stack and commands never appear', () => {
-    const out = generateLlmsTxt(DATA);
+    const out = renderLlmsTxt(DATA);
     expect(out).not.toContain('Express');
     expect(out).not.toContain('npm test');
     expect(out).not.toContain('stack');
@@ -68,7 +68,7 @@ describe('WJTTC BRAKE: llms.txt does not invent or dump HOW', () => {
 
 describe('WJTTC ENGINE: llmstxt.org shape from authored facts', () => {
   test('H1, goal blockquote, filled Who/Why, homepage link', () => {
-    const out = generateLlmsTxt(DATA);
+    const out = renderLlmsTxt(DATA);
     expect(out.startsWith('# demo\n')).toBe(true);
     expect(out).toContain('> A small API');
     expect(out).toContain('## Who');
@@ -81,14 +81,14 @@ describe('WJTTC ENGINE: llmstxt.org shape from authored facts', () => {
   });
 
   test('name-only project still emits a valid H1', () => {
-    const out = generateLlmsTxt({ project: { name: 'just-a-name' } });
+    const out = renderLlmsTxt({ project: { name: 'just-a-name' } });
     expect(out).toBe('# just-a-name\n');
   });
 });
 
 describe('WJTTC AERO: deterministic + --llms is not exportAll', () => {
   test('two calls are byte-identical', () => {
-    expect(generateLlmsTxt(DATA)).toBe(generateLlmsTxt(DATA));
+    expect(renderLlmsTxt(DATA)).toBe(renderLlmsTxt(DATA));
   });
 });
 

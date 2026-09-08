@@ -12,14 +12,14 @@ const present = (v: unknown): boolean =>
 const NON_STACK = new Set(['target_user', 'core_problem', 'mission_purpose']);
 
 /**
- * Generate GEMINI.md content from .faf data (+ repo enrichment at export).
+ * Render GEMINI.md content from .faf data (+ repo enrichment at export).
  *
  * Matches Gemini CLI's own GEMINI.md convention (hierarchical, concatenation-
  * friendly, `@file.md`-importable): commands, key files, and confirmation-
  * required actions — not the AGENTS.md BETTER ladder, which is a different
  * spec for a different reader.
  */
-export function generateGeminiMd(data: FafData): string {
+export function renderGeminiMd(data: FafData): string {
   const lines: string[] = [];
 
   const instant = data.instant_context as { key_files?: string[] } | undefined;
@@ -105,5 +105,5 @@ export function generateGeminiMd(data: FafData): string {
 
 /** Write GEMINI.md — non-destructive: injects/updates the faf block, preserves the rest. */
 export function writeGeminiMd(dir: string, data: FafData): void {
-  injectFafBlock(join(dir, 'GEMINI.md'), generateGeminiMd(data));
+  injectFafBlock(join(dir, 'GEMINI.md'), renderGeminiMd(data));
 }
