@@ -84,7 +84,9 @@ export function renderAgentsMd(data: FafData): string {
     push(orientation);
     push();
   }
-  push('> Authored by faf — do not edit the managed block; refresh with `faf export --agents`. Hand content outside `<!-- faf:start -->` … `<!-- faf:end -->` is preserved.');
+  // Never spell the marker tokens out in prose: any injector that searches for
+  // them (ours until 7.12.0, and other tools') would take the quote for the block.
+  push('> Authored by faf — do not edit the managed block; refresh with `faf export --agents`. Hand-written content outside the managed block is preserved.');
   push();
 
   // §2 Setup & build

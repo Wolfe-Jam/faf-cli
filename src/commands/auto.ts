@@ -1,10 +1,6 @@
 import { existsSync } from 'fs';
 import { join } from 'path';
-import { detectStack } from '../detect/stack.js';
-import { interrogateRepo } from '../interrogate/index.js';
-import { turboCatSlots } from '../detect/turbo-cat.js';
-import { relentlessContext } from '../detect/relentless.js';
-import { assembleFreshFaf, fillEmpties } from '../detect/assemble.js';
+import { assembleFreshFaf, updateExistingFaf } from '../detect/assemble.js';
 import { writeFaf, readFaf, readFafRaw } from '../interop/faf.js';
 import * as kernel from '../wasm/kernel.js';
 import { enrichScore } from '../core/scorer.js';
@@ -21,12 +17,8 @@ export function autoCommand(): void {
   if (existsSync(fafPath)) {
     // Update: existing wins (preserve user edits), then interrogated → detected →
     // Turbo-Cat (formats) → Relentless (6 W's) fill the remaining empties.
-    const existing = readFaf(fafPath);
-    const withInterrogated = fillEmpties(existing, interrogateRepo(dir) as Record<string, unknown>);
-    const merged = fillEmpties(withInterrogated, detectStack(dir) as Record<string, unknown>);
-    const withFormats = fillEmpties(merged, turboCatSlots(dir) as Record<string, unknown>);
-    const seeded = fillEmpties(withFormats, { human_context: relentlessContext(dir) } as Record<string, unknown>);
-    writeFaf(fafPath, seeded);
+    // Shared with consumers via the public updateExistingFaf export.
+    writeFaf(fafPath, updateExistingFaf(dir, readFaf(fafPath)));
     console.log(`${fafCyan('updated')} ${fafPath}`);
   } else {
     // New file: full assembly pipeline (shared with `faf git`).

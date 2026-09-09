@@ -39,6 +39,21 @@ export function assembleFreshFaf(dir: string): Record<string, unknown> {
   return fillEmpties(withFormats, { human_context: relentlessContext(dir, { toolingRoot }) } as Record<string, unknown>);
 }
 
+/**
+ * Update an EXISTING .faf for `dir`. Existing values win; interrogated → detected
+ * → Turbo-Cat (formats) → Relentless (6 W's) fill only the remaining empties.
+ * This is exactly the chain `faf auto` runs on an existing file — exported so
+ * consumers (faf-mcp's faf_auto) compose it instead of re-deriving it and
+ * drifting (they used to merge assembleFreshFaf's slotignore'd output over the
+ * existing file, losing interrogated facts such as a docker-compose Redis).
+ */
+export function updateExistingFaf(dir: string, existing: Record<string, unknown>): Record<string, unknown> {
+  const withInterrogated = fillEmpties(existing, interrogateRepo(dir) as Record<string, unknown>);
+  const merged = fillEmpties(withInterrogated, detectStack(dir) as Record<string, unknown>);
+  const withFormats = fillEmpties(merged, turboCatSlots(dir) as Record<string, unknown>);
+  return fillEmpties(withFormats, { human_context: relentlessContext(dir) } as Record<string, unknown>);
+}
+
 /** Mark slots outside the app-type's active categories as `slotignored`. */
 function applySlotIgnore(seeded: Record<string, unknown>): void {
   const projectType = (seeded.project as { type?: string } | undefined)?.type ?? 'library';

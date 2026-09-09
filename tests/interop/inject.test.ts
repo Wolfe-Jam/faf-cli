@@ -131,3 +131,115 @@ describe('TYRE: interop writers — enhance, never replace', () => {
     expect(out).toContain('demo');
   });
 });
+
+// ---------------------------------------------------------------------------
+// 7.12.0 — line-anchored markers. Regression guard for the stacked-AGENTS.md
+// bug: 7.1.4–7.11.0 quoted the marker tokens in renderAgentsMd's blockquote and
+// injectFafBlock located the block by substring, so every `faf export --agents`
+// re-run appended the old block's tail. Every case below injects twice and
+// asserts the second run is byte-identical.
+// ---------------------------------------------------------------------------
+import { findFafBlock } from '../../src/interop/inject.js';
+
+const V1 = '# AGENTS.md — demo\n\nrender v1\n\n## Guardrails\n\n- **Always OK:** read the tree.';
+const V2 = '# AGENTS.md — demo\n\nrender v2\n\n## Guardrails\n\n- **Always OK:** read the tree · run the tests.';
+const wholeLines = (s: string, m: string): number => s.split('\n').filter(l => l.trim() === m).length;
+const twice = (file: string, b1: string, b2: string, s?: string, e?: string): [string, string] => {
+  injectFafBlock(file, b1, s, e); const first = readFileSync(file, 'utf-8');
+  injectFafBlock(file, b2, s, e); return [first, readFileSync(file, 'utf-8')];
+};
+// Exactly what 7.11.0 wrote: real markers on their own lines, the prose decoy on line 9.
+const SHAPE_7_11 = [
+  '<!-- faf:start -->', '<!-- faf: demo | TypeScript | mcp | Demo. -->', '<!-- faf: claim=project.faf | family=FAF -->', '',
+  '# AGENTS.md — demo', '', 'Demo. — TypeScript · type: mcp · v1.0.0', '',
+  '> Authored by faf — do not edit the managed block; refresh with `faf export --agents`. Hand content outside `<!-- faf:start -->` … `<!-- faf:end -->` is preserved.',
+  '', '## Setup & build', '', '```bash', 'npm ci    # install', '```', '', '## Guardrails', '', '- **Always OK:** read the tree.', '',
+  '## Definition of Done', '', 'Done when: `npm test` passes.', '<!-- faf:end -->', '', '## HAND-WRITTEN — MUST SURVIVE', '', 'user-below-sentinel', '',
+].join('\n');
+
+describe('BRAKE: injectFafBlock — markers are whole lines, never substrings (7.12.0)', () => {
+  test('findFafBlock ignores marker text in prose and in fences; indented copies are code, not markers', () => {
+    expect(findFafBlock('Between `<!-- faf:start -->` and `<!-- faf:end -->`.\n')).toBeNull();
+    const fencedAboveReal = '```\n<!-- faf:start -->\nexample\n<!-- faf:end -->\n```\n\n<!-- faf:start -->\nbody\n<!-- faf:end -->\n';
+    const b = findFafBlock(fencedAboveReal)!;
+    expect(fencedAboveReal.slice(b.start, b.end)).toBe('<!-- faf:start -->\nbody\n<!-- faf:end -->');
+    expect(findFafBlock('    <!-- faf:start -->\n    <!-- faf:end -->\n')).toBeNull();
+  });
+
+  test('a 7.11.0-authored AGENTS.md (prose decoy) is replaced in place, not stacked — and stays stable', () => {
+    const file = join(tmp(), 'AGENTS.md'); writeFileSync(file, SHAPE_7_11);
+    expect(SHAPE_7_11.split(FAF_END).length - 1).toBe(2); // real + decoy
+    const [first, second] = twice(file, V1, V2);
+    expect(wholeLines(first, FAF_START)).toBe(1);
+    expect(wholeLines(first, FAF_END)).toBe(1);
+    expect(first).not.toContain('## Setup & build'); // the old tail is gone
+    expect(first).toContain('user-below-sentinel');
+    expect(second).toContain('render v2');
+    expect(second.split('\n').length).toBe(first.split('\n').length);
+  });
+
+  test('a file already stacked by the old injector is repaired on the next run', () => {
+    // Old behaviour: cut at the decoy → new block + stale tail with a second end marker.
+    const stacked = `${FAF_START}\n${V1}\n${FAF_END}\` is preserved.\n\n## Setup & build\n\nstale\n\n## Guardrails\n\nstale\n${FAF_END}\n\nuser-below-sentinel\n`;
+    const file = join(tmp(), 'AGENTS.md'); writeFileSync(file, stacked);
+    const [first, second] = twice(file, V2, V2);
+    // The first whole-line END is the one right after the old block; the stale tail
+    // that followed it is user territory and is preserved — but never grows again.
+    expect(wholeLines(first, FAF_START)).toBe(1);
+    expect(first).toContain('user-below-sentinel');
+    expect(second).toBe(first);
+  });
+
+  test('fence shapes the toggle misreads still resolve to the real block', () => {
+    for (const shape of ['- ```bash\n  npm i\n  ```\n', '````md\n```\n````\n', '```bash\nunclosed above\n', '```\n~~~\n```\n']) {
+      const file = join(tmp(), 'AGENTS.md');
+      writeFileSync(file, `user-above-sentinel\n\n${shape}\n${FAF_START}\nold body\n${FAF_END}\n\nuser-below-sentinel\n`);
+      const [first, second] = twice(file, V1, V1);
+      expect(first).toContain('user-above-sentinel');
+      expect(first).toContain('user-below-sentinel');
+      expect(first).not.toContain('old body');
+      expect(first.split('render v1').length - 1).toBe(1);
+      expect(second).toBe(first);
+    }
+  });
+
+  test('an unclosed fence pasted INSIDE the block cannot hide the end marker', () => {
+    const file = join(tmp(), 'AGENTS.md');
+    writeFileSync(file, `above\n\n${FAF_START}\nold body\n\`\`\`bash\nnpm test\n${FAF_END}\n\nuser-below-sentinel\n`);
+    const [first, second] = twice(file, V1, V1);
+    expect(first).toContain('above'); expect(first).toContain('user-below-sentinel'); expect(first).not.toContain('old body');
+    expect(second).toBe(first);
+  });
+
+  test('a truncated block (start line, no end line) is prefixed, never treated as legacy output', () => {
+    const file = join(tmp(), 'AGENTS.md');
+    writeFileSync(file, `${FAF_START}\nold body with no end marker\n\n## User content BELOW\n\nuser-below-sentinel\n`);
+    injectFafBlock(file, V1);
+    const out = readFileSync(file, 'utf-8');
+    expect(out.startsWith(`${FAF_START}\n${V1}`)).toBe(true);
+    expect(out).toContain('old body with no end marker');
+    expect(out).toContain('user-below-sentinel');
+  });
+
+  test('CRLF, trailing whitespace on marker lines, and a leading BOM survive', () => {
+    const file = join(tmp(), 'AGENTS.md');
+    writeFileSync(file, `above\r\n${FAF_START}  \r\nold body\r\n${FAF_END}\r\nbelow\r\n`);
+    const [c1, c2] = twice(file, V1, V1);
+    expect(c1.startsWith(`above\r\n${FAF_START}\n`)).toBe(true);
+    expect(c1).toContain(`\n${FAF_END}\r\nbelow\r\n`);
+    expect(c1).not.toContain('old body');
+    expect(c2).toBe(c1);
+    writeFileSync(file, `﻿${FAF_START}\nold body\n${FAF_END}\n\nuser-below-sentinel\n`);
+    const [b1, b2] = twice(file, V1, V1);
+    expect(b1.charCodeAt(0)).toBe(0xfeff); expect(b1).toContain('user-below-sentinel'); expect(b2).toBe(b1);
+  });
+
+  test('.cursorrules: a comment line that merely begins with the hash marker text is not a marker', () => {
+    const file = join(tmp(), '.cursorrules');
+    writeFileSync(file, '# faf:start of the section\nuser-above-sentinel\n\n# faf:start\nold\n# faf:end\n\nkeep-me\n');
+    injectFafBlock(file, 'new', '# faf:start', '# faf:end');
+    const out = readFileSync(file, 'utf-8');
+    expect(out.startsWith('# faf:start of the section\nuser-above-sentinel\n')).toBe(true);
+    expect(out).toContain('keep-me'); expect(out).not.toContain('\nold\n');
+  });
+});

@@ -58,3 +58,31 @@ describe('TYRE: assembleFreshFaf — the .faf builder (public)', () => {
     rmSync(dir, { recursive: true, force: true });
   });
 });
+
+// 7.12.0 — updateExistingFaf (the `faf auto` existing-file chain) + the interop
+// surface consumers compose instead of port.
+import * as api from '../../src/index';
+import { mkdtempSync, writeFileSync } from 'fs';
+import { join } from 'path';
+import { tmpdir } from 'os';
+
+describe('TYRE: updateExistingFaf — existing wins, empties are filled (public)', () => {
+  test('hand-authored values survive; empty slots are sourced from the repo', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'faf-update-'));
+    writeFileSync(join(dir, 'package.json'), JSON.stringify({ name: 'repo-name', description: 'Repo description from package.json', scripts: { test: 'vitest', build: 'tsc' }, dependencies: { express: '^4' } }));
+    writeFileSync(join(dir, 'README.md'), '# repo-name\n\nRepo description from package.json\n');
+    const existing = { project: { name: 'hand-name', goal: '', main_language: 'TypeScript', type: 'backend' }, human_context: { who: 'Hand-written who', what: '' }, stack: { backend: '' } };
+    const out = api.updateExistingFaf(dir, existing) as any;
+    expect(out.project.name).toBe('hand-name');          // existing wins
+    expect(out.human_context.who).toBe('Hand-written who');
+    expect(api.isPlaceholder(out.stack.backend)).toBe(false); // filled from the repo
+    expect(api.updateExistingFaf(dir, existing)).toEqual(out); // deterministic
+  });
+  test('the interop surface is exported', () => {
+    for (const name of ['renderAgentsMd', 'writeAgentsMd', 'renderGeminiMd', 'writeGeminiMd', 'renderCursorrules', 'writeCursorrules', 'renderCopilotInstructions', 'writeCopilotInstructions', 'renderClaudeMd', 'writeClaudeMd', 'readClaudeMd', 'parseClaudeMd', 'fafMetaTag', 'injectFafBlock', 'findFafBlock', 'enrichFromRepo', 'updateExistingFaf', 'fillEmpties', 'serializeFaf', 'writeFaf']) {
+      expect(typeof (api as any)[name]).toBe('function');
+    }
+    expect(api.FAF_START).toBe('<!-- faf:start -->');
+    expect(api.FAF_END).toBe('<!-- faf:end -->');
+  });
+});

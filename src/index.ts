@@ -114,5 +114,19 @@ export type { TurboCatResult, DiscoveredFormat } from './detect/turbo-cat.js';
 // the single source MCPs compose instead of forking their own.
 export { relentlessContext, relentlessContextDetailed } from './detect/relentless.js';
 export type { SeededContext, SeededContextDetailed, SourcedValue } from './detect/relentless.js';
-export { assembleFreshFaf } from './detect/assemble.js';
+export { assembleFreshFaf, updateExistingFaf, fillEmpties } from './detect/assemble.js';
+// 7.12.0 — the interop renderers, the block injector, repo enrichment and the
+// .faf writer become public. Consumers (faf-mcp's faf_agents / faf_cursor /
+// faf_gemini / faf_bi_sync / faf_auto) compose these and DELETE their hand-
+// ported copies: same bytes `faf export --agents/--gemini/--cursor`, `faf sync`
+// and `faf auto` write, and one injector with one marker rule.
+export { renderAgentsMd, writeAgentsMd } from './interop/agents.js';
+export { renderGeminiMd, writeGeminiMd } from './interop/gemini.js';
+export { renderCursorrules, writeCursorrules } from './interop/cursorrules.js';
+export { renderCopilotInstructions, writeCopilotInstructions } from './interop/copilot-instructions.js';
+export { renderClaudeMd, writeClaudeMd, readClaudeMd, parseClaudeMd, fafMetaTag } from './interop/claude.js';
+export type { FafMetaOpts } from './interop/claude.js';
+export { injectFafBlock, findFafBlock, FAF_START, FAF_END } from './interop/inject.js';
+export { enrichFromRepo } from './detect/enrich.js';
+export { serializeFaf, writeFaf } from './interop/faf.js';
 export * as kernel from './wasm/kernel.js';

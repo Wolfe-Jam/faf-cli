@@ -224,3 +224,30 @@ describe('AERO: facts-not-bloat curation', () => {
     expect(md).not.toContain('## Human Context');
   });
 });
+
+// 7.12.0 — the rendered prose must never spell the marker tokens out (it was the
+// decoy behind the stacked-AGENTS.md bug), and a double export is byte-identical.
+import { writeAgentsMd } from '../../src/interop/agents.js';
+import { mkdtempSync, readFileSync, writeFileSync } from 'fs';
+import { join } from 'path';
+import { tmpdir } from 'os';
+
+describe('BRAKE: AGENTS.md export is idempotent and never quotes its own markers', () => {
+  const data: any = { project: { name: 'demo', goal: 'A small API', main_language: 'TypeScript', type: 'backend' }, stack: { backend: 'Express' }, commands: { test: 'npm test', build: 'npm run build' }, human_context: { who: 'devs' } };
+  test('renderAgentsMd output contains no marker token', () => {
+    const md = renderAgentsMd(data);
+    expect(md).not.toContain('<!-- faf:start -->');
+    expect(md).not.toContain('<!-- faf:end -->');
+    expect(md).toContain('Hand-written content outside the managed block is preserved.');
+  });
+  test('writeAgentsMd three times → one block, byte-identical after the first, hand content intact', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'faf-agents-idem-'));
+    writeFileSync(join(dir, 'AGENTS.md'), '# Team notes\n\nhand-sentinel\n');
+    writeAgentsMd(dir, data); const r1 = readFileSync(join(dir, 'AGENTS.md'), 'utf-8');
+    writeAgentsMd(dir, data); const r2 = readFileSync(join(dir, 'AGENTS.md'), 'utf-8');
+    writeAgentsMd(dir, data); const r3 = readFileSync(join(dir, 'AGENTS.md'), 'utf-8');
+    expect(r2).toBe(r1); expect(r3).toBe(r1);
+    expect(r1.split('\n').filter(l => l === '<!-- faf:end -->').length).toBe(1);
+    expect(r1).toContain('hand-sentinel');
+  });
+});
