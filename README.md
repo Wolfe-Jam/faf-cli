@@ -132,20 +132,23 @@ faf memory etch "a durable fact" --id my-fact
 faf memory show
 ```
 
-### What's New in v7.11.0 — The VS Code Edition
+### What's New in v7.12.0 — The Open Renderers Edition
 
-**faf-cli becomes a library a VS Code extension can import — `computeDrift()` joins the public API and `faf drift --json` mirrors it on the CLI. Plus `faf export --llms`.**
+**faf-cli opens its renderers, injector and `faf auto` update chain as public exports — consumers compose instead of port — and `faf export --agents` is idempotent again: one block, every run.**
 
 ```ts
-import { computeDrift, scoreFafYaml, findFafFile, renderProjectHtml } from 'faf-cli';
+import { renderAgentsMd, enrichFromRepo, injectFafBlock, updateExistingFaf, writeFaf } from 'faf-cli';
 ```
 
-- **`computeDrift(fafPath, dir?)`** — the context-drift check is now a pure exported function, not just a command. A VS Code extension reads the mtime relationship between `project.faf` and its `CLAUDE.md` / `AGENTS.md` / `.cursorrules` / `GEMINI.md` directly, in process.
-- **`faf drift --json`** — the CLI mirror: a `faf_version` / `project` / `source` header over the report, raw `*_ms` mtimes and deltas (the consumer formats its own "5d ago"). No `project.faf` → `{ error, hint }` JSON, exit 2. Bare `faf drift` is unchanged.
-- **`faf export --llms`** — writes `llms.txt` (llmstxt.org shape) from the authored 6 Ws. Opt-in, like `--grok`.
+- **Renderers are public** — `renderAgentsMd` · `renderGeminiMd` · `renderCursorrules` · `renderClaudeMd` · `renderCopilotInstructions` and their `write*` pairs. An MCP server or an editor extension writes the same bytes `faf export` writes, instead of carrying its own copy that drifts.
+- **`enrichFromRepo(dir, data)`** — the repo-facts step `faf export --agents` runs first (commands, key files, secrets location) is exported too. Hand-authored values win; detection fills the gaps.
+- **`updateExistingFaf(dir, existing)`** — the exact chain `faf auto` runs on an existing `project.faf`: existing wins, then interrogated → detected → Turbo-Cat → Relentless fill the empties. `faf auto` itself now calls it. `writeFaf` / `serializeFaf` write the file the way faf-cli does.
+- **One injector, one rule** — `injectFafBlock` / `findFafBlock` locate the managed block by whole marker lines at column 0. Fenced examples are skipped, an unbalanced fence inside the block cannot hide the end marker, CRLF and BOM survive. A block that lost its end marker is prefixed, never overwritten.
+- **Fixed: `faf export --agents` stacked its own output.** 7.1.4–7.11.0 quoted the marker tokens in prose and matched them as substrings, so every re-run appended the old block's tail (58 → 107 → 156 lines). Fixed at both ends; a file already stacked is repaired on its next export.
 
 **Recent sprint**
 
+- 🧩 [7.12.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.12.0) The Open Renderers Edition
 - 🖥️ [7.11.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.11.0) The VS Code Edition
 - 📚 [7.10.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.10.0) The Full-Facts Edition
 - 🌱 [7.9.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.9.0) The Git-Flow Edition

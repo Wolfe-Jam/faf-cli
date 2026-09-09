@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v7.11.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v7.12.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -8,15 +8,17 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [7.12.0] - 2026-09-09 — The Open Renderers Edition
 
-### Fixed
-- **`faf export --agents` was not idempotent** (7.1.4–7.11.0): the rendered blockquote quoted the marker tokens in prose, and the injector located the block by substring, so every re-run cut the old block at the quote and appended its stale tail — AGENTS.md grew ~49 lines per export. The injector now matches markers as whole lines at column 0 (fenced examples skipped, an unbalanced fence inside the block can't hide the end marker, CRLF and BOM preserved), and the prose no longer spells the tokens out. A file already stacked by the old behaviour is repaired on its next export.
-- A file whose managed block had lost its end marker was classified as legacy output and overwritten. It is now prefixed; nothing the user wrote is lost.
+**faf-cli opens its renderers, injector and `faf auto` update chain as public exports — consumers compose instead of port — and `faf export --agents` is idempotent again: one block, every run.**
 
 ### Added
 - Public exports for consumers to compose instead of port: `renderAgentsMd`/`writeAgentsMd`, `renderGeminiMd`/`writeGeminiMd`, `renderCursorrules`/`writeCursorrules`, `renderCopilotInstructions`/`writeCopilotInstructions`, `renderClaudeMd`/`writeClaudeMd`/`readClaudeMd`/`parseClaudeMd`/`fafMetaTag`, `injectFafBlock`/`findFafBlock`/`FAF_START`/`FAF_END`, `enrichFromRepo`, `updateExistingFaf`/`fillEmpties`, `serializeFaf`/`writeFaf`.
 - `updateExistingFaf(dir, existing)` — the exact chain `faf auto` runs on an existing project.faf (existing wins; interrogated → detected → Turbo-Cat → Relentless fill the empties), now shared with `faf auto` itself.
+
+### Fixed
+- **`faf export --agents` was not idempotent** (7.1.4–7.11.0): the rendered blockquote quoted the marker tokens in prose, and the injector located the block by substring, so every re-run cut the old block at the quote and appended its stale tail — AGENTS.md grew ~49 lines per export. The injector now matches markers as whole lines at column 0 (fenced examples skipped, an unbalanced fence inside the block can't hide the end marker, CRLF and BOM preserved), and the prose no longer spells the tokens out. A file already stacked by the old behaviour is repaired on its next export.
+- A file whose managed block had lost its end marker was classified as legacy output and overwritten. It is now prefixed; nothing the user wrote is lost.
 
 ## [7.11.0] - 2026-09-07 — The VS Code Edition
 
