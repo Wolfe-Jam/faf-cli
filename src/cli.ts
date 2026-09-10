@@ -110,9 +110,9 @@ program
 
 program
   .command('sync')
-  .description('.faf ↔ CLAUDE.md (mtime auto-direction)')
+  .description('.faf → CLAUDE.md (--direction pull: Trophy-gated backfill into .faf)')
   .option('--watch', 'Watch for changes')
-  .option('--direction <dir>', 'Force direction: auto|push|pull', 'auto')
+  .option('--direction <dir>', 'auto|push write CLAUDE.md from .faf; pull backfills .faf at ✪ Trophy', 'auto')
   .action((options) => syncCommand(options));
 
 // === Power Commands ===

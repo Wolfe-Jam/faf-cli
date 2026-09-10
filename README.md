@@ -136,7 +136,7 @@ faf memory show
 
 **`faf sync` is the one name: "bi-sync" is gone from its help, its output and the footer every rendered CLAUDE.md carries.**
 
-- **One word for one command.** `faf sync` keeps working exactly as before: the newer of `project.faf` and CLAUDE.md wins, and CLAUDE.md → `.faf` runs only at ✪ Trophy. `faf bi-sync` still runs as a hidden alias.
+- **One word for one command.** `faf sync` works as before: it writes CLAUDE.md from `project.faf`. `faf sync --direction pull` backfills name, goal and language into `.faf`, and only at ✪ Trophy. `faf bi-sync` still runs as a hidden alias.
 - **Tools built on faf-cli follow automatically.** Anything that composes `renderClaudeMd` writes the new `STATUS: SYNC ACTIVE` footer on its next sync, with no release of its own.
 
 #### v7.12.0 — the Edition release
@@ -196,7 +196,7 @@ Your own rules for the AI — *"use full words in identifiers," "use bun, not np
 ## Sync
 
 ```
-sync:      .faf  ←── 8ms ──→  CLAUDE.md
+sync:      .faf  ──── 8ms ───→  CLAUDE.md   (pull: Trophy-gated backfill)
 tri-sync:  .faf  ←── 8ms ──→  CLAUDE.md ↔ MEMORY.md
 ```
 

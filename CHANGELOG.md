@@ -8,12 +8,17 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- **`faf sync` help described a direction it does not take.** It said "mtime auto-direction"; since #63 the default has always written CLAUDE.md from `.faf`, never the other way. The help, the README and the 7.12.1 notes now say so: `--direction pull` is the only way back into `.faf`, and it runs only at ✪ Trophy.
+
 ## [7.12.1] - 2026-09-10 — The Open Renderers Edition
 
 **`faf sync` is the one name: "bi-sync" is gone from its help, its output and the footer every rendered CLAUDE.md carries.**
 
 ### Changed
-- **"bi-sync" retired as a name.** The command has been `faf sync` since 5.x; the word lingered in its help text, its two status lines, the npm keywords, the README diagram, and the footer every rendered CLAUDE.md carries. The footer now reads `STATUS: SYNC ACTIVE`, so every consumer that composes `renderClaudeMd` (faf-mcp, claude-faf-mcp, grok-faf-mcp) stops re-emitting the old word on its next sync. `faf bi-sync` still runs as a hidden alias. Behaviour is unchanged: `faf sync` picks the direction by mtime, and CLAUDE.md → .faf runs only at ✪ Trophy.
+- **"bi-sync" retired as a name.** The command has been `faf sync` since 5.x; the word lingered in its help text, its two status lines, the npm keywords, the README diagram, and the footer every rendered CLAUDE.md carries. The footer now reads `STATUS: SYNC ACTIVE`, so every consumer that composes `renderClaudeMd` (faf-mcp, claude-faf-mcp, grok-faf-mcp) stops re-emitting the old word on its next sync. `faf bi-sync` still runs as a hidden alias. Behaviour is unchanged: `faf sync` writes CLAUDE.md from `.faf`, and `faf sync --direction pull` backfills name, goal and language into `.faf` only at ✪ Trophy.
 
 ## [7.12.0] - 2026-09-09 — The Open Renderers Edition
 
