@@ -27,7 +27,7 @@ export function syncCommand(options: SyncOptions = {}): void {
   const memoryPath = join(dir, 'MEMORY.md');
   const direction = options.direction ?? 'auto';
 
-  // bi-sync: .faf ↔ CLAUDE.md
+  // sync: .faf ↔ CLAUDE.md
   if (direction === 'auto') {
     autoSync(fafPath, claudePath, dir);
   } else if (direction === 'push') {
@@ -61,7 +61,7 @@ function pushSync(fafPath: string, dir: string): void {
   const data = readFaf(fafPath);
   const content = renderClaudeMd(data);
   writeClaudeMd(dir, content);
-  console.log(`${fafCyan('◆')} sync  .faf → CLAUDE.md   ${dim('← bi-sync')}`);
+  console.log(`${fafCyan('◆')} sync  .faf → CLAUDE.md`);
 
   const result = enrichScore(kernel.score(readFafRaw(fafPath)));
   displayScore(result, fafPath);
@@ -100,7 +100,7 @@ function pullSync(fafPath: string, claudePath: string): void {
   if (parsed.project?.main_language) {existing.project = { ...existing.project, main_language: parsed.project.main_language };}
 
   writeFaf(fafPath, existing);
-  console.log(`${fafCyan('◆')} sync  CLAUDE.md → .faf   ${dim('← bi-sync (Trophy-gated)')}`);
+  console.log(`${fafCyan('◆')} sync  CLAUDE.md → .faf   ${dim('(Trophy-gated)')}`);
 
   const result = enrichScore(kernel.score(readFafRaw(fafPath)));
   displayScore(result, fafPath);

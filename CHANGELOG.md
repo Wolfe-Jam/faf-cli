@@ -8,6 +8,11 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- **"bi-sync" retired as a name.** The command has been `faf sync` since 5.x; the word lingered in its help text, its two status lines, the npm keywords, the README diagram, and the footer every rendered CLAUDE.md carries. The footer now reads `STATUS: SYNC ACTIVE`, so every consumer that composes `renderClaudeMd` (faf-mcp, claude-faf-mcp, grok-faf-mcp) stops re-emitting the old word on its next sync. `faf bi-sync` still runs as a hidden alias. Behaviour is unchanged: `faf sync` picks the direction by mtime, and CLAUDE.md → .faf runs only at ✪ Trophy.
+
 ## [7.12.0] - 2026-09-09 — The Open Renderers Edition
 
 **faf-cli opens its renderers, injector and `faf auto` update chain as public exports — consumers compose instead of port — and `faf export --agents` is idempotent again: one block, every run.**

@@ -5,7 +5,7 @@ import { injectFafBlock } from './inject.js';
 import { slotLabel } from './labels.js';
 
 const CLAUDE_MD = 'CLAUDE.md';
-const SYNC_MARKER = 'STATUS: BI-SYNC ACTIVE';
+const SYNC_MARKER = 'STATUS: SYNC ACTIVE';
 
 /** Read CLAUDE.md from a directory */
 export function readClaudeMd(dir: string): string | null {
