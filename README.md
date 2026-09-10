@@ -132,7 +132,14 @@ faf memory etch "a durable fact" --id my-fact
 faf memory show
 ```
 
-### What's New in v7.12.0 — The Open Renderers Edition
+### What's New in v7.12.1 — The Open Renderers Edition
+
+**`faf sync` is the one name: "bi-sync" is gone from its help, its output and the footer every rendered CLAUDE.md carries.**
+
+- **One word for one command.** `faf sync` keeps working exactly as before: the newer of `project.faf` and CLAUDE.md wins, and CLAUDE.md → `.faf` runs only at ✪ Trophy. `faf bi-sync` still runs as a hidden alias.
+- **Tools built on faf-cli follow automatically.** Anything that composes `renderClaudeMd` writes the new `STATUS: SYNC ACTIVE` footer on its next sync, with no release of its own.
+
+#### v7.12.0 — the Edition release
 
 **faf-cli opens its renderers, injector and `faf auto` update chain as public exports — consumers compose instead of port — and `faf export --agents` is idempotent again: one block, every run.**
 
