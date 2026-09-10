@@ -226,7 +226,31 @@ jobs:
         with:
           name: npm-package
 
+      # /pubpro cuts the release first (Edition title + curated notes, its
+      # Doc Gate). Overwriting it here renamed v7.12.0 and v7.12.1 to
+      # "FAF CLI vX" and replaced their notes. If the release exists, only
+      # attach the package; create it only when nothing has been cut.
+      - name: 🔎 Does the release already exist?
+        id: existing
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.validate.outputs.version }}
+        run: |
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: 📎 Attach the package to the existing release (title and notes untouched)
+        if: steps.existing.outputs.exists == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.validate.outputs.version }}
+        run: gh release upload "$TAG" *.tgz --clobber --repo "$GITHUB_REPOSITORY"
+
       - name: 🏷️ Create GitHub Release
+        if: steps.existing.outputs.exists != 'true'
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ needs.validate.outputs.version }}
