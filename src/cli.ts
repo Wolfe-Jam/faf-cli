@@ -110,7 +110,7 @@ program
 
 program
   .command('sync')
-  .description('.faf ↔ CLAUDE.md (bi-sync, mtime auto-direction)')
+  .description('.faf ↔ CLAUDE.md (mtime auto-direction)')
   .option('--watch', 'Watch for changes')
   .option('--direction <dir>', 'Force direction: auto|push|pull', 'auto')
   .action((options) => syncCommand(options));

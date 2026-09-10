@@ -34,7 +34,8 @@ describe('ENGINE: interop/claude', () => {
   test('renderClaudeMd includes project name', () => {
     const content = renderClaudeMd(sampleData);
     expect(content).toContain('test-project');
-    expect(content).toContain('BI-SYNC ACTIVE');
+    expect(content).toContain('STATUS: SYNC ACTIVE');
+    expect(content).not.toContain('BI-SYNC');
     expect(content).toContain('TypeScript');
   });
 

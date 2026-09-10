@@ -30,7 +30,8 @@ describe('ENGINE: sync command — renderClaudeMd output contract', () => {
     expect(existsSync(join(testDir, 'CLAUDE.md'))).toBe(true);
     const md = readFileSync(join(testDir, 'CLAUDE.md'), 'utf-8');
     expect(md).toContain('sync-test');
-    expect(md).toContain('BI-SYNC ACTIVE');
+    expect(md).toContain('STATUS: SYNC ACTIVE');
+    expect(md).not.toContain('BI-SYNC');
   });
 
   test('renderClaudeMd skips slotignored values', () => {

@@ -117,7 +117,7 @@ export type { SeededContext, SeededContextDetailed, SourcedValue } from './detec
 export { assembleFreshFaf, updateExistingFaf, fillEmpties } from './detect/assemble.js';
 // 7.12.0 — the interop renderers, the block injector, repo enrichment and the
 // .faf writer become public. Consumers (faf-mcp's faf_agents / faf_cursor /
-// faf_gemini / faf_bi_sync / faf_auto) compose these and DELETE their hand-
+// faf_gemini / faf_claude / faf_auto) compose these and DELETE their hand-
 // ported copies: same bytes `faf export --agents/--gemini/--cursor`, `faf sync`
 // and `faf auto` write, and one injector with one marker rule.
 export { renderAgentsMd, writeAgentsMd } from './interop/agents.js';

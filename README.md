@@ -189,7 +189,7 @@ Your own rules for the AI — *"use full words in identifiers," "use bun, not np
 ## Sync
 
 ```
-bi-sync:   .faf  ←── 8ms ──→  CLAUDE.md
+sync:      .faf  ←── 8ms ──→  CLAUDE.md
 tri-sync:  .faf  ←── 8ms ──→  CLAUDE.md ↔ MEMORY.md
 ```
 
