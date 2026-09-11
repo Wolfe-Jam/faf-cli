@@ -32,7 +32,7 @@
 import { execFileSync } from 'child_process';
 import { existsSync, readFileSync, realpathSync, statSync } from 'fs';
 import { resolve, dirname, relative, isAbsolute, sep } from 'path';
-import { SafePathError, resolveInside, safeWriteFile } from '../core/safe-write.js';
+import { NotWrittenError, SafePathError, resolveInside, safeWriteFile } from '../core/safe-write.js';
 import { readIfPresent } from '../interop/inject.js';
 import { findFafFile, gitRepoRel } from '../interop/faf.js';
 import { computeFafDiff, runnerWorks } from './diff.js';
@@ -119,13 +119,16 @@ function readHook(hookFile: string): { real: string; text: string | null } | str
   }
 }
 
-/** Write the hook through safe-write's git-hook allowance; a refusal is one line. */
+/** Write the hook through safe-write's git-hook allowance. A refusal — or a
+ *  write that failed with the hook left as it was ("not written; original
+ *  kept": a read-only hook, a full disk) — is returned as one line, never a
+ *  stack trace. */
 function writeHook(hookFile: string, next: string, expect: string | null, mode: number): string | null {
   try {
     safeWriteFile(hookFile, next, { root: dirname(hookFile), allowGitHooks: true, expect, mode });
     return null;
   } catch (e) {
-    if (e instanceof SafePathError) {return e.message;}
+    if (e instanceof SafePathError || e instanceof NotWrittenError) {return e.message;}
     throw e;
   }
 }

@@ -10,8 +10,13 @@
  * the value's text when it differs, or is added when the key is missing.
  * Nothing is ever deleted, and `undefined` is skipped. When the file cannot be
  * edited that way — not valid JSON, not an object, a key it repeats on the way,
- * or a value faf would have to replace to go into it — a JsonEditError says
- * why in one line and nothing is changed.
+ * a value faf would have to replace to go into it, or an object or array in the
+ * file where faf sets a plain value — a JsonEditError says why in one line and
+ * nothing is changed.
+ *
+ * Two more edits keep the same promise: {@link upsertJsonRows} updates or
+ * appends faf's own rows in an array (the `faf cards` catalog), and
+ * {@link removeJsonKey} takes out one key faf added (its render hash).
  */
 
 /** Why a JSON text cannot be edited in place (one line). */
@@ -34,6 +39,8 @@ interface JNode {
   start: number;
   end: number;
   members: JMember[];
+  /** The elements of an array, in order (empty for anything else). */
+  items: JNode[];
 }
 
 const WS = new Set([' ', '\t', '\n', '\r']);
@@ -68,14 +75,14 @@ class Parser {
     if (c === '"') {
       const start = this.i;
       this.string();
-      return { kind: 'string', start, end: this.i, members: [] };
+      return { kind: 'string', start, end: this.i, members: [], items: [] };
     }
     if (c === '-' || (c >= '0' && c <= '9')) {return this.number();}
     for (const lit of ['true', 'false', 'null']) {
       if (this.s.startsWith(lit, this.i)) {
         const start = this.i;
         this.i += lit.length;
-        return { kind: 'literal', start, end: this.i, members: [] };
+        return { kind: 'literal', start, end: this.i, members: [], items: [] };
       }
     }
     return this.fail(c === undefined ? 'unexpected end' : `unexpected ${JSON.stringify(c)}`);
@@ -87,7 +94,7 @@ class Parser {
     this.ws();
     if (this.s[this.i] === '}') {
       this.i++;
-      return { kind: 'object', start, end: this.i, members };
+      return { kind: 'object', start, end: this.i, members, items: [] };
     }
     for (;;) {
       this.ws();
@@ -106,7 +113,7 @@ class Parser {
       }
       if (this.s[this.i] === '}') {
         this.i++;
-        return { kind: 'object', start, end: this.i, members };
+        return { kind: 'object', start, end: this.i, members, items: [] };
       }
       this.fail('expected "," or "}"');
     }
@@ -114,13 +121,14 @@ class Parser {
 
   private array(): JNode {
     const start = this.i++;
+    const items: JNode[] = [];
     this.ws();
     if (this.s[this.i] === ']') {
       this.i++;
-      return { kind: 'array', start, end: this.i, members: [] };
+      return { kind: 'array', start, end: this.i, members: [], items };
     }
     for (;;) {
-      this.value();
+      items.push(this.value());
       this.ws();
       if (this.s[this.i] === ',') {
         this.i++;
@@ -128,7 +136,7 @@ class Parser {
       }
       if (this.s[this.i] === ']') {
         this.i++;
-        return { kind: 'array', start, end: this.i, members: [] };
+        return { kind: 'array', start, end: this.i, members: [], items };
       }
       this.fail('expected "," or "]"');
     }
@@ -164,7 +172,7 @@ class Parser {
     if (!m) {this.fail('bad number');}
     const start = this.i;
     this.i += m[0].length;
-    return { kind: 'number', start, end: this.i, members: [] };
+    return { kind: 'number', start, end: this.i, members: [], items: [] };
   }
 }
 
@@ -249,6 +257,11 @@ class Editor {
       }
       const now: unknown = JSON.parse(this.s.slice(member.value.start, member.value.end));
       if (sameJson(now, value)) {continue;}
+      if (member.value.kind === 'object' || member.value.kind === 'array') {
+        // The reverse of the case above: faf would replace the whole object or
+        // array (every key or item in it) with its plain value.
+        throw new JsonEditError(`"${at}" is ${member.value.kind === 'object' ? 'an object' : 'an array'}, so faf will not replace it with a value`);
+      }
       this.edits.push({ start: member.value.start, end: member.value.end, text: this.render(value, this.indentOf(member.keyStart), lined) });
     }
     if (Object.keys(fill).length > 0) {this.fillEmpty(obj, fill, multi);}
@@ -291,6 +304,27 @@ class Editor {
     this.edits.push({ start: anchor.value.end, end: anchor.value.end, text: `${between}${JSON.stringify(key)}${sep}${this.render(value, '', false)}` });
   }
 
+  /** Append `items` to the array `arr`, laid out like it: each on a line of
+   *  its own after the last item when the items sit on lines of their own,
+   *  else on the same line after the last item. An empty array is written
+   *  whole, over lines when `multi` (its key starts the line at `keyStart`). */
+  append(arr: JNode, items: readonly unknown[], keyStart: number, multi: boolean): void {
+    if (items.length === 0) {return;}
+    if (arr.items.length === 0) {
+      this.edits.push({ start: arr.start, end: arr.end, text: this.render(items, this.indentOf(keyStart), multi) });
+      return;
+    }
+    const last = arr.items[arr.items.length - 1];
+    if (this.startsLine(arr.items[0].start)) {
+      const indent = this.indentOf(arr.items[0].start);
+      const text = items.map(v => `,${this.style.eol}${indent}${this.render(v, indent, true)}`).join('');
+      this.edits.push({ start: last.end, end: last.end, text });
+      return;
+    }
+    const between = arr.items.length > 1 ? this.s.slice(arr.items[0].end, arr.items[1].start) : ', ';
+    this.edits.push({ start: last.end, end: last.end, text: items.map(v => `${between}${this.render(v, '', false)}`).join('') });
+  }
+
   /** The first non-blank position of the line `pos` is on. */
   private lineLead(pos: number): number {
     let at = this.s.lastIndexOf('\n', pos - 1) + 1;
@@ -325,13 +359,148 @@ export function editJsonText(
   if (root.kind !== 'object') {throw new JsonEditError('the JSON is not an object');}
   const editor = new Editor(text, styleOf(text, root), after);
   editor.apply(root, patch, '', text.slice(root.start, root.end).includes('\n'));
-  if (editor.edits.length === 0) {return { text, changed: false };}
-  // Last edit first, so earlier offsets stay true; two additions at one spot
-  // keep the patch's order.
-  const order = editor.edits.map((e, i) => ({ e, i })).sort((a, b) => b.e.start - a.e.start || b.i - a.i);
+  return applyEdits(text, editor.edits);
+}
+
+/** `text` with `edits` made. Last edit first, so earlier offsets stay true;
+ *  two additions at one spot keep the order they were made in. */
+function applyEdits(text: string, edits: readonly Edit[]): { text: string; changed: boolean } {
+  if (edits.length === 0) {return { text, changed: false };}
+  const order = edits.map((e, i) => ({ e, i })).sort((a, b) => b.e.start - a.e.start || b.i - a.i);
   let out = text;
   for (const { e } of order) {
     out = out.slice(0, e.start) + e.text + out.slice(e.end);
   }
   return { text: out, changed: out !== text };
+}
+
+/** Parse `text` as a JSON object (JsonEditError otherwise). */
+function parseObject(text: string): JNode {
+  const root = new Parser(text).parse();
+  if (root.kind !== 'object') {throw new JsonEditError('the JSON is not an object');}
+  return root;
+}
+
+/** The string value of `obj`'s key `key` (undefined when it has none, or the
+ *  value is not a string); JsonEditError when the key is there more than once. */
+function stringKey(text: string, obj: JNode, key: string, at: string): string | undefined {
+  const found = obj.members.filter(m => m.key === key);
+  if (found.length > 1) {throw new JsonEditError(`the key "${at}.${key}" is there more than once`);}
+  const v = found[0]?.value;
+  return v?.kind === 'string' ? (JSON.parse(text.slice(v.start, v.end)) as string) : undefined;
+}
+
+/**
+ * Update or add rows in the array at the root key `key`, changing nothing
+ * else: a row whose `id` value is exactly a row's in the file is updated in
+ * place — only the values of its `update` keys change (or are added) — and any
+ * other row is appended after the file's last item, laid out like the items
+ * around it (the array, or the key, is added when missing). Every item faf
+ * does not update stays byte for byte. Never matched by anything but `id`.
+ * Throws a JsonEditError, having changed nothing, when the text cannot be
+ * edited that way: not a JSON object, `key` not an array or there more than
+ * once, a row's id there more than once, or a value faf sets that is an object
+ * or array in the file.
+ */
+export function upsertJsonRows(
+  text: string,
+  key: string,
+  rows: readonly Record<string, unknown>[],
+  opts: { id: string; update: readonly string[] },
+): { text: string; changed: boolean } {
+  const root = parseObject(text);
+  const editor = new Editor(text, styleOf(text, root), {});
+  const multiRoot = text.slice(root.start, root.end).includes('\n');
+  const found = root.members.filter(m => m.key === key);
+  if (found.length > 1) {throw new JsonEditError(`the key "${key}" is there more than once`);}
+  if (found.length === 0) {
+    editor.apply(root, { [key]: rows }, '', multiRoot);
+    return applyEdits(text, editor.edits);
+  }
+  const member = found[0];
+  const arr = member.value;
+  if (arr.kind !== 'array') {throw new JsonEditError(`"${key}" is not an array, so faf cannot add its rows to it`);}
+  const append: Record<string, unknown>[] = [];
+  for (const row of rows) {
+    const want = row[opts.id];
+    const hits = arr.items.filter((item, i) => item.kind === 'object' && stringKey(text, item, opts.id, `${key}[${i}]`) === want);
+    if (hits.length > 1) {throw new JsonEditError(`the ${key} row ${JSON.stringify(want)} is there more than once`);}
+    if (hits.length === 0) {
+      append.push(row);
+      continue;
+    }
+    const item = hits[0];
+    const patch = Object.fromEntries(opts.update.map(k => [k, row[k]]));
+    editor.apply(item, patch, `${key}[${arr.items.indexOf(item)}]`, text.slice(item.start, item.end).includes('\n'));
+  }
+  editor.append(arr, append, member.keyStart, multiRoot);
+  return applyEdits(text, editor.edits);
+}
+
+/** True when only blanks sit between the start of its line and `pos` (and
+ *  there is a line before it). */
+function startsLine(s: string, pos: number): boolean {
+  const nl = s.lastIndexOf('\n', pos - 1);
+  return nl >= 0 && /^[ \t]*$/.test(s.slice(nl + 1, pos));
+}
+
+/** The text to take out to remove `m` from `obj`, as the reverse of how
+ *  {@link editJsonText} adds a key: a key on a line of its own with a comma
+ *  after it goes with its line; a key after another goes with the separator
+ *  before it; the first key on the object's own line goes with the separator
+ *  after it; an only key leaves `{}`. */
+function removal(s: string, obj: JNode, m: JMember): Edit {
+  if (obj.members.length === 1) {return { start: obj.start, end: obj.end, text: '{}' };}
+  const i = obj.members.indexOf(m);
+  if (startsLine(s, m.keyStart) && s[m.value.end] === ',') {
+    const nl = s.lastIndexOf('\n', m.keyStart - 1);
+    return { start: nl > 0 && s[nl - 1] === '\r' ? nl - 1 : nl, end: m.value.end + 1, text: '' };
+  }
+  if (i > 0) {return { start: obj.members[i - 1].value.end, end: m.value.end, text: '' };}
+  return { start: m.keyStart, end: obj.members[1].keyStart, text: '' };
+}
+
+/** Walk `path` (each step a key of an object) from the root of `text`.
+ *  `count` is how many times the last key is there (0 when a step is missing
+ *  or not an object; more than 1 when the last key — or a key on the way — is
+ *  repeated). `chain` holds the object and member of every step when found. */
+function walk(text: string, path: readonly string[]): { count: number; chain: { obj: JNode; member: JMember }[] } {
+  const chain: { obj: JNode; member: JMember }[] = [];
+  let obj = parseObject(text);
+  for (const key of path) {
+    if (obj.kind !== 'object') {return { count: 0, chain };}
+    const found = obj.members.filter(m => m.key === key);
+    if (found.length !== 1) {return { count: found.length, chain };}
+    chain.push({ obj, member: found[0] });
+    obj = found[0].value;
+  }
+  return { count: 1, chain };
+}
+
+/**
+ * The value at `path` in the JSON object `text` (each step a key of an
+ * object): `count` 1 with its parsed `value`, 0 when a step is missing or not
+ * an object, more than 1 when a key on the way is repeated. Throws a
+ * JsonEditError when `text` is not a JSON object.
+ */
+export function locateJsonKey(text: string, path: readonly string[]): { count: number; value?: unknown } {
+  const { count, chain } = walk(text, path);
+  if (count !== 1) {return { count };}
+  const v = chain[chain.length - 1].member.value;
+  return { count, value: JSON.parse(text.slice(v.start, v.end)) as unknown };
+}
+
+/**
+ * `text` with the key at `path` taken out — the reverse of {@link editJsonText}
+ * adding it (see {@link removal}); every other byte stays. With
+ * `dropEmptyParent`, when that key is its object's only key, the object's own
+ * key is taken out instead. Returns null when the key is not there exactly
+ * once; throws a JsonEditError when `text` is not a JSON object.
+ */
+export function removeJsonKey(text: string, path: readonly string[], opts: { dropEmptyParent?: boolean } = {}): string | null {
+  const { count, chain } = walk(text, path);
+  if (count !== 1 || chain.length === 0) {return null;}
+  let step = chain[chain.length - 1];
+  if (opts.dropEmptyParent && chain.length > 1 && step.obj.members.length === 1) {step = chain[chain.length - 2];}
+  return applyEdits(text, [removal(text, step.obj, step.member)]).text;
 }

@@ -272,49 +272,121 @@ function repoRoot(cwd: string): string {
   }
 }
 
+/** faf's own value for `diff.faf.command` — the canonical bin name, never
+ *  the `faf` alias (a `faf` on PATH can be shadowed by another tool; `faf-cli`
+ *  is unambiguous and installed alongside `faf`). */
+export const FAF_DIFF_DRIVER = 'faf-cli diff-driver';
+
+/** Every value git has for `diff.faf.command`, from every config file git
+ *  reads (`git config --get-all`, NUL-separated so a value is never split);
+ *  [] when it is not set. A config git cannot read is a one-line Error. */
+function driverValues(cwd: string): string[] {
+  try {
+    const out = execFileSync('git', ['config', '--null', '--get-all', 'diff.faf.command'], { cwd, encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });
+    return out.split('\0').slice(0, -1);
+  } catch (e) {
+    if ((e as { status?: number }).status === 1) {return [];} // not set
+    const why = String((e as { stderr?: unknown }).stderr ?? '').trim().split('\n')[0] || 'git config failed';
+    throw new Error(`git cannot read diff.faf.command (${why})`, { cause: e });
+  }
+}
+
+/** The values, for a one-line message. */
+const shown = (values: string[]): string => values.map(v => JSON.stringify(v)).join(', ');
+
+/** Add faf's `*.faf diff=faf` line to the repo's `.gitattributes` (at the
+ *  end, in the file's own line ending), keeping every byte it had. */
+function optIntoDriver(top: string): void {
+  const ga = resolveInside(top, '.gitattributes');
+  const before = readIfPresent(ga);
+  const existing = before ?? '';
+  if (existing.split('\n').some((l) => l.trim() === GA_LINE)) {
+    console.log(`•  .gitattributes already opts in (${GA_LINE})`);
+    return;
+  }
+  const eol = existing.includes('\r\n') ? '\r\n' : '\n';
+  const next = `${existing}${existing && !existing.endsWith('\n') ? eol : ''}${GA_LINE}${eol}`;
+  safeWriteFile(ga, next, { root: top, expect: before });
+  console.log(`✅ .gitattributes  ${GA_LINE}`);
+}
+
 /**
  * Wire `faf diff` into native git: adds `*.faf diff=faf` to `.gitattributes`
  * and sets `git config diff.faf.command "faf-cli diff-driver"`. Idempotent.
+ * Returns false, having written nothing, when it refuses.
+ *
+ * `diff.faf.command` is read first (`git config --get-all`): faf sets it only
+ * when it is unset or already faf's value. A driver of your own — or more than
+ * one value — is left alone: one line, and neither the config nor
+ * `.gitattributes` is touched.
  *
  * `.gitattributes` keeps every byte it had: faf reads it, adds its one line at
  * the end (in the file's own line ending) and writes it atomically — never
  * through a link that leaves the repo, dangles or leads to a file with another
  * name, and never over an edit made after faf read it (SafePathError).
  */
-export function installDriver(cwd: string): void {
+export function installDriver(cwd: string): boolean {
   const top = repoRoot(cwd);
-  const ga = resolveInside(top, '.gitattributes');
-  const before = readIfPresent(ga);
-  const existing = before ?? '';
-  if (!existing.split('\n').some((l) => l.trim() === GA_LINE)) {
-    const eol = existing.includes('\r\n') ? '\r\n' : '\n';
-    const next = `${existing}${existing && !existing.endsWith('\n') ? eol : ''}${GA_LINE}${eol}`;
-    safeWriteFile(ga, next, { root: top, expect: before });
-    console.log(`✅ .gitattributes  ${GA_LINE}`);
-  } else {
-    console.log(`•  .gitattributes already opts in (${GA_LINE})`);
+  let values: string[];
+  try {
+    values = driverValues(cwd);
+  } catch (e) {
+    console.error(`faf: ${(e as Error).message} — faf left your git config unchanged.`);
+    return false;
   }
-  // Canonical bin name, never the `faf` alias — a `faf` on PATH can be shadowed
-  // by another tool; `faf-cli` is unambiguous (installed alongside `faf`).
-  execFileSync('git', ['config', 'diff.faf.command', 'faf-cli diff-driver'], { cwd });
-  console.log('✅ git config       diff.faf.command = faf-cli diff-driver');
+  const ours = values.length === 1 && values[0] === FAF_DIFF_DRIVER;
+  if (values.length > 0 && !ours) {
+    console.error(`faf: diff.faf.command is already set to ${shown(values)}, not faf's driver (${FAF_DIFF_DRIVER}) — faf left your git config and .gitattributes unchanged.`);
+    return false;
+  }
+  optIntoDriver(top);
+  if (ours) {
+    console.log(`•  git config already set (diff.faf.command = ${FAF_DIFF_DRIVER})`);
+  } else {
+    execFileSync('git', ['config', 'diff.faf.command', FAF_DIFF_DRIVER], { cwd });
+    console.log(`✅ git config       diff.faf.command = ${FAF_DIFF_DRIVER}`);
+  }
   console.log('\n→ `git diff`, `git log -p`, `git show` now render the .faf score + slot delta.');
   // Pre-flight: the `faf-cli` git will invoke must actually support diff-driver (≥ 7.0).
-  if (!runnerWorks('faf-cli diff-driver')) {
+  if (!runnerWorks(FAF_DIFF_DRIVER)) {
     console.log('\n⚠  the `faf-cli` on your PATH does not support `diff-driver` yet (needs faf-cli ≥ 7.0).');
     console.log('   `git diff` on .faf files falls back to the raw text diff until you upgrade.');
   }
+  return true;
 }
 
-/** Remove the driver wiring (git config). Leaves .gitattributes for the user to keep or delete. */
-export function uninstallDriver(cwd: string): void {
+/**
+ * Remove the driver wiring (git config). Leaves .gitattributes for the user
+ * to keep or delete. `diff.faf.command` is unset only when its one value is
+ * exactly faf's (`faf-cli diff-driver`) and sits in this repo's config; a
+ * driver of your own, more than one value, or faf's value set outside the
+ * repo is left alone with one line. Returns false when it refuses.
+ */
+export function uninstallDriver(cwd: string): boolean {
   repoRoot(cwd);
+  let values: string[];
   try {
-    execFileSync('git', ['config', '--unset', 'diff.faf.command'], { cwd, stdio: 'pipe' });
+    values = driverValues(cwd);
+  } catch (e) {
+    console.error(`faf: ${(e as Error).message} — faf left your git config unchanged.`);
+    return false;
+  }
+  if (values.length === 0) {
+    console.log('•  diff.faf.command is not set — nothing to remove (the .gitattributes line, if any, is left for you to keep or delete).');
+    return true;
+  }
+  if (values.length !== 1 || values[0] !== FAF_DIFF_DRIVER) {
+    console.error(`faf: diff.faf.command is ${shown(values)}, not faf's driver (${FAF_DIFF_DRIVER}) — faf left your git config unchanged.`);
+    return false;
+  }
+  try {
+    execFileSync('git', ['config', '--local', '--unset', 'diff.faf.command'], { cwd, stdio: 'pipe' });
   } catch {
-    /* wasn't set — fine */
+    console.error(`faf: diff.faf.command = ${FAF_DIFF_DRIVER} is set outside this repo's own config (your global or system git config) — faf left it unchanged.`);
+    return false;
   }
   console.log('✅ removed diff.faf.command (the .gitattributes line is left for you to keep or delete).');
+  return true;
 }
 
 export interface DiffOptions {
@@ -324,9 +396,16 @@ export interface DiffOptions {
 }
 
 export function diffCommand(range: string | undefined, options: DiffOptions = {}, cwd: string = process.cwd()): void {
-  // Driver management is a separate verb that lives on the same command.
-  if (options.installDriver) {return installDriver(cwd);}
-  if (options.uninstallDriver) {return uninstallDriver(cwd);}
+  // Driver management is a separate verb that lives on the same command. A
+  // refusal (a diff.faf.command of your own) is one line and exit 1.
+  if (options.installDriver) {
+    if (!installDriver(cwd)) {process.exit(1);}
+    return;
+  }
+  if (options.uninstallDriver) {
+    if (!uninstallDriver(cwd)) {process.exit(1);}
+    return;
+  }
 
   const fafPath = findFafFile(cwd);
   if (!fafPath) {

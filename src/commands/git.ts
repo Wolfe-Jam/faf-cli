@@ -75,8 +75,11 @@ export function gitCommand(
     return;
   }
 
-  // A fresh temp folder of faf's own (mkdtemp), removed when the command ends.
+  // A fresh temp folder of faf's own (mkdtemp, with faf's marker file in it),
+  // removed when the command ends. The clone goes in a subfolder beside the
+  // marker (git clones only into an empty folder).
   const tmpDir = makeTempDir('faf-git-');
+  const cloneDir = join(tmpDir, 'repo');
 
   try {
     // Progress → stderr, so `--stdout` (piped .faf) never gets an ANSI-contaminated first line.
@@ -84,7 +87,7 @@ export function gitCommand(
     try {
       // execFileSync runs git directly — NO shell — so the URL can never be
       // interpreted as a command.
-      execFileSync('git', cloneArgs(repoUrl, tmpDir, options.ref), { stdio: 'pipe' });
+      execFileSync('git', cloneArgs(repoUrl, cloneDir, options.ref), { stdio: 'pipe' });
     } catch (err) {
       const stderr = (err as { stderr?: Buffer })?.stderr?.toString() ?? '';
       const reason = stderr.trim().split('\n').slice(-2).join(' ').trim() || 'git clone failed';
@@ -96,7 +99,7 @@ export function gitCommand(
     // Full slot-filling pipeline (shared with `faf auto`) — not detectStack alone —
     // named after the REPO, not the throwaway clone dir (a real package.json name
     // is kept). The same function consumers call on a repo they fetched.
-    const data = authorFafFromRepo(tmpDir, { repoUrl });
+    const data = authorFafFromRepo(cloneDir, { repoUrl });
 
     if (target.outputPath === null) {
       // --stdout: emit the .faf for piping/inspection, never touching the user's dir.

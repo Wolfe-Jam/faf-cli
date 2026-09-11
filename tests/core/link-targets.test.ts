@@ -31,7 +31,7 @@ import { writeCopilotInstructions } from '../../src/interop/copilot-instructions
 import { writeMemoryMd } from '../../src/interop/memory.js';
 import { writeLlmsTxt } from '../../src/interop/llms.js';
 import { writeClaudeMemory } from '../../src/interop/claude-memory.js';
-import { renderProjectHtml, writeProjectHtml } from '../../src/interop/projecthtml.js';
+import { writeProjectHtml } from '../../src/interop/projecthtml.js';
 import { writeServerCard } from '../../src/interop/servercard.js';
 import { writeGrokConfig } from '../../src/interop/grok.js';
 import { writeJson } from '../../src/interop/cards.js';
@@ -244,8 +244,8 @@ describe('BRAKE: a whole-file writer never writes through a link to a differentl
   test.skipIf(!posix)('a link to a file of the same name is still written through (project.html → site/project.html)', () => {
     const d = project();
     mkdirSync(join(d, 'site'));
-    // A page faf rendered before (it carries faf's mark) is written through…
-    writeFileSync(join(d, 'site', 'project.html'), renderProjectHtml({ project: { name: 'old' } } as any, scoreFafYaml('project:\n  name: old\n')));
+    // A page faf wrote there (it carries faf's render hash) is written through…
+    writeProjectHtml(join(d, 'site'), { project: { name: 'old' } } as any, scoreFafYaml('project:\n  name: old\n'));
     symlinkSync('site/project.html', join(d, 'project.html'));
     writeProjectHtml(d, DATA, scoreFafYaml(serializeFaf(DATA)));
     expect(readFileSync(join(d, 'site', 'project.html'), 'utf-8')).toContain('<title>demo — project.faf</title>');

@@ -35,10 +35,12 @@
  * any bytes that are not UTF-8 are refused, never turned into U+FFFD and
  * written back.
  *
- * Rule 5 — a whole file faf renders (project.html, a card, a `.fafb`) replaces
- * a file already there only when that file carries faf's own mark — so faf
- * wrote it (see {@link safeReplaceOwned}). Anything else is refused unless the
- * caller passes `force` (the CLI's `--force`).
+ * Rule 5 — a whole file faf renders replaces a file already there only when
+ * faf can prove it wrote it: project.html, the cards, `faf server-card --out`
+ * and a `faf taf --output` snapshot must be byte for byte what faf last wrote
+ * (their render hash, render-hash.ts); a `.fafb` must carry the FAFB header
+ * (see {@link safeReplaceOwned}). Anything else is refused unless the caller
+ * passes `force` (the CLI's `--force`).
  */
 import {
   accessSync,
@@ -85,8 +87,10 @@ export type SafePathReason =
  *   - `not-utf8`: the file is not UTF-8 (see {@link readUtf8}).
  *   - `changed`: the file changed on disk after faf read it — its bytes, or its
  *     mode (see the `expect` option of {@link safeWriteFile}).
- *   - `not-owned`: a whole file faf renders is already there without faf's own
- *     mark, so faf did not write it (see {@link safeReplaceOwned}).
+ *   - `not-owned`: a whole file faf renders is already there and faf cannot
+ *     prove it wrote every byte of it — it has no faf mark, or it was edited
+ *     since faf wrote it, or it is from before faf recorded a render hash (see
+ *     {@link safeReplaceOwned} and render-hash.ts).
  *
  * `onWrite` is true when faf refused at the write itself — it may have read
  * the file before (a `.faf` read through a link, say) — and false when it
@@ -373,6 +377,22 @@ function existingFile(target: string): Kept | undefined {
   }
 }
 
+/**
+ * A write that failed partway — a full disk, a quota, a read-only file, a
+ * killed rename — with the file on disk exactly as it was: "<file>: not
+ * written; original kept (<why>)" ("not written" alone when there was no file).
+ * `cause` is the error underneath. The CLI prints it as one line.
+ */
+export class NotWrittenError extends Error {
+  /** The file that was not written. */
+  readonly path: string;
+
+  constructor(path: string, message: string, opts: { cause?: unknown } = {}) {
+    super(message, { cause: opts.cause });
+    this.path = path;
+  }
+}
+
 const changedOnDisk = (target: string): SafePathError =>
   new SafePathError('changed', target, `${target} changed on disk while faf was writing — not written; original kept`, { onWrite: true });
 
@@ -481,7 +501,7 @@ function replaceAtomically(target: string, content: string | Uint8Array, opts: S
     discardTemp(temp);
     if (e instanceof SafePathError) {throw e;}
     const why = errnoOf(e) ?? (e instanceof Error ? e.message : String(e));
-    throw new Error(`${target}: not written${kept ? '; original kept' : ''} (${why})`, { cause: e });
+    throw new NotWrittenError(target, `${target}: not written${kept ? '; original kept' : ''} (${why})`, { cause: e });
   }
   syncFolder(folder);
 }
@@ -648,11 +668,24 @@ export function safeUnlink(path: string, opts: { root?: string; expect: string |
 /** The temp folders makeTempDir made in this process — the only ones removeTempDir removes. */
 const TEMP_DIRS = new Set<string>();
 
+/** The marker file makeTempDir writes into every temp folder it makes, and
+ *  its exact content: `faf clear` removes only a folder that carries it. */
+export const TEMP_MARKER = '.faf-temp';
+const TEMP_MARKER_TEXT = 'faf made this temp folder; `faf clear` removes it.\n';
+
 /** Make a new temp folder for faf's own use — `<os temp>/<prefix>XXXXXX`, a
- *  fresh name no one else can have made (mkdtemp) — and return its real path. */
+ *  fresh name no one else can have made (mkdtemp) — write faf's marker file
+ *  into it ({@link TEMP_MARKER}), and return its real path. Anything faf puts
+ *  there (a clone, say) goes in a subfolder, beside the marker. */
 export function makeTempDir(prefix: string): string {
   const dir = realpath(mkdtempSync(join(tmpdir(), prefix)));
   TEMP_DIRS.add(dir);
+  const fd = openSync(join(dir, TEMP_MARKER), 'wx', 0o644);
+  try {
+    writeFileSync(fd, TEMP_MARKER_TEXT);
+  } finally {
+    closeSync(fd);
+  }
   return dir;
 }
 
@@ -664,22 +697,40 @@ export function removeTempDir(dir: string): void {
   TEMP_DIRS.delete(dir);
 }
 
+/** True when the folder `dir` carries makeTempDir's marker: a regular file
+ *  (never a link) holding exactly the marker text. */
+function hasTempMarker(dir: string): boolean {
+  const marker = join(dir, TEMP_MARKER);
+  try {
+    if (!lstatSync(marker).isFile()) {return false;}
+    return readFileSync(marker, 'utf-8') === TEMP_MARKER_TEXT;
+  } catch {
+    return false;
+  }
+}
+
+const escapeRe = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 /**
  * Remove faf's own temp folders left behind by earlier runs (`faf clear`):
- * entries of the OS temp folder whose name starts with `prefix`, that are
- * real folders (a link is left alone) and belong to this user. Returns how
- * many were removed. A folder that cannot be read or removed is skipped.
+ * only folders faf made — entries of the OS temp folder named exactly as
+ * mkdtemp names them (`prefix` plus six letters or digits), that are real
+ * folders (a link is left alone), belong to this user and carry the marker
+ * file {@link makeTempDir} writes into each one. A folder of yours that only
+ * starts with the prefix (`faf-git-my-notes`) stays. Returns how many were
+ * removed. A folder that cannot be read or removed is skipped.
  */
 export function removeStaleTempDirs(prefix: string): number {
   const tmp = tmpdir();
   const uid = typeof process.getuid === 'function' ? process.getuid() : undefined;
+  const shape = new RegExp(`^${escapeRe(prefix)}[A-Za-z0-9]{6}$`);
   let removed = 0;
   for (const entry of readdirSync(tmp)) {
-    if (!entry.startsWith(prefix)) {continue;}
+    if (!shape.test(entry)) {continue;}
     const p = join(tmp, entry);
     try {
       const st = lstatSync(p);
-      if (!st.isDirectory() || (uid !== undefined && st.uid !== uid)) {continue;}
+      if (!st.isDirectory() || (uid !== undefined && st.uid !== uid) || !hasTempMarker(p)) {continue;}
       rmSync(p, { recursive: true, force: true });
       removed++;
     } catch {

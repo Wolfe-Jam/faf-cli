@@ -41,6 +41,8 @@ export type { DriftReport, DriftTarget, DriftStatus } from './core/drift.js';
 // this, never reimplement, never copy (kills the divergent old display).
 // `generateProjectHtml` is a deprecated alias — use `renderProjectHtml`.
 export { renderProjectHtml, generateProjectHtml, writeProjectHtml } from './interop/projecthtml.js';
+// The `{ force }` options writeProjectHtml and writeServerCard take.
+export type { ProjectHtmlWriteOptions } from './interop/projecthtml.js';
 // Single-source Server Card + registry `_meta` emitter — consumers (the 5 MCP
 // editions, CFM) MUST compose these, never hand-author the `one.faf/context`
 // block. `registryMeta` nests under publisher-provided (registry-safe);
@@ -56,7 +58,7 @@ export {
   registryTitle,
   REGISTRY_PUBLISHER_KEY,
 } from './interop/servercard.js';
-export type { ServerCardOptions } from './interop/servercard.js';
+export type { ServerCardOptions, CardWriteOptions } from './interop/servercard.js';
 // Text-preserving identity edit of a registry server.json — the same edit
 // `faf server-card` makes: only name / title / version and faf's `_meta`
 // context-block keys change; every other byte (key order, a 20-digit number,

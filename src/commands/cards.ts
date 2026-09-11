@@ -1,21 +1,20 @@
 import { existsSync, lstatSync } from 'fs';
-import { join, resolve } from 'path';
+import { dirname, join, resolve } from 'path';
 import { findFafFile, readFaf } from '../interop/faf.js';
 import {
   findFafaFile,
   hasA2ACardMark,
-  isFafJsonLayout,
   parseTargets,
   projectCards,
   readFafa,
-  upsertCatalog,
+  upsertCatalogText,
   writeJson,
-  type AiCatalog,
   type CardTarget,
 } from '../interop/cards.js';
 import { hasServerCardMark, patchServerJson } from '../interop/servercard.js';
-import { readUtf8, resolveInside, safeWriteFile } from '../core/safe-write.js';
+import { makeDirInside, readUtf8, resolveInside, safeWriteFile } from '../core/safe-write.js';
 import { JsonEditError } from '../core/json-edit.js';
+import { isOneLineError, oneLine } from '../core/refusal.js';
 import { dim, fafCyan } from '../ui/colors.js';
 
 export interface CardsCommandOptions {
@@ -27,7 +26,7 @@ export interface CardsCommandOptions {
   a2aUrl?: string;
   doorUrl?: string;
   fafPointer?: string;
-  /** Replace a card file faf did not write (no faf mark). */
+  /** Replace a card file faf cannot prove it wrote (edited since, or no faf mark). */
   force?: boolean;
 }
 
@@ -89,54 +88,62 @@ export function cardsCommand(options: CardsCommandOptions = {}): void {
     return;
   }
 
+  // Each target is written on its own: a refusal for one (a card edited
+  // since faf wrote it, say) is printed in one line, the others still run,
+  // and the command exits 1 at the end.
   const written: string[] = [];
   const force = options.force === true;
+  let refused = 0;
+  // `own` names what faf changes in a file it shares with you (a JsonEditError
+  // says why it cannot change only that).
+  const run = (out: string, write: () => void, own = 'its own keys'): void => {
+    try {
+      write();
+      written.push(out);
+    } catch (e) {
+      if (e instanceof JsonEditError) {
+        console.error(`faf: ${out}: ${e.message} — faf cannot change only ${own}, so it left the file unchanged.`);
+      } else if (isOneLineError(e)) {
+        console.error(oneLine(e, true));
+      } else {
+        throw e;
+      }
+      refused++;
+    }
+  };
   if (projected.a2a) {
     const out = join(dir, '.well-known', 'agent-card.json');
-    writeJson(out, projected.a2a, dir, { owns: hasA2ACardMark, mark: 'FAF context extension (https://faf.one/context)', force });
-    written.push(out);
+    run(out, () => writeJson(out, projected.a2a, dir, { owns: hasA2ACardMark, mark: 'FAF context extension (https://faf.one/context)', force }));
   }
   if (projected.mcp) {
     const out = join(dir, 'server-card');
-    writeJson(out, projected.mcp, dir, { owns: hasServerCardMark, mark: 'FAF context-block (`_meta["one.faf/context"]`)', force });
-    written.push(out);
+    run(out, () => writeJson(out, projected.mcp, dir, { owns: hasServerCardMark, mark: 'FAF context-block (`_meta["one.faf/context"]`)', force }));
   }
   if (projected.catalog) {
-    // The catalog is shared: faf upserts its own rows and keeps the rest. It is
-    // rewritten only when its text is exactly faf's JSON layout, so the rewrite
-    // loses nothing (no hand formatting, repeated key or 20-digit number).
+    // The catalog is shared: faf updates only its own rows (identifier
+    // exactly faf's) and appends the rest, as a text edit — every other row
+    // and every other byte stays.
     const out = join(dir, '.well-known', 'ai-catalog.json');
-    let existing: AiCatalog | undefined;
-    if (present(out)) {
-      existing = JSON.parse(readUtf8(resolveInside(dir, out))) as AiCatalog;
-    }
-    writeJson(out, upsertCatalog(existing, projected.catalog), dir, {
-      owns: isFafJsonLayout,
-      mark: "layout faf writes (2-space JSON), so a rewrite would lose your formatting",
-      force,
-    });
-    written.push(out);
+    const rows = projected.catalog;
+    run(out, () => {
+      makeDirInside(dir, dirname(out));
+      const real = resolveInside(dir, out);
+      const text = present(out) ? readUtf8(real) : null;
+      const next = upsertCatalogText(text, rows);
+      if (next.changed) {safeWriteFile(real, next.text, { root: dir, expect: text });}
+    }, 'its own rows');
   }
   if (projected.registry) {
     const inPath = join(dir, 'server.json');
     if (present(inPath)) {
       // Only faf's identity keys change, in place; every other byte stays.
-      const real = resolveInside(dir, inPath);
-      const text = readUtf8(real);
-      let next: { text: string; changed: boolean };
-      try {
-        next = patchServerJson(text, {
-          name: projected.registry.name,
-          title: projected.registry.title,
-          meta: projected.registry._meta,
-        });
-      } catch (e) {
-        if (!(e instanceof JsonEditError)) {throw e;}
-        console.error(`faf: ${inPath}: ${e.message} — faf cannot change only its identity keys, so it left the file unchanged.`);
-        process.exit(1);
-      }
-      if (next.changed) {safeWriteFile(real, next.text, { root: dir, expect: text });}
-      written.push(inPath);
+      const registry = projected.registry;
+      run(inPath, () => {
+        const real = resolveInside(dir, inPath);
+        const text = readUtf8(real);
+        const next = patchServerJson(text, { name: registry.name, title: registry.title, meta: registry._meta });
+        if (next.changed) {safeWriteFile(real, next.text, { root: dir, expect: text });}
+      }, 'its identity keys');
     } else if (targets?.includes('registry')) {
       console.error(
         `Error: ${inPath} not found.\n\n  Registry target patches an existing server.json. Seed one first.`,
@@ -145,7 +152,7 @@ export function cardsCommand(options: CardsCommandOptions = {}): void {
     }
   }
 
-  if (written.length === 0) {
+  if (written.length === 0 && refused === 0) {
     console.error(
       `${fafCyan('faf cards')} ${dim('nothing to write — need .fafa for A2A/catalog; server.json for registry')}`,
     );
@@ -154,4 +161,5 @@ export function cardsCommand(options: CardsCommandOptions = {}): void {
   for (const w of written) {
     console.error(`${fafCyan('✓')} ${w}`);
   }
+  if (refused > 0) {process.exit(1);}
 }

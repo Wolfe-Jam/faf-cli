@@ -12,6 +12,7 @@ import { writeProjectHtml } from '../interop/projecthtml.js';
 import { writeServerCard } from '../interop/servercard.js';
 import { scoreFafYaml } from '../core/scorer.js';
 import { makeDirInside } from '../core/safe-write.js';
+import { isOneLineError, oneLine } from '../core/refusal.js';
 import { dim, fafCyan } from '../ui/colors.js';
 
 export interface ExportOptions {
@@ -27,7 +28,7 @@ export interface ExportOptions {
   all?: boolean;
   /** Write exported files here instead of the current directory. project.faf is still read from cwd. */
   output?: string;
-  /** Replace a project.html or Server Card faf did not write (no faf mark). */
+  /** Replace a project.html or Server Card faf cannot prove it wrote (edited since, or no faf mark). */
   force?: boolean;
 }
 
@@ -39,6 +40,20 @@ function injected(dir: string, rel: string, write: () => void, markers?: [string
   write();
   console.log(`  ${rel}`);
   if (note) {console.log(dim(`  ${note}`));}
+}
+
+/** Run one target's write. A refusal (a file faf cannot prove it wrote, a
+ *  link out, …) or a write that failed with the file kept is printed as its
+ *  one line and the other targets still run; returns false then. */
+function target(write: () => void): boolean {
+  try {
+    write();
+    return true;
+  } catch (e) {
+    if (!isOneLineError(e)) {throw e;}
+    console.error(oneLine(e, true));
+    return false;
+  }
 }
 
 export function exportCommand(options: ExportOptions = {}): void {
@@ -63,46 +78,58 @@ export function exportCommand(options: ExportOptions = {}): void {
       !options.html &&
       !options.card);
 
+  // Each target is written on its own: a refusal for one (a project.html
+  // edited since faf wrote it, say) is printed in one line, the others still
+  // run, and the command exits 1 at the end.
+  let refused = 0;
+  const run = (write: () => void): void => {
+    if (!target(write)) {refused++;}
+  };
+
   if (exportAll || options.agents) {
     // Enrich with facts detected from the repo (commands/key-files/secrets) so a
     // lean or stale .faf still yields a complete AGENTS.md. Hand-authored wins.
-    injected(dir, 'AGENTS.md', () => writeAgentsMd(dir, enrichFromRepo(dir, data)));
+    run(() => injected(dir, 'AGENTS.md', () => writeAgentsMd(dir, enrichFromRepo(dir, data))));
   }
 
   if (exportAll || options.cursor) {
-    injected(dir, '.cursorrules', () => writeCursorrules(dir, data), ['# faf:start', '# faf:end']);
+    run(() => injected(dir, '.cursorrules', () => writeCursorrules(dir, data), ['# faf:start', '# faf:end']));
   }
 
   if (exportAll || options.gemini) {
     // Same repo-enrichment AGENTS.md gets — a lean/stale .faf still yields a
     // complete GEMINI.md (commands/key-files detected from the repo).
-    injected(dir, 'GEMINI.md', () => writeGeminiMd(dir, enrichFromRepo(dir, data)));
+    run(() => injected(dir, 'GEMINI.md', () => writeGeminiMd(dir, enrichFromRepo(dir, data))));
   }
 
   if (exportAll || options.copilot) {
-    injected(dir, '.github/copilot-instructions.md', () => writeCopilotInstructions(dir, data));
+    run(() => injected(dir, '.github/copilot-instructions.md', () => writeCopilotInstructions(dir, data)));
   }
 
   // Opt-in only: wires an MCP server into the user's .grok/ config, so it
   // never fires on a bare `faf export` or `--all` — only on explicit --grok.
   if (options.grok) {
-    const status = writeGrokConfig(dir, data);
-    console.log(`  .grok/config.toml (${status})`);
+    run(() => {
+      const status = writeGrokConfig(dir, data);
+      console.log(`  .grok/config.toml (${status})`);
+    });
   }
 
   // Opt-in only: project llms.txt (llmstxt.org view of authored 6Ws).
   // Origin crawlers vs repo agents are different rooms — never a side effect
   // of bare `faf export` / `--all`.
   if (options.llms) {
-    injected(dir, 'llms.txt', () => writeLlmsTxt(dir, data));
+    run(() => injected(dir, 'llms.txt', () => writeLlmsTxt(dir, data)));
   }
 
   if (exportAll || options.html) {
     // Render from the CURRENT project.faf — scored via the real scorer,
     // never a reimplementation. project.html is a view, not a format.
-    const result = scoreFafYaml(readFafRaw(fafPath));
-    writeProjectHtml(dir, data, result, fafPath, { force: options.force });
-    console.log(`  project.html`);
+    run(() => {
+      const result = scoreFafYaml(readFafRaw(fafPath));
+      writeProjectHtml(dir, data, result, fafPath, { force: options.force });
+      console.log(`  project.html`);
+    });
   }
 
   // MCP Server Card. Explicit via --card, OR by default for server-card projects
@@ -110,9 +137,12 @@ export function exportCommand(options: ExportOptions = {}): void {
   // context-block in _meta, so FAF context ships by default.
   const isServerCard = data.app_type === 'server-card' || data.project?.type === 'server-card';
   if (options.card || (exportAll && isServerCard)) {
-    const out = writeServerCard(dir, data, {}, { force: options.force });
-    console.log(`  ${out.replace(`${dir}/`, '')}`);
+    run(() => {
+      const out = writeServerCard(dir, data, {}, { force: options.force });
+      console.log(`  ${out.replace(`${dir}/`, '')}`);
+    });
   }
 
   console.log(`${fafCyan('exported')} ${dim(`from ${fafPath}`)}`);
+  if (refused > 0) {process.exit(1);}
 }

@@ -1,7 +1,7 @@
 import { join } from 'path';
 import { deprecate } from 'node:util';
 import type { FafData } from '../core/types.js';
-import { safeReplaceOwned } from '../core/safe-write.js';
+import { writeRendered } from '../core/render-hash.js';
 import { editJsonText } from '../core/json-edit.js';
 
 /**
@@ -203,8 +203,9 @@ export function hasRegistryMark(bytes: Uint8Array): boolean {
 
 /** Options for the card writers ({@link writeServerCard}, `faf cards`). */
 export interface CardWriteOptions {
-  /** Replace a file already there even when it has no faf mark — the explicit
-   *  overwrite (`--force`). Default: such a file is refused and left as it is. */
+  /** Replace a card faf cannot prove it wrote — no faf mark, edited since
+   *  faf wrote it, or from before 7.13 — the explicit overwrite (`--force`).
+   *  Default: such a file is refused and left as it is. */
   force?: boolean;
 }
 
@@ -213,10 +214,14 @@ export interface CardWriteOptions {
  *  `<streamable-http-url>/server-card` (no longer `.well-known`); serve the
  *  emitted file there as `application/mcp-server-card+json`.
  *
- *  A `server-card` already there is replaced only when faf wrote it (it
- *  carries `_meta["one.faf/context"]`); a hand-written card is refused
- *  (SafePathError `not-owned`) and left byte for byte, unless `force`. The
- *  write is atomic and never goes through a link that leaves `dir` or dangles. */
+ *  The card carries faf's render hash at `_meta["one.faf/render"]` (the hash
+ *  of the card without that key; the Server Card schema leaves `_meta` open
+ *  for namespaced keys). A `server-card` already there is replaced only when
+ *  it is byte for byte what faf last wrote (its hash still fits); a card edited
+ *  since, a hand-written card, or a card from before 7.13 that is not exactly
+ *  faf's render of `data` is refused (SafePathError `not-owned`) and left byte
+ *  for byte, unless `force`. The write is atomic and never goes through a link
+ *  that leaves `dir` or dangles. */
 export function writeServerCard(
   dir: string,
   data: FafData,
@@ -225,9 +230,10 @@ export function writeServerCard(
 ): string {
   const card = buildServerCard(data, opts);
   const out = join(dir, 'server-card');
-  safeReplaceOwned(out, `${JSON.stringify(card, null, 2)  }\n`, {
+  writeRendered(out, `${JSON.stringify(card, null, 2)  }\n`, {
     root: dir,
-    owns: hasServerCardMark,
+    format: 'json',
+    hasMark: hasServerCardMark,
     mark: 'FAF context-block (`_meta["one.faf/context"]`)',
     force: write.force,
   });

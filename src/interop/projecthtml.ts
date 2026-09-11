@@ -2,7 +2,7 @@ import { join } from 'path';
 import { deprecate } from 'node:util';
 import type { FafData, ScoreResult } from '../core/types.js';
 import { FAF_HEX } from '../ui/colors.js';
-import { safeReplaceOwned } from '../core/safe-write.js';
+import { writeRendered } from '../core/render-hash.js';
 
 /**
  * project.html — the visual render of project.faf.
@@ -199,16 +199,20 @@ export function hasProjectHtmlMark(bytes: Uint8Array): boolean {
 
 /** Options for {@link writeProjectHtml}. */
 export interface ProjectHtmlWriteOptions {
-  /** Replace a project.html that faf did not render (no faf mark) — the
-   *  explicit overwrite (`--force`). Default: it is refused and left as it is. */
+  /** Replace a project.html faf cannot prove it wrote — no faf mark, edited
+   *  since faf wrote it, or from before 7.13 — the explicit overwrite
+   *  (`--force`). Default: it is refused and left as it is. */
   force?: boolean;
 }
 
 /** Write project.html beside project.faf (repo root) — atomically, and never
- *  through a link that leaves `dir` or dangles (SafePathError). A project.html
- *  already there is replaced only when faf rendered it (it carries faf's
- *  `Visual render of project.faf` description line); a hand-written page is
- *  refused (SafePathError `not-owned`) and left byte for byte, unless `force`. */
+ *  through a link that leaves `dir` or dangles (SafePathError). The page
+ *  carries faf's render hash (`<meta name="faf-render" content="sha256:…">`,
+ *  the hash of the page without that line). A project.html already there is
+ *  replaced only when it is byte for byte what faf last wrote (its hash still
+ *  fits); a page edited since, a hand-written page, or a page from before 7.13
+ *  that is not exactly faf's render of `data` is refused (SafePathError
+ *  `not-owned`) and left byte for byte, unless `force`. */
 export function writeProjectHtml(
   dir: string,
   data: FafData,
@@ -216,9 +220,10 @@ export function writeProjectHtml(
   fafPath = 'project.faf',
   write: ProjectHtmlWriteOptions = {},
 ): void {
-  safeReplaceOwned(join(dir, 'project.html'), renderProjectHtml(data, result, fafPath), {
+  writeRendered(join(dir, 'project.html'), renderProjectHtml(data, result, fafPath), {
     root: dir,
-    owns: hasProjectHtmlMark,
+    format: 'html',
+    hasMark: hasProjectHtmlMark,
     mark: "faf mark (the `Visual render of project.faf` description line)",
     force: write.force,
   });

@@ -7,7 +7,7 @@ import { FafDNAManager } from '../core/faf-dna.js';
 import { sayWhyDnaIsLeft } from './dna.js';
 import * as kernel from '../wasm/kernel.js';
 import { SafePathError, safeReplaceOwned } from '../core/safe-write.js';
-import { FAFB_MARK, isFafbBytes } from './compile.js';
+import { FAFB_MARK, fafbPathFor, isFafbBytes } from './compile.js';
 import { tierBadge } from '../core/tiers.js';
 import { bold, dim, fafCyan } from '../ui/colors.js';
 
@@ -127,7 +127,7 @@ export function refreshCommand(options: RefreshOptions = {}): void {
   //    don't force a binary on YAML-only projects. Rust authors via the kernel.
   //    A .fafb faf did not compile, or one behind a link out of the project,
   //    is left as it is — said in one line — and the re-ground carries on.
-  const fafbPath = fafPath.replace(/\.faf$/, '.fafb');
+  const fafbPath = fafbPathFor(fafPath);
   let fafbBytes: number | null = null;
   let fafbLeft: string | null = null;
   if (present(fafbPath)) {

@@ -3,7 +3,8 @@ import { dirname, resolve } from 'path';
 import { findFafFile, readFaf } from '../interop/faf.js';
 import { REGISTRY_PUBLISHER_KEY, hasRegistryMark, patchServerJson } from '../interop/servercard.js';
 import { projectCards } from '../interop/cards.js';
-import { readUtf8, resolveInside, safeReplaceOwned, safeWriteFile } from '../core/safe-write.js';
+import { readUtf8, resolveInside, safeWriteFile } from '../core/safe-write.js';
+import { writeRendered } from '../core/render-hash.js';
 import { JsonEditError } from '../core/json-edit.js';
 import { dim, fafCyan } from '../ui/colors.js';
 
@@ -14,7 +15,7 @@ export interface ServerCardCommandOptions {
   setVersion?: string;
   generated?: string;
   check?: boolean;
-  /** With --out: replace an existing file that has no faf identity in it. */
+  /** With --out: replace a file faf cannot prove it wrote (edited since, or no faf identity). */
   force?: boolean;
 }
 
@@ -59,8 +60,8 @@ function existingGenerated(text: string): string | undefined {
  * refused in one line. It does NOT invent packages/version/sha (those are
  * per-release and per-registry). --check prints the result to stdout without
  * writing (the idempotency-test hook). --out writes the result to another
- * file, which faf replaces only when it already carries faf's identity
- * (or with --force).
+ * file, with faf's render hash in its `_meta`, and replaces that file only
+ * while it is byte for byte what faf last wrote there (or with --force).
  */
 export function serverCardCommand(options: ServerCardCommandOptions = {}): void {
   const fafPath = options.faf ? resolve(options.faf) : findFafFile();
@@ -115,9 +116,13 @@ export function serverCardCommand(options: ServerCardCommandOptions = {}): void 
   if (outPath === inPath) {
     if (next.changed) {safeWriteFile(inReal, next.text, { root: inRoot, expect: text });}
   } else {
-    safeReplaceOwned(outPath, next.text, {
+    // A file of faf's own: it carries faf's render hash (`_meta["one.faf/render"]`,
+    // which the registry schema allows and the registry drops on publish) and
+    // is replaced only while it is byte for byte what faf last wrote there.
+    writeRendered(outPath, next.text, {
       root: options.out ? dirname(outPath) : process.cwd(),
-      owns: hasRegistryMark,
+      format: 'json',
+      hasMark: hasRegistryMark,
       mark: 'faf identity (`_meta` publisher-provided `one.faf/context`)',
       force: options.force,
     });

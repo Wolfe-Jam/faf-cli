@@ -277,12 +277,25 @@ describe('BRAKE: faf\'s own state files — the go session, the bench state, faf
     const tmp = mk('tmp');
     const target = mk('target');
     writeFileSync(join(target, 'keep.txt'), 'KEEP\n');
+    // A folder faf made (mkdtemp name + faf's marker), with a clone in it…
+    const was = process.env.TMPDIR;
+    process.env.TMPDIR = tmp;
+    let made: string;
+    try {
+      made = sw.makeTempDir('faf-git-');
+    } finally {
+      if (was === undefined) {delete process.env.TMPDIR;} else {process.env.TMPDIR = was;}
+    }
+    mkdirSync(join(made, 'repo'));
+    writeFileSync(join(made, 'repo', 'x'), 'x');
+    // …a folder of the user's that only starts with the prefix, and a link.
     mkdirSync(join(tmp, 'faf-git-old'));
     writeFileSync(join(tmp, 'faf-git-old', 'x'), 'x');
     symlinkSync(target, join(tmp, 'faf-git-link'));
     const r = run(mk('cwd'), ['clear'], { env: { TMPDIR: tmp } });
     expect(r.status).toBe(0);
-    expect(existsSync(join(tmp, 'faf-git-old'))).toBe(false);
+    expect(existsSync(made)).toBe(false);
+    expect(readFileSync(join(tmp, 'faf-git-old', 'x'), 'utf-8')).toBe('x');
     expect(lstatSync(join(tmp, 'faf-git-link')).isSymbolicLink()).toBe(true);
     expect(readFileSync(join(target, 'keep.txt'), 'utf-8')).toBe('KEEP\n');
   });

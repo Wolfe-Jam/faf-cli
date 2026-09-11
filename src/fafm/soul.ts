@@ -14,7 +14,7 @@
 import { existsSync } from 'fs';
 import { dirname, resolve } from 'path';
 import { isMap as isYamlMap, stringify as stringifyYaml, type Document } from 'yaml';
-import { readBytesIfPresent, readUtf8, resolveInside, safeWriteFile } from '../core/safe-write.js';
+import { SafePathError, readBytesIfPresent, readUtf8, resolveInside, safeWriteFile } from '../core/safe-write.js';
 import { describeShape, isMapping } from '../core/shape.js';
 import { applyChange, changeAt, editYaml, parseForEdit, sameJs, seqAt } from '../core/yaml-edit.js';
 import {
@@ -62,13 +62,18 @@ function readSoulText(path: string): { real: string; text: string } {
  *  file must still hold `loaded.text` — else it changed on disk after the
  *  load, and the write is refused (SafePathError `changed`) rather than
  *  written over the edit. Any other path — a soul made with no file, or a
- *  save to a file the soul was not loaded from — must have no file there
- *  (a file that appeared is refused the same way), unless `replace` asks to
- *  write over it. Link rules and the atomic write are safeWriteFile's. */
+ *  save to a file the soul was not loaded from — must have no file there,
+ *  unless `replace` asks to write over it: a file already there is refused
+ *  with "<file> already exists — not written; pass { replace: true } (faf
+ *  memory convert --force) to replace it" (SafePathError `changed`: it is not
+ *  the no-file the soul was made for), and one that appears while faf writes
+ *  with the "changed on disk" line. Link rules and the atomic write are
+ *  safeWriteFile's. */
 function writeUnlessSame(path: string, text: string, loaded: { real: string; text: string } | undefined, replace: boolean): string {
   const full = resolve(path);
   const target = resolveInside(dirname(full), full);
-  if (loaded && loaded.real === target && loaded.text === text) {return target;}
+  const ownFile = loaded !== undefined && loaded.real === target;
+  if (ownFile && loaded.text === text) {return target;}
   let now: Buffer | null | undefined;
   try {
     now = readBytesIfPresent(target);
@@ -76,7 +81,15 @@ function writeUnlessSame(path: string, text: string, loaded: { real: string; tex
     now = undefined; // unreadable: the write below says why
   }
   if (now && now.equals(Buffer.from(text, 'utf-8'))) {return target;}
-  const expect = loaded && loaded.real === target ? loaded.text : replace ? now : null;
+  if (!ownFile && !replace && now) {
+    throw new SafePathError(
+      'changed',
+      full,
+      `${full} already exists — not written; pass { replace: true } (faf memory convert --force) to replace it`,
+      { onWrite: true },
+    );
+  }
+  const expect = ownFile ? loaded.text : replace ? now : null;
   return safeWriteFile(path, text, expect === undefined ? {} : { expect });
 }
 

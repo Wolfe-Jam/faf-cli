@@ -8,12 +8,14 @@
  * hand-written file at the same name — or behind a same-name link
  * (`project.html → docs/project.html`) — was still replaced whole.
  *
- * Now a file already there is replaced only when it carries faf's own mark,
- * the one faf's 7.12 output already carries (so a file faf wrote before still
- * updates with no flag): project.html's `Visual render of project.faf`
- * description line, the Server Card's `_meta["one.faf/context"]`, the A2A
- * card's FAF context extension. Any other file is refused in one line and
- * kept byte for byte; `--force` replaces it, as `faf init --force` does.
+ * Round 3 replaced a file only when it carried faf's own mark (project.html's
+ * `Visual render of project.faf` description line, the Server Card's
+ * `_meta["one.faf/context"]`, the A2A card's FAF context extension). Round 4
+ * goes further (owner-rule-r4.test.ts): the file must be byte for byte what
+ * faf last wrote, proved by the render hash it carries; a file from before
+ * 7.13 (mark, no hash) is faf's only when it is exactly faf's render. Any other
+ * file is refused in one line and kept byte for byte; `--force` replaces it,
+ * as `faf init --force` does.
  */
 import { describe, test, expect } from 'bun:test';
 import { mkdirSync, mkdtempSync, readFileSync, realpathSync, symlinkSync, writeFileSync } from 'fs';
@@ -24,6 +26,7 @@ import { SafePathError } from '../../src/core/safe-write.js';
 import { renderProjectHtml, writeProjectHtml } from '../../src/interop/projecthtml.js';
 import { buildServerCard, writeServerCard } from '../../src/interop/servercard.js';
 import { buildA2ACard, writeJson } from '../../src/interop/cards.js';
+import { RENDER_KEY } from '../../src/core/render-hash.js';
 import { scoreFafYaml } from '../../src/core/scorer.js';
 import { serializeFaf } from '../../src/interop/faf.js';
 
@@ -35,6 +38,16 @@ const SCORE = scoreFafYaml(serializeFaf(DATA));
 const HAND_HTML = '<!doctype html>\n<html><body>\n<h1>Our project page (HAND-HTML)</h1>\n</body></html>\n';
 const HAND_CARD = `${JSON.stringify({ name: 'io.example/hand', description: 'HAND-CARD', tools: [{ name: 'deploy' }] }, null, 2)}\n`;
 const HAND_A2A = `${JSON.stringify({ name: 'hand agent', description: 'HAND-A2A', skills: [{ id: 'x' }] }, null, 2)}\n`;
+/** A page faf wrote, without its render line — faf's render as renderProjectHtml returns it. */
+const noRenderLine = (html: string): string => html.replace(/^<meta name="faf-render" content="sha256:[0-9a-f]{64}">\n/m, '');
+/** A card faf wrote, parsed, without its render hash. */
+const withoutHash = (text: string): any => {
+  const j = JSON.parse(text);
+  expect(j._meta[RENDER_KEY]).toMatch(/^sha256:[0-9a-f]{64}$/);
+  delete j._meta[RENDER_KEY];
+  if (Object.keys(j._meta).length === 0) {delete j._meta;}
+  return j;
+};
 const FAFA: any = {
   agent: { name: 'demo', displayName: 'Demo', description: 'A demo agent', version: '1.0.0', vendor: 'Me', homepage: 'https://example.com' },
   capabilities: [{ name: 'chat', description: 'Talk', tags: ['x'] }],
@@ -68,12 +81,13 @@ describe('BRAKE: the library writers keep a file faf did not write (W01-W03, K13
     expect(readFileSync(join(d, 'project.html'), 'utf-8')).toBe(HAND_HTML);
 
     writeProjectHtml(d, DATA, SCORE, 'project.faf', { force: true });
-    expect(readFileSync(join(d, 'project.html'), 'utf-8')).toBe(renderProjectHtml(DATA, SCORE));
+    expect(noRenderLine(readFileSync(join(d, 'project.html'), 'utf-8'))).toBe(renderProjectHtml(DATA, SCORE));
     const next = { ...DATA, project: { ...DATA.project, goal: 'A new goal' } };
     writeProjectHtml(d, next, SCORE); // faf's own page: no flag needed
     expect(readFileSync(join(d, 'project.html'), 'utf-8')).toContain('A new goal');
 
-    // A page an older faf wrote carries the same description line: it updates with no flag.
+    // A page an older faf wrote carries the description line but no render
+    // hash: faf cannot tell whether it was edited, so it is refused once…
     const old = [
       '<!DOCTYPE html>',
       '<html lang="en">',
@@ -85,6 +99,12 @@ describe('BRAKE: the library writers keep a file faf did not write (W01-W03, K13
       '',
     ].join('\n');
     writeFileSync(join(d, 'project.html'), old);
+    const pre = refusal(() => writeProjectHtml(d, DATA, SCORE));
+    expect(pre.reason).toBe('not-owned');
+    expect(pre.message).toBe(`${join(d, 'project.html')} has no faf render hash (written before 7.13), so faf cannot tell whether it was edited — faf left it unchanged. Use --force once to replace it; after that faf recognises its own output.`);
+    expect(readFileSync(join(d, 'project.html'), 'utf-8')).toBe(old);
+    // …unless it is exactly faf's render of the current data: faf's, nothing to change.
+    writeFileSync(join(d, 'project.html'), renderProjectHtml(DATA, SCORE));
     writeProjectHtml(d, DATA, SCORE);
     expect(readFileSync(join(d, 'project.html'), 'utf-8')).toBe(renderProjectHtml(DATA, SCORE));
   });
@@ -104,7 +124,7 @@ describe('BRAKE: the library writers keep a file faf did not write (W01-W03, K13
     expect(refusal(() => writeServerCard(d, DATA)).reason).toBe('not-owned');
     expect(readFileSync(join(d, 'server-card'), 'utf-8')).toBe(HAND_CARD);
     writeServerCard(d, DATA, { now: 'T0' }, { force: true });
-    expect(JSON.parse(readFileSync(join(d, 'server-card'), 'utf-8'))).toEqual(buildServerCard(DATA, { now: 'T0' }));
+    expect(withoutHash(readFileSync(join(d, 'server-card'), 'utf-8'))).toEqual(buildServerCard(DATA, { now: 'T0' }));
     writeServerCard(d, DATA, { now: 'T1' }); // faf's own card
     expect(JSON.parse(readFileSync(join(d, 'server-card'), 'utf-8'))._meta['one.faf/context'].generated).toBe('T1');
   });
@@ -163,21 +183,21 @@ describe('BRAKE: the commands refuse in one line and take --force (show, export,
     expect(readFileSync(join(d, '.well-known', 'agent-card.json'), 'utf-8')).toBe(HAND_A2A);
   });
 
-  test('faf cards --target catalog: a catalog laid out by hand is refused (a rewrite would lose its layout); faf\'s layout is upserted', () => {
+  test('faf cards --target catalog: a catalog laid out by hand keeps every byte; faf\'s rows are appended as text (round 4, P06)', () => {
     const d = mk('cli');
     writeFileSync(join(d, 'project.faf'), FAF);
     writeFileSync(join(d, 'agent.fafa'), JSON.stringify(FAFA));
     mkdirSync(join(d, '.well-known'));
     const hand = '{\n    "specVersion": "1.0",\n    "entries": [\n        { "identifier": "urn:x:mine", "type": "text/html", "url": "https://example.com/HAND" }\n    ]\n}\n';
     writeFileSync(join(d, '.well-known', 'ai-catalog.json'), hand);
-    expect(run(d, ['cards', '--target', 'catalog']).status).toBe(1);
-    expect(readFileSync(join(d, '.well-known', 'ai-catalog.json'), 'utf-8')).toBe(hand);
-
-    const faf = `${JSON.stringify(JSON.parse(hand), null, 2)}\n`;
-    writeFileSync(join(d, '.well-known', 'ai-catalog.json'), faf);
     expect(run(d, ['cards', '--target', 'catalog']).status).toBe(0);
-    const cat = JSON.parse(readFileSync(join(d, '.well-known', 'ai-catalog.json'), 'utf-8'));
-    expect(cat.entries[0].url).toBe('https://example.com/HAND'); // the user's row kept
-    expect(cat.entries.length).toBeGreaterThan(1); // faf's rows added
+    const after = readFileSync(join(d, '.well-known', 'ai-catalog.json'), 'utf-8');
+    // The hand text up to its last row is kept byte for byte; faf's rows follow it.
+    const lastRow = hand.indexOf('}', hand.indexOf('"url"')) + 1;
+    expect(after.startsWith(hand.slice(0, lastRow))).toBe(true);
+    expect(after.endsWith('\n    ]\n}\n')).toBe(true);
+    const cat = JSON.parse(after);
+    expect(cat.entries[0]).toEqual({ identifier: 'urn:x:mine', type: 'text/html', url: 'https://example.com/HAND' }); // the user's row kept
+    expect(cat.entries.map((e: any) => e.identifier)).toEqual(['urn:x:mine', 'urn:air:example.com:a2a:demo', 'urn:air:example.com:agent:demo']);
   });
 });

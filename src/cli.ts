@@ -39,7 +39,7 @@ import { wjttcCommand } from './commands/wjttc.js';
 import { benchCommand } from './commands/bench.js';
 import { refreshCommand } from './commands/refresh.js';
 import { memoryCommand } from './commands/memory.js';
-import { SafePathError } from './core/safe-write.js';
+import { isOneLineError, oneLine } from './core/refusal.js';
 
 const { version: VERSION } = require('../package.json');
 
@@ -107,7 +107,7 @@ program
 program
   .command('show')
   .description('Render project.faf → project.html and open it')
-  .option('--force', 'Replace a project.html faf did not render')
+  .option('--force', 'Replace a project.html faf cannot prove it rendered (edited since, or not faf\'s)')
   .action((options) => showCommand(options));
 
 program
@@ -191,7 +191,7 @@ program
   .option('--card', 'Author MCP Server Card (.well-known/mcp/server-card) with the FAF context-block')
   .option('--all', 'Author all formats')
   .option('--output <path>', 'Write exported files to this directory instead of the current one')
-  .option('--force', 'Replace a project.html or Server Card faf did not write')
+  .option('--force', 'Replace a project.html or Server Card faf cannot prove it wrote (edited since, or not faf\'s)')
   .action((options) => exportCommand(options));
 
 program
@@ -203,7 +203,7 @@ program
   .option('--set-version <version>', 'Set the version field (default: preserve existing). NOTE: not --version, which is the global CLI-version flag')
   .option('--generated <iso>', 'Override the _meta generated stamp (default: preserve existing)')
   .option('--check', 'Print to stdout, do not write (diff/verify — the idempotency-test hook)')
-  .option('--force', 'With --out: replace a file that has no faf identity in it')
+  .option('--force', 'With --out: replace a file faf cannot prove it wrote (edited since, or no faf identity)')
   .action((options) => serverCardCommand(options));
 
 program
@@ -217,7 +217,7 @@ program
   .option('--door-url <url>', 'A2A door when .fafa has no a2a endpoint')
   .option('--faf-pointer <url>', 'Absolute .faf pointer for served cards (default: ./project.faf)')
   .option('--check', 'Print projected cards to stdout, do not write')
-  .option('--force', 'Replace a card file faf did not write')
+  .option('--force', 'Replace a card file faf cannot prove it wrote (edited since, or not faf\'s)')
   .action((options) => cardsCommand(options));
 
 program
@@ -321,7 +321,7 @@ program
   .description('TAF Receipts — `faf taf setup` wires the CI receipt printer; bare snapshot deprecated → faf score --json')
   .option('--output <path>', 'Write score snapshot to file')
   .option('--write', 'taf setup: create .github/workflows/taf.yml')
-  .option('--force', 'With --output: replace a file that is not a TAF snapshot faf wrote')
+  .option('--force', 'With --output: replace a file faf cannot prove it wrote (edited since, or not a TAF snapshot)')
   .action((subcommand, options) => tafCommand(subcommand, options));
 
 // === Phase C Commands ===
@@ -429,27 +429,16 @@ if (process.argv.length <= 2) {
     ].join('\n'),
   );
   // A refused path (a link out of the project, a dangling link), a file that
-  // is not UTF-8, one that changed on disk while faf was writing, or one faf
-  // did not write is an answer, not a crash: say it in one line and exit 1.
-  // parseAsync, so a refusal inside an async command (faf go, faf ai) is
-  // caught too.
+  // is not UTF-8, one that changed on disk while faf was writing, one faf
+  // cannot prove it wrote, or a write that failed with the original kept (a
+  // read-only file, a full disk) is an answer, not a crash: say it in one line
+  // and exit 1. parseAsync, so a refusal inside an async command (faf go,
+  // faf ai) is caught too.
   program.parseAsync(process.argv).catch((e: unknown) => {
-    if (!(e instanceof SafePathError)) {throw e;}
-    console.error(`faf: ${e.message}${refusalTail(e)}`);
+    if (!isOneLineError(e)) {throw e;}
+    console.error(oneLine(e, commandHasForce()));
     process.exit(1);
   });
-}
-
-/** What the one-line refusal adds after the reason: nothing when the reason
- *  already says the file was left as it is; the --force hint for a file faf
- *  did not write, when the command has --force; otherwise what faf did not
- *  do — "Nothing was written to it." when the refusal came at the write (faf
- *  may have read the file first), "Nothing was read from or written to it."
- *  when it came before either. */
-function refusalTail(e: SafePathError): string {
-  if (e.reason === 'not-utf8' || e.reason === 'changed') {return '';}
-  if (e.reason === 'not-owned') {return commandHasForce() ? ' Use --force to replace it.' : '';}
-  return e.onWrite ? ' Nothing was written to it.' : ' Nothing was read from or written to it.';
 }
 
 /** True when the command being run takes --force. */

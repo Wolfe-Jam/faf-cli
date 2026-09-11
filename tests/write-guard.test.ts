@@ -93,6 +93,18 @@ function libFiles(dir: string, out: string[] = []): string[] {
 // (server.json), taf (taf.yml, --output), diff --install-driver
 // (.gitattributes), go (session), bench (state), demo, hooks, git/clear (temp
 // folders), the star nudge, and mkdirSync in five writers.
+//
+// What the seal cannot see: it reads source text, so a write made by a
+// subprocess is invisible to it. Two commands run one that writes, and their
+// effects follow the owner rule by construction (tested in
+// tests/core/owner-rule-r4.test.ts):
+//   - `faf diff --install-driver` / `--uninstall-driver` run `git config` on
+//     `diff.faf.command`. faf reads `git config --get-all` first, sets it only
+//     when it is unset or already faf's value (`faf-cli diff-driver`), and
+//     unsets it only when its one value is exactly that; any other value is
+//     left alone with one line.
+//   - `faf git` runs `git clone` into a `repo/` folder inside a temp folder
+//     faf made (makeTempDir, with faf's marker file), removed when it ends.
 // ---------------------------------------------------------------------------
 const SAFE_WRITE = join('src', 'core', 'safe-write.ts');
 

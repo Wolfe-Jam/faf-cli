@@ -2,13 +2,14 @@ import { existsSync } from 'fs';
 import { dirname, join, resolve } from 'path';
 import { findFafFile, readFaf, readFafRaw } from '../interop/faf.js';
 import { scoreFafYaml } from '../core/scorer.js';
-import { makeDirInside, safeReplaceOwned, safeWriteFile } from '../core/safe-write.js';
+import { makeDirInside, safeWriteFile } from '../core/safe-write.js';
+import { writeRendered } from '../core/render-hash.js';
 import { fafCyan, dim, bold } from '../ui/colors.js';
 
 export interface TafOptions {
   output?: string;
   write?: boolean;
-  /** With --output: replace a file that is not a TAF snapshot faf wrote. */
+  /** With --output: replace a file faf cannot prove it wrote (edited since, or not a TAF snapshot). */
   force?: boolean;
 }
 
@@ -179,11 +180,14 @@ function tafSnapshot(options: TafOptions): void {
   const json = JSON.stringify(receipt, null, 2);
 
   if (options.output) {
-    // Its own folder is the boundary; a file that is not a TAF snapshot is
-    // left as it is unless --force.
-    safeReplaceOwned(options.output, json, {
+    // Its own folder is the boundary. The snapshot carries faf's render hash
+    // (`_meta["one.faf/render"]`); a file there is replaced only while it is
+    // byte for byte what faf last wrote, and anything else is left as it is
+    // unless --force.
+    writeRendered(options.output, json, {
       root: dirname(resolve(options.output)),
-      owns: isTafSnapshot,
+      format: 'json',
+      hasMark: isTafSnapshot,
       mark: 'TAF snapshot (`taf_version`)',
       force: options.force,
     });

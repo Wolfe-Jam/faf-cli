@@ -3,7 +3,9 @@ import { dirname, join } from 'path';
 import { deprecate } from 'node:util';
 import { parse } from 'yaml';
 import type { FafData } from '../core/types.js';
-import { makeDirInside, safeReplaceOwned } from '../core/safe-write.js';
+import { makeDirInside } from '../core/safe-write.js';
+import { writeRendered } from '../core/render-hash.js';
+import { upsertJsonRows } from '../core/json-edit.js';
 import {
   fafContextBlock,
   buildServerCard,
@@ -301,29 +303,18 @@ function homepageWellKnown(fafa: FafaDoc, name: string): string | undefined {
   }
 }
 
+/** The row in `entries` that is faf's own row `row`: the one whose
+ *  identifier is exactly faf's (`urn:air:<host>:a2a:<slug>` or
+ *  `urn:air:<host>:agent:<slug>`). Never matched by type or URL — a row of
+ *  yours for another agent, or another card of the same type, is not faf's. */
 function catalogMatchIndex(entries: CatalogEntry[], row: CatalogEntry): number {
-  const exact = entries.findIndex((e) => e.identifier === row.identifier);
-  if (exact >= 0) {return exact;}
-  if (
-    row.type === 'application/a2a-agent-card+json' ||
-    row.type === 'application/json' ||
-    row.identifier.includes(':a2a:')
-  ) {
-    return entries.findIndex(
-      (e) =>
-        e.identifier.includes(':a2a:') ||
-        e.type === 'application/a2a-agent-card+json' ||
-        String(e.url ?? '').includes('agent-card.json'),
-    );
-  }
-  if (row.type === 'application/vnd.fafa+yaml') {
-    return entries.findIndex((e) => e.type === 'application/vnd.fafa+yaml');
-  }
-  return -1;
+  return entries.findIndex((e) => e.identifier === row.identifier);
 }
 
-/** Upsert projector entries into an existing catalog. Leaves unknown rows alone.
- *  On match, only url / type / updatedAt move — host copy (title, tags) stays. */
+/** Upsert projector entries into an existing catalog. Leaves every other row
+ *  alone: a row is faf's only when its identifier is exactly faf's (never by
+ *  type or URL). On match, only url / type / updatedAt move — host copy
+ *  (title, tags) stays; any other faf row is appended. */
 export function upsertCatalog(existing: AiCatalog | undefined, incoming: CatalogEntry[]): AiCatalog {
   const base: AiCatalog = existing
     ? { ...existing, entries: [...(existing.entries ?? [])] }
@@ -342,6 +333,28 @@ export function upsertCatalog(existing: AiCatalog | undefined, incoming: Catalog
     }
   }
   return base;
+}
+
+/** The keys of a catalog row faf updates in place (its own row only). */
+const CATALOG_ROW_UPDATES = ['url', 'type', 'updatedAt'] as const;
+
+/**
+ * {@link upsertCatalog} as a text edit of the catalog's JSON: faf's own rows
+ * (identifier exactly faf's) get their url / type / updatedAt values changed
+ * in place, faf's other rows are appended after the last entry, and every
+ * other byte — your rows, their order and layout, other keys — stays. With no
+ * text (no catalog yet) a new catalog is returned. Throws a JsonEditError,
+ * changing nothing, when the catalog cannot be edited that way (not a JSON
+ * object, `entries` not an array, faf's row there twice, …).
+ */
+export function upsertCatalogText(text: string | null, incoming: CatalogEntry[]): { text: string; changed: boolean } {
+  if (text === null) {
+    return { text: `${JSON.stringify({ specVersion: '1.0', entries: incoming }, null, 2)}\n`, changed: true };
+  }
+  return upsertJsonRows(text, 'entries', incoming as unknown as Record<string, unknown>[], {
+    id: 'identifier',
+    update: CATALOG_ROW_UPDATES,
+  });
 }
 
 export function projectCards(input: {
@@ -443,26 +456,30 @@ export function hasFafCardMark(bytes: Uint8Array): boolean {
 
 /** Options for {@link writeJson}. */
 export interface WriteJsonOptions {
-  /** True when the bytes already at the path are ones faf wrote. Default:
-   *  they carry one of faf's card marks ({@link hasFafCardMark}). */
+  /** True when the bytes already at the path carry faf's older mark (a file
+   *  faf wrote before render hashes). Default: one of faf's card marks
+   *  ({@link hasFafCardMark}). */
   owns?: (existing: Buffer) => boolean;
   /** faf's mark in words, for the refusal. */
   mark?: string;
-  /** Replace a file faf did not write anyway — the explicit overwrite (`--force`). */
+  /** Replace a file faf cannot prove it wrote anyway — the explicit overwrite (`--force`). */
   force?: boolean;
 }
 
-/** Write `value` as JSON — atomically, and never through a link that leaves
- *  `root` (default: the file's own folder) or dangles. The folder is created
- *  when missing, never through a link that leaves `root`. A file already
- *  there is replaced only when faf wrote it (`owns`; by default it carries one
- *  of faf's card marks); any other file is refused (SafePathError
- *  `not-owned`) and left byte for byte, unless `force`. */
+/** Write `value` as JSON (2-space, final newline) with faf's render hash at
+ *  `_meta["one.faf/render"]` — atomically, and never through a link that
+ *  leaves `root` (default: the file's own folder) or dangles. The folder is
+ *  created when missing, never through a link that leaves `root`. A file
+ *  already there is replaced only when it is byte for byte what faf last wrote
+ *  (its render hash still fits); a file edited since, one without faf's mark,
+ *  or one from before 7.13 that is not exactly this JSON is refused
+ *  (SafePathError `not-owned`) and left byte for byte, unless `force`. */
 export function writeJson(path: string, value: unknown, root?: string, write: WriteJsonOptions = {}): void {
   makeDirInside(root ?? dirname(path), dirname(path));
-  safeReplaceOwned(path, `${JSON.stringify(value, null, 2)}\n`, {
-    root,
-    owns: write.owns ?? hasFafCardMark,
+  writeRendered(path, `${JSON.stringify(value, null, 2)}\n`, {
+    root: root ?? dirname(path),
+    format: 'json',
+    hasMark: write.owns ?? hasFafCardMark,
     mark: write.mark ?? 'FAF context-block (a faf card mark)',
     force: write.force,
   });

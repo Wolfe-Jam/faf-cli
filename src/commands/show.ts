@@ -27,7 +27,7 @@ function openInBrowser(file: string): boolean {
 }
 
 export interface ShowOptions {
-  /** Replace a project.html faf did not render (no faf mark). */
+  /** Replace a project.html faf cannot prove it rendered (edited since, or no faf mark). */
   force?: boolean;
 }
 
