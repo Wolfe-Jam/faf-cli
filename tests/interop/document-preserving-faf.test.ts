@@ -157,7 +157,9 @@ describe('BRAKE: writeFaf on an existing file — the hand-annotated file surviv
     const { dir, path } = project('# keep me\nproject: legacy-name   # old writer\nstack:\n  backend: Express # hand\n');
     writeFaf(path, updateExistingFaf(dir, readFaf(path)));
     const out = readFileSync(path, 'utf-8');
-    expect(out.startsWith('# keep me\nproject:\n  name: legacy-name\n')).toBe(true);
+    // 7.13 round 2 (t-faf Y14): the lifted value's own comment stays too, as a
+    // comment line above the new entries.
+    expect(out.startsWith('# keep me\nproject:\n  # old writer\n  name: legacy-name\n')).toBe(true);
     expect(out).toContain('  backend: Express # hand\n');
     expect(readFaf(path).project?.name).toBe('legacy-name');
   });

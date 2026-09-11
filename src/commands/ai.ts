@@ -1,5 +1,5 @@
 import { findFafFile, readFaf, readFafRaw, writeFaf } from '../interop/faf.js';
-import { SLOTS, isPlaceholder } from '../core/slots.js';
+import { SLOTS, SLOTIGNORED, isExplicitNone, isPlaceholder } from '../core/slots.js';
 import { getNestedValue, setNestedValue, blockingStep, blockedMessage } from '../core/dot-path.js';
 import * as kernel from '../wasm/kernel.js';
 import { enrichScore } from '../core/scorer.js';
@@ -72,12 +72,14 @@ async function enhanceCommand(): Promise<void> {
   const data = readFaf(fafPath);
   const yaml = readFafRaw(fafPath);
 
-  // Find empty slots. A slot whose section holds a scalar or a list cannot take
-  // a value without replacing that section — faf never does, so it is left out.
+  // Find empty slots. A hand-written None / N/A / not applicable is a decision,
+  // not a gap (Q8): an AI suggestion never replaces it. A slot whose section
+  // holds a scalar or a list cannot take a value without replacing that
+  // section — faf never does, so it is left out.
   let skipped = 0;
   const emptySlots = SLOTS.filter(s => {
     const val = getNestedValue(data as Record<string, unknown>, s.path);
-    if (!isPlaceholder(val) || val === 'slotignored') {return false;}
+    if (!isPlaceholder(val) || val === SLOTIGNORED || isExplicitNone(val)) {return false;}
     const block = blockingStep(data as Record<string, unknown>, s.path);
     if (block) {
       skipped++;

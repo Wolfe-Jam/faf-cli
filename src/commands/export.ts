@@ -1,5 +1,5 @@
 import { mkdirSync } from 'fs';
-import { resolve } from 'path';
+import { join, resolve } from 'path';
 import { findFafFile, readFaf, readFafRaw } from '../interop/faf.js';
 import { writeAgentsMd } from '../interop/agents.js';
 import { enrichFromRepo } from '../detect/enrich.js';
@@ -8,6 +8,7 @@ import { writeGeminiMd } from '../interop/gemini.js';
 import { writeCopilotInstructions } from '../interop/copilot-instructions.js';
 import { writeGrokConfig } from '../interop/grok.js';
 import { writeLlmsTxt } from '../interop/llms.js';
+import { legacyStampNoteAt } from '../interop/inject.js';
 import { writeProjectHtml } from '../interop/projecthtml.js';
 import { writeServerCard } from '../interop/servercard.js';
 import { scoreFafYaml } from '../core/scorer.js';
@@ -26,6 +27,16 @@ export interface ExportOptions {
   all?: boolean;
   /** Write exported files here instead of the current directory. project.faf is still read from cwd. */
   output?: string;
+}
+
+/** Run an injector write and list the file, with the one-line note when
+ *  faf's block went on top of a file led by faf's old stamp (read before the
+ *  write; the old faf text below the block is the user's to delete). */
+function injected(dir: string, rel: string, write: () => void, markers?: [string, string]): void {
+  const note = legacyStampNoteAt(join(dir, rel), rel, markers?.[0], markers?.[1], { root: dir });
+  write();
+  console.log(`  ${rel}`);
+  if (note) {console.log(dim(`  ${note}`));}
 }
 
 export function exportCommand(options: ExportOptions = {}): void {
@@ -53,25 +64,21 @@ export function exportCommand(options: ExportOptions = {}): void {
   if (exportAll || options.agents) {
     // Enrich with facts detected from the repo (commands/key-files/secrets) so a
     // lean or stale .faf still yields a complete AGENTS.md. Hand-authored wins.
-    writeAgentsMd(dir, enrichFromRepo(dir, data));
-    console.log(`  AGENTS.md`);
+    injected(dir, 'AGENTS.md', () => writeAgentsMd(dir, enrichFromRepo(dir, data)));
   }
 
   if (exportAll || options.cursor) {
-    writeCursorrules(dir, data);
-    console.log(`  .cursorrules`);
+    injected(dir, '.cursorrules', () => writeCursorrules(dir, data), ['# faf:start', '# faf:end']);
   }
 
   if (exportAll || options.gemini) {
     // Same repo-enrichment AGENTS.md gets — a lean/stale .faf still yields a
     // complete GEMINI.md (commands/key-files detected from the repo).
-    writeGeminiMd(dir, enrichFromRepo(dir, data));
-    console.log(`  GEMINI.md`);
+    injected(dir, 'GEMINI.md', () => writeGeminiMd(dir, enrichFromRepo(dir, data)));
   }
 
   if (exportAll || options.copilot) {
-    writeCopilotInstructions(dir, data);
-    console.log(`  .github/copilot-instructions.md`);
+    injected(dir, '.github/copilot-instructions.md', () => writeCopilotInstructions(dir, data));
   }
 
   // Opt-in only: wires an MCP server into the user's .grok/ config, so it
@@ -85,8 +92,7 @@ export function exportCommand(options: ExportOptions = {}): void {
   // Origin crawlers vs repo agents are different rooms — never a side effect
   // of bare `faf export` / `--all`.
   if (options.llms) {
-    writeLlmsTxt(dir, data);
-    console.log(`  llms.txt`);
+    injected(dir, 'llms.txt', () => writeLlmsTxt(dir, data));
   }
 
   if (exportAll || options.html) {

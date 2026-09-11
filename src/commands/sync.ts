@@ -3,6 +3,7 @@ import { join, dirname } from 'path';
 import { findFafFile, readFaf, readFafRaw, writeFaf } from '../interop/faf.js';
 import { readClaudeMd, writeClaudeMd, renderClaudeMd, parseClaudeMd } from '../interop/claude.js';
 import { writeClaudeMemory, type ClaudeMemoryAction } from '../interop/claude-memory.js';
+import { legacyStampNoteAt } from '../interop/inject.js';
 import * as kernel from '../wasm/kernel.js';
 import { enrichScore } from '../core/scorer.js';
 import { displayScore } from '../ui/display.js';
@@ -59,8 +60,12 @@ function autoSync(fafPath: string, claudePath: string, dir: string): void {
 function pushSync(fafPath: string, dir: string): void {
   const data = readFaf(fafPath);
   const content = renderClaudeMd(data);
+  // Read before the write: a CLAUDE.md led by faf's old stamp is prefixed,
+  // never reclaimed — say so in one line.
+  const note = legacyStampNoteAt(join(dir, 'CLAUDE.md'), 'CLAUDE.md');
   writeClaudeMd(dir, content);
   console.log(`${fafCyan('◆')} sync  .faf → CLAUDE.md`);
+  if (note) {console.log(dim(`  ${note}`));}
 
   const result = enrichScore(kernel.score(readFafRaw(fafPath)));
   displayScore(result, fafPath);

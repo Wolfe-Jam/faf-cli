@@ -222,6 +222,12 @@ export class Soul {
   private _origin: Origin | undefined;
   /** Each loaded fact's item position in the file's memory.facts. */
   private _factAt = new WeakMap<Fact, number>();
+  /** The index was faf-derived when the soul was loaded (or made, or last
+   *  saved) — the default save keeps it in step with the facts. */
+  private _indexDerived = true;
+  /** The index as it was then: an index changed in memory since is the
+   *  caller's, and the default save leaves it as it is. */
+  private _indexAtRecord: string[] = [];
 
   constructor(
     namepoint: string,
@@ -255,6 +261,9 @@ export class Soul {
     this._custom = opts.custom ? { ...opts.custom } : {};
     this._extra = opts.extra ? { ...opts.extra } : {};
     this._memoryExtra = opts.memoryExtra ? { ...opts.memoryExtra } : {};
+    // A new soul's index is faf's: none given, or exactly the one faf derives.
+    this._indexDerived = opts.index === undefined || sameJs(this._index, this.derivedIndex());
+    this._indexAtRecord = this._index.slice();
   }
 
   get facts(): Fact[] {
@@ -322,7 +331,14 @@ export class Soul {
     soul.last_etched = String(doc.last_etched ?? soul.created);
     soul._version = isNil(doc.version) ? undefined : String(doc.version);
     soul._origin = { path, real, text: raw, base: soul.state(), residual: shape.residual };
+    soul.recordIndex();
     return soul;
+  }
+
+  /** Note whether the index is faf-derived now (at load, and after a save). */
+  private recordIndex(): void {
+    this._indexDerived = this.indexIsDerived();
+    this._indexAtRecord = this._index.slice();
   }
 
   /** Take a fact read from item `i` of the file's memory.facts. */
@@ -380,6 +396,9 @@ export class Soul {
 
   rebuildIndex(width = 80): string[] {
     this._index = this.derivedIndex(width);
+    // Rebuilt by faf: the default save keeps it in step from here on.
+    this._indexDerived = true;
+    this._indexAtRecord = this._index.slice();
     return this._index;
   }
 
@@ -389,8 +408,14 @@ export class Soul {
    *
    * A soul loaded from a file is written as that file's text with only what
    * changed since the load (or the last save) edited into it; a save that
-   * changes nothing writes nothing. The index is kept as it is unless
-   * `reindex: true` rebuilds it from the facts (see {@link indexIsDerived}).
+   * changes nothing writes nothing.
+   *
+   * The index: `reindex: true` rebuilds it from the facts, `reindex: false`
+   * keeps it as it is. Left out, the index is rebuilt only when it was
+   * faf-derived — {@link indexIsDerived} when the soul was loaded or last
+   * saved; a new soul counts as derived unless it was given an index of its
+   * own — and has not been changed in memory since. A hand-kept index is
+   * never touched.
    * Refused, with nothing written: a change to a known key the file holds in
    * a shape faf does not model (adding a fact to `memory.facts` written as a
    * mapping, say); and a save over the file the soul was loaded from (or last
@@ -398,7 +423,7 @@ export class Soul {
    * so an edit made meanwhile is never written over.
    */
   save(path: string, opts: { reindex?: boolean } = {}): string {
-    const reindex = opts.reindex === true;
+    const reindex = opts.reindex ?? (this._indexDerived && sameJs(this._index, this._indexAtRecord));
     if (reindex) {this.rebuildIndex();}
     const origin = this._origin;
     if (!origin) {
@@ -426,6 +451,7 @@ export class Soul {
     this._factAt = new WeakMap();
     for (const [f, i] of positions) {this._factAt.set(f, i);}
     this._origin = { path, real, text, base: this.state(), residual: this._origin?.residual ?? new Map() };
+    this.recordIndex();
   }
 
   /** The soul's modelled state as plain values. */

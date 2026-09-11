@@ -14,8 +14,9 @@
  * blank lines aside). If it does not (a shape the splicer does not handle),
  * faf writes the Document's own serialisation instead — `toString({
  * lineWidth: 0 })`, which still keeps comments, anchors, unknown keys and the
- * source text of every number it did not change. A change that changes
- * nothing returns the original text untouched, so callers skip the write.
+ * source text of every number it did not change. A change that leaves the
+ * data as it was returns the original text untouched — even when that
+ * serialisation would differ — so callers skip the write.
  */
 
 import {
@@ -612,8 +613,8 @@ function reads(text: string, next: Document, want: string, opts: ToStringOptions
  * Parse `text`, let `mutate` change the Document, and return the new text with
  * every byte outside the changed nodes kept. `name` labels errors (a file that
  * is not valid YAML is refused — nothing is guessed). When the change leaves
- * the document as it was, the original `text` is returned with
- * `changed: false`.
+ * the data as it was (the same values, whatever the nodes or their order),
+ * the original `text` is returned with `changed: false`.
  */
 export function editYaml(text: string, mutate: (doc: Document) => void, name = 'YAML'): YamlEditResult {
   const { text: out, changed } = editYamlDetailed(text, mutate, name);
@@ -631,16 +632,29 @@ export function editYamlDetailed(
   const bom = text.startsWith('\uFEFF') ? '\uFEFF' : '';
   const src = text.slice(bom.length);
   const base = parseForEdit(src, name);
-  const next = base.clone();
+  const next = cloneDocument(base);
   mutate(next);
+  const unchanged = { text, changed: false, spliced: false };
+  // A change that leaves the data as it was writes nothing — not even the
+  // Document's own serialisation, which could differ from the file's text.
+  if (sameJs(next.toJS(), base.toJS())) {return unchanged;}
   const canon: ToStringOptions = { lineWidth: 0, ...styleOf(src) };
   const want = next.toString(canon);
-  if (want === base.toString(canon)) {return { text, changed: false, spliced: false };}
+  if (want === base.toString(canon)) {return unchanged;}
   const eol = src.includes('\r\n') ? '\r\n' : '\n';
   const candidate = splice(src, base, next, eol, { ...canon, verifyAliasOrder: false });
   const spliced = candidate !== null && reads(candidate, next, want, canon);
   const out = spliced && candidate !== null ? candidate : want.replace(/\r?\n/g, eol);
   return { text: bom + out, changed: bom + out !== text, spliced };
+}
+
+/** `doc.clone()`, keeping the document-end marker (`...`): yaml's clone
+ *  copies the `%YAML` directive and the `---` start marker but drops `...`,
+ *  so every edit of a file ending in `...` fell back to a full rewrite. */
+function cloneDocument(doc: Document): Document {
+  const copy = doc.clone();
+  if (doc.directives && copy.directives) {copy.directives.docEnd = doc.directives.docEnd;}
+  return copy;
 }
 
 // ─── Applying plain data to a Document ──────────────────────────────────────
@@ -698,7 +712,33 @@ export function applyValue(doc: Document, node: unknown, value: unknown, opts: A
     node.value = value;
     return node;
   }
-  return doc.createNode(value);
+  return withCommentOf(node, doc.createNode(value));
+}
+
+/** `created`, which takes the place of `old`, with `old`'s comments: a
+ *  scalar or an alias keeps its line comment (`summary: *g # note` →
+ *  `summary: New # note`); a scalar lifted to a mapping or a list
+ *  (`project: demo # note`, `stack: # note`) keeps it as a comment line above
+ *  the new entries, or on the key line when the new value is empty
+ *  (`stack: {} # note`). */
+function withCommentOf(old: unknown, created: Node): Node {
+  if (!isScalar(old) && !isAlias(old)) {return created;}
+  const was = old as Trivia;
+  const target = created as Node & Trivia;
+  if (isCollection(created) && created.items.length > 0 && !created.flow) {
+    target.commentBefore = joinComments(target.commentBefore, was.commentBefore, was.comment);
+    return created;
+  }
+  if (isCollection(created)) {created.flow = true;}
+  target.comment = joinComments(target.comment ?? was.comment);
+  target.commentBefore = joinComments(target.commentBefore ?? was.commentBefore);
+  return created;
+}
+
+/** Comment texts joined as lines, or undefined when there are none. */
+function joinComments(...parts: Array<string | null | undefined>): string | undefined {
+  const lines = parts.filter(present);
+  return lines.length > 0 ? lines.join('\n') : undefined;
 }
 
 /** Make `map` hold `data`: changed keys updated in place, new keys appended in
@@ -718,6 +758,35 @@ export function applyMapData(doc: Document, map: YAMLMap, data: Record<string, u
     const key = keyText(p);
     return key === undefined || data[key] !== undefined;
   });
+}
+
+/**
+ * Merge `data` into `map`, whose parsed value (the file as it was read) is
+ * `before`, writing only the paths where `data` differs from `before`:
+ *   - a key whose value in `data` equals its value in `before` is not touched
+ *     — its node stays exactly as written, so an alias (`summary: *g`), a
+ *     merge key or a comment on it survives even when `data` spells out the
+ *     value the alias read as (a stale copy never replaces a live `*alias`);
+ *   - a changed mapping is merged key by key the same way;
+ *   - any other changed value is set with {@link applyValue};
+ *   - keys `data` leaves out (or sets `undefined`) stay; new keys are appended.
+ * This is how writeFaf applies full .faf data to an existing file.
+ */
+export function mergeData(doc: Document, map: YAMLMap, before: unknown, data: Record<string, unknown>): void {
+  const was: Record<string, unknown> = isMapping(before) ? before : {};
+  for (const [key, value] of Object.entries(data)) {
+    if (value === undefined) {continue;}
+    const pair = findPair(map, key);
+    if (!pair) {
+      map.items.push(doc.createPair(key, value));
+    } else if (Object.prototype.hasOwnProperty.call(was, key) && sameJs(was[key], value)) {
+      continue; // unchanged: the node stays as written
+    } else if (isMapping(value) && isMapping(was[key]) && isMap(pair.value)) {
+      mergeData(doc, pair.value, was[key], value);
+    } else {
+      pair.value = applyValue(doc, pair.value, value);
+    }
+  }
 }
 
 /** Index pairs [i, j] of a longest common subsequence of `a` and `b`. */
@@ -808,7 +877,7 @@ export function mapAt(doc: Document, path: readonly string[], name: string): YAM
     }
     if (pair && !isEmptyValue(pair.value)) {throw new Error(`${name}: ${key} is not a mapping — faf left it unchanged.`);}
     const created = new YAMLMap();
-    if (pair) {pair.value = created;} else {map.items.push(doc.createPair(key, created));}
+    if (pair) {pair.value = filling(pair.value, created);} else {map.items.push(doc.createPair(key, created));}
     map = created;
   }
   return map;
@@ -842,8 +911,18 @@ export function seqAt(doc: Document, path: readonly string[], name: string): YAM
   if (pair && isSeq(pair.value)) {return pair.value;}
   if (pair && !isEmptyValue(pair.value)) {throw new Error(`${name}: ${path.join('.')} is not a list — faf left it unchanged.`);}
   const seq = new YAMLSeq();
-  if (pair) {pair.value = seq;} else {parent.items.push(doc.createPair(key, seq));}
+  if (pair) {pair.value = filling(pair.value, seq);} else {parent.items.push(doc.createPair(key, seq));}
   return seq;
+}
+
+/** `created` taking the place of an empty value (`facts: # note`) that entries
+ *  are about to fill: the empty value's comment becomes a comment line above
+ *  those entries, so it is not lost. */
+function filling<T extends YAMLMap | YAMLSeq>(empty: unknown, created: T): T {
+  if (!isScalar(empty)) {return created;}
+  const lines = [empty.commentBefore, empty.comment].filter(present);
+  if (lines.length > 0) {created.commentBefore = lines.join('\n');}
+  return created;
 }
 
 /** `key:` with nothing after it (or `~` / `null`). */

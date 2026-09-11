@@ -200,7 +200,7 @@ describe('BRAKE: injectFafBlock — markers are whole lines, never substrings (7
   });
 
   test('fence shapes the toggle misreads still resolve to the real block', () => {
-    for (const shape of ['- ```bash\n  npm i\n  ```\n', '````md\n```\n````\n', '```bash\nunclosed above\n', '```\n~~~\n```\n']) {
+    for (const shape of ['- ```bash\n  npm i\n  ```\n', '````md\n```\n````\n', '```\n~~~\n```\n']) {
       const file = join(tmp(), 'AGENTS.md');
       writeFileSync(file, `user-above-sentinel\n\n${shape}\n${FAF_START}\nold body\n${FAF_END}\n\nuser-below-sentinel\n`);
       const [first, second] = twice(file, V1, V1);
@@ -212,11 +212,24 @@ describe('BRAKE: injectFafBlock — markers are whole lines, never substrings (7
     }
   });
 
-  test('an unclosed fence pasted INSIDE the block cannot hide the end marker', () => {
+  // 7.13 (CommonMark fences): an unclosed fence runs to the end of the file, so
+  // text after it — a real-looking block included — is code, not a marker. faf
+  // cannot prove it wrote such a block: the file is prefixed, never reclaimed.
+  test('an unclosed fence above a block hides it — prefixed, every byte kept, then stable', () => {
     const file = join(tmp(), 'AGENTS.md');
-    writeFileSync(file, `above\n\n${FAF_START}\nold body\n\`\`\`bash\nnpm test\n${FAF_END}\n\nuser-below-sentinel\n`);
+    const before = `user-above-sentinel\n\n\`\`\`bash\nunclosed above\n\n${FAF_START}\nold body\n${FAF_END}\n\nuser-below-sentinel\n`;
+    writeFileSync(file, before);
     const [first, second] = twice(file, V1, V1);
-    expect(first).toContain('above'); expect(first).toContain('user-below-sentinel'); expect(first).not.toContain('old body');
+    expect(first).toBe(`${FAF_START}\n${V1}\n${FAF_END}\n\n${before}`);
+    expect(second).toBe(first);
+  });
+
+  test('an unclosed fence INSIDE a block hides its end marker — prefixed, every byte kept, then stable', () => {
+    const file = join(tmp(), 'AGENTS.md');
+    const before = `above\n\n${FAF_START}\nold body\n\`\`\`bash\nnpm test\n${FAF_END}\n\nuser-below-sentinel\n`;
+    writeFileSync(file, before);
+    const [first, second] = twice(file, V1, V1);
+    expect(first).toBe(`${FAF_START}\n${V1}\n${FAF_END}\n\n${before}`);
     expect(second).toBe(first);
   });
 
@@ -354,13 +367,13 @@ describe('BRAKE: findFafBlock never takes over a balanced fenced example', () =>
     expect(second).toBe(first);
   });
 
-  test('a balanced example followed by an unclosed fence → still no block (the blind pass starts at the open fence)', () => {
+  test('a balanced example followed by an unclosed fence → no block, even with markers after the open fence', () => {
     const doc = `\`\`\`md\n${FAF_START}\nexample\n${FAF_END}\n\`\`\`\n\nuser text\n\n\`\`\`bash\nnpm test\n`;
     expect(findFafBlock(doc)).toBeNull();
-    // …while a real block after the unclosed fence is still recovered.
-    const withReal = `${doc}\n${FAF_START}\nreal\n${FAF_END}\n`;
-    const b = findFafBlock(withReal)!;
-    expect(withReal.slice(b.start, b.end)).toBe(`${FAF_START}\nreal\n${FAF_END}`);
+    // The unclosed fence runs to the end of the file (CommonMark): marker lines
+    // after it are code, so this is still a user file — prefixed, never reclaimed.
+    const withMarkers = `${doc}\n${FAF_START}\nreal\n${FAF_END}\n`;
+    expect(findFafBlock(withMarkers)).toBeNull();
   });
 });
 

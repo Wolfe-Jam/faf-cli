@@ -28,7 +28,9 @@
  *     project.faf)` line through its `*This section is managed by tri-sync.`
  *     line, both whole lines) → replaced in place by the block, once
  *   - anything else            → the block goes on top; nothing is removed
- * Markers match whole lines only, never substrings. Only a missing file reads
+ * Markers match whole lines only, never substrings, and only outside fenced
+ * code, raw HTML blocks and multi-line HTML comments (a note that quotes the
+ * block or the old section is an example, not a marker). Only a missing file reads
  * as "no file": any other read error is thrown and nothing is written, and a
  * file that is not UTF-8 is refused. The write is atomic, is refused if the
  * file changed on disk after faf read it, and a run that changes nothing
@@ -42,10 +44,8 @@ import type { FafData } from '../core/types.js';
 import { FAF_CONTEXT_FILES, resolveInside, safeWriteFile } from '../core/safe-write.js';
 import {
   findFafBlock,
-  isFenceLine,
-  linesWithEnds,
+  findMarkedRange,
   readIfPresent,
-  stripEnd,
   withFafBlock,
   wrapFafBlock,
 } from './inject.js';
@@ -280,30 +280,19 @@ function section(title: string, items: string[]): string[] {
   return items.length > 0 ? ['', `### ${title}`, ...items] : [];
 }
 
-/** claude-faf-mcp's earlier section: its heading as a whole line at column 0
- *  (outside fenced code), through the first later line that starts with its
- *  closing text. The range covers both lines (the closing line's terminator
- *  excluded), or null. */
+/** claude-faf-mcp's earlier section: its heading as a whole line at column 0,
+ *  through the first later line that starts with its closing text — both
+ *  outside fenced code, raw HTML blocks and multi-line HTML comments (the
+ *  injector's own CommonMark scanner). The range covers both lines (the
+ *  closing line's terminator excluded), or null. A heading whose closing
+ *  line appears only inside a fence (a note quoting the old section) is not
+ *  a section: the file is Claude's, and the block goes on top. */
 function findLegacySection(text: string): { start: number; end: number } | null {
-  let offset = 0;
-  let inFence = false;
-  let start = -1;
-  for (const line of linesWithEnds(text)) {
-    const body = stripEnd(line);
-    const bom = offset === 0 && body.charCodeAt(0) === 0xfeff ? 1 : 0;
-    const content = body.slice(bom);
-    if (start === -1) {
-      if (isFenceLine(content.trim())) {
-        inFence = !inFence;
-      } else if (!inFence && content.trimEnd() === LEGACY_START) {
-        start = offset + bom;
-      }
-    } else if (content.startsWith(LEGACY_END_PREFIX)) {
-      return { start, end: offset + body.length };
-    }
-    offset += line.length;
-  }
-  return null;
+  return findMarkedRange(
+    text,
+    line => line.trimEnd() === LEGACY_START,
+    line => line.startsWith(LEGACY_END_PREFIX),
+  );
 }
 
 /** Lines in a text (a final line break does not start another line). */

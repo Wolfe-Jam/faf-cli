@@ -2,7 +2,7 @@ import { createInterface } from 'readline';
 import { existsSync, readFileSync, writeFileSync, unlinkSync } from 'fs';
 import { join } from 'path';
 import { findFafFile, readFaf, readFafRaw, writeFaf } from '../interop/faf.js';
-import { SLOTS, isPlaceholder } from '../core/slots.js';
+import { SLOTS, SLOTIGNORED, isExplicitNone, isPlaceholder } from '../core/slots.js';
 import { questionForSlot } from '../core/interview.js';
 import { getNestedValue, setNestedValue, blockingStep, blockedMessage } from '../core/dot-path.js';
 import * as kernel from '../wasm/kernel.js';
@@ -67,10 +67,11 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
 
   const data = readFaf(fafPath);
 
-  // Find empty slots
+  // Find empty slots. A hand-written None / N/A / not applicable is a decision,
+  // not a gap (Q8): it is never asked about, so no answer replaces it.
   const emptySlots = SLOTS.filter(s => {
     const val = getNestedValue(data as Record<string, unknown>, s.path);
-    return isPlaceholder(val) && val !== 'slotignored';
+    return isPlaceholder(val) && val !== SLOTIGNORED && !isExplicitNone(val);
   });
 
   refuseBlockedSections(data as Record<string, unknown>, emptySlots.map(s => s.path));
