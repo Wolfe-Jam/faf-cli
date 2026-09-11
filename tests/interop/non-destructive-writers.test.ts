@@ -2,15 +2,17 @@
  * BRAKE: every writer of a user-editable file is non-destructive.
  *
  * Owner rule: no faf writer replaces, reorders, truncates or deletes text it
- * cannot prove it wrote. faf can prove two regions: what sits between its own
- * marker lines, and pre-marker legacy output bounded by its metastamp (first
- * line) and its `*STATUS: [BI-]SYNC ACTIVE — …*` footer. Everything else is the
- * user's — every line of it must survive, in order, byte-for-byte.
+ * cannot prove it wrote. faf can prove one region: what sits between its own
+ * marker lines. Everything else is the user's — every line of it must survive,
+ * in order, byte-for-byte. A file with no marker lines is never reclaimed, even
+ * one that starts with faf's metastamp and ends with its
+ * `*STATUS: [BI-]SYNC ACTIVE — …*` footer: the block goes on top.
  *
  * Each writer runs over the same fixture shapes: user lines above and below a
- * block, balanced fences that document the marker lines, CRLF, a BOM, legacy
- * metastamp-led files with and without a footer (and with notes after the
- * footer), then a second write that must change nothing (one block, always).
+ * block, balanced fences that document the marker lines, CRLF, a BOM,
+ * faf-looking metastamp-led files with and without a footer (and with notes
+ * after the footer), then a second write that must change nothing (one block,
+ * always).
  *
  * The managed block is located independently of findFafBlock: the test knows
  * the exact bytes the writer wraps (the renderer is deterministic), so a bug in
@@ -109,15 +111,16 @@ function shapes(S: string, E: string): Shape[] {
   add('BOM-led user file, no block', `${BOM}# Mine\nUSER BOM LINE\n`, `${BOM}\n\n# Mine\nUSER BOM LINE\n`, '# Mine\nUSER BOM LINE\n');
   add('BOM, block at the top', `${BOM}${S}\nold\n${E}\n\nUSER UNDER BOM\n`, `${BOM}\n\nUSER UNDER BOM\n`, '\n\nUSER UNDER BOM\n');
 
+  // faf-looking files with no marker lines: never reclaimed, whatever their
+  // first and last lines say — prefixed, every byte kept.
+  const noMarkers = (name: string, before: string) => add(name, before, `\n\n${before}`, before);
   const notes = '\n\n## Team rules\n\nUSER NOTE 1\nUSER NOTE 2\n';
-  add('legacy output with BI-SYNC footer and notes after it', `${LEGACY_HEAD.join('\n')}\n${BI_FOOTER}${notes}`, notes, notes);
-  add('legacy output with SYNC footer, nothing after it', `${LEGACY_HEAD.join('\n')}\n${SYNC_FOOTER}\n`, '\n', '');
-  const crlfLegacy = `${LEGACY_HEAD.join('\r\n')}\r\n${BI_FOOTER}\r\n\r\nUSER CRLF NOTE\r\n`;
-  add('legacy output, CRLF, notes after the footer', crlfLegacy, '\r\n\r\nUSER CRLF NOTE\r\n', '\r\n\r\nUSER CRLF NOTE\r\n');
-  add('legacy output behind a BOM, notes after the footer', `${BOM}${LEGACY_HEAD.join('\n')}\n${SYNC_FOOTER}\nUSER BOM NOTE\n`, `${BOM}\nUSER BOM NOTE\n`, '\nUSER BOM NOTE\n');
-
-  const noFooter = `${LEGACY_HEAD.join('\n')}\nUSER LINE IN A FOOTERLESS FILE\n`;
-  add('legacy metastamp-led file WITHOUT a footer (faf cannot prove it)', noFooter, `\n\n${noFooter}`, noFooter);
+  noMarkers('metastamp + BI-SYNC footer + notes after it, no markers', `${LEGACY_HEAD.join('\n')}\n${BI_FOOTER}${notes}`);
+  noMarkers('metastamp + SYNC footer at EOF, no markers', `${LEGACY_HEAD.join('\n')}\n${SYNC_FOOTER}\n`);
+  noMarkers('metastamp + footer, CRLF, notes after the footer, no markers', `${LEGACY_HEAD.join('\r\n')}\r\n${BI_FOOTER}\r\n\r\nUSER CRLF NOTE\r\n`);
+  const bomLegacy = `${LEGACY_HEAD.join('\n')}\n${SYNC_FOOTER}\nUSER BOM NOTE\n`;
+  add('metastamp + footer behind a BOM, no markers', `${BOM}${bomLegacy}`, `${BOM}\n\n${bomLegacy}`, bomLegacy);
+  noMarkers('metastamp-led file WITHOUT a footer, no markers', `${LEGACY_HEAD.join('\n')}\nUSER LINE IN A FOOTERLESS FILE\n`);
   return out;
 }
 

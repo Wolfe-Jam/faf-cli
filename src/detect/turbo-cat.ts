@@ -4,15 +4,19 @@
  * manifest interrogation the v6.0 rewrite narrowed to README+Cargo+package.json.
  *
  * v6-native sync port (the v5 engine was async; sync integrates cleanly with
- * `auto`). Two-layer: (1A) config files walking up to the monorepo .git
- * boundary, (1B) source extensions; priority-wins slot recommendations.
+ * `auto`). Two-layer: (1A) config files in the project directory itself,
+ * (1B) source extensions below it; priority-wins slot recommendations.
+ *
+ * Boundary: detection never looks above the project directory. A parent's
+ * tsconfig.json, Cargo.toml or vercel.json is another project's evidence —
+ * a monorepo package, a subfolder or a new folder under ~ must not inherit it.
  *
  * Used as the LOWEST-precedence filler in `auto`: v6's specific detection wins;
  * Turbo-Cat fills only the slots still empty (esp. non-npm stacks).
  */
 
-import { existsSync, readdirSync, readFileSync } from 'fs';
-import { join, dirname, extname, resolve } from 'path';
+import { readdirSync, readFileSync, statSync, type Dirent } from 'fs';
+import { join, extname, resolve } from 'path';
 import { KNOWLEDGE_BASE } from './turbo-cat-knowledge.js';
 import { detectDartProject } from './dart.js';
 import { detectGoProject } from './go.js';
@@ -134,220 +138,242 @@ function classifyManifestJson(filePath: string): 'chrome' | 'other' {
   }
 }
 
-/** Layer 1A — config files, walking up to the monorepo .git boundary. */
+/** A directory entry that is a regular file (a link counts when it leads to one).
+ *  A folder named `go.mod` or `package.json` is not evidence of anything. */
+function isFileEntry(dir: string, e: Dirent): boolean {
+  if (e.isFile()) {return true;}
+  if (!e.isSymbolicLink()) {return false;}
+  try {
+    return statSync(join(dir, e.name)).isFile();
+  } catch {
+    return false; // dangling link
+  }
+}
+
+/** A directory entry that is a folder (a link counts when it leads to one). */
+function isDirEntry(dir: string, e: Dirent): boolean {
+  if (e.isDirectory()) {return true;}
+  if (!e.isSymbolicLink()) {return false;}
+  try {
+    return statSync(join(dir, e.name)).isDirectory();
+  } catch {
+    return false;
+  }
+}
+
+/** Layer 1A — config files in the project directory only. Never a parent:
+ *  the walk up to 10 ancestors (stopping only at the project's own .git) wrote
+ *  another tree's stack into project.faf. */
 function scanConfigFiles(projectDir: string): FoundFormat[] {
   const found: FoundFormat[] = [];
-  let cur = resolve(projectDir);
-  const ownGit = existsSync(join(projectDir, '.git'));
+  const cur = resolve(projectDir);
   /** One JVM classification per directory (pom + gradle + settings would triple-fire). */
   const jvmDirsDone = new Set<string>();
-  for (let i = 0; i < 10; i++) {
-    let files: string[];
-    try {
-      files = readdirSync(cur);
-    } catch {
-      break;
-    }
-    for (const f of files) {
-      // Content-aware: any *.csproj (names vary — not in KNOWLEDGE_BASE by basename).
-      // .csproj alone ≠ type: Sdk + packages via detectCsharpProject.
-      if (f.toLowerCase().endsWith('.csproj')) {
-        const cp = detectCsharpProject(cur);
-        if (cp) {
-          const slots: Record<string, string> = {
-            mainLanguage: 'C#',
-            packageManager: 'NuGet',
-            buildTool: 'dotnet',
-          };
-          if (cp.appType === 'backend' && cp.framework) {
-            slots.backend = cp.framework;
-          } else if (cp.appType === 'cli' && cp.framework) {
-            slots.framework = cp.framework;
-          } else if (cp.appType === 'mcp') {
-            slots.apiType = 'MCP';
-          } else if (cp.appType === 'mobile' && cp.framework) {
-            slots.framework = cp.framework;
-          }
-          if (cp.targetFramework) {
-            slots.runtime = cp.targetFramework;
-          }
-          const frameworks = cp.framework ? [cp.framework, 'C#', '.NET'] : ['C#', '.NET'];
-          found.push({ slots, priority: 36, frameworks, fileName: f });
+  let entries: Dirent[];
+  try {
+    entries = readdirSync(cur, { withFileTypes: true });
+  } catch {
+    return found;
+  }
+  for (const e of entries) {
+    const f = e.name;
+    // Content-aware: *.xcodeproj is a folder (checked below); every other
+    // format is a file, so anything else by that name is not evidence.
+    if (f.endsWith('.xcodeproj') ? !isDirEntry(cur, e) : !isFileEntry(cur, e)) {continue;}
+    // Content-aware: any *.csproj (names vary — not in KNOWLEDGE_BASE by basename).
+    // .csproj alone ≠ type: Sdk + packages via detectCsharpProject.
+    if (f.toLowerCase().endsWith('.csproj')) {
+      const cp = detectCsharpProject(cur);
+      if (cp) {
+        const slots: Record<string, string> = {
+          mainLanguage: 'C#',
+          packageManager: 'NuGet',
+          buildTool: 'dotnet',
+        };
+        if (cp.appType === 'backend' && cp.framework) {
+          slots.backend = cp.framework;
+        } else if (cp.appType === 'cli' && cp.framework) {
+          slots.framework = cp.framework;
+        } else if (cp.appType === 'mcp') {
+          slots.apiType = 'MCP';
+        } else if (cp.appType === 'mobile' && cp.framework) {
+          slots.framework = cp.framework;
         }
+        if (cp.targetFramework) {
+          slots.runtime = cp.targetFramework;
+        }
+        const frameworks = cp.framework ? [cp.framework, 'C#', '.NET'] : ['C#', '.NET'];
+        found.push({ slots, priority: 36, frameworks, fileName: f });
+      }
+      continue;
+    }
+
+    // Content-aware: *.xcodeproj (directory) — light productType via detectSwiftProject.
+    // Prefer Package.swift when both exist (handled below); xcodeproj covers app-only trees.
+    if (f.endsWith('.xcodeproj')) {
+      const sp = detectSwiftProject(cur);
+      if (sp) {
+        const slots: Record<string, string> = {
+          mainLanguage: 'Swift',
+          packageManager: sp.packageManager === 'spm' ? 'spm' : 'Xcode',
+          buildTool: sp.packageManager.includes('spm') ? 'swift build' : 'xcodebuild',
+        };
+        if (sp.appType === 'backend' && sp.framework) {
+          slots.backend = sp.framework;
+        } else if (sp.appType === 'cli' && sp.framework) {
+          slots.framework = sp.framework;
+        } else if (sp.appType === 'mcp') {
+          slots.apiType = 'MCP';
+        } else if (sp.appType === 'app') {
+          slots.framework = sp.framework || 'Swift App';
+        }
+        const frameworks = sp.framework ? [sp.framework, 'Swift'] : ['Swift'];
+        found.push({ slots, priority: 36, frameworks, fileName: f });
+      }
+      continue;
+    }
+
+    const k = KNOWLEDGE_BASE[f];
+    if (!k) {continue;}
+    // Sourced-only gate: manifest.json only asserts the chrome stack when
+    // its CONTENT proves a chrome extension; mcpb/PWA/unknown assert nothing.
+    if (f === 'manifest.json' && classifyManifestJson(join(cur, f)) !== 'chrome') {continue;}
+    // Content-aware: pubspec.yaml backs Flutter apps, Dart CLIs/packages,
+    // servers, and MCP servers — branch by deps instead of asserting Flutter
+    // for everything (the filename-only flattening this engine used to do).
+    if (f === 'pubspec.yaml') {
+      const dp = detectDartProject(cur);
+      if (dp) {
+        const slots: Record<string, string> = { mainLanguage: 'Dart', packageManager: 'pub' };
+        if (dp.isFlutter) {
+          slots.framework = 'Flutter';
+          if (dp.stateManagement) {slots.stateManagement = dp.stateManagement;}
+        } else if (dp.appType === 'backend' && dp.framework) {
+          slots.backend = dp.framework;
+        } else if (dp.appType === 'mcp') {
+          slots.apiType = 'MCP';
+        }
+        found.push({ slots, priority: k.priority, frameworks: dp.isFlutter ? ['Flutter', 'Dart'] : ['Dart'], fileName: f });
         continue;
       }
-
-      // Content-aware: *.xcodeproj (directory) — light productType via detectSwiftProject.
-      // Prefer Package.swift when both exist (handled below); xcodeproj covers app-only trees.
-      if (f.endsWith('.xcodeproj')) {
-        const sp = detectSwiftProject(cur);
-        if (sp) {
-          const slots: Record<string, string> = {
-            mainLanguage: 'Swift',
-            packageManager: sp.packageManager === 'spm' ? 'spm' : 'Xcode',
-            buildTool: sp.packageManager.includes('spm') ? 'swift build' : 'xcodebuild',
-          };
-          if (sp.appType === 'backend' && sp.framework) {
-            slots.backend = sp.framework;
-          } else if (sp.appType === 'cli' && sp.framework) {
-            slots.framework = sp.framework;
-          } else if (sp.appType === 'mcp') {
-            slots.apiType = 'MCP';
-          } else if (sp.appType === 'app') {
-            slots.framework = sp.framework || 'Swift App';
-          }
-          const frameworks = sp.framework ? [sp.framework, 'Swift'] : ['Swift'];
-          found.push({ slots, priority: 36, frameworks, fileName: f });
+    }
+    // Content-aware: go.mod backs libraries, backends, CLIs, MCP — not one bucket.
+    if (f === 'go.mod') {
+      const gp = detectGoProject(cur);
+      if (gp) {
+        const slots: Record<string, string> = {
+          mainLanguage: 'Go',
+          packageManager: 'go modules',
+          buildTool: 'go build',
+        };
+        if (gp.appType === 'backend' && gp.framework) {
+          slots.backend = gp.framework;
+        } else if (gp.appType === 'cli' && gp.framework) {
+          slots.framework = gp.framework;
+        } else if (gp.appType === 'mcp') {
+          slots.apiType = 'MCP';
         }
+        const frameworks = gp.framework ? [gp.framework, 'Go'] : ['Go'];
+        found.push({ slots, priority: k.priority, frameworks, fileName: f });
         continue;
       }
-
-      const k = KNOWLEDGE_BASE[f];
-      if (!k) {continue;}
-      // Sourced-only gate: manifest.json only asserts the chrome stack when
-      // its CONTENT proves a chrome extension; mcpb/PWA/unknown assert nothing.
-      if (f === 'manifest.json' && classifyManifestJson(join(cur, f)) !== 'chrome') {continue;}
-      // Content-aware: pubspec.yaml backs Flutter apps, Dart CLIs/packages,
-      // servers, and MCP servers — branch by deps instead of asserting Flutter
-      // for everything (the filename-only flattening this engine used to do).
-      if (f === 'pubspec.yaml') {
-        const dp = detectDartProject(cur);
-        if (dp) {
-          const slots: Record<string, string> = { mainLanguage: 'Dart', packageManager: 'pub' };
-          if (dp.isFlutter) {
-            slots.framework = 'Flutter';
-            if (dp.stateManagement) {slots.stateManagement = dp.stateManagement;}
-          } else if (dp.appType === 'backend' && dp.framework) {
-            slots.backend = dp.framework;
-          } else if (dp.appType === 'mcp') {
-            slots.apiType = 'MCP';
-          }
-          found.push({ slots, priority: k.priority, frameworks: dp.isFlutter ? ['Flutter', 'Dart'] : ['Dart'], fileName: f });
-          continue;
-        }
-      }
-      // Content-aware: go.mod backs libraries, backends, CLIs, MCP — not one bucket.
-      if (f === 'go.mod') {
-        const gp = detectGoProject(cur);
-        if (gp) {
-          const slots: Record<string, string> = {
-            mainLanguage: 'Go',
-            packageManager: 'go modules',
-            buildTool: 'go build',
-          };
-          if (gp.appType === 'backend' && gp.framework) {
-            slots.backend = gp.framework;
-          } else if (gp.appType === 'cli' && gp.framework) {
-            slots.framework = gp.framework;
-          } else if (gp.appType === 'mcp') {
-            slots.apiType = 'MCP';
-          }
-          const frameworks = gp.framework ? [gp.framework, 'Go'] : ['Go'];
-          found.push({ slots, priority: k.priority, frameworks, fileName: f });
-          continue;
-        }
-      }
-      // Content-aware: Gemfile alone ≠ Rails (Ruby Edition).
-      if (f === 'Gemfile' || f === 'Gemfile.lock' || f === 'gems.rb') {
-        const rp = detectRubyProject(cur);
-        if (rp) {
-          const slots: Record<string, string> = {
-            mainLanguage: 'Ruby',
-            packageManager: rp.packageManager,
-          };
-          if (rp.appType === 'backend' && rp.framework) {
-            slots.backend = rp.framework;
-          } else if (rp.appType === 'cli' && rp.framework) {
-            slots.framework = rp.framework;
-          } else if (rp.appType === 'mcp') {
-            slots.apiType = 'MCP';
-          }
-          const frameworks = rp.framework ? [rp.framework, 'Ruby'] : ['Ruby'];
-          found.push({
-            slots,
-            priority: k.priority ?? 35,
-            frameworks,
-            fileName: f,
-          });
-          continue;
-        }
-      }
-      // Content-aware: Package.swift alone ≠ app (Swift Edition).
-      if (f === 'Package.swift') {
-        const sp = detectSwiftProject(cur);
-        if (sp) {
-          const slots: Record<string, string> = {
-            mainLanguage: 'Swift',
-            packageManager: sp.packageManager === 'xcode' ? 'Xcode' : 'spm',
-            buildTool: 'swift build',
-          };
-          if (sp.appType === 'backend' && sp.framework) {
-            slots.backend = sp.framework;
-          } else if (sp.appType === 'cli' && sp.framework) {
-            slots.framework = sp.framework;
-          } else if (sp.appType === 'mcp') {
-            slots.apiType = 'MCP';
-          } else if (sp.appType === 'app') {
-            slots.framework = sp.framework || 'SwiftUI/App';
-          }
-          const frameworks = sp.framework ? [sp.framework, 'Swift'] : ['Swift'];
-          found.push({
-            slots,
-            priority: k.priority ?? 36,
-            frameworks,
-            fileName: f,
-          });
-          continue;
-        }
-      }
-      // Content-aware: pom / gradle alone ≠ type (JVM Edition). One brand JVM;
-      // Android/KMP are facets. Version catalogs + multi-module via detectJvmProject.
-      if (
-        f === 'pom.xml' ||
-        f === 'build.gradle' ||
-        f === 'build.gradle.kts' ||
-        f === 'settings.gradle' ||
-        f === 'settings.gradle.kts'
-      ) {
-        if (jvmDirsDone.has(cur)) {continue;}
-        jvmDirsDone.add(cur);
-        const jv = detectJvmProject(cur);
-        if (jv) {
-          const slots: Record<string, string> = {
-            mainLanguage: jv.mainLanguage === 'Java/Kotlin' ? 'Kotlin' : jv.mainLanguage,
-            packageManager: jv.buildTool === 'maven' ? 'maven' : 'gradle',
-            buildTool: jv.buildTool,
-          };
-          if (jv.appType === 'backend' && jv.framework) {
-            slots.backend = jv.framework;
-          } else if (jv.appType === 'cli' && jv.framework) {
-            slots.framework = jv.framework;
-          } else if (jv.appType === 'mcp') {
-            slots.apiType = 'MCP';
-          } else if (jv.appType === 'mobile') {
-            slots.framework = jv.framework || 'Android';
-          }
-          if (jv.facets.includes('multiplatform')) {
-            slots.framework = jv.framework || 'Kotlin Multiplatform';
-          }
-          const frameworks = jv.framework
-            ? [jv.framework, 'JVM', jv.mainLanguage === 'Kotlin' ? 'Kotlin' : 'Java']
-            : ['JVM', jv.mainLanguage === 'Kotlin' ? 'Kotlin' : 'Java'];
-          found.push({
-            slots,
-            priority: k.priority ?? 35,
-            frameworks,
-            fileName: f,
-          });
-          continue;
-        }
-      }
-      found.push({ slots: (k.slots as Record<string, string>) || {}, priority: k.priority, frameworks: k.frameworks, fileName: f });
     }
-    if (ownGit && i === 0) {break;}
-    const parent = dirname(cur);
-    if (parent === cur) {break;}
-    cur = parent;
+    // Content-aware: Gemfile alone ≠ Rails (Ruby Edition).
+    if (f === 'Gemfile' || f === 'Gemfile.lock' || f === 'gems.rb') {
+      const rp = detectRubyProject(cur);
+      if (rp) {
+        const slots: Record<string, string> = {
+          mainLanguage: 'Ruby',
+          packageManager: rp.packageManager,
+        };
+        if (rp.appType === 'backend' && rp.framework) {
+          slots.backend = rp.framework;
+        } else if (rp.appType === 'cli' && rp.framework) {
+          slots.framework = rp.framework;
+        } else if (rp.appType === 'mcp') {
+          slots.apiType = 'MCP';
+        }
+        const frameworks = rp.framework ? [rp.framework, 'Ruby'] : ['Ruby'];
+        found.push({
+          slots,
+          priority: k.priority ?? 35,
+          frameworks,
+          fileName: f,
+        });
+        continue;
+      }
+    }
+    // Content-aware: Package.swift alone ≠ app (Swift Edition).
+    if (f === 'Package.swift') {
+      const sp = detectSwiftProject(cur);
+      if (sp) {
+        const slots: Record<string, string> = {
+          mainLanguage: 'Swift',
+          packageManager: sp.packageManager === 'xcode' ? 'Xcode' : 'spm',
+          buildTool: 'swift build',
+        };
+        if (sp.appType === 'backend' && sp.framework) {
+          slots.backend = sp.framework;
+        } else if (sp.appType === 'cli' && sp.framework) {
+          slots.framework = sp.framework;
+        } else if (sp.appType === 'mcp') {
+          slots.apiType = 'MCP';
+        } else if (sp.appType === 'app') {
+          slots.framework = sp.framework || 'SwiftUI/App';
+        }
+        const frameworks = sp.framework ? [sp.framework, 'Swift'] : ['Swift'];
+        found.push({
+          slots,
+          priority: k.priority ?? 36,
+          frameworks,
+          fileName: f,
+        });
+        continue;
+      }
+    }
+    // Content-aware: pom / gradle alone ≠ type (JVM Edition). One brand JVM;
+    // Android/KMP are facets. Version catalogs + multi-module via detectJvmProject.
+    if (
+      f === 'pom.xml' ||
+      f === 'build.gradle' ||
+      f === 'build.gradle.kts' ||
+      f === 'settings.gradle' ||
+      f === 'settings.gradle.kts'
+    ) {
+      if (jvmDirsDone.has(cur)) {continue;}
+      jvmDirsDone.add(cur);
+      const jv = detectJvmProject(cur);
+      if (jv) {
+        const slots: Record<string, string> = {
+          mainLanguage: jv.mainLanguage === 'Java/Kotlin' ? 'Kotlin' : jv.mainLanguage,
+          packageManager: jv.buildTool === 'maven' ? 'maven' : 'gradle',
+          buildTool: jv.buildTool,
+        };
+        if (jv.appType === 'backend' && jv.framework) {
+          slots.backend = jv.framework;
+        } else if (jv.appType === 'cli' && jv.framework) {
+          slots.framework = jv.framework;
+        } else if (jv.appType === 'mcp') {
+          slots.apiType = 'MCP';
+        } else if (jv.appType === 'mobile') {
+          slots.framework = jv.framework || 'Android';
+        }
+        if (jv.facets.includes('multiplatform')) {
+          slots.framework = jv.framework || 'Kotlin Multiplatform';
+        }
+        const frameworks = jv.framework
+          ? [jv.framework, 'JVM', jv.mainLanguage === 'Kotlin' ? 'Kotlin' : 'Java']
+          : ['JVM', jv.mainLanguage === 'Kotlin' ? 'Kotlin' : 'Java'];
+        found.push({
+          slots,
+          priority: k.priority ?? 35,
+          frameworks,
+          fileName: f,
+        });
+        continue;
+      }
+    }
+    found.push({ slots: (k.slots as Record<string, string>) || {}, priority: k.priority, frameworks: k.frameworks, fileName: f });
   }
   return found;
 }

@@ -33,7 +33,7 @@ faf-cli follows F1-inspired engineering standards:
 
 ### Prerequisites
 
-- Node.js 18 or higher
+- Node.js 22 or higher
 - npm or yarn
 - Git
 - Terminal that supports ANSI colors

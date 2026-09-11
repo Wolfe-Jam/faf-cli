@@ -73,12 +73,12 @@ export function cardsCommand(options: CardsCommandOptions = {}): void {
   const written: string[] = [];
   if (projected.a2a) {
     const out = join(dir, '.well-known', 'agent-card.json');
-    writeJson(out, projected.a2a);
+    writeJson(out, projected.a2a, dir);
     written.push(out);
   }
   if (projected.mcp) {
     const out = join(dir, 'server-card');
-    writeJson(out, projected.mcp);
+    writeJson(out, projected.mcp, dir);
     written.push(out);
   }
   if (projected.catalog) {
@@ -87,7 +87,7 @@ export function cardsCommand(options: CardsCommandOptions = {}): void {
     if (existsSync(out)) {
       existing = JSON.parse(readFileSync(out, 'utf-8')) as AiCatalog;
     }
-    writeJson(out, upsertCatalog(existing, projected.catalog));
+    writeJson(out, upsertCatalog(existing, projected.catalog), dir);
     written.push(out);
   }
   if (projected.registry) {
@@ -100,7 +100,7 @@ export function cardsCommand(options: CardsCommandOptions = {}): void {
         _meta: { ...((existing._meta as object) ?? {}), ...projected.registry._meta },
       };
       if (projected.registry.title) {merged.title = projected.registry.title;}
-      writeJson(inPath, merged);
+      writeJson(inPath, merged, dir);
       written.push(inPath);
     } else if (targets?.includes('registry')) {
       console.error(

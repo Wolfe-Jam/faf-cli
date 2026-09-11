@@ -1,5 +1,6 @@
 import { join } from 'path';
 import type { FafData } from '../core/types.js';
+import { FAF_CONTEXT_FILES } from '../core/safe-write.js';
 import { fafMetaTag } from './claude.js';
 import { injectFafBlock } from './inject.js';
 import { filled, slotLabel, titleLabel } from './labels.js';
@@ -233,5 +234,5 @@ export function renderAgentsMd(data: FafData): string {
 
 /** Write AGENTS.md — non-destructive: injects/updates the faf block, preserves the rest. */
 export function writeAgentsMd(dir: string, data: FafData): void {
-  injectFafBlock(join(dir, 'AGENTS.md'), renderAgentsMd(data));
+  injectFafBlock(join(dir, FAF_CONTEXT_FILES.agents), renderAgentsMd(data));
 }

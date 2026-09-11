@@ -5,6 +5,13 @@ import { maybeStarNudge } from './star-nudge.js';
 
 /** Display a score result to stdout */
 export function displayScore(result: ScoreResult, file: string, verbose = false): void {
+  if (result.unknown) {
+    // An About Repo with no source_score: there is no score to show, so no
+    // number, no percentage and no tier — just what is and isn't known.
+    const about = result.represents ? `about-repo for ${result.represents}` : 'about-repo';
+    console.log(`${dim('—')} ${bold('unknown')} ${dim(`${about} — no about.source_score`)} ${dim('—')} ${file}`);
+    return;
+  }
   const badge = tierBadge(result.tier);
   const pct = bold(`${result.score}%`);
   console.log(`${badge} ${pct} ${dim(`${result.populated}/${result.active} slots`)} ${dim('—')} ${file}`);

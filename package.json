@@ -34,7 +34,8 @@
     "lint": "eslint src/**/*.ts",
     "format": "prettier --write 'src/**/*.ts'",
     "check:no-hardcode": "! grep -rEln '/(Users|home/runner|private/var)/' dist/ || (echo '❌ Hardcoded build-machine path leaked into dist — see grep output above. Externalize the offending dep in the build script.'; exit 1)",
-    "prepublishOnly": "bun run build && bun run check:no-hardcode"
+    "check:engines": "node scripts/check-engines.mjs",
+    "prepublishOnly": "bun run check:engines && bun run build && bun run check:no-hardcode"
   },
   "keywords": [
     "faf",
@@ -94,7 +95,7 @@
     "picomatch": "^4.0.5"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   },
   "publishConfig": {
     "access": "public"

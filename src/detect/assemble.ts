@@ -11,8 +11,17 @@ import { detectStack } from './stack.js';
 import { interrogateRepo } from '../interrogate/index.js';
 import { turboCatSlots } from './turbo-cat.js';
 import { relentlessContext } from './relentless.js';
-import { APP_TYPE_CATEGORIES, SLOTS, isPlaceholder } from '../core/slots.js';
+import {
+  APP_TYPE_CATEGORIES,
+  SLOTS,
+  SLOT_BY_PATH,
+  SLOTIGNORED,
+  isExplicitNone,
+  isPlaceholder,
+} from '../core/slots.js';
+import type { SlotDef } from '../core/types.js';
 import { asFafMapping, isMapping } from '../core/shape.js';
+import { carryFafSource } from '../core/faf-source.js';
 
 /** Build a fresh .faf for `dir` using the full slot-filling pipeline. */
 export function assembleFreshFaf(dir: string): Record<string, unknown> {
@@ -52,13 +61,76 @@ export function assembleFreshFaf(dir: string): Record<string, unknown> {
  * a scalar or a list throws rather than being spread into character keys. A
  * non-null scalar `project:` (older writers stored `project: <name>`) is lifted
  * to `{ name: String(value) }`, so the name is kept and the rest can be filled.
+ *
+ * Explicit none: a slot the file marks `None` / `N/A` / `not applicable`
+ * (any case) is a decision, not a gap. No detected value replaces it — not
+ * under the slot's own name, nor under its other name (`stack.db` for
+ * `stack.database`) — and the result records it as `slotignored`, the same
+ * decision in faf's own word. A slot already `slotignored` is kept the same way.
  */
 export function updateExistingFaf(dir: string, existing: Record<string, unknown>): Record<string, unknown> {
   const base = liftScalarProject(asFafMapping(existing, 'updateExistingFaf: the existing .faf'));
   const withInterrogated = fillEmpties(base, interrogateRepo(dir) as Record<string, unknown>);
   const merged = fillEmpties(withInterrogated, detectStack(dir) as Record<string, unknown>);
   const withFormats = fillEmpties(merged, turboCatSlots(dir) as Record<string, unknown>);
-  return fillEmpties(withFormats, { human_context: relentlessContext(dir) } as Record<string, unknown>);
+  const filled = fillEmpties(withFormats, { human_context: relentlessContext(dir) } as Record<string, unknown>);
+  // The result is the read `existing` came from, filled: writeFaf checks it
+  // against that read, so an edit made while detection ran is never written over.
+  return carryFafSource(existing, keepNotApplicable(filled, base));
+}
+
+/** The places a slot can live: its on-wire path and its Mk4 canonical name. */
+function slotLocations(slot: SlotDef): string[] {
+  return slot.canonical ? [slot.path, slot.canonical] : [slot.path];
+}
+
+/** `section.field` of a .faf data object (every slot path has two parts). */
+function fieldAt(data: Record<string, unknown>, path: string): unknown {
+  const [section, field] = path.split('.');
+  const s = data[section];
+  return isMapping(s) ? s[field] : undefined;
+}
+
+/** Set (or, with `undefined`, remove) `section.field`, copying the section so
+ *  the caller's objects are never changed. */
+function putField(data: Record<string, unknown>, path: string, value: unknown): void {
+  const [section, field] = path.split('.');
+  const s = data[section];
+  if (!isMapping(s)) {return;}
+  const copy = { ...s };
+  if (value === undefined) {
+    delete copy[field];
+  } else {
+    copy[field] = value;
+  }
+  data[section] = copy;
+}
+
+/** `slotignored` or a hand-written none: the slot does not apply. */
+const notApplicable = (v: unknown): boolean => v === SLOTIGNORED || isExplicitNone(v);
+
+/** True when `base` marks the slot not applicable under one of its names and
+ *  holds no real value under any of them. */
+function decidedNotApplicable(base: Record<string, unknown>, locs: string[]): boolean {
+  const values = locs.map(loc => fieldAt(base, loc));
+  return values.some(notApplicable) && values.every(v => isPlaceholder(v) || notApplicable(v));
+}
+
+/** After filling: a slot `base` marks not applicable gets no detected value
+ *  under any of its names (each keeps what `base` had there), and every
+ *  explicit none at a slot is recorded as `slotignored`. */
+function keepNotApplicable(filled: Record<string, unknown>, base: Record<string, unknown>): Record<string, unknown> {
+  const out = { ...filled };
+  for (const slot of SLOTS) {
+    const locs = slotLocations(slot);
+    const decided = decidedNotApplicable(base, locs);
+    for (const loc of locs) {
+      const before = fieldAt(base, loc);
+      if (decided && !notApplicable(before) && fieldAt(out, loc) !== before) {putField(out, loc, before);}
+      if (isExplicitNone(fieldAt(out, loc))) {putField(out, loc, SLOTIGNORED);}
+    }
+  }
+  return out;
 }
 
 /** `project: <scalar>` → `project: { name: String(value) }`. A list is left as it is
@@ -89,28 +161,32 @@ function applySlotIgnore(seeded: Record<string, unknown>): void {
  *  `target` wins when its slot is non-empty. Empty here is per `isPlaceholder`
  *  (covers '', null, undefined, and known placeholder strings) — this is what
  *  lets interrogated/detected values overwrite the empty-string defaults that
- *  detectStack writes to human_context. */
+ *  detectStack writes to human_context.
+ *
+ *  Two things are never filled over:
+ *  - a hand-written explicit none (`None`, `N/A`, `not applicable`, any case):
+ *    at a slot it becomes `slotignored`; anywhere else it is kept as written;
+ *  - a `_meta` the target already carries (the user's own): faf's runtime
+ *    `_meta` from `source` is merged only into a target without one. */
 export function fillEmpties(
   target: Record<string, unknown>,
   source: Record<string, unknown>,
 ): Record<string, unknown> {
+  return fillAt(target, source, '');
+}
+
+function fillAt(target: Record<string, unknown>, source: Record<string, unknown>, prefix: string): Record<string, unknown> {
   const result = { ...target };
   for (const [key, value] of Object.entries(source)) {
     const existing = result[key];
-    if (isPlaceholder(existing)) {
+    const path = prefix ? `${prefix}.${key}` : key;
+    if (path === '_meta' && existing !== undefined) {continue;}
+    if (isExplicitNone(existing)) {
+      if (SLOT_BY_PATH.has(path)) {result[key] = SLOTIGNORED;}
+    } else if (isPlaceholder(existing)) {
       result[key] = value;
-    } else if (
-      typeof value === 'object' &&
-      value !== null &&
-      !Array.isArray(value) &&
-      typeof existing === 'object' &&
-      existing !== null &&
-      !Array.isArray(existing)
-    ) {
-      result[key] = fillEmpties(
-        existing as Record<string, unknown>,
-        value as Record<string, unknown>,
-      );
+    } else if (isMapping(value) && isMapping(existing)) {
+      result[key] = fillAt(existing, value, path);
     }
   }
   return result;

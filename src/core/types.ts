@@ -74,6 +74,14 @@ export interface ScoreResult {
    * `inherited: true` per schema validation.
    */
   represents?: string;
+  /**
+   * True when the score is NOT KNOWN: an About Repo with no valid
+   * `about.source_score`. `score` is then -1 and `tier` is White only as a
+   * placeholder — neither is a result. Render it as "unknown" (—), never as a
+   * number or a percentage ("-1/100", "-1%"), and do not seal a receipt or
+   * attest it. Set only when true (absent on every calculated or inherited score).
+   */
+  unknown?: boolean;
 }
 
 /** Tier boundary info */

@@ -13,10 +13,10 @@ import { bold, dim, fafCyan } from '../ui/colors.js';
  */
 
 /** Same directory on disk, however it is spelled: device + inode, not the path
- *  string. Catches a case-variant spelling on case-insensitive APFS
- *  (`/users/me`), a symlink to home, and macOS firmlinks
- *  (`/System/Volumes/Data/Users/me`). An unreadable path, or a filesystem
- *  that reports no inode (0), is never "the same". */
+ *  string. Catches a case-variant spelling of home on case-insensitive
+ *  APFS, a symlink to home, and the macOS Data-volume firmlink of the home
+ *  folder. An unreadable path, or a filesystem that reports no inode (0),
+ *  is never "the same". */
 function sameDir(a: string, b: string): boolean {
   try {
     const sa = statSync(a, { bigint: true });

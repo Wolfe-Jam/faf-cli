@@ -1,8 +1,8 @@
-import { existsSync, statSync } from 'fs';
+import { existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { findFafFile, readFaf, readFafRaw, writeFaf } from '../interop/faf.js';
 import { readClaudeMd, writeClaudeMd, renderClaudeMd, parseClaudeMd } from '../interop/claude.js';
-import { readMemoryMd, writeMemoryMd } from '../interop/memory.js';
+import { writeClaudeMemory, type ClaudeMemoryAction } from '../interop/claude-memory.js';
 import * as kernel from '../wasm/kernel.js';
 import { enrichScore } from '../core/scorer.js';
 import { displayScore } from '../ui/display.js';
@@ -24,7 +24,6 @@ export function syncCommand(options: SyncOptions = {}): void {
   }
 
   const claudePath = join(dir, 'CLAUDE.md');
-  const memoryPath = join(dir, 'MEMORY.md');
   const direction = options.direction ?? 'auto';
 
   // sync: .faf ↔ CLAUDE.md
@@ -36,14 +35,14 @@ export function syncCommand(options: SyncOptions = {}): void {
     pullSync(fafPath, claudePath);
   }
 
-  // tri-sync: .faf ↔ MEMORY.md (Pro)
+  // tri-sync: .faf → Claude Code's MEMORY.md (Pro)
   if (isPro()) {
-    triSync(fafPath, memoryPath, dir);
+    triSync(fafPath, dir);
   }
 
   if (options.watch) {
     console.log(dim('watching for changes... (Ctrl+C to stop)'));
-    watchSync(fafPath, claudePath, memoryPath, dir);
+    watchSync(fafPath, claudePath, dir);
   }
 }
 
@@ -106,41 +105,33 @@ function pullSync(fafPath: string, claudePath: string): void {
   displayScore(result, fafPath);
 }
 
-function triSync(fafPath: string, memoryPath: string, dir: string): void {
-  const data = readFaf(fafPath);
-  const fafMtime = statSync(fafPath).mtimeMs;
-  const memMtime = existsSync(memoryPath) ? statSync(memoryPath).mtimeMs : 0;
+const MEMORY_ACTION: Record<ClaudeMemoryAction, string> = {
+  created: 'created',
+  updated: 'block updated',
+  migrated: 'earlier tri-sync section replaced by the block',
+  added: "block added on top; Claude's notes kept",
+  unchanged: 'unchanged',
+};
 
-  if (!existsSync(memoryPath) || fafMtime > memMtime) {
-    // Push .faf → MEMORY.md
-    const topics = generateMemoryTopics(data);
-    writeMemoryMd(dir, topics);
-    console.log(`${fafCyan('◆')} sync  .faf → MEMORY.md   ${dim('← tri-sync')}`);
-  } else {
-    // Pull MEMORY.md → .faf (extract relevant context back)
-    console.log(`${fafCyan('◆')} sync  MEMORY.md → .faf   ${dim('← tri-sync')}`);
+/**
+ * Pro tri-sync: write faf's block into the MEMORY.md Claude Code loads for
+ * this project (~/.claude/projects/<id>/memory/MEMORY.md — see
+ * interop/claude-memory.ts). Claude's own notes in that file are kept byte
+ * for byte; a run that changes nothing writes nothing. One direction only:
+ * .faf → MEMORY.md (nothing is read back into .faf).
+ */
+function triSync(fafPath: string, dir: string): void {
+  try {
+    const r = writeClaudeMemory(dir, readFaf(fafPath));
+    console.log(`${fafCyan('◆')} sync  .faf → MEMORY.md   ${dim(`${MEMORY_ACTION[r.action]} — ${r.path}`)}`);
+    for (const w of r.warnings) {console.log(dim(`  ${w}`));}
+  } catch (e) {
+    console.error(`${bold('×')} sync  .faf → MEMORY.md   ${e instanceof Error ? e.message : String(e)}`);
+    process.exitCode = 1;
   }
 }
 
-/** Generate memory topic content from .faf data */
-function generateMemoryTopics(data: Record<string, unknown>): string {
-  const project = (data.project ?? {}) as Record<string, string>;
-  const lines: string[] = [
-    `# ${project.name ?? 'Project'} — Memory Topics`,
-    '',
-    `> Authored by faf sync (tri-sync)`,
-    '',
-  ];
-
-  if (project.name) {lines.push(`- **Project:** ${project.name}`);}
-  if (project.goal) {lines.push(`- **Goal:** ${project.goal}`);}
-  if (project.main_language) {lines.push(`- **Language:** ${project.main_language}`);}
-  if (project.type) {lines.push(`- **Type:** ${project.type}`);}
-
-  return `${lines.join('\n')  }\n`;
-}
-
-function watchSync(fafPath: string, claudePath: string, memoryPath: string, dir: string): void {
+function watchSync(fafPath: string, claudePath: string, dir: string): void {
   const { watch } = require('fs');
   let debounce: ReturnType<typeof setTimeout> | null = null;
 
@@ -149,11 +140,10 @@ function watchSync(fafPath: string, claudePath: string, memoryPath: string, dir:
     debounce = setTimeout(() => {
       console.log(dim('change detected...'));
       autoSync(fafPath, claudePath, dir);
-      if (isPro()) {triSync(fafPath, memoryPath, dir);}
+      if (isPro()) {triSync(fafPath, dir);}
     }, 200);
   };
 
   watch(fafPath, handler);
   if (existsSync(claudePath)) {watch(claudePath, handler);}
-  if (isPro() && existsSync(memoryPath)) {watch(memoryPath, handler);}
 }

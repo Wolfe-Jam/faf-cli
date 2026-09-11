@@ -39,6 +39,7 @@ import { wjttcCommand } from './commands/wjttc.js';
 import { benchCommand } from './commands/bench.js';
 import { refreshCommand } from './commands/refresh.js';
 import { memoryCommand } from './commands/memory.js';
+import { SafePathError } from './core/safe-write.js';
 
 const { version: VERSION } = require('../package.json');
 
@@ -349,6 +350,7 @@ program
   .option('--priority <level>', 'Min priority floor (recall) or etch priority')
   .option('--limit <n>', 'Max recall hits')
   .option('--json', 'JSON output')
+  .option('--force', 'Overwrite an existing soul.fafm (convert)')
   .action((subcommand, arg, options) => memoryCommand(subcommand, arg, options));
 
 // === Soft Deprecation Aliases (v5.x compat) ===
@@ -420,5 +422,15 @@ if (process.argv.length <= 2) {
       '',
     ].join('\n'),
   );
-  program.parse(process.argv);
+  try {
+    program.parse(process.argv);
+  } catch (e) {
+    // A refused path (a link out of the project, a dangling link), a file that
+    // is not UTF-8, or one that changed on disk while faf was writing is an
+    // answer, not a crash: say it in one line and exit 1.
+    if (!(e instanceof SafePathError)) {throw e;}
+    const kept = e.reason === 'not-utf8' || e.reason === 'changed';
+    console.error(`faf: ${e.message}${kept ? '' : ' Nothing was read from or written to it.'}`);
+    process.exit(1);
+  }
 }

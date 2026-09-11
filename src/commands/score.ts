@@ -1,5 +1,5 @@
 import { findFafFile, readFafRaw, readFaf } from '../interop/faf.js';
-import { scoreFafYaml } from '../core/scorer.js';
+import { scoreFafYaml, scoreText } from '../core/scorer.js';
 import { displayScore } from '../ui/display.js';
 import { tierBadge } from '../core/tiers.js';
 import { bold } from '../ui/colors.js';
@@ -38,8 +38,8 @@ export function scoreCommand(file?: string, options: ScoreOptions = {}): void {
   }
 
   if (options.status) {
-    // Compact one-liner for CI/scripts
-    console.log(`${tierBadge(result.tier)} ${bold(`${result.score}%`)}`);
+    // Compact one-liner for CI/scripts. An unknown score has no tier to show.
+    console.log(result.unknown ? `— ${bold(scoreText(result))}` : `${tierBadge(result.tier)} ${bold(scoreText(result))}`);
     return;
   }
 

@@ -197,7 +197,7 @@ Your own rules for the AI — *"use full words in identifiers," "use bun, not np
 
 ```
 sync:      .faf  ──── 8ms ───→  CLAUDE.md   (pull: Trophy-gated backfill)
-tri-sync:  .faf  ←── 8ms ──→  CLAUDE.md ↔ MEMORY.md
+tri-sync:  .faf  ──── 8ms ───→  CLAUDE.md + Claude Code's MEMORY.md   (Pro: faf's block only; Claude's notes kept)
 ```
 
 ---

@@ -1,7 +1,9 @@
 import { existsSync, writeFileSync } from 'fs';
 import { findFafFile, readFafRaw } from '../interop/faf.js';
 import { scoreFafYaml } from '../core/scorer.js';
+import type { ScoreResult } from '../core/types.js';
 import { FafDNAManager } from '../core/faf-dna.js';
+import { sayWhyDnaIsLeft } from './dna.js';
 import * as kernel from '../wasm/kernel.js';
 import { tierBadge } from '../core/tiers.js';
 import { bold, dim, fafCyan } from '../ui/colors.js';
@@ -38,6 +40,36 @@ export interface RefreshOptions {
   json?: boolean;
 }
 
+interface RefreshReport {
+  result: ScoreResult;
+  known: boolean;
+  drifted: boolean;
+  delta: number;
+  prevScore: number | null | undefined;
+  fafbBytes: number | null;
+}
+
+/** The text report of `faf refresh`. An unknown score shows no number. */
+function printRefresh({ result, known, drifted, delta, prevScore, fafbBytes }: RefreshReport): void {
+  console.log(`${fafCyan('refresh')} ${dim('— re-grounding on the live .faf')}\n`);
+  if (!known) {
+    console.log(`  score unknown ${dim('— about-repo with no about.source_score; the DNA journey is left as it is')}`);
+  } else if (drifted) {
+    const arrow = delta > 0 ? '↑' : '↓';
+    console.log(
+      `  drift: ${dim(`${prevScore}%`)} ${arrow} ${bold(`${result.score}%`)} ${dim(`(${delta > 0 ? '+' : ''}${delta})`)}`,
+    );
+  } else if (prevScore !== null && prevScore !== undefined) {
+    console.log(`  no drift ${dim(`— steady at ${result.score}%`)}`);
+  } else {
+    console.log(`  baseline set ${dim(`— ${result.score}%`)}`);
+  }
+  if (fafbBytes !== null) {
+    console.log(`  .fafb re-compiled ${dim(`(${fafbBytes} bytes — fast tier current)`)}`);
+  }
+  if (known) {console.log(`  re-grounded: ${tierBadge(result.tier)} ${bold(`${result.score}%`)}`);}
+}
+
 export function refreshCommand(options: RefreshOptions = {}): void {
   const fafPath = findFafFile();
   if (!fafPath) {
@@ -53,8 +85,11 @@ export function refreshCommand(options: RefreshOptions = {}): void {
   const dna = new FafDNAManager(process.cwd());
   const baseline = dna.load() ? dna.getBirthDNADisplay() : null;
   const prevScore = baseline ? baseline.current : null;
-  const delta = prevScore !== null && prevScore !== undefined ? result.score - prevScore : 0;
-  const drifted = prevScore !== null && prevScore !== undefined && delta !== 0;
+  // An About Repo with no source_score has no score: nothing to measure drift
+  // against, and nothing to record — -1 is a placeholder, not a ground.
+  const known = !result.unknown;
+  const delta = known && prevScore !== null && prevScore !== undefined ? result.score - prevScore : 0;
+  const drifted = known && prevScore !== null && prevScore !== undefined && delta !== 0;
 
   // 3. Keep the .fafb binary tier current (the 412× tier). Only if one exists —
   //    don't force a binary on YAML-only projects. Rust authors via the kernel.
@@ -70,8 +105,9 @@ export function refreshCommand(options: RefreshOptions = {}): void {
     console.log(
       JSON.stringify(
         {
-          reGrounded: true,
+          reGrounded: known,
           score: result.score,
+          ...(known ? {} : { unknown: true }),
           tier: result.tier,
           baseline: prevScore,
           delta,
@@ -84,22 +120,9 @@ export function refreshCommand(options: RefreshOptions = {}): void {
       ),
     );
   } else {
-    console.log(`${fafCyan('refresh')} ${dim('— re-grounding on the live .faf')}\n`);
-    if (drifted) {
-      const arrow = delta > 0 ? '↑' : '↓';
-      console.log(
-        `  drift: ${dim(`${prevScore}%`)} ${arrow} ${bold(`${result.score}%`)} ${dim(`(${delta > 0 ? '+' : ''}${delta})`)}`,
-      );
-    } else if (prevScore !== null && prevScore !== undefined) {
-      console.log(`  no drift ${dim(`— steady at ${result.score}%`)}`);
-    } else {
-      console.log(`  baseline set ${dim(`— ${result.score}%`)}`);
-    }
-    if (fafbBytes !== null && fafbBytes !== undefined) {
-      console.log(`  .fafb re-compiled ${dim(`(${fafbBytes} bytes — fast tier current)`)}`);
-    }
-    console.log(`  re-grounded: ${tierBadge(result.tier)} ${bold(`${result.score}%`)}`);
+    printRefresh({ result, known, drifted, delta, prevScore, fafbBytes });
   }
+  if (!known) {return;}
 
   // 4. Update the ground — the baseline must actually PERSIST, or the next
   //    refresh can never measure drift ("baseline set" must not be a lie).
@@ -107,6 +130,7 @@ export function refreshCommand(options: RefreshOptions = {}): void {
   //    DNA exists → record the re-score on the journey (no-op if unchanged).
   if (dna.exists()) {
     dna.recordGrowth(result.score, ['refresh — re-grounded']);
+    sayWhyDnaIsLeft(dna); // a .faf-dna faf did not write is left as it is
   } else {
     dna.birth(result.score);
   }

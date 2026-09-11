@@ -1,7 +1,7 @@
-import { writeFileSync } from 'fs';
 import { join } from 'path';
 import { deprecate } from 'node:util';
 import type { FafData } from '../core/types.js';
+import { safeWriteFile } from '../core/safe-write.js';
 
 /**
  * Build an MCP Server Card (SEP-2127) from a .faf.
@@ -184,7 +184,8 @@ export function writeServerCard(
 ): string {
   const card = buildServerCard(data, opts);
   const out = join(dir, 'server-card');
-  writeFileSync(out, `${JSON.stringify(card, null, 2)  }\n`, 'utf-8');
+  // Atomic, and never through a link that leaves `dir` or dangles.
+  safeWriteFile(out, `${JSON.stringify(card, null, 2)  }\n`, { root: dir });
   return out;
 }
 

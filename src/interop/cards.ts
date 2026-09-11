@@ -1,8 +1,9 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { deprecate } from 'node:util';
 import { parse } from 'yaml';
 import type { FafData } from '../core/types.js';
+import { safeWriteFile } from '../core/safe-write.js';
 import {
   fafContextBlock,
   buildServerCard,
@@ -416,9 +417,11 @@ export function assertSameBlock(cards: ProjectedCards): void {
   }
 }
 
-export function writeJson(path: string, value: unknown): void {
+/** Write `value` as JSON — atomically, and never through a link that leaves
+ *  `root` (default: the file's own folder) or dangles. */
+export function writeJson(path: string, value: unknown, root?: string): void {
   mkdirSync(dirname(path), { recursive: true });
-  writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`, 'utf-8');
+  safeWriteFile(path, `${JSON.stringify(value, null, 2)}\n`, { root });
 }
 
 export function parseTargets(raw?: string): CardTarget[] | undefined {

@@ -1,14 +1,14 @@
 /**
  * `faf memory` — .fafm soul ops (TS surface, golden-pinned to claude-fafm-sdk 1.0).
  *
- *   faf memory convert <dir> [-o out.fafm] [--namepoint @x]
+ *   faf memory convert <dir> [-o out.fafm] [--namepoint @x] [--force]
  *   faf memory ls [--file soul.fafm]
  *   faf memory recall <query> [--file soul.fafm] [--type] [--tag] [--priority] [--limit]
  *   faf memory etch <text> [--id] [--type] [--file soul.fafm]
  *   faf memory show [--file soul.fafm]
  */
 
-import { existsSync } from 'fs';
+import { existsSync, lstatSync } from 'fs';
 import { resolve } from 'path';
 import { dim, fafCyan, bold } from '../ui/colors.js';
 import { Soul, fromClaudeDir } from '../fafm/index.js';
@@ -23,6 +23,18 @@ export interface MemoryOptions {
   priority?: string;
   limit?: string;
   json?: boolean;
+  /** convert: overwrite an existing output soul. */
+  force?: boolean;
+}
+
+/** True when something is at `path` — a file, or a link (even a dangling one). */
+function present(path: string): boolean {
+  try {
+    lstatSync(path);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function defaultSoulPath(): string {
@@ -44,9 +56,15 @@ function convertCmd(dir: string | undefined, options: MemoryOptions): void {
     process.exit(2);
   }
   const root = resolve(dir);
+  const out = resolve(options.output ?? defaultSoulPath());
+  // A convert writes a whole new soul: never over one that is already there,
+  // unless asked — the same rule as `faf init`.
+  if (present(out) && !options.force) {
+    console.error(`${options.output ?? 'soul.fafm'} already exists. Use ${bold('--force')} to overwrite.`);
+    process.exit(1);
+  }
   try {
     const soul = fromClaudeDir(root, { namepoint: options.namepoint });
-    const out = resolve(options.output ?? defaultSoulPath());
     soul.toFile(out);
     console.log(
       `${fafCyan('memory convert')} ${dim('—')} ${soul.facts.length} facts → ${out}`,
@@ -112,12 +130,14 @@ function etchCmd(text: string | undefined, options: MemoryOptions): void {
   const soul = existsSync(path)
     ? Soul.load(path)
     : new Soul(options.namepoint ?? '@local', { profile: 'knowledge' });
+  // Keep an index faf derived in step with the facts; a hand-kept one is left alone.
+  const reindex = soul.indexIsDerived();
   const fact = soul.etch(text, {
     id: options.id,
     type: options.type,
     priority: options.priority,
   });
-  soul.toFile(path);
+  soul.toFile(path, { reindex });
   console.log(`${fafCyan('memory etch')} ${dim('—')} ${fact.id ?? '(no-id)'} → ${path}`);
 }
 
@@ -191,6 +211,6 @@ function printHelp(): void {
   console.log('  ls              List facts (ranked)');
   console.log('  recall [query]  Deterministic recall');
   console.log('  show            Soul summary\n');
-  console.log(dim('  Options: --file · --output · --namepoint · --id · --type · --tag · --priority · --limit · --json'));
+  console.log(dim('  Options: --file · --output · --namepoint · --id · --type · --tag · --priority · --limit · --json · --force'));
   console.log(dim('  INTEROP: claude-fafm-sdk 1.0 · application/vnd.fafm+yaml v1.1'));
 }

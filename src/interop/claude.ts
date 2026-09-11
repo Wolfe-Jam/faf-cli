@@ -1,17 +1,22 @@
-import { readFileSync, existsSync, statSync } from 'fs';
+import { existsSync, statSync } from 'fs';
 import { join } from 'path';
 import type { FafData } from '../core/types.js';
 import { injectFafBlock } from './inject.js';
 import { slotLabel } from './labels.js';
+import { FAF_CONTEXT_FILES, readUtf8, resolveInside } from '../core/safe-write.js';
 
-const CLAUDE_MD = 'CLAUDE.md';
+const CLAUDE_MD = FAF_CONTEXT_FILES.claude;
 const SYNC_MARKER = 'STATUS: SYNC ACTIVE';
 
-/** Read CLAUDE.md from a directory */
+/** Read CLAUDE.md from a directory. A CLAUDE.md link that leaves the
+ *  directory, or leads to a file that is not an AI context file, is refused
+ *  (SafePathError) and nothing is read; CLAUDE.md → AGENTS.md is read
+ *  through. A CLAUDE.md that is not UTF-8 is refused too (`faf sync --direction
+ *  pull` writes what it reads into project.faf). */
 export function readClaudeMd(dir: string): string | null {
   const path = join(dir, CLAUDE_MD);
   if (!existsSync(path)) {return null;}
-  return readFileSync(path, 'utf-8');
+  return readUtf8(resolveInside(dir, CLAUDE_MD));
 }
 
 /** Write CLAUDE.md — non-destructive: injects/updates the faf block, preserves the rest. */

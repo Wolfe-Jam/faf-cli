@@ -17,5 +17,6 @@ export {
   factFromObj,
   factToObj,
 } from './soul.js';
+export type { RecallOptions } from './soul.js';
 
 export { fromClaudeDir, DEFAULT_SKIP } from './from-claude-dir.js';

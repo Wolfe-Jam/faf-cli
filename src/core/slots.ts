@@ -125,6 +125,20 @@ export const PLACEHOLDERS = new Set([
   'not applicable',
 ]);
 
+/** The words a person writes to say "this slot does not apply": `None`,
+ *  `N/A`, `not applicable` (any case). The explicit-none sentinel — the same
+ *  decision as `slotignored`. faf keeps it: a detected value never replaces
+ *  it, and when faf writes the slot it records it as `slotignored`. */
+export const EXPLICIT_NONE: ReadonlySet<string> = new Set(['none', 'n/a', 'not applicable']);
+
+/** The value that marks a slot as not applicable (the What-Not). */
+export const SLOTIGNORED = 'slotignored';
+
+/** True for a hand-written explicit none — `None`, `N/A`, `not applicable`, `none` (any case). */
+export function isExplicitNone(value: unknown): boolean {
+  return typeof value === 'string' && EXPLICIT_NONE.has(value.trim().toLowerCase());
+}
+
 /** Check if a value is a placeholder (empty) */
 export function isPlaceholder(value: unknown): boolean {
   if (value === null || value === undefined || value === '') {return true;}

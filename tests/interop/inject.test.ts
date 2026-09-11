@@ -5,7 +5,7 @@
  */
 import { describe, test, expect } from 'bun:test';
 import { mkdtempSync, writeFileSync, readFileSync } from 'fs';
-import { join } from 'path';
+import { join, dirname } from 'path';
 import { tmpdir } from 'os';
 import { injectFafBlock, FAF_START, FAF_END } from '../../src/interop/inject.js';
 import { writeAgentsMd } from '../../src/interop/agents.js';
@@ -62,17 +62,17 @@ describe('TYRE: injectFafBlock — non-destructive', () => {
     expect(readFileSync(p, 'utf-8')).toBe(once);
   });
 
-  test('legacy faf file (metastamp, no markers, faf footer) → replaced through the footer, no duplication', () => {
+  test('faf-looking file with no marker lines (metastamp + faf footer) → prefixed, every byte kept (never reclaimed)', () => {
     const p = join(tmp(), 'F.md');
-    // an old faf-rendered CLAUDE.md: led by the metastamp, closed by faf's footer, no markers
-    writeFileSync(p, '<!-- faf: demo | TS | lib | x -->\n\n# CLAUDE.md — demo\nold faf body\n\n---\n\n*STATUS: BI-SYNC ACTIVE — 2026-05-30T23:32:37.806Z*\n');
+    // shaped like an old faf-rendered CLAUDE.md: led by the metastamp, closed by faf's footer, no markers
+    const before = '<!-- faf: demo | TS | lib | x -->\n\n# CLAUDE.md — demo\nold faf body\n\n---\n\n*STATUS: BI-SYNC ACTIVE — 2026-05-30T23:32:37.806Z*\n';
+    writeFileSync(p, before);
     injectFafBlock(p, 'fresh block');
     const out = readFileSync(p, 'utf-8');
-    expect(out).toContain('fresh block');
-    expect(out).not.toContain('old faf body');          // faf's own legacy output replaced
-    expect(out).not.toContain('BI-SYNC');
-    expect(out.split(FAF_START).length - 1).toBe(1);    // single block, no duplication
-    expect(out).toBe(`${FAF_START}\nfresh block\n${FAF_END}\n`);
+    expect(out).toBe(`${FAF_START}\nfresh block\n${FAF_END}\n\n${before}`);
+    expect(out.split(FAF_START).length - 1).toBe(1);    // single block
+    injectFafBlock(p, 'fresh block');
+    expect(readFileSync(p, 'utf-8')).toBe(out);         // and it stays one block
   });
 
   test('legacy-looking file WITHOUT faf footer → prefixed, every byte kept (faf cannot prove it wrote it)', () => {
@@ -254,13 +254,14 @@ describe('BRAKE: injectFafBlock — markers are whole lines, never substrings (7
 });
 
 // ---------------------------------------------------------------------------
-// Unreleased — faf replaces only text it can prove it wrote. Every case below
-// failed on 7.12.1: a legacy CLAUDE.md lost the notes appended after its
-// footer, a fenced marker example was taken over as the block, a marker line
-// inside a .faf value grew the file on every write, and a BOM was pushed off
-// byte 0.
+// Unreleased — faf replaces only text it can prove it wrote: what sits between
+// its own marker lines. A file with NO marker lines is never reclaimed, whatever
+// it starts or ends with — a faf-looking stamp and footer prove nothing (the
+// /claude-md skill tells authors to hand-write that exact stamp). Every case
+// below lost text on fce35d6b, which still replaced a stamp-led file through
+// its footer line.
 // ---------------------------------------------------------------------------
-const BOM = '﻿';
+const BOM = '\uFEFF';
 const LEGACY = [
   '<!-- faf: demo | TypeScript | cli | Demo -->',
   '<!-- faf: claim=project.faf | family=FAF -->',
@@ -274,25 +275,67 @@ const LEGACY = [
   '*STATUS: BI-SYNC ACTIVE — 2026-05-30T23:32:37.806Z*',
 ].join('\n');
 
-describe('BRAKE: legacy faf output is replaced only through its footer line', () => {
-  test('notes appended after the footer survive byte-for-byte', () => {
+describe('BRAKE: a file with no marker lines is never reclaimed — the block goes on top', () => {
+  test('stamp-led file with a faf footer and notes after it: every byte survives', () => {
     const file = join(tmp(), 'CLAUDE.md');
-    const notes = '\n\n## Team rules\n\n- never push to main\n- USER-NOTE-SENTINEL\n';
-    writeFileSync(file, `${LEGACY}${notes}`);
+    const before = `${LEGACY}\n\n## Team rules\n\n- never push to main\n- USER-NOTE-SENTINEL\n`;
+    writeFileSync(file, before);
     const [first, second] = twice(file, V1, V1);
-    expect(first).toBe(`${FAF_START}\n${V1}\n${FAF_END}${notes}`);
+    expect(first).toBe(`${FAF_START}\n${V1}\n${FAF_END}\n\n${before}`);
     expect(second).toBe(first);
   });
 
-  test('the FIRST footer line bounds the claim; a later footer-like line is user text', () => {
+  test('a /claude-md-shaped CLAUDE.md (2-line stamp, hand sections, SYNC footer at EOF) keeps every hand line', () => {
+    // The audit's shape (#3): hand-written context that happens to start with
+    // faf's stamp and end with a copied footer. It lost every hand section.
     const file = join(tmp(), 'CLAUDE.md');
-    const tail = '\n\npasted from another project:\n*STATUS: SYNC ACTIVE — 2026-09-10T00:00:00.000Z*\nUSER-AFTER-SECOND-FOOTER\n';
-    writeFileSync(file, `${LEGACY}${tail}`);
-    injectFafBlock(file, V1);
-    expect(readFileSync(file, 'utf-8')).toBe(`${FAF_START}\n${V1}\n${FAF_END}${tail}`);
+    const before = [
+      '<!-- faf: shop-api | TypeScript | backend | Orders API -->',
+      '<!-- faf: claim=project.faf | family=FAF -->',
+      '',
+      '# CLAUDE.md — shop-api',
+      '',
+      '## Architecture',
+      '',
+      'Hexagonal: adapters in src/adapters, domain in src/core.',
+      '',
+      '## Rules',
+      '',
+      '- NEVER call the payments API from tests.',
+      '',
+      '*STATUS: SYNC ACTIVE — 2026-09-10T09:00:00.000Z*',
+      '',
+    ].join('\n');
+    writeFileSync(file, before);
+    for (const write of [
+      () => injectFafBlock(file, V1),
+      () => writeClaudeMd(dirname(file), renderClaudeMd(DATA)),
+    ]) {
+      writeFileSync(file, before);
+      write();
+      const out = readFileSync(file, 'utf-8');
+      expect(out.endsWith(`\n\n${before}`)).toBe(true);
+      expect(out).toContain('NEVER call the payments API from tests.');
+      expect(wholeLines(out, FAF_START)).toBe(1);
+    }
   });
 
-  test('a metastamp-led file with a footer AND a marker line is not legacy output — prefixed, all kept', () => {
+  test('stamp-led file whose footer sits mid-file: nothing before or after it is claimed', () => {
+    const file = join(tmp(), 'AGENTS.md');
+    const before = `${LEGACY}\n\npasted from another project:\n*STATUS: SYNC ACTIVE — 2026-09-10T00:00:00.000Z*\nUSER-AFTER-SECOND-FOOTER\n`;
+    writeFileSync(file, before);
+    injectFafBlock(file, V1);
+    expect(readFileSync(file, 'utf-8')).toBe(`${FAF_START}\n${V1}\n${FAF_END}\n\n${before}`);
+  });
+
+  test('a stamp-led file behind a BOM keeps the BOM at byte 0 and every byte after it', () => {
+    const file = join(tmp(), 'CLAUDE.md');
+    writeFileSync(file, `${BOM}${LEGACY}\nUSER-BOM-NOTE\n`);
+    injectFafBlock(file, V1);
+    expect(readFileSync(file, 'utf-8')).toBe(`${BOM}${FAF_START}\n${V1}\n${FAF_END}\n\n${LEGACY}\nUSER-BOM-NOTE\n`);
+  });
+
+  test('a metastamp-led file with a footer AND a marker line in a fence — prefixed, all kept', () => {
     const file = join(tmp(), 'CLAUDE.md');
     const before = `${LEGACY}\n\n\`\`\`md\n${FAF_START}\nexample\n${FAF_END}\n\`\`\`\n`;
     writeFileSync(file, before);

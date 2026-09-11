@@ -103,11 +103,10 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
 
   'README.md': {
     frameworks: [], // Can be any framework
-    slots: {
-      targetUser: 'developers', // Often contains who it's for
-      coreProblem: 'understanding project', // Usually describes the problem
-      missionPurpose: 'project documentation' // Contains the why
-    },
+    // No slot values: a README's who/what/why is read from its TEXT by the
+    // Relentless extractor. Constant guesses here ('developers', …) were
+    // asserted for every repo with a README — sourced-only forbids that.
+    slots: {},
     priority: 25, // HIGH: Human context goldmine
     intelligence: 'high'
   },

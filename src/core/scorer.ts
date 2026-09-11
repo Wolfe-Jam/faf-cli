@@ -3,6 +3,13 @@ import { getTier, TIERS } from './tiers.js';
 import * as kernel from '../wasm/kernel.js';
 import { aboutFromYaml } from './about.js';
 
+/** A score as text for display: `85%`, or `unknown (—)` when the result says
+ *  the score is not known (`unknown: true` — an About Repo with no
+ *  source_score). Never `-1%`. */
+export function scoreText(result: Pick<ScoreResult, 'score' | 'unknown'>): string {
+  return result.unknown ? 'unknown (—)' : `${result.score}%`;
+}
+
 /** Convert kernel result into enriched ScoreResult */
 export function enrichScore(kernel: KernelScoreResult): ScoreResult {
   return {
@@ -24,8 +31,9 @@ export function enrichScore(kernel: KernelScoreResult): ScoreResult {
  * (`about.represents`). The scorer reads `about.source_score` and emits
  * that directly — no slot scoring, no kernel call.
  *
- * Optional: `about.source_score: <number>` — without it, score is -1
- * (renders as "—" honest unknown).
+ * Optional: `about.source_score: <number>` — without it the score is not
+ * known: the result carries `unknown: true` (with score -1 and a White tier
+ * as placeholders). Render that as "unknown" (—), never as "-1/100" or "-1%".
  *
  * Doctrine: memory/private-source-public-about-pattern.md.
  *
@@ -46,6 +54,7 @@ export function scoreFafYaml(yaml: string): ScoreResult {
       slots: {},
       inherited: true,
       represents: about.represents,
+      ...(score < 0 ? { unknown: true } : {}),
     };
   }
 

@@ -1,8 +1,8 @@
-import { writeFileSync } from 'fs';
 import { join } from 'path';
 import { deprecate } from 'node:util';
 import type { FafData, ScoreResult } from '../core/types.js';
 import { FAF_HEX } from '../ui/colors.js';
+import { safeWriteFile } from '../core/safe-write.js';
 
 /**
  * project.html — the visual render of project.faf.
@@ -183,18 +183,15 @@ Rendered on-demand from your current <strong>${esc(fafPath)}</strong><br>
 `;
 }
 
-/** Write project.html beside project.faf (repo root). */
+/** Write project.html beside project.faf (repo root) — atomically, and never
+ *  through a link that leaves `dir` or dangles (SafePathError). */
 export function writeProjectHtml(
   dir: string,
   data: FafData,
   result: ScoreResult,
   fafPath = 'project.faf',
 ): void {
-  writeFileSync(
-    join(dir, 'project.html'),
-    renderProjectHtml(data, result, fafPath),
-    'utf-8',
-  );
+  safeWriteFile(join(dir, 'project.html'), renderProjectHtml(data, result, fafPath), { root: dir });
 }
 
 /** @deprecated Use {@link renderProjectHtml}. Removed in the next major. */

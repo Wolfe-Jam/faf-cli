@@ -1,4 +1,5 @@
-import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { dirname, resolve } from 'path';
+import { readUtf8, resolveInside, safeWriteFile } from '../core/safe-write.js';
 
 /**
  * Block markers for the faf-managed front section.
@@ -9,31 +10,15 @@ import { readFileSync, writeFileSync, existsSync } from 'fs';
 export const FAF_START = '<!-- faf:start -->';
 export const FAF_END = '<!-- faf:end -->';
 
-/**
- * faf's own metastamp fingerprint (fafMetaTag output: `<!-- faf: name | … -->`,
- * note the space). faf output from before the markers existed begins with it.
- * The trailing space matters: the START marker `<!-- faf:start -->` must not
- * match this fingerprint.
- */
-const FAF_METASTAMP = '<!-- faf: ';
-
-/**
- * faf's own sync footer — the last line of every CLAUDE.md faf rendered before
- * the markers existed: `*STATUS: BI-SYNC ACTIVE — <ISO>*` (≤7.12.0) or
- * `*STATUS: SYNC ACTIVE — <ISO>*` (7.12.1+). The metastamp opens faf's legacy
- * output and this line closes it; whatever follows it was written by someone else.
- */
-const FAF_FOOTER = /^\*STATUS: (?:BI-)?SYNC ACTIVE — .*\*$/;
-
 const BOM = '\uFEFF';
 
 /** Split into lines keeping each line's own terminator (\r\n, \r or \n). */
-function linesWithEnds(text: string): string[] {
+export function linesWithEnds(text: string): string[] {
   return text.match(/[^\r\n]*(?:\r\n|\r|\n|$)/g)?.filter((l, i, a) => l !== '' || i < a.length - 1) ?? [];
 }
 
-const stripEnd = (line: string): string => line.replace(/\r?\n$|\r$/, '');
-const isFenceLine = (trimmed: string): boolean => trimmed.startsWith('```') || trimmed.startsWith('~~~');
+export const stripEnd = (line: string): string => line.replace(/\r?\n$|\r$/, '');
+export const isFenceLine = (trimmed: string): boolean => trimmed.startsWith('```') || trimmed.startsWith('~~~');
 /** A line as the marker rules see it: terminator, a leading BOM and trailing whitespace dropped. */
 const bareLine = (line: string): string => stripEnd(line).replace(/^\uFEFF/, '').trimEnd();
 
@@ -78,11 +63,6 @@ function scanForBlock(text: string, start: string, end: string, fenceAware: bool
   return { block: null, openFence: blockStart === -1 && inFence ? openedAt : -1 };
 }
 
-/** True when `marker` appears as a whole line anywhere in `text`. */
-function hasMarkerLine(text: string, marker: string): boolean {
-  return linesWithEnds(text).some(l => bareLine(l) === marker);
-}
-
 /**
  * Locate the faf-managed block in `text`: the first START marker line and the
  * first END marker line after it. Returns the char range covering both marker
@@ -115,24 +95,6 @@ export function findFafBlock(
   return scanForBlock(text, start, end, false, aware.openFence).block;
 }
 
-/**
- * Where faf's legacy output ends: the end of its footer line (terminator
- * excluded). Legacy output is a file led by faf's metastamp, carrying no marker
- * line, and closed by faf's footer line — the first one wins, so the least text
- * is claimed. Returns -1 when any of the three is missing: faf cannot prove it
- * wrote that file, so it is a user file.
- */
-function legacyOutputEnd(text: string, start: string, end: string): number {
-  if (!text.trimStart().startsWith(FAF_METASTAMP)) {return -1;}
-  if (hasMarkerLine(text, start) || hasMarkerLine(text, end)) {return -1;}
-  let offset = 0;
-  for (const line of linesWithEnds(text)) {
-    if (FAF_FOOTER.test(bareLine(line))) {return offset + stripEnd(line).length;}
-    offset += line.length;
-  }
-  return -1;
-}
-
 /** A rendered body line that is itself a whole marker line (a .faf value that
  *  documents the markers, say) would let the next write cut the block there and
  *  grow the file every run. Indent it one space: no longer a column-0 marker,
@@ -146,55 +108,82 @@ function guardBody(body: string, start: string, end: string): string {
     .join('');
 }
 
+/** The managed block: START, the body (marker-shaped body lines guarded), END. */
+export function wrapFafBlock(block: string, start: string = FAF_START, end: string = FAF_END): string {
+  return `${start}\n${guardBody(block.trim(), start, end)}\n${end}`;
+}
+
+/** The file's new text: `existing` (null when there is no file) with `wrapped`
+ *  as its managed block. */
+export function withFafBlock(existing: string | null, wrapped: string, start: string = FAF_START, end: string = FAF_END): string {
+  // 1. No file → just the block.
+  if (existing === null) {return `${wrapped}\n`;}
+
+  // 2. A complete block → replace only the managed block; keep everything around it.
+  const found = findFafBlock(existing, start, end);
+  if (found) {return `${existing.slice(0, found.start)}${wrapped}${existing.slice(found.end)}`;}
+
+  // 3. Everything else → prefix the block and keep every byte already there. A
+  //    file with no marker lines is the user's, whatever its first line says —
+  //    a faf-looking stamp or footer proves nothing. A leading BOM stays at byte 0.
+  const bom = existing.startsWith(BOM) ? BOM : '';
+  return `${bom}${wrapped}\n\n${existing.slice(bom.length)}`;
+}
+
+/** Read a resolved path, or null when nothing is there yet. Only ENOENT reads
+ *  as "no file"; any other error is thrown, so a file faf could not read is
+ *  never treated as empty and written fresh. The text is decoded strictly: a
+ *  file that is not UTF-8 (a UTF-16 file, cp1252 bytes) is refused
+ *  (SafePathError `not-utf8`) and left as it is — see readUtf8. */
+export function readIfPresent(path: string): string | null {
+  try {
+    return readUtf8(path);
+  } catch (e) {
+    if ((e as NodeJS.ErrnoException).code === 'ENOENT') {return null;}
+    throw e;
+  }
+}
+
+export interface InjectOptions {
+  /** The project folder the file must stay inside. Default: the file's own
+   *  folder. Pass it when the file sits in a subfolder (`.github/…`), so a
+   *  linked subfolder cannot carry the write out of the project. */
+  root?: string;
+}
+
 /**
  * Non-destructively write a faf-managed block into a file.
  *
  *   - file does not exist     → create it containing just the block
  *   - file has the markers    → replace ONLY the content between them (update in place)
- *   - legacy faf output       → metastamp-led, no marker lines, faf's footer line present:
- *                               replace from the start through that footer line; every
- *                               byte after it is kept
  *   - anything else           → PREFIX the block; everything already there is preserved
  *                               (a leading BOM stays at byte 0)
  *
- * Idempotent: re-running updates the managed block in place and never duplicates
- * it or touches a byte the user owns. faf replaces only text it can prove it
- * wrote — what's between its markers, or its own legacy output bounded by its
- * metastamp and footer. Enhance, never replace.
+ * faf replaces only text it can prove it wrote: what sits between its own
+ * marker lines. A file with no marker lines is never reclaimed, whatever it
+ * starts or ends with. Idempotent: re-running updates the managed block in
+ * place and never duplicates it. Enhance, never replace.
+ *
+ * The file is resolved inside its project first: a link that leads outside,
+ * a dangling link, a link to a file with another name (CLAUDE.md → README.md)
+ * and anything in `.git` are refused (SafePathError) and nothing is written; a
+ * link to a file of the same name, or between AI context files (CLAUDE.md →
+ * AGENTS.md), is written through and stays a link. A file that is not UTF-8
+ * is refused and left as it is. The write is atomic — a failure leaves the
+ * original exactly as it was — and is refused if the file changed on disk
+ * after faf read it.
  */
 export function injectFafBlock(
   path: string,
   block: string,
   start: string = FAF_START,
   end: string = FAF_END,
+  opts: InjectOptions = {},
 ): void {
-  const wrapped = `${start}\n${guardBody(block.trim(), start, end)}\n${end}`;
-
-  // 1. No file → create it with just the block.
-  if (!existsSync(path)) {
-    writeFileSync(path, `${wrapped}\n`, 'utf-8');
-    return;
-  }
-
-  const existing = readFileSync(path, 'utf-8');
-  const bom = existing.startsWith(BOM) ? BOM : '';
-
-  // 2. Complete block present → replace only the managed block; keep everything around it.
-  const found = findFafBlock(existing, start, end);
-  if (found) {
-    writeFileSync(path, `${existing.slice(0, found.start)}${wrapped}${existing.slice(found.end)}`, 'utf-8');
-    return;
-  }
-
-  // 3. Legacy faf output (pre-marker CLAUDE.md): replace it through its footer
-  //    line; notes appended after the footer are kept byte-for-byte. No footer →
-  //    faf cannot prove where its output ends, so it falls through to 4.
-  const legacyEnd = legacyOutputEnd(existing, start, end);
-  if (legacyEnd !== -1) {
-    writeFileSync(path, `${bom}${wrapped}${existing.slice(legacyEnd)}`, 'utf-8');
-    return;
-  }
-
-  // 4. Everything else → prefix the block; preserve all existing content.
-  writeFileSync(path, `${bom}${wrapped}\n\n${existing.slice(bom.length)}`, 'utf-8');
+  const wrapped = wrapFafBlock(block, start, end);
+  const full = resolve(path);
+  const root = opts.root ?? dirname(full);
+  const target = resolveInside(root, full);
+  const existing = readIfPresent(target);
+  safeWriteFile(target, withFafBlock(existing, wrapped, start, end), { root, expect: existing });
 }

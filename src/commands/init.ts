@@ -29,7 +29,8 @@ export function initCommand(options: InitOptions = {}): void {
 
   // Full slot-filling pipeline (shared with `faf auto` + `faf git`).
   const data = assembleFreshFaf(dir);
-  writeFaf(outputPath, data);
+  // --force is the explicit overwrite: a fresh file, not an update of the old one.
+  writeFaf(outputPath, data, { replace: options.force === true });
 
   const yaml = readFafRaw(outputPath);
   const result = scoreFafYaml(yaml);
