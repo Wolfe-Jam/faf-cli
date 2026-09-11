@@ -20,6 +20,11 @@ export { FAF_HEX } from './ui/colors.js';
 export { enrichScore, scoreFafYaml } from './core/scorer.js';
 export { validateFaf } from './core/schema.js';
 export { findFafFile, readFaf, readFafRaw } from './interop/faf.js';
+// Home / filesystem-root guard — the check `faf init` / `faf auto` / `faf go`
+// refuse on, by identity (device + inode), not spelling. Consumers (faf-mcp,
+// claude-faf-mcp) compose it instead of re-deriving it. The CLI's
+// assertProjectCwd is deliberately NOT exported: it exits the process.
+export { isNonProjectRoot } from './core/cwd-guard.js';
 // Context-drift engine — the mtime comparison behind `faf drift` / `faf drift
 // --json`. Pure; programmatic consumers (the VS Code extension) call
 // `computeDrift(fafPath, workspaceRoot)` directly instead of shelling out.

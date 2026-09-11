@@ -11,7 +11,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **Every writer is non-destructive, with no exceptions.** No faf writer replaces, reorders, truncates or deletes text it did not write:
+  - A legacy faf file (led by faf's header line, no block markers) is replaced only up to and including faf's own footer line; anything a user added after the footer is kept byte-for-byte. With no footer, faf can't prove where its text ends, so it puts the block on top and keeps the whole file.
+  - A fenced example that shows the marker lines is never taken over as the block; a block body that contains a marker-shaped line can no longer cut the block on a later write; a file that starts with a BOM keeps it at byte 0.
+  - `MEMORY.md` (tri-sync) is written through the same managed block as CLAUDE.md, AGENTS.md, GEMINI.md, `.cursorrules` and the Copilot file, instead of replacing the whole file.
+  - A `.faf` or `.fafm` that parses to a scalar or a list is refused with a clear error instead of being spread into character keys; an old `project: <name>` is lifted to `project: { name }`.
+  - `faf go` answers refuse, with the blocking field named, when a step on the path is not a mapping, instead of replacing it.
+- **The home and filesystem-root guard compares identity, not spelling** (device + inode), so a case-variant path on a case-insensitive disk, a symlink to home or a macOS firmlink is refused like home itself.
 - **`faf sync` help described a direction it does not take.** It said "mtime auto-direction"; since #63 the default has always written CLAUDE.md from `.faf`, never the other way. The help, the README and the 7.12.1 notes now say so: `--direction pull` is the only way back into `.faf`, and it runs only at ✪ Trophy.
+
+### Added
+- `isNonProjectRoot(dir)` is exported, so MCP servers built on faf-cli refuse the same folders `faf init`, `faf auto` and `faf go` refuse.
 
 ## [7.12.1] - 2026-09-10 — The Open Renderers Edition
 

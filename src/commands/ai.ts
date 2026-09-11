@@ -1,5 +1,6 @@
 import { findFafFile, readFaf, readFafRaw, writeFaf } from '../interop/faf.js';
 import { SLOTS, isPlaceholder } from '../core/slots.js';
+import { getNestedValue, setNestedValue, blockingStep, blockedMessage } from '../core/dot-path.js';
 import * as kernel from '../wasm/kernel.js';
 import { enrichScore } from '../core/scorer.js';
 import { displayScore } from '../ui/display.js';
@@ -28,30 +29,6 @@ export function isValidAiExtraction(v: unknown): v is string {
   const trimmed = v.trim();
   if (trimmed.length < 4 || trimmed.length > 280) {return false;}
   return !AI_SLOP_PATTERNS.some(re => re.test(trimmed));
-}
-
-/** Get a nested value from an object by dot-path */
-function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
-  const parts = path.split('.');
-  let current: unknown = obj;
-  for (const part of parts) {
-    if (current === null || current === undefined || typeof current !== 'object') {return undefined;}
-    current = (current as Record<string, unknown>)[part];
-  }
-  return current;
-}
-
-/** Set a nested value in an object by dot-path */
-function setNestedValue(obj: Record<string, unknown>, path: string, value: string): void {
-  const parts = path.split('.');
-  let current: Record<string, unknown> = obj;
-  for (let i = 0; i < parts.length - 1; i++) {
-    if (!current[parts[i]] || typeof current[parts[i]] !== 'object') {
-      current[parts[i]] = {};
-    }
-    current = current[parts[i]] as Record<string, unknown>;
-  }
-  current[parts[parts.length - 1]] = value;
 }
 
 /** AI-powered features */
@@ -95,14 +72,22 @@ async function enhanceCommand(): Promise<void> {
   const data = readFaf(fafPath);
   const yaml = readFafRaw(fafPath);
 
-  // Find empty slots
+  // Find empty slots. A slot whose section holds a scalar or a list cannot take
+  // a value without replacing that section — faf never does, so it is left out.
+  let skipped = 0;
   const emptySlots = SLOTS.filter(s => {
     const val = getNestedValue(data as Record<string, unknown>, s.path);
-    return isPlaceholder(val) && val !== 'slotignored';
+    if (!isPlaceholder(val) || val === 'slotignored') {return false;}
+    const block = blockingStep(data as Record<string, unknown>, s.path);
+    if (block) {
+      skipped++;
+      console.log(dim(`  skipped — ${blockedMessage(s.path, block)}`));
+    }
+    return !block;
   });
 
   if (emptySlots.length === 0) {
-    console.log(`${fafCyan('◆')} ai enhance  all slots populated`);
+    console.log(`${fafCyan('◆')} ai enhance  ${skipped > 0 ? 'no slot faf can fill' : 'all slots populated'}`);
     return;
   }
 

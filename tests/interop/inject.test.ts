@@ -62,16 +62,25 @@ describe('TYRE: injectFafBlock — non-destructive', () => {
     expect(readFileSync(p, 'utf-8')).toBe(once);
   });
 
-  test('legacy faf file (metastamp, no markers) → upgraded in place, no duplication', () => {
+  test('legacy faf file (metastamp, no markers, faf footer) → replaced through the footer, no duplication', () => {
     const p = join(tmp(), 'F.md');
-    // an old faf-generated file: led by the metastamp, no start/end markers
-    writeFileSync(p, '<!-- faf: demo | TS | lib | x -->\n\n# AGENTS.md — demo\nold faf body\n');
+    // an old faf-rendered CLAUDE.md: led by the metastamp, closed by faf's footer, no markers
+    writeFileSync(p, '<!-- faf: demo | TS | lib | x -->\n\n# CLAUDE.md — demo\nold faf body\n\n---\n\n*STATUS: BI-SYNC ACTIVE — 2026-05-30T23:32:37.806Z*\n');
     injectFafBlock(p, 'fresh block');
     const out = readFileSync(p, 'utf-8');
     expect(out).toContain('fresh block');
-    expect(out).not.toContain('old faf body');          // legacy faf content reclaimed
+    expect(out).not.toContain('old faf body');          // faf's own legacy output replaced
+    expect(out).not.toContain('BI-SYNC');
     expect(out.split(FAF_START).length - 1).toBe(1);    // single block, no duplication
-    expect(out.trimStart().startsWith(FAF_START)).toBe(true);
+    expect(out).toBe(`${FAF_START}\nfresh block\n${FAF_END}\n`);
+  });
+
+  test('legacy-looking file WITHOUT faf footer → prefixed, every byte kept (faf cannot prove it wrote it)', () => {
+    const p = join(tmp(), 'F.md');
+    const before = '<!-- faf: demo | TS | lib | x -->\n\n# AGENTS.md — demo\nold faf body\n';
+    writeFileSync(p, before);
+    injectFafBlock(p, 'fresh block');
+    expect(readFileSync(p, 'utf-8')).toBe(`${FAF_START}\nfresh block\n${FAF_END}\n\n${before}`);
   });
 
   test('user file WITHOUT the faf metastamp → prefixed + fully preserved (never reclaimed)', () => {
@@ -241,5 +250,110 @@ describe('BRAKE: injectFafBlock — markers are whole lines, never substrings (7
     const out = readFileSync(file, 'utf-8');
     expect(out.startsWith('# faf:start of the section\nuser-above-sentinel\n')).toBe(true);
     expect(out).toContain('keep-me'); expect(out).not.toContain('\nold\n');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Unreleased — faf replaces only text it can prove it wrote. Every case below
+// failed on 7.12.1: a legacy CLAUDE.md lost the notes appended after its
+// footer, a fenced marker example was taken over as the block, a marker line
+// inside a .faf value grew the file on every write, and a BOM was pushed off
+// byte 0.
+// ---------------------------------------------------------------------------
+const BOM = '﻿';
+const LEGACY = [
+  '<!-- faf: demo | TypeScript | cli | Demo -->',
+  '<!-- faf: claim=project.faf | family=FAF -->',
+  '',
+  '# CLAUDE.md — demo',
+  '',
+  'old faf body',
+  '',
+  '---',
+  '',
+  '*STATUS: BI-SYNC ACTIVE — 2026-05-30T23:32:37.806Z*',
+].join('\n');
+
+describe('BRAKE: legacy faf output is replaced only through its footer line', () => {
+  test('notes appended after the footer survive byte-for-byte', () => {
+    const file = join(tmp(), 'CLAUDE.md');
+    const notes = '\n\n## Team rules\n\n- never push to main\n- USER-NOTE-SENTINEL\n';
+    writeFileSync(file, `${LEGACY}${notes}`);
+    const [first, second] = twice(file, V1, V1);
+    expect(first).toBe(`${FAF_START}\n${V1}\n${FAF_END}${notes}`);
+    expect(second).toBe(first);
+  });
+
+  test('the FIRST footer line bounds the claim; a later footer-like line is user text', () => {
+    const file = join(tmp(), 'CLAUDE.md');
+    const tail = '\n\npasted from another project:\n*STATUS: SYNC ACTIVE — 2026-09-10T00:00:00.000Z*\nUSER-AFTER-SECOND-FOOTER\n';
+    writeFileSync(file, `${LEGACY}${tail}`);
+    injectFafBlock(file, V1);
+    expect(readFileSync(file, 'utf-8')).toBe(`${FAF_START}\n${V1}\n${FAF_END}${tail}`);
+  });
+
+  test('a metastamp-led file with a footer AND a marker line is not legacy output — prefixed, all kept', () => {
+    const file = join(tmp(), 'CLAUDE.md');
+    const before = `${LEGACY}\n\n\`\`\`md\n${FAF_START}\nexample\n${FAF_END}\n\`\`\`\n`;
+    writeFileSync(file, before);
+    injectFafBlock(file, V1);
+    expect(readFileSync(file, 'utf-8')).toBe(`${FAF_START}\n${V1}\n${FAF_END}\n\n${before}`);
+  });
+});
+
+describe('BRAKE: findFafBlock never takes over a balanced fenced example', () => {
+  test('markers only inside balanced fences → no block; the first write prefixes and keeps the example', () => {
+    const doc = `# Notes\n\n\`\`\`md\n${FAF_START}\n(faf writes here)\n${FAF_END}\n\`\`\`\n\n~~~\n${FAF_START}\n${FAF_END}\n~~~\n`;
+    expect(findFafBlock(doc)).toBeNull();
+    const file = join(tmp(), 'CLAUDE.md'); writeFileSync(file, doc);
+    const [first, second] = twice(file, V1, V1);
+    expect(first).toBe(`${FAF_START}\n${V1}\n${FAF_END}\n\n${doc}`);
+    expect(second).toBe(first);
+  });
+
+  test('a balanced example followed by an unclosed fence → still no block (the blind pass starts at the open fence)', () => {
+    const doc = `\`\`\`md\n${FAF_START}\nexample\n${FAF_END}\n\`\`\`\n\nuser text\n\n\`\`\`bash\nnpm test\n`;
+    expect(findFafBlock(doc)).toBeNull();
+    // …while a real block after the unclosed fence is still recovered.
+    const withReal = `${doc}\n${FAF_START}\nreal\n${FAF_END}\n`;
+    const b = findFafBlock(withReal)!;
+    expect(withReal.slice(b.start, b.end)).toBe(`${FAF_START}\nreal\n${FAF_END}`);
+  });
+});
+
+describe('BRAKE: a marker line inside the rendered body cannot cut the block', () => {
+  test('body lines equal to a marker are indented one space; the file is stable across writes', () => {
+    const file = join(tmp(), 'CLAUDE.md');
+    writeFileSync(file, 'user-above\n');
+    const body = `# CLAUDE.md — demo\n\nGoal documents the markers:\n${FAF_START}\n${FAF_END}  \nend of goal`;
+    const sizes: number[] = [];
+    for (let i = 0; i < 4; i++) { injectFafBlock(file, body); sizes.push(readFileSync(file, 'utf-8').length); }
+    expect(new Set(sizes).size).toBe(1);
+    const out = readFileSync(file, 'utf-8');
+    expect(out).toContain(`\n ${FAF_START}\n ${FAF_END}  \n`);
+    // The finder only treats a marker at column 0 as a marker; the guarded body
+    // lines start with a space, so count column-0 markers (trailing space ignored).
+    const atColumn0 = (m: string): number => out.split('\n').filter(l => l.replace(/\s+$/, '') === m).length;
+    expect(atColumn0(FAF_START)).toBe(1);
+    expect(atColumn0(FAF_END)).toBe(1);
+    expect(out.endsWith('\n\nuser-above\n')).toBe(true);
+  });
+
+  test('hash markers (.cursorrules) get the same guard', () => {
+    const file = join(tmp(), '.cursorrules');
+    const body = 'rules\n# faf:end\nmore rules';
+    injectFafBlock(file, body, '# faf:start', '# faf:end');
+    injectFafBlock(file, body, '# faf:start', '# faf:end');
+    expect(readFileSync(file, 'utf-8')).toBe('# faf:start\nrules\n # faf:end\nmore rules\n# faf:end\n');
+  });
+});
+
+describe('BRAKE: a leading BOM stays at byte 0', () => {
+  test('prefixing a BOM-led user file puts the block after the BOM', () => {
+    const file = join(tmp(), 'CLAUDE.md');
+    writeFileSync(file, `${BOM}# Mine\nuser-line\n`);
+    const [first, second] = twice(file, V1, V1);
+    expect(first).toBe(`${BOM}${FAF_START}\n${V1}\n${FAF_END}\n\n# Mine\nuser-line\n`);
+    expect(second).toBe(first);
   });
 });

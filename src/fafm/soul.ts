@@ -22,6 +22,17 @@ function isNil(v: unknown): v is null | undefined {
   return v === null || v === undefined;
 }
 
+/** Plain words for a YAML value's shape, for load errors. */
+function shapeOf(v: unknown): string {
+  if (Array.isArray(v)) {return `a list (${v.length} item${v.length === 1 ? '' : 's'})`;}
+  if (isNil(v)) {return 'empty';}
+  if (typeof v === 'string') {return `a string (${JSON.stringify(v.length > 40 ? `${v.slice(0, 40)}…` : v)})`;}
+  return `a ${typeof v}`;
+}
+
+const isMap = (v: unknown): v is Record<string, unknown> =>
+  typeof v === 'object' && v !== null && !Array.isArray(v);
+
 export function canonicalPriority(p: string | null | undefined): string {
   if (isNil(p)) {return 'standard';}
   if (LEGACY_PRIORITY[p]) {return LEGACY_PRIORITY[p];}
@@ -179,15 +190,20 @@ export class Soul {
       throw new Error(`soul file not found: ${path}`);
     }
     const raw = readFileSync(path, 'utf-8');
-    const doc = parseYaml(raw) as Record<string, unknown> | null;
-    if (!doc || typeof doc !== 'object') {
-      throw new Error('soul is not a YAML mapping');
+    const doc: unknown = parseYaml(raw);
+    // Shape guards: a list or scalar here would be spread into index keys (or
+    // dropped) and the next save would write that back. Refuse; change nothing.
+    if (!isMap(doc)) {
+      throw new Error(`soul is not a YAML mapping: ${path} is ${shapeOf(doc)}`);
     }
-    const memory =
-      doc.memory && typeof doc.memory === 'object'
-        ? (doc.memory as Record<string, unknown>)
-        : {};
-    const factsRaw = Array.isArray(memory.facts) ? memory.facts : [];
+    if (!isNil(doc.memory) && !isMap(doc.memory)) {
+      throw new Error(`soul memory is not a YAML mapping: ${path} has memory as ${shapeOf(doc.memory)}`);
+    }
+    const memory = (doc.memory ?? {}) as Record<string, unknown>;
+    if (!isNil(memory.facts) && !Array.isArray(memory.facts)) {
+      throw new Error(`soul memory.facts is not a YAML list: ${path} has memory.facts as ${shapeOf(memory.facts)}`);
+    }
+    const factsRaw = (memory.facts ?? []) as unknown[];
     const docExtra: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(doc)) {
       if (!KNOWN_DOC_KEYS.has(k)) {docExtra[k] = structuredClone(v);}

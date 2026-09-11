@@ -4,6 +4,7 @@ import { join } from 'path';
 import { findFafFile, readFaf, readFafRaw, writeFaf } from '../interop/faf.js';
 import { SLOTS, isPlaceholder } from '../core/slots.js';
 import { questionForSlot } from '../core/interview.js';
+import { getNestedValue, setNestedValue, blockingStep, blockedMessage } from '../core/dot-path.js';
 import * as kernel from '../wasm/kernel.js';
 import { enrichScore } from '../core/scorer.js';
 import { displayScore } from '../ui/display.js';
@@ -21,28 +22,25 @@ interface GoSession {
   fafPath: string;
 }
 
-/** Get a nested value from an object by dot-path */
-function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
-  const parts = path.split('.');
-  let current: unknown = obj;
-  for (const part of parts) {
-    if (current === null || current === undefined || typeof current !== 'object') {return undefined;}
-    current = (current as Record<string, unknown>)[part];
+/**
+ * An answer can only land under a mapping. If a slot's section holds a scalar
+ * or a list (older writers stored `project: <name>`), refuse BEFORE asking
+ * anything: faf never replaces that value with {}, and no typed answer is lost.
+ */
+function refuseBlockedSections(data: Record<string, unknown>, paths: string[]): void {
+  const blocked = new Map<string, string>(); // step → message, one per section
+  for (const path of paths) {
+    const block = blockingStep(data, path);
+    if (block && !blocked.has(block.at)) {blocked.set(block.at, blockedMessage(path, block));}
   }
-  return current;
-}
-
-/** Set a nested value in an object by dot-path */
-function setNestedValue(obj: Record<string, unknown>, path: string, value: string): void {
-  const parts = path.split('.');
-  let current: Record<string, unknown> = obj;
-  for (let i = 0; i < parts.length - 1; i++) {
-    if (!current[parts[i]] || typeof current[parts[i]] !== 'object') {
-      current[parts[i]] = {};
-    }
-    current = current[parts[i]] as Record<string, unknown>;
+  if (blocked.size === 0) {return;}
+  console.error(`${bold('×')} go  project.faf has a section faf cannot write under — nothing was changed:`);
+  for (const msg of blocked.values()) {console.error(`  ${msg}`);}
+  const project = data.project;
+  if (project !== null && project !== undefined && typeof project !== 'object') {
+    console.error(dim("  'faf auto' moves a bare `project: <name>` to `project.name` for you."));
   }
-  current[parts[parts.length - 1]] = value;
+  process.exit(1);
 }
 
 /** Guided interview to gold code */
@@ -74,6 +72,8 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
     const val = getNestedValue(data as Record<string, unknown>, s.path);
     return isPlaceholder(val) && val !== 'slotignored';
   });
+
+  refuseBlockedSections(data as Record<string, unknown>, emptySlots.map(s => s.path));
 
   if (emptySlots.length === 0) {
     console.log(`${fafCyan('◆')} go  all slots populated — ✪ Trophy`);

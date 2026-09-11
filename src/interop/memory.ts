@@ -1,5 +1,6 @@
-import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
+import { injectFafBlock } from './inject.js';
 
 /** Read MEMORY.md content */
 export function readMemoryMd(dir: string): string | null {
@@ -8,7 +9,8 @@ export function readMemoryMd(dir: string): string | null {
   return readFileSync(path, 'utf-8');
 }
 
-/** Write MEMORY.md content */
+/** Write MEMORY.md — non-destructive: injects/updates the faf block, preserves the rest.
+ *  Same managed block (and the same injector) as CLAUDE.md, AGENTS.md and the other writers. */
 export function writeMemoryMd(dir: string, content: string): void {
-  writeFileSync(join(dir, 'MEMORY.md'), content, 'utf-8');
+  injectFafBlock(join(dir, 'MEMORY.md'), content);
 }

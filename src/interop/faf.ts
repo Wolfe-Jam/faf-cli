@@ -3,11 +3,14 @@ import { join, dirname, basename } from 'path';
 import { execFileSync } from 'child_process';
 import { parse, stringify } from 'yaml';
 import type { FafData } from '../core/types.js';
+import { asFafMapping } from '../core/shape.js';
 
-/** Read and parse a .faf file */
+/** Read and parse a .faf file. Always a mapping: an empty file reads as `{}`;
+ *  a file that parses to a scalar or a list throws a clear Error instead of
+ *  handing callers a value they would spread into character keys. */
 export function readFaf(path: string): FafData {
   const text = readFileSync(path, 'utf-8');
-  return parse(text) as FafData;
+  return asFafMapping(parse(text), path) as FafData;
 }
 
 /** Write a .faf file from data.

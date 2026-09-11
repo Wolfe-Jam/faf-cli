@@ -1,4 +1,5 @@
 import { findFafFile, readFaf, writeFaf } from '../interop/faf.js';
+import { blockingStep, blockedMessage, setNestedValue } from '../core/dot-path.js';
 import { fafCyan, dim } from '../ui/colors.js';
 
 /** Edit a .faf field by dot-path */
@@ -22,13 +23,15 @@ export function editCommand(path: string, value: string): void {
     process.exit(1);
   }
 
-  const [section, field] = parts;
-
-  if (!data[section] || typeof data[section] !== 'object') {
-    (data as Record<string, unknown>)[section] = {};
+  // A section that holds a scalar or a list is never replaced with {} to make
+  // room for the field — refuse and leave project.faf as it is.
+  const block = blockingStep(data as Record<string, unknown>, path);
+  if (block) {
+    console.error(`Error: ${blockedMessage(path, block)}`);
+    process.exit(1);
   }
 
-  (data[section] as Record<string, unknown>)[field] = value;
+  setNestedValue(data as Record<string, unknown>, path, value);
   writeFaf(fafPath, data);
 
   console.log(`${fafCyan('updated')} ${path} ${dim('→')} ${value}`);

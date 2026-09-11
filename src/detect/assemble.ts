@@ -12,6 +12,7 @@ import { interrogateRepo } from '../interrogate/index.js';
 import { turboCatSlots } from './turbo-cat.js';
 import { relentlessContext } from './relentless.js';
 import { APP_TYPE_CATEGORIES, SLOTS, isPlaceholder } from '../core/slots.js';
+import { asFafMapping, isMapping } from '../core/shape.js';
 
 /** Build a fresh .faf for `dir` using the full slot-filling pipeline. */
 export function assembleFreshFaf(dir: string): Record<string, unknown> {
@@ -46,12 +47,26 @@ export function assembleFreshFaf(dir: string): Record<string, unknown> {
  * consumers (faf-mcp's faf_auto) compose it instead of re-deriving it and
  * drifting (they used to merge assembleFreshFaf's slotignore'd output over the
  * existing file, losing interrogated facts such as a docker-compose Redis).
+ *
+ * Shape: `existing` must be a mapping (an empty document, null, reads as `{}`);
+ * a scalar or a list throws rather than being spread into character keys. A
+ * non-null scalar `project:` (older writers stored `project: <name>`) is lifted
+ * to `{ name: String(value) }`, so the name is kept and the rest can be filled.
  */
 export function updateExistingFaf(dir: string, existing: Record<string, unknown>): Record<string, unknown> {
-  const withInterrogated = fillEmpties(existing, interrogateRepo(dir) as Record<string, unknown>);
+  const base = liftScalarProject(asFafMapping(existing, 'updateExistingFaf: the existing .faf'));
+  const withInterrogated = fillEmpties(base, interrogateRepo(dir) as Record<string, unknown>);
   const merged = fillEmpties(withInterrogated, detectStack(dir) as Record<string, unknown>);
   const withFormats = fillEmpties(merged, turboCatSlots(dir) as Record<string, unknown>);
   return fillEmpties(withFormats, { human_context: relentlessContext(dir) } as Record<string, unknown>);
+}
+
+/** `project: <scalar>` → `project: { name: String(value) }`. A list is left as it is
+ *  (fillEmpties never descends into or spreads a list). Returns a new object. */
+function liftScalarProject(data: Record<string, unknown>): Record<string, unknown> {
+  const project = data.project;
+  if (project === null || project === undefined || isMapping(project) || Array.isArray(project)) {return data;}
+  return { ...data, project: { name: String(project) } };
 }
 
 /** Mark slots outside the app-type's active categories as `slotignored`. */

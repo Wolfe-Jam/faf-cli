@@ -1,4 +1,4 @@
-import { findFafFile, readFaf, readFafRaw } from '../interop/faf.js';
+import { findFafFile, readFafFromString, readFafRaw } from '../interop/faf.js';
 import { validateFaf } from '../core/schema.js';
 import * as kernel from '../wasm/kernel.js';
 import { scoreFafYaml } from '../core/scorer.js';
@@ -20,7 +20,9 @@ export function checkCommand(file?: string, options: CheckOptions = {}): void {
     process.exit(2);
   }
 
-  const data = readFaf(fafPath);
+  // Unguarded parse on purpose: `faf check` REPORTS a file that is not a YAML
+  // mapping (validateFaf says so, exit 3) — readFaf would throw on it instead.
+  const data = readFafFromString(readFafRaw(fafPath));
   const validation = validateFaf(data);
 
   if (!validation.valid) {
