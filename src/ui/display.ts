@@ -3,8 +3,9 @@ import { tierBadge } from '../core/tiers.js';
 import { bold, dim, fafCyan, orange } from './colors.js';
 import { maybeStarNudge } from './star-nudge.js';
 
-/** Display a score result to stdout */
-export function displayScore(result: ScoreResult, file: string, verbose = false): void {
+/** Display a score result to stdout. `notes` are printed, one per line,
+ *  right under the score (the typed-none lines of `faf score` / `faf auto`). */
+export function displayScore(result: ScoreResult, file: string, verbose = false, notes: readonly string[] = []): void {
   if (result.unknown) {
     // An About Repo with no source_score: there is no score to show, so no
     // number, no percentage and no tier — just what is and isn't known.
@@ -33,6 +34,7 @@ export function displayScore(result: ScoreResult, file: string, verbose = false)
     const noun = result.empty === 1 ? 'slot' : 'slots';
     console.log(dim(`  ${result.empty} ${noun} from Trophy: ${preview}${suffix}`));
   }
+  printNotes(notes);
 
   if (verbose) {
     console.log('');
@@ -41,6 +43,11 @@ export function displayScore(result: ScoreResult, file: string, verbose = false)
 
   // Capture the reservoir: a quiet star ask after a genuine win (gated in star-nudge.ts).
   maybeStarNudge(result.score);
+}
+
+/** One dim, indented line per note. */
+function printNotes(notes: readonly string[]): void {
+  for (const note of notes) {console.log(dim(`  ${note}`));}
 }
 
 /** Display individual slot states */

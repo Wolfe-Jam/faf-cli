@@ -1,5 +1,6 @@
 import { findFafFile, readFafRaw, readFaf } from '../interop/faf.js';
 import { scoreFafYaml, scoreText } from '../core/scorer.js';
+import { typedNoneHints } from '../core/typed-none.js';
 import { displayScore } from '../ui/display.js';
 import { tierBadge } from '../core/tiers.js';
 import { bold } from '../ui/colors.js';
@@ -43,5 +44,7 @@ export function scoreCommand(file?: string, options: ScoreOptions = {}): void {
     return;
   }
 
-  displayScore(result, fafPath, options.verbose);
+  // A slot the app-type needs that still holds a typed None / N/A counts as
+  // empty — say so under the score, one line per slot. Nothing is written.
+  displayScore(result, fafPath, options.verbose, typedNoneHints(yaml, result));
 }

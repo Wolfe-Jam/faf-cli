@@ -4,6 +4,7 @@ import { assembleFreshFaf, updateExistingFaf } from '../detect/assemble.js';
 import { aliasKeptNote, writeFaf, readFaf, readFafRaw } from '../interop/faf.js';
 import * as kernel from '../wasm/kernel.js';
 import { enrichScore } from '../core/scorer.js';
+import { typedNoneHints } from '../core/typed-none.js';
 import { FafDNAManager } from '../core/faf-dna.js';
 import { sayWhyDnaIsLeft } from './dna.js';
 import { displayScore } from '../ui/display.js';
@@ -45,7 +46,9 @@ export function autoCommand(): void {
     sayWhyDnaIsLeft(dna);
   }
 
-  displayScore(result, fafPath);
+  // A slot the app-type needs that still holds a typed None / N/A (no repo
+  // fact filled it) counts as empty — say so under the score, one line per slot.
+  displayScore(result, fafPath, false, typedNoneHints(yaml, result));
 
   if (result.score < 100) {
     console.log(dim(`\n  run ${bold("'faf go'")} to reach ✪ Trophy`));

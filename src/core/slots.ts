@@ -125,16 +125,18 @@ export const PLACEHOLDERS = new Set([
   'not applicable',
 ]);
 
-/** The words a person writes to say "this slot does not apply": `None`,
- *  `N/A`, `not applicable` (any case). The explicit-none sentinel — the same
- *  decision as `slotignored`. faf keeps it: a detected value never replaces
- *  it, and when faf writes the slot it records it as `slotignored`. */
+/** `None`, `N/A`, `not applicable` (any case):
+ *  a typed none — counts as an empty slot. It scores 0 until filled; faf auto
+ *  fills a tech slot from a repo fact and otherwise keeps the words as typed,
+ *  and never rewrites them to `slotignored`. */
 export const EXPLICIT_NONE: ReadonlySet<string> = new Set(['none', 'n/a', 'not applicable']);
 
-/** The value that marks a slot as not applicable (the What-Not). */
+/** The value that marks a slot as not applicable (the What-Not). It comes
+ *  only from the app-type (shown to people as N/A); a typed word never means it. */
 export const SLOTIGNORED = 'slotignored';
 
-/** True for a hand-written explicit none — `None`, `N/A`, `not applicable`, `none` (any case). */
+/** True for a typed none — counts as an empty slot: `None`, `N/A`,
+ *  `not applicable`, `none` (any case, any padding). */
 export function isExplicitNone(value: unknown): boolean {
   return typeof value === 'string' && EXPLICIT_NONE.has(value.trim().toLowerCase());
 }

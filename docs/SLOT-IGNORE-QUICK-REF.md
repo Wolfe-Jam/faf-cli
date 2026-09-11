@@ -4,70 +4,33 @@
 
 **Slot-ignore** = Like `.gitignore` for context slots
 
-Set slots to `'None'` when they don't apply to your project type.
+faf writes `slotignored` (shown as N/A) into the slots your app-type leaves out. You don't type it: the app-type decides which slots count.
 
-## The Formula
-
-```
-Score = (Filled + Ignored) / 21 * 100
-
-Example:
-  15 filled + 6 ignored = 21/21 = 100% ✅
-```
+A typed `None`, `N/A` or `not applicable` is **not** slot-ignore. It is an empty slot, and it scores 0 until filled.
 
 ## Common Patterns
 
-### CLI Tools
-```yaml
-stack:
-  db: None           # No data storage
-  css: None      # No web UI
-  framework: None           # No client-side framework
-```
-
-### Backend APIs
-```yaml
-stack:
-  css: None      # No framework
-  framework: None           # No UI framework
-  ui_library: None         # No UI components
-```
-
-### Static Sites
-```yaml
-stack:
-  backend: None            # No server code
-  db: None           # No data storage
-  api: None           # No API
-```
-
-### Libraries/SDKs
-```yaml
-stack:
-  hosting: None            # Not deployed
-  db: None           # No runtime storage
-  cicd: None               # Consumer handles CI
-```
+| App-type | Left out (`slotignored`) |
+|----------|--------------------------|
+| `cli`, `library` | the frontend and backend slots |
+| `frontend`, `website` | the backend slots |
+| `backend`, `mcp` | the frontend slots |
+| `fullstack` | nothing — all 21 base slots count |
 
 ## Quick Check
 
 | Value | Status | Score Impact |
 |-------|--------|--------------|
-| `PostgreSQL` | ✅ Filled | Counts toward score |
-| `None` | ✅ Ignored | Counts toward score |
-| `(undefined)` | ❌ Missing | Doesn't count |
+| `PostgreSQL` | ✅ Filled | Counts for the score |
+| `slotignored` | — Ignored (N/A) | Not counted |
+| `None`, `N/A`, `not applicable` | ❌ Empty | Counts against the score until filled |
+| `(undefined)`, `""` | ❌ Empty | Counts against the score until filled |
 
-## Implementation
+## A typed None
 
-```typescript
-// Set slot-ignore
-contextSlotsFilled['db'] = 'None';
-
-// Check slot-ignore
-if (!db && db !== 'None') {
-  missingSlots.push('Database');  // Only if NOT ignored
-}
-```
+- **Tech slots:** if it's a fact, fill the slot. `faf auto` fills it when the repo has the fact; with no fact your words stay as typed, and faf never rewrites them to `slotignored`.
+- **The 6Ws:** yours. `faf auto` never replaces a typed none there; `faf go` asks.
+- `faf score` and `faf auto` print one line for each slot the app-type needs that still holds a typed none: `stack.database says 'None' — this app-type needs it, so it counts as empty until filled.`
 
 ## Full Documentation
 
@@ -75,4 +38,4 @@ See [SLOT-IGNORE.md](./SLOT-IGNORE.md) for complete specification.
 
 ---
 
-**Remember:** Ignored ≠ Missing. Ignored = "Doesn't apply, and that's correct." 🏎️
+**Remember:** Ignored ≠ Empty. Ignored = "this app-type doesn't use the slot." 🏎️

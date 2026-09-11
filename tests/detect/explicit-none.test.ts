@@ -1,15 +1,18 @@
 /**
- * BRAKE: a hand-written none is a decision, not a gap — owner decision Q8,
- * audit #37.
+ * BRAKE: a typed None / N/A / not applicable is an EMPTY slot — owner
+ * decision Q8, FINAL (2026-09-11), audit #37.
  *
- * `database: None # deliberate: stateless`, `frontend: N/A` and
- * `hosting: not applicable` are the explicit-none sentinel: the same decision
- * as `slotignored`. fce35d6b treated them as empty placeholders, so `faf auto`
- * (updateExistingFaf) replaced them with detected values — PostgreSQL, React,
- * a host — and the comment went with them. Now no detected value replaces
- * one, and it keeps its own text (Q8 with the owner rule: faf writes
- * `slotignored` only into a slot that was empty). Scoring counts it as
- * `slotignored`.
+ * It scores 0 until filled; the app-type alone decides which slots count, and
+ * `slotignored` comes only from the app-type. Tech slots (every slot but the
+ * 6Ws): "if it's a fact, fill the slot" — a repo fact replaces the typed
+ * none; with no fact the typed words stay byte for byte, comment included,
+ * and faf never rewrites them to `slotignored`. The 6Ws are the person's:
+ * auto never replaces a typed none there.
+ *
+ * Before: fce35d6b (7.12) read the words as a placeholder, so `faf auto` wrote
+ * a detected `slotignored` (or `''`) over them when the repo had no fact —
+ * which lifted the score. Round 3a kept every typed none, even against a
+ * fact, and scored it as `slotignored`.
  */
 import { describe, test, expect } from 'bun:test';
 import { mkdtempSync, readFileSync, realpathSync, writeFileSync } from 'fs';
@@ -37,7 +40,7 @@ function repo(): string {
 type Stack = Record<string, unknown>;
 const stackOf = (data: Record<string, unknown>): Stack => data.stack as Stack;
 
-describe('BRAKE: explicit none — never replaced by a detected value', () => {
+describe('BRAKE: a typed none is an empty slot — a fact fills a tech slot, nothing else replaces it', () => {
   test('isExplicitNone is public: None, N/A, not applicable, none — any case, any padding', () => {
     const isExplicitNone = (api as Record<string, unknown>).isExplicitNone as ((v: unknown) => boolean) | undefined;
     expect(typeof isExplicitNone).toBe('function');
@@ -49,46 +52,64 @@ describe('BRAKE: explicit none — never replaced by a detected value', () => {
     }
   });
 
-  test('fillEmpties: at a slot, a hand-written none keeps its own text — the detected value is not used', () => {
+  test('fillEmpties: in a tech slot, a fact replaces the typed none (under either of the slot\'s names)', () => {
     const out = fillEmpties(
-      { stack: { database: 'None', frontend: 'N/A', hosting: ' Not Applicable ', cicd: 'NONE', build: '' } },
-      { stack: { database: 'PostgreSQL', frontend: 'React', hosting: 'Vercel', cicd: 'GitHub Actions', build: 'Vite' } },
+      { stack: { database: 'None', frontend: 'N/A', hosting: ' Not Applicable ', cicd: 'NONE', build: '', css: 'none' } },
+      { stack: { database: 'PostgreSQL', frontend: 'React', hosting: 'Vercel', cicd: 'GitHub Actions', build: 'Vite', css: 'Tailwind' } },
     );
-    expect(stackOf(out)).toEqual({ database: 'None', frontend: 'N/A', hosting: ' Not Applicable ', cicd: 'NONE', build: 'Vite' });
+    expect(stackOf(out)).toEqual({ database: 'PostgreSQL', frontend: 'React', hosting: 'Vercel', cicd: 'GitHub Actions', build: 'Vite', css: 'Tailwind' });
   });
 
-  test('fillEmpties: outside a slot, a hand-written none is kept exactly as written', () => {
+  test('fillEmpties: with no fact the typed words stay exactly — never `slotignored`, never a placeholder', () => {
+    const target = { stack: { database: 'None', frontend: 'N/A', hosting: 'not applicable', cicd: 'none', build: 'N/A', runtime: 'None' } };
+    const out = fillEmpties(target, {
+      stack: { database: '', frontend: 'slotignored', hosting: 'unknown', cicd: null, build: 'None', runtime: '   ' },
+    });
+    expect(out).toEqual(target);
+  });
+
+  test('fillEmpties: a 6W typed none is the person\'s — a detected value never replaces it', () => {
+    const out = fillEmpties(
+      { human_context: { who: 'None', why: 'N/A', what: '' } },
+      { human_context: { who: 'Platform devs', why: 'To ship faster', what: 'A web app' } },
+    );
+    expect(out.human_context).toEqual({ who: 'None', why: 'N/A', what: 'A web app' });
+  });
+
+  test('fillEmpties: outside the slots, a typed none is kept exactly as written', () => {
     const out = fillEmpties({ project: { type: 'none' }, notes: 'N/A' }, { project: { type: 'cli' }, notes: 'detected' });
     expect(out).toEqual({ project: { type: 'none' }, notes: 'N/A' });
   });
 
-  test('updateExistingFaf (faf auto): None / N/A / not applicable stay as written, not PostgreSQL / React / a host', () => {
+  test('updateExistingFaf (faf auto): repo facts fill None / N/A; a slot with no fact and a 6W keep their words', () => {
     const out = updateExistingFaf(repo(), {
       project: { name: 'web', type: 'frontend' },
-      stack: { database: 'None', frontend: 'N/A', hosting: 'not applicable' },
+      stack: { database: 'None', frontend: 'N/A', css_framework: 'not applicable' },
+      human_context: { who: 'None' },
     });
-    expect(stackOf(out).database).toBe('None');
-    expect(stackOf(out).frontend).toBe('N/A');
-    expect(stackOf(out).hosting).toBe('not applicable');
+    expect(stackOf(out).database).toBe('PostgreSQL'); // docker-compose: postgres
+    expect(stackOf(out).frontend).toBe('React'); // package.json: react
+    expect(stackOf(out).css_framework).toBe('not applicable'); // no fact in the repo
+    expect((out.human_context as Record<string, unknown>).who).toBe('None'); // the 6Ws are the person's
   });
 
-  test('a slot marked none (or slotignored) under its other name is not filled under this one', () => {
+  test('`slotignored` under either name still keeps detection out; a typed none under the other name does not', () => {
     const out = updateExistingFaf(repo(), {
       project: { name: 'web', type: 'frontend' },
       stack: { framework: 'None', db: 'slotignored' },
     });
-    expect(stackOf(out).frontend).toBeUndefined();
-    expect(stackOf(out).database).toBeUndefined();
-    expect(stackOf(out).framework).toBe('None');
+    expect(stackOf(out).database).toBeUndefined(); // stack.db says slotignored: no PostgreSQL under stack.database
     expect(stackOf(out).db).toBe('slotignored');
+    expect(stackOf(out).frontend).toBe('React'); // a typed none is empty: the fact fills the slot
+    expect(stackOf(out).framework).toBe('None'); // and the words under the other name are not rewritten
 
-    // An empty placeholder under one name does not open the slot up again.
+    // An empty value and a typed none under the slot's two names: the fact fills it.
     const both = updateExistingFaf(repo(), { project: { name: 'web', type: 'frontend' }, stack: { database: '', db: 'N/A' } });
-    expect(stackOf(both).database).toBe('');
+    expect(stackOf(both).database).toBe('PostgreSQL');
     expect(stackOf(both).db).toBe('N/A');
   });
 
-  test('the written file: the decision keeps its own words and comment; scoring reads it as slotignored', () => {
+  test('the written file: a fact lands in place with the comment kept; no fact leaves the line byte for byte; it scores as empty', () => {
     const dir = repo();
     const path = join(dir, 'project.faf');
     writeFileSync(path, [
@@ -97,20 +118,23 @@ describe('BRAKE: explicit none — never replaced by a detected value', () => {
       '  type: frontend',
       'stack:',
       '  database: None # deliberate: stateless',
-      '  frontend: N/A',
-      '  hosting: not applicable',
+      '  css_framework: not applicable # CSS-NONE',
+      'human_context:',
+      '  who: N/A # WHO-NA',
       '',
     ].join('\n'));
     writeFaf(path, updateExistingFaf(dir, readFaf(path)));
-    const text = readFileSync(path, 'utf-8');
-    expect(text).toContain('\n  database: None # deliberate: stateless\n  frontend: N/A\n  hosting: not applicable\n');
-    const stack = stackOf(readFaf(path) as Record<string, unknown>);
-    expect([stack.database, stack.frontend, stack.hosting]).toEqual(['None', 'N/A', 'not applicable']);
-    // Scoring counts each as slotignored, exactly as if faf had written the word.
+    const lines = readFileSync(path, 'utf-8').split('\n');
+    expect(lines).toContain('  database: PostgreSQL # deliberate: stateless');
+    expect(lines).toContain('  css_framework: not applicable # CSS-NONE');
+    expect(lines).toContain('  who: N/A # WHO-NA');
+    expect(lines.some(l => l.includes('slotignored') && /css_framework|who:/.test(l))).toBe(false);
+    // Scoring reads a typed none as an empty slot — exactly like the empty value.
+    const text = lines.join('\n');
     const slots = scoreFafYaml(text).slots;
-    expect([slots['stack.database'], slots['stack.frontend'], slots['stack.hosting']]).toEqual(['slotignored', 'slotignored', 'slotignored']);
-    const asWord = text.replace('None # deliberate', 'slotignored # deliberate').replace('frontend: N/A', 'frontend: slotignored').replace('hosting: not applicable', 'hosting: slotignored');
-    expect(scoreFafYaml(text).score).toBe(scoreFafYaml(asWord).score);
+    expect([slots['stack.css_framework'], slots['human_context.who']]).toEqual(['empty', 'empty']);
+    const asEmpty = text.replace('css_framework: not applicable', 'css_framework: ""').replace('who: N/A', 'who: ""');
+    expect(scoreFafYaml(text).score).toBe(scoreFafYaml(asEmpty).score);
   });
 
   test('a user _meta is never merged into by faf\'s runtime _meta', () => {

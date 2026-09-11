@@ -9,7 +9,7 @@ The notes below are being consolidated into docs.faf.one over time.
 - [GUIDE.md](./GUIDE.md) — the walkthrough
 - [SCORING.md](./SCORING.md) — how the 0–100% score works
 - [SYNC.md](./SYNC.md) — `.faf` ↔ `CLAUDE.md`
-- [SLOT-IGNORE.md](./SLOT-IGNORE.md) · [quick ref](./SLOT-IGNORE-QUICK-REF.md) — marking slots N/A
+- [SLOT-IGNORE.md](./SLOT-IGNORE.md) · [quick ref](./SLOT-IGNORE-QUICK-REF.md) — slots an app-type leaves out (`slotignored`, shown as N/A)
 - [TESTING.md](./TESTING.md) — the test suite
 - [PRO.md](./PRO.md) — Pro features
 - [ECOSYSTEM.md](./ECOSYSTEM.md) · [SKILLS.md](./SKILLS.md) — the wider FAF family

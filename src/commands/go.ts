@@ -2,6 +2,7 @@ import { createInterface } from 'readline';
 import { join } from 'path';
 import { aliasKeptNote, findFafFile, readFaf, readFafRaw, writeFaf } from '../interop/faf.js';
 import { SLOTS, SLOTIGNORED, isExplicitNone, isPlaceholder } from '../core/slots.js';
+import type { SlotDef } from '../core/types.js';
 import { questionForSlot } from '../core/interview.js';
 import { getNestedValue, setNestedValue, blockingStep, blockedMessage } from '../core/dot-path.js';
 import * as kernel from '../wasm/kernel.js';
@@ -98,6 +99,15 @@ function refuseBlockedSections(data: Record<string, unknown>, paths: string[]): 
   process.exit(1);
 }
 
+/** The question for `slot`, in the interview voice of the single-source
+ *  registry (core/interview.ts) — the same question CFM's faf_go and every
+ *  other consumer asks. A typed none is shown as it is, so the person can keep
+ *  it (Enter) or answer. */
+function questionLine(slot: SlotDef, current: unknown): string {
+  const keep = isExplicitNone(current) ? ` ${dim(`now '${String(current).trim()}' — Enter keeps it`)}` : '';
+  return `  ${bold(`#${slot.index}`)} ${questionForSlot(slot.path)} ${dim(`(${slot.path})`)}${keep}: `;
+}
+
 /** Guided interview to gold code */
 export async function goCommand(options: GoOptions = {}): Promise<void> {
   assertProjectCwd(process.cwd(), 'faf go');
@@ -121,11 +131,12 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
 
   const data = readFaf(fafPath);
 
-  // Find empty slots. A hand-written None / N/A / not applicable is a decision,
-  // not a gap (Q8): it is never asked about, so no answer replaces it.
+  // Find empty slots. A typed None / N/A / not applicable is an empty slot, so
+  // it is asked about like any other; the question shows the words, and Enter
+  // keeps them. `slotignored` (the app-type leaves the slot out) is never asked.
   const emptySlots = SLOTS.filter(s => {
     const val = getNestedValue(data as Record<string, unknown>, s.path);
-    return isPlaceholder(val) && val !== SLOTIGNORED && !isExplicitNone(val);
+    return isPlaceholder(val) && val !== SLOTIGNORED;
   });
 
   refuseBlockedSections(data as Record<string, unknown>, emptySlots.map(s => s.path));
@@ -152,9 +163,7 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
 
   for (let i = 0; i < slotsToProcess.length; i++) {
     const slot = slotsToProcess[i];
-    // Interview voice from the single-source registry (core/interview.ts) —
-    // the same question CFM's faf_go and every other consumer asks.
-    const answer = await ask(`  ${bold(`#${slot.index}`)} ${questionForSlot(slot.path)} ${dim(`(${slot.path})`)}: `);
+    const answer = await ask(questionLine(slot, getNestedValue(data as Record<string, unknown>, slot.path)));
 
     if (answer.toLowerCase() === 'quit') {
       // Save session for resume

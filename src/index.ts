@@ -15,8 +15,9 @@ export type {
 } from './core/types.js';
 
 export { SLOTS, BASE_SLOTS, ENTERPRISE_SLOTS, SLOT_BY_PATH, slotsByCategory, PLACEHOLDERS, isPlaceholder } from './core/slots.js';
-// Explicit none: a hand-written `None` / `N/A` / `not applicable` is a decision
-// (the same as `slotignored`), never a gap a detected value may fill.
+// A typed none — `None` / `N/A` / `not applicable` — counts as an empty slot:
+// it scores 0 until filled, and a repo fact fills it. `slotignored` comes only
+// from the app-type.
 export { EXPLICIT_NONE, SLOTIGNORED, isExplicitNone } from './core/slots.js';
 export { TIERS, getTier, getNextTier } from './core/tiers.js';
 export { FAF_HEX } from './ui/colors.js';

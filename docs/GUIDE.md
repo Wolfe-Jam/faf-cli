@@ -155,7 +155,7 @@ faf init
 ```bash
 faf init                    # Start from your codebase
 faf go                      # Interview to 100%
-faf auto                    # Auto-enhance to Gold Code
+faf auto                    # Fill slots from repo facts
 ```
 
 ### Exploring Repos

@@ -2,255 +2,60 @@
 
 ## Overview
 
-**Slot-ignore** is the mechanism for handling slots that don't apply to certain project types. Like `.gitignore` for files and `.fafignore` for scanning, **slot-ignore** tells the scoring system: "This slot exists, but it's not applicable to this project type."
+**Slot-ignore** is how a slot that does not apply to a project's app-type is left out of the score. Like `.gitignore` for files and `.fafignore` for scanning, it tells the scorer: "this slot exists, but this app-type does not use it."
+
+The value is `slotignored`, shown to people as **N/A**. It comes from the app-type (`project.type`), and only from it.
 
 ## The Problem It Solves
 
 **Without slot-ignore:**
-- CLI tool with no db → "Database missing" → Low score ❌
+- CLI tool with no database → "Database missing" → Low score ❌
 - Static site with no backend → "Backend missing" → Low score ❌
-- Library with no hosting → "Hosting missing" → Low score ❌
 
 **With slot-ignore:**
-- CLI tool with `db: None` → Database ignored → Not counted as missing ✅
-- Static site with `backend: None` → Backend ignored → Not counted as missing ✅
-- Library with `hosting: None` → Hosting ignored → Not counted as missing ✅
+- `project.type: cli` → the frontend and backend slots are `slotignored` → not counted ✅
+- `project.type: frontend` → the backend slots are `slotignored` → not counted ✅
 
-## The 21-Slot System
+## Who writes `slotignored`
+
+faf does, from the app-type. `faf init`, `faf auto` and `faf git` detect the project's app-type (`project.type`) and write `slotignored` into each slot that type leaves out. On an existing project.faf, `faf auto` writes it only into a slot that is empty: never over a value, and never over words you typed.
+
+A `cli` leaves out the frontend and backend slots, a `frontend` leaves out the backend slots, and a `fullstack` uses all 21 base slots. The full list of app-types is `APP_TYPE_CATEGORIES` in [`src/core/slots.ts`](../src/core/slots.ts).
+
+## A typed None / N/A is an empty slot
+
+`None`, `N/A` and `not applicable` (any case) are not slot-ignore. People type them before they learn the word `slotignored`; they still do not take a slot out. A typed none is an **empty** slot: it scores 0 until filled.
+
+- **Tech slots** (every slot except the 6Ws): if it's a fact, fill the slot. When the repo has the fact, `faf auto` fills the slot in place of the typed none. With no fact, your words stay exactly as you typed them, comment included, and faf never rewrites them to `slotignored`.
+- **The 6Ws** (`human_context.*`) are yours: `faf auto` never replaces a typed none there. `faf go` asks, as it does for any empty slot, and shows your words so you can keep them or answer.
+- `faf score` and `faf auto` print one line for each slot the app-type needs that still holds a typed none:
 
 ```
-Total Slots: 21 (always constant)
-├── Filled: X (has real values)
-├── Ignored: Y (set to 'None' - not applicable)
-└── Missing: Z (undefined/null - needs attention)
-
-Score = (Filled + Ignored) / 21 * 100
+stack.database says 'None' — this app-type needs it, so it counts as empty until filled.
 ```
 
-## Slot-Ignore Value
+## Slot states
 
-**Standard value:** `'None'`
+| State | Value | Meaning | Score |
+|-------|-------|---------|-------|
+| **Filled** | `PostgreSQL` | Has a real value | Counts for the score |
+| **Ignored (N/A)** | `slotignored` | The app-type leaves it out | Not counted |
+| **Empty** | missing, `""`, `None`, `N/A`, `not applicable` | Not filled yet | Counts against the score |
 
-**Other accepted values:** `'Unknown'`, `'Not specified'`, `'N/A'`
+`faf score` shows filled slots out of the slots that count (`4/12 slots`); `faf score --verbose` lists each slot, with an ignored one shown as `N/A`.
 
-**Example:**
-```yaml
-stack:
-  db: None           # ✅ Ignored (CLI doesn't need db)
-  css: None      # ✅ Ignored (CLI doesn't have CSS)
-  backend: PostgreSQL      # ✅ Filled (has value)
-  hosting: (undefined)     # ❌ Missing (not set)
-```
-
-## Slot-Ignore Rules by Project Type
-
-### CLI Tools (Node.js, Rust, Go, Python CLI)
-
-**Ignored slots:**
-- `db` - CLI tools don't typically need databases
-- `css` - No web UI
-- `framework` - No web UI
-
-**Example:**
+**Example (`project.type: cli`):**
 ```yaml
 project:
-  type: cli-ts
+  type: cli
 stack:
-  db: None
-  css: None
-  framework: None
+  frontend: slotignored    # N/A — a cli leaves out the frontend slots (faf wrote this)
+  database: slotignored    # N/A — a cli leaves out the backend slots (faf wrote this)
+  hosting: npm registry    # Filled
+  cicd: None               # Empty — a cli needs CI/CD; faf auto fills it when the repo has the fact
 ```
 
-### Static Sites (HTML, Gatsby, Hugo)
-
-**Ignored slots:**
-- `backend` - No server-side code
-- `db` - No data storage
-- `api` - No API
-
-**Example:**
-```yaml
-project:
-  type: static-html
-stack:
-  backend: None
-  db: None
-  api: None
-```
-
-### Backend APIs (REST, GraphQL, gRPC)
-
-**Ignored slots:**
-- `css` - No framework UI
-- `framework` - No client-side framework
-- `ui_library` - No UI components
-
-**Example:**
-```yaml
-project:
-  type: api-server
-stack:
-  css: None
-  framework: None
-  ui_library: None
-```
-
-### Libraries/SDKs (npm, PyPI, crates.io)
-
-**Ignored slots:**
-- `hosting` - Libraries aren't deployed
-- `cicd` - Often handled by consumers
-- `db` - Libraries don't run databases
-
-**Example:**
-```yaml
-project:
-  type: library
-stack:
-  hosting: None
-  cicd: None
-  db: None
-```
-
-### Full-Stack Web Apps (React, Vue, Svelte + Backend)
-
-**Ignored slots:**
-- None - Full-stack apps use all slots
-
-**Example:**
-```yaml
-project:
-  type: web-app
-stack:
-  framework: React
-  backend: Node.js
-  db: PostgreSQL
-  # All 21 slots typically filled
-```
-
-## Implementation
-
-### Generator (Sets slot-ignore values)
-
-```typescript
-// For CLI projects
-if (isNodeCLI || isRustCLI) {
-  contextSlotsFilled['db'] = 'None';
-  contextSlotsFilled['css'] = 'None';
-  contextSlotsFilled['framework'] = 'None';
-}
-```
-
-### YAML Generator (Excludes from missing_context)
-
-```typescript
-// Only mark as missing if NOT set to 'None'
-if (!projectData.db && projectData.db !== 'None') {
-  missingSlots.push('Database');
-}
-```
-
-### Compiler (Optimization pass)
-
-```typescript
-// Removes 'None' values during compilation/optimization
-const defaults = ['None', 'Unknown', 'Not specified', 'N/A'];
-if (defaults.includes(value)) {
-  delete obj[key];  // Optimization for cleaner output
-}
-```
-
-## Scoring Examples
-
-### Example 1: CLI Tool (11 filled, 10 ignored)
-
-```yaml
-# Technical Slots (15)
-project.name: faf-cli               # ✅ Filled
-project.goal: AI context standard   # ✅ Filled
-main_language: TypeScript           # ✅ Filled
-framework: CLI                      # ✅ Filled
-css: None                 # ✅ Ignored
-ui_library: inquirer                # ✅ Filled
-backend: Node.js                    # ✅ Filled
-runtime: Node.js                    # ✅ Filled
-db: None                      # ✅ Ignored
-api: CLI                       # ✅ Filled
-hosting: npm registry               # ✅ Filled
-cicd: GitHub Actions                # ✅ Filled
-build_tool: TypeScript (tsc)        # ✅ Filled
-pkg_manager: npm                # ✅ Filled
-version: 4.2.1                      # ✅ Filled
-
-# Human Context (6)
-who: wolfejam.dev team              # ✅ Filled
-what: AI context standard           # ✅ Filled
-why: Enable persistent context      # ✅ Filled
-where: npm registry + GitHub        # ✅ Filled
-when: Production/Stable             # ✅ Filled
-how: Test-driven development        # ✅ Filled
-
-# Score Calculation
-Filled: 19/21
-Ignored: 2/21 (css, db)
-Missing: 0/21
-
-Score: (19 + 2) / 21 = 100%
-```
-
-### Example 2: Web App (21 filled, 0 ignored)
-
-```yaml
-# All 21 slots have real values
-db: PostgreSQL                # ✅ Filled
-css: Tailwind             # ✅ Filled
-framework: React                     # ✅ Filled
-# ... all other slots filled
-
-Score: 21/21 = 100%
-```
-
-### Example 3: Incomplete Project (10 filled, 2 ignored, 9 missing)
-
-```yaml
-# Some slots filled
-project.name: my-app                # ✅ Filled
-main_language: JavaScript           # ✅ Filled
-# ... 8 more filled
-
-# Some slots ignored
-db: None                      # ✅ Ignored
-css: None                 # ✅ Ignored
-
-# Some slots missing
-backend: (undefined)                # ❌ Missing
-hosting: (undefined)                # ❌ Missing
-# ... 7 more missing
-
-Score: (10 + 2) / 21 = 57%
-```
-
-## Best Practices
-
-### DO:
-✅ Set slots to `'None'` when they don't apply to your project type
-✅ Use slot-ignore to achieve 100% on appropriate projects
-✅ Document WHY a slot is ignored (e.g., "CLI tool doesn't need CSS")
-
-### DON'T:
-❌ Use `'None'` to hide missing information
-❌ Ignore slots that DO apply (e.g., don't ignore `db` if you use one)
-❌ Mix `null`, `undefined`, and `'None'` - use `'None'` consistently
-
-## Slot-Ignore vs. Missing
-
-| State | Value | Meaning | Counts Toward Score |
-|-------|-------|---------|---------------------|
-| **Filled** | `PostgreSQL` | Has a real value | ✅ Yes |
-| **Ignored** | `None` | Doesn't apply to this project | ✅ Yes |
-| **Missing** | `undefined` | Unknown/not set | ❌ No |
-
-## Future Enhancements
+## Future work
 
 ### Explicit `.slotignore` File (Optional)
 
@@ -266,25 +71,25 @@ auto_detect: true
 
 ### Smart Detection (Current Approach)
 
-The generator automatically detects project type and applies slot-ignore rules:
+faf detects the project type and applies the slot-ignore rules for it:
 
 ```typescript
-// Auto-detect CLI → ignore db/css/framework
+// Auto-detect CLI → ignore the frontend and backend slots
 if (isNodeCLI) {
-  applySlotIgnore(['db', 'css', 'framework']);
+  applySlotIgnore(['frontend', 'backend']);
 }
 ```
 
 ## Reference
 
 - **Design Philosophy:** Like `.gitignore` for files, slot-ignore for context slots
-- **Standard Value:** `'None'`
-- **Total Slots:** 21 (always constant)
-- **Score Formula:** `(Filled + Ignored) / 21 * 100`
+- **Value:** `slotignored` (shown as N/A), written by faf from the app-type
+- **A typed None / N/A / not applicable:** an empty slot, 0 until filled
+- **Base Slots:** 21 (`faf score`); 33 with the enterprise slots
 
 ---
 
 **Slot-ignore: The perfect way to handle app-types.** 🏎️
 
-*Last Updated: 2026-02-08*
-*FAF Version: 4.2.1+*
+*Last Updated: 2026-09-11*
+*FAF Version: 7.13.0+*

@@ -35,7 +35,7 @@ import { bold, dim, fafCyan } from '../ui/colors.js';
  *   - `faf drift`  — mtime sync of context files (.faf ↔ CLAUDE.md/AGENTS.md/…)
  *   - `faf score`  — point-in-time score, no baseline, no re-ground
  *
- * Slot-level "which slot moved" diffing is the MCP/agent enhancement (the agent
+ * Slot-level "which slot moved" diffing is left to the MCP server or agent (it
  * supplies its loaded baseline content); the CLI re-grounds against the DNA
  * score baseline, which needs no caller state.
  */

@@ -25,33 +25,36 @@ Work surfaces use ✪ for Trophy (not the social emoji 🏆). Sub-Trophy tiers u
 
 **Like `.gitignore` for files, slot-ignore for context slots.**
 
-FAF has 21 slots. Some don't apply to your project type. **Slot-ignore** handles this elegantly:
+FAF has 21 base slots. Some don't apply to your app-type. faf writes `slotignored` (shown as N/A) into those, and they are left out of the count:
 
 ```yaml
-# CLI Tool - 21 slots total
+# CLI Tool — the frontend and backend slots don't apply
+project:
+  type: cli
 stack:
-  db: None           # ✅ Ignored (CLI doesn't need db)
-  css: None      # ✅ Ignored (no web UI)
-  backend: Node.js         # ✅ Filled (has value)
+  frontend: slotignored    # N/A — left out (faf wrote this)
+  database: slotignored    # N/A — left out (faf wrote this)
+  hosting: npm registry    # ✅ Filled
+  cicd: GitHub Actions     # ✅ Filled
   # ... other slots
-
-Score: (Filled + Ignored) / 21 = 100% ✪
 ```
 
-**The formula:**
+**How the slots count:**
 ```
-Total Slots: 21 (constant)
-├── Filled: 15 (has values)
-├── Ignored: 6 (set to 'None' - not applicable)
-└── Missing: 0 (undefined - needs attention)
+Filled   — has a real value            → counts for the score
+Ignored  — slotignored (N/A)            → not counted
+Empty    — missing, "", None, N/A,      → counts against the score
+           not applicable
+```
 
-Score: (15 + 6) / 21 = 100%
-```
+`faf score` shows filled slots out of the slots that count, e.g. `12/12 slots` = 100% ✪.
+
+**A typed `None` / `N/A` / `not applicable` is an empty slot**, not slot-ignore: it scores 0 until filled. The app-type decides which slots count. `faf auto` fills a tech slot when the repo has the fact; with no fact your words stay as typed. The 6Ws stay yours: `faf go` asks.
 
 **Common patterns:**
-- **CLI Tools:** Ignore `db`, `css`, `framework`
-- **Backend APIs:** Ignore `css`, `framework`, `ui_library`
-- **Static Sites:** Ignore `backend`, `db`, `api`
-- **Libraries:** Ignore `hosting`, `cicd`, `db`
+- **CLI tools, libraries:** the frontend and backend slots are left out
+- **Frontend apps, websites:** the backend slots are left out
+- **Backend APIs, MCP servers:** the frontend slots are left out
+- **Full-stack apps:** all 21 base slots count
 
 **Full spec:** [SLOT-IGNORE.md](./SLOT-IGNORE.md)

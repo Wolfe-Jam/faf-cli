@@ -14,6 +14,7 @@ import { relentlessContext } from './relentless.js';
 import {
   APP_TYPE_CATEGORIES,
   SLOTS,
+  SLOT_BY_PATH,
   SLOTIGNORED,
   isExplicitNone,
   isPlaceholder,
@@ -61,14 +62,15 @@ export function assembleFreshFaf(dir: string): Record<string, unknown> {
  * non-null scalar `project:` (older writers stored `project: <name>`) is lifted
  * to `{ name: String(value) }`, so the name is kept and the rest can be filled.
  *
- * Explicit none: a slot the file marks `None` / `N/A` / `not applicable`
- * (any case) is a decision, not a gap. No detected value replaces it — not
- * under the slot's own name, nor under its other name (`stack.db` for
- * `stack.database`) — and it keeps its own text: the result holds exactly
- * what the file had there, so a write changes nothing on that line (its
- * comment included). Scoring counts it as `slotignored`; faf writes the word
- * `slotignored` only into a slot that was empty. A slot already
- * `slotignored` is kept the same way.
+ * A typed none (`None` / `N/A` / `not applicable`, any case) is an empty
+ * slot — it scores 0 until filled. In a tech slot (every slot but the 6Ws) a
+ * repo fact fills it: "if it's a fact, fill the slot". With no fact the typed
+ * words stay exactly as the file has them, comment included, and faf never
+ * writes `slotignored` over them — `slotignored` comes only from the
+ * app-type. In a 6W (`human_context.*`) a typed none is the person's: auto
+ * never replaces it (`faf go` asks). A slot that says `slotignored` under
+ * either of its names (`stack.db` for `stack.database`) gets no detected
+ * value under either.
  */
 export function updateExistingFaf(dir: string, existing: Record<string, unknown>): Record<string, unknown> {
   const base = liftScalarProject(asFafMapping(existing, 'updateExistingFaf: the existing .faf'));
@@ -111,20 +113,20 @@ function putField(data: Record<string, unknown>, path: string, value: unknown): 
   data[section] = copy;
 }
 
-/** `slotignored` or a hand-written none: the slot does not apply. */
-const notApplicable = (v: unknown): boolean => v === SLOTIGNORED || isExplicitNone(v);
+/** `slotignored`: the app-type leaves the slot out. A typed none is not this. */
+const isSlotIgnored = (v: unknown): boolean => typeof v === 'string' && v.trim() === SLOTIGNORED;
 
-/** True when `base` marks the slot not applicable under one of its names and
+/** True when `base` says `slotignored` under one of the slot's names and
  *  holds no real value under any of them. */
 function decidedNotApplicable(base: Record<string, unknown>, locs: string[]): boolean {
   const values = locs.map(loc => fieldAt(base, loc));
-  return values.some(notApplicable) && values.every(v => isPlaceholder(v) || notApplicable(v));
+  return values.some(isSlotIgnored) && values.every(v => isPlaceholder(v) || isSlotIgnored(v));
 }
 
-/** After filling: a slot `base` marks not applicable gets no detected value
- *  under any of its names — each keeps exactly what `base` had there, a
- *  hand-written none keeping its own text (scoring reads it as
- *  `slotignored`; faf never rewrites it to that word). */
+/** After filling: a slot `base` marks `slotignored` gets no detected value
+ *  under any of its names — each keeps exactly what `base` had there. Only
+ *  `slotignored` is kept this way; a typed none is an empty slot, and a fact
+ *  fills it (see fillEmpties). */
 function keepNotApplicable(filled: Record<string, unknown>, base: Record<string, unknown>): Record<string, unknown> {
   const out = { ...filled };
   for (const slot of SLOTS) {
@@ -168,17 +170,40 @@ function applySlotIgnore(seeded: Record<string, unknown>): void {
  *  lets interrogated/detected values overwrite the empty-string defaults that
  *  detectStack writes to human_context.
  *
- *  Two things are never filled over:
- *  - a hand-written explicit none (`None`, `N/A`, `not applicable`, any case):
- *    it is kept as written, at a slot or anywhere else (scoring reads it at a
- *    slot as `slotignored`);
- *  - a `_meta` the target already carries (the user's own): faf's runtime
- *    `_meta` from `source` is merged only into a target without one. */
+ *  A typed none (`None`, `N/A`, `not applicable`, any case) is an empty slot,
+ *  but only a fact replaces the words: in a tech slot (every slot but the
+ *  6Ws, under either of its names) a source value that is real content — not
+ *  empty, not a placeholder, not `slotignored` — fills it. Anything else
+ *  leaves the typed words exactly as they are: no fact, a 6W
+ *  (`human_context.*`, the person's), or a place that is not a slot.
+ *
+ *  A `_meta` the target already carries (the user's own) is never filled
+ *  over: faf's runtime `_meta` from `source` is merged only into a target
+ *  without one. */
 export function fillEmpties(
   target: Record<string, unknown>,
   source: Record<string, unknown>,
 ): Record<string, unknown> {
   return fillAt(target, source, '');
+}
+
+/** A tech slot: any slot but the 6Ws, under its path or its canonical name. */
+function isTechSlot(path: string): boolean {
+  const slot = SLOT_BY_PATH.get(path);
+  return slot !== undefined && slot.category !== 'human';
+}
+
+/** A value the repo gave for a slot: real content. Not empty, not a
+ *  placeholder or a typed none, and not `slotignored` (the app-type's word,
+ *  never a fact about the repo). */
+function isFact(value: unknown): boolean {
+  if (typeof value === 'number' || typeof value === 'boolean') {return true;}
+  return typeof value === 'string' && value.trim() !== '' && !isPlaceholder(value) && !isSlotIgnored(value);
+}
+
+/** True when `value` may replace a typed none at `path`: a fact, in a tech slot. */
+function factFillsTypedNone(path: string, value: unknown): boolean {
+  return isTechSlot(path) && isFact(value);
 }
 
 function fillAt(target: Record<string, unknown>, source: Record<string, unknown>, prefix: string): Record<string, unknown> {
@@ -187,7 +212,11 @@ function fillAt(target: Record<string, unknown>, source: Record<string, unknown>
     const existing = result[key];
     const path = prefix ? `${prefix}.${key}` : key;
     if (path === '_meta' && existing !== undefined) {continue;}
-    if (isExplicitNone(existing)) {continue;} // a decision, kept in its own words
+    if (isExplicitNone(existing)) {
+      // A typed none is an empty slot: a fact fills a tech slot; otherwise the words stay.
+      if (factFillsTypedNone(path, value)) {result[key] = value;}
+      continue;
+    }
     if (isPlaceholder(existing)) {
       result[key] = value;
     } else if (isMapping(value) && isMapping(existing)) {

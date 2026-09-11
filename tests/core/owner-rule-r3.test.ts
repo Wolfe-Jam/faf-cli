@@ -3,8 +3,9 @@
  * at the source:
  *
  *   Y52  `faf auto` rewrote a hand-written `database: None # deliberate …` to
- *        `slotignored`. Q8 with the owner rule: the none keeps its own text;
- *        scoring still counts it as slotignored.
+ *        `slotignored`. Q8, FINAL: a typed none is an empty slot — with no
+ *        repo fact its words stay byte for byte, a fact fills it, and it
+ *        scores as empty (never as slotignored).
  *   D08/D10  a peak or current milestone relabelled by hand was replaced by
  *        faf's "Peak" / "Current" on the next growth.
  *   T03/T04/T08  a chmod made while faf was writing was undone (the rename
@@ -58,30 +59,36 @@ function inWindow(during: () => void, fn: () => unknown): unknown {
   }
 }
 
-describe('BRAKE: Q8 — a hand-written None / N/A keeps its own text; scoring counts it as slotignored (Y52)', () => {
-  test('faf auto leaves `database: None # …` and `backend: N/A` byte for byte', () => {
+describe('BRAKE: Q8 — a typed None / N/A is an empty slot: no fact keeps the words, a fact fills it (Y52)', () => {
+  test('faf auto: `database: None # …` (no fact) stays byte for byte; `backend: N/A` takes the fact (Express)', () => {
     const d = tmp('q8');
     writeFileSync(join(d, 'package.json'), JSON.stringify({ name: 'demo', dependencies: { react: '^18.0.0', pg: '^8', express: '^4' } }));
     writeFileSync(join(d, 'vercel.json'), '{}\n');
     const text = 'project:\n  name: demo\n  goal: Old goal\nstack:\n  database: None # deliberate: stateless (NONE-COMMENT)\n  backend: N/A\n';
     writeFileSync(join(d, 'project.faf'), text);
-    expect(run(d, ['auto']).status).toBe(0);
+    const r = run(d, ['auto']);
+    expect(r.status).toBe(0);
     const lines = readFileSync(join(d, 'project.faf'), 'utf-8').split('\n');
-    expect(lines).toContain('  database: None # deliberate: stateless (NONE-COMMENT)');
-    expect(lines).toContain('  backend: N/A');
-    // slotignored goes only into slots that were empty, never over the user's words.
-    expect(lines.filter(l => /^ {2}(database|backend):/.test(l))).toEqual(['  database: None # deliberate: stateless (NONE-COMMENT)', '  backend: N/A']);
+    // No repo fact for the database: the typed words stay, never `slotignored`.
+    // A repo fact for the backend (express): it fills the slot in place.
+    expect(lines.filter(l => /^ {2}(database|backend):/.test(l))).toEqual(['  database: None # deliberate: stateless (NONE-COMMENT)', '  backend: Express']);
+    // The app-type (fullstack) needs a database, so faf auto says so, once.
+    const hint = "stack.database says 'None' — this app-type needs it, so it counts as empty until filled.";
+    expect(r.stdout.replace(/\x1b\[[0-9;]*m/g, '').split('\n').filter(l => l.trim() === hint)).toHaveLength(1);
   });
 
-  test('scoring reads None / N/A / not applicable at a slot as slotignored — the same score as the word', () => {
+  test('scoring reads None / N/A / not applicable at a slot as an empty slot — the same score as the empty value, below 100', () => {
     const base = (v: string) => `project:\n  name: demo\n  goal: g\n  main_language: TypeScript\n  type: fullstack\nstack:\n  frontend: React\n  database: ${v}\n`;
-    const word = scoreFafYaml(base('slotignored'));
+    const empty = scoreFafYaml(base('""'));
+    expect(empty.slots['stack.database']).toBe('empty');
     for (const v of ['None', 'N/A', 'not applicable', '"none"']) {
       const r = scoreFafYaml(base(v));
-      expect(r.slots['stack.database']).toBe('slotignored');
-      expect([r.score, r.active, r.ignored]).toEqual([word.score, word.active, word.ignored]);
+      expect(r.slots['stack.database']).toBe('empty');
+      expect([r.score, r.active, r.ignored, r.empty]).toEqual([empty.score, empty.active, empty.ignored, empty.empty]);
+      expect(r.score).toBeLessThan(100);
     }
-    expect(scoreFafYaml(base('""')).slots['stack.database']).toBe('empty'); // an empty slot is still empty
+    // Only the app-type's word takes a slot out.
+    expect(scoreFafYaml(base('slotignored')).slots['stack.database']).toBe('slotignored');
   });
 });
 

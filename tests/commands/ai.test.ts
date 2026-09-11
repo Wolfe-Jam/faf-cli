@@ -1,7 +1,12 @@
 import { describe, test, expect, beforeEach, afterEach, spyOn } from 'bun:test';
-import { mkdirSync, rmSync, writeFileSync, readFileSync, existsSync } from 'fs';
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync, statSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
-import { join } from 'path';
+import { join, relative } from 'path';
+import { spawnSync } from 'child_process';
+
+const CLI = join(import.meta.dir, '../../src/cli.ts');
+const plain = (s: string): string => s.replace(/\x1b\[[0-9;]*m/g, '');
+const RETIRED = "faf ai enhance was retired in 7.13 — project.faf isn't enhanced: faf auto fills tech slots from repo facts, and you write the 6Ws (faf go).";
 
 describe('BRAKE: ai command', () => {
   let testDir: string;
@@ -41,35 +46,15 @@ describe('BRAKE: ai command', () => {
     const logSpy = spyOn(console, 'log').mockImplementation((s: string) => { logs.push(s); });
     await aiCommand('totally-not-a-subcommand');
     logSpy.mockRestore();
-    // Help text mentions both subcommands
+    // Help text lists the one subcommand there is
     const all = logs.join('\n');
-    expect(all).toContain('enhance');
     expect(all).toContain('analyze');
+    expect(all).not.toContain('enhance');
   });
 
   // ───────────────────────────────────────────────────────────────────
   // Error paths — these should never make a network call
   // ───────────────────────────────────────────────────────────────────
-
-  test('aiCommand("enhance") in dir without .faf → exits 2 with clear error', async () => {
-    process.env.ANTHROPIC_API_KEY = 'sk-ant-test-key';
-    const { aiCommand } = await import('../../src/commands/ai.js');
-    const errs: string[] = [];
-    const errSpy = spyOn(console, 'error').mockImplementation((s: string) => { errs.push(s); });
-    const exitSpy = spyOn(process, 'exit').mockImplementation(((code?: number) => {
-      throw new Error(`__exit_${code}__`);
-    }) as never);
-    try {
-      await aiCommand('enhance');
-      throw new Error('expected process.exit to be called');
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : String(e);
-      expect(msg).toContain('__exit_2__');
-    }
-    errSpy.mockRestore();
-    exitSpy.mockRestore();
-    expect(errs.join('\n')).toMatch(/project\.faf not found/);
-  });
 
   test('aiCommand("analyze") with no API key → exits 2 with clear error', async () => {
     delete process.env.ANTHROPIC_API_KEY;
@@ -95,41 +80,6 @@ describe('BRAKE: ai command', () => {
     expect(errs.join('\n')).toMatch(/ANTHROPIC_API_KEY/);
   });
 
-  test('aiCommand("enhance") with all slots populated → no API call, prints "all slots populated"', async () => {
-    process.env.ANTHROPIC_API_KEY = 'sk-ant-test-key';
-    // Build a .faf where every slot in SLOTS is populated with a non-placeholder.
-    // This guarantees the early-exit "all slots populated" path, so no API call
-    // is ever attempted. Reads SLOTS from the same module ai.ts uses.
-    const { SLOTS } = await import('../../src/core/slots.js');
-    type FafObj = Record<string, unknown>;
-    const data: FafObj = { faf_version: '2.5.0' };
-    function setNested(obj: FafObj, path: string, value: string): void {
-      const parts = path.split('.');
-      let cur: FafObj = obj;
-      for (let i = 0; i < parts.length - 1; i++) {
-        if (typeof cur[parts[i]] !== 'object' || cur[parts[i]] === null) {
-          cur[parts[i]] = {};
-        }
-        cur = cur[parts[i]] as FafObj;
-      }
-      cur[parts[parts.length - 1]] = value;
-    }
-    for (const slot of SLOTS) {
-      setNested(data, slot.path, `value-for-${slot.path.replace(/\./g, '-')}`);
-    }
-    // Write as YAML
-    const { stringify } = await import('yaml');
-    writeFileSync(join(testDir, 'project.faf'), stringify(data));
-
-    const { aiCommand } = await import('../../src/commands/ai.js');
-    const logs: string[] = [];
-    const logSpy = spyOn(console, 'log').mockImplementation((s: string) => { logs.push(s); });
-    await aiCommand('enhance');
-    logSpy.mockRestore();
-    const all = logs.join('\n');
-    expect(all).toContain('all slots populated');
-  });
-
   // ───────────────────────────────────────────────────────────────────
   // Help text content
   // ───────────────────────────────────────────────────────────────────
@@ -143,28 +93,104 @@ describe('BRAKE: ai command', () => {
     expect(logs.join('\n')).toContain('ANTHROPIC_API_KEY');
   });
 
-  test('help text shows both enhance and analyze subcommands', async () => {
+  test('help text lists only analyze, and names Claude', async () => {
     const { aiCommand } = await import('../../src/commands/ai.js');
     const logs: string[] = [];
     const logSpy = spyOn(console, 'log').mockImplementation((s: string) => { logs.push(s); });
     await aiCommand();
     logSpy.mockRestore();
     const all = logs.join('\n');
-    expect(all).toContain('enhance');
-    expect(all).toContain('analyze');
+    expect(all).toContain('faf ai analyze');
+    expect(all).not.toContain('enhance');
     expect(all).toContain('Claude');
   });
 });
 
-describe('PIT: ai command — internal helpers (behavior contracts)', () => {
-  // The internal helpers (getNestedValue, setNestedValue) aren't exported,
-  // but their behavior contract IS testable through aiCommand("enhance"):
-  // - reads slots via dot-paths
-  // - writes back values via dot-paths
-  // - creates intermediate objects when needed
-  //
-  // These contracts are exercised end-to-end by the tests above.
-  // No duplication of helper logic in tests — tests behavior, not implementation.
+/** Every file under `dir` (relative path → size and mtime), to show nothing was written. */
+function snapshot(dir: string): Record<string, string> {
+  const out: Record<string, string> = {};
+  const walk = (d: string): void => {
+    for (const name of readdirSync(d)) {
+      const p = join(d, name);
+      const st = statSync(p);
+      if (st.isDirectory()) {walk(p);} else {out[relative(dir, p)] = `${st.size}:${st.mtimeMs}`;}
+    }
+  };
+  walk(dir);
+  return out;
+}
+
+describe('BRAKE: `faf ai enhance` is retired — one line, exit 1, nothing written', () => {
+  test('`faf ai enhance` prints exactly the retirement line and exits 1; project.faf and the folder are untouched', () => {
+    const dir = realpathSync(mkdtempSync(join(tmpdir(), 'faf-ai-retired-')));
+    const home = realpathSync(mkdtempSync(join(tmpdir(), 'faf-ai-home-')));
+    const faf = 'project:\n  name: demo\n  goal: A demo\nstack:\n  database: None # typed\n';
+    writeFileSync(join(dir, 'project.faf'), faf);
+    const before = snapshot(dir);
+    // With a key set, so nothing about the environment stops it early.
+    const r = spawnSync(process.execPath, [CLI, 'ai', 'enhance'], {
+      cwd: dir,
+      encoding: 'utf-8',
+      env: { ...process.env, HOME: home, ANTHROPIC_API_KEY: 'sk-test-not-real', NO_COLOR: '1' },
+    });
+    expect(r.status).toBe(1);
+    expect(plain(`${r.stdout}${r.stderr}`)).toBe(`${RETIRED}\n`);
+    expect(readFileSync(join(dir, 'project.faf'), 'utf-8')).toBe(faf);
+    expect(snapshot(dir)).toEqual(before);
+    // Nothing of faf's in HOME either (bun keeps its own cache there).
+    expect(Object.keys(snapshot(home)).filter(f => !/^(Library\/Caches|\.cache)\//.test(f))).toEqual([]);
+
+    // The same with no project.faf and no key: still the one line, still exit 1.
+    const empty = realpathSync(mkdtempSync(join(tmpdir(), 'faf-ai-retired-')));
+    const bare = spawnSync(process.execPath, [CLI, 'ai', 'enhance'], {
+      cwd: empty,
+      encoding: 'utf-8',
+      env: { ...process.env, HOME: home, ANTHROPIC_API_KEY: '', NO_COLOR: '1' },
+    });
+    expect(bare.status).toBe(1);
+    expect(plain(`${bare.stdout}${bare.stderr}`)).toBe(`${RETIRED}\n`);
+    expect(readdirSync(empty)).toEqual([]);
+  });
+
+  test('`faf ai` and `faf --help` do not mention enhance; `faf ai` lists only analyze', () => {
+    const home = realpathSync(mkdtempSync(join(tmpdir(), 'faf-ai-home-')));
+    const dir = realpathSync(mkdtempSync(join(tmpdir(), 'faf-ai-help-')));
+    const env = { ...process.env, HOME: home, NO_COLOR: '1' };
+    const bare = spawnSync(process.execPath, [CLI, 'ai'], { cwd: dir, encoding: 'utf-8', env });
+    expect(bare.status).toBe(0);
+    const out = plain(bare.stdout);
+    expect(out).toContain('faf ai analyze');
+    expect(out).not.toMatch(/enhance/i);
+    expect(out.split('\n').filter(l => /^\s*faf ai \w/.test(l))).toHaveLength(1);
+
+    const help = plain(spawnSync(process.execPath, [CLI, '--help'], { cwd: dir, encoding: 'utf-8', env }).stdout);
+    expect(help).toContain('Ask Claude for suggestions about project.faf (analyze)');
+    expect(help).not.toMatch(/enhance/i);
+  });
+
+  test('no file in src/ references enhanceCommand, AI_SLOP_PATTERNS or isValidAiExtraction', () => {
+    const src = join(import.meta.dir, '../../src');
+    const hits: string[] = [];
+    const walk = (d: string): void => {
+      for (const name of readdirSync(d)) {
+        const p = join(d, name);
+        if (statSync(p).isDirectory()) {walk(p); continue;}
+        if (!/\.(ts|js|mjs|cjs)$/.test(name)) {continue;}
+        const text = readFileSync(p, 'utf-8');
+        for (const word of ['enhanceCommand', 'AI_SLOP_PATTERNS', 'isValidAiExtraction']) {
+          if (text.includes(word)) {hits.push(`${relative(src, p)}: ${word}`);}
+        }
+      }
+    };
+    walk(src);
+    expect(hits).toEqual([]);
+  });
+});
+
+describe('PIT: ai command — read-only contract', () => {
+  // `faf ai` writes nothing: `analyze` reads project.faf and prints Claude's
+  // suggestions; `enhance` is retired (one line, exit 1). The tests above
+  // cover both end to end.
   test('contract documented above', () => {
     expect(true).toBe(true);
   });

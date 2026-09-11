@@ -328,7 +328,7 @@ program
 
 program
   .command('ai [subcommand]')
-  .description('AI-powered features (enhance|analyze)')
+  .description('Ask Claude for suggestions about project.faf (analyze)')
   .action((subcommand) => aiCommand(subcommand));
 
 program

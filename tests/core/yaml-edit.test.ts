@@ -61,9 +61,9 @@ describe('ENGINE: editYaml — only the changed nodes are rewritten', () => {
       .toBe(HAND.replace('name:     demo   # aligned', 'name:     renamed   # aligned'));
   });
 
-  test('an explicit none becomes slotignored in place, comment kept', () => {
-    expect(edit(HAND, d => d.setIn(['stack', 'database'], 'slotignored')))
-      .toBe(HAND.replace('database: None # deliberate', 'database: slotignored # deliberate'));
+  test('a typed none replaced by a fact changes in place, comment kept', () => {
+    expect(edit(HAND, d => d.setIn(['stack', 'database'], 'PostgreSQL')))
+      .toBe(HAND.replace('database: None # deliberate', 'database: PostgreSQL # deliberate'));
   });
 
   test('empty values (`key:`, `~`) are filled where they are', () => {
