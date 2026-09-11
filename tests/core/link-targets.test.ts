@@ -31,7 +31,7 @@ import { writeCopilotInstructions } from '../../src/interop/copilot-instructions
 import { writeMemoryMd } from '../../src/interop/memory.js';
 import { writeLlmsTxt } from '../../src/interop/llms.js';
 import { writeClaudeMemory } from '../../src/interop/claude-memory.js';
-import { writeProjectHtml } from '../../src/interop/projecthtml.js';
+import { renderProjectHtml, writeProjectHtml } from '../../src/interop/projecthtml.js';
 import { writeServerCard } from '../../src/interop/servercard.js';
 import { writeGrokConfig } from '../../src/interop/grok.js';
 import { writeJson } from '../../src/interop/cards.js';
@@ -244,11 +244,16 @@ describe('BRAKE: a whole-file writer never writes through a link to a differentl
   test.skipIf(!posix)('a link to a file of the same name is still written through (project.html → site/project.html)', () => {
     const d = project();
     mkdirSync(join(d, 'site'));
-    writeFileSync(join(d, 'site', 'project.html'), 'old');
+    // A page faf rendered before (it carries faf's mark) is written through…
+    writeFileSync(join(d, 'site', 'project.html'), renderProjectHtml({ project: { name: 'old' } } as any, scoreFafYaml('project:\n  name: old\n')));
     symlinkSync('site/project.html', join(d, 'project.html'));
     writeProjectHtml(d, DATA, scoreFafYaml(serializeFaf(DATA)));
-    expect(readFileSync(join(d, 'site', 'project.html'), 'utf-8')).toContain('<!DOCTYPE html>');
+    expect(readFileSync(join(d, 'site', 'project.html'), 'utf-8')).toContain('<title>demo — project.faf</title>');
     expect(lstatSync(join(d, 'project.html')).isSymbolicLink()).toBe(true);
+    // …and a hand page behind the same link is not (the whole-file owner rule).
+    writeFileSync(join(d, 'site', 'project.html'), '<h1>HAND-PAGE</h1>\n');
+    expect(refusal(() => writeProjectHtml(d, DATA, scoreFafYaml(serializeFaf(DATA)))).reason).toBe('not-owned');
+    expect(readFileSync(join(d, 'site', 'project.html'), 'utf-8')).toBe('<h1>HAND-PAGE</h1>\n');
     // …and a .faf-dna link to a file with another name is not grown either.
     const e = project();
     mkdirSync(join(e, 'docs'));

@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, writeFileSync, readdirSync } from 'fs';
+import { existsSync, readFileSync, readdirSync } from 'fs';
 import { join, basename } from 'path';
 import { findFafFile, readFaf, writeFaf } from '../interop/faf.js';
 import { FAF_VERSION } from '../core/version.js';

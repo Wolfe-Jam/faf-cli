@@ -15,12 +15,13 @@
  * kernel (faf_score is NOT persisted in .faf — each side is scored fresh).
  */
 import { execFileSync } from 'child_process';
-import { readFileSync, existsSync, appendFileSync } from 'fs';
-import { join } from 'path';
+import { readFileSync, existsSync } from 'fs';
 import type { FafData } from '../core/types.js';
 import { SLOTS, readSlotValue, isPlaceholder } from '../core/slots.js';
 import { readFafFromString, readFafRaw, findFafFile, gitRepoRel } from '../interop/faf.js';
 import { scoreFafYaml } from '../core/scorer.js';
+import { resolveInside, safeWriteFile } from '../core/safe-write.js';
+import { readIfPresent } from '../interop/inject.js';
 import { getTier, tierBadge } from '../core/tiers.js';
 
 export type SlotChangeKind = 'added' | 'removed' | 'changed';
@@ -272,15 +273,23 @@ function repoRoot(cwd: string): string {
 }
 
 /**
- * Wire `faf diff` into native git: writes `.gitattributes` (*.faf diff=faf) and
- * sets `git config diff.faf.command "faf-cli diff-driver"`. Idempotent.
+ * Wire `faf diff` into native git: adds `*.faf diff=faf` to `.gitattributes`
+ * and sets `git config diff.faf.command "faf-cli diff-driver"`. Idempotent.
+ *
+ * `.gitattributes` keeps every byte it had: faf reads it, adds its one line at
+ * the end (in the file's own line ending) and writes it atomically — never
+ * through a link that leaves the repo, dangles or leads to a file with another
+ * name, and never over an edit made after faf read it (SafePathError).
  */
 export function installDriver(cwd: string): void {
   const top = repoRoot(cwd);
-  const ga = join(top, '.gitattributes');
-  const existing = existsSync(ga) ? readFileSync(ga, 'utf-8') : '';
+  const ga = resolveInside(top, '.gitattributes');
+  const before = readIfPresent(ga);
+  const existing = before ?? '';
   if (!existing.split('\n').some((l) => l.trim() === GA_LINE)) {
-    appendFileSync(ga, `${existing && !existing.endsWith('\n') ? '\n' : ''}${GA_LINE}\n`);
+    const eol = existing.includes('\r\n') ? '\r\n' : '\n';
+    const next = `${existing}${existing && !existing.endsWith('\n') ? eol : ''}${GA_LINE}${eol}`;
+    safeWriteFile(ga, next, { root: top, expect: before });
     console.log(`✅ .gitattributes  ${GA_LINE}`);
   } else {
     console.log(`•  .gitattributes already opts in (${GA_LINE})`);

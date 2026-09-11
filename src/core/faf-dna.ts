@@ -28,7 +28,7 @@
  * lineage when you ask it to.
  */
 
-import { existsSync } from 'fs';
+import { existsSync, lstatSync } from 'fs';
 import { join, basename } from 'path';
 import { createHash } from 'crypto';
 import { readBytesIfPresent, readUtf8, resolveInside, safeWriteFile } from './safe-write.js';
@@ -99,6 +99,16 @@ function hasFafShape(raw: unknown): raw is FafDNA {
   return isObject(raw) && birthOk(raw.birthCertificate) && versionsOk(raw.versions) && currentOk(raw.current) && growthOk(raw.growth);
 }
 
+/** True when something is at `path` — a file, or a link (even a dangling one). */
+function present(path: string): boolean {
+  try {
+    lstatSync(path);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /** faf's own serialisation of a `.faf-dna` — the exact text save() writes. */
 const serialise = (dna: unknown): string => `${JSON.stringify(dna, null, 2)}\n`;
 
@@ -109,10 +119,29 @@ const CURRENT_KEYS = new Set(['version', 'score', 'lastSync']);
 const MILESTONE_KEYS = new Set(['type', 'score', 'date', 'version', 'label', 'emoji']);
 const onlyKeys = (o: object, keys: Set<string>): boolean => Object.keys(o).every((k) => keys.has(k));
 
-/** True when every object recordGrowth replaces holds only what faf writes there. */
+/** The label and emoji faf gives each milestone it writes. */
+const MILESTONE_TEXT: Record<Milestone['type'], { label: string; emoji: string }> = {
+  birth: { label: 'Birth', emoji: '🐣' },
+  doubled: { label: 'Doubled', emoji: '2️⃣' },
+  peak: { label: 'Peak', emoji: '🏔️' },
+  current: { label: 'Current', emoji: '📍' },
+};
+
+/** The milestones recordGrowth replaces: the peak and the current one. */
+const replaced = (dna: FafDNA): Milestone[] => dna.growth.milestones.filter((m) => m.type === 'peak' || m.type === 'current');
+
+/** True when every object recordGrowth replaces holds only keys faf writes there. */
+const onlyFafKeys = (dna: FafDNA): boolean =>
+  onlyKeys(dna.current, CURRENT_KEYS) && replaced(dna).every((m) => onlyKeys(m, MILESTONE_KEYS));
+
+/** True when the peak and current milestones carry faf's own label and emoji
+ *  for their type — a relabelled one is the user's text. */
+const fafLabels = (dna: FafDNA): boolean =>
+  replaced(dna).every((m) => m.label === MILESTONE_TEXT[m.type].label && m.emoji === MILESTONE_TEXT[m.type].emoji);
+
+/** True when every object recordGrowth replaces is exactly what faf writes there. */
 function growthLosesNothing(dna: FafDNA): boolean {
-  return onlyKeys(dna.current, CURRENT_KEYS) &&
-    dna.growth.milestones.every((m) => (m.type !== 'peak' && m.type !== 'current') || onlyKeys(m, MILESTONE_KEYS));
+  return onlyFafKeys(dna) && fafLabels(dna);
 }
 
 /** Why faf leaves a `.faf-dna` as it is, in one line. */
@@ -121,6 +150,8 @@ const NOT_FAF_TEXT =
   '.faf-dna is not exactly as faf wrote it (hand formatting, key order, a repeated key or a number JSON cannot hold exactly): faf reads it and leaves it as it is.';
 const USER_NOTE =
   '.faf-dna has a key of yours in an entry faf would replace (current, or the peak or current milestone): faf reads it and leaves it as it is.';
+const USER_LABEL =
+  '.faf-dna has a label or emoji of yours on a milestone faf would replace (the peak or current one): faf reads it and leaves it as it is.';
 const NO_BIRTH = '.faf-dna has no birth certificate faf can read: faf leaves it as it is.';
 
 /** Milestones as the journey reads them: well-formed entries only. */
@@ -218,6 +249,10 @@ export class FafDNAManager {
   private text: string | undefined;
   /** Why the file is read only, when it is; null when faf may add to it. */
   private reason: string | null = null;
+  /** True once this manager found no `.faf-dna` (exists / load / birth) and
+   *  has not written one since: a birth then refuses a file that appeared
+   *  meanwhile instead of writing over it. */
+  private sawNoFile = false;
 
   constructor(projectPath: string) {
     this.projectPath = projectPath;
@@ -225,11 +260,18 @@ export class FafDNAManager {
   }
 
   exists(): boolean {
-    return existsSync(this.dnaPath);
+    const there = existsSync(this.dnaPath);
+    if (!there && !present(this.dnaPath)) {this.sawNoFile = true;}
+    return there;
   }
 
-  /** Birth — the first heartbeat. Writes the birth certificate with the honest first score. */
+  /** Birth — the first heartbeat. Writes the birth certificate with the honest first score.
+   *  When this manager found no `.faf-dna` (now, or at an earlier exists() /
+   *  load()), a file that appeared since is refused (SafePathError `changed`)
+   *  rather than written over; over a `.faf-dna` that is there, birth starts a
+   *  fresh lineage (`faf init --force`). */
   birth(birthDNA: number): FafDNA {
+    if (!present(this.dnaPath)) {this.sawNoFile = true;}
     const now = new Date().toISOString();
     this.own = true;
     this.dna = {
@@ -336,7 +378,10 @@ export class FafDNAManager {
    *  (see the file header). */
   load(): FafDNA | null {
     if (this.dna) {return this.dna;}
-    if (!existsSync(this.dnaPath)) {return null;}
+    if (!existsSync(this.dnaPath)) {
+      if (!present(this.dnaPath)) {this.sawNoFile = true;}
+      return null;
+    }
     const read = this.read();
     if (read === null) {return null;}
     const { text, raw } = read;
@@ -347,7 +392,8 @@ export class FafDNAManager {
     } else {
       this.own = false;
       this.dna = readableView(raw);
-      this.reason = !this.dna ? NO_BIRTH : !hasFafShape(raw) ? NOT_FAF_SHAPE : serialise(raw) !== text ? NOT_FAF_TEXT : USER_NOTE;
+      this.reason = !this.dna ? NO_BIRTH : !hasFafShape(raw) ? NOT_FAF_SHAPE : serialise(raw) !== text ? NOT_FAF_TEXT
+        : onlyFafKeys(raw) ? USER_LABEL : USER_NOTE;
     }
     this.text = text;
     return this.dna;
@@ -374,12 +420,14 @@ export class FafDNAManager {
     if (!this.dna) {return;}
     this.dna.lastModified = new Date().toISOString();
     const text = serialise(this.dna);
-    // The file must still be what this manager read (or, before any read, what
-    // is there now): another process's growth is never written over.
-    const expect = this.text ?? readBytesIfPresent(resolveInside(this.projectPath, '.faf-dna'));
+    // The file must still be what this manager read (or, when it found none,
+    // still be absent; before any read, what is there now): another process's
+    // growth — or a .faf-dna that appeared meanwhile — is never written over.
+    const expect = this.text ?? (this.sawNoFile ? null : readBytesIfPresent(resolveInside(this.projectPath, '.faf-dna')));
     // Atomic, and never through a link that leaves the project or dangles.
     safeWriteFile(this.dnaPath, text, { root: this.projectPath, expect });
     this.text = text;
+    this.sawNoFile = false;
   }
 
   private generateProjectDNA(): string {
@@ -409,18 +457,18 @@ export class FafDNAManager {
     if (!this.dna) {return;}
     const ms = this.dna.growth.milestones;
     const has = (t: Milestone['type']) => ms.some((m) => m.type === t);
-    const add = (type: Milestone['type'], label: string, emoji: string) =>
-      ms.push({ type, score, date: now, version, label, emoji });
+    const add = (type: Milestone['type']) =>
+      ms.push({ type, score, date: now, version, ...MILESTONE_TEXT[type] });
 
-    if (score >= this.dna.birthCertificate.birthDNA * 2 && score > 0 && !has('doubled')) {add('doubled', 'Doubled', '2️⃣');}
+    if (score >= this.dna.birthCertificate.birthDNA * 2 && score > 0 && !has('doubled')) {add('doubled');}
 
     const peak = ms.find((m) => m.type === 'peak');
     if (!peak || score > peak.score) {
       if (peak) {ms.splice(ms.indexOf(peak), 1);}
-      add('peak', 'Peak', '🏔️');
+      add('peak');
     }
     const cur = ms.findIndex((m) => m.type === 'current');
     if (cur >= 0) {ms.splice(cur, 1);}
-    add('current', 'Current', '📍');
+    add('current');
   }
 }

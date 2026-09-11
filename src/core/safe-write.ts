@@ -1,12 +1,15 @@
 /**
  * Safe file access — the one primitive every faf writer, and every read of
- * project context, goes through.
+ * project context, goes through. It is also the only module in faf that calls
+ * a filesystem write, rename, delete, mkdir or chmod API (tests/write-guard
+ * enforces that for all of src/).
  *
  * Rule 1 — stay inside the project. Before faf touches a path it resolves it on
  * disk (realpath: every link followed). If that leads outside the project
  * folder, faf refuses. A dangling link is refused — faf never creates a file at
  * the end of a link. Anything whose real path is inside a `.git` folder is
- * refused, always.
+ * refused, always — with one narrow exception, faf's own git hook
+ * (`allowGitHooks`: one file directly inside the repo's hooks folder).
  *
  * Rule 2 — a link leads to the same kind of file. faf follows a link only to a
  * file with the same name (CLAUDE.md → docs/CLAUDE.md), or from one AI context
@@ -24,11 +27,18 @@
  * original kept". A plain writeFileSync truncates first, so a full disk, a
  * quota or a killed process used to leave the user's file cut short. With
  * `expect` (the bytes the caller read), the file is read again just before the
- * rename and the write is refused if it changed in the meantime.
+ * rename and the write is refused if it changed in the meantime. Its mode is
+ * checked too: a file made read-only, or given other permissions, while faf
+ * was writing is not replaced.
  *
  * Rule 4 — text faf edits is UTF-8. readUtf8 decodes strictly: a UTF-16 file or
  * any bytes that are not UTF-8 are refused, never turned into U+FFFD and
  * written back.
+ *
+ * Rule 5 — a whole file faf renders (project.html, a card, a `.fafb`) replaces
+ * a file already there only when that file carries faf's own mark — so faf
+ * wrote it (see {@link safeReplaceOwned}). Anything else is refused unless the
+ * caller passes `force` (the CLI's `--force`).
  */
 import {
   accessSync,
@@ -38,16 +48,21 @@ import {
   fchownSync,
   fsyncSync,
   lstatSync,
+  mkdirSync,
+  mkdtempSync,
   openSync,
+  readdirSync,
   readFileSync,
   readlinkSync,
   realpathSync,
   renameSync,
+  rmSync,
   statSync,
   unlinkSync,
   writeFileSync,
 } from 'fs';
 import { randomBytes } from 'crypto';
+import { tmpdir } from 'os';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'path';
 
 /** Why a path was refused. */
@@ -59,27 +74,37 @@ export type SafePathReason =
   | 'other-file'
   | 'git'
   | 'not-utf8'
-  | 'changed';
+  | 'changed'
+  | 'not-owned';
 
 /**
  * A path faf will not read or write, or a file faf will not change. Nothing
  * was written; the file on disk is exactly as it was.
  *   - `outside`, `dangling`, `not-a-file`, `not-faf`, `other-file`, `git`: the
- *     path is refused (see {@link resolveInside}); nothing was read either.
+ *     path is refused (see {@link resolveInside}).
  *   - `not-utf8`: the file is not UTF-8 (see {@link readUtf8}).
- *   - `changed`: the file changed on disk after faf read it (see the `expect`
- *     option of {@link safeWriteFile}).
+ *   - `changed`: the file changed on disk after faf read it — its bytes, or its
+ *     mode (see the `expect` option of {@link safeWriteFile}).
+ *   - `not-owned`: a whole file faf renders is already there without faf's own
+ *     mark, so faf did not write it (see {@link safeReplaceOwned}).
+ *
+ * `onWrite` is true when faf refused at the write itself — it may have read
+ * the file before (a `.faf` read through a link, say) — and false when it
+ * refused before reading or writing anything.
  */
 export class SafePathError extends Error {
   readonly reason: SafePathReason;
   /** The path as the caller named it (absolute). */
   readonly path: string;
+  /** True when the refusal came at the write (faf may have read the file first). */
+  readonly onWrite: boolean;
 
-  constructor(reason: SafePathReason, path: string, message: string) {
+  constructor(reason: SafePathReason, path: string, message: string, opts: { onWrite?: boolean } = {}) {
     super(message);
     this.name = 'SafePathError';
     this.reason = reason;
     this.path = path;
+    this.onWrite = opts.onWrite === true;
   }
 }
 
@@ -87,6 +112,16 @@ export interface ResolveInsideOptions {
   /** Resolving for a read of project context: a link must end at a `.faf` or
    *  `.fafm` file. A plain file is read under the name the caller gave. */
   read?: boolean;
+  /**
+   * Resolving faf's own git hook (`faf hooks`) — the one exception to the
+   * `.git` rule. `dir` must be the repo's hooks folder as git names it
+   * (`git rev-parse --git-path hooks`, a folder named `hooks`), and `name` a
+   * hook file sitting directly in it (`pre-commit`). Only that file may be
+   * inside `.git`; nothing below or beside it. Links are still checked: a
+   * link must stay inside the hooks folder's real folder and end at a file of
+   * the same name.
+   */
+  allowGitHooks?: boolean;
 }
 
 export interface SafeWriteOptions {
@@ -99,9 +134,15 @@ export interface SafeWriteOptions {
    * faf was writing — not written; original kept". A string is compared as its
    * UTF-8 bytes. `null` means the caller found no file there: if one has
    * appeared, the write is refused the same way (a missing file stays
-   * missing). Omit it to write without the check.
+   * missing). Omit it to write without the byte check (the mode check below
+   * still runs).
    */
   expect?: string | Uint8Array | null;
+  /** Write faf's own git hook: see {@link ResolveInsideOptions.allowGitHooks}. `root` is the hooks folder. */
+  allowGitHooks?: boolean;
+  /** Permission bits for the written file. Default: the original's (a new
+   *  file gets the default create mode). */
+  mode?: number;
 }
 
 /**
@@ -134,6 +175,8 @@ function inGitDir(p: string): boolean {
 }
 
 const FAF_FILE = /\.fafm?$/i;
+/** A git hook's file name (`pre-commit`, `commit-msg`, …). */
+const HOOK_NAME = /^[a-z][a-z0-9-]*$/;
 const realpath = (p: string): string => realpathSync.native(p);
 const errnoOf = (e: unknown): string | undefined => (e as NodeJS.ErrnoException | null)?.code;
 
@@ -152,11 +195,18 @@ function linkText(p: string): string {
   }
 }
 
+/** What a resolve is for: a read of project context, and/or faf's git hook. */
+interface ResolveMode {
+  read: boolean;
+  hooks: boolean;
+}
+
 /** Resolve the final component when it is a link: it must exist, stay inside
- *  `root` and out of `.git`, be a regular file and — for a read of project
- *  context — be a .faf/.fafm file; otherwise have the link's own name, or be
- *  an AI context file reached from one. */
-function followLink(root: string, requested: string, link: string, read: boolean): string {
+ *  `root` and out of `.git` (a hook may sit directly in the hooks folder),
+ *  be a regular file and — for a read of project context — be a .faf/.fafm
+ *  file; otherwise have the link's own name, or be an AI context file reached
+ *  from one. */
+function followLink(root: string, requested: string, link: string, mode: ResolveMode): string {
   let real: string;
   try {
     real = realpath(link);
@@ -174,13 +224,13 @@ function followLink(root: string, requested: string, link: string, read: boolean
   if (!isInside(root, real)) {
     throw new SafePathError('outside', requested, `${requested} is a link to ${real}, outside ${root} — refused.`);
   }
-  if (inGitDir(real)) {
+  if (inGitDir(real) && !(mode.hooks && dirname(real) === root)) {
     throw new SafePathError('git', requested, `${requested} is a link to ${real}, inside .git/ — refused.`);
   }
   if (!statSync(real).isFile()) {
     throw new SafePathError('not-a-file', requested, `${requested} is a link to ${real}, which is not a regular file — refused.`);
   }
-  refuseOtherKind(requested, real, read);
+  refuseOtherKind(requested, real, mode.read);
   return real;
 }
 
@@ -202,12 +252,24 @@ function refuseOtherKind(requested: string, real: string, read: boolean): void {
   }
 }
 
+/** With allowGitHooks: `dir` must be a hooks folder and `requested` a hook
+ *  file directly in it — the whole of the exception. */
+function checkHookTarget(dir: string, requested: string, root: string, folder: string): void {
+  if (basename(resolve(dir)) !== 'hooks' || !HOOK_NAME.test(basename(requested))) {
+    throw new SafePathError('git', requested, `${requested} is not a git hook in a hooks folder — refused.`);
+  }
+  if (folder !== root) {
+    throw new SafePathError('git', requested, `${requested} is not directly in the hooks folder ${root} — refused.`);
+  }
+}
+
 /**
  * Resolve `name` inside the project folder `dir` and return the real path to
  * read or write — or throw a SafePathError.
  *
  *   - the folder the file sits in must resolve to `dir` or below it
- *   - a path whose real form runs through `.git` → refused, always
+ *   - a path whose real form runs through `.git` → refused, always (the one
+ *     exception: `allowGitHooks`, a hook file directly in the hooks folder)
  *   - a file that does not exist yet → its path inside the project
  *   - a regular file → its path (spelled as on disk)
  *   - a link → the file it points at, when that exists, is a regular file, is
@@ -227,8 +289,10 @@ export function resolveInside(dir: string, name: string, opts: ResolveInsideOpti
   if (!isInside(root, folder)) {
     throw new SafePathError('outside', requested, `${requested} is in ${folder}, outside ${root} — refused.`);
   }
+  const hooks = opts.allowGitHooks === true;
+  if (hooks) {checkHookTarget(dir, requested, root, folder);}
   const target = join(folder, basename(requested));
-  if (inGitDir(target)) {
+  if (inGitDir(target) && !hooks) {
     throw new SafePathError(
       'git',
       requested,
@@ -242,7 +306,7 @@ export function resolveInside(dir: string, name: string, opts: ResolveInsideOpti
     if (errnoOf(e) === 'ENOENT') {return target;}
     throw e;
   }
-  if (st.isSymbolicLink()) {return followLink(root, requested, target, opts.read === true);}
+  if (st.isSymbolicLink()) {return followLink(root, requested, target, { read: opts.read === true, hooks });}
   if (!st.isFile()) {
     throw new SafePathError('not-a-file', requested, `${requested} is not a regular file — refused.`);
   }
@@ -288,20 +352,13 @@ export function readBytesIfPresent(path: string): Buffer | null {
   }
 }
 
-/** Refuse the rename when the file is no longer what the caller read. */
-function assertUnchanged(target: string, expect: string | Uint8Array | null): void {
-  const now = readBytesIfPresent(target);
-  const want = expect === null ? null : typeof expect === 'string' ? Buffer.from(expect, 'utf-8') : Buffer.from(expect);
-  const same = now === null || want === null ? now === want : now.equals(want);
-  if (!same) {
-    throw new SafePathError('changed', target, `${target} changed on disk while faf was writing — not written; original kept`);
-  }
-}
-
 /** What to keep from the file already at `target` — its permission bits and
  *  owner — or undefined when there is none yet. */
 interface Kept {
+  /** Permission bits given to the new file (rwx for owner, group, other). */
   mode: number;
+  /** Every mode bit as it was (setuid, setgid and sticky included), to notice a change. */
+  perm: number;
   uid: number;
   gid: number;
 }
@@ -309,10 +366,40 @@ interface Kept {
 function existingFile(target: string): Kept | undefined {
   try {
     const st = statSync(target);
-    return { mode: st.mode & 0o777, uid: st.uid, gid: st.gid };
+    return { mode: st.mode & 0o777, perm: st.mode & 0o7777, uid: st.uid, gid: st.gid };
   } catch (e) {
     if (errnoOf(e) === 'ENOENT') {return undefined;}
     throw e;
+  }
+}
+
+const changedOnDisk = (target: string): SafePathError =>
+  new SafePathError('changed', target, `${target} changed on disk while faf was writing — not written; original kept`, { onWrite: true });
+
+/** Refuse the rename when the file is no longer what the caller read (its
+ *  bytes, with `expect`), or when its mode changed or it stopped being
+ *  writable since faf looked at it (`kept`): a file the user made read-only,
+ *  or gave other permissions, while faf was writing is left as it is. */
+function assertUnchanged(target: string, expect: SafeWriteOptions['expect'], kept: Kept | undefined): void {
+  if (expect !== undefined) {
+    const now = readBytesIfPresent(target);
+    const want = expect === null ? null : typeof expect === 'string' ? Buffer.from(expect, 'utf-8') : Buffer.from(expect);
+    const same = now === null || want === null ? now === want : now.equals(want);
+    if (!same) {throw changedOnDisk(target);}
+  }
+  if (!kept) {return;}
+  let st;
+  try {
+    st = statSync(target);
+  } catch (e) {
+    if (errnoOf(e) === 'ENOENT') {return;} // gone: the byte check above decides
+    throw e;
+  }
+  if ((st.mode & 0o7777) !== kept.perm) {throw changedOnDisk(target);}
+  try {
+    accessSync(target, constants.W_OK);
+  } catch {
+    throw changedOnDisk(target);
   }
 }
 
@@ -350,12 +437,13 @@ interface TempFile {
 
 /** Create the temp file (never opening anything already at its name — 'wx' is
  *  O_CREAT | O_EXCL, a link included), write it in full, keep the original's
- *  owner and mode, flush it to disk and close it. */
-function fillTemp(temp: TempFile, content: string | Uint8Array, kept: Kept | undefined): void {
-  temp.fd = openSync(temp.path, 'wx', kept?.mode ?? 0o666);
+ *  owner and mode (or give it `mode`), flush it to disk and close it. */
+function fillTemp(temp: TempFile, content: string | Uint8Array, kept: Kept | undefined, mode: number | undefined): void {
+  temp.fd = openSync(temp.path, 'wx', mode ?? kept?.mode ?? 0o666);
   temp.created = true;
   writeFileSync(temp.fd, content);
   if (kept) {keepOwnerAndMode(temp.fd, kept);}
+  if (mode !== undefined) {fchmodSync(temp.fd, mode);}
   fsyncSync(temp.fd);
   closeSync(temp.fd);
   temp.fd = undefined;
@@ -373,9 +461,10 @@ function discardTemp(temp: TempFile): void {
 }
 
 /** Write `content` to `target` atomically: temp file in the same folder,
- *  fsync, then — when the file is still what the caller read (`expect`) —
- *  rename over. `target` must already be resolved. */
-function replaceAtomically(target: string, content: string | Uint8Array, expect: SafeWriteOptions['expect']): void {
+ *  fsync, then — when the file is still what the caller read (`expect`), with
+ *  the same mode, and still writable — rename over. `target` must already be
+ *  resolved. */
+function replaceAtomically(target: string, content: string | Uint8Array, opts: SafeWriteOptions): void {
   const folder = dirname(target);
   const temp: TempFile = {
     path: join(folder, `.${basename(target).slice(0, 100)}.${process.pid}.${randomBytes(6).toString('hex')}.faf-tmp`),
@@ -385,8 +474,8 @@ function replaceAtomically(target: string, content: string | Uint8Array, expect:
   try {
     // A file faf may not write in place (read-only) is not replaced either.
     if (kept) {accessSync(target, constants.W_OK);}
-    fillTemp(temp, content, kept);
-    if (expect !== undefined) {assertUnchanged(target, expect);}
+    fillTemp(temp, content, kept, opts.mode);
+    assertUnchanged(target, opts.expect, kept);
     renameSync(temp.path, target);
   } catch (e) {
     discardTemp(temp);
@@ -397,6 +486,11 @@ function replaceAtomically(target: string, content: string | Uint8Array, expect:
   syncFolder(folder);
 }
 
+/** A refusal raised while writing: the same SafePathError, marked `onWrite`. */
+function atWrite(e: unknown): unknown {
+  return e instanceof SafePathError && !e.onWrite ? new SafePathError(e.reason, e.path, e.message, { onWrite: true }) : e;
+}
+
 /**
  * Write a file inside a project, safely: resolved with {@link resolveInside}
  * (a link that leaves the project, dangles, or leads to a file with another
@@ -405,12 +499,192 @@ function replaceAtomically(target: string, content: string | Uint8Array, expect:
  * where the OS allows, its owner — kept). On any failure the original is
  * untouched and the Error says "not written; original kept". With `expect`,
  * a file that changed after the caller read it is not replaced either
- * (SafePathError `changed`). Returns the real path written — the link's target
- * when `path` is an in-project link.
+ * (SafePathError `changed`); nor is one whose mode changed, or that became
+ * read-only, while faf was writing. Returns the real path written — the
+ * link's target when `path` is an in-project link.
  */
 export function safeWriteFile(path: string, content: string | Uint8Array, opts: SafeWriteOptions = {}): string {
   const full = resolve(path);
-  const target = resolveInside(opts.root ?? dirname(full), full);
-  replaceAtomically(target, content, opts.expect);
+  let target: string;
+  try {
+    target = resolveInside(opts.root ?? dirname(full), full, { allowGitHooks: opts.allowGitHooks });
+  } catch (e) {
+    throw atWrite(e);
+  }
+  replaceAtomically(target, content, opts);
   return target;
+}
+
+/** Options for {@link safeReplaceOwned}. */
+export interface ReplaceOwnedOptions {
+  /** The project folder the write must stay inside. Default: the file's own folder. */
+  root?: string;
+  /** True when the bytes already at the path carry faf's own mark (faf wrote them). */
+  owns: (existing: Buffer) => boolean;
+  /** faf's mark in words, for the refusal: "the `_meta[\"one.faf/context\"]` block". */
+  mark: string;
+  /** Replace a file without the mark anyway — the explicit overwrite (`--force`). */
+  force?: boolean;
+  /** The bytes the caller read there earlier (`null`: no file then). When
+   *  given, the file must still hold them, else SafePathError `changed`. */
+  expect?: string | Uint8Array | null;
+}
+
+/**
+ * Write a whole file faf renders (project.html, a Server Card, an A2A card, a
+ * `.fafb`), replacing a file already at `path` only when faf can prove it wrote
+ * it: its bytes carry faf's own mark (`owns`). A file without the mark is
+ * refused — SafePathError `not-owned`: "<file> has no <mark>, so faf did not
+ * write it — faf left it unchanged." — and stays byte for byte, unless `force`
+ * asks to replace it. The link rules and the atomic write are
+ * {@link safeWriteFile}'s, and the write is refused if the file changed on
+ * disk after faf read it. Returns the real path written.
+ */
+export function safeReplaceOwned(path: string, content: string | Uint8Array, opts: ReplaceOwnedOptions): string {
+  const full = resolve(path);
+  const root = opts.root ?? dirname(full);
+  const target = resolveInside(root, full);
+  const existing = readBytesIfPresent(target);
+  if (opts.expect !== undefined) {assertUnchanged(target, opts.expect, undefined);}
+  if (existing !== null && opts.force !== true && !opts.owns(existing)) {
+    throw new SafePathError('not-owned', full, `${full} has no ${opts.mark}, so faf did not write it — faf left it unchanged.`, { onWrite: true });
+  }
+  return safeWriteFile(target, content, { root, expect: existing });
+}
+
+/**
+ * Create the folder `dir` inside the project folder `root`, with any missing
+ * folders between them, and return its real path. `root` itself is the
+ * caller's own folder: it is created as named when missing. Below it, faf
+ * never creates a folder through a link: an existing folder on the way that
+ * is a link leading out of `root` (or a dangling link) is refused, as is any
+ * part inside `.git` and anything on the way that is not a folder — so
+ * `.github → ~/elsewhere` cannot make faf create `~/elsewhere/workflows`.
+ */
+export function makeDirInside(root: string, dir: string = root): string {
+  const top = resolve(root);
+  mkdirSync(top, { recursive: true });
+  const realRoot = realpath(top);
+  const want = resolve(top, dir);
+  const rel = relative(top, want);
+  if (rel === '..' || rel.startsWith(`..${sep}`) || isAbsolute(rel)) {
+    throw new SafePathError('outside', want, `${want} is outside ${realRoot} — refused.`, { onWrite: true });
+  }
+  let cur = realRoot;
+  for (const part of rel.split(/[\\/]/).filter(Boolean)) {
+    const next = join(cur, part);
+    if (inGitDir(next)) {
+      throw new SafePathError('git', want, `${want} runs through ${next}, inside .git/ — refused.`, { onWrite: true });
+    }
+    cur = stepInto(realRoot, want, next);
+  }
+  return cur;
+}
+
+/** One folder on the way down in makeDirInside: made when missing, followed
+ *  when it is a link that stays inside `root`, refused otherwise. */
+function stepInto(root: string, want: string, next: string): string {
+  let st;
+  try {
+    st = lstatSync(next);
+  } catch (e) {
+    if (errnoOf(e) !== 'ENOENT') {throw e;}
+    mkdirSync(next);
+    return next;
+  }
+  let real = next;
+  if (st.isSymbolicLink()) {
+    try {
+      real = realpath(next);
+    } catch {
+      throw new SafePathError('dangling', want, `${next} is a link to ${linkText(next)}, which does not exist. faf does not create folders through a link — refused.`, { onWrite: true });
+    }
+    if (!isInside(root, real)) {
+      throw new SafePathError('outside', want, `${next} is a link to ${real}, outside ${root} — refused.`, { onWrite: true });
+    }
+    if (inGitDir(real)) {
+      throw new SafePathError('git', want, `${next} is a link to ${real}, inside .git/ — refused.`, { onWrite: true });
+    }
+  }
+  if (!statSync(real).isDirectory()) {
+    throw new SafePathError('not-a-file', want, `${next} is not a folder — refused.`, { onWrite: true });
+  }
+  return real;
+}
+
+/**
+ * Remove a file faf wrote — only when it still holds exactly `expect` (the
+ * bytes faf wrote or read there) and is a regular file inside `root` (default:
+ * its own folder), out of `.git`. A link is never removed (faf did not make
+ * it), and a file whose bytes changed is left as it is (SafePathError
+ * `changed`). Returns false when nothing was there.
+ */
+export function safeUnlink(path: string, opts: { root?: string; expect: string | Uint8Array }): boolean {
+  const full = resolve(path);
+  const realRoot = realpath(resolve(opts.root ?? dirname(full)));
+  const folder = realpath(dirname(full));
+  if (!isInside(realRoot, folder)) {
+    throw new SafePathError('outside', full, `${full} is in ${folder}, outside ${realRoot} — refused.`, { onWrite: true });
+  }
+  const target = join(folder, basename(full));
+  if (inGitDir(target)) {
+    throw new SafePathError('git', full, `${full} is inside .git/ — refused.`, { onWrite: true });
+  }
+  let st;
+  try {
+    st = lstatSync(target);
+  } catch (e) {
+    if (errnoOf(e) === 'ENOENT') {return false;}
+    throw e;
+  }
+  if (!st.isFile()) {
+    throw new SafePathError('not-a-file', full, `${full} is not a regular file faf wrote — left as it is.`, { onWrite: true });
+  }
+  assertUnchanged(target, opts.expect, undefined);
+  unlinkSync(target);
+  return true;
+}
+
+/** The temp folders makeTempDir made in this process — the only ones removeTempDir removes. */
+const TEMP_DIRS = new Set<string>();
+
+/** Make a new temp folder for faf's own use — `<os temp>/<prefix>XXXXXX`, a
+ *  fresh name no one else can have made (mkdtemp) — and return its real path. */
+export function makeTempDir(prefix: string): string {
+  const dir = realpath(mkdtempSync(join(tmpdir(), prefix)));
+  TEMP_DIRS.add(dir);
+  return dir;
+}
+
+/** Remove a temp folder {@link makeTempDir} made in this process, with what is
+ *  in it. Any other folder is refused (an Error; nothing removed). */
+export function removeTempDir(dir: string): void {
+  if (!TEMP_DIRS.has(dir)) {throw new Error(`${dir} is not a temp folder faf made — not removed`);}
+  rmSync(dir, { recursive: true, force: true });
+  TEMP_DIRS.delete(dir);
+}
+
+/**
+ * Remove faf's own temp folders left behind by earlier runs (`faf clear`):
+ * entries of the OS temp folder whose name starts with `prefix`, that are
+ * real folders (a link is left alone) and belong to this user. Returns how
+ * many were removed. A folder that cannot be read or removed is skipped.
+ */
+export function removeStaleTempDirs(prefix: string): number {
+  const tmp = tmpdir();
+  const uid = typeof process.getuid === 'function' ? process.getuid() : undefined;
+  let removed = 0;
+  for (const entry of readdirSync(tmp)) {
+    if (!entry.startsWith(prefix)) {continue;}
+    const p = join(tmp, entry);
+    try {
+      const st = lstatSync(p);
+      if (!st.isDirectory() || (uid !== undefined && st.uid !== uid)) {continue;}
+      rmSync(p, { recursive: true, force: true });
+      removed++;
+    } catch {
+      /* not ours to remove, or already gone */
+    }
+  }
+  return removed;
 }

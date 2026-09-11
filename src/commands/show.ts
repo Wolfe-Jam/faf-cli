@@ -26,7 +26,12 @@ function openInBrowser(file: string): boolean {
   }
 }
 
-export function showCommand(): void {
+export interface ShowOptions {
+  /** Replace a project.html faf did not render (no faf mark). */
+  force?: boolean;
+}
+
+export function showCommand(options: ShowOptions = {}): void {
   const fafPath = findFafFile();
   if (!fafPath) {
     console.error("Error: project.faf not found\n\n  Run 'faf init' to create one.");
@@ -37,7 +42,7 @@ export function showCommand(): void {
   const data = readFaf(fafPath);
   // Real scorer — never a reimplementation. Same pipeline as export --html.
   const result = scoreFafYaml(readFafRaw(fafPath));
-  writeProjectHtml(dir, data, result, fafPath);
+  writeProjectHtml(dir, data, result, fafPath, { force: options.force });
 
   const htmlPath = join(dir, 'project.html');
   const opened = openInBrowser(htmlPath);

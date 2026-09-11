@@ -65,7 +65,9 @@ function convertCmd(dir: string | undefined, options: MemoryOptions): void {
   }
   try {
     const soul = fromClaudeDir(root, { namepoint: options.namepoint });
-    soul.toFile(out);
+    // A new soul: written only where no file is (one that appeared since the
+    // check is refused), or over the old one with --force.
+    soul.toFile(out, { replace: options.force === true });
     console.log(
       `${fafCyan('memory convert')} ${dim('—')} ${soul.facts.length} facts → ${out}`,
     );
@@ -127,6 +129,8 @@ function etchCmd(text: string | undefined, options: MemoryOptions): void {
     process.exit(2);
   }
   const path = resolve(options.file ?? defaultSoulPath());
+  // No file: a new soul, made with no file — its save refuses a soul.fafm
+  // that appeared meanwhile rather than writing over it.
   const soul = existsSync(path)
     ? Soul.load(path)
     : new Soul(options.namepoint ?? '@local', { profile: 'knowledge' });

@@ -1,7 +1,8 @@
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
 import { dim, orange } from './colors.js';
+import { makeDirInside, safeReplaceOwned } from '../core/safe-write.js';
 
 /**
  * The star-nudge — capture the reservoir. A CLI has orders of magnitude more
@@ -77,10 +78,28 @@ function readState(): NudgeState {
   }
 }
 
+/** True when `bytes` are the nudge state faf keeps: `{"shown":N,"last":"…"}`,
+ *  or the first release's plain ISO date. Any other file is left as it is. */
+function isNudgeState(bytes: Uint8Array): boolean {
+  const raw = new TextDecoder().decode(bytes).trim();
+  try {
+    const j = JSON.parse(raw) as Record<string, unknown>;
+    return typeof j === 'object' && j !== null && Object.keys(j).every(k => k === 'shown' || k === 'last');
+  } catch {
+    return /^\d{4}-\d{2}-\d{2}T[\d:.]+Z$/.test(raw);
+  }
+}
+
 function record(prevShown: number, nowMs: number): void {
   try {
-    mkdirSync(STATE_DIR, { recursive: true });
-    writeFileSync(STATE_FILE, JSON.stringify({ shown: prevShown + 1, last: new Date(nowMs).toISOString() }));
+    makeDirInside(STATE_DIR);
+    // Atomic, never through a link out of faf's own config folder, and only
+    // over a nudge state faf wrote.
+    safeReplaceOwned(STATE_FILE, JSON.stringify({ shown: prevShown + 1, last: new Date(nowMs).toISOString() }), {
+      root: STATE_DIR,
+      owns: isNudgeState,
+      mark: 'faf star-nudge state',
+    });
   } catch {
     /* a nudge must never fail a command */
   }

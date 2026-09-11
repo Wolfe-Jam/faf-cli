@@ -1,12 +1,26 @@
-import { writeFileSync, existsSync, mkdirSync } from 'fs';
-import { join } from 'path';
+import { existsSync } from 'fs';
+import { dirname, join, resolve } from 'path';
 import { findFafFile, readFaf, readFafRaw } from '../interop/faf.js';
 import { scoreFafYaml } from '../core/scorer.js';
+import { makeDirInside, safeReplaceOwned, safeWriteFile } from '../core/safe-write.js';
 import { fafCyan, dim, bold } from '../ui/colors.js';
 
 export interface TafOptions {
   output?: string;
   write?: boolean;
+  /** With --output: replace a file that is not a TAF snapshot faf wrote. */
+  force?: boolean;
+}
+
+/** True when `bytes` are a TAF snapshot faf wrote: a JSON object with a
+ *  `taf_version`. faf replaces an --output file only when it is one. */
+export function isTafSnapshot(bytes: Uint8Array): boolean {
+  try {
+    const j = JSON.parse(new TextDecoder().decode(bytes)) as unknown;
+    return typeof j === 'object' && j !== null && !Array.isArray(j) && typeof (j as { taf_version?: unknown }).taf_version === 'string';
+  } catch {
+    return false;
+  }
 }
 
 const FAF_TAF_GIT = 'Wolfe-Jam/faf-taf-git@v2.2.0';
@@ -119,8 +133,10 @@ function tafSetup(options: TafOptions): void {
       console.error(dim(`  Add the faf-taf-git step to your existing workflow, or remove taf.yml and re-run.`));
       return; // non-destructive: refuse, never clobber
     }
-    mkdirSync(join(dir, '.github', 'workflows'), { recursive: true });
-    writeFileSync(wfPath, workflow, 'utf-8');
+    // Never through a linked .github or a taf.yml link (dangling included), and
+    // never over a taf.yml that appeared meanwhile.
+    makeDirInside(dir, join('.github', 'workflows'));
+    safeWriteFile(wfPath, workflow, { root: dir, expect: null });
     console.log(`${fafCyan('◆')} taf  wrote .github/workflows/taf.yml`);
     console.log(dim('  commit + push → your first Test Receipt prints to the taf-receipts branch.'));
     return;
@@ -163,7 +179,14 @@ function tafSnapshot(options: TafOptions): void {
   const json = JSON.stringify(receipt, null, 2);
 
   if (options.output) {
-    writeFileSync(options.output, json, 'utf-8');
+    // Its own folder is the boundary; a file that is not a TAF snapshot is
+    // left as it is unless --force.
+    safeReplaceOwned(options.output, json, {
+      root: dirname(resolve(options.output)),
+      owns: isTafSnapshot,
+      mark: 'TAF snapshot (`taf_version`)',
+      force: options.force,
+    });
     console.log(`${fafCyan('◆')} taf  receipt written to ${options.output}`);
   } else {
     console.log(json);

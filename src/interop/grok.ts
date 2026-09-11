@@ -1,7 +1,7 @@
-import { existsSync, mkdirSync } from 'fs';
+import { existsSync } from 'fs';
 import { join } from 'path';
 import type { FafData } from '../core/types.js';
-import { readUtf8, resolveInside, safeWriteFile } from '../core/safe-write.js';
+import { makeDirInside, readUtf8, resolveInside, safeWriteFile } from '../core/safe-write.js';
 
 /**
  * Canonical hosted endpoint for grok-faf-mcp — the URL form Grok CLI chose
@@ -37,14 +37,14 @@ export type GrokWriteStatus = 'created' | 'merged' | 'unchanged';
  * config.toml that is not UTF-8 is refused and left as it is.
  */
 export function writeGrokConfig(dir: string, data?: FafData): GrokWriteStatus {
-  const grokDir = join(dir, '.grok');
   const block = renderGrokConfig(data);
 
-  mkdirSync(grokDir, { recursive: true });
+  makeDirInside(dir, '.grok');
   const configPath = resolveInside(dir, join('.grok', 'config.toml'));
   if (!existsSync(configPath)) {
     const header = '# grok-faf-mcp — wired by FAF from project.faf\n\n';
-    safeWriteFile(configPath, header + block, { root: dir });
+    // A config.toml that appeared meanwhile is not written over.
+    safeWriteFile(configPath, header + block, { root: dir, expect: null });
     return 'created';
   }
 
@@ -54,6 +54,6 @@ export function writeGrokConfig(dir: string, data?: FafData): GrokWriteStatus {
   }
 
   const sep = existing.endsWith('\n\n') ? '' : existing.endsWith('\n') ? '\n' : '\n\n';
-  safeWriteFile(configPath, existing + sep + block, { root: dir });
+  safeWriteFile(configPath, existing + sep + block, { root: dir, expect: existing });
   return 'merged';
 }

@@ -14,7 +14,6 @@ import { relentlessContext } from './relentless.js';
 import {
   APP_TYPE_CATEGORIES,
   SLOTS,
-  SLOT_BY_PATH,
   SLOTIGNORED,
   isExplicitNone,
   isPlaceholder,
@@ -65,8 +64,11 @@ export function assembleFreshFaf(dir: string): Record<string, unknown> {
  * Explicit none: a slot the file marks `None` / `N/A` / `not applicable`
  * (any case) is a decision, not a gap. No detected value replaces it — not
  * under the slot's own name, nor under its other name (`stack.db` for
- * `stack.database`) — and the result records it as `slotignored`, the same
- * decision in faf's own word. A slot already `slotignored` is kept the same way.
+ * `stack.database`) — and it keeps its own text: the result holds exactly
+ * what the file had there, so a write changes nothing on that line (its
+ * comment included). Scoring counts it as `slotignored`; faf writes the word
+ * `slotignored` only into a slot that was empty. A slot already
+ * `slotignored` is kept the same way.
  */
 export function updateExistingFaf(dir: string, existing: Record<string, unknown>): Record<string, unknown> {
   const base = liftScalarProject(asFafMapping(existing, 'updateExistingFaf: the existing .faf'));
@@ -92,11 +94,14 @@ function fieldAt(data: Record<string, unknown>, path: string): unknown {
 }
 
 /** Set (or, with `undefined`, remove) `section.field`, copying the section so
- *  the caller's objects are never changed. */
+ *  the caller's objects are never changed. Setting the value the field
+ *  already holds leaves the section as it is (no copy, no change for the
+ *  merge to see). */
 function putField(data: Record<string, unknown>, path: string, value: unknown): void {
   const [section, field] = path.split('.');
   const s = data[section];
   if (!isMapping(s)) {return;}
+  if (value === undefined ? !(field in s) : s[field] === value) {return;}
   const copy = { ...s };
   if (value === undefined) {
     delete copy[field];
@@ -117,17 +122,17 @@ function decidedNotApplicable(base: Record<string, unknown>, locs: string[]): bo
 }
 
 /** After filling: a slot `base` marks not applicable gets no detected value
- *  under any of its names (each keeps what `base` had there), and every
- *  explicit none at a slot is recorded as `slotignored`. */
+ *  under any of its names — each keeps exactly what `base` had there, a
+ *  hand-written none keeping its own text (scoring reads it as
+ *  `slotignored`; faf never rewrites it to that word). */
 function keepNotApplicable(filled: Record<string, unknown>, base: Record<string, unknown>): Record<string, unknown> {
   const out = { ...filled };
   for (const slot of SLOTS) {
     const locs = slotLocations(slot);
-    const decided = decidedNotApplicable(base, locs);
+    if (!decidedNotApplicable(base, locs)) {continue;}
     for (const loc of locs) {
       const before = fieldAt(base, loc);
-      if (decided && !notApplicable(before) && fieldAt(out, loc) !== before) {putField(out, loc, before);}
-      if (isExplicitNone(fieldAt(out, loc))) {putField(out, loc, SLOTIGNORED);}
+      if (fieldAt(out, loc) !== before) {putField(out, loc, before);}
     }
   }
   return out;
@@ -165,7 +170,8 @@ function applySlotIgnore(seeded: Record<string, unknown>): void {
  *
  *  Two things are never filled over:
  *  - a hand-written explicit none (`None`, `N/A`, `not applicable`, any case):
- *    at a slot it becomes `slotignored`; anywhere else it is kept as written;
+ *    it is kept as written, at a slot or anywhere else (scoring reads it at a
+ *    slot as `slotignored`);
  *  - a `_meta` the target already carries (the user's own): faf's runtime
  *    `_meta` from `source` is merged only into a target without one. */
 export function fillEmpties(
@@ -181,9 +187,8 @@ function fillAt(target: Record<string, unknown>, source: Record<string, unknown>
     const existing = result[key];
     const path = prefix ? `${prefix}.${key}` : key;
     if (path === '_meta' && existing !== undefined) {continue;}
-    if (isExplicitNone(existing)) {
-      if (SLOT_BY_PATH.has(path)) {result[key] = SLOTIGNORED;}
-    } else if (isPlaceholder(existing)) {
+    if (isExplicitNone(existing)) {continue;} // a decision, kept in its own words
+    if (isPlaceholder(existing)) {
       result[key] = value;
     } else if (isMapping(value) && isMapping(existing)) {
       result[key] = fillAt(existing, value, path);

@@ -56,6 +56,13 @@ export {
   REGISTRY_PUBLISHER_KEY,
 } from './interop/servercard.js';
 export type { ServerCardOptions } from './interop/servercard.js';
+// Text-preserving identity edit of a registry server.json — the same edit
+// `faf server-card` makes: only name / title / version and faf's `_meta`
+// context-block keys change; every other byte (key order, a 20-digit number,
+// an array on one line) stays. JS build scripts compose it instead of
+// re-emitting the manifest.
+export { patchServerJson } from './interop/servercard.js';
+export type { ServerJsonIdentity } from './interop/servercard.js';
 // `generateA2ACard` is a deprecated alias — use `buildA2ACard`.
 export {
   projectCards,
@@ -178,6 +185,12 @@ export { resolveInside, safeWriteFile, SafePathError } from './core/safe-write.j
 // U+FFFD and written back.
 export { readUtf8 } from './core/safe-write.js';
 export type { ResolveInsideOptions, SafeWriteOptions, SafePathReason } from './core/safe-write.js';
+// The rest of the safe-write family every faf writer uses: replace a whole
+// file only when it carries faf's own mark (SafePathError 'not-owned'
+// otherwise), make a folder inside the project (never through a link out),
+// and remove a file only when it still holds the bytes faf wrote.
+export { safeReplaceOwned, makeDirInside, safeUnlink } from './core/safe-write.js';
+export type { ReplaceOwnedOptions } from './core/safe-write.js';
 export { enrichFromRepo } from './detect/enrich.js';
 export { serializeFaf, writeFaf } from './interop/faf.js';
 // Document-preserving .faf updates: parse → change the YAML Document → write

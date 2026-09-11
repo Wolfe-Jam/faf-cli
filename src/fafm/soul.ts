@@ -61,8 +61,11 @@ function readSoulText(path: string): { real: string; text: string } {
  *  nothing new to write (whatever is on disk now stays), and otherwise the
  *  file must still hold `loaded.text` — else it changed on disk after the
  *  load, and the write is refused (SafePathError `changed`) rather than
- *  written over the edit. Link rules and the atomic write are safeWriteFile's. */
-function writeUnlessSame(path: string, text: string, loaded?: { real: string; text: string }): string {
+ *  written over the edit. Any other path — a soul made with no file, or a
+ *  save to a file the soul was not loaded from — must have no file there
+ *  (a file that appeared is refused the same way), unless `replace` asks to
+ *  write over it. Link rules and the atomic write are safeWriteFile's. */
+function writeUnlessSame(path: string, text: string, loaded: { real: string; text: string } | undefined, replace: boolean): string {
   const full = resolve(path);
   const target = resolveInside(dirname(full), full);
   if (loaded && loaded.real === target && loaded.text === text) {return target;}
@@ -73,7 +76,7 @@ function writeUnlessSame(path: string, text: string, loaded?: { real: string; te
     now = undefined; // unreadable: the write below says why
   }
   if (now && now.equals(Buffer.from(text, 'utf-8'))) {return target;}
-  const expect = loaded && loaded.real === target ? loaded.text : now;
+  const expect = loaded && loaded.real === target ? loaded.text : replace ? now : null;
   return safeWriteFile(path, text, expect === undefined ? {} : { expect });
 }
 
@@ -219,6 +222,10 @@ export class Soul {
   private _extra: Record<string, unknown>;
   private _memoryExtra: Record<string, unknown>;
   private _version: string | undefined;
+  /** The file the soul was loaded from or last saved to. Undefined while the
+   *  soul was made with no file (in memory, not saved yet): its first save
+   *  then refuses a file already at the path — one that appeared since the
+   *  caller found none — unless `replace`. */
   private _origin: Origin | undefined;
   /** Each loaded fact's item position in the file's memory.facts. */
   private _factAt = new WeakMap<Fact, number>();
@@ -418,17 +425,23 @@ export class Soul {
    * never touched.
    * Refused, with nothing written: a change to a known key the file holds in
    * a shape faf does not model (adding a fact to `memory.facts` written as a
-   * mapping, say); and a save over the file the soul was loaded from (or last
+   * mapping, say); a save over the file the soul was loaded from (or last
    * saved to) when that file changed on disk since — SafePathError `changed`,
-   * so an edit made meanwhile is never written over.
+   * so an edit made meanwhile is never written over; and a save of a soul
+   * made with no file (or to a path it was not loaded from) when a file is
+   * already there — the same `changed` refusal, so a soul.fafm that appeared
+   * after the caller found none is kept. `replace: true` is the explicit
+   * overwrite of such a file (`faf memory convert --force`).
    */
-  save(path: string, opts: { reindex?: boolean } = {}): string {
+  save(path: string, opts: { reindex?: boolean; replace?: boolean } = {}): string {
     const reindex = opts.reindex ?? (this._indexDerived && sameJs(this._index, this._indexAtRecord));
     if (reindex) {this.rebuildIndex();}
+    const replace = opts.replace === true;
     const origin = this._origin;
     if (!origin) {
       const text = this.toYaml();
-      const real = writeUnlessSame(path, text);
+      // Made with no file: nothing may be there now (unless replace).
+      const real = writeUnlessSame(path, text, undefined, replace);
       this.settle(path, text, new Map(this._facts.map((f, i) => [f, i])), real);
       return path;
     }
@@ -437,12 +450,12 @@ export class Soul {
       positions = this.applyTo(doc, origin, reindex);
     }, path);
     // Refused, with nothing written, if the file changed on disk since the load.
-    const real = writeUnlessSame(path, text, origin.real === undefined ? undefined : { real: origin.real, text: origin.text });
+    const real = writeUnlessSame(path, text, origin.real === undefined ? undefined : { real: origin.real, text: origin.text }, replace);
     this.settle(path, text, positions, real);
     return path;
   }
 
-  toFile(path: string, opts: { reindex?: boolean } = {}): string {
+  toFile(path: string, opts: { reindex?: boolean; replace?: boolean } = {}): string {
     return this.save(path, opts);
   }
 

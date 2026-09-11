@@ -1,10 +1,13 @@
-import { existsSync, writeFileSync } from 'fs';
+import { lstatSync } from 'fs';
+import { dirname, resolve } from 'path';
 import { findFafFile, readFafRaw } from '../interop/faf.js';
 import { scoreFafYaml } from '../core/scorer.js';
 import type { ScoreResult } from '../core/types.js';
 import { FafDNAManager } from '../core/faf-dna.js';
 import { sayWhyDnaIsLeft } from './dna.js';
 import * as kernel from '../wasm/kernel.js';
+import { SafePathError, safeReplaceOwned } from '../core/safe-write.js';
+import { FAFB_MARK, isFafbBytes } from './compile.js';
 import { tierBadge } from '../core/tiers.js';
 import { bold, dim, fafCyan } from '../ui/colors.js';
 
@@ -47,10 +50,36 @@ interface RefreshReport {
   delta: number;
   prevScore: number | null | undefined;
   fafbBytes: number | null;
+  /** Why an existing .fafb was left as it is (a link out, not a .fafb faf compiled, …). */
+  fafbLeft: string | null;
+}
+
+/** True when something is at `path` — a file, or a link (even a dangling one). */
+function present(path: string): boolean {
+  try {
+    lstatSync(path);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Re-compile the .fafb at `fafbPath` from `yaml` — only over a .fafb faf
+ *  compiled, inside the project folder `root` (never through a link that
+ *  leaves it or dangles). Returns the bytes written, or why it was left. */
+function recompileFafb(fafbPath: string, yaml: string, root: string): { bytes: number | null; left: string | null } {
+  const binary = kernel.compile(yaml);
+  try {
+    safeReplaceOwned(fafbPath, binary, { root, owns: isFafbBytes, mark: FAFB_MARK });
+    return { bytes: binary.length, left: null };
+  } catch (e) {
+    if (e instanceof SafePathError) {return { bytes: null, left: e.message };}
+    throw e;
+  }
 }
 
 /** The text report of `faf refresh`. An unknown score shows no number. */
-function printRefresh({ result, known, drifted, delta, prevScore, fafbBytes }: RefreshReport): void {
+function printRefresh({ result, known, drifted, delta, prevScore, fafbBytes, fafbLeft }: RefreshReport): void {
   console.log(`${fafCyan('refresh')} ${dim('— re-grounding on the live .faf')}\n`);
   if (!known) {
     console.log(`  score unknown ${dim('— about-repo with no about.source_score; the DNA journey is left as it is')}`);
@@ -66,6 +95,9 @@ function printRefresh({ result, known, drifted, delta, prevScore, fafbBytes }: R
   }
   if (fafbBytes !== null) {
     console.log(`  .fafb re-compiled ${dim(`(${fafbBytes} bytes — fast tier current)`)}`);
+  }
+  if (fafbLeft !== null) {
+    console.log(`  .fafb left as it is ${dim(`— ${fafbLeft}`)}`);
   }
   if (known) {console.log(`  re-grounded: ${tierBadge(result.tier)} ${bold(`${result.score}%`)}`);}
 }
@@ -93,12 +125,13 @@ export function refreshCommand(options: RefreshOptions = {}): void {
 
   // 3. Keep the .fafb binary tier current (the 412× tier). Only if one exists —
   //    don't force a binary on YAML-only projects. Rust authors via the kernel.
+  //    A .fafb faf did not compile, or one behind a link out of the project,
+  //    is left as it is — said in one line — and the re-ground carries on.
   const fafbPath = fafPath.replace(/\.faf$/, '.fafb');
   let fafbBytes: number | null = null;
-  if (existsSync(fafbPath)) {
-    const binary = kernel.compile(yaml);
-    writeFileSync(fafbPath, binary);
-    fafbBytes = binary.length;
+  let fafbLeft: string | null = null;
+  if (present(fafbPath)) {
+    ({ bytes: fafbBytes, left: fafbLeft } = recompileFafb(fafbPath, yaml, dirname(resolve(fafPath))));
   }
 
   if (options.json) {
@@ -112,7 +145,9 @@ export function refreshCommand(options: RefreshOptions = {}): void {
           baseline: prevScore,
           delta,
           drifted,
-          fafb: fafbBytes !== null && fafbBytes !== undefined ? { reCompiled: true, bytes: fafbBytes } : { reCompiled: false },
+          fafb: fafbBytes !== null && fafbBytes !== undefined
+            ? { reCompiled: true, bytes: fafbBytes }
+            : { reCompiled: false, ...(fafbLeft !== null ? { left: fafbLeft } : {}) },
           journey: dna.getJourney() || null,
         },
         null,
@@ -120,7 +155,7 @@ export function refreshCommand(options: RefreshOptions = {}): void {
       ),
     );
   } else {
-    printRefresh({ result, known, drifted, delta, prevScore, fafbBytes });
+    printRefresh({ result, known, drifted, delta, prevScore, fafbBytes, fafbLeft });
   }
   if (!known) {return;}
 

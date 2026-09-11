@@ -1,4 +1,5 @@
 import type { KernelScoreResult, FafbInfo } from '../core/types.js';
+import { scoringText } from '../core/score-input.js';
 
 // faf-scoring-kernel is CommonJS with synchronous WASM loading
  
@@ -17,14 +18,15 @@ function getKernel(): typeof import('faf-scoring-kernel') {
   }
 }
 
-/** Score a .faf YAML string (21 base slots) */
+/** Score a .faf YAML string (21 base slots). A hand-written None / N/A /
+ *  not applicable at a slot scores as `slotignored` (see core/score-input). */
 export function score(yaml: string): KernelScoreResult {
-  return JSON.parse(getKernel().score_faf(yaml));
+  return JSON.parse(getKernel().score_faf(scoringText(yaml)));
 }
 
-/** Score a .faf YAML string (33 enterprise slots) */
+/** Score a .faf YAML string (33 enterprise slots), explicit none as `slotignored`. */
 export function scoreEnterprise(yaml: string): KernelScoreResult {
-  return JSON.parse(getKernel().score_faf_enterprise(yaml));
+  return JSON.parse(getKernel().score_faf_enterprise(scoringText(yaml)));
 }
 
 /** Validate .faf YAML */

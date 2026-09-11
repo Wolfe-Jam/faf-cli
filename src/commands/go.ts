@@ -1,5 +1,4 @@
 import { createInterface } from 'readline';
-import { existsSync, readFileSync, writeFileSync, unlinkSync } from 'fs';
 import { join } from 'path';
 import { findFafFile, readFaf, readFafRaw, writeFaf } from '../interop/faf.js';
 import { SLOTS, SLOTIGNORED, isExplicitNone, isPlaceholder } from '../core/slots.js';
@@ -10,6 +9,7 @@ import { enrichScore } from '../core/scorer.js';
 import { displayScore } from '../ui/display.js';
 import { bold, dim, fafCyan } from '../ui/colors.js';
 import { assertProjectCwd } from '../core/cwd-guard.js';
+import { readBytesIfPresent, resolveInside, SafePathError, safeReplaceOwned, safeUnlink } from '../core/safe-write.js';
 
 export interface GoOptions {
   resume?: boolean;
@@ -20,6 +20,61 @@ const SESSION_FILE = '.faf-session.json';
 interface GoSession {
   slotIndex: number;
   fafPath: string;
+}
+
+/** The session faf wrote in `bytes` (exactly `JSON.stringify({ slotIndex,
+ *  fafPath })`), or null when they are anything else. */
+export function goSessionOf(bytes: Uint8Array | null): GoSession | null {
+  if (bytes === null) {return null;}
+  const text = new TextDecoder().decode(bytes);
+  try {
+    const j = JSON.parse(text) as Record<string, unknown>;
+    const keys = typeof j === 'object' && j !== null && !Array.isArray(j) ? Object.keys(j).sort().join(',') : '';
+    if (keys !== 'fafPath,slotIndex' || typeof j.slotIndex !== 'number' || typeof j.fafPath !== 'string') {return null;}
+    return JSON.stringify({ slotIndex: j.slotIndex, fafPath: j.fafPath }) === text ? { slotIndex: j.slotIndex, fafPath: j.fafPath } : null;
+  } catch {
+    return null;
+  }
+}
+
+/** The bytes at the session path — through the project's link rules — or
+ *  null when there is none, or it is refused (said in one line). */
+function readSessionBytes(dir: string): Buffer | null {
+  try {
+    return readBytesIfPresent(resolveInside(dir, SESSION_FILE));
+  } catch (e) {
+    if (!(e instanceof SafePathError)) {throw e;}
+    console.error(dim(`  ${SESSION_FILE}: ${e.message}`));
+    return null;
+  }
+}
+
+/** Save the session for `faf go --resume` — over nothing, or over a session
+ *  faf wrote; any other file is left as it is. Never throws: the answers
+ *  are written whatever happens to the session. */
+function saveSession(dir: string, session: GoSession): boolean {
+  try {
+    safeReplaceOwned(join(dir, SESSION_FILE), JSON.stringify(session), {
+      root: dir,
+      owns: b => goSessionOf(b) !== null,
+      mark: 'faf go session',
+    });
+    return true;
+  } catch (e) {
+    console.error(dim(`  session not saved: ${e instanceof Error ? e.message : String(e)}`));
+    return false;
+  }
+}
+
+/** Remove the session once the interview is done — only a session faf wrote. */
+function clearSession(dir: string): void {
+  const bytes = readSessionBytes(dir);
+  if (goSessionOf(bytes) === null || bytes === null) {return;}
+  try {
+    safeUnlink(join(dir, SESSION_FILE), { root: dir, expect: bytes });
+  } catch (e) {
+    if (!(e instanceof SafePathError)) {throw e;}
+  }
 }
 
 /**
@@ -53,16 +108,15 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
   }
 
   const dir = process.cwd();
-  const sessionPath = join(dir, SESSION_FILE);
 
   // Resume session if requested
   let startIndex = 0;
-  if (options.resume && existsSync(sessionPath)) {
-    try {
-      const session: GoSession = JSON.parse(readFileSync(sessionPath, 'utf-8'));
+  if (options.resume) {
+    const session = goSessionOf(readSessionBytes(dir));
+    if (session) {
       startIndex = session.slotIndex;
       console.log(dim(`  resuming from slot #${startIndex + 1}`));
-    } catch { /* ignore corrupted session */ }
+    }
   }
 
   const data = readFaf(fafPath);
@@ -93,6 +147,7 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
     new Promise(resolve => rl.question(prompt, resolve));
 
   let filled = 0;
+  let quit = false;
   const slotsToProcess = emptySlots.slice(startIndex);
 
   for (let i = 0; i < slotsToProcess.length; i++) {
@@ -103,9 +158,10 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
 
     if (answer.toLowerCase() === 'quit') {
       // Save session for resume
-      const session: GoSession = { slotIndex: startIndex + i, fafPath };
-      writeFileSync(sessionPath, JSON.stringify(session), 'utf-8');
-      console.log(dim(`\n  session saved. Resume with: faf go --resume`));
+      quit = true;
+      if (saveSession(dir, { slotIndex: startIndex + i, fafPath })) {
+        console.log(dim(`\n  session saved. Resume with: faf go --resume`));
+      }
       break;
     }
 
@@ -128,8 +184,7 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
   const result = enrichScore(kernel.score(readFafRaw(fafPath)));
   displayScore(result, fafPath);
 
-  // Clean up session file if we finished all slots
-  if (existsSync(sessionPath)) {
-    try { unlinkSync(sessionPath); } catch { /* ignore */ }
-  }
+  // Clean up the session file if we finished all slots (a quit keeps it for
+  // --resume); only a session faf wrote is removed.
+  if (!quit) {clearSession(dir);}
 }

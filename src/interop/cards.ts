@@ -1,12 +1,14 @@
-import { existsSync, mkdirSync, readFileSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { deprecate } from 'node:util';
 import { parse } from 'yaml';
 import type { FafData } from '../core/types.js';
-import { safeWriteFile } from '../core/safe-write.js';
+import { makeDirInside, safeReplaceOwned } from '../core/safe-write.js';
 import {
   fafContextBlock,
   buildServerCard,
+  hasRegistryMark,
+  hasServerCardMark,
   registryMeta,
   registryName,
   registryTitle,
@@ -417,11 +419,65 @@ export function assertSameBlock(cards: ProjectedCards): void {
   }
 }
 
+/** True when `bytes` are an A2A Agent Card faf wrote: JSON whose
+ *  `capabilities.extensions` carry the FAF context extension
+ *  ({@link A2A_CONTEXT_URI}), as every card faf has written does. */
+export function hasA2ACardMark(bytes: Uint8Array): boolean {
+  let j: unknown;
+  try {
+    j = JSON.parse(new TextDecoder().decode(bytes).replace(/^\uFEFF/, ''));
+  } catch {
+    return false;
+  }
+  const caps = typeof j === 'object' && j !== null ? (j as { capabilities?: { extensions?: unknown } }).capabilities : undefined;
+  const exts = caps?.extensions;
+  return Array.isArray(exts) && exts.some(e => typeof e === 'object' && e !== null && (e as { uri?: unknown }).uri === A2A_CONTEXT_URI);
+}
+
+/** True when `bytes` carry any of faf's card marks: the MCP Server Card's
+ *  `_meta["one.faf/context"]`, a registry server.json's publisher-provided
+ *  `one.faf/context`, or the A2A card's FAF context extension. */
+export function hasFafCardMark(bytes: Uint8Array): boolean {
+  return hasServerCardMark(bytes) || hasRegistryMark(bytes) || hasA2ACardMark(bytes);
+}
+
+/** Options for {@link writeJson}. */
+export interface WriteJsonOptions {
+  /** True when the bytes already at the path are ones faf wrote. Default:
+   *  they carry one of faf's card marks ({@link hasFafCardMark}). */
+  owns?: (existing: Buffer) => boolean;
+  /** faf's mark in words, for the refusal. */
+  mark?: string;
+  /** Replace a file faf did not write anyway — the explicit overwrite (`--force`). */
+  force?: boolean;
+}
+
 /** Write `value` as JSON — atomically, and never through a link that leaves
- *  `root` (default: the file's own folder) or dangles. */
-export function writeJson(path: string, value: unknown, root?: string): void {
-  mkdirSync(dirname(path), { recursive: true });
-  safeWriteFile(path, `${JSON.stringify(value, null, 2)}\n`, { root });
+ *  `root` (default: the file's own folder) or dangles. The folder is created
+ *  when missing, never through a link that leaves `root`. A file already
+ *  there is replaced only when faf wrote it (`owns`; by default it carries one
+ *  of faf's card marks); any other file is refused (SafePathError
+ *  `not-owned`) and left byte for byte, unless `force`. */
+export function writeJson(path: string, value: unknown, root?: string, write: WriteJsonOptions = {}): void {
+  makeDirInside(root ?? dirname(path), dirname(path));
+  safeReplaceOwned(path, `${JSON.stringify(value, null, 2)}\n`, {
+    root,
+    owns: write.owns ?? hasFafCardMark,
+    mark: write.mark ?? 'FAF context-block (a faf card mark)',
+    force: write.force,
+  });
+}
+
+/** True when `bytes` are JSON laid out exactly as faf writes it (2-space
+ *  JSON and a final newline), so re-writing it loses nothing: no hand
+ *  formatting, no repeated key, no number JSON cannot hold exactly. */
+export function isFafJsonLayout(bytes: Uint8Array): boolean {
+  const text = new TextDecoder().decode(bytes);
+  try {
+    return `${JSON.stringify(JSON.parse(text), null, 2)}\n` === text;
+  } catch {
+    return false;
+  }
 }
 
 export function parseTargets(raw?: string): CardTarget[] | undefined {

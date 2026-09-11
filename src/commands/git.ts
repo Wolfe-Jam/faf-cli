@@ -1,7 +1,7 @@
-import { mkdirSync, rmSync, existsSync } from 'fs';
+import { existsSync } from 'fs';
 import { join, resolve } from 'path';
 import { execFileSync } from 'child_process';
-import { tmpdir } from 'os';
+import { makeTempDir, removeTempDir } from '../core/safe-write.js';
 import { authorFafFromRepo, normalizeGitUrl, repoNameFromUrl } from '../detect/git-repo.js';
 import { writeFaf, readFafRaw, serializeFaf } from '../interop/faf.js';
 import * as kernel from '../wasm/kernel.js';
@@ -75,8 +75,8 @@ export function gitCommand(
     return;
   }
 
-  const tmpDir = join(tmpdir(), `faf-git-${Date.now()}`);
-  mkdirSync(tmpDir, { recursive: true });
+  // A fresh temp folder of faf's own (mkdtemp), removed when the command ends.
+  const tmpDir = makeTempDir('faf-git-');
 
   try {
     // Progress → stderr, so `--stdout` (piped .faf) never gets an ANSI-contaminated first line.
@@ -111,6 +111,6 @@ export function gitCommand(
     const result = enrichScore(kernel.score(yaml));
     displayScore(result, target.outputPath);
   } finally {
-    rmSync(tmpDir, { recursive: true, force: true });
+    removeTempDir(tmpDir);
   }
 }

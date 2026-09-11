@@ -107,7 +107,8 @@ program
 program
   .command('show')
   .description('Render project.faf → project.html and open it')
-  .action(() => showCommand());
+  .option('--force', 'Replace a project.html faf did not render')
+  .action((options) => showCommand(options));
 
 program
   .command('sync')
@@ -122,6 +123,7 @@ program
   .command('compile [file]')
   .description('Compile .faf to .fafb binary')
   .option('--output <path>', 'Output path')
+  .option('--force', 'Replace an output file that is not a .fafb faf compiled')
   .action((file, options) => compileCommand(file, options));
 
 program
@@ -189,6 +191,7 @@ program
   .option('--card', 'Author MCP Server Card (.well-known/mcp/server-card) with the FAF context-block')
   .option('--all', 'Author all formats')
   .option('--output <path>', 'Write exported files to this directory instead of the current one')
+  .option('--force', 'Replace a project.html or Server Card faf did not write')
   .action((options) => exportCommand(options));
 
 program
@@ -200,6 +203,7 @@ program
   .option('--set-version <version>', 'Set the version field (default: preserve existing). NOTE: not --version, which is the global CLI-version flag')
   .option('--generated <iso>', 'Override the _meta generated stamp (default: preserve existing)')
   .option('--check', 'Print to stdout, do not write (diff/verify — the idempotency-test hook)')
+  .option('--force', 'With --out: replace a file that has no faf identity in it')
   .action((options) => serverCardCommand(options));
 
 program
@@ -213,6 +217,7 @@ program
   .option('--door-url <url>', 'A2A door when .fafa has no a2a endpoint')
   .option('--faf-pointer <url>', 'Absolute .faf pointer for served cards (default: ./project.faf)')
   .option('--check', 'Print projected cards to stdout, do not write')
+  .option('--force', 'Replace a card file faf did not write')
   .action((options) => cardsCommand(options));
 
 program
@@ -316,6 +321,7 @@ program
   .description('TAF Receipts — `faf taf setup` wires the CI receipt printer; bare snapshot deprecated → faf score --json')
   .option('--output <path>', 'Write score snapshot to file')
   .option('--write', 'taf setup: create .github/workflows/taf.yml')
+  .option('--force', 'With --output: replace a file that is not a TAF snapshot faf wrote')
   .action((subcommand, options) => tafCommand(subcommand, options));
 
 // === Phase C Commands ===
@@ -422,15 +428,33 @@ if (process.argv.length <= 2) {
       '',
     ].join('\n'),
   );
-  try {
-    program.parse(process.argv);
-  } catch (e) {
-    // A refused path (a link out of the project, a dangling link), a file that
-    // is not UTF-8, or one that changed on disk while faf was writing is an
-    // answer, not a crash: say it in one line and exit 1.
+  // A refused path (a link out of the project, a dangling link), a file that
+  // is not UTF-8, one that changed on disk while faf was writing, or one faf
+  // did not write is an answer, not a crash: say it in one line and exit 1.
+  // parseAsync, so a refusal inside an async command (faf go, faf ai) is
+  // caught too.
+  program.parseAsync(process.argv).catch((e: unknown) => {
     if (!(e instanceof SafePathError)) {throw e;}
-    const kept = e.reason === 'not-utf8' || e.reason === 'changed';
-    console.error(`faf: ${e.message}${kept ? '' : ' Nothing was read from or written to it.'}`);
+    console.error(`faf: ${e.message}${refusalTail(e)}`);
     process.exit(1);
-  }
+  });
+}
+
+/** What the one-line refusal adds after the reason: nothing when the reason
+ *  already says the file was left as it is; the --force hint for a file faf
+ *  did not write, when the command has --force; otherwise what faf did not
+ *  do — "Nothing was written to it." when the refusal came at the write (faf
+ *  may have read the file first), "Nothing was read from or written to it."
+ *  when it came before either. */
+function refusalTail(e: SafePathError): string {
+  if (e.reason === 'not-utf8' || e.reason === 'changed') {return '';}
+  if (e.reason === 'not-owned') {return commandHasForce() ? ' Use --force to replace it.' : '';}
+  return e.onWrite ? ' Nothing was written to it.' : ' Nothing was read from or written to it.';
+}
+
+/** True when the command being run takes --force. */
+function commandHasForce(): boolean {
+  const name = process.argv[2];
+  const cmd = program.commands.find(c => c.name() === name || c.aliases().includes(name));
+  return cmd?.options.some(o => o.long === '--force') ?? false;
 }

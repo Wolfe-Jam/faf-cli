@@ -37,11 +37,11 @@
  * writes nothing.
  */
 
-import { existsSync, lstatSync, mkdirSync, readFileSync, realpathSync, statSync } from 'fs';
+import { existsSync, lstatSync, readFileSync, realpathSync, statSync } from 'fs';
 import { homedir } from 'os';
 import { basename, dirname, join, resolve } from 'path';
 import type { FafData } from '../core/types.js';
-import { FAF_CONTEXT_FILES, resolveInside, safeWriteFile } from '../core/safe-write.js';
+import { FAF_CONTEXT_FILES, makeDirInside, resolveInside, safeWriteFile } from '../core/safe-write.js';
 import {
   findFafBlock,
   findMarkedRange,
@@ -371,7 +371,7 @@ export function claudeMemoryStatus(dir: string, opts: ClaudeMemoryOptions = {}):
  */
 export function writeClaudeMemory(dir: string, data: FafData, opts: ClaudeMemoryOptions = {}): ClaudeMemoryResult {
   const memoryDir = resolveClaudeMemoryDir(dir, opts);
-  mkdirSync(memoryDir, { recursive: true });
+  makeDirInside(memoryDir);
   const path = resolveInside(memoryDir, FAF_CONTEXT_FILES.memory);
   const existing = readIfPresent(path);
   const next = plan(existing, wrapFafBlock(renderClaudeMemory(data)));

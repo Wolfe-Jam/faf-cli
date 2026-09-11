@@ -1,4 +1,3 @@
-import { mkdirSync } from 'fs';
 import { join, resolve } from 'path';
 import { findFafFile, readFaf, readFafRaw } from '../interop/faf.js';
 import { writeAgentsMd } from '../interop/agents.js';
@@ -12,6 +11,7 @@ import { legacyStampNoteAt } from '../interop/inject.js';
 import { writeProjectHtml } from '../interop/projecthtml.js';
 import { writeServerCard } from '../interop/servercard.js';
 import { scoreFafYaml } from '../core/scorer.js';
+import { makeDirInside } from '../core/safe-write.js';
 import { dim, fafCyan } from '../ui/colors.js';
 
 export interface ExportOptions {
@@ -27,6 +27,8 @@ export interface ExportOptions {
   all?: boolean;
   /** Write exported files here instead of the current directory. project.faf is still read from cwd. */
   output?: string;
+  /** Replace a project.html or Server Card faf did not write (no faf mark). */
+  force?: boolean;
 }
 
 /** Run an injector write and list the file, with the one-line note when
@@ -47,7 +49,7 @@ export function exportCommand(options: ExportOptions = {}): void {
   }
 
   const dir = options.output ? resolve(process.cwd(), options.output) : process.cwd();
-  if (options.output) {mkdirSync(dir, { recursive: true });}
+  if (options.output) {makeDirInside(dir);}
   const data = readFaf(fafPath);
   const exportAll =
     options.all ||
@@ -99,7 +101,7 @@ export function exportCommand(options: ExportOptions = {}): void {
     // Render from the CURRENT project.faf — scored via the real scorer,
     // never a reimplementation. project.html is a view, not a format.
     const result = scoreFafYaml(readFafRaw(fafPath));
-    writeProjectHtml(dir, data, result, fafPath);
+    writeProjectHtml(dir, data, result, fafPath, { force: options.force });
     console.log(`  project.html`);
   }
 
@@ -108,7 +110,7 @@ export function exportCommand(options: ExportOptions = {}): void {
   // context-block in _meta, so FAF context ships by default.
   const isServerCard = data.app_type === 'server-card' || data.project?.type === 'server-card';
   if (options.card || (exportAll && isServerCard)) {
-    const out = writeServerCard(dir, data);
+    const out = writeServerCard(dir, data, {}, { force: options.force });
     console.log(`  ${out.replace(`${dir}/`, '')}`);
   }
 
