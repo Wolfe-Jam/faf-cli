@@ -118,4 +118,33 @@ describe('BRAKE: check-engines fails on any Node below the floor, anywhere in CI
     expect(r.status).toBe(0);
     expect(r.stdout).toContain('engine floor 22');
   });
+
+  // The re-check's engmut-nvf: `node-version-file: .nvmrc` naming Node 20
+  // passed, because the file was never read (7.13 round 3b).
+  const nvf = (file = '.nvmrc'): string => job(`    steps:\n      - uses: actions/setup-node@v7\n        with:\n          node-version-file: ${file}\n`);
+
+  test('`node-version-file:` is read: the first line of the file it names is the version', () => {
+    const low = repo('>=22.0.0', { 'ci.yml': REAL_CI, 'extra.yml': nvf() });
+    writeFileSync(join(low, '..', '..', '.nvmrc'), '20\n');
+    const r = run(low);
+    expect(r.status).toBe(1);
+    expect(r.stderr).toContain('extra.yml');
+    expect(r.stderr).toContain('Node 20');
+
+    const ok = repo('>=22.0.0', { 'ci.yml': REAL_CI, 'extra.yml': nvf('.node-version') });
+    writeFileSync(join(ok, '..', '..', '.node-version'), 'v22.4.0\n# pinned for CI\n');
+    expect(run(ok).status).toBe(0);
+  });
+
+  test('a `node-version-file:` the guard cannot read, or that holds no version number, fails', () => {
+    const missing = run(repo('>=22.0.0', { 'ci.yml': REAL_CI, 'extra.yml': nvf('.nvmrc') }));
+    expect(missing.status).toBe(1);
+    expect(missing.stderr).toContain('.nvmrc cannot be read');
+
+    const lts = repo('>=22.0.0', { 'ci.yml': REAL_CI, 'extra.yml': nvf() });
+    writeFileSync(join(lts, '..', '..', '.nvmrc'), 'lts/*\n');
+    const r = run(lts);
+    expect(r.status).toBe(1);
+    expect(r.stderr).toContain("'lts/*' is not a Node version number");
+  });
 });

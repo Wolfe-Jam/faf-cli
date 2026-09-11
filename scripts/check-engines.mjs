@@ -21,8 +21,11 @@
 //                          the file's own `env:` blocks (every value that name
 //                          has in the file counts)
 //   - `${{ matrix.* }}`    skipped: the matrix list itself is read where it is
-// Anything else (`lts/*`, `latest`, an unknown `${{ … }}`) is refused: the floor
-// can't be checked against a version the script cannot read.
+//   - a version file       node-version-file: .nvmrc — the named file (from the
+//                          repo root) is read and its first line is the version
+// Anything else (`lts/*`, `latest`, an unknown `${{ … }}`, a version file that
+// cannot be read) is refused: the floor can't be checked against a version the
+// script cannot read.
 //
 // Fails when any version is below the floor, or when the lowest version is not
 // the floor. Runs in CI (Code Quality) and in prepublishOnly.
@@ -118,10 +121,26 @@ function majorsOf(raw, env) {
   return m ? { majors: [Number(m[1])] } : { error: `'${raw}' is not a Node version number — pin one (e.g. ${floor})` };
 }
 
+/** The major version the first line of a `node-version-file:` names, or why it cannot be read. */
+function majorsOfFile(raw) {
+  const name = scalar(raw);
+  if (name === '' || name.includes('${{')) {return { error: `'${name}' is not a file the script can read` };}
+  let first;
+  try {
+    first = readFileSync(join(root, name), 'utf8').split(/\r?\n/)[0].trim();
+  } catch (e) {
+    return { error: `${name} cannot be read (${e.code ?? e.message}) — the floor cannot be checked against it` };
+  }
+  const r = majorsOf(first, new Map());
+  return r.error ? { error: `${name}: ${r.error}` } : r;
+}
+
 let failed = false;
 const found = []; // { file, line, major }
 // Every `node:` / `node-version:` key in the file, list item keys included.
 const NODE_KEY = /^([ \t]*)(?:-[ \t]+)?(node|node-version):(.*)$/gm;
+// Every `node-version-file:` key (setup-node reads the version from that file).
+const NODE_FILE_KEY = /^[ \t]*(?:-[ \t]+)?node-version-file:(.*)$/gm;
 
 for (const file of files) {
   const text = read(file);
@@ -138,6 +157,16 @@ for (const file of files) {
       }
       for (const major of r.majors) {found.push({ file, line: i + 1, major });}
     }
+  }
+  for (const m of text.matchAll(NODE_FILE_KEY)) {
+    const i = text.slice(0, m.index).split('\n').length - 1;
+    const r = majorsOfFile(m[1].replace(/\s+#.*$/, ''));
+    if (r.error) {
+      console.error(`✗ ${file}:${i + 1} node-version-file: ${r.error}`);
+      failed = true;
+      continue;
+    }
+    for (const major of r.majors) {found.push({ file, line: i + 1, major });}
   }
 }
 

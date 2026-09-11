@@ -6,7 +6,7 @@ import type { FafData } from '../core/types.js';
 import { asFafMapping, describeShape } from '../core/shape.js';
 import { isPlaceholder } from '../core/slots.js';
 import { readBytesIfPresent, readUtf8, resolveInside, safeWriteFile } from '../core/safe-write.js';
-import { editYaml, mergeData } from '../core/yaml-edit.js';
+import { editYaml, keptAliases, mergeData, restoreAliases, type KeptAlias } from '../core/yaml-edit.js';
 import { fafSourceOf, setFafSource, type FafSource } from '../core/faf-source.js';
 
 /** The real path to read for the .faf at `path`. A link must stay inside the
@@ -71,7 +71,13 @@ export interface UpdateFafResult {
   written: boolean;
   /** The file's text after the update (its original text when nothing changed). */
   text: string;
+  /** Aliases the change would have replaced, left as written: `path` is where
+   *  (`stack`), `alias` what the file says there (`*base`). faf never replaces
+   *  or expands an alias; the change at that path is not written. */
+  keptAliases?: KeptAlias[];
 }
+
+export type { KeptAlias };
 
 /**
  * Update an existing .faf in place, keeping every byte the change does not
@@ -85,6 +91,10 @@ export interface UpdateFafResult {
  * the data as it was, nothing is written (`written: false`), even if faf's own
  * layout of the file would differ.
  *
+ * An alias the change replaces (`doc.set('stack', …)` over `stack: *base`)
+ * is put back: faf never replaces or expands an alias, so that path stays as
+ * written and is listed in `keptAliases`; the rest of the change is written.
+ *
  * The file must exist. The same link rules as {@link readFaf} (a link must
  * stay in the folder and end at a .faf/.fafm file) and the atomic write of
  * `safeWriteFile` apply; the write itself goes only through a link to a file
@@ -97,16 +107,29 @@ export function updateFafFile(path: string, mutate: (doc: Document) => void): Up
 }
 
 /** updateFafFile, checked against `base` — the read the caller's data came
- *  from — when it is a read of this same file. */
-function updateFaf(path: string, mutate: (doc: Document) => void, base: FafSource | undefined): UpdateFafResult {
+ *  from — when it is a read of this same file. `after` runs on the changed
+ *  Document once its aliases are back (with the file's data before the
+ *  change), and may list more of them. */
+function updateFaf(
+  path: string,
+  mutate: (doc: Document) => void,
+  base: FafSource | undefined,
+  after?: (doc: Document, before: unknown) => KeptAlias[],
+): UpdateFafResult {
   const real = fafToRead(path);
   const text = readUtf8(real);
-  const result = editYaml(text, mutate, path);
-  if (!result.changed) {return { written: false, text };}
+  let kept: KeptAlias[] = [];
+  const result = editYaml(text, doc => {
+    const before = doc.clone();
+    mutate(doc);
+    kept = restoreAliases(before, doc);
+    if (after) {kept = [...kept, ...after(doc, before.toJS()).filter(k => !kept.some(x => x.path === k.path))];}
+  }, path);
+  if (!result.changed) {return { written: false, text, keptAliases: kept };}
   // The file must still be what the caller's data was read from (else a stale
   // read would write over a newer edit), and what faf read here.
   safeWriteFile(path, result.text, { expect: base && base.real === real ? base.text : text });
-  return { written: true, text: result.text };
+  return { written: true, text: result.text, keptAliases: kept };
 }
 
 /** Options for {@link writeFaf}. */
@@ -115,6 +138,16 @@ export interface WriteFafOptions {
    *  overwrite (`faf init --force`, `faf git --force`). Default: an existing
    *  file is updated in place with {@link updateFafFile}. */
   replace?: boolean;
+  /** Called for each alias of an existing file that `data` would change
+   *  (`stack: *base` while `data.stack` has more keys): faf leaves it as
+   *  written — it never replaces or expands an alias — and that path is not
+   *  written. `faf auto` prints one line for each. */
+  onAliasKept?: (kept: KeptAlias) => void;
+}
+
+/** The one line faf prints for an alias it left as written. */
+export function aliasKeptNote(kept: KeptAlias): string {
+  return `${kept.path} is an alias (${kept.alias}) — faf left it as written`;
 }
 
 /** True when something is already at `path` (a file or a link). */
@@ -157,6 +190,15 @@ function applyFafData(doc: Document, data: FafData, path: string): void {
   if (!fileHasMeta) {addFoundRationale(doc, meta?.found, typeBefore);}
 }
 
+/** `data` as applyFafData writes it: faf's runtime `_meta` left out unless
+ *  the file has a `_meta` of its own. */
+function withoutRuntimeMeta(doc: Document, data: FafData): unknown {
+  const root = doc.contents;
+  if (isMap(root) && root.items.some(p => isScalar(p.key) && p.key.value === '_meta')) {return data;}
+  const { _meta: _ignored, ...rest } = data as FafData & { _meta?: unknown };
+  return rest;
+}
+
 /** `# found: …` next to `project.type` — only when this write filled it. */
 function addFoundRationale(doc: Document, found: string[] | undefined, typeBefore: unknown): void {
   if (!found || found.length === 0 || !isPlaceholder(typeBefore)) {return;}
@@ -180,6 +222,10 @@ function addFoundRationale(doc: Document, found: string[] | undefined, typeBefor
  *  nothing it did not write). Pass `{ replace: true }` to overwrite the file
  *  with a fresh render instead. Returns false when nothing was written.
  *
+ *  An alias in the file (`stack: *base`) is never replaced or expanded: it
+ *  stays as written, and a change `data` makes under it is not written —
+ *  `opts.onAliasKept` hears of each such path.
+ *
  *  When `data` came from readFaf of this file (directly, or through
  *  updateExistingFaf), the write is refused if the file changed on disk since
  *  that read (SafePathError `changed`: "not written; original kept"), so an
@@ -187,8 +233,9 @@ function addFoundRationale(doc: Document, found: string[] | undefined, typeBefor
  *  one that appeared meanwhile. */
 export function writeFaf(path: string, data: FafData, opts: WriteFafOptions = {}): boolean {
   if (!opts.replace && exists(path)) {
-    const result = updateFaf(path, doc => applyFafData(doc, data, path), fafSourceOf(data));
+    const result = updateFaf(path, doc => applyFafData(doc, data, path), fafSourceOf(data), (doc, before) => keptAliases(doc, withoutRuntimeMeta(doc, data), before));
     setFafSource(data, { real: fafToRead(path), text: result.text });
+    for (const kept of result.keptAliases ?? []) {opts.onAliasKept?.(kept);}
     return result.written;
   }
   const full = resolve(path);

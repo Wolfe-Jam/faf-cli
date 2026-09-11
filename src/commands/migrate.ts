@@ -1,4 +1,4 @@
-import { findFafFile, readFaf, writeFaf } from '../interop/faf.js';
+import { aliasKeptNote, findFafFile, readFaf, writeFaf } from '../interop/faf.js';
 import { SLOTS } from '../core/slots.js';
 import { fafCyan, dim, bold } from '../ui/colors.js';
 import { FAF_VERSION } from '../core/version.js';
@@ -40,7 +40,7 @@ export function migrateCommand(options: MigrateOptions = {}): void {
     return;
   }
 
-  writeFaf(fafPath, data);
+  writeFaf(fafPath, data, { onAliasKept: k => console.log(dim(`  ${aliasKeptNote(k)}`)) });
   console.log(`${fafCyan('◆')} migrate  v${oldVersion} → v${CURRENT_VERSION}`);
   console.log(dim(`  updated ${fafPath}`));
 }

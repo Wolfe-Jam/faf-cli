@@ -28,9 +28,12 @@
  *     project.faf)` line through its `*This section is managed by tri-sync.`
  *     line, both whole lines) → replaced in place by the block, once
  *   - anything else            → the block goes on top; nothing is removed
- * Markers match whole lines only, never substrings, and only outside fenced
- * code, raw HTML blocks and multi-line HTML comments (a note that quotes the
- * block or the old section is an example, not a marker). Only a missing file reads
+ * Markers match whole lines only (faf's own exactly), never substrings, and
+ * only outside fenced code, raw HTML blocks and multi-line HTML comments, as
+ * both CommonMark and a plain column-0 reading see them (a note that quotes
+ * the block or the old section is an example, not a marker; see inject.ts).
+ * When the block goes on top of a file whose older faf block sits in such a
+ * region, the result's warnings say so in one line. Only a missing file reads
  * as "no file": any other read error is thrown and nothing is written, and a
  * file that is not UTF-8 is refused. The write is atomic, is refused if the
  * file changed on disk after faf read it, and a run that changes nothing
@@ -45,6 +48,8 @@ import { FAF_CONTEXT_FILES, makeDirInside, resolveInside, safeWriteFile } from '
 import {
   findFafBlock,
   findMarkedRange,
+  legacyStampNote,
+  placeFafBlock,
   readIfPresent,
   withFafBlock,
   wrapFafBlock,
@@ -320,7 +325,7 @@ function plan(existing: string | null, wrapped: string): Plan {
   if (range) {
     const head = existing.slice(0, range.start);
     const tail = existing.slice(range.end);
-    return { text: `${head}${wrapped}${tail}`, action: block ? 'updated' : 'migrated', head, tail };
+    return { text: placeFafBlock(head, wrapped, tail), action: block ? 'updated' : 'migrated', head, tail };
   }
   const bom = existing.startsWith('\uFEFF') ? '\uFEFF' : '';
   return { text: withFafBlock(existing, wrapped), action: 'added', head: bom, tail: existing.slice(bom.length) };
@@ -385,5 +390,8 @@ export function writeClaudeMemory(dir: string, data: FafData, opts: ClaudeMemory
   const after = readFileSync(written, 'utf-8');
   const preserved = after === next.text && after.startsWith(next.head) && after.endsWith(next.tail);
   const lines = countLines(after);
-  return { path: written, action: next.action, written: true, preserved, lines, warnings: lineWarnings(lines) };
+  // The block went on top of a file whose older faf block sits in a code
+  // fence or comment: say so, as `faf sync` does for CLAUDE.md.
+  const older = next.action === 'added' ? legacyStampNote(FAF_CONTEXT_FILES.memory, existing) : null;
+  return { path: written, action: next.action, written: true, preserved, lines, warnings: [...(older ? [older] : []), ...lineWarnings(lines)] };
 }

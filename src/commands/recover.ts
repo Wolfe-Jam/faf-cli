@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
-import { findFafFile, readFaf, writeFaf } from '../interop/faf.js';
+import { aliasKeptNote, findFafFile, readFaf, writeFaf } from '../interop/faf.js';
 import { parseClaudeMd } from '../interop/claude.js';
 import { fafCyan, dim, bold } from '../ui/colors.js';
 import type { FafData } from '../core/types.js';
@@ -64,7 +64,7 @@ export function recoverCommand(): void {
     if (data.project!.name && !prev.project.name) {prev.project.name = data.project!.name;}
     if (data.project!.goal && !prev.project.goal) {prev.project.goal = data.project!.goal;}
     if (data.project!.main_language && !prev.project.main_language) {prev.project.main_language = data.project!.main_language;}
-    writeFaf(existing, prev);
+    writeFaf(existing, prev, { onAliasKept: k => console.log(dim(`  ${aliasKeptNote(k)}`)) });
     console.log(`${fafCyan('◆')} recover  merged into ${existing}`);
   } else {
     const outPath = join(dir, 'project.faf');

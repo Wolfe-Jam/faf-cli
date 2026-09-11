@@ -108,7 +108,6 @@ describe('BRAKE: findFafBlock reads regions the CommonMark way', () => {
       `<PRE class="x">\n${FAF_START}\n</pre>\n`,
       '<script>\nlet a = 1;\n</script>\n',
       `<!-- note\n${FAF_START}\n-->\n`,
-      `- ${F3}bash\n  ${FAF_START}\n  ${F3}\n`,
       `<pre>${FAF_START}</pre>\n`,
     ];
     for (const region of regions) {
@@ -137,10 +136,13 @@ describe('BRAKE: findFafBlock reads regions the CommonMark way', () => {
     writeFileSync(file, example);
     injectFafBlock(file, 'NEW-BODY');
     expect(readFileSync(file, 'utf-8')).toBe(`${FAF_START}\nNEW-BODY\n${FAF_END}\n\n${example}`);
-    // A real block after a closed list-item fence is found; so is one after an
-    // unclosed list-item fence, which ends where the list item does.
-    expect(findFafBlock(`- ${F3}bash\n  npm i\n  ${F3}\n${FAF_START}\nx\n${FAF_END}\n`)).not.toBeNull();
+    // A real block after an unclosed list-item fence, which ends where the
+    // list item does, is found: the column-0 reading never opened a fence.
+    // After a list-item fence closed at its content column it is not: the
+    // column-0 reading takes that closer for an opener, the readings
+    // disagree, and faf prefixes (7.13 round 3b).
     expect(findFafBlock(`- ${F3}bash\n  npm i\n${FAF_START}\nx\n${FAF_END}\n`)).not.toBeNull();
+    expect(findFafBlock(`- ${F3}bash\n  npm i\n  ${F3}\n${FAF_START}\nx\n${FAF_END}\n`)).toBeNull();
   });
 });
 

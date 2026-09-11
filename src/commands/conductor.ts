@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, readdirSync } from 'fs';
 import { join, basename } from 'path';
-import { findFafFile, readFaf, writeFaf } from '../interop/faf.js';
+import { aliasKeptNote, findFafFile, readFaf, writeFaf } from '../interop/faf.js';
 import { FAF_VERSION } from '../core/version.js';
 import { parse } from 'yaml';
 import { fafCyan, dim, bold } from '../ui/colors.js';
@@ -72,7 +72,7 @@ function conductorImport(configPath?: string): void {
     if (data.project!.name && !prev.project.name) {prev.project.name = data.project!.name;}
     if (data.project!.goal && !prev.project.goal) {prev.project.goal = data.project!.goal;}
     if (data.project!.main_language && !prev.project.main_language) {prev.project.main_language = data.project!.main_language;}
-    writeFaf(existing, prev);
+    writeFaf(existing, prev, { onAliasKept: k => console.log(dim(`  ${aliasKeptNote(k)}`)) });
     console.log(`${fafCyan('◆')} conductor import  merged into ${existing}`);
   } else {
     const outPath = join(dir, 'project.faf');

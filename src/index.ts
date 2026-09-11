@@ -158,6 +158,10 @@ export { renderClaudeMd, writeClaudeMd, readClaudeMd, parseClaudeMd, fafMetaTag 
 export type { FafMetaOpts } from './interop/claude.js';
 export { injectFafBlock, findFafBlock, FAF_START, FAF_END } from './interop/inject.js';
 export type { InjectOptions } from './interop/inject.js';
+// The one line `faf sync` / `faf export` print when faf's block goes on top of
+// a file holding older faf text (faf's old stamp, or an older block inside a
+// code fence or comment) — so MCP servers built on faf-cli print the same line.
+export { legacyStampNote, legacyStampNoteAt } from './interop/inject.js';
 // Claude Code auto-memory — the MEMORY.md Claude Code loads for a project
 // (<config>/projects/<id>/memory/MEMORY.md). The path follows Claude Code's own
 // rule (canonical git root, [^a-zA-Z0-9] → '-', 200-char cut + hash,
@@ -197,5 +201,5 @@ export { serializeFaf, writeFaf } from './interop/faf.js';
 // only what changed (comments, source text, anchors, unknown keys and key
 // order kept; a no-op writes nothing). writeFaf uses it for existing files.
 export { updateFafFile } from './interop/faf.js';
-export type { UpdateFafResult, WriteFafOptions } from './interop/faf.js';
+export type { UpdateFafResult, WriteFafOptions, KeptAlias } from './interop/faf.js';
 export * as kernel from './wasm/kernel.js';

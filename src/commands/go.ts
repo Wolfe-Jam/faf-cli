@@ -1,6 +1,6 @@
 import { createInterface } from 'readline';
 import { join } from 'path';
-import { findFafFile, readFaf, readFafRaw, writeFaf } from '../interop/faf.js';
+import { aliasKeptNote, findFafFile, readFaf, readFafRaw, writeFaf } from '../interop/faf.js';
 import { SLOTS, SLOTIGNORED, isExplicitNone, isPlaceholder } from '../core/slots.js';
 import { questionForSlot } from '../core/interview.js';
 import { getNestedValue, setNestedValue, blockingStep, blockedMessage } from '../core/dot-path.js';
@@ -176,7 +176,7 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
   rl.close();
 
   if (filled > 0) {
-    writeFaf(fafPath, data);
+    writeFaf(fafPath, data, { onAliasKept: k => console.log(dim(`  ${aliasKeptNote(k)}`)) });
     console.log(`\n${fafCyan('◆')} go  filled ${filled} slot${filled === 1 ? '' : 's'}`);
   }
 

@@ -200,7 +200,11 @@ describe('BRAKE: injectFafBlock — markers are whole lines, never substrings (7
   });
 
   test('fence shapes the toggle misreads still resolve to the real block', () => {
-    for (const shape of ['- ```bash\n  npm i\n  ```\n', '````md\n```\n````\n', '```\n~~~\n```\n']) {
+    // A list-item fence closed at its content column ('- ```bash' … '  ```')
+    // is not here: the column-0 reading takes its closer for an opener, the
+    // two readings disagree, and faf prefixes (7.13 round 3b — see
+    // tests/interop/fence-readings.test.ts).
+    for (const shape of ['````md\n```\n````\n', '```\n~~~\n```\n']) {
       const file = join(tmp(), 'AGENTS.md');
       writeFileSync(file, `user-above-sentinel\n\n${shape}\n${FAF_START}\nold body\n${FAF_END}\n\nuser-below-sentinel\n`);
       const [first, second] = twice(file, V1, V1);
@@ -243,14 +247,22 @@ describe('BRAKE: injectFafBlock — markers are whole lines, never substrings (7
     expect(out).toContain('user-below-sentinel');
   });
 
-  test('CRLF, trailing whitespace on marker lines, and a leading BOM survive', () => {
+  test('CRLF and a leading BOM survive; a marker line with trailing whitespace is text, not a marker', () => {
     const file = join(tmp(), 'AGENTS.md');
-    writeFileSync(file, `above\r\n${FAF_START}  \r\nold body\r\n${FAF_END}\r\nbelow\r\n`);
+    writeFileSync(file, `above\r\n${FAF_START}\r\nold body\r\n${FAF_END}\r\nbelow\r\n`);
     const [c1, c2] = twice(file, V1, V1);
     expect(c1.startsWith(`above\r\n${FAF_START}\n`)).toBe(true);
     expect(c1).toContain(`\n${FAF_END}\r\nbelow\r\n`);
     expect(c1).not.toContain('old body');
     expect(c2).toBe(c1);
+    // faf never writes trailing whitespace on a marker line (round-1 C30): a
+    // START with two spaces after it is the user's text — faf prefixes.
+    const spaced = `above\r\n${FAF_START}  \r\nold body\r\n${FAF_END}\r\nbelow\r\n`;
+    writeFileSync(file, spaced);
+    const [s1, s2] = twice(file, V1, V1);
+    expect(s1.endsWith(spaced)).toBe(true);
+    expect(s1.startsWith(`${FAF_START}\n`)).toBe(true);
+    expect(s2).toBe(s1);
     writeFileSync(file, `﻿${FAF_START}\nold body\n${FAF_END}\n\nuser-below-sentinel\n`);
     const [b1, b2] = twice(file, V1, V1);
     expect(b1.charCodeAt(0)).toBe(0xfeff); expect(b1).toContain('user-below-sentinel'); expect(b2).toBe(b1);

@@ -1,6 +1,6 @@
 import { existsSync } from 'fs';
 import { join, dirname } from 'path';
-import { findFafFile, readFaf, readFafRaw, writeFaf } from '../interop/faf.js';
+import { aliasKeptNote, findFafFile, readFaf, readFafRaw, writeFaf } from '../interop/faf.js';
 import { readClaudeMd, writeClaudeMd, renderClaudeMd, parseClaudeMd } from '../interop/claude.js';
 import { writeClaudeMemory, type ClaudeMemoryAction } from '../interop/claude-memory.js';
 import { legacyStampNoteAt } from '../interop/inject.js';
@@ -103,7 +103,7 @@ function pullSync(fafPath: string, claudePath: string): void {
   if (parsed.project?.goal) {existing.project = { ...existing.project, goal: parsed.project.goal };}
   if (parsed.project?.main_language) {existing.project = { ...existing.project, main_language: parsed.project.main_language };}
 
-  writeFaf(fafPath, existing);
+  writeFaf(fafPath, existing, { onAliasKept: k => console.log(dim(`  ${aliasKeptNote(k)}`)) });
   console.log(`${fafCyan('◆')} sync  CLAUDE.md → .faf   ${dim('(Trophy-gated)')}`);
 
   const result = enrichScore(kernel.score(readFafRaw(fafPath)));

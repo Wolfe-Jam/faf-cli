@@ -1,5 +1,6 @@
 import { dirname, resolve } from 'path';
 import { readUtf8, resolveInside, safeWriteFile } from '../core/safe-write.js';
+import { BlockReader, type HiddenIn } from './commonmark.js';
 
 /**
  * Block markers for the faf-managed front section.
@@ -18,190 +19,119 @@ export function linesWithEnds(text: string): string[] {
 }
 
 export const stripEnd = (line: string): string => line.replace(/\r?\n$|\r$/, '');
-/** A line that starts with ``` or ~~~ (after trimming). Kept for callers of
- *  7.13's first cut; the scanner below reads fences the CommonMark way. */
-export const isFenceLine = (trimmed: string): boolean => trimmed.startsWith('```') || trimmed.startsWith('~~~');
 /** A line as the marker rules see it: terminator, a leading BOM and trailing whitespace dropped. */
 const bareLine = (line: string): string => stripEnd(line).replace(/^\uFEFF/, '').trimEnd();
 
-// ─── Markdown regions (CommonMark) ───────────────────────────────────────────
+// ─── Markdown regions: two readings ──────────────────────────────────────────
 //
-// Text in fenced code, in a raw HTML block (<pre>, <script>, <style>,
-// <textarea>) or in a multi-line HTML comment is shown as code, or not shown
-// at all — a marker line there is an example, never a marker. The rules are
-// CommonMark's:
-//   - a fence opens on a line of 3+ backticks or tildes indented at most 3
-//     spaces (a backtick fence's info string has no backtick); it closes on a
-//     line of the same character, at least as long, with nothing after it but
-//     spaces or tabs, indented at most 3 spaces. A fence right after a list
-//     marker (`- ```bash`) sits at the item's content column: its closer may
-//     sit there too, and a later line indented less (the item has ended) ends
-//     it. A fence that never closes runs to the end of the file.
-//   - a raw HTML block opens on a line starting `<pre`, `<script`, `<style` or
-//     `<textarea` and ends at the first line (that one included) with
-//     `</pre>`, `</script>`, `</style>` or `</textarea>`;
-//   - a comment opens on a line starting `<!--` and ends at the first line
-//     (that one included) holding `-->` — so a single-line comment, faf's own
-//     marker lines among them, opens nothing.
+// Text in fenced or indented code, in a raw HTML block (<pre>, <script>,
+// <style>, <textarea>, <?…?>, <!X…>, <![CDATA[…]]>) or in a multi-line HTML
+// comment is shown as code, or not shown at all — a marker line there is an
+// example, never a marker. faf reads every file two ways (commonmark.ts):
+//   (a) as CommonMark reads it: list items and block quotes included. A list
+//       item's lines sit at its content column (a tab after the marker
+//       advances to the next multiple of 4); a fence or raw block opened in a
+//       list item closes at that column and ends when the item does; no
+//       fence opens inside an HTML block of types 6 or 7 (<div>, <details>,
+//       a lone tag) until a blank line;
+//   (b) plainly, every line at column 0: the same blocks, with no list items
+//       and no block quotes.
+// A START/END pair is faf's block only when both readings find that same
+// pair. When they differ the file is the user's, and faf prefixes: when in
+// doubt, prefix.
 
-type Region =
-  | { kind: 'fence'; char: string; len: number; col: number }
-  | { kind: 'raw'; tag: string }
-  | { kind: 'comment' };
+/** One reading's search: the latest START seen, and the pair once found. */
+interface Search {
+  reader: BlockReader;
+  start: number;
+  found: { start: number; end: number } | null;
+}
 
-/** A line's leading indentation in columns (a tab advances to the next
- *  multiple of 4), and the text after it. */
-function indentOf(line: string): { width: number; rest: string } {
-  let width = 0;
-  let i = 0;
-  for (; i < line.length; i++) {
-    if (line[i] === ' ') {width++;} else if (line[i] === '\t') {width += 4 - (width % 4);} else {break;}
+/** One line of the text, where it starts, and its BOM-free content. */
+interface ScanLine {
+  offset: number;
+  /** Where the line's text starts (after a line-1 BOM). */
+  from: number;
+  /** Where the line's text ends (before its terminator). */
+  to: number;
+  content: string;
+}
+
+function* scanLines(text: string): Generator<ScanLine> {
+  let offset = 0;
+  for (const line of linesWithEnds(text)) {
+    const body = stripEnd(line);
+    const bom = offset === 0 && body.charCodeAt(0) === 0xfeff ? 1 : 0;
+    yield { offset, from: offset + bom, to: offset + body.length, content: body.slice(bom) };
+    offset += line.length;
   }
-  return { width, rest: line.slice(i) };
 }
 
-const RAW_OPEN = /^<(pre|script|style|textarea)(?=[\s>]|$)/i;
-const RAW_CLOSE = /<\/(?:pre|script|style|textarea)>/i;
-const LIST_MARKER = /^(?:[-+*]|\d{1,9}[.)])( {1,4}|\t)/;
-
-/** The fence `rest` (a line after its indentation) opens, at column `col`. */
-function fenceAt(rest: string, col: number): Region | null {
-  const m = /^(`{3,}|~{3,})(.*)$/.exec(rest);
-  if (!m || (m[1][0] === '`' && m[2].includes('`'))) {return null;}
-  return { kind: 'fence', char: m[1][0], len: m[1].length, col };
-}
-
-/** The region a line outside every region opens, or null. */
-function regionOpenedBy(content: string): Region | null {
-  const { width, rest } = indentOf(content);
-  if (width > 3) {return null;}
-  const fence = fenceAt(rest, 0);
-  if (fence) {return fence;}
-  const item = LIST_MARKER.exec(rest);
-  if (item) {
-    const after = rest.slice(item[0].length);
-    const inner = indentOf(after);
-    if (inner.width <= 3) {
-      const col = width + item[0].length + inner.width;
-      const listFence = fenceAt(inner.rest, col);
-      if (listFence) {return listFence;}
+/** Move each reading that shows `line` on: a START there becomes its latest
+ *  START, an END after a START completes its pair. */
+function advance(shown: Search[], line: ScanLine, isStart: (l: string) => boolean, isEnd: (l: string) => boolean): void {
+  const end = shown.some(r => r.start !== -1) && isEnd(line.content);
+  const start = isStart(line.content);
+  for (const r of shown) {
+    if (r.start !== -1 && end) {
+      r.found = { start: r.start, end: line.to };
+    } else if (start) {
+      r.start = line.from;
     }
-  }
-  const raw = RAW_OPEN.exec(rest);
-  if (raw) {return RAW_CLOSE.test(rest) ? null : { kind: 'raw', tag: raw[1].toLowerCase() };}
-  if (rest.startsWith('<!--')) {return rest.includes('-->') ? null : { kind: 'comment' };}
-  return null;
-}
-
-/** True when `content` is the line that closes `open` (the line is part of the region). */
-function closesRegion(open: Region, content: string): boolean {
-  if (open.kind === 'raw') {return RAW_CLOSE.test(content);}
-  if (open.kind === 'comment') {return content.includes('-->');}
-  const { width, rest } = indentOf(content);
-  if (width < open.col || width > open.col + 3) {return false;}
-  const m = /^(`+|~+)[ \t]*$/.exec(rest);
-  return !!m && m[1][0] === open.char && m[1].length >= open.len;
-}
-
-/** The line that closes `open`, for a body faf renders. */
-function closerOf(open: Region): string {
-  if (open.kind === 'raw') {return `</${open.tag}>`;}
-  if (open.kind === 'comment') {return '-->';}
-  return open.char.repeat(open.len);
-}
-
-/** Walks a text line by line and says which lines sit in a region. */
-class Regions {
-  private open: Region | null = null;
-
-  /** Feed one line (terminator and a line-1 BOM removed). True when the line
-   *  belongs to a region — its opening and closing lines included — so it is
-   *  never a marker. A false line is then passed to {@link after}. */
-  inside(content: string): boolean {
-    const open = this.open;
-    if (!open) {return false;}
-    if (open.kind === 'fence' && open.col > 0 && content.trim() !== '' && indentOf(content).width < open.col) {
-      this.open = null; // the list item ended, and its fence with it
-      return false;
-    }
-    if (closesRegion(open, content)) {this.open = null;}
-    return true;
-  }
-
-  /** A line outside every region that was not a marker: it may open one. */
-  after(content: string): void {
-    this.open = regionOpenedBy(content);
-  }
-
-  /** The region still open, when a line of `content` that follows would be
-   *  inside it (and so not seen as a marker). */
-  hiding(content: string): Region | null {
-    const open = this.open;
-    if (!open) {return null;}
-    const probe = new Regions();
-    probe.open = open;
-    return probe.inside(content) ? open : null;
   }
 }
 
 /**
- * The first line outside every Markdown region for which `isStart` holds, and
- * the first later line outside every region for which `isEnd` holds. Returns
- * the char range covering both lines (the end line's terminator excluded), or
- * null. A leading BOM on line 1 stays outside the range. Marker lines are
- * tested on the line with its terminator and that BOM removed.
+ * faf's marked range in `text`: in each reading, the last START line before
+ * the first END line after it (the innermost pair — text between an earlier
+ * START and the last one is kept), both outside every Markdown region. The
+ * two readings must find the same pair; otherwise there is no range. Returns
+ * the char range covering both lines (the END line's terminator excluded), or
+ * null. A leading BOM on line 1 stays outside the range. `isStart` and
+ * `isEnd` are asked about each line shown as text in at least one reading,
+ * once, in order, on the line with its terminator and that BOM removed.
  */
 export function findMarkedRange(
   text: string,
   isStart: (line: string) => boolean,
   isEnd: (line: string) => boolean,
 ): { start: number; end: number } | null {
-  const regions = new Regions();
-  let offset = 0;
-  let blockStart = -1;
-  for (const line of linesWithEnds(text)) {
-    const body = stripEnd(line);
-    const bom = offset === 0 && body.charCodeAt(0) === 0xfeff ? 1 : 0;
-    const content = body.slice(bom);
-    if (!regions.inside(content)) {
-      if (blockStart === -1 && isStart(content)) {
-        blockStart = offset + bom;
-      } else if (blockStart !== -1 && isEnd(content)) {
-        return { start: blockStart, end: offset + body.length };
-      } else {
-        regions.after(content);
-      }
-    }
-    offset += line.length;
+  const [a, b]: Search[] = [new BlockReader(true), new BlockReader(false)].map(reader => ({ reader, start: -1, found: null }));
+  for (const line of scanLines(text)) {
+    const shown = [a, b].filter(r => r.reader.line(line.content) === null);
+    if (shown.length > 0) {advance(shown, line, isStart, isEnd);}
+    // Both readings end their pair on this same line, or they do not agree.
+    if (a.found || b.found) {return a.found && b.found && a.found.start === b.found.start ? a.found : null;}
   }
   return null;
 }
 
-/** A whole marker line at column 0 (trailing whitespace ignored). */
-const markerLine = (marker: string) => (line: string): boolean => line.trimEnd() === marker;
+/** A whole marker line at column 0: exactly the marker text (a CRLF line's
+ *  `\r` is its terminator). Trailing spaces or tabs make it text, not a marker. */
+const markerLine = (marker: string) => (line: string): boolean => line === marker;
 
 /**
- * Locate the faf-managed block in `text`: the first START marker line and the
- * first END marker line after it, both outside fenced code, raw HTML blocks
- * and multi-line HTML comments (see {@link findMarkedRange}). Returns the char
- * range covering both marker lines (terminator of the END line excluded), or
- * null when there is no complete block.
+ * Locate the faf-managed block in `text`: a START marker line and the first
+ * END marker line after it, both outside fenced and indented code, raw HTML
+ * blocks and multi-line HTML comments, under both readings (see
+ * {@link findMarkedRange}). Returns the char range covering both marker lines
+ * (terminator of the END line excluded), or null when there is no complete
+ * block both readings agree on.
  *
- * Markers are matched as WHOLE LINES at column 0, never as substrings. Substring
- * search was a real bug (7.1.4–7.11.0): renderAgentsMd quoted the marker tokens
- * in its own blockquote, so on every re-run `indexOf(end)` hit the quote, cut
- * the old block in half and appended its stale tail below the new block —
- * `faf export --agents` grew AGENTS.md by ~49 lines per run. The same happened
- * to users who documented the markers in a code fence above the block.
+ * Markers are matched as WHOLE LINES at column 0 — exactly the marker text,
+ * nothing after it — never as substrings. Substring search was a real bug
+ * (7.1.4–7.11.0): renderAgentsMd quoted the marker tokens in its own
+ * blockquote, so on every re-run `indexOf(end)` hit the quote, cut the old
+ * block in half and appended its stale tail below the new block — `faf
+ * export --agents` grew AGENTS.md by ~49 lines per run. The same happened to
+ * users who documented the markers in a code fence above the block.
  *
- * Fences are read the CommonMark way (the opening fence's character and
- * length; a closer at least as long with no info string, indented at most 3
- * spaces; an unclosed fence runs to the end of the file), so a ```` fence
- * around a ``` line, a ~~~ fence, an info-string line or an indented ``` never
- * ends a fence early. A START with no END outside a region is not a block:
- * the caller treats "no block" as a user file and prefixes — it never
- * reclaims. faf's own rendered body never leaves a region open (see
- * {@link wrapFafBlock}), so its END line is always found.
+ * Two START lines before an END: the pair is the last START and that END.
+ * faf's own body never holds a column-0 START (see {@link wrapFafBlock}), so
+ * the text between the two STARTs is the user's and stays. A START with no
+ * END is not a block: the caller treats "no block" as a user file and
+ * prefixes — it never reclaims. faf's own block is always found again where
+ * faf put it (see {@link placeFafBlock}).
  */
 export function findFafBlock(
   text: string,
@@ -211,28 +141,75 @@ export function findFafBlock(
   return findMarkedRange(text, markerLine(start), markerLine(end));
 }
 
+/** For each reading that would hide a line of `end` after `text`: the line
+ *  that ends the region it sits in (null when no single line does). */
+function closersFor(text: string, end: string): Array<string | null> {
+  const closers: Array<string | null> = [];
+  for (const containers of [true, false]) {
+    const reader = new BlockReader(containers);
+    for (const line of linesWithEnds(text)) {reader.line(stripEnd(line));}
+    if (reader.clone().line(end) !== null) {closers.push(reader.closer());}
+  }
+  return closers;
+}
+
 /** faf's own body, made safe to wrap between its markers:
- *   - a body line that is itself a whole marker line (a .faf value that
- *     documents the markers, say) would let the next write cut the block there
- *     and grow the file every run — it is indented one space: no longer a
- *     column-0 marker, and the text is unchanged;
+ *   - a body line that is itself a marker line (a .faf value that documents
+ *     the markers, say — with or without trailing spaces) would let the next
+ *     write cut the block there and grow the file every run — it is indented
+ *     one space: no longer a column-0 marker, and the text is unchanged;
  *   - a body that leaves fenced code, a raw HTML block or a comment open (a
  *     .faf value holding a ``` line, say) would hide the END line from the
  *     next scan, and faf would prefix a second block — the region is closed
- *     on a line of its own at the end of the body. */
+ *     on a line of its own at the end of the body, in each reading. A closer
+ *     that would hide the END line in the other reading is not added: such a
+ *     body is quoted by {@link placeFafBlock} instead. */
 function guardBody(body: string, start: string, end: string): string {
   const lines = linesWithEnds(body).map(line => {
     const bare = bareLine(line);
     return bare === start || bare === end ? ` ${line}` : line;
   });
-  const regions = new Regions();
-  for (const line of lines) {
-    const content = stripEnd(line);
-    if (!regions.inside(content)) {regions.after(content);}
+  let text = lines.join('');
+  let hiding = closersFor(text, end);
+  while (hiding.length > 0 && hiding[0] !== null) {
+    const next = `${text}\n${hiding[0]}`;
+    const after = closersFor(next, end);
+    if (after.length >= hiding.length) {break;}
+    text = next;
+    hiding = after;
   }
-  const open = regions.hiding(end);
-  const text = lines.join('');
-  return open ? `${text}\n${closerOf(open)}` : text;
+  return text;
+}
+
+/** The same block with every body line quoted (`> `; a blank line `>`): a
+ *  block quote in the CommonMark reading and plain text in the column-0 one,
+ *  so no body line can hide the END line in either — whatever the text
+ *  before the block leaves open. The fallback for a body the closers cannot
+ *  settle. */
+function quoteBody(wrapped: string, start: string, end: string): string {
+  const body = wrapped.slice(start.length + 1, wrapped.length - end.length - 1);
+  const quoted = linesWithEnds(body).map(line => (stripEnd(line) === '' ? `>${line}` : `> ${line}`)).join('');
+  return `${start}\n${quoted}\n${end}`;
+}
+
+/**
+ * `head`, faf's block (`wrapped`, from {@link wrapFafBlock}) and `tail` as one
+ * text in which {@link findFafBlock} finds the block exactly where it was put
+ * — so the next write updates it in place and never stacks a second one. A
+ * body that would not be found there (it leaves a region open in only one
+ * reading, or the text before it holds a raw HTML block the body continues)
+ * is quoted line by line instead. Throws, and nothing is written, if even
+ * that is not found.
+ */
+export function placeFafBlock(head: string, wrapped: string, tail: string, start: string = FAF_START, end: string = FAF_END): string {
+  const placed = (block: string): string | null => {
+    const text = `${head}${block}${tail}`;
+    const found = findFafBlock(text, start, end);
+    return found && found.start === head.length && found.end === head.length + block.length ? text : null;
+  };
+  const text = placed(wrapped) ?? placed(quoteBody(wrapped, start, end));
+  if (text === null) {throw new Error("faf could not place its block where the next run finds it again — nothing written.");}
+  return text;
 }
 
 /** The managed block: START, the body (guarded — see guardBody), END. */
@@ -241,20 +218,21 @@ export function wrapFafBlock(block: string, start: string = FAF_START, end: stri
 }
 
 /** The file's new text: `existing` (null when there is no file) with `wrapped`
- *  as its managed block. */
+ *  as its managed block, placed where the next scan finds it again (see
+ *  {@link placeFafBlock}). */
 export function withFafBlock(existing: string | null, wrapped: string, start: string = FAF_START, end: string = FAF_END): string {
   // 1. No file → just the block.
-  if (existing === null) {return `${wrapped}\n`;}
+  if (existing === null) {return placeFafBlock('', wrapped, '\n', start, end);}
 
   // 2. A complete block → replace only the managed block; keep everything around it.
   const found = findFafBlock(existing, start, end);
-  if (found) {return `${existing.slice(0, found.start)}${wrapped}${existing.slice(found.end)}`;}
+  if (found) {return placeFafBlock(existing.slice(0, found.start), wrapped, existing.slice(found.end), start, end);}
 
   // 3. Everything else → prefix the block and keep every byte already there. A
   //    file with no marker lines is the user's, whatever its first line says —
   //    a faf-looking stamp or footer proves nothing. A leading BOM stays at byte 0.
   const bom = existing.startsWith(BOM) ? BOM : '';
-  return `${bom}${wrapped}\n\n${existing.slice(bom.length)}`;
+  return placeFafBlock(bom, wrapped, `\n\n${existing.slice(bom.length)}`, start, end);
 }
 
 /** Read a resolved path, or null when nothing is there yet. Only ENOENT reads
@@ -319,13 +297,38 @@ export function injectFafBlock(
  *  versions put at the top of CLAUDE.md and friends, with no markers. */
 const LEGACY_STAMP = '<!-- faf:';
 
+/** How the note names the region an old START line sits in. */
+function regionName(hidden: HiddenIn): string {
+  if (hidden === 'code fence') {return 'a code fence';}
+  if (hidden === 'indented code') {return 'an indented code block';}
+  if (hidden === 'comment') {return 'an HTML comment';}
+  return hidden === 'html' ? 'an HTML block' : `a ${hidden} block`;
+}
+
+/** The region a whole-line START of `text` sits in — in either reading — or
+ *  null when every START line is shown as text (or there is none). */
+function hiddenStart(text: string, start: string): HiddenIn | null {
+  const readers = [new BlockReader(true), new BlockReader(false)];
+  for (const { content } of scanLines(text)) {
+    const [a, b] = readers.map(r => r.line(content));
+    const hidden = a ?? b;
+    if (content === start && hidden !== null) {return hidden;}
+  }
+  return null;
+}
+
 /**
- * The one line the CLI prints when faf's block goes on top of a file whose
- * first line is faf's old metastamp (`<!-- faf: … -->`) and that has no block
- * of its own — or null. faf never reclaims such a file (it cannot prove it
- * wrote the text), so the old faf text stays below the new block; the note
- * says so. `label` names the file (`CLAUDE.md`). `existing` is the file's
- * text before the write (null when there was none).
+ * The one line the CLI prints when faf's block goes on top of a file that has
+ * no block of its own but holds older faf text — or null:
+ *   - the file's first line is faf's old metastamp (`<!-- faf: … -->`): faf
+ *     never reclaims such a file (it cannot prove it wrote the text), so the
+ *     old faf text stays below the new block;
+ *   - a whole-line START marker sits inside a code fence, a raw HTML block
+ *     or an HTML comment (in either reading — see {@link findFafBlock}): the
+ *     older block there is an example to faf, and stays below the new one.
+ * `label` names the file (`CLAUDE.md`). `existing` is the file's text before
+ * the write (null when there was none). faf-mcp and claude-faf-mcp print the
+ * same line through this export.
  */
 export function legacyStampNote(
   label: string,
@@ -335,8 +338,12 @@ export function legacyStampNote(
 ): string | null {
   if (existing === null || findFafBlock(existing, start, end)) {return null;}
   const first = bareLine(linesWithEnds(existing)[0] ?? '');
-  if (!first.startsWith(LEGACY_STAMP) || first === start || first === end) {return null;}
-  return `${label}: faf's block is now on top; the old faf text below it is left as you had it — delete it by hand if you no longer want it.`;
+  if (first.startsWith(LEGACY_STAMP) && first !== start && first !== end) {
+    return `${label}: faf's block is now on top; the old faf text below it is left as you had it — delete it by hand if you no longer want it.`;
+  }
+  const hidden = hiddenStart(existing, start);
+  if (hidden === null) {return null;}
+  return `${label}: faf's block is now on top; an older faf block below sits inside ${regionName(hidden)} and is left as you had it — delete it by hand if you no longer want it.`;
 }
 
 /** {@link legacyStampNote} for the file at `path`, read the way

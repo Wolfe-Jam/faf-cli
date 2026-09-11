@@ -1,4 +1,4 @@
-import { findFafFile, readFaf, readFafRaw, writeFaf } from '../interop/faf.js';
+import { aliasKeptNote, findFafFile, readFaf, readFafRaw, writeFaf } from '../interop/faf.js';
 import { SLOTS, SLOTIGNORED, isExplicitNone, isPlaceholder } from '../core/slots.js';
 import { getNestedValue, setNestedValue, blockingStep, blockedMessage } from '../core/dot-path.js';
 import * as kernel from '../wasm/kernel.js';
@@ -146,7 +146,7 @@ Respond with ONLY valid JSON, no markdown fences. Each value is either a short s
     }
 
     if (filled > 0) {
-      writeFaf(fafPath, data);
+      writeFaf(fafPath, data, { onAliasKept: k => console.log(dim(`  ${aliasKeptNote(k)}`)) });
       console.log(`\n${fafCyan('◆')} ai enhance  filled ${filled} slot${filled === 1 ? '' : 's'}${rejected > 0 ? ` (${rejected} rejected)` : ''}`);
       const result = enrichScore(kernel.score(readFafRaw(fafPath)));
       displayScore(result, fafPath);

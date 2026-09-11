@@ -1,4 +1,4 @@
-import { findFafFile, readFaf, writeFaf } from '../interop/faf.js';
+import { aliasKeptNote, findFafFile, readFaf, writeFaf } from '../interop/faf.js';
 import { blockingStep, blockedMessage, setNestedValue } from '../core/dot-path.js';
 import { fafCyan, dim } from '../ui/colors.js';
 
@@ -32,7 +32,13 @@ export function editCommand(path: string, value: string): void {
   }
 
   setNestedValue(data as Record<string, unknown>, path, value);
-  writeFaf(fafPath, data);
+  // faf never replaces an alias (`summary: *g`): that edit is not written.
+  const kept: string[] = [];
+  writeFaf(fafPath, data, { onAliasKept: k => kept.push(aliasKeptNote(k)) });
+  if (kept.length > 0) {
+    for (const line of kept) {console.error(`Error: ${line}. Change the value its anchor holds, or replace the alias by hand.`);}
+    process.exit(1);
+  }
 
   console.log(`${fafCyan('updated')} ${path} ${dim('→')} ${value}`);
 }

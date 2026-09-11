@@ -1,7 +1,7 @@
 import { existsSync } from 'fs';
 import { join } from 'path';
 import { assembleFreshFaf, updateExistingFaf } from '../detect/assemble.js';
-import { writeFaf, readFaf, readFafRaw } from '../interop/faf.js';
+import { aliasKeptNote, writeFaf, readFaf, readFafRaw } from '../interop/faf.js';
 import * as kernel from '../wasm/kernel.js';
 import { enrichScore } from '../core/scorer.js';
 import { FafDNAManager } from '../core/faf-dna.js';
@@ -20,8 +20,14 @@ export function autoCommand(): void {
     // Turbo-Cat (formats) → Relentless (6 W's) fill the remaining empties.
     // Shared with consumers via the public updateExistingFaf export.
     // Only what changed is written; comments and formatting stay as they are.
-    const written = writeFaf(fafPath, updateExistingFaf(dir, readFaf(fafPath)));
+    // An alias (`stack: *base`) is never expanded to fill a slot under it —
+    // it stays as written, and faf says so in one line.
+    const aliases: string[] = [];
+    const written = writeFaf(fafPath, updateExistingFaf(dir, readFaf(fafPath)), {
+      onAliasKept: kept => aliases.push(aliasKeptNote(kept)),
+    });
     console.log(`${written ? fafCyan('updated') : dim('unchanged')} ${fafPath}`);
+    for (const line of aliases) {console.log(dim(`  ${line}`));}
   } else {
     // New file: full assembly pipeline (shared with `faf git`).
     writeFaf(fafPath, assembleFreshFaf(dir));

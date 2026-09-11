@@ -22,6 +22,7 @@
 import {
   Document,
   YAMLMap,
+  type Alias,
   YAMLSeq,
   isAlias,
   isCollection,
@@ -261,6 +262,21 @@ function valueOnly(node: unknown): unknown {
   return copy;
 }
 
+/** `b` without the anchor and tag it shares with `a`. A node's range starts
+ *  at its value — `&g` and `!!str` sit in front of it and stay in the text —
+ *  so the new value is rendered without them, and only the value text inside
+ *  the range changes (`goal: &g Old` → `goal: &g New`, not `&g &g New`). */
+function withoutSharedProps(a: unknown, b: unknown): unknown {
+  if (!isNode(a) || !isNode(b)) {return b;}
+  const ta = a as Trivia;
+  const tb = b as Trivia;
+  if ((!ta.anchor && !ta.tag) || ta.anchor !== tb.anchor || ta.tag !== tb.tag) {return b;}
+  const copy = b.clone() as Node & Trivia;
+  copy.anchor = undefined;
+  copy.tag = undefined;
+  return copy;
+}
+
 /** Just after the `:` that follows `key`, or -1. */
 function afterColon(src: string, key: unknown): number {
   const r = rangeOf(key);
@@ -287,13 +303,17 @@ interface Replacement {
   piece: { inline: boolean; text: string };
 }
 
-function planReplace(ctx: Ctx, a: unknown, b: unknown, slot: Slot): Replacement | null {
+/** How `a` is replaced by `b`. `fromColon`: the new text starts right after
+ *  the key's colon, over the node's anchor and tag too, so they are rendered
+ *  with it; otherwise the new text starts at the node's range, after them. */
+function planReplace(ctx: Ctx, a: unknown, b: unknown, slot: Slot, fromColon = false): Replacement | null {
   const range = rangeOf(a);
   if (!range || slot.kind === 'root') {return null;}
   const oldComment = (a as Trivia).comment;
   const newComment = isNode(b) ? (b as Trivia).comment : undefined;
   const keepTail = !present(oldComment) || oldComment === newComment;
-  const shown = keepTail ? valueOnly(b) : b;
+  const valueText = keepTail ? valueOnly(b) : b;
+  const shown = fromColon ? valueText : withoutSharedProps(a, valueText);
   const piece = slot.kind === 'value' ? renderValue(ctx, shown, slot.col) : renderItem(ctx, shown, slot.col);
   return piece ? { range, keepTail, newComment, piece } : null;
 }
@@ -308,17 +328,19 @@ function replaceEnd(src: string, a: unknown, r: [number, number, number], keepTa
 /** Replace the node `a` (a pair's value, or a list item) with `b`; `addComment`
  *  is a line comment the unchanged-style scalar gains. */
 function replace(ctx: Ctx, a: unknown, b: unknown, slot: Slot, addComment?: string): boolean {
-  const plan = planReplace(ctx, a, b, slot);
-  if (!plan) {return false;}
-  const end = replaceEnd(ctx.src, a, plan.range, plan.keepTail);
-  if (plan.piece.inline && (!isBlockNode(a) || slot.kind === 'item')) {
-    replaceInline(ctx, plan, end, slot, addComment);
+  const inRange = planReplace(ctx, a, b, slot);
+  if (!inRange) {return false;}
+  const end = replaceEnd(ctx.src, a, inRange.range, inRange.keepTail);
+  if (inRange.piece.inline && (!isBlockNode(a) || slot.kind === 'item')) {
+    replaceInline(ctx, inRange, end, slot, addComment);
     return true;
   }
   // A multi-line value (or a block node replaced): no comment can be carried.
-  const tailComment = plan.keepTail ? (a as Trivia).comment : plan.newComment;
+  const tailComment = inRange.keepTail ? (a as Trivia).comment : inRange.newComment;
   if (addComment !== undefined || present(tailComment)) {return false;}
-  return replaceBlock(ctx, plan.range[0], end, plan.piece, slot);
+  // A pair's value is rewritten from its key's colon, anchor and tag included.
+  const plan = slot.kind === 'value' ? planReplace(ctx, a, b, slot, true) : inRange;
+  return plan !== null && replaceBlock(ctx, plan.range[0], end, plan.piece, slot);
 }
 
 /** One line in, one line out: the new value takes the old value's place. */
@@ -690,6 +712,14 @@ export interface ApplyOptions {
   /** Remove keys of a mapping that the data leaves out (or sets `undefined`).
    *  Default false: a key the data does not mention stays exactly as it is. */
   prune?: boolean;
+  /** Leave every alias (`*name`) as written, whatever the data holds there:
+   *  it is never expanded or replaced (see {@link keptAliases}). */
+  keepAliases?: boolean;
+}
+
+/** The node already holds `value`, or is an alias kept as written. */
+function staysAsWritten(doc: Document, node: unknown, value: unknown, opts: ApplyOptions): boolean {
+  return (opts.keepAliases === true && isAlias(node)) || sameJs(nodeJs(doc, node), value);
 }
 
 /**
@@ -699,7 +729,7 @@ export interface ApplyOptions {
  * to store — `node` itself, or a new node when the shape changed.
  */
 export function applyValue(doc: Document, node: unknown, value: unknown, opts: ApplyOptions = {}): unknown {
-  if (sameJs(nodeJs(doc, node), value)) {return node;}
+  if (staysAsWritten(doc, node, value, opts)) {return node;}
   if (isMapping(value) && isMap(node)) {
     applyMapData(doc, node, value, opts);
     return node;
@@ -769,6 +799,9 @@ export function applyMapData(doc: Document, map: YAMLMap, data: Record<string, u
  *     value the alias read as (a stale copy never replaces a live `*alias`);
  *   - a changed mapping is merged key by key the same way;
  *   - any other changed value is set with {@link applyValue};
+ *   - an alias (`stack: *base`) is never replaced or expanded, at any depth:
+ *     it stays as written, and a change `data` makes under it is not written
+ *     ({@link keptAliases} lists those paths);
  *   - keys `data` leaves out (or sets `undefined`) stay; new keys are appended.
  * This is how writeFaf applies full .faf data to an existing file.
  */
@@ -784,9 +817,107 @@ export function mergeData(doc: Document, map: YAMLMap, before: unknown, data: Re
     } else if (isMapping(value) && isMapping(was[key]) && isMap(pair.value)) {
       mergeData(doc, pair.value, was[key], value);
     } else {
-      pair.value = applyValue(doc, pair.value, value);
+      pair.value = applyValue(doc, pair.value, value, { keepAliases: true });
     }
   }
+}
+
+/** An alias faf left as written: where it is (`stack`, `key_files.2`) and
+ *  what it says (`*base`). */
+export interface KeptAlias {
+  path: string;
+  alias: string;
+}
+
+/** Every alias in a mapping or list, with its path — not looking through aliases. */
+function aliasesIn(node: unknown, path: readonly (string | number)[], out: Array<{ path: (string | number)[]; node: Alias }>): void {
+  if (isAlias(node)) {
+    out.push({ path: [...path], node });
+  } else if (isMap(node)) {
+    for (const pair of node.items) {
+      const key = keyText(pair);
+      if (key !== undefined) {aliasesIn(pair.value, [...path, key], out);}
+    }
+  } else if (isSeq(node)) {
+    node.items.forEach((item, i) => aliasesIn(item, [...path, i], out));
+  }
+}
+
+/** The plain value at `path` of parsed data, or undefined. */
+function jsAt(data: unknown, path: readonly (string | number)[]): unknown {
+  let cur = data;
+  for (const step of path) {
+    if (Array.isArray(cur) && typeof step === 'number') {
+      cur = cur[step];
+    } else if (isMapping(cur) && typeof step === 'string') {
+      cur = cur[step];
+    } else {
+      return undefined;
+    }
+  }
+  return cur;
+}
+
+/** The aliases in `doc` where `data` changed the value the file held
+ *  (`before`) and the alias does not read as the new value — a change under
+ *  an alias that faf did not write, because it never replaces or expands an
+ *  alias. A value `data` only repeats (a stale copy of what the alias read
+ *  as) is not a change. */
+export function keptAliases(doc: Document, data: unknown, before: unknown): KeptAlias[] {
+  const found: Array<{ path: (string | number)[]; node: Alias }> = [];
+  aliasesIn(doc.contents, [], found);
+  return found
+    .filter(({ path, node }) => {
+      const want = jsAt(data, path);
+      return want !== undefined && !sameJs(jsAt(before, path), want) && !sameJs(node.toJS(doc), want);
+    })
+    .map(({ path, node }) => ({ path: path.join('.'), alias: `*${node.source}` }));
+}
+
+/** The node at `path` of a Document, and a way to put another node in its
+ *  place — or null when nothing is there. A list item is put back only over a
+ *  node the change made (one with no place in the file); an item of the file
+ *  that moved there is left. */
+function slotAt(doc: Document, path: readonly (string | number)[]): { node: unknown; put: (n: Alias) => boolean } | null {
+  let parent: unknown = doc.contents;
+  for (let i = 0; i < path.length - 1 && parent !== undefined; i++) {parent = childAt(parent, path[i]);}
+  const step = path[path.length - 1];
+  if (isMap(parent) && typeof step === 'string') {
+    const pair = findPair(parent, step);
+    return pair ? { node: pair.value, put: n => ((pair.value = n), true) } : null;
+  }
+  if (isSeq(parent) && typeof step === 'number' && step < parent.items.length) {
+    const seq = parent;
+    const node = seq.items[step];
+    return { node, put: n => (rangeOf(node) === undefined ? ((seq.items[step] = n), true) : false) };
+  }
+  return null;
+}
+
+/** The value a mapping holds under `step`, or a list's item `step`. */
+function childAt(node: unknown, step: string | number): unknown {
+  if (isMap(node) && typeof step === 'string') {return findPair(node, step)?.value;}
+  if (isSeq(node) && typeof step === 'number') {return node.items[step];}
+  return undefined;
+}
+
+/**
+ * Put back every alias of `before` that `after` (the same Document, changed)
+ * holds something else in place of: faf never replaces an alias, so that
+ * path keeps the file's `*name` and its change is not written. A key the
+ * change removed stays removed. Returns the aliases put back.
+ */
+export function restoreAliases(before: Document, after: Document): KeptAlias[] {
+  const found: Array<{ path: (string | number)[]; node: Alias }> = [];
+  aliasesIn(before.contents, [], found);
+  const kept: KeptAlias[] = [];
+  for (const { path, node } of found) {
+    const slot = slotAt(after, path);
+    if (!slot || (isAlias(slot.node) && slot.node.source === node.source)) {continue;}
+    if (!slot.put(node.clone() as Alias)) {continue;}
+    kept.push({ path: path.join('.'), alias: `*${node.source}` });
+  }
+  return kept;
 }
 
 /** Index pairs [i, j] of a longest common subsequence of `a` and `b`. */

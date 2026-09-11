@@ -106,13 +106,18 @@ describe('BRAKE: writeFaf applies only the paths that changed', () => {
     expect(back.stack.hosting).toBe('Netlify');
   });
 
-  test('an explicit change to an alias key replaces it, keeping its line comment', () => {
+  test('a change to an alias key is not written: the alias stays as written, and the caller hears of it (7.13 round 3b)', () => {
+    // faf never replaces an alias — `summary: *g` is the user's text. Round 2
+    // replaced it on an explicit change; the owner rule says leave it.
     const p = join(project(), 'project.faf');
-    writeFileSync(p, 'project:\n  goal: &g Old goal\n  summary: *g # SUMMARY-COMMENT\n');
+    const before = 'project:\n  goal: &g Old goal\n  summary: *g # SUMMARY-COMMENT\n';
+    writeFileSync(p, before);
     const data = readFaf(p);
     setNestedValue(data as Record<string, unknown>, 'project.summary', 'Its own summary');
-    writeFaf(p, data);
-    expect(readFileSync(p, 'utf-8')).toBe('project:\n  goal: &g Old goal\n  summary: Its own summary # SUMMARY-COMMENT\n');
+    const kept: Array<{ path: string; alias: string }> = [];
+    expect(writeFaf(p, data, { onAliasKept: k => kept.push(k) })).toBe(false);
+    expect(readFileSync(p, 'utf-8')).toBe(before);
+    expect(kept).toEqual([{ path: 'project.summary', alias: '*g' }]);
   });
 
   test('a value lifted to an empty section keeps its comment on the key line', () => {
