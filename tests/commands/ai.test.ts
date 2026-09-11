@@ -137,8 +137,9 @@ describe('BRAKE: `faf ai enhance` is retired — one line, exit 1, nothing writt
     expect(plain(`${r.stdout}${r.stderr}`)).toBe(`${RETIRED}\n`);
     expect(readFileSync(join(dir, 'project.faf'), 'utf-8')).toBe(faf);
     expect(snapshot(dir)).toEqual(before);
-    // Nothing of faf's in HOME either (bun keeps its own cache there).
-    expect(Object.keys(snapshot(home)).filter(f => !/^(Library\/Caches|\.cache)\//.test(f))).toEqual([]);
+    // Nothing of faf's in HOME either. bun keeps its own caches there:
+    // Library/Caches (macOS), .cache and .bun/install/cache (Linux).
+    expect(Object.keys(snapshot(home)).filter(f => !/^(Library\/Caches|\.cache|\.bun)\//.test(f))).toEqual([]);
 
     // The same with no project.faf and no key: still the one line, still exit 1.
     const empty = realpathSync(mkdtempSync(join(tmpdir(), 'faf-ai-retired-')));
