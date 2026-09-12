@@ -101,9 +101,9 @@ export function updateExistingFaf(dir: string, existing: Record<string, unknown>
   const merged = fillEmpties(withInterrogated, detected);
   const withFormats = fillEmpties(merged, turboCatSlots(dir) as Record<string, unknown>);
   const filled = useFileSlotNames(fillEmpties(withFormats, { human_context: relentlessContext(dir) } as Record<string, unknown>), base);
-  const decided = appTypeIsFact(existing, base, detected)
+  const decided = scoredNamesInStep(appTypeIsFact(existing, base, detected)
     ? applyAppType(keepNotApplicable(filled, base), base, facts)
-    : keepNotApplicable(filled, base);
+    : keepNotApplicable(filled, base), base);
   // The result is the read `existing` came from, filled: writeFaf checks it
   // against that read, so an edit made while detection ran is never written over.
   return markAsFill(carryFafSource(existing, decided));
@@ -200,6 +200,23 @@ function useFileSlotNames(filled: Record<string, unknown>, base: Record<string, 
     putField(out, slot.path, undefined);
     const own = fieldAt(out, slot.canonical);
     if (isFact(twin) && isPlaceholder(own)) {putField(out, slot.canonical, twin);}
+  }
+  return out;
+}
+
+/** The scoring kernel reads a slot under its on-wire name (`stack.database`),
+ *  never its Mk4 name (`stack.db`). When the file names a slot only by its
+ *  Mk4 name, faf keeps the on-wire name in step with it — a repo fact or
+ *  `slotignored` — so the score counts what the file says. faf adds that
+ *  key; the file's own line is left as the steps above decided. A Mk4 name
+ *  that still holds no real value (empty, or typed words) adds nothing: the
+ *  slot is empty under either name. */
+function scoredNamesInStep(decided: Record<string, unknown>, base: Record<string, unknown>): Record<string, unknown> {
+  const out = { ...decided };
+  for (const slot of SLOTS) {
+    if (!slot.canonical || !hasField(base, slot.canonical) || hasField(base, slot.path)) {continue;}
+    const own = fieldAt(out, slot.canonical);
+    if (isFact(own) || isSlotIgnored(own)) {putField(out, slot.path, own);}
   }
   return out;
 }

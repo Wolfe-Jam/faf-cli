@@ -42,6 +42,7 @@ import * as inject from '../../src/interop/inject.js';
 import { BlockReader, MAX_OPEN_CONTAINERS } from '../../src/interop/commonmark.js';
 import { writeClaudeMemory } from '../../src/interop/claude-memory.js';
 import { readFaf, writeFaf } from '../../src/interop/faf.js';
+import { scoreFafYaml } from '../../src/index.js';
 import * as diff from '../../src/commands/diff.js';
 
 // Read through the module objects, so this file also loads against a tree
@@ -486,10 +487,13 @@ describe('BRAKE: faf auto fills a slot under the name the file uses, from the re
   };
   const P = (type: string, stack: string): string => `project:\n  name: demo\n  goal: A demo tool\n  main_language: Go\n  type: ${type}\nstack:\n${stack}`;
 
-  test('ST11: a file that names the slot stack.db gets no stack.database twin; a repo fact fills stack.db', () => {
+  test('ST11: a repo fact fills stack.db; the scored name stack.database is kept in step, so the score counts it', () => {
     const cli = auto({ 'project.faf': P('cli', '  db: None # HAND-DB\n'), 'go.mod': 'module x\n' });
     expect(cli.split('\n')).toContain('  db: slotignored # HAND-DB');
-    expect(cli).not.toMatch(/^ {2}database:/m);
+    // The kernel scores stack.database, not stack.db: without it a cli project
+    // counted 13 active slots and could never reach 100%.
+    expect(cli.split('\n')).toContain('  database: slotignored');
+    expect(scoreFafYaml(cli).active).toBe(12);
 
     const backend = auto({
       'project.faf': P('backend', '  db: None # HAND-DB\n'),
@@ -497,7 +501,7 @@ describe('BRAKE: faf auto fills a slot under the name the file uses, from the re
       'docker-compose.yml': 'services:\n  db:\n    image: postgres:16\n',
     });
     expect(backend.split('\n')).toContain('  db: PostgreSQL # HAND-DB');
-    expect(backend).not.toMatch(/^ {2}database:/m);
+    expect(backend.split('\n')).toContain('  database: PostgreSQL');
   });
 
   test('SX01: a slot the file\'s type uses gets the repo\'s fact even when detection reads the repo as another type (go.mod → runtime Go)', () => {

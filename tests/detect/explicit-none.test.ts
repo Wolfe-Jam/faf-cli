@@ -103,12 +103,14 @@ describe('BRAKE: a typed none is an empty slot — a fact fills a tech slot, not
       project: { name: 'web', type: 'frontend' },
       stack: { framework: 'None', db: 'slotignored' },
     });
-    expect(stackOf(out).database).toBeUndefined(); // stack.db says slotignored: no PostgreSQL under stack.database
+    // stack.db says slotignored: no PostgreSQL. The on-wire name the kernel
+    // scores (stack.database) is kept in step with it.
+    expect(stackOf(out).database).toBe('slotignored');
     expect(stackOf(out).db).toBe('slotignored');
-    // A typed none is empty: the fact fills the slot — under the name the file
-    // uses (stack.framework), with no stack.frontend twin added beside it.
+    // A typed none is empty: the fact fills the slot under the name the file
+    // uses (stack.framework), and the scored on-wire name carries it too.
     expect(stackOf(out).framework).toBe('React');
-    expect(stackOf(out).frontend).toBeUndefined();
+    expect(stackOf(out).frontend).toBe('React');
 
     // An empty value and a typed none under the slot's two names: the fact fills it.
     const both = updateExistingFaf(repo(), { project: { name: 'web', type: 'frontend' }, stack: { database: '', db: 'N/A' } });
