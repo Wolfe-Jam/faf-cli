@@ -9,11 +9,15 @@
  * when they drift apart.
  */
 
-import { describe, test, expect, afterEach } from 'bun:test';
-import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
+import { describe, test, expect, afterAll, afterEach } from 'bun:test';
+import { copyFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'fs';
+import { tempDirs } from './helpers/temp-dirs.js';
 import { spawnSync } from 'child_process';
 import { tmpdir } from 'os';
 import { join } from 'path';
+
+const tempFolders = tempDirs();
+afterAll(() => tempFolders.removeAll());
 
 const ROOT = join(import.meta.dir, '..');
 const SCRIPT = join(ROOT, 'scripts', 'check-engines.mjs');
@@ -28,7 +32,7 @@ afterEach(() => {
 
 /** A copy of the guard in a mkdtemp repo with the given floor and matrices. */
 function repo(engines: string, ci: string, release: string): string {
-  fixture = mkdtempSync(join(tmpdir(), 'faf-engines-'));
+  fixture = tempFolders.mkdtemp(join(tmpdir(), 'faf-engines-'));
   mkdirSync(join(fixture, 'scripts'));
   mkdirSync(join(fixture, '.github', 'workflows'), { recursive: true });
   copyFileSync(SCRIPT, join(fixture, 'scripts', 'check-engines.mjs'));

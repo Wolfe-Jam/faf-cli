@@ -16,8 +16,8 @@
  * refused, always. The refusal is one line naming the link and its target,
  * and the target is left byte for byte.
  */
-import { describe, test, expect } from 'bun:test';
-import { existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, symlinkSync, writeFileSync } from 'fs';
+import { afterAll, describe, test, expect } from 'bun:test';
+import { existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, realpathSync, symlinkSync, writeFileSync } from 'fs';
 import { basename, dirname, join, relative } from 'path';
 import { tmpdir } from 'os';
 import { execFileSync, spawnSync } from 'child_process';
@@ -39,6 +39,10 @@ import { serializeFaf, writeFaf } from '../../src/interop/faf.js';
 import { FafDNAManager } from '../../src/core/faf-dna.js';
 import { Soul } from '../../src/fafm/soul.js';
 import { scoreFafYaml } from '../../src/core/scorer.js';
+import { tempDirs } from '../helpers/temp-dirs.js';
+
+const tempFolders = tempDirs();
+afterAll(() => tempFolders.removeAll());
 
 const posix = process.platform !== 'win32';
 const CLI = join(import.meta.dir, '../../src/cli.ts');
@@ -55,7 +59,7 @@ const PKG = '{\n  "name": "demo"\n}\n';
 const README = '# My Project\n\nA real README with install steps.\n\n## Install\n\nnpm i myproject\n';
 
 function project(): string {
-  return realpathSync(mkdtempSync(join(tmpdir(), 'faf-links-')));
+  return realpathSync(tempFolders.mkdtemp(join(tmpdir(), 'faf-links-')));
 }
 
 function refusal(fn: () => unknown): SafePathError {
@@ -289,7 +293,7 @@ describe('BRAKE: the CLI refuses in one line (the .git/config end-to-end)', () =
     spawnSync(process.execPath, [CLI, ...args], {
       cwd,
       encoding: 'utf-8',
-      env: { ...process.env, HOME: realpathSync(mkdtempSync(join(tmpdir(), 'faf-links-home-'))), NO_COLOR: '1' },
+      env: { ...process.env, HOME: realpathSync(tempFolders.mkdtemp(join(tmpdir(), 'faf-links-home-'))), NO_COLOR: '1' },
     });
 
   for (const [flag, rel] of [['--cursor', '.cursorrules'], ['--html', 'project.html']] as const) {

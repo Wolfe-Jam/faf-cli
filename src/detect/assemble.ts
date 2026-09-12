@@ -13,15 +13,18 @@ import { turboCatSlots } from './turbo-cat.js';
 import { relentlessContext } from './relentless.js';
 import {
   APP_TYPE_CATEGORIES,
+  NO_CLASSIFYING_SIGNALS,
   SLOTS,
   SLOT_BY_PATH,
   SLOTIGNORED,
-  isExplicitNone,
+  appTypeUsesSlot,
   isPlaceholder,
+  isTypedWords,
 } from '../core/slots.js';
 import type { SlotDef } from '../core/types.js';
 import { asFafMapping, isMapping } from '../core/shape.js';
-import { carryFafSource } from '../core/faf-source.js';
+import { carryFafSource, fafSourceOf, markAsFill } from '../core/faf-source.js';
+import { typeIsFallback } from '../core/typed-none.js';
 
 /** Build a fresh .faf for `dir` using the full slot-filling pipeline. */
 export function assembleFreshFaf(dir: string): Record<string, unknown> {
@@ -62,25 +65,56 @@ export function assembleFreshFaf(dir: string): Record<string, unknown> {
  * non-null scalar `project:` (older writers stored `project: <name>`) is lifted
  * to `{ name: String(value) }`, so the name is kept and the rest can be filled.
  *
- * A typed none (`None` / `N/A` / `not applicable`, any case) is an empty
- * slot — it scores 0 until filled. In a tech slot (every slot but the 6Ws) a
- * repo fact fills it: "if it's a fact, fill the slot". With no fact the typed
- * words stay exactly as the file has them, comment included, and faf never
- * writes `slotignored` over them — `slotignored` comes only from the
- * app-type. In a 6W (`human_context.*`) a typed none is the person's: auto
- * never replaces it (`faf go` asks). A slot that says `slotignored` under
- * either of its names (`stack.db` for `stack.database`) gets no detected
- * value under either.
+ * Words typed into a slot — a typed none (`None` / `N/A` / `not applicable`)
+ * or any other placeholder word (`unknown`, `"null"`), any case — are an
+ * empty slot: they score 0 until filled.
+ *   - In a tech slot (every slot but the 6Ws) a repo fact fills it: "if it's
+ *     a fact, fill the slot". With no fact the words stay exactly as the file
+ *     has them, comment included; faf never writes `''` over them.
+ *   - In a tech slot the file's app-type (`project.type`) leaves out, the
+ *     app-type's decision is the fact: with no repo fact, the slot becomes
+ *     `slotignored` (shown as N/A) in place of the words, an empty value or a
+ *     placeholder. A real value there is kept. `slotignored` comes only from
+ *     the app-type — in a slot the app-type uses, it is never written, even
+ *     when detection reads the repo as another type. A `project.type` faf does
+ *     not know decides nothing, and neither does the `library` detection falls
+ *     back to when the repo has no classifying signal.
+ *   - In a 6W (`human_context.*`) the words are the person's: auto never
+ *     replaces them (`faf go` asks).
+ * A slot that says `slotignored` under either of its names (`stack.db` for
+ * `stack.database`) gets no detected value under either.
+ *
+ * The result is marked as a fill: writeFaf leaves a node with an anchor that
+ * an alias reads as written (`frontend: &x None` with `ui_library: *x`) —
+ * filling it would change every alias — and reports it like a kept alias.
  */
 export function updateExistingFaf(dir: string, existing: Record<string, unknown>): Record<string, unknown> {
   const base = liftScalarProject(asFafMapping(existing, 'updateExistingFaf: the existing .faf'));
+  const detected = detectStack(dir) as Record<string, unknown>;
   const withInterrogated = fillEmpties(base, interrogateRepo(dir) as Record<string, unknown>);
-  const merged = fillEmpties(withInterrogated, detectStack(dir) as Record<string, unknown>);
+  const merged = fillEmpties(withInterrogated, detected);
   const withFormats = fillEmpties(merged, turboCatSlots(dir) as Record<string, unknown>);
   const filled = fillEmpties(withFormats, { human_context: relentlessContext(dir) } as Record<string, unknown>);
+  const decided = appTypeIsFact(existing, base, detected)
+    ? applyAppType(keepNotApplicable(filled, base), base)
+    : keepNotApplicable(filled, base);
   // The result is the read `existing` came from, filled: writeFaf checks it
   // against that read, so an edit made while detection ran is never written over.
-  return carryFafSource(existing, keepNotApplicable(filled, base));
+  return markAsFill(carryFafSource(existing, decided));
+}
+
+/** True when the app-type the filled file will declare is a fact: a type the
+ *  file names (unless its line carries faf's `# found: no classifying signals
+ *  — fallback` note, as the `library` faf fell back to does), or one detection
+ *  fills in from a classifying signal. faf's fallback decides no slot, on
+ *  this run or a later one. */
+function appTypeIsFact(existing: Record<string, unknown>, base: Record<string, unknown>, detected: Record<string, unknown>): boolean {
+  if (!isPlaceholder(fieldAt(base, 'project.type'))) {
+    const text = fafSourceOf(existing)?.text;
+    return text === undefined || !typeIsFallback(text);
+  }
+  const found = (detected._meta as { found?: string[] } | undefined)?.found ?? [];
+  return !found.includes(NO_CLASSIFYING_SIGNALS);
 }
 
 /** The places a slot can live: its on-wire path and its Mk4 canonical name. */
@@ -113,7 +147,7 @@ function putField(data: Record<string, unknown>, path: string, value: unknown): 
   data[section] = copy;
 }
 
-/** `slotignored`: the app-type leaves the slot out. A typed none is not this. */
+/** `slotignored`: the app-type leaves the slot out. Typed words are not this. */
 const isSlotIgnored = (v: unknown): boolean => typeof v === 'string' && v.trim() === SLOTIGNORED;
 
 /** True when `base` says `slotignored` under one of the slot's names and
@@ -125,7 +159,7 @@ function decidedNotApplicable(base: Record<string, unknown>, locs: string[]): bo
 
 /** After filling: a slot `base` marks `slotignored` gets no detected value
  *  under any of its names — each keeps exactly what `base` had there. Only
- *  `slotignored` is kept this way; a typed none is an empty slot, and a fact
+ *  `slotignored` is kept this way; typed words are an empty slot, and a fact
  *  fills it (see fillEmpties). */
 function keepNotApplicable(filled: Record<string, unknown>, base: Record<string, unknown>): Record<string, unknown> {
   const out = { ...filled };
@@ -138,6 +172,62 @@ function keepNotApplicable(filled: Record<string, unknown>, base: Record<string,
     }
   }
   return out;
+}
+
+/** True when `data` has a key at `section.field` (whatever its value). */
+function hasField(data: Record<string, unknown>, path: string): boolean {
+  const [section, field] = path.split('.');
+  const s = data[section];
+  return isMapping(s) && Object.prototype.hasOwnProperty.call(s, field);
+}
+
+/** The file's app-type decides which tech slots count (after filling, so a
+ *  type detection filled in counts too; a type faf does not know decides
+ *  nothing):
+ *   - a slot it leaves out that holds no real value under either of its
+ *     names — only empty values, placeholders or typed words — becomes
+ *     `slotignored`, under each of the slot's names the file has (or its
+ *     on-wire name when it has neither);
+ *   - a slot it uses never takes `slotignored` from detection (which may have
+ *     read the repo as another type): it keeps what `base` had there, or
+ *     `''` when `base` had nothing. A `slotignored` of the file's own stays. */
+function applyAppType(filled: Record<string, unknown>, base: Record<string, unknown>): Record<string, unknown> {
+  const project = filled.project;
+  const type = isMapping(project) ? project.type : undefined;
+  const out = { ...filled };
+  for (const slot of SLOTS) {
+    if (slot.category === 'human' || slot.category === 'project') {continue;}
+    const uses = appTypeUsesSlot(type, slot);
+    if (uses === null) {return filled;}
+    if (uses) {
+      keepUsedSlot(out, base, slotLocations(slot));
+    } else {
+      markLeftOutSlot(out, slot);
+    }
+  }
+  return out;
+}
+
+/** A slot the app-type uses takes no `slotignored` from detection: each name
+ *  of it gets back what `base` had there (`''` when it had nothing). */
+function keepUsedSlot(out: Record<string, unknown>, base: Record<string, unknown>, locs: string[]): void {
+  for (const loc of locs) {
+    if (isSlotIgnored(fieldAt(out, loc)) && !isSlotIgnored(fieldAt(base, loc))) {
+      putField(out, loc, hasField(base, loc) ? fieldAt(base, loc) : '');
+    }
+  }
+}
+
+/** A slot the app-type leaves out, with no real value under either of its
+ *  names, becomes `slotignored` under each name the file has (or its on-wire
+ *  name when it has neither). A real value there is kept. */
+function markLeftOutSlot(out: Record<string, unknown>, slot: SlotDef): void {
+  const present = slotLocations(slot).filter(loc => hasField(out, loc));
+  const real = (loc: string): boolean => !isPlaceholder(fieldAt(out, loc)) && !isSlotIgnored(fieldAt(out, loc));
+  if (present.some(real)) {return;}
+  for (const loc of present.length > 0 ? present : [slot.path]) {
+    if (isPlaceholder(fieldAt(out, loc))) {putField(out, loc, SLOTIGNORED);}
+  }
 }
 
 /** `project: <scalar>` → `project: { name: String(value) }`. A list is left as it is
@@ -164,18 +254,18 @@ function applySlotIgnore(seeded: Record<string, unknown>): void {
   }
 }
 
-/** Fill empty/placeholder slots in `target` with values from `source`.
- *  `target` wins when its slot is non-empty. Empty here is per `isPlaceholder`
- *  (covers '', null, undefined, and known placeholder strings) — this is what
- *  lets interrogated/detected values overwrite the empty-string defaults that
- *  detectStack writes to human_context.
+/** Fill empty slots in `target` with values from `source`. `target` wins
+ *  when its slot is non-empty. Empty here is '', null, undefined, an empty
+ *  list or mapping — this is what lets interrogated/detected values overwrite
+ *  the empty-string defaults that detectStack writes to human_context.
  *
- *  A typed none (`None`, `N/A`, `not applicable`, any case) is an empty slot,
- *  but only a fact replaces the words: in a tech slot (every slot but the
- *  6Ws, under either of its names) a source value that is real content — not
- *  empty, not a placeholder, not `slotignored` — fills it. Anything else
- *  leaves the typed words exactly as they are: no fact, a 6W
- *  (`human_context.*`, the person's), or a place that is not a slot.
+ *  Typed words — a typed none (`None`, `N/A`, `not applicable`) or any other
+ *  placeholder word (`unknown`, `"null"`), any case — are an empty slot, but
+ *  only a fact replaces them: in a tech slot (every slot but the 6Ws, under
+ *  either of its names) a source value that is real content — not empty, not
+ *  a placeholder, not `slotignored` — fills it. Anything else leaves the
+ *  words exactly as they are: no fact, a 6W (`human_context.*`, the
+ *  person's), or a place that is not a slot.
  *
  *  A `_meta` the target already carries (the user's own) is never filled
  *  over: faf's runtime `_meta` from `source` is merged only into a target
@@ -194,14 +284,14 @@ function isTechSlot(path: string): boolean {
 }
 
 /** A value the repo gave for a slot: real content. Not empty, not a
- *  placeholder or a typed none, and not `slotignored` (the app-type's word,
+ *  placeholder or typed words, and not `slotignored` (the app-type's word,
  *  never a fact about the repo). */
 function isFact(value: unknown): boolean {
   if (typeof value === 'number' || typeof value === 'boolean') {return true;}
   return typeof value === 'string' && value.trim() !== '' && !isPlaceholder(value) && !isSlotIgnored(value);
 }
 
-/** True when `value` may replace a typed none at `path`: a fact, in a tech slot. */
+/** True when `value` may replace typed words at `path`: a fact, in a tech slot. */
 function factFillsTypedNone(path: string, value: unknown): boolean {
   return isTechSlot(path) && isFact(value);
 }
@@ -212,8 +302,8 @@ function fillAt(target: Record<string, unknown>, source: Record<string, unknown>
     const existing = result[key];
     const path = prefix ? `${prefix}.${key}` : key;
     if (path === '_meta' && existing !== undefined) {continue;}
-    if (isExplicitNone(existing)) {
-      // A typed none is an empty slot: a fact fills a tech slot; otherwise the words stay.
+    if (isTypedWords(existing)) {
+      // Typed words are an empty slot: a fact fills a tech slot; otherwise the words stay.
       if (factFillsTypedNone(path, value)) {result[key] = value;}
       continue;
     }

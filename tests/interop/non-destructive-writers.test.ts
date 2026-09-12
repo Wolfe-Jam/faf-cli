@@ -18,8 +18,8 @@
  * the exact bytes the writer wraps (the renderer is deterministic), so a bug in
  * the block finder cannot hide a bug in the writer.
  */
-import { describe, test, expect } from 'bun:test';
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync } from 'fs';
+import { afterAll, describe, test, expect } from 'bun:test';
+import { mkdirSync, writeFileSync, readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { tmpdir } from 'os';
 import { FAF_START, FAF_END } from '../../src/interop/inject.js';
@@ -30,6 +30,10 @@ import { writeCursorrules, renderCursorrules } from '../../src/interop/cursorrul
 import { writeCopilotInstructions, renderCopilotInstructions } from '../../src/interop/copilot-instructions.js';
 import { writeLlmsTxt, renderLlmsTxt } from '../../src/interop/llms.js';
 import { writeMemoryMd } from '../../src/interop/memory.js';
+import { tempDirs } from '../helpers/temp-dirs.js';
+
+const tempFolders = tempDirs();
+afterAll(() => tempFolders.removeAll());
 
 const DATA: any = {
   faf_version: '3.0',
@@ -140,7 +144,7 @@ describe('BRAKE: non-destructive writers — every user line survives, one block
     test(`${w.name} (${w.file})`, () => {
       const wrapped = `${w.start}\n${w.body.trim()}\n${w.end}`;
       for (const s of shapes(w.start, w.end)) {
-        const dir = mkdtempSync(join(tmpdir(), 'faf-ndw-'));
+        const dir = tempFolders.mkdtemp(join(tmpdir(), 'faf-ndw-'));
         const path = join(dir, w.file);
         mkdirSync(dirname(path), { recursive: true });
         writeFileSync(path, s.before);

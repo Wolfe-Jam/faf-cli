@@ -199,10 +199,11 @@ describe('🏎️ ENGINE TIER - Svelte Smart Defaults', () => {
 
   // --- Build ---
 
-  test('ENGINE-S007: Svelte always defaults build to Vite', () => {
+  test('ENGINE-S007: plain Svelte builds with Vite only when the repo says so (no guess)', () => {
     writePkg({ svelte: '^5.0.0' });
-    const data = detectStack(testDir);
-    expect(data.stack?.build).toBe('Vite');
+    expect(detectStack(testDir).stack?.build).toBe(''); // Rollup, webpack and Vite all build Svelte
+    writePkg({ svelte: '^5.0.0' }, { vite: '^5.0.0' });
+    expect(detectStack(testDir).stack?.build).toBe('Vite');
   });
 
   test('ENGINE-S008: Svelte build is Vite even without vite in deps', () => {
@@ -451,10 +452,10 @@ export default { kit: { adapter: adapter() } };`);
     expect(detectProjectType(testDir)).toBe('cli');
   });
 
-  test('AERO-S015: Svelte-only (no SvelteKit) still gets Vite and Runes', () => {
+  test('AERO-S015: Svelte 5 only (no SvelteKit) gets Runes, and no build tool the repo does not name', () => {
     writePkg({ svelte: '^5.0.0' });
     const data = detectStack(testDir);
-    expect(data.stack?.build).toBe('Vite');
+    expect(data.stack?.build).toBe(''); // no vite in package.json: no guess
     expect(data.stack?.state_management).toBe('Runes');
     expect(data.stack?.api_type).toBe(''); // No SvelteKit = no server routes
     expect(data.stack?.backend).toBe(''); // No SvelteKit = no backend default

@@ -10,13 +10,17 @@
  * take the options-object form consumers call it with, and a bare-string fact
  * passed in from code had no text.
  */
-import { describe, test, expect } from 'bun:test';
-import { mkdtempSync, readFileSync, realpathSync, statSync, writeFileSync } from 'fs';
+import { afterAll, describe, test, expect } from 'bun:test';
+import { readFileSync, realpathSync, statSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { spawnSync } from 'child_process';
 import { parse } from 'yaml';
 import { Soul } from '../../src/fafm/soul.js';
+import { tempDirs } from '../helpers/temp-dirs.js';
+
+const tempFolders = tempDirs();
+afterAll(() => tempFolders.removeAll());
 
 const CLI = join(import.meta.dir, '../../src/cli.ts');
 
@@ -47,7 +51,7 @@ memory:
 `;
 
 function soulFile(text = HAND): string {
-  const dir = realpathSync(mkdtempSync(join(tmpdir(), 'faf-soul-')));
+  const dir = realpathSync(tempFolders.mkdtemp(join(tmpdir(), 'faf-soul-')));
   const path = join(dir, 'soul.fafm');
   writeFileSync(path, text);
   return path;
@@ -199,7 +203,7 @@ describe('BRAKE: faf memory etch keeps a faf index in step and leaves a hand ind
   });
 
   test('a new soul, and an index faf derived, follow the facts', () => {
-    const dir = realpathSync(mkdtempSync(join(tmpdir(), 'faf-soul-cli-')));
+    const dir = realpathSync(tempFolders.mkdtemp(join(tmpdir(), 'faf-soul-cli-')));
     const path = join(dir, 'soul.fafm');
     etch(path, 'first', 'a');
     etch(path, 'second', 'b');

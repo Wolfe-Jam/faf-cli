@@ -224,8 +224,8 @@ function scanConfigFiles(projectDir: string): FoundFormat[] {
           slots.framework = sp.framework;
         } else if (sp.appType === 'mcp') {
           slots.apiType = 'MCP';
-        } else if (sp.appType === 'app') {
-          slots.framework = sp.framework || 'Swift App';
+        } else if (sp.appType === 'app' && sp.framework) {
+          slots.framework = sp.framework;
         }
         const frameworks = sp.framework ? [sp.framework, 'Swift'] : ['Swift'];
         found.push({ slots, priority: 36, frameworks, fileName: f });
@@ -318,8 +318,8 @@ function scanConfigFiles(projectDir: string): FoundFormat[] {
           slots.framework = sp.framework;
         } else if (sp.appType === 'mcp') {
           slots.apiType = 'MCP';
-        } else if (sp.appType === 'app') {
-          slots.framework = sp.framework || 'SwiftUI/App';
+        } else if (sp.appType === 'app' && sp.framework) {
+          slots.framework = sp.framework;
         }
         const frameworks = sp.framework ? [sp.framework, 'Swift'] : ['Swift'];
         found.push({

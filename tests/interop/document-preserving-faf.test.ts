@@ -8,14 +8,18 @@
  * existing file is edited through its YAML Document (updateFafFile): only the
  * values that change are rewritten, and a no-op writes nothing.
  */
-import { describe, test, expect } from 'bun:test';
-import { mkdtempSync, readFileSync, realpathSync, statSync, writeFileSync } from 'fs';
+import { afterAll, describe, test, expect } from 'bun:test';
+import { readFileSync, realpathSync, statSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { spawnSync } from 'child_process';
 import * as api from '../../src/index.js';
 import { readFaf, serializeFaf, writeFaf } from '../../src/interop/faf.js';
 import { updateExistingFaf } from '../../src/detect/assemble.js';
+import { tempDirs } from '../helpers/temp-dirs.js';
+
+const tempFolders = tempDirs();
+afterAll(() => tempFolders.removeAll());
 
 const LONG = `"${'a value well over eighty characters, '.repeat(3)}and the end"`;
 const HAND = `# project.faf — hand-annotated. Keep my notes.
@@ -45,7 +49,7 @@ _meta:
 `;
 
 function project(text = HAND): { dir: string; path: string } {
-  const dir = realpathSync(mkdtempSync(join(tmpdir(), 'faf-doc-')));
+  const dir = realpathSync(tempFolders.mkdtemp(join(tmpdir(), 'faf-doc-')));
   const path = join(dir, 'project.faf');
   writeFileSync(path, text);
   return { dir, path };

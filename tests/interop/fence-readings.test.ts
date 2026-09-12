@@ -25,8 +25,8 @@
  * When faf prefixes a file whose older block sits in a fence, <pre> or
  * comment, `faf sync` / `faf export` say so in one line.
  */
-import { describe, test, expect } from 'bun:test';
-import { mkdirSync, mkdtempSync, readFileSync, realpathSync, writeFileSync } from 'fs';
+import { afterAll, describe, test, expect } from 'bun:test';
+import { mkdirSync, readFileSync, realpathSync, writeFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { tmpdir } from 'os';
 import { spawnSync } from 'child_process';
@@ -49,6 +49,10 @@ import { writeCopilotInstructions } from '../../src/interop/copilot-instructions
 import { writeMemoryMd } from '../../src/interop/memory.js';
 import { writeLlmsTxt } from '../../src/interop/llms.js';
 import { writeClaudeMemory } from '../../src/interop/claude-memory.js';
+import { tempDirs } from '../helpers/temp-dirs.js';
+
+const tempFolders = tempDirs();
+afterAll(() => tempFolders.removeAll());
 
 const CLI = join(import.meta.dir, '../../src/cli.ts');
 const F = '```';
@@ -58,7 +62,7 @@ const DATA: any = {
 };
 
 function dir(tag = 'faf-readings-'): string {
-  return realpathSync(mkdtempSync(join(tmpdir(), tag)));
+  return realpathSync(tempFolders.mkdtemp(join(tmpdir(), tag)));
 }
 
 interface Writer {

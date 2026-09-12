@@ -823,10 +823,13 @@ export function mergeData(doc: Document, map: YAMLMap, before: unknown, data: Re
 }
 
 /** An alias faf left as written: where it is (`stack`, `key_files.2`) and
- *  what it says (`*base`). */
+ *  what it says (`*base`). With `kind: 'anchor'` the path holds an anchor an
+ *  alias reads (`alias` then says `&name`): `faf auto` would have filled it,
+ *  which would change every alias that reads it, so it is left as written. */
 export interface KeptAlias {
   path: string;
   alias: string;
+  kind?: 'alias' | 'anchor';
 }
 
 /** Every alias in a mapping or list, with its path — not looking through aliases. */
@@ -878,7 +881,7 @@ export function keptAliases(doc: Document, data: unknown, before: unknown): Kept
  *  place — or null when nothing is there. A list item is put back only over a
  *  node the change made (one with no place in the file); an item of the file
  *  that moved there is left. */
-function slotAt(doc: Document, path: readonly (string | number)[]): { node: unknown; put: (n: Alias) => boolean } | null {
+function slotAt(doc: Document, path: readonly (string | number)[]): { node: unknown; put: (n: Node) => boolean } | null {
   let parent: unknown = doc.contents;
   for (let i = 0; i < path.length - 1 && parent !== undefined; i++) {parent = childAt(parent, path[i]);}
   const step = path[path.length - 1];
@@ -916,6 +919,48 @@ export function restoreAliases(before: Document, after: Document): KeptAlias[] {
     if (!slot || (isAlias(slot.node) && slot.node.source === node.source)) {continue;}
     if (!slot.put(node.clone() as Alias)) {continue;}
     kept.push({ path: path.join('.'), alias: `*${node.source}` });
+  }
+  return kept;
+}
+
+/** Every node with an anchor in `names`, with its path — not looking through aliases. */
+function anchoredIn(node: unknown, path: readonly (string | number)[], names: ReadonlySet<string>, out: Array<{ path: (string | number)[]; node: Node }>): void {
+  if (!isNode(node) || isAlias(node)) {return;}
+  const anchor = (node as Trivia).anchor;
+  if (anchor && names.has(anchor)) {out.push({ path: [...path], node });}
+  if (isMap(node)) {
+    for (const pair of node.items) {
+      const key = keyText(pair);
+      if (key !== undefined) {anchoredIn(pair.value, [...path, key], names, out);}
+    }
+  } else if (isSeq(node)) {
+    node.items.forEach((item, i) => anchoredIn(item, [...path, i], names, out));
+  }
+}
+
+/**
+ * Put back every node of `before` that carries an anchor an alias reads
+ * (`frontend: &x None` while `ui_library: *x`) and that `after` (the same
+ * Document, changed) holds something else in place of: a fill there would
+ * change the value of every alias that reads it, so faf leaves the node as
+ * written and its change is not written. Returns those paths (`kind:
+ * 'anchor'`, `alias` saying `&name`).
+ */
+export function restoreAnchors(before: Document, after: Document): KeptAlias[] {
+  const aliases: Array<{ path: (string | number)[]; node: Alias }> = [];
+  aliasesIn(before.contents, [], aliases);
+  const names = new Set(aliases.map(a => a.node.source));
+  if (names.size === 0) {return [];}
+  const found: Array<{ path: (string | number)[]; node: Node }> = [];
+  anchoredIn(before.contents, [], names, found);
+  const kept: KeptAlias[] = [];
+  for (const { path, node } of found) {
+    const slot = slotAt(after, path);
+    if (!slot) {continue;}
+    const anchor = (node as Trivia).anchor as string;
+    const same = isNode(slot.node) && (slot.node as Trivia).anchor === anchor && sameJs(node.toJS(before), (slot.node as Node).toJS(after));
+    if (same || !slot.put(node.clone() as Node)) {continue;}
+    kept.push({ path: path.join('.'), alias: `&${anchor}`, kind: 'anchor' });
   }
   return kept;
 }

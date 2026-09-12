@@ -1,47 +1,46 @@
-# Bi-Sync & Tri-Sync
+# Sync & Tri-Sync
 
-Your `project.faf` stays synchronized with everything in milliseconds.
+Your `project.faf` is the one source. `faf sync` writes it out — in one direction.
 
 ```
-bi-sync:   project.faf  ←── 8ms ──→  CLAUDE.md            (free)
-tri-sync:  project.faf  ←── 8ms ──→  CLAUDE.md ←→ MEMORY.md  (free)
+sync:      project.faf  →  CLAUDE.md                     (free)
+tri-sync:  project.faf  →  CLAUDE.md  +  MEMORY.md       (free)
 ```
 
-## bi-sync — free forever
+## sync — free forever
 
 ```bash
-faf bi-sync              # Sync once (CLAUDE.md)
-faf bi-sync --agents     # Also generate AGENTS.md
-faf bi-sync --cursor     # Also generate .cursorrules
-faf bi-sync --all        # All formats + RAM
-faf bi-sync --watch      # Continuous sync
+faf sync                 # .faf → CLAUDE.md, once
+faf sync --watch         # The same, on every change
+faf export --agents      # .faf → AGENTS.md (also --cursor, --gemini, --copilot, --all)
 ```
 
-**Default direction is one-way:** `.faf → CLAUDE.md`. The `.faf` is the canonical Foundational Context Layer (FCL); CLAUDE.md is a downstream prose render. MD files never write back automatically.
+**One direction:** `.faf → CLAUDE.md`. The `.faf` is the canonical Foundational Context Layer (FCL); CLAUDE.md is a downstream prose render. faf writes only its own block in CLAUDE.md — your text around it stays as you wrote it — and CLAUDE.md never writes back on its own.
 
-**Reverse direction (`faf sync --pull`, MD → .faf) is Trophy-gated** (v6.6.0+). Backfilling from CLAUDE.md into a sub-Trophy `.faf` would overwrite canonical slots with prose that wasn't derived from `.faf` in the first place. The gate refuses the operation below 100%:
+**The way back (`faf sync --direction pull`, CLAUDE.md → .faf) is Trophy-gated** (v6.6.0+). Backfilling from CLAUDE.md into a sub-Trophy `.faf` would overwrite canonical slots with prose that wasn't derived from `.faf` in the first place. The gate refuses the operation below 100%:
 
 ```bash
-$ faf sync --pull
+$ faf sync --direction pull
 × sync --pull blocked: requires ✪ Trophy (currently 81%)
   MD → .faf backfill only runs at 100%. Reach Trophy with 'faf go', then retry.
 ```
 
-Reach Trophy (`faf go`) first; then `--pull` unlocks for legacy bootstrap.
+Reach Trophy (`faf go`) first; then `--direction pull` backfills name, goal and language into `.faf`.
 
 ## tri-sync — free forever (ROM meets RAM)
 
 ```bash
-faf tri-sync             # .faf ↔ CLAUDE.md ↔ MEMORY.md
-faf ram                  # Sync project context to RAM
-faf ram status           # Check RAM path and line count
+faf pro activate         # Shows how to turn tri-sync on: export FAF_PRO=1
+FAF_PRO=1 faf sync       # .faf → CLAUDE.md, and .faf → Claude Code's MEMORY.md
 ```
 
-| Sync | Target | Status |
-|------|--------|--------|
-| bi-sync | `.faf` ↔ CLAUDE.md | Free forever |
-| bi-sync | `.faf` ↔ AGENTS.md, .cursorrules, GEMINI.md | Free forever |
-| **tri-sync** | `.faf` ↔ CLAUDE.md ↔ **MEMORY.md** | **Free forever** |
+tri-sync writes faf's block into the MEMORY.md Claude Code loads for the project (`~/.claude/projects/<id>/memory/MEMORY.md`) and keeps every line Claude wrote there. One direction: `.faf → MEMORY.md`.
+
+| Sync | Direction | Status |
+|------|-----------|--------|
+| sync | `.faf` → CLAUDE.md | Free forever |
+| export | `.faf` → AGENTS.md, .cursorrules, GEMINI.md, Copilot | Free forever |
+| **tri-sync** | `.faf` → CLAUDE.md + **MEMORY.md** | **Free forever** |
 
 No trial, no license, no catch. `.faf` relies on tri-sync now, so it has to be free.
 Pro features (the Rust `.fafb` compiler suite) live in a separate package — **[faf.one/pro](https://faf.one/pro)**
@@ -50,14 +49,14 @@ Pro features (the Rust `.fafb` compiler suite) live in a separate package — **
 
 ## Human Context (The 6 Ws)
 
-Boost your score by 25-35% with human context — the information only YOU know.
+Raise your score with human context — the information only YOU know.
 
 ```bash
-# Auto-extract from README
-faf readme --apply
+# Interview: faf asks for each empty W
+faf go
 
 # Manual entry
-faf human-set who "Frontend team at Acme Corp"
-faf human-set what "Customer dashboard with real-time analytics"
-faf human-set why "10x faster than previous solution"
+faf edit human_context.who "Frontend team at Acme Corp"
+faf edit human_context.what "Customer dashboard with real-time analytics"
+faf edit human_context.why "10x faster than previous solution"
 ```

@@ -17,18 +17,22 @@
  *    so (`onAliasKept`, `keptAliases`), `faf auto` prints one line, and
  *    `faf edit` of an alias key refuses in one line.
  */
-import { describe, test, expect } from 'bun:test';
-import { mkdtempSync, readFileSync, realpathSync, writeFileSync } from 'fs';
+import { afterAll, describe, test, expect } from 'bun:test';
+import { readFileSync, realpathSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { spawnSync } from 'child_process';
 import { editYamlDetailed } from '../../src/core/yaml-edit.js';
 import { readFaf, updateFafFile, writeFaf, type KeptAlias } from '../../src/interop/faf.js';
+import { tempDirs } from '../helpers/temp-dirs.js';
+
+const tempFolders = tempDirs();
+afterAll(() => tempFolders.removeAll());
 
 const CLI = join(import.meta.dir, '../../src/cli.ts');
 
 function dir(tag = 'faf-anchor-'): string {
-  return realpathSync(mkdtempSync(join(tmpdir(), tag)));
+  return realpathSync(tempFolders.mkdtemp(join(tmpdir(), tag)));
 }
 
 function faf(cwd: string, ...args: string[]): { status: number | null; out: string } {

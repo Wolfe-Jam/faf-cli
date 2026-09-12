@@ -13,9 +13,9 @@
  *   T11  a Soul (or a .faf-dna birth) made with no file wrote over a file
  *        that appeared after the caller found none.
  */
-import { describe, test, expect, spyOn } from 'bun:test';
+import { afterAll, describe, test, expect, spyOn } from 'bun:test';
 import * as fs from 'fs';
-import { chmodSync, existsSync, mkdtempSync, readFileSync, realpathSync, statSync, writeFileSync } from 'fs';
+import { chmodSync, existsSync, readFileSync, realpathSync, statSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { spawnSync } from 'child_process';
@@ -26,10 +26,14 @@ import { writeGrokConfig } from '../../src/interop/grok.js';
 import { FafDNAManager } from '../../src/core/faf-dna.js';
 import { Soul } from '../../src/fafm/soul.js';
 import { scoreFafYaml } from '../../src/core/scorer.js';
+import { tempDirs } from '../helpers/temp-dirs.js';
+
+const tempFolders = tempDirs();
+afterAll(() => tempFolders.removeAll());
 
 const posix = process.platform !== 'win32';
 const CLI = join(import.meta.dir, '../../src/cli.ts');
-const tmp = (tag = 'r3'): string => realpathSync(mkdtempSync(join(tmpdir(), `faf-${tag}-`)));
+const tmp = (tag = 'r3'): string => realpathSync(tempFolders.mkdtemp(join(tmpdir(), `faf-${tag}-`)));
 const mode = (p: string): string => (statSync(p).mode & 0o777).toString(8);
 const run = (cwd: string, args: string[]) =>
   spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf-8', env: { ...process.env, HOME: tmp('home'), NO_COLOR: '1' } });

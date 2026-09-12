@@ -13,7 +13,7 @@ This doc covers what to read first, how to get unstuck, and where to ask when yo
 | [README.md](README.md) | Install, commands, scoring, sync, the current edition |
 | [CHANGELOG.md](CHANGELOG.md) | What shipped in each version, in order |
 | [docs/SCORING.md](docs/SCORING.md) | Tier system and the 🏆 Trophy 100% recommendation |
-| [docs/SYNC.md](docs/SYNC.md) | bi-sync (free) and tri-sync (Pro) |
+| [docs/SYNC.md](docs/SYNC.md) | sync and tri-sync (one way: .faf → CLAUDE.md, .faf → MEMORY.md; both free) |
 | [docs/SLOT-IGNORE.md](docs/SLOT-IGNORE.md) | How to mark slots as not-applicable |
 | [docs/GUIDE.md](docs/GUIDE.md) | The 6Ws deep dive |
 | [faf.one](https://faf.one) | Official site |
@@ -97,16 +97,16 @@ faf sync --watch               # continuous push on file change
 
 Default sync is one-way (`.faf → CLAUDE.md`). The `.faf` is the canonical Foundational Context Layer; MD files never write back automatically.
 
-**MD → .faf direction (`faf sync --pull`) blocked**
+**MD → .faf direction (`faf sync --direction pull`) blocked**
 
-v6.6.0+ requires 🏆 Trophy before allowing MD-to-`.faf` backfill. Below 100%, the gate refuses the operation:
+v6.6.0+ requires ✪ Trophy before allowing MD-to-`.faf` backfill. Below 100%, the gate refuses the operation:
 
 ```
-× sync --pull blocked: requires 🏆 Trophy (currently 81%)
+× sync --pull blocked: requires ✪ Trophy (currently 81%)
   MD → .faf backfill only runs at 100%. Reach Trophy with 'faf go', then retry.
 ```
 
-Reach Trophy first (`faf go`), then `--pull` unlocks. See [docs/SYNC.md](docs/SYNC.md).
+Reach Trophy first (`faf go`), then `--direction pull` unlocks. See [docs/SYNC.md](docs/SYNC.md).
 
 ### Terminal output
 

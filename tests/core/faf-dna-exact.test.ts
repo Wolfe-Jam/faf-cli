@@ -16,12 +16,16 @@
  * growth, and readOnlyReason() says why in one line — the same path a file in
  * another tool's shape takes.
  */
-import { describe, test, expect } from 'bun:test';
-import { mkdtempSync, readFileSync, realpathSync, statSync, writeFileSync } from 'fs';
+import { afterAll, describe, test, expect } from 'bun:test';
+import { readFileSync, realpathSync, statSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { spawnSync } from 'child_process';
 import { FafDNAManager } from '../../src/core/faf-dna.js';
+import { tempDirs } from '../helpers/temp-dirs.js';
+
+const tempFolders = tempDirs();
+afterAll(() => tempFolders.removeAll());
 
 const CLI = join(import.meta.dir, '../../src/cli.ts');
 const NOW = '2026-01-01T00:00:00.000Z';
@@ -46,7 +50,7 @@ const own = (extra: Record<string, unknown> = {}, peakExtra: Record<string, unkn
 const exact = (v: unknown): string => `${JSON.stringify(v, null, 2)}\n`;
 
 function project(dna: string): { dir: string; file: string } {
-  const dir = realpathSync(mkdtempSync(join(tmpdir(), 'faf-dna-exact-')));
+  const dir = realpathSync(tempFolders.mkdtemp(join(tmpdir(), 'faf-dna-exact-')));
   const file = join(dir, '.faf-dna');
   writeFileSync(file, dna);
   return { dir, file };
@@ -124,7 +128,7 @@ describe('BRAKE: the CLI says why in one line and leaves the file', () => {
     spawnSync(process.execPath, [CLI, ...args], {
       cwd,
       encoding: 'utf-8',
-      env: { ...process.env, HOME: realpathSync(mkdtempSync(join(tmpdir(), 'faf-dna-exact-home-'))), NO_COLOR: '1' },
+      env: { ...process.env, HOME: realpathSync(tempFolders.mkdtemp(join(tmpdir(), 'faf-dna-exact-home-'))), NO_COLOR: '1' },
     });
 
   test('faf auto: exit 0, one warning line, the .faf-dna byte for byte', () => {

@@ -25,9 +25,20 @@
  *   - not an HTML block of types 6 or 7 (<div>, <details>, any lone tag): a
  *     comment inside raw HTML is still a comment. No fence or other block
  *     opens inside one until a blank line ends it.
+ *
+ * Speed: each line costs time in proportion to its length, however deep the
+ * nesting — the reader never re-reads the rest of a line per nesting level.
+ * Past MAX_OPEN_CONTAINERS open block quotes, lists and list items the reader
+ * stops reading (`tooDeep`): faf cannot say for sure where such a file's
+ * regions are, so the file is the user's — faf's block goes on top and every
+ * byte stays.
  */
 
 const CODE_INDENT = 4;
+
+/** More open block quotes, lists and list items than this, and a reader stops
+ *  reading (see {@link BlockReader.tooDeep}). */
+export const MAX_OPEN_CONTAINERS = 100;
 
 const TAGNAME = '[A-Za-z][A-Za-z0-9-]*';
 const ATTRIBUTENAME = '[a-zA-Z_:][a-zA-Z0-9:._-]*';
@@ -55,15 +66,43 @@ const HTML_CLOSE: readonly RegExp[] = [/<\/(?:script|pre|style|textarea)>/i, /--
 /** The line that meets each end condition of types 1-5 (type 1 names its tag). */
 const HTML_CLOSER: readonly string[] = ['', '-->', '?>', '>', ']]>'];
 
-const THEMATIC_BREAK = /^(?:\*[ \t]*){3,}$|^(?:_[ \t]*){3,}$|^(?:-[ \t]*){3,}$/;
-const MAYBE_SPECIAL = /^[#`~*+_=<>0-9-]/;
-const BULLET = /^[*+-]/;
-const ORDERED = /^(\d{1,9})([.)])/;
-const ATX_HEADING = /^#{1,6}(?:[ \t]+|$)/;
-const FENCE_OPEN = /^`{3,}(?!.*`)|^~{3,}/;
-const FENCE_CLOSE = /^(?:`{3,}|~{3,})(?=[ \t]*$)/;
-const SETEXT_LINE = /^(?:=+|-+)[ \t]*$/;
+// Line rules, matched where the reader stands (sticky: no copy of the rest of the line).
+const MAYBE_SPECIAL = /[#`~*+_=<>0-9-]/;
+const ORDERED = /(\d{1,9})([.)])/y;
+const ATX_HEADING = /#{1,6}(?:[ \t]+|$)/y;
+const FENCE_OPEN = /`{3,}(?!.*`)|~{3,}/y;
+const FENCE_CLOSE = /(?:`{3,}|~{3,})(?=[ \t]*$)/y;
+const SETEXT_LINE = /(?:=+|-+)[ \t]*$/y;
 const NON_SPACE = /[^ \t\f\v\r\n]/;
+
+/** `re` (sticky) matched at `pos` of `text`, or null. */
+function matchAt(re: RegExp, text: string, pos: number): RegExpExecArray | null {
+  re.lastIndex = pos;
+  return re.exec(text);
+}
+
+const isContainer = (kind: Kind): boolean => kind === 'quote' || kind === 'list' || kind === 'item';
+
+/** For each position of `ln`: 1 when the rest of the line from there is a
+ *  thematic break — three or more of one of `*`, `-`, `_`, starting there,
+ *  with only spaces and tabs between and after them. One pass from the end,
+ *  so the check costs the same however often a line asks it. */
+function thematicBreaks(ln: string): Uint8Array {
+  const ok = new Uint8Array(ln.length);
+  const marks = '*-_';
+  const count = [0, 0, 0];
+  const pure = [true, true, true]; // only this mark, spaces and tabs after i
+  for (let i = ln.length - 1; i >= 0; i--) {
+    const c = ln[i];
+    const space = c === ' ' || c === '\t';
+    for (let k = 0; k < 3; k++) {
+      if (c === marks[k]) {count[k]++;} else if (!space) {pure[k] = false;}
+    }
+    const k = marks.indexOf(c);
+    ok[i] = k >= 0 && pure[k] && count[k] >= 3 ? 1 : 0;
+  }
+  return ok;
+}
 
 interface ListData {
   bullet: string | null;
@@ -124,6 +163,11 @@ export class BlockReader {
   private matched = 0;
   private htmlStarted = false;
   private hiddenIn: HiddenIn | null = null;
+  /** Where the last whitespace scan of this line started (-1: none yet). */
+  private scannedFrom = -1;
+  /** Per line, lazily: 1 where the rest of the line is a thematic break. */
+  private breaks: Uint8Array | null = null;
+  private deep = false;
   private readonly starts: ReadonlyArray<(container: Block) => Step>;
 
   /** `containers: false` — the plain column-0 reading: no block quotes, no list items. */
@@ -144,20 +188,33 @@ export class BlockReader {
   clone(): BlockReader {
     const copy = new BlockReader(this.containers);
     copy.stack = this.stack.map(copyBlock);
+    copy.deep = this.deep;
     return copy;
+  }
+
+  /** True once more than MAX_OPEN_CONTAINERS block quotes, lists and list
+   *  items were open at once. The reader then stops reading: what it says
+   *  about that line and every later one means nothing, and a caller treats
+   *  the file as one it cannot read for sure. */
+  get tooDeep(): boolean {
+    return this.deep;
   }
 
   /** Read one line (no terminator). Returns what hides it, or null when it is shown as text. */
   line(ln: string): HiddenIn | null {
+    if (this.deep) {return null;}
     this.ln = ln;
     this.offset = 0;
     this.column = 0;
     this.blank = false;
     this.htmlStarted = false;
     this.hiddenIn = null;
+    this.scannedFrom = -1;
+    this.breaks = null;
     const container = this.continueContainers();
     if (container < 0) {return this.hiddenIn;} // a closing fence: the line is its last
     const leaf = this.openBlocks(container);
+    if (this.deep) {return null;}
     // A lazy paragraph line (a list item's or a quote's paragraph, run on) is text.
     if (!this.allClosed && !this.blank && this.tip.kind === 'paragraph') {return null;}
     this.closeUnmatched();
@@ -200,9 +257,9 @@ export class BlockReader {
   private openBlocks(index: number): Block {
     let container = this.stack[index];
     let leaf = container.kind !== 'paragraph' && acceptsLines(container.kind);
-    while (!leaf) {
+    while (!leaf && !this.deep) {
       this.findNextNonspace();
-      if (!this.indented && !MAYBE_SPECIAL.test(this.ln.slice(this.nextNonspace))) {break;}
+      if (!this.indented && !MAYBE_SPECIAL.test(this.ln.charAt(this.nextNonspace))) {break;}
       let res: Step = 0;
       for (const start of this.starts) {
         res = start(container);
@@ -258,7 +315,7 @@ export class BlockReader {
   }
 
   private continueQuote(): Step {
-    if (this.indented || this.ln[this.nextNonspace] !== '>') {return 1;}
+    if (this.indented || this.ch !== '>') {return 1;}
     this.advanceNextNonspace();
     this.advanceOffset(1, false);
     if (isSpaceOrTab(this.ln[this.offset])) {this.advanceOffset(1, true);}
@@ -279,8 +336,7 @@ export class BlockReader {
   }
 
   private continueFence(fence: Fence, index: number): Step {
-    const rest = this.ln.slice(this.nextNonspace);
-    const m = this.indent <= 3 && rest[0] === fence.char ? FENCE_CLOSE.exec(rest) : null;
+    const m = this.indent <= 3 && this.ch === fence.char ? matchAt(FENCE_CLOSE, this.ln, this.nextNonspace) : null;
     if (m && m[0].length >= fence.len) {
       this.stack.length = index;
       this.hiddenIn = 'code fence';
@@ -301,12 +357,20 @@ export class BlockReader {
     return 0;
   }
 
-  private get rest(): string {
-    return this.ln.slice(this.nextNonspace);
+  /** The character at the next non-space position ('' at the line's end). */
+  private get ch(): string {
+    return this.ln.charAt(this.nextNonspace);
+  }
+
+  /** True when the rest of the line, from the next non-space position, is a
+   *  thematic break (see {@link thematicBreaks}; worked out once per line). */
+  private breakAhead(): boolean {
+    this.breaks ??= thematicBreaks(this.ln);
+    return this.breaks[this.nextNonspace] === 1;
   }
 
   private startQuote(): Step {
-    if (!this.containers || this.indented || this.rest[0] !== '>') {return 0;}
+    if (!this.containers || this.indented || this.ch !== '>') {return 0;}
     this.advanceNextNonspace();
     this.advanceOffset(1, false);
     if (isSpaceOrTab(this.ln[this.offset])) {this.advanceOffset(1, true);}
@@ -316,7 +380,7 @@ export class BlockReader {
   }
 
   private startHeading(): Step {
-    if (this.indented || !ATX_HEADING.test(this.rest)) {return 0;}
+    if (this.indented || this.ch !== '#' || !matchAt(ATX_HEADING, this.ln, this.nextNonspace)) {return 0;}
     this.closeUnmatched();
     this.addChild({ kind: 'heading' });
     this.offset = this.ln.length;
@@ -324,7 +388,8 @@ export class BlockReader {
   }
 
   private startFence(): Step {
-    const m = this.indented ? null : FENCE_OPEN.exec(this.rest);
+    const c = this.ch;
+    const m = this.indented || (c !== '`' && c !== '~') ? null : matchAt(FENCE_OPEN, this.ln, this.nextNonspace);
     if (!m) {return 0;}
     this.closeUnmatched();
     this.addChild({ kind: 'code', fence: { char: m[0][0], len: m[0].length, offset: this.indent } });
@@ -334,11 +399,12 @@ export class BlockReader {
   }
 
   private startHtml(container: Block): Step {
-    if (this.indented || this.rest[0] !== '<') {return 0;}
+    if (this.indented || this.ch !== '<') {return 0;}
     const lazy = !this.allClosed && !this.blank && this.tip.kind === 'paragraph';
     const type7 = container.kind !== 'paragraph' && !lazy; // type 7 cannot interrupt a paragraph
+    const rest = this.ln.slice(this.nextNonspace); // once: an HTML start ends the line's block openers
     for (let type = 1; type <= (type7 ? 7 : 6); type++) {
-      const m = HTML_OPEN[type - 1].exec(this.rest);
+      const m = HTML_OPEN[type - 1].exec(rest);
       if (m) {
         this.closeUnmatched();
         this.addChild({ kind: 'html', type, tag: type === 1 ? m[1].toLowerCase() : '' });
@@ -350,7 +416,8 @@ export class BlockReader {
   }
 
   private startSetext(container: Block): Step {
-    if (this.indented || container.kind !== 'paragraph' || !SETEXT_LINE.test(this.rest)) {return 0;}
+    const c = this.ch;
+    if (this.indented || container.kind !== 'paragraph' || (c !== '=' && c !== '-') || !matchAt(SETEXT_LINE, this.ln, this.nextNonspace)) {return 0;}
     this.closeUnmatched();
     this.stack[this.stack.length - 1] = { kind: 'heading' }; // the paragraph becomes a heading
     this.offset = this.ln.length;
@@ -358,7 +425,7 @@ export class BlockReader {
   }
 
   private startBreak(): Step {
-    if (this.indented || !THEMATIC_BREAK.test(this.rest)) {return 0;}
+    if (this.indented || !this.breakAhead()) {return 0;}
     this.closeUnmatched();
     this.addChild({ kind: 'break' });
     this.offset = this.ln.length;
@@ -400,21 +467,20 @@ export class BlockReader {
 
   /** A bullet or an ordered marker followed by a space, a tab or the line's end. */
   private markerAt(container: Block): { width: number; kind: Pick<ListData, 'bullet' | 'delimiter'> } | null {
-    const rest = this.rest;
     const inParagraph = container.kind === 'paragraph';
-    const found = this.markerKind(rest, inParagraph);
+    const found = this.markerKind(inParagraph);
     if (!found) {return null;}
-    const after = rest[found.width];
+    const after = this.ln[this.nextNonspace + found.width];
     if (!(after === undefined || isSpaceOrTab(after))) {return null;}
     // A list item that interrupts a paragraph cannot start with a blank line.
-    if (inParagraph && !NON_SPACE.test(rest.slice(found.width))) {return null;}
+    if (inParagraph && !NON_SPACE.test(this.ln.slice(this.nextNonspace + found.width))) {return null;}
     return found;
   }
 
-  private markerKind(rest: string, inParagraph: boolean): { width: number; kind: Pick<ListData, 'bullet' | 'delimiter'> } | null {
-    const bullet = BULLET.exec(rest);
-    if (bullet) {return { width: 1, kind: { bullet: bullet[0], delimiter: null } };}
-    const ordered = ORDERED.exec(rest);
+  private markerKind(inParagraph: boolean): { width: number; kind: Pick<ListData, 'bullet' | 'delimiter'> } | null {
+    const c = this.ch;
+    if (c === '*' || c === '+' || c === '-') {return { width: 1, kind: { bullet: c, delimiter: null } };}
+    const ordered = c >= '0' && c <= '9' ? matchAt(ORDERED, this.ln, this.nextNonspace) : null;
     // An ordered list interrupts a paragraph only when it starts at 1.
     if (!ordered || (inParagraph && Number(ordered[1]) !== 1)) {return null;}
     return { width: ordered[0].length, kind: { bullet: null, delimiter: ordered[2] } };
@@ -441,6 +507,9 @@ export class BlockReader {
     while (!canContain(this.tip.kind, block.kind)) {this.stack.pop();}
     this.tip.hasChild = true;
     this.stack.push(block);
+    // Below the document only containers are open when a container is added
+    // (a leaf is always the tip, and it was closed to make room).
+    if (isContainer(block.kind) && this.stack.length - 1 > MAX_OPEN_CONTAINERS) {this.deep = true;}
   }
 
   private closeUnmatched(): void {
@@ -450,17 +519,28 @@ export class BlockReader {
     }
   }
 
+  /** The next non-space position from where the reader stands, its column,
+   *  and the indent to it. A second call from inside the same run of spaces
+   *  and tabs reuses the first scan (the column a run ends at does not depend
+   *  on where in the run the scan starts), so a line is scanned once however
+   *  many containers it continues. */
   private findNextNonspace(): void {
     const ln = this.ln;
     let i = this.offset;
     let cols = this.column;
-    for (; i < ln.length; i++) {
-      if (ln[i] === ' ') {
-        cols++;
-      } else if (ln[i] === '\t') {
-        cols += 4 - (cols % 4);
-      } else {
-        break;
+    if (this.scannedFrom !== -1 && this.offset >= this.scannedFrom && this.offset <= this.nextNonspace) {
+      i = this.nextNonspace;
+      cols = this.nextNonspaceColumn;
+    } else {
+      this.scannedFrom = this.offset;
+      for (; i < ln.length; i++) {
+        if (ln[i] === ' ') {
+          cols++;
+        } else if (ln[i] === '\t') {
+          cols += 4 - (cols % 4);
+        } else {
+          break;
+        }
       }
     }
     this.blank = i >= ln.length;

@@ -19,8 +19,8 @@
  * every byte kept, never reclaimed. claude-faf-mcp's earlier MEMORY.md section
  * is found with the same scanner.
  */
-import { describe, test, expect } from 'bun:test';
-import { mkdirSync, mkdtempSync, readFileSync, realpathSync, writeFileSync } from 'fs';
+import { afterAll, describe, test, expect } from 'bun:test';
+import { mkdirSync, readFileSync, realpathSync, writeFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { tmpdir } from 'os';
 import { FAF_END, FAF_START, findFafBlock, injectFafBlock } from '../../src/interop/inject.js';
@@ -32,6 +32,10 @@ import { writeCopilotInstructions } from '../../src/interop/copilot-instructions
 import { writeMemoryMd } from '../../src/interop/memory.js';
 import { writeLlmsTxt } from '../../src/interop/llms.js';
 import { writeClaudeMemory } from '../../src/interop/claude-memory.js';
+import { tempDirs } from '../helpers/temp-dirs.js';
+
+const tempFolders = tempDirs();
+afterAll(() => tempFolders.removeAll());
 
 const DATA: any = {
   project: { name: 'demo', goal: 'Demo goal', main_language: 'TypeScript', type: 'cli' },
@@ -71,7 +75,7 @@ const CASES: Array<{ id: string; name: string; text: (S: string, E: string) => s
 ];
 
 function project(): string {
-  return realpathSync(mkdtempSync(join(tmpdir(), 'faf-fences-')));
+  return realpathSync(tempFolders.mkdtemp(join(tmpdir(), 'faf-fences-')));
 }
 
 describe('BRAKE: every block writer prefixes a file whose only markers are examples (C14-C18, C20, C21, C26)', () => {

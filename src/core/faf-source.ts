@@ -32,3 +32,19 @@ export function carryFafSource<T extends object>(from: unknown, to: T): T {
   if (source) {sources.set(to, source);}
   return to;
 }
+
+const fills = new WeakSet<object>();
+
+/** Mark `data` as a fill of the file it was read from — what `faf auto`
+ *  (updateExistingFaf) makes: detected values in the file's empty slots.
+ *  writeFaf leaves a node with an anchor that an alias reads as written in
+ *  such data, since filling it would change every alias. Returns `data`. */
+export function markAsFill<T extends object>(data: T): T {
+  fills.add(data);
+  return data;
+}
+
+/** True when `data` was marked with {@link markAsFill}. */
+export function isFill(data: unknown): boolean {
+  return typeof data === 'object' && data !== null && fills.has(data);
+}

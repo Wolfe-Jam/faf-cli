@@ -8,12 +8,16 @@
  * when the output exists, as `faf init` does for project.faf, unless --force
  * is given.
  */
-import { describe, test, expect } from 'bun:test';
-import { mkdtempSync, readFileSync, realpathSync, writeFileSync } from 'fs';
+import { afterAll, describe, test, expect } from 'bun:test';
+import { readFileSync, realpathSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { spawnSync } from 'child_process';
 import { parse } from 'yaml';
+import { tempDirs } from '../helpers/temp-dirs.js';
+
+const tempFolders = tempDirs();
+afterAll(() => tempFolders.removeAll());
 
 const CLI = join(import.meta.dir, '../../src/cli.ts');
 const CLAUDE_MEM = join(import.meta.dir, '../fixtures/claude-memory');
@@ -28,7 +32,7 @@ memory:
     - a bare string fact (BARE-FACT)
 `;
 
-const tmp = (): string => realpathSync(mkdtempSync(join(tmpdir(), 'faf-convert-')));
+const tmp = (): string => realpathSync(tempFolders.mkdtemp(join(tmpdir(), 'faf-convert-')));
 const convert = (cwd: string, args: string[]) =>
   spawnSync(process.execPath, [CLI, 'memory', 'convert', CLAUDE_MEM, ...args], {
     cwd,

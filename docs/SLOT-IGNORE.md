@@ -18,20 +18,24 @@ The value is `slotignored`, shown to people as **N/A**. It comes from the app-ty
 
 ## Who writes `slotignored`
 
-faf does, from the app-type. `faf init`, `faf auto` and `faf git` detect the project's app-type (`project.type`) and write `slotignored` into each slot that type leaves out. On an existing project.faf, `faf auto` writes it only into a slot that is empty: never over a value, and never over words you typed.
+faf does, from the app-type. `faf init`, `faf auto` and `faf git` detect the project's app-type (`project.type`) and write `slotignored` into each slot that type leaves out. On an existing project.faf, `faf auto` writes it into a slot the file's app-type leaves out that holds no value — empty, or words like `None` or `unknown` (the app-type's decision, not the words') — and never over a real value. It never writes `slotignored` into a slot the file's app-type uses, even when detection reads the repo as another type.
+
+The `library` type detection falls back to when the repo has no classifying signal (`type: library # found: no classifying signals — fallback`) decides nothing while its line carries that note. Set the type yourself, and it decides.
 
 A `cli` leaves out the frontend and backend slots, a `frontend` leaves out the backend slots, and a `fullstack` uses all 21 base slots. The full list of app-types is `APP_TYPE_CATEGORIES` in [`src/core/slots.ts`](../src/core/slots.ts).
 
-## A typed None / N/A is an empty slot
+## Typed words (None, N/A, unknown) are an empty slot
 
-`None`, `N/A` and `not applicable` (any case) are not slot-ignore. People type them before they learn the word `slotignored`; they still do not take a slot out. A typed none is an **empty** slot: it scores 0 until filled.
+`None`, `N/A`, `not applicable`, `unknown`, `"null"` and the other placeholder words (any case) are not slot-ignore. People type them before they learn the word `slotignored`; they still do not take a slot out. Typed words are an **empty** slot: they score 0 until filled.
 
-- **Tech slots** (every slot except the 6Ws): if it's a fact, fill the slot. When the repo has the fact, `faf auto` fills the slot in place of the typed none. With no fact, your words stay exactly as you typed them, comment included, and faf never rewrites them to `slotignored`.
-- **The 6Ws** (`human_context.*`) are yours: `faf auto` never replaces a typed none there. `faf go` asks, as it does for any empty slot, and shows your words so you can keep them or answer.
-- `faf score` and `faf auto` print one line for each slot the app-type needs that still holds a typed none:
+- **Tech slots the app-type uses** (every slot except the 6Ws): if it's a fact, fill the slot. When the repo has the fact, `faf auto` fills the slot in place of your words. With no fact, your words stay exactly as you typed them, comment included, and faf never rewrites them to `slotignored`.
+- **Tech slots the app-type leaves out:** the app-type's decision is the fact. `faf auto` writes `slotignored` in place of your words (the comment stays), so the slot is left out of the count. A real value there is kept.
+- **The 6Ws** (`human_context.*`) are yours: `faf auto` never replaces typed words there. `faf go` asks, as it does for any empty slot, and shows your words so you can keep them or answer.
+- `faf score` prints a line for each scored slot that holds typed words — one kind for a slot the app-type needs, one for a slot it leaves out. `faf auto` prints the first kind for the slots it could not fill:
 
 ```
 stack.database says 'None' — this app-type needs it, so it counts as empty until filled.
+stack.database says 'None' — this app-type doesn't use it; faf auto marks it slotignored (N/A).
 ```
 
 ## Slot states
@@ -40,7 +44,7 @@ stack.database says 'None' — this app-type needs it, so it counts as empty unt
 |-------|-------|---------|-------|
 | **Filled** | `PostgreSQL` | Has a real value | Counts for the score |
 | **Ignored (N/A)** | `slotignored` | The app-type leaves it out | Not counted |
-| **Empty** | missing, `""`, `None`, `N/A`, `not applicable` | Not filled yet | Counts against the score |
+| **Empty** | missing, `""`, `None`, `N/A`, `not applicable`, `unknown` | Not filled yet | Counts against the score |
 
 `faf score` shows filled slots out of the slots that count (`4/12 slots`); `faf score --verbose` lists each slot, with an ignored one shown as `N/A`.
 

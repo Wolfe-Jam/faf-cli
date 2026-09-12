@@ -15,9 +15,9 @@
  * that appeared is not written over. injectFafBlock, updateFafFile, writeFaf,
  * FafmSoul.save (the loaded text), FafDNAManager and writeClaudeMemory pass it.
  */
-import { describe, test, expect, spyOn } from 'bun:test';
+import { afterAll, describe, test, expect, spyOn } from 'bun:test';
 import * as fs from 'fs';
-import { appendFileSync, existsSync, mkdtempSync, readFileSync, readdirSync, realpathSync, writeFileSync } from 'fs';
+import { appendFileSync, existsSync, readFileSync, readdirSync, realpathSync, writeFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { tmpdir } from 'os';
 import { SafePathError, safeWriteFile } from '../../src/core/safe-write.js';
@@ -28,6 +28,10 @@ import { updateExistingFaf } from '../../src/detect/assemble.js';
 import { FafDNAManager } from '../../src/core/faf-dna.js';
 import { Soul } from '../../src/fafm/soul.js';
 import { setNestedValue } from '../../src/core/dot-path.js';
+import { tempDirs } from '../helpers/temp-dirs.js';
+
+const tempFolders = tempDirs();
+afterAll(() => tempFolders.removeAll());
 
 const DATA: any = { project: { name: 'demo', goal: 'Demo goal', main_language: 'TypeScript' }, stack: { frontend: 'React' } };
 const NOW = '2026-01-01T00:00:00.000Z';
@@ -45,7 +49,7 @@ const DNA = `${JSON.stringify(
   2,
 )}\n`;
 
-const tmp = (): string => realpathSync(mkdtempSync(join(tmpdir(), 'faf-cas-')));
+const tmp = (): string => realpathSync(tempFolders.mkdtemp(join(tmpdir(), 'faf-cas-')));
 const temps = (dir: string): string[] => readdirSync(dir).filter(n => n.endsWith('.faf-tmp'));
 
 function changed(fn: () => unknown): SafePathError {

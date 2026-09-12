@@ -10,12 +10,16 @@
  *   - `eslint src/**\/*.ts` was not quoted, so npm's sh expanded the glob to
  *     depth 2 and src/cli.ts and src/index.ts were never linted.
  */
-import { describe, test, expect } from 'bun:test';
-import { mkdtempSync, readFileSync, realpathSync, writeFileSync } from 'fs';
+import { afterAll, describe, test, expect } from 'bun:test';
+import { readFileSync, realpathSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import * as api from '../../src/index.js';
 import * as inject from '../../src/interop/inject.js';
+import { tempDirs } from '../helpers/temp-dirs.js';
+
+const tempFolders = tempDirs();
+afterAll(() => tempFolders.removeAll());
 
 describe('PIT: the prefix note is a root export', () => {
   test('legacyStampNote and legacyStampNoteAt come from the package root and say what the CLI says', () => {
@@ -25,7 +29,7 @@ describe('PIT: the prefix note is a root export', () => {
     expect(api.legacyStampNote('CLAUDE.md', old)).toBe(
       "CLAUDE.md: faf's block is now on top; the old faf text below it is left as you had it — delete it by hand if you no longer want it.",
     );
-    const dir = realpathSync(mkdtempSync(join(tmpdir(), 'faf-note-export-')));
+    const dir = realpathSync(tempFolders.mkdtemp(join(tmpdir(), 'faf-note-export-')));
     writeFileSync(join(dir, 'AGENTS.md'), '```\n<!-- faf:start -->\nx\n<!-- faf:end -->\n');
     expect(api.legacyStampNoteAt(join(dir, 'AGENTS.md'), 'AGENTS.md')).toBe(
       "AGENTS.md: faf's block is now on top; an older faf block below sits inside a code fence and is left as you had it — delete it by hand if you no longer want it.",

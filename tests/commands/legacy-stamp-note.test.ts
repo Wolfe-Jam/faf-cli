@@ -10,12 +10,16 @@
  * faf keeps. `faf sync` and `faf export` now print one line when it happens;
  * a run that finds faf's block (the next one) prints nothing.
  */
-import { describe, test, expect } from 'bun:test';
-import { mkdirSync, mkdtempSync, readFileSync, realpathSync, writeFileSync } from 'fs';
+import { afterAll, describe, test, expect } from 'bun:test';
+import { mkdirSync, readFileSync, realpathSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { spawnSync } from 'child_process';
 import { FAF_END, FAF_START, legacyStampNote } from '../../src/interop/inject.js';
+import { tempDirs } from '../helpers/temp-dirs.js';
+
+const tempFolders = tempDirs();
+afterAll(() => tempFolders.removeAll());
 
 const CLI = join(import.meta.dir, '../../src/cli.ts');
 const STAMP = '<!-- faf: demo | TypeScript | cli | Demo goal -->\n<!-- faf: claim=project.faf | score=90 | family=FAF -->\n';
@@ -24,8 +28,8 @@ const note = (file: string): string =>
   `${file}: faf's block is now on top; the old faf text below it is left as you had it — delete it by hand if you no longer want it.`;
 
 function repo(): { dir: string; home: string } {
-  const dir = realpathSync(mkdtempSync(join(tmpdir(), 'faf-stamp-')));
-  const home = realpathSync(mkdtempSync(join(tmpdir(), 'faf-stamp-home-')));
+  const dir = realpathSync(tempFolders.mkdtemp(join(tmpdir(), 'faf-stamp-')));
+  const home = realpathSync(tempFolders.mkdtemp(join(tmpdir(), 'faf-stamp-home-')));
   writeFileSync(join(dir, 'project.faf'), 'project:\n  name: demo\n  goal: Demo goal\n  main_language: TypeScript\n  type: cli\n');
   return { dir, home };
 }

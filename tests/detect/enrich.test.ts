@@ -4,14 +4,18 @@
  *   BRAKE  — the safety contract: hand-authored .faf ALWAYS wins (fill-if-absent),
  *            input never mutated, empty/bare repo invents nothing.
  */
-import { describe, test, expect } from 'bun:test';
-import { mkdtempSync, writeFileSync, mkdirSync } from 'fs';
+import { afterAll, describe, test, expect } from 'bun:test';
+import { writeFileSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { enrichFromRepo } from '../../src/detect/enrich.js';
+import { tempDirs } from '../helpers/temp-dirs.js';
+
+const tempFolders = tempDirs();
+afterAll(() => tempFolders.removeAll());
 
 function repo(): string {
-  const d = mkdtempSync(join(tmpdir(), 'faf-enrich-'));
+  const d = tempFolders.mkdtemp(join(tmpdir(), 'faf-enrich-'));
   writeFileSync(
     join(d, 'package.json'),
     JSON.stringify({ name: 'demo', scripts: { build: 'tsc', test: 'vitest', lint: 'eslint .' } }),
@@ -49,7 +53,7 @@ describe('ENGINE: detects facts at export time', () => {
   });
 
   test('conventions: tsconfig strict + ESM + ESLint/Prettier (pointers)', () => {
-    const d = mkdtempSync(join(tmpdir(), 'faf-conv-'));
+    const d = tempFolders.mkdtemp(join(tmpdir(), 'faf-conv-'));
     writeFileSync(
       join(d, 'package.json'),
       JSON.stringify({ type: 'module', devDependencies: { eslint: '^9', prettier: '^3' } }),
@@ -82,7 +86,7 @@ describe('BRAKE: safety contract — hand-authored wins, no mutation, no inventi
   });
 
   test('hand-authored conventions preserved', () => {
-    const d = mkdtempSync(join(tmpdir(), 'faf-hconv-'));
+    const d = tempFolders.mkdtemp(join(tmpdir(), 'faf-hconv-'));
     writeFileSync(join(d, 'tsconfig.json'), JSON.stringify({ compilerOptions: { strict: true } }));
     const out = enrichFromRepo(d, {
       project: { name: 'x' },
@@ -99,13 +103,13 @@ describe('BRAKE: safety contract — hand-authored wins, no mutation, no inventi
   });
 
   test('empty repo (no manifest) invents no commands', () => {
-    const d = mkdtempSync(join(tmpdir(), 'faf-empty-'));
+    const d = tempFolders.mkdtemp(join(tmpdir(), 'faf-empty-'));
     const out = enrichFromRepo(d, { project: { name: 'x' } } as never);
     expect(out.commands).toBeUndefined();
   });
 
   test('bare repo → no conventions invented', () => {
-    const d = mkdtempSync(join(tmpdir(), 'faf-noconv-'));
+    const d = tempFolders.mkdtemp(join(tmpdir(), 'faf-noconv-'));
     writeFileSync(join(d, 'package.json'), JSON.stringify({ name: 'x' }));
     const out = enrichFromRepo(d, { project: { name: 'x' } } as never) as { conventions?: string[] };
     expect(out.conventions).toBeUndefined();

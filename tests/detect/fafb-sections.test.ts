@@ -103,19 +103,30 @@ describe('WJTTC ENGINE: detectCommands', () => {
     expect(commands.build).toBe('bun run build');
   });
 
-  test('Rust project — Cargo defaults', () => {
+  test('Rust project — cargo build/test; clippy only when the repo configures it', () => {
     writeFileSync(join(dir, 'Cargo.toml'), '[package]\nname = "x"\n');
     const commands = detectCommands(dir, null);
     expect(commands.build).toBe('cargo build --release');
     expect(commands.test).toBe('cargo test');
-    expect(commands.lint).toBe('cargo clippy');
+    expect(commands.lint).toBeUndefined(); // a Cargo.toml alone does not say clippy
+    writeFileSync(join(dir, 'Cargo.toml'), '[package]\nname = "x"\n\n[lints.clippy]\npedantic = "warn"\n');
+    expect(detectCommands(dir, null).lint).toBe('cargo clippy');
   });
 
-  test('Zig project — zig build defaults', () => {
+  test('Zig project — zig build; `zig build test` only when build.zig has a test step', () => {
     writeFileSync(join(dir, 'build.zig'), '');
     const commands = detectCommands(dir, null);
     expect(commands.build).toBe('zig build');
-    expect(commands.test).toBe('zig build test');
+    expect(commands.test).toBeUndefined();
+    writeFileSync(join(dir, 'build.zig'), 'const test_step = b.step("test", "Run unit tests");\n');
+    expect(detectCommands(dir, null).test).toBe('zig build test');
+  });
+
+  test('Python — pytest only when the repo names it (no guess from pyproject.toml alone)', () => {
+    writeFileSync(join(dir, 'pyproject.toml'), '[project]\nname = "x"\n');
+    expect(detectCommands(dir, null).test).toBeUndefined();
+    writeFileSync(join(dir, 'pyproject.toml'), '[project]\nname = "x"\n\n[tool.pytest.ini_options]\naddopts = "-q"\n');
+    expect(detectCommands(dir, null).test).toBe('pytest');
   });
 
   test('Go project — go build/test', () => {

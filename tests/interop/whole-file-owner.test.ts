@@ -17,8 +17,8 @@
  * file is refused in one line and kept byte for byte; `--force` replaces it,
  * as `faf init --force` does.
  */
-import { describe, test, expect } from 'bun:test';
-import { mkdirSync, mkdtempSync, readFileSync, realpathSync, symlinkSync, writeFileSync } from 'fs';
+import { afterAll, describe, test, expect } from 'bun:test';
+import { mkdirSync, readFileSync, realpathSync, symlinkSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { spawnSync } from 'child_process';
@@ -29,10 +29,14 @@ import { buildA2ACard, writeJson } from '../../src/interop/cards.js';
 import { RENDER_KEY } from '../../src/core/render-hash.js';
 import { scoreFafYaml } from '../../src/core/scorer.js';
 import { serializeFaf } from '../../src/interop/faf.js';
+import { tempDirs } from '../helpers/temp-dirs.js';
+
+const tempFolders = tempDirs();
+afterAll(() => tempFolders.removeAll());
 
 const posix = process.platform !== 'win32';
 const CLI = join(import.meta.dir, '../../src/cli.ts');
-const mk = (tag: string): string => realpathSync(mkdtempSync(join(tmpdir(), `faf-owned-${tag}-`)));
+const mk = (tag: string): string => realpathSync(tempFolders.mkdtemp(join(tmpdir(), `faf-owned-${tag}-`)));
 const DATA: any = { project: { name: 'demo', goal: 'Demo goal', main_language: 'TypeScript', type: 'cli' }, stack: { frontend: 'React' } };
 const SCORE = scoreFafYaml(serializeFaf(DATA));
 const HAND_HTML = '<!doctype html>\n<html><body>\n<h1>Our project page (HAND-HTML)</h1>\n</body></html>\n';

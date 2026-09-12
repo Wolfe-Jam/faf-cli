@@ -1,6 +1,6 @@
 import { dirname, resolve } from 'path';
 import { readUtf8, resolveInside, safeWriteFile } from '../core/safe-write.js';
-import { BlockReader, type HiddenIn } from './commonmark.js';
+import { BlockReader, MAX_OPEN_CONTAINERS, type HiddenIn } from './commonmark.js';
 
 /**
  * Block markers for the faf-managed front section.
@@ -38,7 +38,9 @@ const bareLine = (line: string): string => stripEnd(line).replace(/^\uFEFF/, '')
 //       and no block quotes.
 // A START/END pair is faf's block only when both readings find that same
 // pair. When they differ the file is the user's, and faf prefixes: when in
-// doubt, prefix.
+// doubt, prefix. A file that nests more than MAX_OPEN_CONTAINERS block quotes,
+// lists and list items before faf's block is one faf cannot read for sure:
+// the reading stops there, and faf prefixes too.
 
 /** One reading's search: the latest START seen, and the pair once found. */
 interface Search {
@@ -89,7 +91,10 @@ function advance(shown: Search[], line: ScanLine, isStart: (l: string) => boolea
  * the char range covering both lines (the END line's terminator excluded), or
  * null. A leading BOM on line 1 stays outside the range. `isStart` and
  * `isEnd` are asked about each line shown as text in at least one reading,
- * once, in order, on the line with its terminator and that BOM removed.
+ * once, in order, on the line with its terminator and that BOM removed. Past
+ * MAX_OPEN_CONTAINERS open containers the CommonMark reading stops, and there
+ * is no range (a pair found before that point still counts). Time grows with
+ * the text's length, not with how deep it nests.
  */
 export function findMarkedRange(
   text: string,
@@ -98,7 +103,9 @@ export function findMarkedRange(
 ): { start: number; end: number } | null {
   const [a, b]: Search[] = [new BlockReader(true), new BlockReader(false)].map(reader => ({ reader, start: -1, found: null }));
   for (const line of scanLines(text)) {
-    const shown = [a, b].filter(r => r.reader.line(line.content) === null);
+    const hidden = [a, b].map(r => r.reader.line(line.content));
+    if (a.reader.tooDeep) {return null;} // nested too deep to read for sure: the file is the user's
+    const shown = [a, b].filter((_, i) => hidden[i] === null);
     if (shown.length > 0) {advance(shown, line, isStart, isEnd);}
     // Both readings end their pair on this same line, or they do not agree.
     if (a.found || b.found) {return a.found && b.found && a.found.start === b.found.start ? a.found : null;}
@@ -306,13 +313,21 @@ function regionName(hidden: HiddenIn): string {
 }
 
 /** The region a whole-line START of `text` sits in — in either reading — or
- *  null when every START line is shown as text (or there is none). */
-function hiddenStart(text: string, start: string): HiddenIn | null {
+ *  null when every START line is shown as text (or there is none). `'too
+ *  deep'` when a whole-line START sits past the point where the file nests
+ *  more than MAX_OPEN_CONTAINERS containers (faf stopped reading there). */
+function hiddenStart(text: string, start: string): HiddenIn | 'too deep' | null {
   const readers = [new BlockReader(true), new BlockReader(false)];
+  let deep = false;
   for (const { content } of scanLines(text)) {
+    if (deep) {
+      if (content === start) {return 'too deep';}
+      continue;
+    }
     const [a, b] = readers.map(r => r.line(content));
+    deep = readers[0].tooDeep;
     const hidden = a ?? b;
-    if (content === start && hidden !== null) {return hidden;}
+    if (content === start && (deep || hidden !== null)) {return deep ? 'too deep' : hidden;}
   }
   return null;
 }
@@ -325,7 +340,10 @@ function hiddenStart(text: string, start: string): HiddenIn | null {
  *     old faf text stays below the new block;
  *   - a whole-line START marker sits inside a code fence, a raw HTML block
  *     or an HTML comment (in either reading — see {@link findFafBlock}): the
- *     older block there is an example to faf, and stays below the new one.
+ *     older block there is an example to faf, and stays below the new one;
+ *   - a whole-line START marker sits past more than MAX_OPEN_CONTAINERS
+ *     nested lists or quotes: faf did not read that far, and the older block
+ *     stays below the new one.
  * `label` names the file (`CLAUDE.md`). `existing` is the file's text before
  * the write (null when there was none). faf-mcp and claude-faf-mcp print the
  * same line through this export.
@@ -343,6 +361,9 @@ export function legacyStampNote(
   }
   const hidden = hiddenStart(existing, start);
   if (hidden === null) {return null;}
+  if (hidden === 'too deep') {
+    return `${label}: faf's block is now on top; the file nests more than ${MAX_OPEN_CONTAINERS} lists or quotes before an older faf block, so faf did not read that far — the older block is left as you had it; delete it by hand if you no longer want it.`;
+  }
   return `${label}: faf's block is now on top; an older faf block below sits inside ${regionName(hidden)} and is left as you had it — delete it by hand if you no longer want it.`;
 }
 

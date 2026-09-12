@@ -15,13 +15,12 @@
  * Now each goes through src/core/safe-write.ts with the right root, and the
  * file outside stays byte for byte. HOME is a mkdtemp folder for every CLI run.
  */
-import { describe, test, expect, spyOn } from 'bun:test';
+import { afterAll, describe, test, expect, spyOn } from 'bun:test';
 import {
   chmodSync,
   existsSync,
   lstatSync,
   mkdirSync,
-  mkdtempSync,
   readFileSync,
   readdirSync,
   realpathSync,
@@ -37,10 +36,14 @@ import { SafePathError } from '../../src/core/safe-write.js';
 import { installHooks, uninstallHooks } from '../../src/commands/hooks.js';
 import { SLOTS } from '../../src/core/slots.js';
 import { serializeFaf } from '../../src/interop/faf.js';
+import { tempDirs } from '../helpers/temp-dirs.js';
+
+const tempFolders = tempDirs();
+afterAll(() => tempFolders.removeAll());
 
 const posix = process.platform !== 'win32';
 const CLI = join(import.meta.dir, '../../src/cli.ts');
-const mk = (tag: string): string => realpathSync(mkdtempSync(join(tmpdir(), `faf-r3a-${tag}-`)));
+const mk = (tag: string): string => realpathSync(tempFolders.mkdtemp(join(tmpdir(), `faf-r3a-${tag}-`)));
 const ZSHRC = '# my shell\nexport PATH="$HOME/bin:$PATH"\nsource ~/.secrets\n';
 const FAF = 'project:\n  name: demo\n  goal: Demo goal\n  main_language: TypeScript\n';
 

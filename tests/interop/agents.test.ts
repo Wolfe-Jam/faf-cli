@@ -6,8 +6,12 @@
  *   AERO   — facts-not-bloat curation (human↔assistant prefs + context/marketing
  *            keys excluded; Human Context omitted from agent ops file).
  */
-import { describe, test, expect } from 'bun:test';
+import { afterAll, describe, test, expect } from 'bun:test';
 import { renderAgentsMd } from '../../src/interop/agents.js';
+import { tempDirs } from '../helpers/temp-dirs.js';
+
+const tempFolders = tempDirs();
+afterAll(() => tempFolders.removeAll());
 
 const FULL: any = {
   project: { name: 'demo', goal: 'A small API', main_language: 'Python', type: 'service', version: '2.1.0' },
@@ -228,7 +232,7 @@ describe('AERO: facts-not-bloat curation', () => {
 // 7.12.0 — the rendered prose must never spell the marker tokens out (it was the
 // decoy behind the stacked-AGENTS.md bug), and a double export is byte-identical.
 import { writeAgentsMd } from '../../src/interop/agents.js';
-import { mkdtempSync, readFileSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 
@@ -241,7 +245,7 @@ describe('BRAKE: AGENTS.md export is idempotent and never quotes its own markers
     expect(md).toContain('Hand-written content outside the managed block is preserved.');
   });
   test('writeAgentsMd three times → one block, byte-identical after the first, hand content intact', () => {
-    const dir = mkdtempSync(join(tmpdir(), 'faf-agents-idem-'));
+    const dir = tempFolders.mkdtemp(join(tmpdir(), 'faf-agents-idem-'));
     writeFileSync(join(dir, 'AGENTS.md'), '# Team notes\n\nhand-sentinel\n');
     writeAgentsMd(dir, data); const r1 = readFileSync(join(dir, 'AGENTS.md'), 'utf-8');
     writeAgentsMd(dir, data); const r2 = readFileSync(join(dir, 'AGENTS.md'), 'utf-8');

@@ -13,15 +13,19 @@
  * faf-derived when the soul was loaded or made (a new soul counts, unless it
  * was given an index of its own) and has not been changed in memory since.
  */
-import { describe, test, expect } from 'bun:test';
-import { mkdtempSync, readFileSync, realpathSync, writeFileSync } from 'fs';
+import { afterAll, describe, test, expect } from 'bun:test';
+import { readFileSync, realpathSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { parse } from 'yaml';
 import { Soul } from '../../src/fafm/soul.js';
+import { tempDirs } from '../helpers/temp-dirs.js';
+
+const tempFolders = tempDirs();
+afterAll(() => tempFolders.removeAll());
 
 function soulPath(): string {
-  return join(realpathSync(mkdtempSync(join(tmpdir(), 'faf-reindex-'))), 'soul.fafm');
+  return join(realpathSync(tempFolders.mkdtemp(join(tmpdir(), 'faf-reindex-'))), 'soul.fafm');
 }
 
 describe('BRAKE: the default save rebuilds a faf-derived index', () => {

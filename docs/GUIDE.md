@@ -67,8 +67,8 @@ Every field in your `project.faf` is validated and scored. No more "I think this
 **2. Context Persists Forever** — Never lost, never re-explained
 Your project DNA is written once, read forever. No context drift across sessions, team members, or AI tools.
 
-**3. Bi-Sync Keeps It Current** — Responds to changes automatically
-When your project evolves, `project.faf` ↔ `CLAUDE.md` stays synchronized in 8ms. Always current, never stale.
+**3. Sync Keeps It Current** — One source of truth, one direction
+When your project evolves, `faf sync` rewrites the faf block in `CLAUDE.md` from `project.faf` (`project.faf` → `CLAUDE.md`, never the other way unless you ask: `faf sync --direction pull` backfills `project.faf` from `CLAUDE.md`, and only at ✪ Trophy). Your own text in `CLAUDE.md` stays as you wrote it.
 
 ---
 
@@ -107,7 +107,7 @@ Good context isn't a "nice to have" — it's the foundation of AI-augmented deve
 At 100% AI Readiness:
 - AI knows your stack, goals, and conventions (scored with facts)
 - Zero clarifying questions needed (context persists)
-- Drift is impossible (bi-sync keeps it current)
+- CLAUDE.md stays current (`faf sync` writes it from `project.faf`)
 - Your project ships on time, within budget, with fewer surprises
 
 ---
@@ -117,7 +117,7 @@ At 100% AI Readiness:
 **Everywhere AI needs context:**
 
 ### Official Integrations
-- **[Claude Code](https://claude.ai/download)** (Anthropic) — Bi-sync + tri-sync with CLAUDE.md + MEMORY.md
+- **[Claude Code](https://claude.ai/download)** (Anthropic) — `faf sync` writes CLAUDE.md from project.faf; tri-sync also writes faf's block into the MEMORY.md Claude Code loads (one way: .faf → MEMORY.md)
 - **[Gemini CLI](https://github.com/google/generative-ai-cli)** (Google) — Import/export GEMINI.md
 - **[Antigravity IDE](https://antigravityide.com)** (Google) — Global config support
 - **[Conductor Extension](https://chromewebstore.google.com/detail/conductor)** (Google) — conductor/ directory sync
@@ -169,14 +169,14 @@ bunx faf-cli git https://github.com/facebook/react
 ### Daily Workflow
 **Always synced.** Keep context fresh automatically:
 ```bash
-faf bi-sync --watch         # Continuous sync with CLAUDE.md
+faf sync --watch            # Rewrites CLAUDE.md from project.faf on every change
 ```
 
 Add to package.json to see FAF status every dev session:
 ```json
 {
   "scripts": {
-    "predev": "faf status --oneline"
+    "predev": "faf score --status"
   }
 }
 ```
@@ -190,7 +190,7 @@ Add to package.json to see FAF status every dev session:
 **Zero install, zero clone:**
 
 ```bash
-# Generate AI context for ANY GitHub repo
+# Author AI context for ANY GitHub repo
 bunx faf-cli git https://github.com/facebook/react
 # ⏱️ 2 seconds → 95% ◆ Silver score
 
@@ -216,7 +216,7 @@ npm install -g faf-cli    # or: brew install faf-cli
 faf git <repo-url>        # 1-Click Context (90%+)
 faf go                    # Interactive to 100%
 faf auto                  # Full automation
-faf bi-sync               # Keep synced
+faf sync                  # project.faf → CLAUDE.md
 # + 57 more commands
 ```
 

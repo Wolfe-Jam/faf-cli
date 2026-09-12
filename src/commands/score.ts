@@ -44,7 +44,8 @@ export function scoreCommand(file?: string, options: ScoreOptions = {}): void {
     return;
   }
 
-  // A slot the app-type needs that still holds a typed None / N/A counts as
-  // empty — say so under the score, one line per slot. Nothing is written.
+  // Typed words in a slot — None, N/A, unknown — count as empty: say so
+  // under the score, one line per slot (a slot the app-type leaves out: faf
+  // auto marks it slotignored). Nothing is written.
   displayScore(result, fafPath, options.verbose, typedNoneHints(yaml, result));
 }

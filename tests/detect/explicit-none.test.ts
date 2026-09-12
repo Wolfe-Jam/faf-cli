@@ -6,26 +6,31 @@
  * `slotignored` comes only from the app-type. Tech slots (every slot but the
  * 6Ws): "if it's a fact, fill the slot" — a repo fact replaces the typed
  * none; with no fact the typed words stay byte for byte, comment included,
- * and faf never rewrites them to `slotignored`. The 6Ws are the person's:
- * auto never replaces a typed none there.
+ * in a slot the app-type uses (in a slot it leaves out, faf auto writes
+ * `slotignored` — see owner-rule-r4b). The 6Ws are the person's: auto never
+ * replaces a typed none there.
  *
  * Before: fce35d6b (7.12) read the words as a placeholder, so `faf auto` wrote
  * a detected `slotignored` (or `''`) over them when the repo had no fact —
  * which lifted the score. Round 3a kept every typed none, even against a
  * fact, and scored it as `slotignored`.
  */
-import { describe, test, expect } from 'bun:test';
-import { mkdtempSync, readFileSync, realpathSync, writeFileSync } from 'fs';
+import { afterAll, describe, test, expect } from 'bun:test';
+import { readFileSync, realpathSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import * as api from '../../src/index.js';
 import { fillEmpties, updateExistingFaf } from '../../src/detect/assemble.js';
 import { readFaf, writeFaf } from '../../src/interop/faf.js';
 import { scoreFafYaml } from '../../src/core/scorer.js';
+import { tempDirs } from '../helpers/temp-dirs.js';
+
+const tempFolders = tempDirs();
+afterAll(() => tempFolders.removeAll());
 
 /** A repo whose files point at React, PostgreSQL, Vite and Vercel. */
 function repo(): string {
-  const dir = realpathSync(mkdtempSync(join(tmpdir(), 'faf-none-')));
+  const dir = realpathSync(tempFolders.mkdtemp(join(tmpdir(), 'faf-none-')));
   writeFileSync(join(dir, 'package.json'), JSON.stringify({
     name: 'web',
     description: 'A web app',

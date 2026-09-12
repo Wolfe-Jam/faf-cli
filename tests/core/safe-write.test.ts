@@ -10,13 +10,12 @@
  * them. Each symlink and failed-write case below read or wrote through the link
  * (or truncated the file) on fce35d6b.
  */
-import { describe, test, expect } from 'bun:test';
+import { afterAll, describe, test, expect } from 'bun:test';
 import {
   chmodSync,
   existsSync,
   lstatSync,
   mkdirSync,
-  mkdtempSync,
   readdirSync,
   readFileSync,
   realpathSync,
@@ -44,6 +43,10 @@ import { writeJson } from '../../src/interop/cards.js';
 import { FafDNAManager } from '../../src/core/faf-dna.js';
 import { Soul } from '../../src/fafm/soul.js';
 import { scoreFafYaml } from '../../src/core/scorer.js';
+import { tempDirs } from '../helpers/temp-dirs.js';
+
+const tempFolders = tempDirs();
+afterAll(() => tempFolders.removeAll());
 
 const posix = process.platform !== 'win32';
 const SECRET = 'aws_access_key_id = AKIA-SECRET-DO-NOT-READ\n';
@@ -56,7 +59,7 @@ const DATA: any = {
 
 /** A project folder and a sibling "home" folder outside it. */
 function sandbox(): { base: string; project: string; home: string } {
-  const base = realpathSync(mkdtempSync(join(tmpdir(), 'faf-safe-')));
+  const base = realpathSync(tempFolders.mkdtemp(join(tmpdir(), 'faf-safe-')));
   const project = join(base, 'project');
   const home = join(base, 'home');
   mkdirSync(project);

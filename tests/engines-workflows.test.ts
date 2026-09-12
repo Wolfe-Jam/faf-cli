@@ -21,11 +21,15 @@
  * is not the floor. Each fixture is a mkdtemp copy of the guard.
  */
 
-import { describe, test, expect } from 'bun:test';
-import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'fs';
+import { afterAll, describe, test, expect } from 'bun:test';
+import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { spawnSync } from 'child_process';
 import { tmpdir } from 'os';
 import { join } from 'path';
+import { tempDirs } from './helpers/temp-dirs.js';
+
+const tempFolders = tempDirs();
+afterAll(() => tempFolders.removeAll());
 
 const ROOT = join(import.meta.dir, '..');
 const SCRIPT = join(ROOT, 'scripts', 'check-engines.mjs');
@@ -37,7 +41,7 @@ const ENGMUT = '\n  extra-compat:\n    runs-on: ubuntu-latest\n    strategy:\n  
 
 /** A mkdtemp repo: the guard, a package.json with `engines`, and these workflows. */
 function repo(engines: string, workflows: Record<string, string>): string {
-  const dir = mkdtempSync(join(tmpdir(), 'faf-engines-wf-'));
+  const dir = tempFolders.mkdtemp(join(tmpdir(), 'faf-engines-wf-'));
   mkdirSync(join(dir, 'scripts'));
   mkdirSync(join(dir, '.github', 'workflows'), { recursive: true });
   copyFileSync(SCRIPT, join(dir, 'scripts', 'check-engines.mjs'));

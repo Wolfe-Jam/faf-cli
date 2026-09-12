@@ -11,11 +11,15 @@
  * `faf go` runs for real here, with its answers written as each question is
  * asked.
  */
-import { describe, test, expect } from 'bun:test';
-import { mkdtempSync, readFileSync, realpathSync, writeFileSync } from 'fs';
+import { afterAll, describe, test, expect } from 'bun:test';
+import { readFileSync, realpathSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { spawn } from 'child_process';
+import { tempDirs } from '../helpers/temp-dirs.js';
+
+const tempFolders = tempDirs();
+afterAll(() => tempFolders.removeAll());
 
 const CLI = join(import.meta.dir, '../../src/cli.ts');
 
@@ -33,8 +37,8 @@ human_context:
 `;
 
 function repo(): { dir: string; home: string } {
-  const dir = realpathSync(mkdtempSync(join(tmpdir(), 'faf-q8-')));
-  const home = realpathSync(mkdtempSync(join(tmpdir(), 'faf-q8-home-')));
+  const dir = realpathSync(tempFolders.mkdtemp(join(tmpdir(), 'faf-q8-')));
+  const home = realpathSync(tempFolders.mkdtemp(join(tmpdir(), 'faf-q8-home-')));
   writeFileSync(join(dir, 'project.faf'), FAF);
   return { dir, home };
 }

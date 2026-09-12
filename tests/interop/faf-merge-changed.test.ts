@@ -16,8 +16,8 @@
  * paths that changed; a lifted value keeps its comment; and a change that
  * leaves the data as it was writes nothing.
  */
-import { describe, test, expect } from 'bun:test';
-import { mkdtempSync, readFileSync, realpathSync, statSync, writeFileSync } from 'fs';
+import { afterAll, describe, test, expect } from 'bun:test';
+import { readFileSync, realpathSync, statSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { spawnSync } from 'child_process';
@@ -25,11 +25,15 @@ import { parse } from 'yaml';
 import { readFaf, updateFafFile, writeFaf } from '../../src/interop/faf.js';
 import { setNestedValue } from '../../src/core/dot-path.js';
 import { Soul } from '../../src/fafm/soul.js';
+import { tempDirs } from '../helpers/temp-dirs.js';
+
+const tempFolders = tempDirs();
+afterAll(() => tempFolders.removeAll());
 
 const CLI = join(import.meta.dir, '../../src/cli.ts');
 
 function project(): string {
-  return realpathSync(mkdtempSync(join(tmpdir(), 'faf-merge-')));
+  return realpathSync(tempFolders.mkdtemp(join(tmpdir(), 'faf-merge-')));
 }
 
 /** A React + Vite + Vercel repo (t-faf's REACT fixture) with `project.faf`. */
@@ -44,7 +48,7 @@ function reactRepo(faf: string): string {
 
 /** Run the real CLI in `dir`, with HOME in a mkdtemp folder. */
 function faf(dir: string, ...args: string[]): { status: number | null; out: string } {
-  const home = mkdtempSync(join(tmpdir(), 'faf-merge-home-'));
+  const home = tempFolders.mkdtemp(join(tmpdir(), 'faf-merge-home-'));
   const r = spawnSync(process.execPath, [CLI, ...args], {
     cwd: dir,
     encoding: 'utf-8',

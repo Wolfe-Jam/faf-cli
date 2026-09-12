@@ -46,9 +46,10 @@ export function autoCommand(): void {
     sayWhyDnaIsLeft(dna);
   }
 
-  // A slot the app-type needs that still holds a typed None / N/A (no repo
-  // fact filled it) counts as empty — say so under the score, one line per slot.
-  displayScore(result, fafPath, false, typedNoneHints(yaml, result));
+  // A slot the app-type needs that still holds typed words — None, N/A,
+  // unknown — (no repo fact filled it) counts as empty: say so under the
+  // score, one line per slot. Slots the app-type leaves out are marked by now.
+  displayScore(result, fafPath, false, typedNoneHints(yaml, result, { outOfType: false }));
 
   if (result.score < 100) {
     console.log(dim(`\n  run ${bold("'faf go'")} to reach ✪ Trophy`));

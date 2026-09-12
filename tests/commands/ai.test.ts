@@ -1,8 +1,12 @@
-import { describe, test, expect, beforeEach, afterEach, spyOn } from 'bun:test';
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync, statSync, writeFileSync } from 'fs';
+import { describe, test, expect, afterAll, beforeEach, afterEach, spyOn } from 'bun:test';
+import { mkdirSync, readdirSync, readFileSync, realpathSync, rmSync, statSync, writeFileSync } from 'fs';
+import { tempDirs } from '../helpers/temp-dirs.js';
 import { tmpdir } from 'os';
 import { join, relative } from 'path';
 import { spawnSync } from 'child_process';
+
+const tempFolders = tempDirs();
+afterAll(() => tempFolders.removeAll());
 
 const CLI = join(import.meta.dir, '../../src/cli.ts');
 const plain = (s: string): string => s.replace(/\x1b\[[0-9;]*m/g, '');
@@ -122,8 +126,8 @@ function snapshot(dir: string): Record<string, string> {
 
 describe('BRAKE: `faf ai enhance` is retired — one line, exit 1, nothing written', () => {
   test('`faf ai enhance` prints exactly the retirement line and exits 1; project.faf and the folder are untouched', () => {
-    const dir = realpathSync(mkdtempSync(join(tmpdir(), 'faf-ai-retired-')));
-    const home = realpathSync(mkdtempSync(join(tmpdir(), 'faf-ai-home-')));
+    const dir = realpathSync(tempFolders.mkdtemp(join(tmpdir(), 'faf-ai-retired-')));
+    const home = realpathSync(tempFolders.mkdtemp(join(tmpdir(), 'faf-ai-home-')));
     const faf = 'project:\n  name: demo\n  goal: A demo\nstack:\n  database: None # typed\n';
     writeFileSync(join(dir, 'project.faf'), faf);
     const before = snapshot(dir);
@@ -142,7 +146,7 @@ describe('BRAKE: `faf ai enhance` is retired — one line, exit 1, nothing writt
     expect(Object.keys(snapshot(home)).filter(f => !/^(Library\/Caches|\.cache|\.bun)\//.test(f))).toEqual([]);
 
     // The same with no project.faf and no key: still the one line, still exit 1.
-    const empty = realpathSync(mkdtempSync(join(tmpdir(), 'faf-ai-retired-')));
+    const empty = realpathSync(tempFolders.mkdtemp(join(tmpdir(), 'faf-ai-retired-')));
     const bare = spawnSync(process.execPath, [CLI, 'ai', 'enhance'], {
       cwd: empty,
       encoding: 'utf-8',
@@ -154,8 +158,8 @@ describe('BRAKE: `faf ai enhance` is retired — one line, exit 1, nothing writt
   });
 
   test('`faf ai` and `faf --help` do not mention enhance; `faf ai` lists only analyze', () => {
-    const home = realpathSync(mkdtempSync(join(tmpdir(), 'faf-ai-home-')));
-    const dir = realpathSync(mkdtempSync(join(tmpdir(), 'faf-ai-help-')));
+    const home = realpathSync(tempFolders.mkdtemp(join(tmpdir(), 'faf-ai-home-')));
+    const dir = realpathSync(tempFolders.mkdtemp(join(tmpdir(), 'faf-ai-help-')));
     const env = { ...process.env, HOME: home, NO_COLOR: '1' };
     const bare = spawnSync(process.execPath, [CLI, 'ai'], { cwd: dir, encoding: 'utf-8', env });
     expect(bare.status).toBe(0);

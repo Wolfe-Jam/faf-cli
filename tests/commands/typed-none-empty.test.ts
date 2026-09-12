@@ -6,22 +6,28 @@
  *     human surface never shows it as N/A or ignored;
  *   - tech slots, "if it's a fact, fill the slot": `faf auto` fills it from a
  *     repo fact; with no fact the words stay byte for byte, comment included,
- *     and never become `slotignored`;
+ *     in a slot the app-type uses — and in a slot the app-type leaves out,
+ *     `faf auto` marks it `slotignored` (the app-type's decision);
  *   - the 6Ws are the person's: `faf auto` never replaces a typed none there;
- *   - `faf score` and `faf auto` print one line per slot the app-type needs
- *     that still holds a typed none, and write nothing for it.
+ *   - `faf score` prints one line per slot that still holds a typed none (the
+ *     app-type needs it / faf auto marks it slotignored); `faf auto` prints
+ *     the first kind. Neither line writes anything.
  *
  * Every run has HOME set to its own mkdtemp folder.
  */
-import { describe, test, expect } from 'bun:test';
-import { mkdtempSync, readFileSync, realpathSync, statSync, writeFileSync } from 'fs';
+import { afterAll, describe, test, expect } from 'bun:test';
+import { readFileSync, realpathSync, statSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { spawnSync } from 'child_process';
 import { parse } from 'yaml';
+import { tempDirs } from '../helpers/temp-dirs.js';
+
+const tempFolders = tempDirs();
+afterAll(() => tempFolders.removeAll());
 
 const CLI = join(import.meta.dir, '../../src/cli.ts');
-const tmp = (tag: string): string => realpathSync(mkdtempSync(join(tmpdir(), `faf-typed-none-${tag}-`)));
+const tmp = (tag: string): string => realpathSync(tempFolders.mkdtemp(join(tmpdir(), `faf-typed-none-${tag}-`)));
 const plain = (s: string): string => s.replace(/\x1b\[[0-9;]*m/g, '');
 
 function faf(dir: string, ...args: string[]): { status: number | null; out: string; lines: string[] } {
@@ -32,6 +38,8 @@ function faf(dir: string, ...args: string[]): { status: number | null; out: stri
 
 const hint = (slot: string, words: string): string =>
   `${slot} says '${words}' — this app-type needs it, so it counts as empty until filled.`;
+const outHint = (slot: string, words: string): string =>
+  `${slot} says '${words}' — this app-type doesn't use it; faf auto marks it slotignored (N/A).`;
 
 /** A React + Vite front end on Vercel, with a README that names its audience. No database. */
 function webRepo(): string {
@@ -57,7 +65,7 @@ describe('BRAKE: faf auto — a fact fills a typed none in a tech slot', () => {
 });
 
 describe('BRAKE: faf auto — no fact, the typed words stay; a 6W typed none is never replaced', () => {
-  test('no fact: `None` / `not applicable` lines stay byte for byte, never slotignored — and faf says which the app-type needs, once each', () => {
+  test('no fact: `not applicable` in a slot the app-type uses stays byte for byte; `None` in a slot it leaves out becomes slotignored, comment kept — and faf says which the app-type needs, once each', () => {
     const dir = webRepo();
     const text = [
       'project:',
@@ -72,10 +80,11 @@ describe('BRAKE: faf auto — no fact, the typed words stay; a 6W typed none is 
     const r = faf(dir, 'auto');
     expect(r.status).toBe(0);
     const lines = readFileSync(join(dir, 'project.faf'), 'utf-8').split('\n');
-    expect(lines).toContain('  database: None # deliberate: stateless (NONE-COMMENT)');
+    // A frontend does not use the database slot: the app-type's decision, not the words.
+    expect(lines).toContain('  database: slotignored # deliberate: stateless (NONE-COMMENT)');
     expect(lines).toContain('  css_framework: not applicable # CSS-COMMENT');
     expect(lines.filter(l => /^ {2}(database|css_framework):/.test(l))).toHaveLength(2);
-    // A frontend needs css_framework: one line. It does not use the database slot: no line.
+    // A frontend needs css_framework: one line. The database slot is marked by now: no line.
     expect(r.lines.filter(l => l === hint('stack.css_framework', 'not applicable'))).toHaveLength(1);
     expect(r.out).not.toContain('stack.database says');
   });
@@ -127,7 +136,7 @@ describe('BRAKE: faf score — a typed none counts as empty, and the hint prints
     expect([json.slots['stack.database'], json.slots['human_context.who']]).toEqual(['empty', 'empty']);
   });
 
-  test('one line per needed slot that holds a typed none — exactly once; none for a slot the app-type leaves out; nothing written', () => {
+  test('one line per slot that holds a typed none — exactly once; a slot the app-type leaves out says faf auto marks it; nothing written', () => {
     const dir = tmp('hint');
     const path = join(dir, 'project.faf');
     writeFileSync(path, file('None # stateless', 'N/A'));
@@ -137,9 +146,9 @@ describe('BRAKE: faf score — a typed none counts as empty, and the hint prints
     expect(r.status).toBe(0);
     expect(r.lines.filter(l => l === hint('stack.database', 'None'))).toHaveLength(1);
     expect(r.lines.filter(l => l === hint('human_context.who', 'N/A'))).toHaveLength(1);
-    expect(r.lines.filter(l => l.includes(' says \''))).toHaveLength(2);
-    // A backend does not use the frontend slots: `frontend: None` gets no line.
-    expect(r.out).not.toContain('stack.frontend says');
+    // A backend does not use the frontend slots: `frontend: None` gets the other line.
+    expect(r.lines.filter(l => l === outHint('stack.frontend', 'None'))).toHaveLength(1);
+    expect(r.lines.filter(l => l.includes(' says \''))).toHaveLength(3);
     expect(readFileSync(path).equals(before)).toBe(true);
     expect(statSync(path).mtimeMs).toBe(mtime);
     // The machine outputs stay as they are: no hint in --json or --status.

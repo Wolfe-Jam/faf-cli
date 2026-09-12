@@ -13,8 +13,8 @@
  * UTF-8 — faf left it unchanged" — and the file stays byte for byte. A UTF-8
  * BOM still works as before.
  */
-import { describe, test, expect } from 'bun:test';
-import { mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, writeFileSync } from 'fs';
+import { afterAll, describe, test, expect } from 'bun:test';
+import { mkdirSync, readFileSync, readdirSync, realpathSync, writeFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { tmpdir } from 'os';
 import { spawnSync } from 'child_process';
@@ -34,6 +34,10 @@ import { readFaf, readFafRaw, updateFafFile, writeFaf } from '../../src/interop/
 import { updateExistingFaf } from '../../src/detect/assemble.js';
 import { FafDNAManager } from '../../src/core/faf-dna.js';
 import { Soul } from '../../src/fafm/soul.js';
+import { tempDirs } from '../helpers/temp-dirs.js';
+
+const tempFolders = tempDirs();
+afterAll(() => tempFolders.removeAll());
 
 const CLI = join(import.meta.dir, '../../src/cli.ts');
 const BOM = '\uFEFF';
@@ -59,7 +63,7 @@ const S09 = latin1('# caf', ' (LATIN1-SOUL)\nnamepoint: "@me"\nmemory:\n  facts:
 const M10 = latin1('- caf', ' (LATIN1-NOTE)\n');
 
 function project(): string {
-  return realpathSync(mkdtempSync(join(tmpdir(), 'faf-utf8-')));
+  return realpathSync(tempFolders.mkdtemp(join(tmpdir(), 'faf-utf8-')));
 }
 
 /** Runs `fn`, which must refuse `file` as not UTF-8, and checks the file is byte for byte. */

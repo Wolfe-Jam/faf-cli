@@ -3,8 +3,8 @@
  * Regression guard for the file-wipe bug: the four interop writers must ENHANCE
  * existing AGENTS.md / GEMINI.md / .cursorrules / CLAUDE.md, never replace them.
  */
-import { describe, test, expect } from 'bun:test';
-import { mkdtempSync, writeFileSync, readFileSync } from 'fs';
+import { afterAll, describe, test, expect } from 'bun:test';
+import { writeFileSync, readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { tmpdir } from 'os';
 import { injectFafBlock, FAF_START, FAF_END } from '../../src/interop/inject.js';
@@ -13,8 +13,12 @@ import { writeGeminiMd } from '../../src/interop/gemini.js';
 import { writeCursorrules } from '../../src/interop/cursorrules.js';
 import { writeClaudeMd, renderClaudeMd } from '../../src/interop/claude.js';
 import { writeLlmsTxt } from '../../src/interop/llms.js';
+import { tempDirs } from '../helpers/temp-dirs.js';
 
-function tmp(): string { return mkdtempSync(join(tmpdir(), 'faf-inject-')); }
+const tempFolders = tempDirs();
+afterAll(() => tempFolders.removeAll());
+
+function tmp(): string { return tempFolders.mkdtemp(join(tmpdir(), 'faf-inject-')); }
 const DATA: any = {
   project: { name: 'demo', goal: 'A small API', main_language: 'TypeScript' },
   stack: { backend: 'Express' },

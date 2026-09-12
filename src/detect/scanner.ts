@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, readdirSync, type Dirent } from 'fs';
 import { join } from 'path';
 import type { DetectedFramework, Signal } from '../core/types.js';
+import { NO_CLASSIFYING_SIGNALS } from '../core/slots.js';
 import { FRAMEWORKS } from './frameworks.js';
 import { detectDartProject } from './dart.js';
 import { detectGoProject } from './go.js';
@@ -328,7 +329,7 @@ export function detectSubdirStacks(dir: string): SubdirStack[] {
     const sub = join(dir, e.name);
     if (!hasLanguageManifest(sub)) {continue;}
     const language = detectLanguage(sub);
-    if (language === 'Unknown') {continue;}
+    if (!language) {continue;}
     const fws = detectFrameworks(sub).filter(f => STACK_FW_CATEGORIES.has(f.category));
     const fe = fws.find(f => f.category === 'frontend');
     const be = fws.find(f => f.category === 'backend');
@@ -472,7 +473,8 @@ export function detectFrameworks(dir: string): DetectedFramework[] {
     .sort((a, b) => b.confidence - a.confidence);
 }
 
-/** Detect the primary language of a project */
+/** Detect the primary language of a project from its manifests — `''` when
+ *  there is no evidence. */
 export function detectLanguage(dir: string): string {
   const pkg = readPackageJson(dir);
 
@@ -495,10 +497,11 @@ export function detectLanguage(dir: string): string {
   if (existsSync(join(dir, 'build.zig'))) {return 'Zig';}
   if (existsSync(join(dir, 'pubspec.yaml'))) {return 'Dart';}
 
-  // Fallback to JS if package.json exists
+  // A package.json with none of the manifests above: JavaScript
   if (pkg) {return 'JavaScript';}
 
-  return 'Unknown';
+  // No evidence: nothing (never a placeholder word for project.faf)
+  return '';
 }
 
 /** Project-type detection result + rationale (the #found list).
@@ -761,8 +764,10 @@ export function detectProjectTypeWithRationale(dir: string): ProjectTypeDetectio
     return { type: 'library', found };
   }
 
-  // Default — bare repo with no classifying signals
-  found.push('no classifying signals — fallback');
+  // Default — bare repo with no classifying signals. The type is a
+  // classification, not a slot: the file says it is the fallback (`# found:`),
+  // and faf auto never writes slotignored over typed words on it.
+  found.push(NO_CLASSIFYING_SIGNALS);
   return { type: 'library', found };
 }
 
@@ -773,7 +778,8 @@ export function detectProjectType(dir: string): string {
   return detectProjectTypeWithRationale(dir).type;
 }
 
-/** Detect the runtime */
+/** Detect the runtime from a runtime file or manifest — `''` when there is
+ *  no evidence. */
 export function detectRuntime(dir: string): string {
   if (existsSync(join(dir, 'bunfig.toml'))) {return 'Bun';}
   if (existsSync(join(dir, 'deno.json')) || existsSync(join(dir, 'deno.jsonc'))) {return 'Deno';}
@@ -782,26 +788,41 @@ export function detectRuntime(dir: string): string {
   if (existsSync(join(dir, 'go.mod'))) {return 'Go';}
   if (listRootCsprojs(dir).length > 0) {return '.NET';}
   if (existsSync(join(dir, 'pubspec.yaml'))) {return 'Dart';}
-  return 'Unknown';
+  return '';
 }
 
-/** Detect package manager */
-export function detectPackageManager(dir: string): string {
+/** The JS package managers package.json's `packageManager` field names. */
+const JS_PACKAGE_MANAGERS = new Set(['npm', 'pnpm', 'yarn', 'bun']);
+
+/** The package manager package.json's `packageManager` field declares
+ *  (`"pnpm@9.1.0"`, corepack's format) — `''` when it names none. */
+function declaredPackageManager(dir: string): string {
+  const declared = (readPackageJson(dir) as { packageManager?: unknown } | null)?.packageManager;
+  if (typeof declared !== 'string') {return '';}
+  const name = /^([a-z]+)@/i.exec(declared.trim())?.[1]?.toLowerCase() ?? '';
+  return JS_PACKAGE_MANAGERS.has(name) ? name : '';
+}
+
+/** The package manager a non-JS manifest implies, or `''`. */
+function manifestPackageManager(dir: string): string {
   if (existsSync(join(dir, 'pubspec.yaml'))) {return 'pub';}
   if (existsSync(join(dir, 'go.mod'))) {return 'go modules';}
   if (listRootCsprojs(dir).length > 0) {return 'NuGet';}
   if (existsSync(join(dir, 'pom.xml'))) {return 'maven';}
-  if (
-    existsSync(join(dir, 'build.gradle')) ||
-    existsSync(join(dir, 'build.gradle.kts')) ||
-    existsSync(join(dir, 'settings.gradle')) ||
-    existsSync(join(dir, 'settings.gradle.kts'))
-  ) {return 'gradle';}
-  if (existsSync(join(dir, 'bun.lockb')) || existsSync(join(dir, 'bun.lock'))) {return 'bun';}
-  if (existsSync(join(dir, 'pnpm-lock.yaml'))) {return 'pnpm';}
-  if (existsSync(join(dir, 'yarn.lock'))) {return 'yarn';}
-  if (existsSync(join(dir, 'package-lock.json'))) {return 'npm';}
-  return 'npm';
+  const gradle = ['build.gradle', 'build.gradle.kts', 'settings.gradle', 'settings.gradle.kts'];
+  return gradle.some(f => existsSync(join(dir, f))) ? 'gradle' : '';
+}
+
+/** The JS package manager a committed lockfile names, or `''`. */
+const LOCKFILES: ReadonlyArray<[file: string, manager: string]> = [
+  ['bun.lockb', 'bun'], ['bun.lock', 'bun'], ['pnpm-lock.yaml', 'pnpm'], ['yarn.lock', 'yarn'], ['package-lock.json', 'npm'],
+];
+
+/** Detect the package manager from repo facts — a manifest that implies one,
+ *  package.json's `packageManager` field, then a lockfile. `''` when there is
+ *  no evidence: a package.json alone does not say which manager installs it. */
+export function detectPackageManager(dir: string): string {
+  return manifestPackageManager(dir) || declaredPackageManager(dir) || (LOCKFILES.find(([f]) => existsSync(join(dir, f)))?.[1] ?? '');
 }
 
 /** Detect CI/CD */
@@ -913,31 +934,54 @@ export function detectCommands(dir: string, pkg: PackageJson | null): Record<str
     }
   }
 
-  // Cargo defaults (Rust)
+  // Rust: cargo builds and tests every Cargo package. Clippy only when the
+  // repo configures it — a Cargo.toml alone does not say the project lints with it.
   if (existsSync(join(dir, 'Cargo.toml'))) {
     if (!commands.build) {commands.build = 'cargo build --release';}
     if (!commands.test) {commands.test = 'cargo test';}
-    if (!commands.lint) {commands.lint = 'cargo clippy';}
+    if (!commands.lint && configuresClippy(dir)) {commands.lint = 'cargo clippy';}
   }
 
-  // Zig defaults
+  // Zig: build.zig is `zig build`'s own script; `zig build test` only when
+  // it defines a test step.
   if (existsSync(join(dir, 'build.zig'))) {
     if (!commands.build) {commands.build = 'zig build';}
-    if (!commands.test) {commands.test = 'zig build test';}
+    if (!commands.test && /\.step\(\s*"test"/.test(readText(dir, 'build.zig'))) {commands.test = 'zig build test';}
   }
 
-  // Go defaults
+  // Go: the go tool builds and tests every module.
   if (existsSync(join(dir, 'go.mod'))) {
     if (!commands.build) {commands.build = 'go build ./...';}
     if (!commands.test) {commands.test = 'go test ./...';}
   }
 
-  // Python defaults (if pytest is detectable)
-  if (existsSync(join(dir, 'pyproject.toml')) || existsSync(join(dir, 'pytest.ini'))) {
-    if (!commands.test) {commands.test = 'pytest';}
-  }
+  // Python: pytest only when the repo says pytest — a pyproject.toml alone
+  // does not (unittest, nox and tox are as common).
+  if (!commands.test && usesPytest(dir)) {commands.test = 'pytest';}
 
   return commands;
+}
+
+/** A file's text, or `''` when it cannot be read. */
+function readText(dir: string, name: string): string {
+  try {
+    return readFileSync(join(dir, name), 'utf-8');
+  } catch {
+    return '';
+  }
+}
+
+/** The repo configures Clippy: a clippy.toml, or a `[lints.clippy]` table in Cargo.toml. */
+function configuresClippy(dir: string): boolean {
+  if (existsSync(join(dir, 'clippy.toml')) || existsSync(join(dir, '.clippy.toml'))) {return true;}
+  return /^\s*\[(workspace\.)?lints\.clippy\]/m.test(readText(dir, 'Cargo.toml'));
+}
+
+/** The repo says pytest: pytest.ini or conftest.py, or pytest named in
+ *  pyproject.toml, setup.cfg or tox.ini (its config table or a dependency). */
+function usesPytest(dir: string): boolean {
+  if (existsSync(join(dir, 'pytest.ini')) || existsSync(join(dir, 'conftest.py'))) {return true;}
+  return ['pyproject.toml', 'setup.cfg', 'tox.ini'].some(f => /\bpytest\b/.test(readText(dir, f)));
 }
 
 /** Detect a tech-stack list for the TECH_STACK FAFB section.

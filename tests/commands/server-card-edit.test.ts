@@ -14,14 +14,18 @@
  * or the key added on a line of its own. No field is deleted and every other
  * byte stays; a file that cannot be edited that way is refused in one line.
  */
-import { describe, test, expect } from 'bun:test';
-import { mkdtempSync, readFileSync, realpathSync, statSync, writeFileSync } from 'fs';
+import { afterAll, describe, test, expect } from 'bun:test';
+import { readFileSync, realpathSync, statSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { spawnSync } from 'child_process';
+import { tempDirs } from '../helpers/temp-dirs.js';
+
+const tempFolders = tempDirs();
+afterAll(() => tempFolders.removeAll());
 
 const CLI = join(import.meta.dir, '../../src/cli.ts');
-const mk = (tag: string): string => realpathSync(mkdtempSync(join(tmpdir(), `faf-sj-${tag}-`)));
+const mk = (tag: string): string => realpathSync(tempFolders.mkdtemp(join(tmpdir(), `faf-sj-${tag}-`)));
 const PUB = 'io.modelcontextprotocol.registry/publisher-provided';
 const HAND = `{
   "name": "io.github.me/tool",

@@ -44,12 +44,12 @@ stack:
 Filled   — has a real value            → counts for the score
 Ignored  — slotignored (N/A)            → not counted
 Empty    — missing, "", None, N/A,      → counts against the score
-           not applicable
+           not applicable, unknown
 ```
 
 `faf score` shows filled slots out of the slots that count, e.g. `12/12 slots` = 100% ✪.
 
-**A typed `None` / `N/A` / `not applicable` is an empty slot**, not slot-ignore: it scores 0 until filled. The app-type decides which slots count. `faf auto` fills a tech slot when the repo has the fact; with no fact your words stay as typed. The 6Ws stay yours: `faf go` asks.
+**A typed `None` / `N/A` / `not applicable` / `unknown` is an empty slot**, not slot-ignore: it scores 0 until filled. The app-type decides which slots count. `faf auto` fills a tech slot when the repo has the fact; with no fact your words stay as typed in a slot the app-type uses, and become `slotignored` in a slot it leaves out. The 6Ws stay yours: `faf go` asks.
 
 **Common patterns:**
 - **CLI tools, libraries:** the frontend and backend slots are left out
