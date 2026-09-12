@@ -68,7 +68,7 @@ program
 
 program
   .command('auto')
-  .description('Zero to 100% in one command')
+  .description('Fill every tech slot from the repo, then score')
   .action(() => autoCommand());
 
 program
@@ -130,6 +130,7 @@ program
   .command('decompile <file>')
   .description('Decompile .fafb to JSON')
   .option('--output <path>', 'Output path')
+  .option('--force', 'With --output: replace a file faf cannot prove it wrote (edited since, or not a faf decompile)')
   .action((file, options) => decompileCommand(file, options));
 
 program

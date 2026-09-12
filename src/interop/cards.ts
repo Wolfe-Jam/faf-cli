@@ -4,7 +4,7 @@ import { deprecate } from 'node:util';
 import { parse } from 'yaml';
 import type { FafData } from '../core/types.js';
 import { makeDirInside } from '../core/safe-write.js';
-import { writeRendered } from '../core/render-hash.js';
+import { writeRendered, type RenderedResult } from '../core/render-hash.js';
 import { upsertJsonRows } from '../core/json-edit.js';
 import {
   fafContextBlock,
@@ -473,16 +473,18 @@ export interface WriteJsonOptions {
  *  already there is replaced only when it is byte for byte what faf last wrote
  *  (its render hash still fits); a file edited since, one without faf's mark,
  *  or one from before 7.13 that is not exactly this JSON is refused
- *  (SafePathError `not-owned`) and left byte for byte, unless `force`. */
-export function writeJson(path: string, value: unknown, root?: string, write: WriteJsonOptions = {}): void {
+ *  (SafePathError `not-owned`) and left byte for byte, unless `force`.
+ *  Returns what it did: `created`, `updated`, or `unchanged` (the file
+ *  already held exactly these bytes, and nothing was written). */
+export function writeJson(path: string, value: unknown, root?: string, write: WriteJsonOptions = {}): RenderedResult {
   makeDirInside(root ?? dirname(path), dirname(path));
-  writeRendered(path, `${JSON.stringify(value, null, 2)}\n`, {
+  return writeRendered(path, `${JSON.stringify(value, null, 2)}\n`, {
     root: root ?? dirname(path),
     format: 'json',
     hasMark: write.owns ?? hasFafCardMark,
     mark: write.mark ?? 'FAF context-block (a faf card mark)',
     force: write.force,
-  });
+  }).result;
 }
 
 /** True when `bytes` are JSON laid out exactly as faf writes it (2-space

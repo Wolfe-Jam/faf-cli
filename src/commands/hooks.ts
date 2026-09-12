@@ -288,6 +288,15 @@ export function installHooks(cwd: string, options: InstallOptions = {}): boolean
   return true;
 }
 
+/** `before` (the hook's text up to faf's start marker) without the blank
+ *  separator line install writes between your lines and faf's section: one
+ *  `\n` after your last line end, when your lines hold more than blank space
+ *  (install writes none after a hook that is blank). Anything else before the
+ *  marker is left as it is. */
+function withoutSeparator(before: string): string {
+  return before.endsWith('\n\n') && before.slice(0, -1).trim() !== '' ? before.slice(0, -1) : before;
+}
+
 /** Remove only the faf sentinel block; preserve any other hook content. */
 export function uninstallHooks(cwd: string): boolean {
   let hookFile: string;
@@ -316,8 +325,9 @@ export function uninstallHooks(cwd: string): boolean {
     console.log('• faf block not found in pre-commit — nothing to remove.');
     return true;
   }
-  // Only faf's own section goes; every other byte of the hook stays.
-  const refused = writeHook(hookFile, text.slice(0, section.start) + text.slice(section.end), text, statSync(real).mode & 0o777);
+  // Only faf's own section goes — with the blank line install put before it
+  // in a hook of yours — and every other byte of the hook stays.
+  const refused = writeHook(hookFile, withoutSeparator(text.slice(0, section.start)) + text.slice(section.end), text, statSync(real).mode & 0o777);
   if (refused) {
     console.error(`Error: ${refused}`);
     return false;

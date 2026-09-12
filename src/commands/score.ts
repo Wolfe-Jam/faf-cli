@@ -1,4 +1,4 @@
-import { findFafFile, readFafRaw, readFaf } from '../interop/faf.js';
+import { findFafFile, readFafRaw, readFaf, readFafFromString, withKernel } from '../interop/faf.js';
 import { scoreFafYaml, scoreText } from '../core/scorer.js';
 import { typedNoneHints } from '../core/typed-none.js';
 import { displayScore } from '../ui/display.js';
@@ -19,9 +19,13 @@ export function scoreCommand(file?: string, options: ScoreOptions = {}): void {
   }
 
   const yaml = readFafRaw(fafPath);
+  // Parsed first, as every .faf reader does: text that is not valid YAML is
+  // the one-line refusal, never the kernel's parse error. What the kernel
+  // itself cannot read is one line too (withKernel).
+  readFafFromString(yaml, fafPath);
   // scoreFafYaml short-circuits on about.represents — see core/scorer.ts.
   // About is a repo role, not an app_type.
-  const result = scoreFafYaml(yaml);
+  const result = withKernel(fafPath, () => scoreFafYaml(yaml));
 
   if (options.json) {
     // The score snapshot — folded in from the former `faf taf`. The scorer

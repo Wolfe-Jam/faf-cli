@@ -1,6 +1,6 @@
 import { statSync } from 'fs';
 import { dirname, resolve } from 'path';
-import { findFafFile, readFafRaw } from '../interop/faf.js';
+import { findFafFile, readFafFromString, readFafRaw, withKernel } from '../interop/faf.js';
 import { safeReplaceOwned } from '../core/safe-write.js';
 import * as kernel from '../wasm/kernel.js';
 import { dim, fafCyan } from '../ui/colors.js';
@@ -29,7 +29,7 @@ export function fafbPathFor(fafPath: string): string {
 
 /** True when `a` and `b` name the same file on disk (same path, or the same
  *  device and inode: a case variant on a case-insensitive disk, a link). */
-function sameFile(a: string, b: string): boolean {
+export function sameFile(a: string, b: string): boolean {
   if (resolve(a) === resolve(b)) {return true;}
   try {
     const x = statSync(a);
@@ -48,7 +48,11 @@ export function compileCommand(file?: string, options: CompileOptions = {}): voi
   }
 
   const yaml = readFafRaw(fafPath);
-  const binary = kernel.compile(yaml);
+  // Parsed first: text that is not valid YAML is the one-line refusal every
+  // .faf reader gives; what the kernel cannot read is one line too. A
+  // leading BOM is not compiled (kernel.compile), as in faf score.
+  readFafFromString(yaml, fafPath);
+  const binary = withKernel(fafPath, () => kernel.compile(yaml));
 
   // Next to the .faf by default (the project folder is the boundary); an
   // --output path is its own folder's. Atomic, never through a link that leaves

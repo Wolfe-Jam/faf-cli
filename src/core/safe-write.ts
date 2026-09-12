@@ -41,11 +41,11 @@
  * written back.
  *
  * Rule 5 — a whole file faf renders replaces a file already there only when
- * faf can prove it wrote it: project.html, the cards, `faf server-card --out`
- * and a `faf taf --output` snapshot must be byte for byte what faf last wrote
- * (their render hash, render-hash.ts); a `.fafb` must carry the FAFB header
- * (see {@link safeReplaceOwned}). Anything else is refused unless the caller
- * passes `force` (the CLI's `--force`).
+ * faf can prove it wrote it: project.html, the cards, `faf server-card --out`,
+ * a `faf taf --output` snapshot and a `faf decompile --output` file must be
+ * byte for byte what faf last wrote (their render hash, render-hash.ts); a
+ * `.fafb` must carry the FAFB header (see {@link safeReplaceOwned}). Anything
+ * else is refused unless the caller passes `force` (the CLI's `--force`).
  */
 import {
   accessSync,
@@ -99,7 +99,9 @@ export type SafePathReason =
  *     since faf wrote it, or it is from before faf recorded a render hash (see
  *     {@link safeReplaceOwned} and render-hash.ts).
  *   - `not-yaml`: a .faf faf reads or edits is not valid YAML: "<file> is not
- *     valid YAML (<reason>, line N) — faf left it unchanged".
+ *     valid YAML (<reason>, line N) — faf left it unchanged"; or it parses to
+ *     a scalar or a list, not a mapping; or faf's scoring kernel cannot read
+ *     it (`faf score`, `faf compile`, `faf refresh`).
  *   - `unplaceable`: faf could not place its managed block where its next run
  *     finds it again, so it wrote nothing (see inject.ts).
  *

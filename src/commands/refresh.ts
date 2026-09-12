@@ -1,6 +1,6 @@
 import { lstatSync } from 'fs';
 import { dirname, resolve } from 'path';
-import { findFafFile, readFafRaw } from '../interop/faf.js';
+import { findFafFile, readFafFromString, readFafRaw, withKernel } from '../interop/faf.js';
 import { scoreFafYaml } from '../core/scorer.js';
 import type { ScoreResult } from '../core/types.js';
 import { FafDNAManager } from '../core/faf-dna.js';
@@ -64,11 +64,12 @@ function present(path: string): boolean {
   }
 }
 
-/** Re-compile the .fafb at `fafbPath` from `yaml` — only over a .fafb faf
- *  compiled, inside the project folder `root` (never through a link that
- *  leaves it or dangles). Returns the bytes written, or why it was left. */
-function recompileFafb(fafbPath: string, yaml: string, root: string): { bytes: number | null; left: string | null } {
-  const binary = kernel.compile(yaml);
+/** Re-compile the .fafb at `fafbPath` from `yaml` (the text of the .faf at
+ *  `fafPath`) — only over a .fafb faf compiled, inside the project folder
+ *  `root` (never through a link that leaves it or dangles). Returns the bytes
+ *  written, or why it was left. */
+function recompileFafb(fafbPath: string, yaml: string, root: string, fafPath: string): { bytes: number | null; left: string | null } {
+  const binary = withKernel(fafPath, () => kernel.compile(yaml));
   try {
     safeReplaceOwned(fafbPath, binary, { root, owns: isFafbBytes, mark: FAFB_MARK });
     return { bytes: binary.length, left: null };
@@ -111,7 +112,10 @@ export function refreshCommand(options: RefreshOptions = {}): void {
 
   // 1. Re-read the LIVE .faf and re-score it — the authoritative current ground.
   const yaml = readFafRaw(fafPath);
-  const result = scoreFafYaml(yaml);
+  // Parsed first: text that is not valid YAML is the one-line refusal every
+  // .faf reader gives; what the kernel cannot read is one line too.
+  readFafFromString(yaml, fafPath);
+  const result = withKernel(fafPath, () => scoreFafYaml(yaml));
 
   // 2. Baseline = the last-stamped DNA score (the ground we measure drift from).
   const dna = new FafDNAManager(process.cwd());
@@ -131,7 +135,7 @@ export function refreshCommand(options: RefreshOptions = {}): void {
   let fafbBytes: number | null = null;
   let fafbLeft: string | null = null;
   if (present(fafbPath)) {
-    ({ bytes: fafbBytes, left: fafbLeft } = recompileFafb(fafbPath, yaml, dirname(resolve(fafPath))));
+    ({ bytes: fafbBytes, left: fafbLeft } = recompileFafb(fafbPath, yaml, dirname(resolve(fafPath)), fafPath));
   }
 
   if (options.json) {

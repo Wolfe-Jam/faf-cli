@@ -68,7 +68,7 @@ monorepo:
   remote_cache: slotignored
 surfaces:
   # Distribution map — the machine-checkable form of human_context.where. Score-neutral.
-  auto:                      # derived from manifests; regenerate with `faf surface --sync`
+  auto:                      # derived from manifests; re-derive with the /surface skill
     - { type: npm,    id: faf-cli,           source: "package.json#name" }
     - { type: github, id: Wolfe-Jam/faf-cli, source: "package.json#repository" }
   declared:                  # hand-authored: surfaces the manifests don't carry + targets

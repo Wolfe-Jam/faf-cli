@@ -34,14 +34,15 @@ export function scoreEnterprise(yaml: string): KernelScoreResult {
   return JSON.parse(getKernel().score_faf_enterprise(withoutBom(yaml)));
 }
 
-/** Validate .faf YAML */
+/** Validate .faf YAML (a leading BOM is left out, as in {@link score}: `faf check` reads a BOM file). */
 export function validate(yaml: string): boolean {
-  return getKernel().validate_faf(yaml);
+  return getKernel().validate_faf(withoutBom(yaml));
 }
 
-/** Compile .faf YAML to FAFb binary */
+/** Compile .faf YAML to FAFb binary (a leading BOM is not compiled, as in
+ *  {@link score}: `faf compile` and `faf refresh` read a BOM file). */
 export function compile(yaml: string): Uint8Array {
-  return getKernel().compile_fafb(yaml);
+  return getKernel().compile_fafb(withoutBom(yaml));
 }
 
 /** Decompile FAFb binary to JSON info */

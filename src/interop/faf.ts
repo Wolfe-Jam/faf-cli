@@ -35,9 +35,30 @@ function notValidYaml(path: string, err: YAMLParseError): SafePathError {
   return new SafePathError('not-yaml', full, `${full} is not valid YAML (${reason}${line === undefined ? '' : `, line ${line}`}) — faf left it unchanged`, { cause: err });
 }
 
+/** Run `call` — a call into faf's scoring kernel with the text of the .faf
+ *  at `path` — and turn a rejection by the kernel into the one-line refusal.
+ *  The kernel throws a bare string (or an Error) for text it cannot read,
+ *  some of which yaml reads (a 30-digit integer, nesting past the kernel's
+ *  depth limit); that becomes a SafePathError (`not-yaml`): "<file>: faf's
+ *  scoring kernel could not read it (<reason>) — faf left it unchanged". A
+ *  SafePathError from `call` passes through as it is. For `faf score`,
+ *  `faf compile` and `faf refresh`, which parse the text with
+ *  {@link readFafFromString} first. */
+export function withKernel<T>(path: string, call: () => T): T {
+  try {
+    return call();
+  } catch (e) {
+    if (e instanceof SafePathError) {throw e;}
+    const why = (e instanceof Error ? e.message : String(e)).split('\n')[0].trim();
+    const full = resolve(path);
+    throw new SafePathError('not-yaml', full, `${full}: faf's scoring kernel could not read it (${why}) — faf left it unchanged`, { cause: e });
+  }
+}
+
 /** Read and parse a .faf file. Always a mapping: an empty file reads as `{}`;
- *  a file that parses to a scalar or a list throws a clear Error instead of
- *  handing callers a value they would spread into character keys. A file
+ *  a file that parses to a scalar or a list throws a SafePathError
+ *  (`not-yaml`, one line) instead of handing callers a value they would
+ *  spread into character keys. A file
  *  that is not valid YAML throws a SafePathError (`not-yaml`): "<file> is not
  *  valid YAML (<reason>, line N) — faf left it unchanged". A link that
  *  leaves the folder, or does not end at a .faf/.fafm file, is refused, and so
@@ -218,7 +239,7 @@ function projectType(doc: Document): unknown {
 function applyFafData(doc: Document, data: FafData, path: string): void {
   const root = doc.contents;
   if (root !== null && root !== undefined && !isMap(root)) {
-    throw new Error(`${path}: a .faf must be a YAML mapping (key: value pairs), but this one is ${describeShape(doc.toJS())}. faf left it unchanged — fix it by hand.`);
+    throw new SafePathError('not-yaml', resolve(path), `${path}: a .faf must be a YAML mapping (key: value pairs), but this one is ${describeShape(doc.toJS())}. faf left it unchanged — fix it by hand.`);
   }
   const fileHasMeta = isMap(root) && root.items.some(p => isScalar(p.key) && p.key.value === '_meta');
   const { _meta: meta, ...rest } = data as FafData & { _meta?: { found?: string[] } };

@@ -39,7 +39,7 @@ detected from your real stack, scored, and versioned with your code. No drift. N
 FAF defines. AGENTS.md instructs. AI codes.
 
 <!-- trophy — bottom of hero -->
-[![FAF Trophy 100%](https://img.shields.io/badge/FAF-%F0%9F%8F%86%20100%25-000000?labelColor=FF6B35)](https://faf.one)
+[![FAF Trophy 100%](https://img.shields.io/badge/FAF-%E2%9C%AA%20100%25-000000?labelColor=FF6B35)](https://faf.one)
 
 </div>
 
@@ -63,12 +63,12 @@ No setup, no drift, no re-explaining.
 ## Install
 
 ```bash
-bunx faf                      # Bun — zero install, fastest path
-npx faf                       # npm — works everywhere
-brew install wolfe-jam/faf/faf-cli && faf   # Homebrew (auto-taps)
+bunx faf auto                 # Bun — zero install, fastest path
+npx faf auto                  # npm — works everywhere
+brew install wolfe-jam/faf/faf-cli && faf auto   # Homebrew (auto-taps)
 ```
 
-> `faf` is shorthand for `faf-cli auto` — same behavior, fewer keystrokes.
+> `faf` with no arguments shows your project's score; `faf auto` detects and fills.
 
 ---
 
@@ -80,7 +80,7 @@ bunx faf-cli git https://github.com/facebook/react
 
 # Your own project
 bunx faf-cli init              # Create .faf
-bunx faf-cli auto              # Zero to 100% in one command
+bunx faf-cli auto              # Fill every tech slot from the repo, then score
 bunx faf-cli go                # Interactive interview to gold code
 ```
 

@@ -1,7 +1,8 @@
 /**
  * Whole-file ownership — faf replaces a whole file it renders (project.html,
  * the Server Card, the A2A card, `faf server-card --out`, a `faf taf --output`
- * snapshot) only when the file is byte for byte what faf last wrote there.
+ * snapshot, a `faf decompile --output` file) only when the file is byte for
+ * byte what faf last wrote there.
  *
  * A mark (`Visual render of project.faf`, `_meta["one.faf/context"]`) only
  * shows that faf wrote the file once: a hand edit made after that — a section

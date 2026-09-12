@@ -9,7 +9,7 @@ FAF-CLI (v7.1, "The AGENTS.md Edition") is the canonical tool for the [`.faf` fo
 ## Quick start (zero-install)
 
 ```bash
-bunx faf                     # auto-detect the stack, write project.faf, score it
+bunx faf auto                # auto-detect the stack, write project.faf, score it
 bunx faf sync                # write CLAUDE.md from .faf (one way)
 bunx faf export --agents     # also emit AGENTS.md — Claude Code reads it too
 bunx faf score               # AI-readiness score (target: Trophy 100%)
@@ -44,14 +44,14 @@ Static files are the baseline; [claude-faf-mcp](https://www.npmjs.com/package/cl
 
 ## For CLAUDE.md maintainers & teams
 
-- **Stop hand-editing** — `bunx faf` once, then `faf sync` keeps `CLAUDE.md` honest as the stack evolves.
+- **Stop hand-editing** — `bunx faf auto` once, then `faf sync` keeps `CLAUDE.md` honest as the stack evolves.
 - **Onboarding** — a new teammate or a fresh Claude session gets accurate context immediately, not a stale hand-written guess.
 - **Remote work** — `faf git owner/repo` pulls structured, scored context for any repo Claude needs to reason about, from a shallow clone faf makes for you.
 - **One source → many surfaces** — change `project.faf`, and `CLAUDE.md`, `AGENTS.md`, and the MCP tools stay consistent.
 
 ## Why it's a natural fit
 
-FAF-CLI isn't another AI wrapper — it's the canonical, versioned, stack-aware source that `CLAUDE.md` should be authored *from*. One-way sync means the file Claude reads follows the `.faf` instead of quietly falling out of date, and the MCP server means Claude can act on live context, not just a snapshot. One command (`bunx faf`) turns any project into one Claude can actually understand — measurable, versioned, and consistent.
+FAF-CLI isn't another AI wrapper — it's the canonical, versioned, stack-aware source that `CLAUDE.md` should be authored *from*. One-way sync means the file Claude reads follows the `.faf` instead of quietly falling out of date, and the MCP server means Claude can act on live context, not just a snapshot. One command (`bunx faf auto`) turns any project into one Claude can actually understand — measurable, versioned, and consistent.
 
 ---
 

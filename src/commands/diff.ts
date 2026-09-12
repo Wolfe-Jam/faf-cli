@@ -390,6 +390,9 @@ export function installDriver(cwd: string): boolean {
 const DRIVER_HEADER = '[diff "faf"]';
 const DRIVER_LINE = `\tcommand = ${FAF_DIFF_DRIVER}`;
 
+/** True when `text` holds a CR that is not followed by an LF (a lone CR). */
+const hasLoneCr = (text: string): boolean => /\r(?!\n)/.test(text);
+
 /** True when a config line ends in a backslash that continues its value on
  *  the next line (an odd run of them). A heuristic: git's own reading of the
  *  file checks the edit (see {@link removeDriverLine}). */
@@ -404,8 +407,13 @@ const continues = (line: string): boolean => (/\\+$/.exec(stripEnd(line))?.[0].l
  * section holds (blank lines aside, and they stay). Then both lines go. A
  * comment on either line or in the section, another key in it, another
  * spelling (`COMMAND`, `[DIFF "faf"]`) or the key on the header line: null.
+ * A config text with a CR that is not part of a CRLF line end (a lone CR)
+ * is null too: faf splits lines at it, git does not (`# note\r[diff "faf"]`
+ * is one comment line to git), so faf's edit and git's reading could
+ * disagree about what the text holds.
  */
 export function withoutDriverLine(text: string): string | null {
+  if (hasLoneCr(text)) {return null;}
   const lines = linesWithEnds(text);
   const continued = lines.map((_, i) => i > 0 && continues(lines[i - 1]));
   const header = lines.map((line, i) => !continued[i] && stripEnd(line).trimStart().startsWith('['));
@@ -463,6 +471,9 @@ function removeDriverLine(cwd: string): string | null {
   try {
     const cfg = resolveInside(folder, named, { allowGitConfig: true });
     const text = readUtf8(cfg);
+    if (hasLoneCr(text)) {
+      return `${cfg} has a carriage return (CR) that does not end a line, so faf and git could read its lines differently — faf left your git config unchanged.`;
+    }
     const next = withoutDriverLine(text);
     if (next === null || !onlyDriverRemoved(cwd, text, next)) {
       return `diff.faf.command in ${cfg} is not in the section faf writes (a [diff "faf"] line and a tab-indented "command = ${FAF_DIFF_DRIVER}" line, with nothing else in the section or on either line) — faf left your git config unchanged.`;

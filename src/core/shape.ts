@@ -7,6 +7,7 @@
  * spreads or descends into a parsed .faf / .fafm value checks its shape first
  * and refuses with an Error that names what it found.
  */
+import { SafePathError } from './safe-write.js';
 
 /** True for a YAML mapping: a plain object, not a list. */
 export function isMapping(value: unknown): value is Record<string, unknown> {
@@ -27,13 +28,16 @@ export function describeShape(value: unknown): string {
 
 /**
  * A parsed .faf document as a mapping. An empty document reads as `{}`; a
- * scalar or a list throws — faf never rewrites a file whose shape it does not
+ * scalar or a list throws a SafePathError (`not-yaml`), so the CLI prints it
+ * as one line — faf never rewrites a file whose shape it does not
  * understand. `source` names the file (or caller) in the error.
  */
 export function asFafMapping(value: unknown, source: string): Record<string, unknown> {
   if (value === null || value === undefined) {return {};}
   if (!isMapping(value)) {
-    throw new Error(
+    throw new SafePathError(
+      'not-yaml',
+      source,
       `${source}: a .faf must be a YAML mapping (key: value pairs), but this one is ${describeShape(value)}. ` +
         'faf left it unchanged — fix it by hand.',
     );
