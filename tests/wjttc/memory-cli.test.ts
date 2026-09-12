@@ -2,25 +2,31 @@
  * WJTTC TYRE — live `faf memory` CLI (the real road).
  * Converts fixture dir end-to-end via the CLI entry, not the library alone.
  */
-import { describe, test, expect } from 'bun:test';
+import { afterAll, describe, test, expect } from 'bun:test';
 import { join } from 'path';
-import { mkdirSync, rmSync, existsSync, readFileSync } from 'fs';
+import { tmpdir } from 'os';
+import { mkdtempSync, realpathSync, rmSync, existsSync, readFileSync } from 'fs';
 import { parse as parseYaml } from 'yaml';
 
 const ROOT = join(import.meta.dir, '../..');
 const CLI = join(ROOT, 'src/cli.ts');
 const FIX_MEM = join(ROOT, 'tests/fixtures/claude-memory');
-const OUT_DIR = join(ROOT, 'tests/.tmp-fafm-cli');
+// Folders of this suite's own (the output and HOME), removed when the suite ends.
+const OUT_DIR = realpathSync(mkdtempSync(join(tmpdir(), 'faf-fafm-cli-')));
+const HOME = realpathSync(mkdtempSync(join(tmpdir(), 'faf-fafm-cli-home-')));
+const ENV = { ...process.env, HOME };
+afterAll(() => {
+  for (const d of [OUT_DIR, HOME]) {rmSync(d, { recursive: true, force: true });}
+});
 
 describe('WJTTC TYRE: faf memory CLI', () => {
   test('convert fixture → soul.fafm via real CLI', async () => {
-    mkdirSync(OUT_DIR, { recursive: true });
     const out = join(OUT_DIR, 'from-cli.fafm');
     if (existsSync(out)) {rmSync(out);}
 
     const proc = Bun.spawn(
       ['bun', CLI, 'memory', 'convert', FIX_MEM, '-o', out, '--namepoint', '@claude-code:tyre'],
-      { cwd: ROOT, stdout: 'pipe', stderr: 'pipe' },
+      { cwd: ROOT, stdout: 'pipe', stderr: 'pipe', env: ENV },
     );
     const [stdout, stderr, code] = await Promise.all([
       new Response(proc.stdout).text(),
@@ -46,6 +52,7 @@ describe('WJTTC TYRE: faf memory CLI', () => {
       cwd: ROOT,
       stdout: 'pipe',
       stderr: 'pipe',
+      env: ENV,
     });
     const showOut = await new Response(show.stdout).text();
     expect(await show.exited).toBe(0);

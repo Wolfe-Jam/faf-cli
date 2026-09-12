@@ -123,7 +123,7 @@ describe('BRAKE: the format finder asserts only what a file proves, in a slot it
 
   test('empty dir → nothing; generic words are never a slot value', () => {
     expect(turboCatSlots(repo())).toEqual({});
-    expect(stackOf({ 'Dockerfile': 'FROM node:22\n' })).toEqual({ hosting: 'Docker' }); // no connection: Containerized
+    expect(stackOf({ 'Dockerfile': 'FROM node:22\n' })).toEqual({}); // no connection: Containerized; no hosting: a container build is not where the app runs
     expect(stackOf({ 'docker-compose.yml': 'services: {}\n' }).connection).toBeUndefined(); // no Multi-container
     expect(stackOf({ 'k8s.yaml': 'kind: Deployment\n' }).connection).toBeUndefined(); // no Orchestrated
     expect(stackOf({ 'Pulumi.yaml': 'name: x\n' }).hosting).toBeUndefined(); // no Cloud

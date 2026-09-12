@@ -8,13 +8,14 @@
 import { NotWrittenError, SafePathError } from './safe-write.js';
 
 /** What the line adds after the reason: nothing when the reason already says
- *  the file was left as it is, or already says how to replace it; the --force
+ *  the file was left as it is (not UTF-8, changed on disk, not valid YAML,
+ *  a block faf could not place), or already says how to replace it; the --force
  *  hint for a file faf did not write, when the command has --force; otherwise
  *  what faf did not do — "Nothing was written to it." when the refusal came at
  *  the write (faf may have read the file first), "Nothing was read from or
  *  written to it." when it came before either. */
 export function refusalTail(e: SafePathError, hasForce: boolean): string {
-  if (e.reason === 'not-utf8' || e.reason === 'changed') {return '';}
+  if (e.reason === 'not-utf8' || e.reason === 'changed' || e.reason === 'not-yaml' || e.reason === 'unplaceable') {return '';}
   if (e.reason === 'not-owned') {return hasForce && !e.message.includes('--force') ? ' Use --force to replace it.' : '';}
   return e.onWrite ? ' Nothing was written to it.' : ' Nothing was read from or written to it.';
 }

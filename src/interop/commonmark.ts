@@ -168,6 +168,10 @@ export class BlockReader {
   /** Per line, lazily: 1 where the rest of the line is a thematic break. */
   private breaks: Uint8Array | null = null;
   private deep = false;
+  /** With a limit (see {@link overflowAt}): open containers allowed, and
+   *  where the line first opened one past it (-1: nowhere yet). */
+  private limit = -1;
+  private overflow = -1;
   private readonly starts: ReadonlyArray<(container: Block) => Step>;
 
   /** `containers: false` — the plain column-0 reading: no block quotes, no list items. */
@@ -190,6 +194,19 @@ export class BlockReader {
     copy.stack = this.stack.map(copyBlock);
     copy.deep = this.deep;
     return copy;
+  }
+
+  /**
+   * Where in `ln` a reader in this state would open a block quote, list or
+   * list item past `limit` open ones — the offset of that quote's `>` or that
+   * item's marker — or -1 when the line leaves at most `limit` open. This
+   * reader does not move: a copy reads the line.
+   */
+  overflowAt(ln: string, limit: number): number {
+    const probe = this.clone();
+    probe.limit = limit;
+    probe.line(ln);
+    return probe.overflow;
   }
 
   /** True once more than MAX_OPEN_CONTAINERS block quotes, lists and list
@@ -259,18 +276,27 @@ export class BlockReader {
     let leaf = container.kind !== 'paragraph' && acceptsLines(container.kind);
     while (!leaf && !this.deep) {
       this.findNextNonspace();
-      if (!this.indented && !MAYBE_SPECIAL.test(this.ln.charAt(this.nextNonspace))) {break;}
+      const at = this.nextNonspace;
+      if (!this.indented && !MAYBE_SPECIAL.test(this.ln.charAt(at))) {break;}
       let res: Step = 0;
       for (const start of this.starts) {
         res = start(container);
         if (res !== 0) {break;}
       }
       if (res === 0) {break;}
+      this.noteOverflow(at, res);
       container = this.tip;
       leaf = res === 2;
     }
     if (!leaf) {this.advanceNextNonspace();}
     return container;
+  }
+
+  /** A block just opened at `at` (`res` 1: a container): with a limit set,
+   *  remember the first place the line went past it (below the document
+   *  only containers are open when a container is added). */
+  private noteOverflow(at: number, res: Step): void {
+    if (res === 1 && this.limit >= 0 && this.overflow < 0 && this.stack.length - 1 > this.limit) {this.overflow = at;}
   }
 
   /** Step 3: the rest of the line goes to `block`. */

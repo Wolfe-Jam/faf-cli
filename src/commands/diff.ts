@@ -16,12 +16,13 @@
  */
 import { execFileSync } from 'child_process';
 import { readFileSync, existsSync } from 'fs';
+import { dirname, resolve } from 'path';
 import type { FafData } from '../core/types.js';
 import { SLOTS, readSlotValue, isPlaceholder } from '../core/slots.js';
 import { readFafFromString, readFafRaw, findFafFile, gitRepoRel } from '../interop/faf.js';
 import { scoreFafYaml } from '../core/scorer.js';
-import { resolveInside, safeWriteFile } from '../core/safe-write.js';
-import { readIfPresent } from '../interop/inject.js';
+import { NotWrittenError, SafePathError, readUtf8, resolveInside, safeWriteFile } from '../core/safe-write.js';
+import { linesWithEnds, readIfPresent, stripEnd } from '../interop/inject.js';
 import { getTier, tierBadge } from '../core/tiers.js';
 
 export type SlotChangeKind = 'added' | 'removed' | 'changed';
@@ -277,18 +278,33 @@ function repoRoot(cwd: string): string {
  *  is unambiguous and installed alongside `faf`). */
 export const FAF_DIFF_DRIVER = 'faf-cli diff-driver';
 
-/** Every value git has for `diff.faf.command`, from every config file git
- *  reads (`git config --get-all`, NUL-separated so a value is never split);
- *  [] when it is not set. A config git cannot read is a one-line Error. */
-function driverValues(cwd: string): string[] {
+/** The NUL-separated output of a `git config --null` query; '' when the
+ *  key is not set. A config git cannot read is a one-line Error. */
+function gitConfigQuery(cwd: string, args: string[], what: string): string {
   try {
-    const out = execFileSync('git', ['config', '--null', '--get-all', 'diff.faf.command'], { cwd, encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });
-    return out.split('\0').slice(0, -1);
+    return execFileSync('git', ['config', '--null', ...args], { cwd, encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });
   } catch (e) {
-    if ((e as { status?: number }).status === 1) {return [];} // not set
+    if ((e as { status?: number }).status === 1) {return '';} // not set
     const why = String((e as { stderr?: unknown }).stderr ?? '').trim().split('\n')[0] || 'git config failed';
-    throw new Error(`git cannot read diff.faf.command (${why})`, { cause: e });
+    throw new Error(`git cannot read ${what} (${why})`, { cause: e });
   }
+}
+
+/** Every value git has for `diff.faf.command`, from every config file git
+ *  reads (`git config --get-all`, NUL-separated so a value is never split) —
+ *  or, with `local`, from the repo's own config file only (`--local` reads no
+ *  include); [] when it is not set. A config git cannot read is a one-line Error. */
+function driverValues(cwd: string, local = false): string[] {
+  return gitConfigQuery(cwd, [...(local ? ['--local'] : []), '--get-all', 'diff.faf.command'], 'diff.faf.command').split('\0').slice(0, -1);
+}
+
+/** Every `diff.faf.*` key git has other than faf's own `command` — a driver
+ *  setting of the user's (`diff.faf.textconv`, `diff.faf.binary`), from any
+ *  config file git reads. A config git cannot read is a one-line Error. */
+function otherDriverKeys(cwd: string): string[] {
+  const out = gitConfigQuery(cwd, ['--get-regexp', '^diff\\.faf\\.'], 'the diff.faf settings');
+  const keys = out.split('\0').slice(0, -1).map(entry => entry.split('\n')[0]);
+  return [...new Set(keys.filter(k => k !== 'diff.faf.command'))];
 }
 
 /** The values, for a one-line message. */
@@ -316,9 +332,9 @@ function optIntoDriver(top: string): void {
  * Returns false, having written nothing, when it refuses.
  *
  * `diff.faf.command` is read first (`git config --get-all`): faf sets it only
- * when it is unset or already faf's value. A driver of your own — or more than
- * one value — is left alone: one line, and neither the config nor
- * `.gitattributes` is touched.
+ * when it is unset or already faf's value. A driver of your own — more than
+ * one value, or any other `diff.faf.*` key (a `textconv` of yours) — is left
+ * alone: one line, and neither the config nor `.gitattributes` is touched.
  *
  * `.gitattributes` keeps every byte it had: faf reads it, adds its one line at
  * the end (in the file's own line ending) and writes it atomically — never
@@ -339,6 +355,19 @@ export function installDriver(cwd: string): boolean {
     console.error(`faf: diff.faf.command is already set to ${shown(values)}, not faf's driver (${FAF_DIFF_DRIVER}) — faf left your git config and .gitattributes unchanged.`);
     return false;
   }
+  // A [diff "faf"] setting of your own (a textconv, say) is a driver of yours:
+  // faf's command would take its place, so faf sets nothing.
+  let others: string[];
+  try {
+    others = otherDriverKeys(cwd);
+  } catch (e) {
+    console.error(`faf: ${(e as Error).message} — faf left your git config unchanged.`);
+    return false;
+  }
+  if (others.length > 0) {
+    console.error(`faf: your git config already has ${others.join(', ')} — a diff driver setting of your own, so faf left your git config and .gitattributes unchanged.`);
+    return false;
+  }
   optIntoDriver(top);
   if (ours) {
     console.log(`•  git config already set (diff.faf.command = ${FAF_DIFF_DRIVER})`);
@@ -355,12 +384,108 @@ export function installDriver(cwd: string): boolean {
   return true;
 }
 
+/** The section `faf diff --install-driver` writes (`git config
+ *  diff.faf.command "faf-cli diff-driver"` into a config without one): its
+ *  header line and its key line, each a whole line. */
+const DRIVER_HEADER = '[diff "faf"]';
+const DRIVER_LINE = `\tcommand = ${FAF_DIFF_DRIVER}`;
+
+/** True when a config line ends in a backslash that continues its value on
+ *  the next line (an odd run of them). A heuristic: git's own reading of the
+ *  file checks the edit (see {@link removeDriverLine}). */
+const continues = (line: string): boolean => (/\\+$/.exec(stripEnd(line))?.[0].length ?? 0) % 2 === 1;
+
+/**
+ * The repo's config text without the driver section faf's install writes —
+ * or null when faf cannot prove the section is that. Only a line that is
+ * byte for byte `\tcommand = faf-cli diff-driver` (a CRLF line end allowed),
+ * not continued from the line above, under a header line that is exactly
+ * `[diff "faf"]`, counts; there must be exactly one, and it must be all its
+ * section holds (blank lines aside, and they stay). Then both lines go. A
+ * comment on either line or in the section, another key in it, another
+ * spelling (`COMMAND`, `[DIFF "faf"]`) or the key on the header line: null.
+ */
+export function withoutDriverLine(text: string): string | null {
+  const lines = linesWithEnds(text);
+  const continued = lines.map((_, i) => i > 0 && continues(lines[i - 1]));
+  const header = lines.map((line, i) => !continued[i] && stripEnd(line).trimStart().startsWith('['));
+  const found: Array<{ at: number; head: number }> = [];
+  let head = -1;
+  lines.forEach((line, i) => {
+    if (header[i]) {
+      head = stripEnd(line) === DRIVER_HEADER ? i : -1;
+    } else if (head >= 0 && !continued[i] && stripEnd(line) === DRIVER_LINE) {
+      found.push({ at: i, head });
+    }
+  });
+  if (found.length !== 1) {return null;}
+  const { at, head: top } = found[0];
+  let end = at + 1;
+  while (end < lines.length && !header[end]) {end++;}
+  const more = lines.slice(top + 1, end).some((l, j) => top + 1 + j !== at && stripEnd(l).trim() !== '');
+  if (more) {return null;} // a comment or a setting of yours in the section: not faf's alone
+  return lines.filter((_, i) => i !== top && i !== at).join('');
+}
+
+/** Every entry git reads from a config text (`git config --file - --list`,
+ *  NUL-separated), in order; null when git cannot read it. */
+function configEntries(cwd: string, text: string): string[] | null {
+  try {
+    return execFileSync('git', ['config', '--file', '-', '--null', '--list'], { cwd, input: text, encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] }).split('\0').slice(0, -1);
+  } catch {
+    return null;
+  }
+}
+
+/** True when git reads `after` as exactly `before` less one faf driver entry. */
+function onlyDriverRemoved(cwd: string, before: string, after: string): boolean {
+  const was = configEntries(cwd, before);
+  const now = configEntries(cwd, after);
+  if (was === null || now === null) {return false;}
+  const ours = `diff.faf.command\n${FAF_DIFF_DRIVER}`;
+  const at = was.indexOf(ours);
+  if (at < 0 || was.lastIndexOf(ours) !== at) {return false;}
+  const want = [...was.slice(0, at), ...was.slice(at + 1)];
+  return want.length === now.length && want.every((entry, i) => entry === now[i]);
+}
+
+/** Remove the driver section faf's install wrote from the repo's own config
+ *  file, as a text edit through safe-write — only when git reads the result
+ *  as the file less faf's entry and nothing else. null when done, else the
+ *  one-line reason faf left the file as it is. */
+function removeDriverLine(cwd: string): string | null {
+  const local = driverValues(cwd, true);
+  if (local.length !== 1 || local[0] !== FAF_DIFF_DRIVER) {
+    return `diff.faf.command = ${FAF_DIFF_DRIVER} is set outside this repo's own config (your global or system git config) — faf left it unchanged.`;
+  }
+  const named = resolve(cwd, execFileSync('git', ['rev-parse', '--git-path', 'config'], { cwd, encoding: 'utf-8' }).trim());
+  const folder = dirname(named);
+  try {
+    const cfg = resolveInside(folder, named, { allowGitConfig: true });
+    const text = readUtf8(cfg);
+    const next = withoutDriverLine(text);
+    if (next === null || !onlyDriverRemoved(cwd, text, next)) {
+      return `diff.faf.command in ${cfg} is not in the section faf writes (a [diff "faf"] line and a tab-indented "command = ${FAF_DIFF_DRIVER}" line, with nothing else in the section or on either line) — faf left your git config unchanged.`;
+    }
+    safeWriteFile(cfg, next, { root: folder, allowGitConfig: true, expect: text });
+    return null;
+  } catch (e) {
+    if (e instanceof SafePathError || e instanceof NotWrittenError) {return e.message;}
+    throw e;
+  }
+}
+
 /**
  * Remove the driver wiring (git config). Leaves .gitattributes for the user
- * to keep or delete. `diff.faf.command` is unset only when its one value is
- * exactly faf's (`faf-cli diff-driver`) and sits in this repo's config; a
- * driver of your own, more than one value, or faf's value set outside the
- * repo is left alone with one line. Returns false when it refuses.
+ * to keep or delete. faf removes only what its install wrote: its one value
+ * must be exactly faf's (`faf-cli diff-driver`) and sit in this repo's own
+ * config file as the section install writes — a `[diff "faf"]` line and a
+ * `\tcommand = faf-cli diff-driver` line, nothing else in it. faf reads that
+ * file (`git rev-parse --git-path config`) and removes those two lines as a
+ * text edit, so every other byte stays. A driver of your own, more than one
+ * value, faf's value set outside the repo, or faf's value written any other
+ * way (a comment on its line, another spelling, a setting of yours in the
+ * section) is left alone with one line. Returns false when it refuses.
  */
 export function uninstallDriver(cwd: string): boolean {
   repoRoot(cwd);
@@ -379,10 +504,14 @@ export function uninstallDriver(cwd: string): boolean {
     console.error(`faf: diff.faf.command is ${shown(values)}, not faf's driver (${FAF_DIFF_DRIVER}) — faf left your git config unchanged.`);
     return false;
   }
+  let refused: string | null;
   try {
-    execFileSync('git', ['config', '--local', '--unset', 'diff.faf.command'], { cwd, stdio: 'pipe' });
-  } catch {
-    console.error(`faf: diff.faf.command = ${FAF_DIFF_DRIVER} is set outside this repo's own config (your global or system git config) — faf left it unchanged.`);
+    refused = removeDriverLine(cwd);
+  } catch (e) {
+    refused = `${(e as Error).message.split('\n')[0]} — faf left your git config unchanged.`;
+  }
+  if (refused !== null) {
+    console.error(`faf: ${refused}`);
     return false;
   }
   console.log('✅ removed diff.faf.command (the .gitattributes line is left for you to keep or delete).');

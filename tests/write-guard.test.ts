@@ -97,12 +97,13 @@ function libFiles(dir: string, out: string[] = []): string[] {
 // What the seal cannot see: it reads source text, so a write made by a
 // subprocess is invisible to it. Two commands run one that writes, and their
 // effects follow the owner rule by construction (tested in
-// tests/core/owner-rule-r4.test.ts):
-//   - `faf diff --install-driver` / `--uninstall-driver` run `git config` on
-//     `diff.faf.command`. faf reads `git config --get-all` first, sets it only
-//     when it is unset or already faf's value (`faf-cli diff-driver`), and
-//     unsets it only when its one value is exactly that; any other value is
-//     left alone with one line.
+// tests/core/owner-rule-r4.test.ts and owner-rule-r5.test.ts):
+//   - `faf diff --install-driver` runs `git config` to set
+//     `diff.faf.command`. faf reads `git config --get-all` first and sets it
+//     only when it is unset or already faf's value (`faf-cli diff-driver`) and
+//     no other `diff.faf.*` key of yours is there; anything else is left alone
+//     with one line. (`--uninstall-driver` no longer runs git to write: it
+//     removes faf's section from the repo's config file through safe-write.)
 //   - `faf git` runs `git clone` into a `repo/` folder inside a temp folder
 //     faf made (makeTempDir, with faf's marker file), removed when it ends.
 // ---------------------------------------------------------------------------

@@ -31,8 +31,9 @@
 
 /**
  * A slot value here must name what the file itself proves, in a slot that
- * value fills: `Dockerfile` → hosting Docker, `jest.config.js` → nothing for
- * CI/CD (Jest is a test runner, not a pipeline). No generic words ('Cloud',
+ * value fills: `vercel.json` → hosting Vercel; `Dockerfile` → no hosting (it
+ * shows a container build, not where the app runs); `jest.config.js` →
+ * nothing for CI/CD (Jest is a test runner, not a pipeline). No generic words ('Cloud',
  * 'Containerized', 'API Server'), no language in a framework or backend slot,
  * and no `runtime: Node.js` from a framework config alone — package.json is
  * that fact, and detectRuntime reads it. `faf auto` writes these values into
@@ -568,11 +569,10 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   // HIGH VALUE (30 points) - Infrastructure
   // ============================================
   
+  // A Dockerfile shows a container build, not where the app runs: no hosting.
   'Dockerfile': {
     frameworks: ['Docker'],
-    slots: { 
-      hosting: 'Docker'
-    },
+    slots: {},
     priority: 30,
     intelligence: 'high'
   },

@@ -24,6 +24,11 @@
  * it is exactly faf's render of the current project.faf (and then leaves it,
  * as there is nothing to change), else refuses once. `force` (`--force`)
  * replaces any of these.
+ *
+ * Line endings: a checkout with git's `core.autocrlf` ends every line of a
+ * file faf wrote with CRLF. A file whose only difference from faf's text is
+ * that — every line ending CRLF — is still faf's: the hash is compared with
+ * the CRLF line ends read as LF, and the new render is written with CRLF.
  */
 import { createHash } from 'crypto';
 import { resolve } from 'path';
@@ -46,6 +51,9 @@ export type RenderFormat = 'html' | 'json';
 // ── project.html ───────────────────────────────────────────────────────────────
 
 const HTML_LINE = /^<meta name="faf-render" content="(sha256:[0-9a-f]{64})">$/;
+/** Any line that starts like faf's render line: one that is not exactly faf's
+ *  form (a trailing space, an upper-case hash) is faf's line, edited. */
+const HTML_LINE_START = '<meta name="faf-render"';
 const HTML_ANCHOR = '<meta name="description" content="Visual render of project.faf.';
 
 /** `doc` with faf's render line added after its description line (or at the top). */
@@ -57,16 +65,24 @@ function stampHtml(doc: string): string {
 }
 
 /** The hash a page carries and the page without its render line; 'many'
- *  when it has more than one; null when it has none. */
+ *  when it has more than one, or a line that starts like faf's render line
+ *  but is not exactly its form (edited since faf wrote it); null when it has
+ *  none. */
 function splitHtml(text: string): { hash: string; canonical: string } | 'many' | null {
   const lines = text.split(/(?<=\n)/);
   const found: { at: number; hash: string }[] = [];
+  let edited = false;
   lines.forEach((l, at) => {
-    const m = HTML_LINE.exec(l.replace(/\r?\n$/, ''));
-    if (m) {found.push({ at, hash: m[1] });}
+    const bare = l.replace(/\r?\n$/, '');
+    const m = HTML_LINE.exec(bare);
+    if (m) {
+      found.push({ at, hash: m[1] });
+    } else if (bare.startsWith(HTML_LINE_START)) {
+      edited = true;
+    }
   });
-  if (found.length === 0) {return null;}
-  if (found.length > 1) {return 'many';}
+  if (found.length === 0 && !edited) {return null;}
+  if (found.length !== 1 || edited) {return 'many';}
   lines.splice(found[0].at, 1);
   return { hash: found[0].hash, canonical: lines.join('') };
 }
@@ -123,9 +139,11 @@ function canonicalOf(format: RenderFormat, render: string): string {
  * Whether the bytes of a whole file faf renders are exactly what faf wrote:
  * `match` — they carry faf's render hash, the hash is that of the rest of the
  * file, and the file is laid out exactly as faf writes it; `mismatch` — they
- * carry a render hash that no longer fits (the file was edited since faf wrote
- * it); `none` — they carry no render hash (a file from before 7.13, or one
- * faf never wrote).
+ * carry a render hash that no longer fits, or (project.html) a render line
+ * that is not exactly faf's form (the file was edited since faf wrote it);
+ * `none` — they carry no render hash (a file from before 7.13, or one faf
+ * never wrote). The bytes are taken as they are: see {@link writeRendered}
+ * for a file git checked out with CRLF line ends.
  */
 export function renderOwnership(bytes: Uint8Array, format: RenderFormat): 'match' | 'mismatch' | 'none' {
   const text = new TextDecoder().decode(bytes);
@@ -153,6 +171,22 @@ export interface RenderedWriteOptions {
 /** What {@link writeRendered} did. */
 export type RenderedResult = 'created' | 'updated' | 'unchanged';
 
+/** `bytes` with each CRLF line end read as LF, when every line of the file
+ *  ends CRLF (git's `core.autocrlf` checkout) and the bytes are UTF-8; null
+ *  otherwise (LF line ends, mixed ones, or none). */
+function crlfAsLf(bytes: Buffer): Buffer | null {
+  const text = new TextDecoder().decode(bytes);
+  if (!text.includes('\r\n') || /(?:^|[^\r])\n/.test(text) || !Buffer.from(text, 'utf-8').equals(bytes)) {return null;}
+  return Buffer.from(text.replace(/\r\n/g, '\n'), 'utf-8');
+}
+
+/** Ownership of the bytes on disk, or of their LF reading (`lf`) when only
+ *  the CRLF line ends keep them from being faf's. */
+function ownershipOf(existing: Buffer, lf: Buffer | null, format: RenderFormat): 'match' | 'mismatch' | 'none' {
+  const raw = renderOwnership(existing, format);
+  return raw !== 'match' && lf !== null && renderOwnership(lf, format) === 'match' ? 'match' : raw;
+}
+
 /**
  * Write the whole file faf renders at `path`: `render` (faf's text, without a
  * render hash) with faf's render hash added. The link rules and the atomic,
@@ -168,7 +202,9 @@ export type RenderedResult = 'created' | 'updated' | 'unchanged';
  *     recognises its own output."
  *   - without the mark: "<file> has no <mark>, so faf did not write it — faf left it unchanged."
  * `force` replaces it anyway. A file already holding exactly the new bytes is
- * not written again.
+ * not written again. A file whose every line ends CRLF (git's
+ * `core.autocrlf`) is judged with those line ends read as LF, and is written
+ * back with CRLF line ends.
  */
 export function writeRendered(path: string, render: string, opts: RenderedWriteOptions): { path: string; result: RenderedResult } {
   const full = resolve(path);
@@ -181,24 +217,33 @@ export function writeRendered(path: string, render: string, opts: RenderedWriteO
     return { path: target, result: 'created' };
   }
   if (existing.equals(Buffer.from(next, 'utf-8'))) {return { path: target, result: 'unchanged' };}
-  if (opts.force !== true) {
-    const state = renderOwnership(existing, opts.format);
-    if (state === 'mismatch') {
-      throw new SafePathError('not-owned', full, `${full} was edited since faf wrote it — faf left it unchanged. Use --force to replace it.`, { onWrite: true });
-    }
-    if (state === 'none') {
-      if (!opts.hasMark(existing)) {
-        throw new SafePathError('not-owned', full, `${full} has no ${opts.mark}, so faf did not write it — faf left it unchanged.`, { onWrite: true });
-      }
-      if (existing.equals(Buffer.from(canonical, 'utf-8'))) {return { path: target, result: 'unchanged' };}
-      throw new SafePathError(
-        'not-owned',
-        full,
-        `${full} has no faf render hash (written before 7.13), so faf cannot tell whether it was edited — faf left it unchanged. Use --force once to replace it; after that faf recognises its own output.`,
-        { onWrite: true },
-      );
-    }
-  }
-  safeWriteFile(target, next, { root: opts.root, expect: existing });
+  const lf = crlfAsLf(existing);
+  const out = lf === null ? next : next.replace(/\r?\n/g, '\r\n');
+  if (lf !== null && existing.equals(Buffer.from(out, 'utf-8'))) {return { path: target, result: 'unchanged' };}
+  if (opts.force !== true && !ownedOrRefused(full, existing, lf, canonical, opts)) {return { path: target, result: 'unchanged' };}
+  safeWriteFile(target, out, { root: opts.root, expect: existing });
   return { path: target, result: 'updated' };
+}
+
+/** For a file already there (`existing`; `lf`, its LF reading when every
+ *  line ends CRLF): true when faf may replace it (its render hash matches);
+ *  false when it is faf's pre-7.13 render of this very content (nothing to
+ *  change); otherwise a SafePathError `not-owned` — see {@link writeRendered}. */
+function ownedOrRefused(full: string, existing: Buffer, lf: Buffer | null, canonical: string, opts: RenderedWriteOptions): boolean {
+  const state = ownershipOf(existing, lf, opts.format);
+  if (state === 'match') {return true;}
+  if (state === 'mismatch') {
+    throw new SafePathError('not-owned', full, `${full} was edited since faf wrote it — faf left it unchanged. Use --force to replace it.`, { onWrite: true });
+  }
+  if (!opts.hasMark(existing)) {
+    throw new SafePathError('not-owned', full, `${full} has no ${opts.mark}, so faf did not write it — faf left it unchanged.`, { onWrite: true });
+  }
+  const exact = Buffer.from(canonical, 'utf-8');
+  if (existing.equals(exact) || (lf !== null && lf.equals(exact))) {return false;}
+  throw new SafePathError(
+    'not-owned',
+    full,
+    `${full} has no faf render hash (written before 7.13), so faf cannot tell whether it was edited — faf left it unchanged. Use --force once to replace it; after that faf recognises its own output.`,
+    { onWrite: true },
+  );
 }

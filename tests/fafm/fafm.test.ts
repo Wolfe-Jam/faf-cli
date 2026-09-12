@@ -1,15 +1,18 @@
 /**
  * WJTTC ENGINE: .fafm TS surface — golden-pinned against claude-fafm-sdk 1.0 INTEROP.
  */
-import { describe, test, expect } from 'bun:test';
+import { afterAll, describe, test, expect } from 'bun:test';
 import { join } from 'path';
-import { mkdirSync, writeFileSync } from 'fs';
+import { tmpdir } from 'os';
+import { mkdtempSync, realpathSync, rmSync, writeFileSync } from 'fs';
 import { Soul, fromClaudeDir, factFromObj, factToObj } from '../../src/fafm/index.js';
 
 const FIX = join(import.meta.dir, '../fixtures');
 const FAFM = join(FIX, 'fafm');
 const CLAUDE_MEM = join(FIX, 'claude-memory');
-const TMP = join(import.meta.dir, '../.tmp-fafm');
+// A folder of this suite's own, removed when the suite ends.
+const TMP = realpathSync(mkdtempSync(join(tmpdir(), 'faf-fafm-')));
+afterAll(() => rmSync(TMP, { recursive: true, force: true }));
 
 describe('ENGINE: fafm Soul load/save fidelity', () => {
   test('voice fixture loads', () => {
@@ -31,7 +34,6 @@ describe('ENGINE: fafm Soul load/save fidelity', () => {
   });
 
   test('missing profile defaults to voice', () => {
-    mkdirSync(TMP, { recursive: true });
     const p = join(TMP, 'noprofile.fafm');
     const bare = `version: "1.1"
 namepoint: "@x"
@@ -50,7 +52,6 @@ memory:
     const s = Soul.load(join(FAFM, 'unknown-fields.fafm'));
     expect(s.extra.future_root_field).toBeTruthy();
     expect(s.facts[0].extra.experimental_attr).toBe(123);
-    mkdirSync(TMP, { recursive: true });
     const out = join(TMP, 'residual.fafm');
     s.toFile(out, { reindex: false });
     const back = Soul.fromFile(out);
@@ -114,7 +115,6 @@ describe('ENGINE: fromClaudeDir', () => {
   });
 
   test('convert → save shape is facts not entries', () => {
-    mkdirSync(TMP, { recursive: true });
     const soul = fromClaudeDir(CLAUDE_MEM, { namepoint: '@claude-code:cli' });
     const out = join(TMP, 'converted.fafm');
     soul.toFile(out);

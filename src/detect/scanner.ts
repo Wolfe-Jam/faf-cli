@@ -834,12 +834,12 @@ export function detectCicd(dir: string): string | null {
   return null;
 }
 
-/** Detect hosting platform */
+/** Detect hosting platform — from a platform's own config file. A bare
+ *  Dockerfile is not one: it shows a container build, not where the app runs. */
 export function detectHosting(dir: string): string | null {
   if (existsSync(join(dir, 'vercel.json'))) {return 'Vercel';}
   if (existsSync(join(dir, 'netlify.toml'))) {return 'Netlify';}
   if (existsSync(join(dir, 'wrangler.toml'))) {return 'Cloudflare';}
-  if (existsSync(join(dir, 'Dockerfile'))) {return 'Docker';}
   if (existsSync(join(dir, 'fly.toml'))) {return 'Fly.io';}
   if (existsSync(join(dir, 'render.yaml'))) {return 'Render';}
   return null;

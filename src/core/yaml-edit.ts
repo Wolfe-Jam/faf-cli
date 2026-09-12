@@ -120,12 +120,13 @@ function styleOf(src: string): { indent: number; indentSeq: boolean } {
   return { indent: indent ?? 2, indentSeq: indentSeq ?? true };
 }
 
-/** Parse `src` for editing; a file that is not valid YAML is refused. */
+/** Parse `src` for editing; a file that is not valid YAML is refused (an
+ *  Error whose `cause` is yaml's YAMLParseError, with its line). */
 export function parseForEdit(src: string, name: string): Document {
   const doc = parseDocument(src, EDIT_OPTIONS);
   if (doc.errors.length > 0) {
     const why = doc.errors[0].message.split('\n')[0];
-    throw new Error(`${name}: not valid YAML (${why}) — faf left it unchanged.`);
+    throw new Error(`${name}: not valid YAML (${why}) — faf left it unchanged.`, { cause: doc.errors[0] });
   }
   return doc;
 }

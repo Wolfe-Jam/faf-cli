@@ -20,10 +20,12 @@ function present(path: string): boolean {
 
 /** A context file to recover from, read the way faf reads project context:
  *  inside the project only (a link must stay in it and end at a .faf/.fafm
- *  file — never ~/.aws/credentials behind an AGENTS.md link) and strictly as
- *  UTF-8 (a cp1252 file is never turned into U+FFFD). null when it is not
- *  there, or when it is refused — the refusal is printed as its one line and
- *  the file is skipped as a source. */
+ *  file, or at another AI context file — CLAUDE.md → AGENTS.md, the rule the
+ *  writers use; never ~/.aws/credentials behind an AGENTS.md link, never
+ *  README.md behind a CLAUDE.md link) and strictly as UTF-8 (a cp1252 file is
+ *  never turned into U+FFFD). null when it is not there, or when it is
+ *  refused — the refusal is printed as its one line and the file is skipped
+ *  as a source. */
 function readSource(dir: string, name: string, refused: string[]): string | null {
   if (!present(join(dir, name))) {return null;}
   try {

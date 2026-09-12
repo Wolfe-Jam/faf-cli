@@ -315,20 +315,22 @@ interface Plan {
   tail: string;
 }
 
-/** The new file text, and what of the old text must survive around the block. */
-function plan(existing: string | null, wrapped: string): Plan {
+/** The new file text, and what of the old text must survive around the
+ *  block. `path` names the file when faf cannot place its block there (a
+ *  SafePathError `unplaceable`; nothing is written). */
+function plan(existing: string | null, wrapped: string, path: string): Plan {
   if (existing === null) {
-    return { text: withFafBlock(null, wrapped), action: 'created', head: '', tail: '' };
+    return { text: withFafBlock(null, wrapped, undefined, undefined, path), action: 'created', head: '', tail: '' };
   }
   const block = findFafBlock(existing);
   const range = block ?? findLegacySection(existing);
   if (range) {
     const head = existing.slice(0, range.start);
     const tail = existing.slice(range.end);
-    return { text: placeFafBlock(head, wrapped, tail), action: block ? 'updated' : 'migrated', head, tail };
+    return { text: placeFafBlock(head, wrapped, tail, undefined, undefined, path), action: block ? 'updated' : 'migrated', head, tail };
   }
   const bom = existing.startsWith('\uFEFF') ? '\uFEFF' : '';
-  return { text: withFafBlock(existing, wrapped), action: 'added', head: bom, tail: existing.slice(bom.length) };
+  return { text: withFafBlock(existing, wrapped, undefined, undefined, path), action: 'added', head: bom, tail: existing.slice(bom.length) };
 }
 
 /** The 200-line note, when the text is past what Claude Code loads. */
@@ -372,14 +374,16 @@ export function claudeMemoryStatus(dir: string, opts: ClaudeMemoryOptions = {}):
  * memory folder when it is not there yet. Throws — having written nothing —
  * when the file cannot be read (other than not existing), is not UTF-8, is a
  * link that leaves the memory folder, changed on disk while faf was writing,
- * or cannot be written (the original is kept).
+ * cannot be written (the original is kept), or is one where faf cannot place
+ * its block where its next run finds it again (SafePathError `unplaceable`,
+ * the same one-line refusal as injectFafBlock).
  */
 export function writeClaudeMemory(dir: string, data: FafData, opts: ClaudeMemoryOptions = {}): ClaudeMemoryResult {
   const memoryDir = resolveClaudeMemoryDir(dir, opts);
   makeDirInside(memoryDir);
   const path = resolveInside(memoryDir, FAF_CONTEXT_FILES.memory);
   const existing = readIfPresent(path);
-  const next = plan(existing, wrapFafBlock(renderClaudeMemory(data)));
+  const next = plan(existing, wrapFafBlock(renderClaudeMemory(data)), path);
 
   if (next.text === existing) {
     const lines = countLines(existing);

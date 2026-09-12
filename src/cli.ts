@@ -188,7 +188,7 @@ program
   .option('--llms', 'Author llms.txt (llmstxt.org view of authored 6Ws — opt-in)')
   .option('--conductor', 'Author conductor config')
   .option('--html', 'Author project.html (visual render of project.faf)')
-  .option('--card', 'Author MCP Server Card (.well-known/mcp/server-card) with the FAF context-block')
+  .option('--card', 'Author MCP Server Card (./server-card) with the FAF context-block')
   .option('--all', 'Author all formats')
   .option('--output <path>', 'Write exported files to this directory instead of the current one')
   .option('--force', 'Replace a project.html or Server Card faf cannot prove it wrote (edited since, or not faf\'s)')

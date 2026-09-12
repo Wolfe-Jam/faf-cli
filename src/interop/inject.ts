@@ -1,5 +1,5 @@
 import { dirname, resolve } from 'path';
-import { readUtf8, resolveInside, safeWriteFile } from '../core/safe-write.js';
+import { SafePathError, readUtf8, resolveInside, safeWriteFile } from '../core/safe-write.js';
 import { BlockReader, MAX_OPEN_CONTAINERS, type HiddenIn } from './commonmark.js';
 
 /**
@@ -160,11 +160,42 @@ function closersFor(text: string, end: string): Array<string | null> {
   return closers;
 }
 
+/** No line of faf's own body leaves more block quotes, lists and list items
+ *  open than this (as CommonMark reads it) — far below the reader's cap,
+ *  MAX_OPEN_CONTAINERS, so the next run always reads the block to its end,
+ *  quoted (one quote more) or not. See {@link capDepth}. */
+export const BODY_MAX_CONTAINERS = 16;
+
+/** The same lines, with the marker that would open a block quote, list or
+ *  list item past BODY_MAX_CONTAINERS escaped with a backslash — `\>` for a
+ *  quote, `\-` / `\*` / `\+` for a bullet, `1\.` for an ordered item — so
+ *  that line opens nothing more and shows the same text (a .faf value holding
+ *  a 101-deep `>>>…` quote, or a list nested 52 levels deep). Every line
+ *  within the cap is left exactly as it is. */
+function capDepth(lines: string[]): string[] {
+  const reader = new BlockReader(true);
+  return lines.map(line => {
+    const at = reader.overflowAt(stripEnd(line), BODY_MAX_CONTAINERS);
+    let out = line;
+    if (at >= 0) {
+      const ordered = /^\d{1,9}(?=[.)])/.exec(line.slice(at));
+      const mark = ordered ? at + ordered[0].length : at;
+      out = `${line.slice(0, mark)}\\${line.slice(mark)}`;
+    }
+    reader.line(stripEnd(out));
+    return out;
+  });
+}
+
 /** faf's own body, made safe to wrap between its markers:
  *   - a body line that is itself a marker line (a .faf value that documents
  *     the markers, say — with or without trailing spaces) would let the next
  *     write cut the block there and grow the file every run — it is indented
  *     one space: no longer a column-0 marker, and the text is unchanged;
+ *   - a body that nests block quotes or lists past BODY_MAX_CONTAINERS would
+ *     stop the next run's reading inside the block, and faf would prefix a
+ *     second block — the marker that goes past it is escaped (see
+ *     {@link capDepth});
  *   - a body that leaves fenced code, a raw HTML block or a comment open (a
  *     .faf value holding a ``` line, say) would hide the END line from the
  *     next scan, and faf would prefix a second block — the region is closed
@@ -172,10 +203,10 @@ function closersFor(text: string, end: string): Array<string | null> {
  *     that would hide the END line in the other reading is not added: such a
  *     body is quoted by {@link placeFafBlock} instead. */
 function guardBody(body: string, start: string, end: string): string {
-  const lines = linesWithEnds(body).map(line => {
+  const lines = capDepth(linesWithEnds(body).map(line => {
     const bare = bareLine(line);
     return bare === start || bare === end ? ` ${line}` : line;
-  });
+  }));
   let text = lines.join('');
   let hiding = closersFor(text, end);
   while (hiding.length > 0 && hiding[0] !== null) {
@@ -205,17 +236,28 @@ function quoteBody(wrapped: string, start: string, end: string): string {
  * — so the next write updates it in place and never stacks a second one. A
  * body that would not be found there (it leaves a region open in only one
  * reading, or the text before it holds a raw HTML block the body continues)
- * is quoted line by line instead. Throws, and nothing is written, if even
- * that is not found.
+ * is quoted line by line instead. If even that is not found, it throws a
+ * SafePathError (`unplaceable`) naming `path` (the file being written):
+ * "<file>: faf could not place its block where the next run finds it again —
+ * faf left it unchanged" — one line, and nothing is written.
  */
-export function placeFafBlock(head: string, wrapped: string, tail: string, start: string = FAF_START, end: string = FAF_END): string {
+export function placeFafBlock(
+  head: string,
+  wrapped: string,
+  tail: string,
+  start: string = FAF_START,
+  end: string = FAF_END,
+  path = 'the file',
+): string {
   const placed = (block: string): string | null => {
     const text = `${head}${block}${tail}`;
     const found = findFafBlock(text, start, end);
     return found && found.start === head.length && found.end === head.length + block.length ? text : null;
   };
   const text = placed(wrapped) ?? placed(quoteBody(wrapped, start, end));
-  if (text === null) {throw new Error("faf could not place its block where the next run finds it again — nothing written.");}
+  if (text === null) {
+    throw new SafePathError('unplaceable', path, `${path}: faf could not place its block where the next run finds it again — faf left it unchanged`, { onWrite: true });
+  }
   return text;
 }
 
@@ -226,20 +268,20 @@ export function wrapFafBlock(block: string, start: string = FAF_START, end: stri
 
 /** The file's new text: `existing` (null when there is no file) with `wrapped`
  *  as its managed block, placed where the next scan finds it again (see
- *  {@link placeFafBlock}). */
-export function withFafBlock(existing: string | null, wrapped: string, start: string = FAF_START, end: string = FAF_END): string {
+ *  {@link placeFafBlock}; `path` names the file in its refusal). */
+export function withFafBlock(existing: string | null, wrapped: string, start: string = FAF_START, end: string = FAF_END, path?: string): string {
   // 1. No file → just the block.
-  if (existing === null) {return placeFafBlock('', wrapped, '\n', start, end);}
+  if (existing === null) {return placeFafBlock('', wrapped, '\n', start, end, path);}
 
   // 2. A complete block → replace only the managed block; keep everything around it.
   const found = findFafBlock(existing, start, end);
-  if (found) {return placeFafBlock(existing.slice(0, found.start), wrapped, existing.slice(found.end), start, end);}
+  if (found) {return placeFafBlock(existing.slice(0, found.start), wrapped, existing.slice(found.end), start, end, path);}
 
   // 3. Everything else → prefix the block and keep every byte already there. A
   //    file with no marker lines is the user's, whatever its first line says —
   //    a faf-looking stamp or footer proves nothing. A leading BOM stays at byte 0.
   const bom = existing.startsWith(BOM) ? BOM : '';
-  return placeFafBlock(bom, wrapped, `\n\n${existing.slice(bom.length)}`, start, end);
+  return placeFafBlock(bom, wrapped, `\n\n${existing.slice(bom.length)}`, start, end, path);
 }
 
 /** Read a resolved path, or null when nothing is there yet. Only ENOENT reads
@@ -283,7 +325,8 @@ export interface InjectOptions {
  * AGENTS.md), is written through and stays a link. A file that is not UTF-8
  * is refused and left as it is. The write is atomic — a failure leaves the
  * original exactly as it was — and is refused if the file changed on disk
- * after faf read it.
+ * after faf read it. A block faf cannot place where its next run finds it
+ * again is refused too (SafePathError `unplaceable`), and nothing is written.
  */
 export function injectFafBlock(
   path: string,
@@ -297,7 +340,7 @@ export function injectFafBlock(
   const root = opts.root ?? dirname(full);
   const target = resolveInside(root, full);
   const existing = readIfPresent(target);
-  safeWriteFile(target, withFafBlock(existing, wrapped, start, end), { root, expect: existing });
+  safeWriteFile(target, withFafBlock(existing, wrapped, start, end, full), { root, expect: existing });
 }
 
 /** faf's old metastamp line — the two-line `<!-- faf: … -->` stamp older faf

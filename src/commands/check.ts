@@ -22,7 +22,8 @@ export function checkCommand(file?: string, options: CheckOptions = {}): void {
 
   // Unguarded parse on purpose: `faf check` REPORTS a file that is not a YAML
   // mapping (validateFaf says so, exit 3) — readFaf would throw on it instead.
-  const data = readFafFromString(readFafRaw(fafPath));
+  // A file that is not valid YAML at all is the one-line refusal readFaf gives.
+  const data = readFafFromString(readFafRaw(fafPath), fafPath);
   const validation = validateFaf(data);
 
   if (!validation.valid) {

@@ -271,9 +271,9 @@ describe('scanner', () => {
       expect(detectHosting(testDir)).toBe('Vercel');
     });
 
-    test('detects Docker', () => {
+    test('a bare Dockerfile is not a hosting fact', () => {
       writeFileSync(join(testDir, 'Dockerfile'), 'FROM node');
-      expect(detectHosting(testDir)).toBe('Docker');
+      expect(detectHosting(testDir)).toBeNull();
     });
   });
 

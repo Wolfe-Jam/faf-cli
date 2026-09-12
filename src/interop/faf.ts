@@ -1,11 +1,11 @@
 import { lstatSync } from 'fs';
 import { join, dirname, basename, resolve } from 'path';
 import { execFileSync } from 'child_process';
-import { isMap, isScalar, parse, stringify, type Document } from 'yaml';
+import { YAMLParseError, isMap, isScalar, parse, stringify, type Document } from 'yaml';
 import type { FafData } from '../core/types.js';
 import { asFafMapping, describeShape } from '../core/shape.js';
 import { isPlaceholder } from '../core/slots.js';
-import { readBytesIfPresent, readUtf8, resolveInside, safeWriteFile } from '../core/safe-write.js';
+import { SafePathError, readBytesIfPresent, readUtf8, resolveInside, safeWriteFile } from '../core/safe-write.js';
 import { editYaml, keptAliases, mergeData, restoreAliases, restoreAnchors, type KeptAlias } from '../core/yaml-edit.js';
 import { fafSourceOf, isFill, setFafSource, type FafSource } from '../core/faf-source.js';
 
@@ -18,16 +18,43 @@ function fafToRead(path: string): string {
   return resolveInside(dirname(full), full, { read: true });
 }
 
+/** yaml's YAMLParseError behind `e` (thrown by yaml, or the cause of
+ *  parseForEdit's refusal), or null. */
+function yamlParseError(e: unknown): YAMLParseError | null {
+  if (e instanceof YAMLParseError) {return e;}
+  const cause = (e as { cause?: unknown } | null)?.cause;
+  return cause instanceof YAMLParseError ? cause : null;
+}
+
+/** A .faf that is not valid YAML, as one line (SafePathError `not-yaml`):
+ *  "<file> is not valid YAML (<reason>, line N) — faf left it unchanged". */
+function notValidYaml(path: string, err: YAMLParseError): SafePathError {
+  const reason = err.message.split('\n')[0].replace(/ at line \d+, column \d+:?\s*$/, '').replace(/:\s*$/, '');
+  const line = err.linePos?.[0]?.line;
+  const full = resolve(path);
+  return new SafePathError('not-yaml', full, `${full} is not valid YAML (${reason}${line === undefined ? '' : `, line ${line}`}) — faf left it unchanged`, { cause: err });
+}
+
 /** Read and parse a .faf file. Always a mapping: an empty file reads as `{}`;
  *  a file that parses to a scalar or a list throws a clear Error instead of
- *  handing callers a value they would spread into character keys. A link that
+ *  handing callers a value they would spread into character keys. A file
+ *  that is not valid YAML throws a SafePathError (`not-yaml`): "<file> is not
+ *  valid YAML (<reason>, line N) — faf left it unchanged". A link that
  *  leaves the folder, or does not end at a .faf/.fafm file, is refused, and so
  *  is a file that is not UTF-8. The data remembers the text it was read from:
  *  writeFaf refuses to write it back over a file that changed since. */
 export function readFaf(path: string): FafData {
   const real = fafToRead(path);
   const text = readUtf8(real);
-  const data = asFafMapping(parse(text), path) as FafData;
+  let parsed: unknown;
+  try {
+    parsed = parse(text);
+  } catch (e) {
+    const yamlError = yamlParseError(e);
+    if (yamlError) {throw notValidYaml(path, yamlError);}
+    throw e;
+  }
+  const data = asFafMapping(parsed, path) as FafData;
   setFafSource(data, { real, text });
   return data;
 }
@@ -98,9 +125,9 @@ export type { KeptAlias };
  * The file must exist. The same link rules as {@link readFaf} (a link must
  * stay in the folder and end at a .faf/.fafm file) and the atomic write of
  * `safeWriteFile` apply; the write itself goes only through a link to a file
- * of the same name. A file that is not valid YAML, or not UTF-8, is refused
- * (nothing written); so is anything `mutate` throws, and so is a file that
- * changed on disk while faf was writing.
+ * of the same name. A file that is not valid YAML (SafePathError `not-yaml`,
+ * one line), or not UTF-8, is refused (nothing written); so is anything
+ * `mutate` throws, and so is a file that changed on disk while faf was writing.
  */
 export function updateFafFile(path: string, mutate: (doc: Document) => void): UpdateFafResult {
   return updateFaf(path, mutate, undefined);
@@ -121,13 +148,20 @@ function updateFaf(
   const real = fafToRead(path);
   const text = readUtf8(real);
   let kept: KeptAlias[] = [];
-  const result = editYaml(text, doc => {
-    const before = doc.clone();
-    mutate(doc);
-    kept = restoreAliases(before, doc);
-    if (keepAnchors) {kept = [...kept, ...restoreAnchors(before, doc)];}
-    if (after) {kept = [...kept, ...after(doc, before.toJS()).filter(k => !kept.some(x => x.path === k.path))];}
-  }, path);
+  let result: ReturnType<typeof editYaml>;
+  try {
+    result = editYaml(text, doc => {
+      const before = doc.clone();
+      mutate(doc);
+      kept = restoreAliases(before, doc);
+      if (keepAnchors) {kept = [...kept, ...restoreAnchors(before, doc)];}
+      if (after) {kept = [...kept, ...after(doc, before.toJS()).filter(k => !kept.some(x => x.path === k.path))];}
+    }, path);
+  } catch (e) {
+    const yamlError = yamlParseError(e);
+    if (yamlError) {throw notValidYaml(path, yamlError);}
+    throw e;
+  }
   if (!result.changed) {return { written: false, text, keptAliases: kept };}
   // The file must still be what the caller's data was read from (else a stale
   // read would write over a newer edit), and what faf read here.
@@ -263,9 +297,18 @@ export function readFafRaw(path: string): string {
 
 /** Parse .faf data from a YAML string — e.g. the output of `git show <ref>:project.faf`.
  *  The readers above are path-only; `faf diff` needs to parse a version that
- *  lives in git history, never on disk. */
-export function readFafFromString(text: string): FafData {
-  return parse(text) as FafData;
+ *  lives in git history, never on disk. With `path` (the file the text was
+ *  read from), text that is not valid YAML throws a SafePathError
+ *  (`not-yaml`) naming it, as {@link readFaf} does; without it, yaml's own
+ *  error. */
+export function readFafFromString(text: string, path?: string): FafData {
+  try {
+    return parse(text) as FafData;
+  } catch (e) {
+    const yamlError = yamlParseError(e);
+    if (path !== undefined && yamlError) {throw notValidYaml(path, yamlError);}
+    throw e;
+  }
 }
 
 /** True when `full` is a .faf faf may read: a regular file, or a link that

@@ -8,8 +8,11 @@
  * disk (realpath: every link followed). If that leads outside the project
  * folder, faf refuses. A dangling link is refused — faf never creates a file at
  * the end of a link. Anything whose real path is inside a `.git` folder is
- * refused, always — with one narrow exception, faf's own git hook
- * (`allowGitHooks`: one file directly inside the repo's hooks folder).
+ * refused, always — with two narrow exceptions: faf's own git hook
+ * (`allowGitHooks`: one file directly inside the repo's hooks folder), and
+ * the repo's own git config file (`allowGitConfig`: the file `config`
+ * directly in the folder git names for it), where `faf diff
+ * --uninstall-driver` removes the section faf's install wrote.
  *
  * Rule 2 — a link leads to the same kind of file. faf follows a link only to a
  * file with the same name (CLAUDE.md → docs/CLAUDE.md), or from one AI context
@@ -18,7 +21,9 @@
  * README.md` or `project.html → package.json` is refused — faf would be
  * writing a file it was never asked to write. A read of project context
  * through a link must land on a .faf or .fafm file instead, so `project.faf →
- * .env` is refused even though .env is in the project.
+ * .env` is refused even though .env is in the project — or, for a read of an
+ * AI context file, on another AI context file (`faf recover` reads CLAUDE.md →
+ * AGENTS.md), the rule the writers use.
  *
  * Rule 3 — never leave a half-written file. A write goes to a temp file in the
  * same folder, is flushed to disk (fsync), then renamed over the original in
@@ -77,7 +82,9 @@ export type SafePathReason =
   | 'git'
   | 'not-utf8'
   | 'changed'
-  | 'not-owned';
+  | 'not-owned'
+  | 'not-yaml'
+  | 'unplaceable';
 
 /**
  * A path faf will not read or write, or a file faf will not change. Nothing
@@ -91,6 +98,10 @@ export type SafePathReason =
  *     prove it wrote every byte of it — it has no faf mark, or it was edited
  *     since faf wrote it, or it is from before faf recorded a render hash (see
  *     {@link safeReplaceOwned} and render-hash.ts).
+ *   - `not-yaml`: a .faf faf reads or edits is not valid YAML: "<file> is not
+ *     valid YAML (<reason>, line N) — faf left it unchanged".
+ *   - `unplaceable`: faf could not place its managed block where its next run
+ *     finds it again, so it wrote nothing (see inject.ts).
  *
  * `onWrite` is true when faf refused at the write itself — it may have read
  * the file before (a `.faf` read through a link, say) — and false when it
@@ -103,8 +114,8 @@ export class SafePathError extends Error {
   /** True when the refusal came at the write (faf may have read the file first). */
   readonly onWrite: boolean;
 
-  constructor(reason: SafePathReason, path: string, message: string, opts: { onWrite?: boolean } = {}) {
-    super(message);
+  constructor(reason: SafePathReason, path: string, message: string, opts: { onWrite?: boolean; cause?: unknown } = {}) {
+    super(message, opts.cause === undefined ? undefined : { cause: opts.cause });
     this.name = 'SafePathError';
     this.reason = reason;
     this.path = path;
@@ -114,11 +125,13 @@ export class SafePathError extends Error {
 
 export interface ResolveInsideOptions {
   /** Resolving for a read of project context: a link must end at a `.faf` or
-   *  `.fafm` file. A plain file is read under the name the caller gave. */
+   *  `.fafm` file — or, when the name is an AI context file (CLAUDE.md), at
+   *  another AI context file (CLAUDE.md → AGENTS.md), the rule the writers
+   *  use. A plain file is read under the name the caller gave. */
   read?: boolean;
   /**
-   * Resolving faf's own git hook (`faf hooks`) — the one exception to the
-   * `.git` rule. `dir` must be the repo's hooks folder as git names it
+   * Resolving faf's own git hook (`faf hooks`) — one of the two exceptions
+   * to the `.git` rule. `dir` must be the repo's hooks folder as git names it
    * (`git rev-parse --git-path hooks`, a folder named `hooks`), and `name` a
    * hook file sitting directly in it (`pre-commit`). Only that file may be
    * inside `.git`; nothing below or beside it. Links are still checked: a
@@ -126,6 +139,15 @@ export interface ResolveInsideOptions {
    * the same name.
    */
   allowGitHooks?: boolean;
+  /**
+   * Resolving the repo's own git config file (`faf diff --uninstall-driver`)
+   * — the other exception to the `.git` rule. `dir` must be the folder git
+   * names for it (the folder of `git rev-parse --git-path config`), and `name`
+   * the file `config` directly in it. Only that file may be inside `.git`;
+   * nothing below or beside it. A link must stay inside that folder and end
+   * at a file named `config`.
+   */
+  allowGitConfig?: boolean;
 }
 
 export interface SafeWriteOptions {
@@ -144,6 +166,8 @@ export interface SafeWriteOptions {
   expect?: string | Uint8Array | null;
   /** Write faf's own git hook: see {@link ResolveInsideOptions.allowGitHooks}. `root` is the hooks folder. */
   allowGitHooks?: boolean;
+  /** Write the repo's own git config file: see {@link ResolveInsideOptions.allowGitConfig}. `root` is its folder. */
+  allowGitConfig?: boolean;
   /** Permission bits for the written file. Default: the original's (a new
    *  file gets the default create mode). */
   mode?: number;
@@ -199,14 +223,17 @@ function linkText(p: string): string {
   }
 }
 
-/** What a resolve is for: a read of project context, and/or faf's git hook. */
+/** What a resolve is for: a read of project context, and/or one of the two
+ *  files faf may reach inside `.git` (its git hook, the repo's git config) —
+ *  `inGit`: a file directly in `root` may be inside `.git`. */
 interface ResolveMode {
   read: boolean;
-  hooks: boolean;
+  inGit: boolean;
 }
 
 /** Resolve the final component when it is a link: it must exist, stay inside
- *  `root` and out of `.git` (a hook may sit directly in the hooks folder),
+ *  `root` and out of `.git` (a hook may sit directly in the hooks folder, the
+ *  git config directly in its folder),
  *  be a regular file and — for a read of project context — be a .faf/.fafm
  *  file; otherwise have the link's own name, or be an AI context file reached
  *  from one. */
@@ -228,7 +255,7 @@ function followLink(root: string, requested: string, link: string, mode: Resolve
   if (!isInside(root, real)) {
     throw new SafePathError('outside', requested, `${requested} is a link to ${real}, outside ${root} — refused.`);
   }
-  if (inGitDir(real) && !(mode.hooks && dirname(real) === root)) {
+  if (inGitDir(real) && !(mode.inGit && dirname(real) === root)) {
     throw new SafePathError('git', requested, `${requested} is a link to ${real}, inside .git/ — refused.`);
   }
   if (!statSync(real).isFile()) {
@@ -239,15 +266,18 @@ function followLink(root: string, requested: string, link: string, mode: Resolve
 }
 
 /** The file at the end of a link must be the kind the caller asked for: for a
- *  read of project context a .faf/.fafm file; otherwise a file with the
- *  link's own name, or an AI context file when the link is one too. */
+ *  read of project context a .faf/.fafm file (or, for an AI context file,
+ *  another AI context file); otherwise a file with the link's own name, or an
+ *  AI context file when the link is one too. */
 function refuseOtherKind(requested: string, real: string, read: boolean): void {
   const asked = basename(requested);
   const got = basename(real);
-  if (read && !FAF_FILE.test(got)) {
-    throw new SafePathError('not-faf', requested, `${requested} is a link to ${real}, which is not a .faf or .fafm file — refused.`);
+  const contextToContext = isContextFile(asked) && isContextFile(got);
+  if (read && !FAF_FILE.test(got) && !contextToContext) {
+    const kind = isContextFile(asked) ? 'a .faf or .fafm file, nor another AI context file' : 'a .faf or .fafm file';
+    throw new SafePathError('not-faf', requested, `${requested} is a link to ${real}, which is not ${kind} — refused.`);
   }
-  if (!read && !sameName(asked, got) && !(isContextFile(asked) && isContextFile(got))) {
+  if (!read && !sameName(asked, got) && !contextToContext) {
     throw new SafePathError(
       'other-file',
       requested,
@@ -267,19 +297,29 @@ function checkHookTarget(dir: string, requested: string, root: string, folder: s
   }
 }
 
+/** With allowGitConfig: `requested` must be the file `config` directly in the
+ *  folder git names for it — the whole of the exception. */
+function checkConfigTarget(requested: string, root: string, folder: string): void {
+  if (basename(requested) !== 'config' || folder !== root) {
+    throw new SafePathError('git', requested, `${requested} is not the git config file directly in ${root} — refused.`);
+  }
+}
+
 /**
  * Resolve `name` inside the project folder `dir` and return the real path to
  * read or write — or throw a SafePathError.
  *
  *   - the folder the file sits in must resolve to `dir` or below it
- *   - a path whose real form runs through `.git` → refused, always (the one
- *     exception: `allowGitHooks`, a hook file directly in the hooks folder)
+ *   - a path whose real form runs through `.git` → refused, always (the two
+ *     exceptions: `allowGitHooks`, a hook file directly in the hooks folder,
+ *     and `allowGitConfig`, the file `config` directly in its git folder)
  *   - a file that does not exist yet → its path inside the project
  *   - a regular file → its path (spelled as on disk)
  *   - a link → the file it points at, when that exists, is a regular file, is
  *     inside the project and out of `.git`, and has the link's own name (or
  *     both names are AI context files: CLAUDE.md → AGENTS.md). With `read`, the
- *     file must be a .faf/.fafm file instead (`project.faf → config/team.faf`).
+ *     file must be a .faf/.fafm file instead (`project.faf → config/team.faf`),
+ *     or — for an AI context file — another AI context file.
  *   - anything else (a link out, a dangling link, a link to a file with
  *     another name, a folder, a device) → refused
  *
@@ -294,9 +334,11 @@ export function resolveInside(dir: string, name: string, opts: ResolveInsideOpti
     throw new SafePathError('outside', requested, `${requested} is in ${folder}, outside ${root} — refused.`);
   }
   const hooks = opts.allowGitHooks === true;
+  const gitConfig = opts.allowGitConfig === true;
   if (hooks) {checkHookTarget(dir, requested, root, folder);}
+  if (gitConfig) {checkConfigTarget(requested, root, folder);}
   const target = join(folder, basename(requested));
-  if (inGitDir(target) && !hooks) {
+  if (inGitDir(target) && !hooks && !gitConfig) {
     throw new SafePathError(
       'git',
       requested,
@@ -310,7 +352,7 @@ export function resolveInside(dir: string, name: string, opts: ResolveInsideOpti
     if (errnoOf(e) === 'ENOENT') {return target;}
     throw e;
   }
-  if (st.isSymbolicLink()) {return followLink(root, requested, target, { read: opts.read === true, hooks });}
+  if (st.isSymbolicLink()) {return followLink(root, requested, target, { read: opts.read === true, inGit: hooks || gitConfig });}
   if (!st.isFile()) {
     throw new SafePathError('not-a-file', requested, `${requested} is not a regular file — refused.`);
   }
@@ -527,7 +569,7 @@ export function safeWriteFile(path: string, content: string | Uint8Array, opts: 
   const full = resolve(path);
   let target: string;
   try {
-    target = resolveInside(opts.root ?? dirname(full), full, { allowGitHooks: opts.allowGitHooks });
+    target = resolveInside(opts.root ?? dirname(full), full, { allowGitHooks: opts.allowGitHooks, allowGitConfig: opts.allowGitConfig });
   } catch (e) {
     throw atWrite(e);
   }

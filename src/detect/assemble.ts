@@ -7,7 +7,7 @@
  * can't drift — `faf git` previously ran detectStack alone (~33% vs ~75%).
  */
 
-import { detectStack } from './stack.js';
+import { detectStack, detectStackWithFacts } from './stack.js';
 import { interrogateRepo } from '../interrogate/index.js';
 import { turboCatSlots } from './turbo-cat.js';
 import { relentlessContext } from './relentless.js';
@@ -76,13 +76,18 @@ export function assembleFreshFaf(dir: string): Record<string, unknown> {
  *     `slotignored` (shown as N/A) in place of the words, an empty value or a
  *     placeholder. A real value there is kept. `slotignored` comes only from
  *     the app-type — in a slot the app-type uses, it is never written, even
- *     when detection reads the repo as another type. A `project.type` faf does
- *     not know decides nothing, and neither does the `library` detection falls
- *     back to when the repo has no classifying signal.
+ *     when detection reads the repo as another type; such a slot gets the
+ *     repo's fact for it instead (`runtime: Go` from go.mod), or keeps what
+ *     it had. A `project.type` faf does not know decides nothing, and neither
+ *     does the `library` detection falls back to when the repo has no
+ *     classifying signal.
  *   - In a 6W (`human_context.*`) the words are the person's: auto never
  *     replaces them (`faf go` asks).
  * A slot that says `slotignored` under either of its names (`stack.db` for
- * `stack.database`) gets no detected value under either.
+ * `stack.database`) gets no detected value under either. A slot the file
+ * names only by its Mk4 name (`stack.db`) keeps that name: faf adds no
+ * on-wire twin (`stack.database`), and a repo fact fills the name the file
+ * uses.
  *
  * The result is marked as a fill: writeFaf leaves a node with an anchor that
  * an alias reads as written (`frontend: &x None` with `ui_library: *x`) —
@@ -90,13 +95,14 @@ export function assembleFreshFaf(dir: string): Record<string, unknown> {
  */
 export function updateExistingFaf(dir: string, existing: Record<string, unknown>): Record<string, unknown> {
   const base = liftScalarProject(asFafMapping(existing, 'updateExistingFaf: the existing .faf'));
-  const detected = detectStack(dir) as Record<string, unknown>;
+  const { data, facts } = detectStackWithFacts(dir);
+  const detected = data as Record<string, unknown>;
   const withInterrogated = fillEmpties(base, interrogateRepo(dir) as Record<string, unknown>);
   const merged = fillEmpties(withInterrogated, detected);
   const withFormats = fillEmpties(merged, turboCatSlots(dir) as Record<string, unknown>);
-  const filled = fillEmpties(withFormats, { human_context: relentlessContext(dir) } as Record<string, unknown>);
+  const filled = useFileSlotNames(fillEmpties(withFormats, { human_context: relentlessContext(dir) } as Record<string, unknown>), base);
   const decided = appTypeIsFact(existing, base, detected)
-    ? applyAppType(keepNotApplicable(filled, base), base)
+    ? applyAppType(keepNotApplicable(filled, base), base, facts)
     : keepNotApplicable(filled, base);
   // The result is the read `existing` came from, filled: writeFaf checks it
   // against that read, so an edit made while detection ran is never written over.
@@ -181,6 +187,23 @@ function hasField(data: Record<string, unknown>, path: string): boolean {
   return isMapping(s) && Object.prototype.hasOwnProperty.call(s, field);
 }
 
+/** A slot the file names only by its Mk4 name (`stack.db`, not
+ *  `stack.database`) keeps that one name: the on-wire twin the fill added is
+ *  taken out again, and a repo fact it carried fills the Mk4 name when that
+ *  holds no real value (empty, or typed words) — "if it's a fact, fill the
+ *  slot", under the name the file uses. */
+function useFileSlotNames(filled: Record<string, unknown>, base: Record<string, unknown>): Record<string, unknown> {
+  const out = { ...filled };
+  for (const slot of SLOTS) {
+    if (!slot.canonical || !hasField(base, slot.canonical) || hasField(base, slot.path)) {continue;}
+    const twin = fieldAt(out, slot.path);
+    putField(out, slot.path, undefined);
+    const own = fieldAt(out, slot.canonical);
+    if (isFact(twin) && isPlaceholder(own)) {putField(out, slot.canonical, twin);}
+  }
+  return out;
+}
+
 /** The file's app-type decides which tech slots count (after filling, so a
  *  type detection filled in counts too; a type faf does not know decides
  *  nothing):
@@ -189,9 +212,11 @@ function hasField(data: Record<string, unknown>, path: string): boolean {
  *     `slotignored`, under each of the slot's names the file has (or its
  *     on-wire name when it has neither);
  *   - a slot it uses never takes `slotignored` from detection (which may have
- *     read the repo as another type): it keeps what `base` had there, or
- *     `''` when `base` had nothing. A `slotignored` of the file's own stays. */
-function applyAppType(filled: Record<string, unknown>, base: Record<string, unknown>): Record<string, unknown> {
+ *     read the repo as another type): it gets the repo's fact for it from
+ *     `facts` (detection's fact for every stack slot, whatever the type), or
+ *     keeps what `base` had there (`''` when `base` had nothing). A
+ *     `slotignored` of the file's own stays. */
+function applyAppType(filled: Record<string, unknown>, base: Record<string, unknown>, facts: Record<string, string> = {}): Record<string, unknown> {
   const project = filled.project;
   const type = isMapping(project) ? project.type : undefined;
   const out = { ...filled };
@@ -200,7 +225,7 @@ function applyAppType(filled: Record<string, unknown>, base: Record<string, unkn
     const uses = appTypeUsesSlot(type, slot);
     if (uses === null) {return filled;}
     if (uses) {
-      keepUsedSlot(out, base, slotLocations(slot));
+      keepUsedSlot(out, base, slot, slot.path.startsWith('stack.') ? facts[slot.path.slice('stack.'.length)] : undefined);
     } else {
       markLeftOutSlot(out, slot);
     }
@@ -209,13 +234,23 @@ function applyAppType(filled: Record<string, unknown>, base: Record<string, unkn
 }
 
 /** A slot the app-type uses takes no `slotignored` from detection: each name
- *  of it gets back what `base` had there (`''` when it had nothing). */
-function keepUsedSlot(out: Record<string, unknown>, base: Record<string, unknown>, locs: string[]): void {
+ *  of it gets back what `base` had there (`''` when it had nothing). Then,
+ *  when the repo has a fact for the slot (`fact`, detection's value whatever
+ *  the type) and the slot holds no real value under any of its names, each
+ *  name the file has that holds none — empty, or typed words, never the
+ *  file's own `slotignored` — gets the fact (the on-wire name when it has
+ *  neither): "if it's a fact, fill the slot". */
+function keepUsedSlot(out: Record<string, unknown>, base: Record<string, unknown>, slot: SlotDef, fact: string | undefined): void {
+  const locs = slotLocations(slot);
   for (const loc of locs) {
     if (isSlotIgnored(fieldAt(out, loc)) && !isSlotIgnored(fieldAt(base, loc))) {
       putField(out, loc, hasField(base, loc) ? fieldAt(base, loc) : '');
     }
   }
+  if (!isFact(fact)) {return;}
+  const present = locs.filter(loc => hasField(out, loc));
+  if (present.some(loc => !isPlaceholder(fieldAt(out, loc)))) {return;} // a real value (or the file's slotignored) stays
+  for (const loc of present.length > 0 ? present : [slot.path]) {putField(out, loc, fact);}
 }
 
 /** A slot the app-type leaves out, with no real value under either of its
