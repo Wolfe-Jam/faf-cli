@@ -145,14 +145,20 @@ describe('ENGINE: 🛡️ one projector — faf cards', () => {
     expect(params.deterministic).toBe(true);
   });
 
-  test('upsertCatalog patches existing A2A row, leaves showcase rows', () => {
+  test('upsertCatalog patches faf\'s own A2A row (exact identifier), leaves showcase rows and another agent\'s A2A row', () => {
     const existing = {
       specVersion: '1.0',
       entries: [
         {
-          identifier: 'urn:air:faf.one:a2a:fafa',
+          identifier: 'urn:air:faf.one:a2a:faf-agent',
           type: 'application/a2a-agent-card+json',
           url: 'https://faf-voice.vercel.app/.well-known/agent-card.json',
+        },
+        {
+          // Another agent's A2A card: the same type and card URL shape, not faf's row.
+          identifier: 'urn:air:faf.one:a2a:fafa',
+          type: 'application/a2a-agent-card+json',
+          url: 'https://example.com/other/.well-known/agent-card.json',
         },
         {
           identifier: 'urn:air:faf.one:context:zeph',
@@ -168,10 +174,11 @@ describe('ENGINE: 🛡️ one projector — faf cards', () => {
       opts: { a2aCardUrl: 'https://faf.one/.well-known/agent-card.json' },
     });
     const next = upsertCatalog(existing, p.catalog!);
-    const a2a = next.entries.find((e) => e.identifier === 'urn:air:faf.one:a2a:fafa')!;
+    const a2a = next.entries.find((e) => e.identifier === 'urn:air:faf.one:a2a:faf-agent')!;
     expect(a2a.url).toBe('https://faf.one/.well-known/agent-card.json');
     expect(a2a.type).toBe('application/a2a-agent-card+json');
     expect(a2a.displayName).toBeUndefined();
+    expect(next.entries[1]).toEqual(existing.entries[1]); // never matched by type or URL
     expect(next.entries.find((e) => e.identifier.endsWith(':zeph'))!.url).toContain('zeph');
   });
 

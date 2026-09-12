@@ -1,4 +1,4 @@
-import { findFafFile, readFaf, readFafRaw } from '../interop/faf.js';
+import { findFafFile, readFafFromString, readFafRaw, withKernel } from '../interop/faf.js';
 import { validateFaf } from '../core/schema.js';
 import * as kernel from '../wasm/kernel.js';
 import { scoreFafYaml } from '../core/scorer.js';
@@ -20,7 +20,11 @@ export function checkCommand(file?: string, options: CheckOptions = {}): void {
     process.exit(2);
   }
 
-  const data = readFaf(fafPath);
+  // Read as every .faf reader reads it, before anything else: a file that is
+  // not valid YAML, or that is a scalar or a list, is the one-line not-yaml
+  // refusal (exit 1). Exit 3 is check's own verdict on a .faf it could read:
+  // a required field missing, or text the kernel does not validate.
+  const data = readFafFromString(readFafRaw(fafPath), fafPath);
   const validation = validateFaf(data);
 
   if (!validation.valid) {
@@ -39,7 +43,7 @@ export function checkCommand(file?: string, options: CheckOptions = {}): void {
 
   console.log(`${fafCyan('valid')} ${fafPath}`);
 
-  const result = scoreFafYaml(yaml);
+  const result = withKernel(fafPath, () => scoreFafYaml(yaml));
   displayScore(result, fafPath, options.verbose);
 
   if (options.strict && result.score < 100) {

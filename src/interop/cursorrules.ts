@@ -1,5 +1,6 @@
 import { join } from 'path';
 import type { FafData } from '../core/types.js';
+import { FAF_CONTEXT_FILES } from '../core/safe-write.js';
 import { fafMetaTag } from './claude.js';
 import { injectFafBlock } from './inject.js';
 import { filled, slotLabel } from './labels.js';
@@ -34,5 +35,5 @@ export function renderCursorrules(data: FafData): string {
 
 /** Write .cursorrules — non-destructive: injects/updates the faf block (hash-comment markers), preserves the rest. */
 export function writeCursorrules(dir: string, data: FafData): void {
-  injectFafBlock(join(dir, '.cursorrules'), renderCursorrules(data), '# faf:start', '# faf:end');
+  injectFafBlock(join(dir, FAF_CONTEXT_FILES.cursorrules), renderCursorrules(data), '# faf:start', '# faf:end');
 }

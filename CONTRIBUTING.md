@@ -33,7 +33,7 @@ faf-cli follows F1-inspired engineering standards:
 
 ### Prerequisites
 
-- Node.js 18 or higher
+- Node.js 22 or higher
 - npm or yarn
 - Git
 - Terminal that supports ANSI colors
@@ -113,11 +113,11 @@ faf-cli has 41 commands organized into categories:
 **Core Commands** (context management):
 - `faf init`, `faf auto`, `faf score`, `faf status`
 
-**Enhancement Commands** (optimization):
-- `faf enhance`, `faf trust`, `faf podium`
+**Slot Commands** (fill from repo facts and from you):
+- `faf auto`, `faf go`, `faf edit`
 
-**Sync Commands** (bi-directional):
-- `faf sync`, `faf bi-sync`, `faf c-mirror`
+**Sync Commands** (one way, `.faf` → CLAUDE.md):
+- `faf sync` (`faf bi-sync` is a hidden alias)
 
 **File Operations** (CRUD):
 - `faf read`, `faf write`, `faf list`, `faf search`
@@ -321,7 +321,7 @@ faf auto
 ### Welcome Contributions
 
 - Additional project type support
-- Enhanced scoring algorithms
+- Scoring improvements
 - Test coverage improvements
 - Documentation improvements
 - Example projects
@@ -401,8 +401,7 @@ Expected performance targets:
 - `faf init`: <50ms
 - `faf score`: <50ms
 - `faf auto`: <200ms (depends on project size)
-- `faf enhance`: <500ms
-- `faf bi-sync`: <100ms
+- `faf sync`: <100ms
 
 ## License
 

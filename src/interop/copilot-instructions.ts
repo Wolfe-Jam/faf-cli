@@ -1,8 +1,8 @@
 import { join } from 'path';
-import { mkdirSync } from 'fs';
 import type { FafData } from '../core/types.js';
+import { FAF_CONTEXT_FILES, makeDirInside } from '../core/safe-write.js';
 import { fafMetaTag } from './claude.js';
-import { injectFafBlock } from './inject.js';
+import { FAF_END, FAF_START, injectFafBlock } from './inject.js';
 import { filled, slotLabel } from './labels.js';
 
 /**
@@ -102,8 +102,11 @@ export function renderCopilotInstructions(data: FafData): string {
 /**
  * Write `.github/copilot-instructions.md` — non-destructive (injects/updates the
  * faf block, preserves the rest). Creates the `.github/` directory if absent.
+ * The project folder is the boundary: a `.github` linked outside it is refused.
  */
 export function writeCopilotInstructions(dir: string, data: FafData): void {
-  mkdirSync(join(dir, '.github'), { recursive: true });
-  injectFafBlock(join(dir, '.github', 'copilot-instructions.md'), renderCopilotInstructions(data));
+  makeDirInside(dir, '.github');
+  injectFafBlock(join(dir, '.github', FAF_CONTEXT_FILES.copilot), renderCopilotInstructions(data), FAF_START, FAF_END, {
+    root: dir,
+  });
 }

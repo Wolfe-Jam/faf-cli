@@ -1,5 +1,6 @@
+import { statSync } from 'fs';
 import { homedir } from 'os';
-import { resolve } from 'path';
+import { parse, resolve } from 'path';
 import { bold, dim, fafCyan } from '../ui/colors.js';
 
 /**
@@ -11,14 +12,39 @@ import { bold, dim, fafCyan } from '../ui/colors.js';
  * cd is the product.
  */
 
-/** True if dir is the user's home directory or the filesystem root. */
-export function isNonProjectRoot(dir: string = process.cwd()): boolean {
+/** Same directory on disk, however it is spelled: device + inode, not the path
+ *  string. Catches a case-variant spelling of home on case-insensitive
+ *  APFS, a symlink to home, and the macOS Data-volume firmlink of the home
+ *  folder. An unreadable path, or a filesystem that reports no inode (0),
+ *  is never "the same". */
+function sameDir(a: string, b: string): boolean {
+  try {
+    const sa = statSync(a, { bigint: true });
+    const sb = statSync(b, { bigint: true });
+    return sa.isDirectory() && sa.ino !== 0n && sa.dev === sb.dev && sa.ino === sb.ino;
+  } catch {
+    return false;
+  }
+}
+
+/** Which non-project root `dir` is — home, the filesystem root — or null. */
+function nonProjectRootKind(dir: string): 'home' | 'root' | null {
   const resolved = resolve(dir);
   const home = resolve(homedir());
-  if (resolved === home) {return true;}
+  const root = parse(resolved).root; // '/' on POSIX, 'C:\' on Windows
+  if (resolved === home) {return 'home';}
   // POSIX root or Windows drive root (C:\ etc.)
-  if (resolved === '/' || /^[A-Za-z]:[\\/]?$/.test(resolved)) {return true;}
-  return false;
+  if (resolved === root || resolved === '/' || /^[A-Za-z]:[\\/]?$/.test(resolved)) {return 'root';}
+  // Spelled differently — compare identity.
+  if (sameDir(resolved, home)) {return 'home';}
+  if (sameDir(resolved, root)) {return 'root';}
+  return null;
+}
+
+/** True if dir is the user's home directory or the filesystem root — compared
+ *  by identity (device + inode), not by spelling. */
+export function isNonProjectRoot(dir: string = process.cwd()): boolean {
+  return nonProjectRootKind(dir) !== null;
 }
 
 /**
@@ -26,9 +52,10 @@ export function isNonProjectRoot(dir: string = process.cwd()): boolean {
  * Call at the top of commands that create or interview project.faf.
  */
 export function assertProjectCwd(dir: string = process.cwd(), command = 'faf'): void {
-  if (!isNonProjectRoot(dir)) {return;}
+  const kind = nonProjectRootKind(dir);
+  if (kind === null) {return;}
 
-  const where = resolve(dir) === resolve(homedir()) ? 'your home directory (~)' : 'the filesystem root';
+  const where = kind === 'home' ? 'your home directory (~)' : 'the filesystem root';
   console.error(`${fafCyan('faf')}: ${where} is not a project.`);
   console.error('');
   console.error(`  ${bold('cd')} into a real repo (or any folder you mean to own), then run again:`);

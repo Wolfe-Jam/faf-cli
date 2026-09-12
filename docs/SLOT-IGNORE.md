@@ -24,6 +24,22 @@ You don't write `slotignored` to skip a slot you haven't filled. If a slot that 
 
 Typing `None` or `N/A` reads as "doesn't apply" to a person, but faf treats it as empty. Whether a slot applies is the app-type's call, never the typed word's. This keeps the score honest: nobody can type their way to ✪.
 
+## Typed words
+
+What `faf auto` does with a typed `None`, `N/A`, `not applicable`, `unknown` or `"null"` (faf-cli 7.13+):
+
+- **A tech slot your app-type uses** (every slot except the 6 Ws): if it's a fact, fill the slot. When the repo has the fact, `faf auto` fills it in place of your words. With no fact, your words stay exactly as typed, comment included, and the slot counts as empty.
+- **A tech slot your app-type leaves out:** the app-type's decision is the fact. `faf auto` writes `slotignored` in place of your words (the comment stays). A real value there is kept.
+- **The 6 Ws** (`human_context.*`) are yours: `faf auto` never replaces typed words there; `faf go` asks for the empty ones.
+- The `library` type faf falls back to when a repo has no classifying signal (`type: library # found: no classifying signals — fallback`) decides no slot while its line carries that note. Set the type yourself, and it decides.
+
+`faf score` prints one line per slot that holds typed words:
+
+```
+stack.database says 'None' — this app-type needs it, so it counts as empty until filled.
+stack.database says 'None' — this app-type doesn't use it; faf auto marks it slotignored (N/A).
+```
+
 ## Example: a CLI tool
 
 ```yaml

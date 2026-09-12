@@ -13,7 +13,7 @@ This doc covers what to read first, how to get unstuck, and where to ask when yo
 | [README.md](README.md) | Install, commands, scoring, sync, the current edition |
 | [CHANGELOG.md](CHANGELOG.md) | What shipped in each version, in order |
 | [docs/SCORING.md](docs/SCORING.md) | Tiers, app-types, and how the score works (✪ Trophy = 100%) |
-| [docs/SYNC.md](docs/SYNC.md) | bi-sync (free) and tri-sync (Pro) |
+| [docs/SYNC.md](docs/SYNC.md) | sync and tri-sync (one way: .faf → CLAUDE.md, .faf → MEMORY.md; both free) |
 | [docs/SLOT-IGNORE.md](docs/SLOT-IGNORE.md) | N/A slots — your app-type decides which slots count |
 | [docs/GUIDE.md](docs/GUIDE.md) | The 6Ws deep dive |
 | [faf.one](https://faf.one) | Official site |
@@ -62,13 +62,13 @@ faf info                       # confirm version
 
 **Sub-Trophy score (anything below 100%)**
 
-From v6.6.0 onward, faf-cli recommends only 🏆 Trophy. Sub-Trophy is an interim state — a slot count from Trophy — not an endpoint.
+From v6.6.0 onward, faf-cli recommends only ✪ Trophy. Sub-Trophy is an interim state — a slot count from Trophy — not an endpoint.
 
 ```bash
 faf score                      # see exactly which slots are empty
 faf auto                       # auto-fill from observable signals
 faf go                         # guided interview for the rest
-faf score                      # verify 🏆 Trophy
+faf score                      # verify ✪ Trophy
 ```
 
 If a slot doesn't apply to your project (e.g. `stack.database` for a CLI tool), check your app-type: faf marks every slot outside it as N/A (`slotignored`). Typing `None` doesn't skip a slot — it counts as empty. See [docs/SLOT-IGNORE.md](docs/SLOT-IGNORE.md).
@@ -97,16 +97,16 @@ faf sync --watch               # continuous push on file change
 
 Default sync is one-way (`.faf → CLAUDE.md`). The `.faf` is the canonical Foundational Context Layer; MD files never write back automatically.
 
-**MD → .faf direction (`faf sync --pull`) blocked**
+**MD → .faf direction (`faf sync --direction pull`) blocked**
 
-v6.6.0+ requires 🏆 Trophy before allowing MD-to-`.faf` backfill. Below 100%, the gate refuses the operation:
+v6.6.0+ requires ✪ Trophy before allowing MD-to-`.faf` backfill. Below 100%, the gate refuses the operation:
 
 ```
-× sync --pull blocked: requires 🏆 Trophy (currently 81%)
+× sync --pull blocked: requires ✪ Trophy (currently 81%)
   MD → .faf backfill only runs at 100%. Reach Trophy with 'faf go', then retry.
 ```
 
-Reach Trophy first (`faf go`), then `--pull` unlocks. See [docs/SYNC.md](docs/SYNC.md).
+Reach Trophy first (`faf go`), then `--direction pull` unlocks. See [docs/SYNC.md](docs/SYNC.md).
 
 ### Terminal output
 
@@ -188,7 +188,7 @@ The full list lives in [README.md](README.md). Most-used:
 
 ```bash
 faf init               # Create .faf from your project
-faf auto               # Zero to 100% in one command
+faf auto               # Fill every tech slot from the repo, then score
 faf go                 # Guided interview to Trophy
 faf score              # Check AI-readiness (0–100%)
 faf sync               # .faf → CLAUDE.md

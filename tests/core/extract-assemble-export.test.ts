@@ -1,15 +1,19 @@
-import { describe, test, expect } from 'bun:test';
-import { mkdtempSync, writeFileSync, rmSync } from 'fs';
+import { afterAll, describe, test, expect } from 'bun:test';
+import { writeFileSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { relentlessContext, assembleFreshFaf } from '../../src/index';
+import { tempDirs } from '../helpers/temp-dirs.js';
+
+const tempFolders = tempDirs();
+afterAll(() => tempFolders.removeAll());
 
 // WJTTC — the relentlessContext + assembleFreshFaf public exports.
 // Present AND populated (not just exported), so MCPs can compose them instead
 // of forking. Verified on a real temp project.
 
 function tmpProject(files: Record<string, string>): string {
-  const d = mkdtempSync(join(tmpdir(), 'faf-export-'));
+  const d = tempFolders.mkdtemp(join(tmpdir(), 'faf-export-'));
   for (const [name, body] of Object.entries(files)) writeFileSync(join(d, name), body);
   return d;
 }
@@ -62,13 +66,13 @@ describe('TYRE: assembleFreshFaf — the .faf builder (public)', () => {
 // 7.12.0 — updateExistingFaf (the `faf auto` existing-file chain) + the interop
 // surface consumers compose instead of port.
 import * as api from '../../src/index';
-import { mkdtempSync, writeFileSync } from 'fs';
+import { writeFileSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 
 describe('TYRE: updateExistingFaf — existing wins, empties are filled (public)', () => {
   test('hand-authored values survive; empty slots are sourced from the repo', () => {
-    const dir = mkdtempSync(join(tmpdir(), 'faf-update-'));
+    const dir = tempFolders.mkdtemp(join(tmpdir(), 'faf-update-'));
     writeFileSync(join(dir, 'package.json'), JSON.stringify({ name: 'repo-name', description: 'Repo description from package.json', scripts: { test: 'vitest', build: 'tsc' }, dependencies: { express: '^4' } }));
     writeFileSync(join(dir, 'README.md'), '# repo-name\n\nRepo description from package.json\n');
     const existing = { project: { name: 'hand-name', goal: '', main_language: 'TypeScript', type: 'backend' }, human_context: { who: 'Hand-written who', what: '' }, stack: { backend: '' } };

@@ -1,6 +1,7 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync } from 'fs';
 import { join } from 'path';
 import type { FafData } from '../core/types.js';
+import { makeDirInside, readUtf8, resolveInside, safeWriteFile } from '../core/safe-write.js';
 
 /**
  * Canonical hosted endpoint for grok-faf-mcp — the URL form Grok CLI chose
@@ -31,25 +32,28 @@ export type GrokWriteStatus = 'created' | 'merged' | 'unchanged';
  *
  * Never overwrites or deletes existing config. A stale url in an existing
  * entry is left untouched (idempotent) — re-point by editing the file.
+ * The project folder is the boundary: a `.grok/` or `config.toml` linked
+ * outside it (or a dangling link) is refused, and writes are atomic. A
+ * config.toml that is not UTF-8 is refused and left as it is.
  */
 export function writeGrokConfig(dir: string, data?: FafData): GrokWriteStatus {
-  const grokDir = join(dir, '.grok');
-  const configPath = join(grokDir, 'config.toml');
   const block = renderGrokConfig(data);
 
+  makeDirInside(dir, '.grok');
+  const configPath = resolveInside(dir, join('.grok', 'config.toml'));
   if (!existsSync(configPath)) {
-    mkdirSync(grokDir, { recursive: true });
     const header = '# grok-faf-mcp — wired by FAF from project.faf\n\n';
-    writeFileSync(configPath, header + block, 'utf-8');
+    // A config.toml that appeared meanwhile is not written over.
+    safeWriteFile(configPath, header + block, { root: dir, expect: null });
     return 'created';
   }
 
-  const existing = readFileSync(configPath, 'utf-8');
+  const existing = readUtf8(configPath);
   if (existing.includes(`[${GROK_MCP_TABLE}]`)) {
     return 'unchanged';
   }
 
   const sep = existing.endsWith('\n\n') ? '' : existing.endsWith('\n') ? '\n' : '\n\n';
-  writeFileSync(configPath, existing + sep + block, 'utf-8');
+  safeWriteFile(configPath, existing + sep + block, { root: dir, expect: existing });
   return 'merged';
 }

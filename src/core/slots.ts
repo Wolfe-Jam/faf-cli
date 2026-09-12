@@ -125,6 +125,34 @@ export const PLACEHOLDERS = new Set([
   'not applicable',
 ]);
 
+/** `None`, `N/A`, `not applicable` (any case):
+ *  a typed none — counts as an empty slot. It scores 0 until filled; faf auto
+ *  fills a tech slot from a repo fact and otherwise keeps the words as typed.
+ *  Only in a tech slot the app-type leaves out does faf auto write
+ *  `slotignored` over them — the app-type's decision, never the words'. */
+export const EXPLICIT_NONE: ReadonlySet<string> = new Set(['none', 'n/a', 'not applicable']);
+
+/** The value that marks a slot as not applicable (the What-Not). It comes
+ *  only from the app-type (shown to people as N/A); a typed word never means it. */
+export const SLOTIGNORED = 'slotignored';
+
+/** True for a typed none — counts as an empty slot: `None`, `N/A`,
+ *  `not applicable`, `none` (any case, any padding). */
+export function isExplicitNone(value: unknown): boolean {
+  return typeof value === 'string' && EXPLICIT_NONE.has(value.trim().toLowerCase());
+}
+
+/** True for words typed into a slot that do not fill it: a typed none
+ *  (`None`, `N/A`, `not applicable`) or any other placeholder word
+ *  (`unknown`, `null` written as a string, …), any case, any padding. Like a
+ *  typed none, they count as an empty slot, and faf keeps them as typed until
+ *  a repo fact fills a tech slot (or, in a tech slot the app-type leaves out,
+ *  `faf auto` marks it `slotignored`). An empty value (`''`, YAML null) is
+ *  not typed words. */
+export function isTypedWords(value: unknown): boolean {
+  return typeof value === 'string' && value.trim() !== '' && isPlaceholder(value);
+}
+
 /** Check if a value is a placeholder (empty) */
 export function isPlaceholder(value: unknown): boolean {
   if (value === null || value === undefined || value === '') {return true;}
@@ -134,6 +162,29 @@ export function isPlaceholder(value: unknown): boolean {
   if (Array.isArray(value) && value.length === 0) {return true;}
   if (typeof value === 'object' && Object.keys(value as object).length === 0) {return true;}
   return false;
+}
+
+/** The `# found:` note of a type detection chose with no classifying signal
+ *  (its `library` fallback). A type carrying it is faf's fallback, not a fact
+ *  about the repo: `faf auto` writes no `slotignored` over typed words on it,
+ *  and `faf score` promises none. */
+export const NO_CLASSIFYING_SIGNALS = 'no classifying signals — fallback';
+
+/** The slots a `framework` repo leaves out although their categories are
+ *  active: framework source code has no CSS framework, UI library, database,
+ *  connection or hosting of its own. */
+const FRAMEWORK_LEAVES_OUT: ReadonlySet<string> = new Set([
+  'stack.css_framework', 'stack.ui_library', 'stack.database', 'stack.connection', 'stack.hosting',
+]);
+
+/** Whether the app-type `type` uses `slot` — the one rule for which slots
+ *  count: the type's active categories, less the slots a `framework` repo
+ *  leaves out. `null` when `type` is not an app-type faf knows (then faf
+ *  cannot tell, and decides nothing from it). */
+export function appTypeUsesSlot(type: unknown, slot: SlotDef): boolean | null {
+  if (typeof type !== 'string' || !Object.prototype.hasOwnProperty.call(APP_TYPE_CATEGORIES, type)) {return null;}
+  if (!APP_TYPE_CATEGORIES[type].includes(slot.category)) {return false;}
+  return !(type === 'framework' && FRAMEWORK_LEAVES_OUT.has(slot.path));
 }
 
 /** App-type to active category mapping. The canonical 24-type ladder —

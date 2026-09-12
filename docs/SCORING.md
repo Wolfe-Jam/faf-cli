@@ -29,7 +29,7 @@ Work surfaces use ✪ for Trophy (not the social emoji 🏆). Sub-Trophy tiers u
 
 1. **33 slots.** Every `.faf` uses the same Mk4 slot set: project (3), human context (6), frontend (4), backend (5), universal (3), and enterprise infra, app and ops (12). faf-cli scores the base tier, slots 1–21. The enterprise tier scores all 33.
 2. **Your app-type decides which slots count.** `project.type` is your app-type. `faf init`, `faf auto` and `faf git` detect it and write `slotignored` into every slot your app-type doesn't use. faf shows these as **N/A**, and they are left out of the score.
-3. **Every other slot is active.** An active slot is either filled or empty. Typing `None`, `N/A`, `null`, `unknown` or `not applicable` doesn't take a slot out of the score — it counts as empty.
+3. **Every other slot is active.** An active slot is either filled or empty. Typing `None`, `N/A`, `null`, `unknown` or `not applicable` doesn't take a slot out of the score — it counts as empty. From faf-cli 7.13, `faf auto` fills such a tech slot when the repo has the fact, and writes `slotignored` over typed words in a slot your app-type leaves out; the 6Ws stay yours (`faf go` asks). See [SLOT-IGNORE.md](./SLOT-IGNORE.md#typed-words).
 4. **Score = filled ÷ active**, as a whole percentage.
 
 | App-type | Categories that count | Active slots |
@@ -50,7 +50,7 @@ An app-type that isn't in this table falls back to `library`. App-types that use
 
 ## Slot keys
 
-Write the keys faf writes. Six slots also have a shorter Mk4 name. faf-cli can read either, but the scoring kernel in faf-cli 7.12 scores the key faf writes, so a file that uses the short name scores that slot as empty.
+Write the keys faf writes. Six slots also have a shorter Mk4 name. faf-cli can read either, but the scoring kernel scores the key faf writes. From faf-cli 7.13, when your file uses the short name, `faf auto` keeps the scored key in step with it (the fact, or `slotignored`), so the score counts what your file says.
 
 | Key faf writes (scored) | Mk4 short name |
 |---|---|

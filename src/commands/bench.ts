@@ -24,9 +24,10 @@
  */
 
 import { createHash } from 'crypto';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
-import { findFafFile, readFafRaw } from '../interop/faf.js';
+import { findFafFile, readFafFromString, readFafRaw, withKernel } from '../interop/faf.js';
+import { readBytesIfPresent, resolveInside, safeReplaceOwned } from '../core/safe-write.js';
 import { scoreFafYaml } from '../core/scorer.js';
 import { SLOTS, readSlotValue, PLACEHOLDERS } from '../core/slots.js';
 import { parse as parseYAML } from 'yaml';
@@ -207,18 +208,36 @@ export interface BenchState {
 
 const STATE_FILE = '.faf-bench.json';
 
-function loadState(dir: string): BenchState | null {
-  const p = join(dir, STATE_FILE);
-  if (!existsSync(p)) {return null;}
+/** True when `bytes` are a bench state faf wrote: its shape (version, qsetHash,
+ *  protocol) in faf's own layout (2-space JSON and a final newline). */
+function isBenchState(bytes: Uint8Array): boolean {
+  const text = new TextDecoder().decode(bytes);
   try {
-    return JSON.parse(readFileSync(p, 'utf-8')) as BenchState;
+    const j = JSON.parse(text) as Partial<BenchState>;
+    return typeof j === 'object' && j !== null && typeof j.version === 'string' && typeof j.qsetHash === 'string' &&
+      j.protocol === 'in-session' && `${JSON.stringify(j, null, 2)}\n` === text;
   } catch {
-    return null;
+    return false;
   }
 }
 
-function saveState(dir: string, state: BenchState): void {
-  writeFileSync(join(dir, STATE_FILE), `${JSON.stringify(state, null, 2)  }\n`, 'utf-8');
+/** The saved bench state (null when there is none faf can use) and the bytes
+ *  read (null when no file) — read inside the project's link rules. */
+function loadState(dir: string): { state: BenchState | null; bytes: Buffer | null } {
+  const bytes = readBytesIfPresent(resolveInside(dir, STATE_FILE));
+  if (bytes === null || !isBenchState(bytes)) {return { state: null, bytes };}
+  return { state: JSON.parse(bytes.toString('utf-8')) as BenchState, bytes };
+}
+
+/** Save the bench state — over nothing, or over a state faf wrote that is
+ *  still what was read (`read`); any other file is refused and left as it is. */
+function saveState(dir: string, state: BenchState, read: Buffer | null): void {
+  safeReplaceOwned(join(dir, STATE_FILE), `${JSON.stringify(state, null, 2)  }\n`, {
+    root: dir,
+    owns: isBenchState,
+    mark: 'faf bench state (2-space JSON with version, qsetHash and protocol)',
+    expect: read,
+  });
 }
 
 /** ✪ receipt — sha256 over the canonical projection; third-party verifiable.
@@ -308,7 +327,10 @@ export function benchCommand(action?: string, answersFile?: string, options: Ben
     process.exit(2);
   }
   const yaml = readFafRaw(fafPath);
-  const qset = deriveQuestionSet(yaml);
+  // Read as a .faf first (not valid YAML, a scalar or a list: the one-line
+  // refusal); what the scoring kernel cannot read is one line too.
+  readFafFromString(yaml, fafPath);
+  const qset = withKernel(fafPath, () => deriveQuestionSet(yaml));
   const dir = dirname(fafPath);
   const project = (parseYAML(yaml) as Record<string, any>)?.project?.name ?? dir.split('/').pop();
 
@@ -345,7 +367,7 @@ export function benchCommand(action?: string, answersFile?: string, options: Ben
       ...(options.model ? { model: options.model } : {}),
     };
 
-    const prior = loadState(dir);
+    const { state: prior, bytes: priorBytes } = loadState(dir);
     const state: BenchState =
       prior && prior.qsetHash === qset.qsetHash
         ? prior
@@ -357,7 +379,7 @@ export function benchCommand(action?: string, answersFile?: string, options: Ben
       console.error('Error: specify the run mode — --cold (no context) or --faf (after reading project.faf).');
       process.exit(2);
     }
-    saveState(dir, state);
+    saveState(dir, state, priorBytes);
 
     if (options.json) {
       const receipt = buildReceipt(state, project);

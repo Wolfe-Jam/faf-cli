@@ -1,7 +1,7 @@
 import { existsSync } from 'fs';
 import { join } from 'path';
 import { autoCommand } from './auto.js';
-import { readFaf, readFafRaw } from '../interop/faf.js';
+import { readFaf, readFafRaw, withKernel } from '../interop/faf.js';
 import * as kernel from '../wasm/kernel.js';
 import { enrichScore } from '../core/scorer.js';
 import { runLoop } from '../core/loop.js';
@@ -28,7 +28,9 @@ export function loopCommand(options: { rounds?: string } = {}): void {
       existsSync(fafPath)
         ? { data: readFaf(fafPath) as Record<string, unknown>, yaml: readFafRaw(fafPath) }
         : { data: {}, yaml: '' },
-    score: (yaml) => (yaml ? enrichScore(kernel.score(yaml)).score : 0),
+    // What the kernel cannot read is one line; the first score comes before
+    // the first auto round, so nothing is written then.
+    score: (yaml) => (yaml ? withKernel(fafPath, () => enrichScore(kernel.score(yaml))).score : 0),
     runAuto: () => autoCommand(),
   };
 

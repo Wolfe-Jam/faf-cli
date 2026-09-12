@@ -189,9 +189,9 @@ describe('AERO: WJTTC — Next.js Edge Cases', () => {
       expect(detectHosting(testDir)).toBe('Netlify');
     });
 
-    test('Docker hosting detected from Dockerfile', () => {
+    test('a bare Dockerfile is not a hosting fact (a container build, not where the app runs)', () => {
       writeFileSync(join(testDir, 'Dockerfile'), 'FROM node:20');
-      expect(detectHosting(testDir)).toBe('Docker');
+      expect(detectHosting(testDir)).toBeNull();
     });
 
     test('pnpm detected from pnpm-lock.yaml', () => {

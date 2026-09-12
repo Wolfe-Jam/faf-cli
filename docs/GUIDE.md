@@ -11,7 +11,7 @@ Every README should answer these questions. Here's ours:
 | **🎯 WHY** do you need it? | 100% context (AI-scored), persists forever, syncs automatically - saves $1000s/developer |
 | **🌍 WHERE** does it work? | Everywhere AI needs context (Claude Code, Gemini CLI, Cursor, etc.) |
 | **⏰ WHEN** should you use it? | New projects (day one), existing projects (now), exploring repos (instantly) |
-| **🚀 HOW** does it work? | `bunx faf-cli git <url>` or `npx faf-cli git <url>` - No install, no clone, 2 seconds |
+| **🚀 HOW** does it work? | `bunx faf-cli git <url>` or `npx faf-cli git <url>` - No install, one shallow clone, 2 seconds |
 
 **For AI:** Read the detailed sections below for full context.
 **For humans:** Use this pattern in YOUR README. Answer these 6 questions clearly.
@@ -67,8 +67,8 @@ Every field in your `project.faf` is validated and scored. No more "I think this
 **2. Context Persists Forever** — Never lost, never re-explained
 Your project DNA is written once, read forever. No context drift across sessions, team members, or AI tools.
 
-**3. Bi-Sync Keeps It Current** — Responds to changes automatically
-When your project evolves, `project.faf` ↔ `CLAUDE.md` stays synchronized in 8ms. Always current, never stale.
+**3. Sync Keeps It Current** — One source of truth, one direction
+When your project evolves, `faf sync` rewrites the faf block in `CLAUDE.md` from `project.faf` (`project.faf` → `CLAUDE.md`, never the other way unless you ask: `faf sync --direction pull` backfills `project.faf` from `CLAUDE.md`, and only at ✪ Trophy). Your own text in `CLAUDE.md` stays as you wrote it.
 
 ---
 
@@ -107,7 +107,7 @@ Good context isn't a "nice to have" — it's the foundation of AI-augmented deve
 At 100% AI Readiness:
 - AI knows your stack, goals, and conventions (scored with facts)
 - Zero clarifying questions needed (context persists)
-- Drift is impossible (bi-sync keeps it current)
+- CLAUDE.md stays current (`faf sync` writes it from `project.faf`)
 - Your project ships on time, within budget, with fewer surprises
 
 ---
@@ -117,7 +117,7 @@ At 100% AI Readiness:
 **Everywhere AI needs context:**
 
 ### Official Integrations
-- **[Claude Code](https://claude.ai/download)** (Anthropic) — Bi-sync + tri-sync with CLAUDE.md + MEMORY.md
+- **[Claude Code](https://claude.ai/download)** (Anthropic) — `faf sync` writes CLAUDE.md from project.faf; tri-sync also writes faf's block into the MEMORY.md Claude Code loads (one way: .faf → MEMORY.md)
 - **[Gemini CLI](https://github.com/google/generative-ai-cli)** (Google) — Import/export GEMINI.md
 - **[Antigravity IDE](https://antigravityide.com)** (Google) — Global config support
 - **[Conductor Extension](https://chromewebstore.google.com/detail/conductor)** (Google) — conductor/ directory sync
@@ -155,28 +155,28 @@ faf init
 ```bash
 faf init                    # Start from your codebase
 faf go                      # Interview to 100%
-faf auto                    # Auto-enhance to Gold Code
+faf auto                    # Fill slots from repo facts
 ```
 
 ### Exploring Repos
-**Instantly.** Author context for ANY GitHub repo WITHOUT cloning:
+**Instantly.** Author context for ANY GitHub repo from one shallow clone:
 ```bash
 bunx faf-cli git https://github.com/facebook/react
 # 2 seconds → 95% ◆ Silver score
-# No install. No clone. Just instant context.
+# No install. One shallow clone. Just instant context.
 ```
 
 ### Daily Workflow
 **Always synced.** Keep context fresh automatically:
 ```bash
-faf bi-sync --watch         # Continuous sync with CLAUDE.md
+faf sync --watch            # Rewrites CLAUDE.md from project.faf on every change
 ```
 
 Add to package.json to see FAF status every dev session:
 ```json
 {
   "scripts": {
-    "predev": "faf status --oneline"
+    "predev": "faf score --status"
   }
 }
 ```
@@ -187,10 +187,10 @@ Add to package.json to see FAF status every dev session:
 
 ### Quick Start (No Install Required)
 
-**Zero install, zero clone:**
+**Zero install, one shallow clone:**
 
 ```bash
-# Generate AI context for ANY GitHub repo
+# Author AI context for ANY GitHub repo
 bunx faf-cli git https://github.com/facebook/react
 # ⏱️ 2 seconds → 95% ◆ Silver score
 
@@ -216,7 +216,7 @@ npm install -g faf-cli    # or: brew install faf-cli
 faf git <repo-url>        # 1-Click Context (90%+)
 faf go                    # Interactive to 100%
 faf auto                  # Full automation
-faf bi-sync               # Keep synced
+faf sync                  # project.faf → CLAUDE.md
 # + 57 more commands
 ```
 

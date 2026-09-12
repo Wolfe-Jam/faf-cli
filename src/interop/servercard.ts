@@ -1,7 +1,8 @@
-import { writeFileSync } from 'fs';
 import { join } from 'path';
 import { deprecate } from 'node:util';
 import type { FafData } from '../core/types.js';
+import { writeRendered } from '../core/render-hash.js';
+import { editJsonText } from '../core/json-edit.js';
 
 /**
  * Build an MCP Server Card (SEP-2127) from a .faf.
@@ -173,19 +174,105 @@ export function registryTitle(data: FafData): string | undefined {
   return undefined;
 }
 
+/** The parsed JSON in `bytes`, or undefined when they are not JSON. */
+function jsonOf(bytes: Uint8Array): unknown {
+  try {
+    return JSON.parse(new TextDecoder().decode(bytes).replace(/^\uFEFF/, ''));
+  } catch {
+    return undefined;
+  }
+}
+
+const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
+
+/** True when `bytes` are a Server Card faf wrote: JSON carrying the FAF
+ *  context-block at `_meta["one.faf/context"]`, as every card faf has
+ *  written does. */
+export function hasServerCardMark(bytes: Uint8Array): boolean {
+  const j = jsonOf(bytes);
+  return isObj(j) && isObj(j._meta) && isObj(j._meta['one.faf/context']);
+}
+
+/** True when `bytes` are a registry `server.json` carrying faf's identity:
+ *  `_meta[REGISTRY_PUBLISHER_KEY]["one.faf/context"]`. */
+export function hasRegistryMark(bytes: Uint8Array): boolean {
+  const j = jsonOf(bytes);
+  const provided = isObj(j) && isObj(j._meta) ? j._meta[REGISTRY_PUBLISHER_KEY] : undefined;
+  return isObj(provided) && isObj(provided['one.faf/context']);
+}
+
+/** Options for the card writers ({@link writeServerCard}, `faf cards`). */
+export interface CardWriteOptions {
+  /** Replace a card faf cannot prove it wrote — no faf mark, edited since
+   *  faf wrote it, or from before 7.13 — the explicit overwrite (`--force`).
+   *  Default: such a file is refused and left as it is. */
+  force?: boolean;
+}
+
 /** Write the Server Card to a `server-card` file. Returns the path.
  *  Per experimental-ext-server-card#22 the reserved location is
  *  `<streamable-http-url>/server-card` (no longer `.well-known`); serve the
- *  emitted file there as `application/mcp-server-card+json`. */
+ *  emitted file there as `application/mcp-server-card+json`.
+ *
+ *  The card carries faf's render hash at `_meta["one.faf/render"]` (the hash
+ *  of the card without that key; the Server Card schema leaves `_meta` open
+ *  for namespaced keys). A `server-card` already there is replaced only when
+ *  it is byte for byte what faf last wrote (its hash still fits); a card edited
+ *  since, a hand-written card, or a card from before 7.13 that is not exactly
+ *  faf's render of `data` is refused (SafePathError `not-owned`) and left byte
+ *  for byte, unless `force`. The write is atomic and never goes through a link
+ *  that leaves `dir` or dangles. */
 export function writeServerCard(
   dir: string,
   data: FafData,
   opts: ServerCardOptions = {},
+  write: CardWriteOptions = {},
 ): string {
   const card = buildServerCard(data, opts);
   const out = join(dir, 'server-card');
-  writeFileSync(out, `${JSON.stringify(card, null, 2)  }\n`, 'utf-8');
+  writeRendered(out, `${JSON.stringify(card, null, 2)  }\n`, {
+    root: dir,
+    format: 'json',
+    hasMark: hasServerCardMark,
+    mark: 'FAF context-block (`_meta["one.faf/context"]`)',
+    force: write.force,
+  });
   return out;
+}
+
+/** The identity faf owns in a registry `server.json`. */
+export interface ServerJsonIdentity {
+  /** The reverse-DNS registry name ({@link registryName}). */
+  name: string;
+  /** The display title ({@link registryTitle}); when undefined the file's own title is kept. */
+  title?: string;
+  /** A version to set (`--set-version`); when undefined the file's own is kept. */
+  version?: string;
+  /** The `_meta` faf writes ({@link registryMeta}). */
+  meta: Record<string, unknown>;
+}
+
+/**
+ * Put faf's identity into the text of a registry `server.json`, changing
+ * nothing else: the `name` value, the `title` (only when faf has one — the
+ * file's own title is kept otherwise), a `version` asked for, and the keys of
+ * faf's context-block under `_meta[REGISTRY_PUBLISHER_KEY]["one.faf/context"]`.
+ * Each is a text edit of that one value, or the key added when missing; no
+ * field is deleted, and every other byte — key order, a 20-digit number, an
+ * array on one line, spacing, CRLF — stays as it was. Throws a JsonEditError,
+ * changing nothing, when the text cannot be edited that way (not valid JSON,
+ * not an object, a key repeated on the way, a `_meta` that is not an object).
+ */
+export function patchServerJson(text: string, identity: ServerJsonIdentity): { text: string; changed: boolean } {
+  const patch: Record<string, unknown> = {
+    name: identity.name,
+    title: identity.title,
+    version: identity.version,
+    _meta: identity.meta,
+  };
+  return editJsonText(text, patch, {
+    '': { name: ['$schema'], title: ['name'], version: ['description', 'title', 'name'] },
+  });
 }
 
 /** @deprecated Use {@link buildServerCard}. Removed in the next major. */

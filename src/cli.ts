@@ -39,6 +39,7 @@ import { wjttcCommand } from './commands/wjttc.js';
 import { benchCommand } from './commands/bench.js';
 import { refreshCommand } from './commands/refresh.js';
 import { memoryCommand } from './commands/memory.js';
+import { isOneLineError, oneLine } from './core/refusal.js';
 
 const { version: VERSION } = require('../package.json');
 
@@ -67,7 +68,7 @@ program
 
 program
   .command('auto')
-  .description('Zero to 100% in one command')
+  .description('Fill every tech slot from the repo, then score')
   .action(() => autoCommand());
 
 program
@@ -106,7 +107,8 @@ program
 program
   .command('show')
   .description('Render project.faf → project.html and open it')
-  .action(() => showCommand());
+  .option('--force', 'Replace a project.html faf cannot prove it rendered (edited since, or not faf\'s)')
+  .action((options) => showCommand(options));
 
 program
   .command('sync')
@@ -121,12 +123,14 @@ program
   .command('compile [file]')
   .description('Compile .faf to .fafb binary')
   .option('--output <path>', 'Output path')
+  .option('--force', 'Replace an output file that is not a .fafb faf compiled')
   .action((file, options) => compileCommand(file, options));
 
 program
   .command('decompile <file>')
   .description('Decompile .fafb to JSON')
   .option('--output <path>', 'Output path')
+  .option('--force', 'With --output: replace a file faf cannot prove it wrote (edited since, or not a faf decompile)')
   .action((file, options) => decompileCommand(file, options));
 
 program
@@ -185,9 +189,10 @@ program
   .option('--llms', 'Author llms.txt (llmstxt.org view of authored 6Ws — opt-in)')
   .option('--conductor', 'Author conductor config')
   .option('--html', 'Author project.html (visual render of project.faf)')
-  .option('--card', 'Author MCP Server Card (.well-known/mcp/server-card) with the FAF context-block')
+  .option('--card', 'Author MCP Server Card (./server-card) with the FAF context-block')
   .option('--all', 'Author all formats')
   .option('--output <path>', 'Write exported files to this directory instead of the current one')
+  .option('--force', 'Replace a project.html or Server Card faf cannot prove it wrote (edited since, or not faf\'s)')
   .action((options) => exportCommand(options));
 
 program
@@ -199,6 +204,7 @@ program
   .option('--set-version <version>', 'Set the version field (default: preserve existing). NOTE: not --version, which is the global CLI-version flag')
   .option('--generated <iso>', 'Override the _meta generated stamp (default: preserve existing)')
   .option('--check', 'Print to stdout, do not write (diff/verify — the idempotency-test hook)')
+  .option('--force', 'With --out: replace a file faf cannot prove it wrote (edited since, or no faf identity)')
   .action((options) => serverCardCommand(options));
 
 program
@@ -212,6 +218,7 @@ program
   .option('--door-url <url>', 'A2A door when .fafa has no a2a endpoint')
   .option('--faf-pointer <url>', 'Absolute .faf pointer for served cards (default: ./project.faf)')
   .option('--check', 'Print projected cards to stdout, do not write')
+  .option('--force', 'Replace a card file faf cannot prove it wrote (edited since, or not faf\'s)')
   .action((options) => cardsCommand(options));
 
 program
@@ -315,13 +322,14 @@ program
   .description('TAF Receipts — `faf taf setup` wires the CI receipt printer; bare snapshot deprecated → faf score --json')
   .option('--output <path>', 'Write score snapshot to file')
   .option('--write', 'taf setup: create .github/workflows/taf.yml')
+  .option('--force', 'With --output: replace a file faf cannot prove it wrote (edited since, or not a TAF snapshot)')
   .action((subcommand, options) => tafCommand(subcommand, options));
 
 // === Phase C Commands ===
 
 program
   .command('ai [subcommand]')
-  .description('AI-powered features (enhance|analyze)')
+  .description('Ask Claude for suggestions about project.faf (analyze)')
   .action((subcommand) => aiCommand(subcommand));
 
 program
@@ -349,6 +357,7 @@ program
   .option('--priority <level>', 'Min priority floor (recall) or etch priority')
   .option('--limit <n>', 'Max recall hits')
   .option('--json', 'JSON output')
+  .option('--force', 'Overwrite an existing soul.fafm (convert)')
   .action((subcommand, arg, options) => memoryCommand(subcommand, arg, options));
 
 // === Soft Deprecation Aliases (v5.x compat) ===
@@ -420,5 +429,22 @@ if (process.argv.length <= 2) {
       '',
     ].join('\n'),
   );
-  program.parse(process.argv);
+  // A refused path (a link out of the project, a dangling link), a file that
+  // is not UTF-8, one that changed on disk while faf was writing, one faf
+  // cannot prove it wrote, or a write that failed with the original kept (a
+  // read-only file, a full disk) is an answer, not a crash: say it in one line
+  // and exit 1. parseAsync, so a refusal inside an async command (faf go,
+  // faf ai) is caught too.
+  program.parseAsync(process.argv).catch((e: unknown) => {
+    if (!isOneLineError(e)) {throw e;}
+    console.error(oneLine(e, commandHasForce()));
+    process.exit(1);
+  });
+}
+
+/** True when the command being run takes --force. */
+function commandHasForce(): boolean {
+  const name = process.argv[2];
+  const cmd = program.commands.find(c => c.name() === name || c.aliases().includes(name));
+  return cmd?.options.some(o => o.long === '--force') ?? false;
 }

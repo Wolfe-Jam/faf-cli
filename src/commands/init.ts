@@ -1,12 +1,13 @@
 import { existsSync } from 'fs';
 import { join } from 'path';
 import { assembleFreshFaf } from '../detect/assemble.js';
-import { writeFaf, readFafRaw } from '../interop/faf.js';
+import { writeFaf, readFafRaw, withKernel } from '../interop/faf.js';
 import { scoreFafYaml } from '../core/scorer.js';
 import { FafDNAManager } from '../core/faf-dna.js';
 import { displayScore } from '../ui/display.js';
 import { bold, dim, fafCyan } from '../ui/colors.js';
 import { assertProjectCwd } from '../core/cwd-guard.js';
+import { refuseMissingOutputFolder } from '../core/refusal.js';
 
 export interface InitOptions {
   yolo?: boolean;
@@ -26,13 +27,16 @@ export function initCommand(options: InitOptions = {}): void {
     console.error(`project.faf already exists. Use ${bold('--force')} to overwrite.`);
     process.exit(1);
   }
+  // An --output folder that is not there is one line: faf does not create it.
+  refuseMissingOutputFolder(options.output);
 
   // Full slot-filling pipeline (shared with `faf auto` + `faf git`).
   const data = assembleFreshFaf(dir);
-  writeFaf(outputPath, data);
+  // --force is the explicit overwrite: a fresh file, not an update of the old one.
+  writeFaf(outputPath, data, { replace: options.force === true });
 
   const yaml = readFafRaw(outputPath);
-  const result = scoreFafYaml(yaml);
+  const result = withKernel(outputPath, () => scoreFafYaml(yaml));
 
   // Birth DNA — the first heartbeat. Records the honest first score (even 0%)
   // in a separate .faf-dna lineage file (keeps the .faf itself clean).

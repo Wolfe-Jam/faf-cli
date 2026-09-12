@@ -17,24 +17,32 @@ function getKernel(): typeof import('faf-scoring-kernel') {
   }
 }
 
-/** Score a .faf YAML string (21 base slots) */
+/** The text the kernel scores: a leading UTF-8 BOM (U+FEFF) left out. The
+ *  kernel reads a BOM before a file's second top-level key as a second YAML
+ *  document and throws; the file itself keeps its BOM. */
+const withoutBom = (yaml: string): string => (yaml.startsWith('\uFEFF') ? yaml.slice(1) : yaml);
+
+/** Score a .faf YAML string (21 base slots), as the file is. A typed None /
+ *  N/A / not applicable at a slot is an empty slot, as in every engine. A
+ *  leading BOM is not scored (`faf auto` and `faf score` read a BOM file). */
 export function score(yaml: string): KernelScoreResult {
-  return JSON.parse(getKernel().score_faf(yaml));
+  return JSON.parse(getKernel().score_faf(withoutBom(yaml)));
 }
 
-/** Score a .faf YAML string (33 enterprise slots) */
+/** Score a .faf YAML string (33 enterprise slots), as the file is (a leading BOM is not scored). */
 export function scoreEnterprise(yaml: string): KernelScoreResult {
-  return JSON.parse(getKernel().score_faf_enterprise(yaml));
+  return JSON.parse(getKernel().score_faf_enterprise(withoutBom(yaml)));
 }
 
-/** Validate .faf YAML */
+/** Validate .faf YAML (a leading BOM is left out, as in {@link score}: `faf check` reads a BOM file). */
 export function validate(yaml: string): boolean {
-  return getKernel().validate_faf(yaml);
+  return getKernel().validate_faf(withoutBom(yaml));
 }
 
-/** Compile .faf YAML to FAFb binary */
+/** Compile .faf YAML to FAFb binary (a leading BOM is not compiled, as in
+ *  {@link score}: `faf compile` and `faf refresh` read a BOM file). */
 export function compile(yaml: string): Uint8Array {
-  return getKernel().compile_fafb(yaml);
+  return getKernel().compile_fafb(withoutBom(yaml));
 }
 
 /** Decompile FAFb binary to JSON info */

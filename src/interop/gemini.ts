@@ -1,5 +1,6 @@
 import { join } from 'path';
 import type { FafData } from '../core/types.js';
+import { FAF_CONTEXT_FILES } from '../core/safe-write.js';
 import { fafMetaTag } from './claude.js';
 import { injectFafBlock } from './inject.js';
 import { filled, slotLabel } from './labels.js';
@@ -105,5 +106,5 @@ export function renderGeminiMd(data: FafData): string {
 
 /** Write GEMINI.md — non-destructive: injects/updates the faf block, preserves the rest. */
 export function writeGeminiMd(dir: string, data: FafData): void {
-  injectFafBlock(join(dir, 'GEMINI.md'), renderGeminiMd(data));
+  injectFafBlock(join(dir, FAF_CONTEXT_FILES.gemini), renderGeminiMd(data));
 }

@@ -236,8 +236,21 @@ describe('scanner', () => {
       expect(detectPackageManager(testDir)).toBe('yarn');
     });
 
-    test('defaults to npm', () => {
-      expect(detectPackageManager(testDir)).toBe('npm');
+    test('no evidence → nothing (never a guessed npm)', () => {
+      expect(detectPackageManager(testDir)).toBe('');
+      writeFileSync(join(testDir, 'package.json'), '{"name":"x"}'); // a package.json alone names no manager
+      expect(detectPackageManager(testDir)).toBe('');
+    });
+
+    test('package.json `packageManager` is a fact, read before lockfiles', () => {
+      writeFileSync(join(testDir, 'package.json'), JSON.stringify({ name: 'x', packageManager: 'pnpm@9.1.0' }));
+      expect(detectPackageManager(testDir)).toBe('pnpm');
+      writeFileSync(join(testDir, 'package-lock.json'), '{}');
+      expect(detectPackageManager(testDir)).toBe('pnpm');
+      writeFileSync(join(testDir, 'package.json'), JSON.stringify({ name: 'x', packageManager: 'yarn@4.1.0+sha224.abc' }));
+      expect(detectPackageManager(testDir)).toBe('yarn');
+      writeFileSync(join(testDir, 'package.json'), JSON.stringify({ name: 'x', packageManager: 'not a manager' }));
+      expect(detectPackageManager(testDir)).toBe('npm'); // the lockfile is then the fact
     });
   });
 
@@ -258,9 +271,9 @@ describe('scanner', () => {
       expect(detectHosting(testDir)).toBe('Vercel');
     });
 
-    test('detects Docker', () => {
+    test('a bare Dockerfile is not a hosting fact', () => {
       writeFileSync(join(testDir, 'Dockerfile'), 'FROM node');
-      expect(detectHosting(testDir)).toBe('Docker');
+      expect(detectHosting(testDir)).toBeNull();
     });
   });
 

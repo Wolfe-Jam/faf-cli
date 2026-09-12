@@ -1,22 +1,54 @@
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, lstatSync } from 'fs';
 import { join } from 'path';
-import { findFafFile, readFaf, writeFaf } from '../interop/faf.js';
+import { aliasKeptNote, findFafFile, readFaf, writeFaf } from '../interop/faf.js';
 import { parseClaudeMd } from '../interop/claude.js';
+import { SafePathError, readUtf8, resolveInside } from '../core/safe-write.js';
+import { oneLine } from '../core/refusal.js';
 import { fafCyan, dim, bold } from '../ui/colors.js';
 import type { FafData } from '../core/types.js';
 import { FAF_VERSION } from '../core/version.js';
+
+/** True when something is at `path` — a file, or a link (even a dangling one). */
+function present(path: string): boolean {
+  try {
+    lstatSync(path);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** A context file to recover from, read the way faf reads project context:
+ *  inside the project only (a link must stay in it and end at a .faf/.fafm
+ *  file, or at another AI context file — CLAUDE.md → AGENTS.md, the rule the
+ *  writers use; never ~/.aws/credentials behind an AGENTS.md link, never
+ *  README.md behind a CLAUDE.md link) and strictly as UTF-8 (a cp1252 file is
+ *  never turned into U+FFFD). null when it is not there, or when it is
+ *  refused — the refusal is printed as its one line and the file is skipped
+ *  as a source. */
+function readSource(dir: string, name: string, refused: string[]): string | null {
+  if (!present(join(dir, name))) {return null;}
+  try {
+    return readUtf8(resolveInside(dir, name, { read: true }));
+  } catch (e) {
+    if (!(e instanceof SafePathError)) {throw e;}
+    console.error(oneLine(e, false));
+    refused.push(name);
+    return null;
+  }
+}
 
 /** Recover .faf from context files (CLAUDE.md, AGENTS.md, GEMINI.md, .cursorrules) */
 export function recoverCommand(): void {
   const dir = process.cwd();
   const sources: string[] = [];
+  const refused: string[] = [];
   const data: FafData = { faf_version: FAF_VERSION, project: {} };
 
   // Try CLAUDE.md first (richest source)
-  const claudePath = join(dir, 'CLAUDE.md');
-  if (existsSync(claudePath)) {
-    const content = readFileSync(claudePath, 'utf-8');
-    const parsed = parseClaudeMd(content);
+  const claude = readSource(dir, 'CLAUDE.md', refused);
+  if (claude !== null) {
+    const parsed = parseClaudeMd(claude);
     if (parsed.project?.name) {data.project!.name = parsed.project.name;}
     if (parsed.project?.goal) {data.project!.goal = parsed.project.goal;}
     if (parsed.project?.main_language) {data.project!.main_language = parsed.project.main_language;}
@@ -24,22 +56,20 @@ export function recoverCommand(): void {
   }
 
   // Try AGENTS.md
-  const agentsPath = join(dir, 'AGENTS.md');
-  if (existsSync(agentsPath)) {
-    const content = readFileSync(agentsPath, 'utf-8');
+  const agents = readSource(dir, 'AGENTS.md', refused);
+  if (agents !== null) {
     if (!data.project!.name) {
-      const m = content.match(/^#\s+(.+)/m);
+      const m = agents.match(/^#\s+(.+)/m);
       if (m) {data.project!.name = m[1].trim();}
     }
     sources.push('AGENTS.md');
   }
 
   // Try GEMINI.md
-  const geminiPath = join(dir, 'GEMINI.md');
-  if (existsSync(geminiPath)) {
-    const content = readFileSync(geminiPath, 'utf-8');
+  const gemini = readSource(dir, 'GEMINI.md', refused);
+  if (gemini !== null) {
     if (!data.project!.name) {
-      const m = content.match(/^#\s+(.+)/m);
+      const m = gemini.match(/^#\s+(.+)/m);
       if (m) {data.project!.name = m[1].trim();}
     }
     sources.push('GEMINI.md');
@@ -52,6 +82,10 @@ export function recoverCommand(): void {
   }
 
   if (sources.length === 0) {
+    if (refused.length > 0) {
+      console.error(`Nothing to recover from: ${refused.join(', ')} ${refused.length === 1 ? 'was' : 'were'} refused (above), and no other context file is there. Nothing was written.`);
+      process.exit(1);
+    }
     console.error('No context files found (CLAUDE.md, AGENTS.md, GEMINI.md, .cursorrules).');
     process.exit(2);
   }
@@ -64,7 +98,7 @@ export function recoverCommand(): void {
     if (data.project!.name && !prev.project.name) {prev.project.name = data.project!.name;}
     if (data.project!.goal && !prev.project.goal) {prev.project.goal = data.project!.goal;}
     if (data.project!.main_language && !prev.project.main_language) {prev.project.main_language = data.project!.main_language;}
-    writeFaf(existing, prev);
+    writeFaf(existing, prev, { onAliasKept: k => console.log(dim(`  ${aliasKeptNote(k)}`)) });
     console.log(`${fafCyan('◆')} recover  merged into ${existing}`);
   } else {
     const outPath = join(dir, 'project.faf');

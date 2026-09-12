@@ -1,5 +1,6 @@
 import { join } from 'path';
 import type { FafData } from '../core/types.js';
+import { FAF_CONTEXT_FILES } from '../core/safe-write.js';
 import { injectFafBlock } from './inject.js';
 import { filled } from './labels.js';
 
@@ -70,5 +71,5 @@ export function renderLlmsTxt(data: FafData): string {
 
 /** Write llms.txt — non-destructive: injects/updates the faf block, preserves the rest. */
 export function writeLlmsTxt(dir: string, data: FafData): void {
-  injectFafBlock(join(dir, 'llms.txt'), renderLlmsTxt(data));
+  injectFafBlock(join(dir, FAF_CONTEXT_FILES.llms), renderLlmsTxt(data));
 }

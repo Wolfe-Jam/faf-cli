@@ -2,17 +2,17 @@
 
 **One command. Every agent in your session gets the same accurate, versioned context.**
 
-FAF-CLI (v7.1, "The AGENTS.md Edition") is the canonical tool for the [`.faf` format](https://faf.one): persistent, versioned, AI-readable project context. It runs straight through Bun's package runner — `bunx faf` — detects your Bun stack, and emits the context files AI coding tools read. It's bundled with `bun build`, so it's built the way you build. Part of the FAF ecosystem — over 100k downloads; see [faf.one/downloads](https://faf.one/downloads) for latest stats.
+FAF-CLI is the canonical tool for the [`.faf` format](https://faf.one): persistent, versioned, AI-readable project context. It runs straight through Bun's package runner — `bunx faf auto` — detects your Bun stack, and writes the context files AI coding tools read. It's bundled with `bun build`, so it's built the way you build. Part of the FAF ecosystem — over 100k downloads; see [faf.one/downloads](https://faf.one/downloads) for latest stats.
 
 ---
 
 ## Quick start (zero-install)
 
 ```bash
-bunx faf                     # auto-detect the stack, write project.faf, score it
-bunx faf export --agents     # generate AGENTS.md agents actually read
+bunx faf auto                # auto-detect the stack, write project.faf, score it
+bunx faf export --agents     # author AGENTS.md agents actually read
 bunx faf score               # AI-readiness score (target: Trophy 100%)
-bunx faf git owner/repo      # instant, scored context for any remote repo — no clone
+bunx faf git owner/repo      # instant, scored context for any remote repo — one shallow clone
 ```
 
 No `bun add -g` needed — `bunx` runs the latest faf-cli on demand. Add `bunx faf export --agents` to a `package.json` script or a pre-commit hook and context files stay fresh.

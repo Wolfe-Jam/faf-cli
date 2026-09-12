@@ -4,50 +4,44 @@
 
 ## What is tri-sync?
 
-FAF has two layers of memory:
+FAF writes your project context in one direction, from one source:
 
 ```
-bi-sync:   project.faf  <-->  CLAUDE.md                    (free forever)
-tri-sync:  project.faf  <-->  CLAUDE.md  <-->  MEMORY.md   (free forever)
+sync:      project.faf  →  CLAUDE.md                      (free forever)
+tri-sync:  project.faf  →  CLAUDE.md  +  MEMORY.md        (free forever)
 ```
 
 - **ROM** (`.faf`) — Your project DNA. Stack, conventions, architecture. Defined once, portable everywhere.
-- **RAM** (`MEMORY.md`) — Session memory. Your AI remembers project context, decisions, and conventions across every session. No more re-explaining.
+- **RAM** (`MEMORY.md`) — Session memory. The MEMORY.md Claude Code loads for your project (`~/.claude/projects/<id>/memory/MEMORY.md`) carries your project context into every session. No more re-explaining.
 
-bi-sync keeps your `.faf` and `CLAUDE.md` in sync. tri-sync adds RAM — persistent session memory that survives across every AI session. Both are free, no trial, no license, no catch — `.faf` relies on tri-sync now, so it has to be.
+`faf sync` writes faf's block in `CLAUDE.md` from your `.faf`. tri-sync also writes faf's block into Claude Code's `MEMORY.md`. Both are free, no trial, no license, no catch — `.faf` relies on tri-sync now, so it has to be.
+
+Nothing flows back into `.faf` on its own. The one way sync writes back is `faf sync --direction pull`, which backfills `.faf` from `CLAUDE.md` and runs only at ✪ Trophy (100%). `faf recover` rebuilds name, goal and language from your context files when you ask it to.
 
 ## Commands
 
 ```bash
-faf tri-sync    # ROM <-> CLAUDE.md <-> MEMORY.md
-faf ram export  # ROM -> RAM (seed Claude's memory)
-faf ram import  # RAM -> ROM (harvest Claude's notes)
-faf ram sync    # Bidirectional sync
-faf ram status  # Show sync status
+faf pro activate           # Shows how to turn tri-sync on: export FAF_PRO=1
+FAF_PRO=1 faf sync         # .faf → CLAUDE.md, and .faf → MEMORY.md
+FAF_PRO=1 faf sync --watch # The same, on every change to .faf
 ```
 
 ## How It Works
 
-tri-sync is merge-safe. It preserves Claude's existing notes and only touches the FAF section of MEMORY.md. Your AI's own observations stay intact.
+tri-sync is merge-safe. It writes only faf's own block in MEMORY.md and keeps every line Claude wrote there, byte for byte. A run that changes nothing writes nothing, and faf says what it did (created, updated, block added on top, unchanged).
 
 ```bash
-# Seed Claude's memory with your project context
-faf ram export
-
-# After working with Claude, harvest what it learned
-faf ram import
-
-# Or just sync both ways
-faf ram sync
+# Put your project context into Claude's memory
+FAF_PRO=1 faf sync
 ```
 
-The 200-line MEMORY.md ceiling is respected — tri-sync warns you if you're approaching the limit.
+Claude Code loads the first 200 lines of MEMORY.md — faf tells you when the file runs past that.
 
 ## FAQ
 
-**What's the difference between bi-sync and tri-sync?**
-bi-sync: `.faf` <-> `CLAUDE.md` (project structure). Free.
-tri-sync: adds `MEMORY.md` (session memory). Also free.
+**What's the difference between sync and tri-sync?**
+sync: `.faf` → `CLAUDE.md` (project structure). Free.
+tri-sync: also `.faf` → `MEMORY.md` (session memory). Also free.
 
 **Is there a paid tier for faf-cli?**
 No. Every command in faf-cli is free, unlimited, forever. Pro features (the Rust `.fafb` compiler suite — `faf compile`, `faf bench`, Glass Hood diagnostics) live in the separate `rust-faf-cli` package. See [faf.one/pro](https://faf.one/pro).

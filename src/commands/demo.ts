@@ -1,16 +1,16 @@
-import { mkdirSync, writeFileSync, rmSync } from 'fs';
-import { tmpdir } from 'os';
 import { join } from 'path';
-import { readFafRaw } from '../interop/faf.js';
+import { readFafRaw, withKernel } from '../interop/faf.js';
 import * as kernel from '../wasm/kernel.js';
 import { enrichScore } from '../core/scorer.js';
 import { displayScore } from '../ui/display.js';
 import { fafCyan, dim, bold } from '../ui/colors.js';
+import { makeTempDir, removeTempDir, safeWriteFile } from '../core/safe-write.js';
 
 /** Demo walkthrough — show what faf does without modifying user's project */
 export function demoCommand(): void {
-  const demoDir = join(tmpdir(), `faf-demo-${Date.now()}`);
-  mkdirSync(demoDir, { recursive: true });
+  // A fresh temp folder of faf's own (mkdtemp: no one else can have made it),
+  // removed at the end — the user's project is never touched.
+  const demoDir = makeTempDir('faf-demo-');
 
   console.log(`${fafCyan('demo')} ${dim('— FAF in action')}\n`);
 
@@ -43,19 +43,19 @@ human_context:
 `;
 
   const fafPath = join(demoDir, 'project.faf');
-  writeFileSync(fafPath, sampleYaml);
+  safeWriteFile(fafPath, sampleYaml, { root: demoDir, expect: null });
 
   console.log(`  ${bold('1.')} Created sample project.faf`);
   console.log(dim(`     ${fafPath}\n`));
 
   // Step 2: Score it
   console.log(`  ${bold('2.')} Scoring...`);
-  const result = enrichScore(kernel.score(readFafRaw(fafPath)));
+  const result = withKernel(fafPath, () => enrichScore(kernel.score(readFafRaw(fafPath))));
   console.log('');
   displayScore(result, 'project.faf', true);
 
   // Cleanup
-  rmSync(demoDir, { recursive: true, force: true });
+  removeTempDir(demoDir);
 
   console.log(`\n${dim('  Demo complete. Run "faf init" in your project to get started.')}`);
 }

@@ -99,13 +99,14 @@ jobs:
           name: dist-files
           path: dist/
 
-  # Node Smoke Test — npx users still work
+  # Node Smoke Test — npx users still work. The low end of this matrix IS the
+  # engines.node floor (scripts/check-engines.mjs gates it).
   node-compat:
     name: Node Smoke Test
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [18.x, 20.x, 22.x]
+        node: [22.x, 24.x]
 
     steps:
       - uses: actions/checkout@v7
@@ -179,6 +180,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Engine floor gate
+        run: npm run check:engines  # HARD gate — engines.node floor == lowest Node in the ci.yml and release.yml matrices
 
       - name: Lint
         run: npm run lint
@@ -277,7 +281,7 @@ jobs:
             echo "FAIL Node Compat: ${{ needs.node-compat.result }}"
             failed=1
           else
-            echo "PASS Node Compat: 18.x, 20.x, 22.x"
+            echo "PASS Node Compat: 22.x, 24.x"
           fi
 
           if [ "${{ needs.quality.result }}" != "success" ]; then

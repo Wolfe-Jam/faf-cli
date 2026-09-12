@@ -29,6 +29,16 @@
  * 🏆 199 formats - CHAMPIONSHIP GRADE FORMAT DETECTION
  */
 
+/**
+ * A slot value here must name what the file itself proves, in a slot that
+ * value fills: `vercel.json` → hosting Vercel; `Dockerfile` → no hosting (it
+ * shows a container build, not where the app runs); `jest.config.js` →
+ * nothing for CI/CD (Jest is a test runner, not a pipeline). No generic words ('Cloud',
+ * 'Containerized', 'API Server'), no language in a framework or backend slot,
+ * and no `runtime: Node.js` from a framework config alone — package.json is
+ * that fact, and detectRuntime reads it. `faf auto` writes these values into
+ * project.faf, so a value that is not a fact about the repo is a guess.
+ */
 export interface FormatKnowledge {
   frameworks: string[];           // Possible frameworks this format indicates
   slots: Partial<ContextSlots>;  // Direct Context-On-Demand slot mappings
@@ -103,11 +113,10 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
 
   'README.md': {
     frameworks: [], // Can be any framework
-    slots: {
-      targetUser: 'developers', // Often contains who it's for
-      coreProblem: 'understanding project', // Usually describes the problem
-      missionPurpose: 'project documentation' // Contains the why
-    },
+    // No slot values: a README's who/what/why is read from its TEXT by the
+    // Relentless extractor. Constant guesses here ('developers', …) were
+    // asserted for every repo with a README — sourced-only forbids that.
+    slots: {},
     priority: 25, // HIGH: Human context goldmine
     intelligence: 'high'
   },
@@ -136,8 +145,7 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
     frameworks: ['Python'],
     slots: {
       mainLanguage: 'Python',
-      runtime: 'Python',
-      backend: 'Python'
+      runtime: 'Python'
     },
     priority: 36,
     intelligence: 'ultra-high'
@@ -297,7 +305,6 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
     frameworks: ['Next.js'],
     slots: { 
       framework: 'Next.js',
-      runtime: 'Node.js',
       buildTool: 'Next.js',
       mainLanguage: 'JavaScript',
       server: 'Node.js'
@@ -310,7 +317,6 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
     frameworks: ['Next.js'],
     slots: { 
       framework: 'Next.js',
-      runtime: 'Node.js',
       buildTool: 'Next.js',
       mainLanguage: 'JavaScript',
       server: 'Node.js'
@@ -323,7 +329,6 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
     frameworks: ['Next.js 13+'],
     slots: { 
       framework: 'Next.js 13+',
-      runtime: 'Node.js',
       buildTool: 'Next.js',
       mainLanguage: 'TypeScript',
       server: 'Node.js'
@@ -336,7 +341,6 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
     frameworks: ['Nuxt 2'],
     slots: { 
       framework: 'Nuxt 2',
-      runtime: 'Node.js',
       buildTool: 'Nuxt',
       mainLanguage: 'JavaScript',
       server: 'Node.js'
@@ -349,7 +353,6 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
     frameworks: ['Nuxt 3'],
     slots: { 
       framework: 'Nuxt 3',
-      runtime: 'Node.js',
       buildTool: 'Nuxt',
       mainLanguage: 'TypeScript',
       server: 'Node.js'
@@ -415,7 +418,6 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
     frameworks: ['Remix'],
     slots: { 
       framework: 'Remix',
-      runtime: 'Node.js',
       mainLanguage: 'JavaScript',
       server: 'Node.js'
     },
@@ -557,7 +559,6 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
     slots: { 
       backend: 'Strapi',
       apiType: 'REST API',
-      database: 'Required',
       server: 'Node.js'
     },
     priority: 30,
@@ -568,12 +569,10 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   // HIGH VALUE (30 points) - Infrastructure
   // ============================================
   
+  // A Dockerfile shows a container build, not where the app runs: no hosting.
   'Dockerfile': {
     frameworks: ['Docker'],
-    slots: { 
-      hosting: 'Docker',
-      connection: 'Containerized'
-    },
+    slots: {},
     priority: 30,
     intelligence: 'high'
   },
@@ -581,8 +580,7 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   'docker-compose.yml': {
     frameworks: ['Docker Compose'],
     slots: { 
-      hosting: 'Docker',
-      connection: 'Multi-container'
+      hosting: 'Docker'
     },
     priority: 30,
     intelligence: 'high'
@@ -591,8 +589,7 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   'docker-compose.yaml': {
     frameworks: ['Docker Compose'],
     slots: { 
-      hosting: 'Docker',
-      connection: 'Multi-container'
+      hosting: 'Docker'
     },
     priority: 30,
     intelligence: 'high'
@@ -601,8 +598,7 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   'kubernetes.yml': {
     frameworks: ['Kubernetes'],
     slots: { 
-      hosting: 'Kubernetes',
-      connection: 'Orchestrated'
+      hosting: 'Kubernetes'
     },
     priority: 30,
     intelligence: 'high'
@@ -611,8 +607,7 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   'k8s.yaml': {
     frameworks: ['Kubernetes'],
     slots: { 
-      hosting: 'Kubernetes',
-      connection: 'Orchestrated'
+      hosting: 'Kubernetes'
     },
     priority: 30,
     intelligence: 'high'
@@ -817,7 +812,6 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   'jest.config.js': {
     frameworks: ['Jest'],
     slots: { 
-      cicd: 'Jest'
     },
     priority: 25,
     intelligence: 'medium'
@@ -826,7 +820,6 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   'jest.config.ts': {
     frameworks: ['Jest'],
     slots: { 
-      cicd: 'Jest',
       mainLanguage: 'TypeScript'
     },
     priority: 25,
@@ -836,7 +829,6 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   'vitest.config.ts': {
     frameworks: ['Vitest'],
     slots: { 
-      cicd: 'Vitest',
       mainLanguage: 'TypeScript'
     },
     priority: 25,
@@ -846,7 +838,6 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   'cypress.config.js': {
     frameworks: ['Cypress'],
     slots: { 
-      cicd: 'Cypress'
     },
     priority: 25,
     intelligence: 'medium'
@@ -855,7 +846,6 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   'playwright.config.ts': {
     frameworks: ['Playwright'],
     slots: { 
-      cicd: 'Playwright',
       mainLanguage: 'TypeScript'
     },
     priority: 25,
@@ -865,7 +855,6 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   'karma.conf.js': {
     frameworks: ['Karma'],
     slots: { 
-      cicd: 'Karma'
     },
     priority: 20,
     intelligence: 'medium'
@@ -874,7 +863,6 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   'mocha.opts': {
     frameworks: ['Mocha'],
     slots: { 
-      cicd: 'Mocha'
     },
     priority: 20,
     intelligence: 'medium'
@@ -883,7 +871,6 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   '.rspec': {
     frameworks: ['RSpec'],
     slots: { 
-      cicd: 'RSpec',
       mainLanguage: 'Ruby'
     },
     priority: 25,
@@ -893,7 +880,6 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   'pytest.ini': {
     frameworks: ['Pytest'],
     slots: { 
-      cicd: 'Pytest',
       mainLanguage: 'Python'
     },
     priority: 25,
@@ -903,7 +889,6 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   'phpunit.xml': {
     frameworks: ['PHPUnit'],
     slots: { 
-      cicd: 'PHPUnit',
       mainLanguage: 'PHP'
     },
     priority: 25,
@@ -1438,7 +1423,6 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
       packageManager: 'Zig Package Manager',
       mainLanguage: 'Zig',
       buildTool: 'zig build',
-      framework: 'Zig',
       // snake_case slots (template compatibility)
       build: 'zig build'
     },
@@ -1453,8 +1437,7 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   'openapi.json': {
     frameworks: ['OpenAPI'],
     slots: { 
-      apiType: 'REST API',
-      backend: 'API Server'
+      apiType: 'REST API'
     },
     priority: 30,
     intelligence: 'high'
@@ -1463,8 +1446,7 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   'openapi.yaml': {
     frameworks: ['OpenAPI'],
     slots: { 
-      apiType: 'REST API',
-      backend: 'API Server'
+      apiType: 'REST API'
     },
     priority: 30,
     intelligence: 'high'
@@ -1473,8 +1455,7 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   'swagger.json': {
     frameworks: ['Swagger'],
     slots: { 
-      apiType: 'REST API',
-      backend: 'API Server'
+      apiType: 'REST API'
     },
     priority: 30,
     intelligence: 'high'
@@ -1483,8 +1464,7 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   'graphql.schema': {
     frameworks: ['GraphQL'],
     slots: { 
-      apiType: 'GraphQL',
-      backend: 'GraphQL Server'
+      apiType: 'GraphQL'
     },
     priority: 30,
     intelligence: 'high'
@@ -1493,8 +1473,7 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   'schema.graphql': {
     frameworks: ['GraphQL'],
     slots: { 
-      apiType: 'GraphQL',
-      backend: 'GraphQL Server'
+      apiType: 'GraphQL'
     },
     priority: 30,
     intelligence: 'high'
@@ -1712,9 +1691,7 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
     frameworks: ['MLflow'],
     slots: {
       mainLanguage: 'Python',
-      framework: 'MLflow',
-      backend: 'MLflow',
-      cicd: 'MLflow'
+      backend: 'MLflow'
     },
     priority: 30,
     intelligence: 'high'
@@ -1724,7 +1701,6 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
     frameworks: ['DVC', 'Data Version Control'],
     slots: {
       mainLanguage: 'Python',
-      framework: 'DVC',
       cicd: 'DVC Pipelines'
     },
     priority: 30,
@@ -1734,7 +1710,6 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   'dvc.lock': {
     frameworks: ['DVC'],
     slots: {
-      framework: 'DVC'
     },
     priority: 20,
     intelligence: 'medium'
@@ -1783,7 +1758,6 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   'codecov.yml': {
     frameworks: ['Codecov'],
     slots: {
-      cicd: 'Codecov'
     },
     priority: 25,
     intelligence: 'high'
@@ -1792,7 +1766,6 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   'dependabot.yml': {
     frameworks: ['Dependabot', 'GitHub'],
     slots: {
-      cicd: 'Dependabot'
     },
     priority: 25,
     intelligence: 'high'
@@ -1801,7 +1774,6 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   'renovate.json': {
     frameworks: ['Renovate'],
     slots: {
-      cicd: 'Renovate'
     },
     priority: 25,
     intelligence: 'high'
@@ -1960,8 +1932,7 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   'Chart.yaml': {
     frameworks: ['Helm', 'Kubernetes'],
     slots: {
-      hosting: 'Kubernetes',
-      backend: 'Helm'
+      hosting: 'Kubernetes'
     },
     priority: 30,
     intelligence: 'high'
@@ -1980,7 +1951,6 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   'pulumi.yaml': {
     frameworks: ['Pulumi'],
     slots: {
-      hosting: 'Cloud',
       cicd: 'Pulumi'
     },
     priority: 30,
@@ -1990,7 +1960,6 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   'Pulumi.yaml': {
     frameworks: ['Pulumi'],
     slots: {
-      hosting: 'Cloud',
       cicd: 'Pulumi'
     },
     priority: 30,
@@ -2000,7 +1969,6 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   'terragrunt.hcl': {
     frameworks: ['Terragrunt', 'Terraform'],
     slots: {
-      hosting: 'Cloud',
       cicd: 'Terragrunt'
     },
     priority: 30,
@@ -2109,7 +2077,6 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   'sonar-project.properties': {
     frameworks: ['SonarQube', 'SonarCloud'],
     slots: {
-      cicd: 'SonarQube'
     },
     priority: 25,
     intelligence: 'high'
@@ -2214,7 +2181,6 @@ export const KNOWLEDGE_BASE: Record<string, FormatKnowledge> = {
   '.pre-commit-config.yaml': {
     frameworks: ['pre-commit'],
     slots: {
-      cicd: 'pre-commit'
     },
     priority: 25,
     intelligence: 'high'

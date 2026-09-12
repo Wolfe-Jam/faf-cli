@@ -1,6 +1,6 @@
 import { join } from 'path';
 import open from 'open';
-import { findFafFile, readFaf, readFafRaw } from '../interop/faf.js';
+import { findFafFile, readFaf, readFafRaw, withKernel } from '../interop/faf.js';
 import { writeProjectHtml } from '../interop/projecthtml.js';
 import { scoreFafYaml } from '../core/scorer.js';
 import { dim, fafCyan } from '../ui/colors.js';
@@ -26,7 +26,12 @@ function openInBrowser(file: string): boolean {
   }
 }
 
-export function showCommand(): void {
+export interface ShowOptions {
+  /** Replace a project.html faf cannot prove it rendered (edited since, or no faf mark). */
+  force?: boolean;
+}
+
+export function showCommand(options: ShowOptions = {}): void {
   const fafPath = findFafFile();
   if (!fafPath) {
     console.error("Error: project.faf not found\n\n  Run 'faf init' to create one.");
@@ -36,8 +41,8 @@ export function showCommand(): void {
   const dir = process.cwd();
   const data = readFaf(fafPath);
   // Real scorer — never a reimplementation. Same pipeline as export --html.
-  const result = scoreFafYaml(readFafRaw(fafPath));
-  writeProjectHtml(dir, data, result, fafPath);
+  const result = withKernel(fafPath, () => scoreFafYaml(readFafRaw(fafPath)));
+  writeProjectHtml(dir, data, result, fafPath, { force: options.force });
 
   const htmlPath = join(dir, 'project.html');
   const opened = openInBrowser(htmlPath);

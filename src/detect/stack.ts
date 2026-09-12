@@ -1,5 +1,5 @@
-import type { FafData } from '../core/types.js';
-import { APP_TYPE_CATEGORIES, SLOTS } from '../core/slots.js';
+import type { FafData, SlotDef } from '../core/types.js';
+import { SLOTS, appTypeUsesSlot } from '../core/slots.js';
 import { FAF_VERSION } from '../core/version.js';
 import {
   detectFrameworks,
@@ -19,8 +19,29 @@ import {
   detectTechStack,
 } from './scanner.js';
 
-/** Auto-detect project stack and generate .faf data */
+/** The major version of the `svelte` dependency package.json names
+ *  (`^5.0.0` → 5), or NaN when it names none or no number. */
+function svelteMajor(pkg: ReturnType<typeof readPackageJson>): number {
+  const range = pkg?.dependencies?.svelte ?? pkg?.devDependencies?.svelte;
+  const major = typeof range === 'string' ? /\d+/.exec(range)?.[0] : undefined;
+  return major === undefined ? NaN : Number(major);
+}
+
+/** Detect the project stack from repo facts and build .faf data. A slot with
+ *  no evidence is left empty (`''`) — never a default. */
 export function detectStack(dir: string): FafData {
+  return detectStackWithFacts(dir).data;
+}
+
+/**
+ * {@link detectStack}'s data, and `facts`: the repo's fact for every stack
+ * slot (by field — `runtime`, `database`), whatever the app-type — `''` when
+ * the repo shows none. detectStack marks a slot its detected type leaves out
+ * `slotignored`; `faf auto` fills such a slot from `facts` when the file's own
+ * type uses it (a `backend` project whose repo reads as a CLI still gets
+ * `runtime: Go` from go.mod).
+ */
+export function detectStackWithFacts(dir: string): { data: FafData; facts: Record<string, string> } {
   const pkg = readPackageJson(dir);
   const frameworks = detectFrameworks(dir);
   const detection = detectProjectTypeWithRationale(dir);
@@ -43,8 +64,8 @@ export function detectStack(dir: string): FafData {
   const backendFw = frameworks.find(f => f.category === 'backend');
   const dbFw = frameworks.find(f => f.category === 'database');
 
-  // Determine which categories are active
-  const activeCategories = APP_TYPE_CATEGORIES[projectType] || APP_TYPE_CATEGORIES.library;
+  // Which slots the app-type uses (an unknown type reads as library)
+  const uses = (slot: SlotDef): boolean => appTypeUsesSlot(projectType, slot) ?? appTypeUsesSlot('library', slot) === true;
 
   // Framework sub-type detection (framework → svelte, framework → nextjs, etc.)
   const isFramework = projectType === 'framework';
@@ -56,67 +77,63 @@ export function detectStack(dir: string): FafData {
   const svelteAdapter = isSvelte ? detectSvelteAdapter(dir) : null;
   const hasSvelteKit = isSvelte && frameworks.some(f => f.slug === 'sveltekit');
 
-  // Framework repos: slots that never apply to framework source code
-  const frameworkIgnoredSlots = new Set(['css_framework', 'ui_library', 'database', 'connection', 'hosting']);
-
-  // Build stack with slotignored for inactive categories
-  const stack: Record<string, string> = {};
+  // The repo's fact for each stack slot, whatever the app-type ('' when none).
+  const facts: Record<string, string> = {};
   const stackSlots = SLOTS.filter(s => s.path.startsWith('stack.'));
 
   for (const slot of stackSlots) {
     const field = slot.path.replace('stack.', '');
-    if (!activeCategories.includes(slot.category)) {
-      stack[field] = 'slotignored';
-      continue;
-    }
-
-    // Framework repos: slotignore slots that never apply to framework source code
-    if (isFramework && frameworkIgnoredSlots.has(field)) {
-      stack[field] = 'slotignored';
-      continue;
-    }
-
-    // Auto-fill detected values (Svelte-aware overrides applied inline)
+    // Detected values (Svelte-aware overrides applied inline)
     switch (field) {
-      case 'frontend': stack[field] = frontendFw?.name ?? (projectType === 'cli' ? 'CLI' : ''); break;
-      case 'css_framework': stack[field] = cssFw?.name ?? ''; break;
-      case 'ui_library': stack[field] = uiFw?.name ?? ''; break;
+      case 'frontend': facts[field] = frontendFw?.name ?? ''; break;
+      case 'css_framework': facts[field] = cssFw?.name ?? ''; break;
+      case 'ui_library': facts[field] = uiFw?.name ?? ''; break;
       case 'state_management':
-        // Svelte 5 uses Runes — no external state library needed
-        stack[field] = isSvelte ? (stateFw?.name ?? 'Runes') : (stateFw?.name ?? '');
+        // Svelte 5 uses Runes — no external state library needed. Only when
+        // package.json says Svelte 5 or later: Svelte 4 has no Runes.
+        facts[field] = stateFw?.name ?? (isSvelte && svelteMajor(pkg) >= 5 ? 'Runes' : '');
         break;
       case 'backend':
         // SvelteKit IS the backend (server routes, form actions, hooks)
-        stack[field] = isSvelte ? (hasSvelteKit ? 'SvelteKit' : (backendFw?.name ?? '')) : (backendFw?.name ?? '');
+        facts[field] = isSvelte ? (hasSvelteKit ? 'SvelteKit' : (backendFw?.name ?? '')) : (backendFw?.name ?? '');
         break;
       case 'api_type':
         // SvelteKit uses form actions + server routes
-        stack[field] = hasSvelteKit ? 'Server Routes' : '';
+        facts[field] = hasSvelteKit ? 'Server Routes' : '';
         break;
-      case 'runtime': stack[field] = runtime !== 'Unknown' ? runtime : ''; break;
+      case 'runtime': facts[field] = runtime; break;
       case 'database':
         // Only populate if ORM actually detected
-        stack[field] = dbFw?.name ?? '';
+        facts[field] = dbFw?.name ?? '';
         break;
       case 'connection':
-        stack[field] = dbFw?.name ?? '';
+        facts[field] = dbFw?.name ?? '';
         break;
       case 'hosting':
         // Svelte adapter → hosting platform (adapter-vercel = Vercel, etc.)
         if (isSvelte && svelteAdapter) {
-          stack[field] = svelteAdapter;
+          facts[field] = svelteAdapter;
         } else {
-          stack[field] = hosting ?? '';
+          facts[field] = hosting ?? '';
         }
         break;
       case 'build':
-        // SvelteKit always uses Vite
-        stack[field] = isSvelte ? 'Vite' : (buildTool ?? '');
+        // SvelteKit always builds with Vite; plain Svelte only when the repo says so
+        facts[field] = hasSvelteKit ? 'Vite' : (buildTool ?? '');
         break;
-      case 'cicd': stack[field] = cicd ?? ''; break;
-      case 'package_manager': stack[field] = pkgManager; break;
-      default: stack[field] = ''; break;
+      case 'cicd': facts[field] = cicd ?? ''; break;
+      case 'package_manager': facts[field] = pkgManager; break;
+      default: facts[field] = ''; break;
     }
+  }
+
+  // Build stack with slotignored for the slots the app-type leaves out
+  // (a framework repo also leaves out the slots framework source code never
+  // has — see appTypeUsesSlot)
+  const stack: Record<string, string> = {};
+  for (const slot of stackSlots) {
+    const field = slot.path.replace('stack.', '');
+    stack[field] = uses(slot) ? facts[field] : 'slotignored';
   }
 
   // Build monorepo section
@@ -124,7 +141,7 @@ export function detectStack(dir: string): FafData {
   const monorepoSlots = SLOTS.filter(s => s.path.startsWith('monorepo.'));
   for (const slot of monorepoSlots) {
     const field = slot.path.replace('monorepo.', '');
-    if (!activeCategories.includes(slot.category)) {
+    if (!uses(slot)) {
       monorepo[field] = 'slotignored';
     } else {
       monorepo[field] = '';
@@ -190,5 +207,5 @@ export function detectStack(dir: string): FafData {
   if (keyFiles.length > 0) {result.key_files = keyFiles;}
   if (Object.keys(commands).length > 0) {result.commands = commands;}
 
-  return result;
+  return { data: result, facts };
 }

@@ -1,8 +1,8 @@
-import { writeFileSync } from 'fs';
 import { join } from 'path';
 import { deprecate } from 'node:util';
 import type { FafData, ScoreResult } from '../core/types.js';
 import { FAF_HEX } from '../ui/colors.js';
+import { writeRendered } from '../core/render-hash.js';
 
 /**
  * project.html — the visual render of project.faf.
@@ -183,18 +183,50 @@ Rendered on-demand from your current <strong>${esc(fafPath)}</strong><br>
 `;
 }
 
-/** Write project.html beside project.faf (repo root). */
+/** The start of faf's mark in every project.html it renders: the description
+ *  line (`<meta name="description" content="Visual render of project.faf. …
+ *  by faf — …">`). */
+const HTML_MARK = '<meta name="description" content="Visual render of project.faf.';
+
+/** True when `bytes` are a project.html faf rendered: a line that is faf's
+ *  description meta (every faf release has written it). */
+export function hasProjectHtmlMark(bytes: Uint8Array): boolean {
+  return new TextDecoder()
+    .decode(bytes)
+    .split(/\r?\n/)
+    .some(line => line.trim().startsWith(HTML_MARK) && line.includes(' by faf'));
+}
+
+/** Options for {@link writeProjectHtml}. */
+export interface ProjectHtmlWriteOptions {
+  /** Replace a project.html faf cannot prove it wrote — no faf mark, edited
+   *  since faf wrote it, or from before 7.13 — the explicit overwrite
+   *  (`--force`). Default: it is refused and left as it is. */
+  force?: boolean;
+}
+
+/** Write project.html beside project.faf (repo root) — atomically, and never
+ *  through a link that leaves `dir` or dangles (SafePathError). The page
+ *  carries faf's render hash (`<meta name="faf-render" content="sha256:…">`,
+ *  the hash of the page without that line). A project.html already there is
+ *  replaced only when it is byte for byte what faf last wrote (its hash still
+ *  fits); a page edited since, a hand-written page, or a page from before 7.13
+ *  that is not exactly faf's render of `data` is refused (SafePathError
+ *  `not-owned`) and left byte for byte, unless `force`. */
 export function writeProjectHtml(
   dir: string,
   data: FafData,
   result: ScoreResult,
   fafPath = 'project.faf',
+  write: ProjectHtmlWriteOptions = {},
 ): void {
-  writeFileSync(
-    join(dir, 'project.html'),
-    renderProjectHtml(data, result, fafPath),
-    'utf-8',
-  );
+  writeRendered(join(dir, 'project.html'), renderProjectHtml(data, result, fafPath), {
+    root: dir,
+    format: 'html',
+    hasMark: hasProjectHtmlMark,
+    mark: "faf mark (the `Visual render of project.faf` description line)",
+    force: write.force,
+  });
 }
 
 /** @deprecated Use {@link renderProjectHtml}. Removed in the next major. */

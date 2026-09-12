@@ -5,20 +5,20 @@
 | Skill | What it does |
 |-------|-------------|
 | `/faf-score` | Score your `.faf` (0-100%) — runs in background while you work |
-| `/faf-auto` | Zero to 100% in one command |
+| `/faf-auto` | Fill every tech slot from the repo, then score |
 | `/faf-go` | Guided interview to Gold Code |
 | `/faf-init` | Create `.faf` from your project |
-| `/faf-sync` | Bi-sync `.faf` ↔ CLAUDE.md |
+| `/faf-sync` | `.faf` → CLAUDE.md (pull: Trophy-gated backfill) |
 | `/faf-status` | Quick health check (<200ms) |
 | `/faf-formats` | TURBO-CAT discovers all formats |
 | `/faf-expert` | Deep `.faf` knowledge on demand |
 | `/commit` | Context-aware git commits powered by FAF |
 | `/pr` | Context-aware pull requests powered by FAF |
 | `/review` | Context-aware code reviews powered by FAF |
-| `/wjttc-builder` | Auto-generate championship-grade test suites |
+| `/wjttc-builder` | Author championship-grade test suites |
 | `/wjttc-tester` | F1-inspired testing expert |
 | `/mcp-builder` | Guide for creating MCP servers |
-| `/pubblog` | Generate release blog posts |
+| `/pubblog` | Write release blog posts |
 | `/pubpro` | npm + MCP Registry publish protocol |
 
 ## Why skills matter

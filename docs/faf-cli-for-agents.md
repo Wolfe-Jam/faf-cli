@@ -2,17 +2,17 @@
 
 **One command. Every agent in your session gets the same accurate, versioned context.**
 
-FAF-CLI (v7.1, "The AGENTS.md Edition") is the canonical tool for the [`.faf` format](https://faf.one): persistent, versioned, AI-readable project context. It authors exactly the instruction files agentic tools are built to read — `AGENTS.md`, `.cursorrules`, `CLAUDE.md`, `GEMINI.md`, `copilot-instructions.md` — from a single source of truth, and exposes live tools over MCP. Part of the FAF ecosystem — over 100k downloads; see [faf.one/downloads](https://faf.one/downloads) for latest stats.
+FAF-CLI is the canonical tool for the [`.faf` format](https://faf.one): persistent, versioned, AI-readable project context. It authors exactly the instruction files agentic tools are built to read — `AGENTS.md`, `.cursorrules`, `CLAUDE.md`, `GEMINI.md`, `copilot-instructions.md` — from a single source of truth, and exposes live tools over MCP. Part of the FAF ecosystem — over 100k downloads; see [faf.one/downloads](https://faf.one/downloads) for latest stats.
 
 ---
 
 ## Quick start (zero-install)
 
 ```bash
-bunx faf                     # auto-detect the stack, write project.faf, score it
-bunx faf export --agents     # generate AGENTS.md (+ related files) agents actually read
+bunx faf auto                # auto-detect the stack, write project.faf, score it
+bunx faf export --agents     # author AGENTS.md (+ related files) agents actually read
 bunx faf score               # AI-readiness score (target: Trophy 100%)
-bunx faf git owner/repo      # instant, scored context for any remote repo — no clone
+bunx faf git owner/repo      # instant, scored context for any remote repo — one shallow clone
 ```
 
 `npx faf` works too. Add `faf export --agents` to `package.json` scripts, a pre-commit hook, or your agent's bootstrap step, and every session starts from accurate context instead of a guess.
@@ -43,9 +43,9 @@ xAI ships strong agentic capabilities — native tool use, the Agent Tools API, 
 Cursor's Composer and background agents rely on exactly the files FAF authors:
 
 1. **Better context files** — `faf export --agents` produces higher-fidelity `AGENTS.md` / `.cursorrules` than hand-rolled versions, because it scans for real build commands, conventions, guardrails, and Definition of Done.
-2. **Non-destructive + bi-sync** — keep editing the parts you care about; FAF keeps the structured block current.
+2. **Non-destructive, one way** — keep editing the parts you care about; FAF rewrites only its own block, from `project.faf`.
 3. **Live tools over MCP** — wire a FAF MCP server so Cursor agents can call `score`, `validate`, `search`, not just read Markdown.
-4. **Team bootstrap** — new projects/teammates run `bunx faf` once and have the files Cursor expects.
+4. **Team bootstrap** — new projects/teammates run `bunx faf auto` once and have the files Cursor expects.
 5. **External work** — `faf git` gives agents instant context on any repo or dependency without a full clone.
 
 ## For general AI coding sessions
@@ -57,9 +57,9 @@ Cursor's Composer and background agents rely on exactly the files FAF authors:
 
 ## Why it's a natural fit
 
-FAF-CLI isn't another AI wrapper — it's the canonical, versioned, stack-aware context source that emits exactly the files Grok Build, xAI agents, and Cursor agents are built to consume. The v7.1 "AGENTS.md Edition" lines up with where agentic coding is going, and the existing Grok interop makes integration low-friction.
+FAF-CLI isn't another AI wrapper — it's the canonical, versioned, stack-aware context source that emits exactly the files Grok Build, xAI agents, and Cursor agents are built to consume. Its AGENTS.md authoring lines up with where agentic coding is going, and the existing Grok interop makes integration low-friction.
 
-One command (`bunx faf`) turns any project into one an agent can actually understand — measurable, versioned, and consistent.
+One command (`bunx faf auto`) turns any project into one an agent can actually understand — measurable, versioned, and consistent.
 
 ---
 

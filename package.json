@@ -1,6 +1,6 @@
 {
   "name": "faf-cli",
-  "version": "7.12.1",
+  "version": "7.13.0",
   "description": "Persistent AI context + memory — .faf and .fafm, IANA-registered. Anthropic-merged.",
   "type": "module",
   "icon": "https://faf.one/orange-smiley.svg",
@@ -31,10 +31,11 @@
     "compile:all": "bun build src/cli.ts --compile --bytecode --minify --target=bun-darwin-arm64 --outfile faf-darwin-arm64 && bun build src/cli.ts --compile --bytecode --minify --target=bun-darwin-x64 --outfile faf-darwin-x64 && bun build src/cli.ts --compile --bytecode --minify --target=bun-linux-x64 --outfile faf-linux-x64 && bun build src/cli.ts --compile --bytecode --minify --target=bun-windows-x64 --outfile faf-windows-x64.exe",
     "test": "bun test --timeout=120000",
     "test:watch": "bun test --watch --timeout=120000",
-    "lint": "eslint src/**/*.ts",
+    "lint": "eslint 'src/**/*.ts'",
     "format": "prettier --write 'src/**/*.ts'",
     "check:no-hardcode": "! grep -rEln '/(Users|home/runner|private/var)/' dist/ || (echo '❌ Hardcoded build-machine path leaked into dist — see grep output above. Externalize the offending dep in the build script.'; exit 1)",
-    "prepublishOnly": "bun run build && bun run check:no-hardcode"
+    "check:engines": "node scripts/check-engines.mjs",
+    "prepublishOnly": "bun run check:engines && bun run build && bun run check:no-hardcode"
   },
   "keywords": [
     "faf",
@@ -94,7 +95,7 @@
     "picomatch": "^4.0.5"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   },
   "publishConfig": {
     "access": "public"
