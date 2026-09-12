@@ -12,9 +12,9 @@ This doc covers what to read first, how to get unstuck, and where to ask when yo
 |--------|----------------|
 | [README.md](README.md) | Install, commands, scoring, sync, the current edition |
 | [CHANGELOG.md](CHANGELOG.md) | What shipped in each version, in order |
-| [docs/SCORING.md](docs/SCORING.md) | Tier system and the 🏆 Trophy 100% recommendation |
+| [docs/SCORING.md](docs/SCORING.md) | Tiers, app-types, and how the score works (✪ Trophy = 100%) |
 | [docs/SYNC.md](docs/SYNC.md) | bi-sync (free) and tri-sync (Pro) |
-| [docs/SLOT-IGNORE.md](docs/SLOT-IGNORE.md) | How to mark slots as not-applicable |
+| [docs/SLOT-IGNORE.md](docs/SLOT-IGNORE.md) | N/A slots — your app-type decides which slots count |
 | [docs/GUIDE.md](docs/GUIDE.md) | The 6Ws deep dive |
 | [faf.one](https://faf.one) | Official site |
 
@@ -71,7 +71,7 @@ faf go                         # guided interview for the rest
 faf score                      # verify 🏆 Trophy
 ```
 
-If a slot genuinely doesn't apply to your project type (e.g. `stack.db` for a CLI tool), mark it `slotignored` — see [docs/SLOT-IGNORE.md](docs/SLOT-IGNORE.md).
+If a slot doesn't apply to your project (e.g. `stack.database` for a CLI tool), check your app-type: faf marks every slot outside it as N/A (`slotignored`). Typing `None` doesn't skip a slot — it counts as empty. See [docs/SLOT-IGNORE.md](docs/SLOT-IGNORE.md).
 
 **`faf auto` not detecting project type**
 
@@ -82,7 +82,7 @@ faf score                      # check the # found: rationale
 faf edit project.type cli      # override with the right type
 ```
 
-Supported types are listed in [docs/SCORING.md](docs/SCORING.md) and the canonical doctrine memory `v6.6.md`.
+Supported types, and the slots each one counts, are listed in [docs/SCORING.md](docs/SCORING.md) (source: [`src/core/slots.ts`](src/core/slots.ts)).
 
 ### Sync
 
