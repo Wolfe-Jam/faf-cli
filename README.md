@@ -141,7 +141,7 @@ faf memory show
 - **If it's a fact, faf fills the slot.** A typed `None` or `N/A` is an empty slot, and the app-type decides which slots count.
   - `faf auto` fills a tech slot only from a repo fact. With no fact, the slot stays empty; only `project.type` falls back to `library`, and says so on its line.
   - With no fact, your words stay in a slot the app-type uses, and that slot scores 0 until filled.
-  - In a slot the app-type leaves out, `faf auto` writes `slotignored` (shown as N/A).
+  - In a slot the app-type leaves out, `faf auto` writes `slotignored`: not required, not scored.
   - The 6Ws stay yours: faf never replaces your words there, and `faf go` asks for the empty ones.
 - **`faf ai enhance` is retired.** project.faf isn't enhanced: tech slots come from repo facts, and the 6Ws come from you.
 - **Links and encodings are checked first.** faf refuses, in one line, to write:

@@ -132,8 +132,8 @@ export const PLACEHOLDERS = new Set([
  *  `slotignored` over them — the app-type's decision, never the words'. */
 export const EXPLICIT_NONE: ReadonlySet<string> = new Set(['none', 'n/a', 'not applicable']);
 
-/** The value that marks a slot as not applicable (the What-Not). It comes
- *  only from the app-type (shown to people as N/A); a typed word never means it. */
+/** The value that marks a slot as not required and not scored (the What-Not).
+ *  It comes only from the app-type; a typed word never means it. */
 export const SLOTIGNORED = 'slotignored';
 
 /** True for a typed none — counts as an empty slot: `None`, `N/A`,
@@ -224,7 +224,7 @@ export const APP_TYPE_CATEGORIES: Record<string, SlotCategory[]> = {
   html: ['project', 'human', 'universal'],
   // server-card: a published MCP Server Card (discovery manifest) — artifact-class
   // like sdk/wasm/html. Identity + human context + build/ship matter; frontend,
-  // backend and DB are N/A. By design it carries the FAF context-block in the
+  // backend and DB are slotignored. By design it carries the FAF context-block in the
   // card's `_meta["one.faf/context"]` by default — so anyone generating a Server
   // Card through FAF gets FAF context for free. See faf-server-card-ref.
   'server-card': ['project', 'human', 'universal'],

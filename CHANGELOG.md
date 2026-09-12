@@ -8,6 +8,11 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- **`slotignored` is shown as `slotignored`, never N/A.** A slot has three states: empty (the default), `slotignored` (from the app-type: not required, not scored) and populated. The `faf score` slot breakdown, the `faf show` statline and the typed-words line now say `slotignored`, replacing the N/A label. A typed `N/A` in a slot that needs a fact is still empty and scores 0.
+
 ## [7.13.0] - 2026-09-12 — The Co-Author Edition
 
 **You and your AI co-author project.faf — AI fills the tech facts from your repo, you write the 6Ws — and faf-cli only touches what it wrote: links can't lead it outside your project, a failed write keeps the original, and your comments, values and notes stay as you left them.**

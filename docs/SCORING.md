@@ -28,7 +28,7 @@ Work surfaces use ✪ for Trophy (not the social emoji 🏆). Sub-Trophy tiers u
 ## How the score works
 
 1. **33 slots.** Every `.faf` uses the same Mk4 slot set: project (3), human context (6), frontend (4), backend (5), universal (3), and enterprise infra, app and ops (12). faf-cli scores the base tier, slots 1–21. The enterprise tier scores all 33.
-2. **Your app-type decides which slots count.** `project.type` is your app-type. `faf init`, `faf auto` and `faf git` detect it and write `slotignored` into every slot your app-type doesn't use. faf shows these as **N/A**, and they are left out of the score.
+2. **Your app-type decides which slots count.** `project.type` is your app-type. `faf init`, `faf auto` and `faf git` detect it and write `slotignored` into every slot your app-type doesn't use. These slots are not required and not scored.
 3. **Every other slot is active.** An active slot is either filled or empty. Typing `None`, `N/A`, `null`, `unknown` or `not applicable` doesn't take a slot out of the score — it counts as empty. From faf-cli 7.13, `faf auto` fills such a tech slot when the repo has the fact, and writes `slotignored` over typed words in a slot your app-type leaves out; the 6Ws stay yours (`faf go` asks). See [SLOT-IGNORE.md](./SLOT-IGNORE.md#typed-words).
 4. **Score = filled ÷ active**, as a whole percentage.
 
@@ -65,8 +65,8 @@ Write the keys faf writes. Six slots also have a shorter Mk4 name. faf-cli can r
 
 | February 2026 (v4.2.1) | Now |
 |---|---|
-| A typed `None` marks a slot as ignored | A typed `None` / `N/A` counts as **empty**; only the app-type decides N/A |
+| A typed `None` marks a slot as ignored | A typed `None` / `N/A` counts as **empty**; only the app-type decides `slotignored` |
 | `Score = (Filled + Ignored) / 21` | `Score = filled ÷ active` |
 | 21 slots, always constant | 33 slots; the app-type selects 9–33 of them |
 
-More on N/A: [SLOT-IGNORE.md](./SLOT-IGNORE.md). The February text is in git history.
+More on `slotignored`: [SLOT-IGNORE.md](./SLOT-IGNORE.md). The February text is in git history.

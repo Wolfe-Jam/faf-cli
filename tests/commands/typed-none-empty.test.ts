@@ -3,7 +3,7 @@
  * real CLI (Q8, FINAL, wolfejam 2026-09-11).
  *
  *   - it scores 0: `faf score` counts it exactly like an empty slot, and a
- *     human surface never shows it as N/A or ignored;
+ *     human surface never shows it as slotignored;
  *   - tech slots, "if it's a fact, fill the slot": `faf auto` fills it from a
  *     repo fact; with no fact the words stay byte for byte, comment included,
  *     in a slot the app-type uses — and in a slot the app-type leaves out,
@@ -39,7 +39,7 @@ function faf(dir: string, ...args: string[]): { status: number | null; out: stri
 const hint = (slot: string, words: string): string =>
   `${slot} says '${words}' — this app-type needs it, so it counts as empty until filled.`;
 const outHint = (slot: string, words: string): string =>
-  `${slot} says '${words}' — this app-type doesn't use it; faf auto marks it slotignored (N/A).`;
+  `${slot} says '${words}' — this app-type doesn't use it; faf auto marks it slotignored.`;
 
 /** A React + Vite front end on Vercel, with a README that names its audience. No database. */
 function webRepo(): string {
@@ -127,10 +127,10 @@ describe('BRAKE: faf score — a typed none counts as empty, and the hint prints
     const head = (lines: string[]): string => (lines.find(l => /\d+%/.test(l)) ?? '').replace(/—.*$/, '');
     expect(head(a.lines)).toBe(head(b.lines));
     expect(Number(/(\d+)%/.exec(head(a.lines))![1])).toBeLessThan(100);
-    // Human surface: an empty slot, never "N/A" or ignored.
+    // Human surface: an empty slot, never slotignored.
     for (const slot of ['stack.database', 'human_context.who']) {
       expect(a.lines).toContain(`○ ${slot}`);
-      expect(a.out).not.toContain(`${slot}: N/A`);
+      expect(a.out).not.toContain(`${slot}: slotignored`);
     }
     const json = JSON.parse(spawnSync(process.execPath, [CLI, 'score', '--json'], { cwd: typed, encoding: 'utf-8', env: { ...process.env, HOME: tmp('home') } }).stdout);
     expect([json.slots['stack.database'], json.slots['human_context.who']]).toEqual(['empty', 'empty']);

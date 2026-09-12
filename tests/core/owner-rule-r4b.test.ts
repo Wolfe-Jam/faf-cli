@@ -8,7 +8,7 @@
  *        and README text over a 6W `who: unknown`. Now:
  *          - a tech slot the app-type uses: only a repo fact replaces them;
  *          - a tech slot the app-type leaves out: faf auto writes
- *            `slotignored` (shown as N/A) — the app-type's decision is the
+ *            `slotignored` — the app-type's decision is the
  *            fact — so such a project can reach 100; a real value is kept;
  *          - a 6W: never auto-replaced (faf go asks, showing the words).
  *        `faf score` says per slot which kind it is; `faf auto` names the
@@ -69,7 +69,7 @@ function repo(files: Record<string, string>): string {
 
 const read = (dir: string): string => readFileSync(join(dir, 'project.faf'), 'utf-8');
 const needs = (slot: string, words: string): string => `${slot} says '${words}' — this app-type needs it, so it counts as empty until filled.`;
-const leftOut = (slot: string, words: string): string => `${slot} says '${words}' — this app-type doesn't use it; faf auto marks it slotignored (N/A).`;
+const leftOut = (slot: string, words: string): string => `${slot} says '${words}' — this app-type doesn't use it; faf auto marks it slotignored.`;
 const scoreOf = (dir: string): number => Number(/(\d+)%/.exec(faf(dir, 'score', '--status').out)?.[1]);
 
 describe('BRAKE: R04 — every typed word is handled like a typed none', () => {

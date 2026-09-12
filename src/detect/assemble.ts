@@ -73,7 +73,7 @@ export function assembleFreshFaf(dir: string): Record<string, unknown> {
  *     has them, comment included; faf never writes `''` over them.
  *   - In a tech slot the file's app-type (`project.type`) leaves out, the
  *     app-type's decision is the fact: with no repo fact, the slot becomes
- *     `slotignored` (shown as N/A) in place of the words, an empty value or a
+ *     `slotignored` in place of the words, an empty value or a
  *     placeholder. A real value there is kept. `slotignored` comes only from
  *     the app-type — in a slot the app-type uses, it is never written, even
  *     when detection reads the repo as another type; such a slot gets the

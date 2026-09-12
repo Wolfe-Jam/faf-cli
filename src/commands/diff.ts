@@ -52,7 +52,7 @@ export interface FafDiff {
 
 const val = (v: unknown): string => String(v).trim();
 
-/** The deliberate "this slot is N/A" sentinel — kernel-recognised as *ignored*. */
+/** The `slotignored` sentinel — the slot is not required and not scored. */
 const IGNORED = 'slotignored';
 
 /**

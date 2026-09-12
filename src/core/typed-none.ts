@@ -4,7 +4,7 @@
  * until filled. The app-type alone decides which slots count, and
  * `slotignored` comes only from the app-type — typed words never take a slot
  * out. So `faf score` and `faf auto` say, one line per slot, where typed
- * words still sit, and never show a slot the app-type needs as N/A or ignored.
+ * words still sit, and never show a slot the app-type needs as slotignored.
  */
 import { isScalar, parseDocument } from 'yaml';
 import { APP_TYPE_CATEGORIES, NO_CLASSIFYING_SIGNALS, SLOTS, appTypeUsesSlot, isTypedWords } from './slots.js';
@@ -38,7 +38,7 @@ function hintFor(path: string, words: string, uses: boolean | null, inLibrary: b
     return `${path} says '${words}' — this app-type needs it, so it counts as empty until filled.`;
   }
   if (uses === false && outOfType) {
-    return `${path} says '${words}' — this app-type doesn't use it; faf auto marks it slotignored (N/A).`;
+    return `${path} says '${words}' — this app-type doesn't use it; faf auto marks it slotignored.`;
   }
   return null;
 }
@@ -69,7 +69,7 @@ export interface TypedNoneHintOptions {
  *   - a slot the app-type needs:
  *     `<slot> says '<words>' — this app-type needs it, so it counts as empty until filled.`
  *   - a slot the app-type leaves out (before `faf auto` has run):
- *     `<slot> says '<words>' — this app-type doesn't use it; faf auto marks it slotignored (N/A).`
+ *     `<slot> says '<words>' — this app-type doesn't use it; faf auto marks it slotignored.`
  * A file whose type faf does not know, or whose type is the `library`
  * detection fell back to (see {@link typeIsFallback}), gives the first line
  * for the slots a library needs (as faf's detection reads such a file) and no

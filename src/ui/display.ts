@@ -56,7 +56,7 @@ function displaySlotBreakdown(result: ScoreResult): void {
     const icon = state === 'populated' ? fafCyan('●')
       : state === 'slotignored' ? dim('—')
       : dim('○');
-    console.log(`  ${icon} ${state === 'slotignored' ? dim(`${path}: N/A`) : path}`);
+    console.log(`  ${icon} ${state === 'slotignored' ? dim(`${path}: slotignored`) : path}`);
   }
 }
 

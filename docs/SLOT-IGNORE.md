@@ -1,12 +1,12 @@
-# N/A slots (`slotignored`)
+# `slotignored` slots
 
 > **Source of truth:** [`src/core/slots.ts`](../src/core/slots.ts). How the score works: [SCORING.md](./SCORING.md).
 >
 > **Updated 2026-09-12.** This replaces the February 2026 spec (v4.2.1), which said typing `None` ignores a slot. It doesn't — see below.
 
-## What N/A means
+## What `slotignored` means
 
-Some slots don't apply to some projects: a CLI has no CSS framework, a static site has no database. Those slots are **N/A** and are left out of the score. In the file, faf writes them as `slotignored`.
+Some slots don't apply to some projects: a CLI has no CSS framework, a static site has no database. Those slots are `slotignored`: not required, and not scored. faf writes `slotignored` into them from your app-type.
 
 ## Who decides
 
@@ -18,11 +18,11 @@ You don't write `slotignored` to skip a slot you haven't filled. If a slot that 
 
 | State | In the file | Effect on the score |
 |---|---|---|
-| **Filled** | a real value, e.g. `PostgreSQL` | counts, as filled |
-| **N/A** | `slotignored`, written by faf from your app-type | left out |
-| **Empty** | missing, `''`, or a typed `None` / `N/A` / `null` / `unknown` / `not applicable` | counts, as empty |
+| **Empty** (the default) | missing, `''`, or a typed `None` / `N/A` / `null` / `unknown` / `not applicable` | counts, as empty (scores 0) |
+| **slotignored** | `slotignored`, written by faf from your app-type | not required, not scored |
+| **Populated** | a real value, e.g. `PostgreSQL` | counts, as filled |
 
-Typing `None` or `N/A` reads as "doesn't apply" to a person, but faf treats it as empty. Whether a slot applies is the app-type's call, never the typed word's. This keeps the score honest: nobody can type their way to ✪.
+Typing `None` or `N/A` reads as "doesn't apply" to a person, but faf treats it as empty: in a slot that needs a fact, it scores 0. Whether a slot applies is the app-type's call, never the typed word's. This keeps the score honest: nobody can type their way to ✪.
 
 ## Typed words
 
@@ -37,7 +37,7 @@ What `faf auto` does with a typed `None`, `N/A`, `not applicable`, `unknown` or 
 
 ```
 stack.database says 'None' — this app-type needs it, so it counts as empty until filled.
-stack.database says 'None' — this app-type doesn't use it; faf auto marks it slotignored (N/A).
+stack.database says 'None' — this app-type doesn't use it; faf auto marks it slotignored.
 ```
 
 ## Example: a CLI tool
@@ -54,8 +54,8 @@ stack:
   hosting: npm
   build: tsc
   cicd: GitHub Actions
-  database: slotignored         # N/A — written by faf; not a cli slot
-  css_framework: slotignored    # N/A — written by faf
+  database: slotignored         # written by faf; not a cli slot
+  css_framework: slotignored    # written by faf
 ```
 
 With all 12 active slots filled, the score is 100% ✪. If `cicd` were `None` instead, it would be 11 of 12: 92% ◇.
@@ -63,6 +63,6 @@ With all 12 active slots filled, the score is 100% ✪. If `cicd` were `None` in
 ## What changed
 
 - **February 2026 (v4.2.1):** a typed `None` ignored a slot; `Score = (Filled + Ignored) / 21`; per-type lists of slots to set to `None`; a planned `.slotignore` file.
-- **Now:** the app-type alone decides N/A; a typed `None` / `N/A` is empty; `Score = filled ÷ active`, across 33 slots.
+- **Now:** the app-type alone decides `slotignored`; a typed `None` / `N/A` is empty; `Score = filled ÷ active`, across 33 slots.
 
 The February text is in git history.
