@@ -33,7 +33,7 @@ npm install -g faf-cli         # global install
 brew install faf-cli           # Homebrew
 ```
 
-`faf` is the verb across every surface: `bunx faf`, `npx faf`, `/faf` (Claude Code plugin), `faf` (global). Bare `faf` is shorthand for `faf auto` — same behavior, fewer keystrokes.
+`faf` is the verb across every surface: `bunx faf`, `npx faf`, `/faf` (Claude Code plugin), `faf` (global). Bare `faf` shows your project's score; `faf auto` detects and fills.
 
 ## The workflow
 

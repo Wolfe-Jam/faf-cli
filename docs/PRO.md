@@ -16,7 +16,7 @@ tri-sync:  project.faf  →  CLAUDE.md  +  MEMORY.md        (free forever)
 
 `faf sync` writes faf's block in `CLAUDE.md` from your `.faf`. tri-sync also writes faf's block into Claude Code's `MEMORY.md`. Both are free, no trial, no license, no catch — `.faf` relies on tri-sync now, so it has to be.
 
-Nothing flows back into `.faf` on its own. The one way back is `faf sync --direction pull`, which backfills `.faf` from `CLAUDE.md` and runs only at ✪ Trophy (100%).
+Nothing flows back into `.faf` on its own. The one way sync writes back is `faf sync --direction pull`, which backfills `.faf` from `CLAUDE.md` and runs only at ✪ Trophy (100%). `faf recover` rebuilds name, goal and language from your context files when you ask it to.
 
 ## Commands
 

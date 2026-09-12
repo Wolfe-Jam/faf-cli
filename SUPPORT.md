@@ -188,7 +188,7 @@ The full list lives in [README.md](README.md). Most-used:
 
 ```bash
 faf init               # Create .faf from your project
-faf auto               # Zero to 100% in one command
+faf auto               # Fill every tech slot from the repo, then score
 faf go                 # Guided interview to Trophy
 faf score              # Check AI-readiness (0–100%)
 faf sync               # .faf → CLAUDE.md

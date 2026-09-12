@@ -2,7 +2,7 @@
 
 **One command. Every agent in your session gets the same accurate, versioned context.**
 
-FAF-CLI (v7.1, "The AGENTS.md Edition") is the canonical tool for the [`.faf` format](https://faf.one): persistent, versioned, AI-readable project context. It authors exactly the instruction files agentic tools are built to read — `AGENTS.md`, `.cursorrules`, `CLAUDE.md`, `GEMINI.md`, `copilot-instructions.md` — from a single source of truth, and exposes live tools over MCP. Part of the FAF ecosystem — over 100k downloads; see [faf.one/downloads](https://faf.one/downloads) for latest stats.
+FAF-CLI is the canonical tool for the [`.faf` format](https://faf.one): persistent, versioned, AI-readable project context. It authors exactly the instruction files agentic tools are built to read — `AGENTS.md`, `.cursorrules`, `CLAUDE.md`, `GEMINI.md`, `copilot-instructions.md` — from a single source of truth, and exposes live tools over MCP. Part of the FAF ecosystem — over 100k downloads; see [faf.one/downloads](https://faf.one/downloads) for latest stats.
 
 ---
 
@@ -57,7 +57,7 @@ Cursor's Composer and background agents rely on exactly the files FAF authors:
 
 ## Why it's a natural fit
 
-FAF-CLI isn't another AI wrapper — it's the canonical, versioned, stack-aware context source that emits exactly the files Grok Build, xAI agents, and Cursor agents are built to consume. The v7.1 "AGENTS.md Edition" lines up with where agentic coding is going, and the existing Grok interop makes integration low-friction.
+FAF-CLI isn't another AI wrapper — it's the canonical, versioned, stack-aware context source that emits exactly the files Grok Build, xAI agents, and Cursor agents are built to consume. Its AGENTS.md authoring lines up with where agentic coding is going, and the existing Grok interop makes integration low-friction.
 
 One command (`bunx faf auto`) turns any project into one an agent can actually understand — measurable, versioned, and consistent.
 

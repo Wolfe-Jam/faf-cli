@@ -110,7 +110,7 @@ Run `faf` with no arguments:
 | `faf memory` | `.fafm` soul ops — convert Claude memory, etch, recall, ls, show |
 | `faf diff` / `log` | Semantic context diff + score timeline across git history |
 | `faf hooks --install` | Pre-commit guard against context regression |
-| `faf compile` / `decompile` | `.faf` ↔ `.fafb` sealed binary |
+| `faf compile` / `decompile` | `.faf` → `.fafb` sealed binary; `decompile` shows a `.fafb`'s sections as JSON |
 | `faf check` | Validate a `.faf` file |
 | `faf recover` | Rebuild `.faf` from an existing `CLAUDE.md` / `AGENTS.md` |
 | `faf show` | Render `project.faf` to a browsable HTML page |
