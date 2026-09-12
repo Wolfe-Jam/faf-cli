@@ -132,29 +132,36 @@ faf memory etch "a durable fact" --id my-fact
 faf memory show
 ```
 
-### What's New in v7.12.1 — The Open Renderers Edition
+### What's New in v7.13.0 — The Co-Author Edition
 
-**`faf sync` is the one name: "bi-sync" is gone from its help, its output and the footer every rendered CLAUDE.md carries.**
+**You and your AI co-author project.faf — AI fills the tech facts from your repo, you write the 6Ws — and faf-cli only touches what it wrote: links can't lead it outside your project, a failed write keeps the original, and your comments, values and notes stay as you left them.**
 
-- **One word for one command.** `faf sync` works as before: it writes CLAUDE.md from `project.faf`. `faf sync --direction pull` backfills name, goal and language into `.faf`, and only at ✪ Trophy. `faf bi-sync` still runs as a hidden alias.
-- **Tools built on faf-cli follow automatically.** Anything that composes `renderClaudeMd` writes the new `STATUS: SYNC ACTIVE` footer on its next sync, with no release of its own.
-
-#### v7.12.0 — the Edition release
-
-**faf-cli opens its renderers, injector and `faf auto` update chain as public exports — consumers compose instead of port — and `faf export --agents` is idempotent again: one block, every run.**
-
-```ts
-import { renderAgentsMd, enrichFromRepo, injectFafBlock, updateExistingFaf, writeFaf } from 'faf-cli';
-```
-
-- **Renderers are public** — `renderAgentsMd` · `renderGeminiMd` · `renderCursorrules` · `renderClaudeMd` · `renderCopilotInstructions` and their `write*` pairs. An MCP server or an editor extension writes the same bytes `faf export` writes, instead of carrying its own copy that drifts.
-- **`enrichFromRepo(dir, data)`** — the repo-facts step `faf export --agents` runs first (commands, key files, secrets location) is exported too. Hand-authored values win; detection fills the gaps.
-- **`updateExistingFaf(dir, existing)`** — the exact chain `faf auto` runs on an existing `project.faf`: existing wins, then interrogated → detected → Turbo-Cat → Relentless fill the empties. `faf auto` itself now calls it. `writeFaf` / `serializeFaf` write the file the way faf-cli does.
-- **One injector, one rule** — `injectFafBlock` / `findFafBlock` locate the managed block by whole marker lines at column 0. Fenced examples are skipped, an unbalanced fence inside the block cannot hide the end marker, CRLF and BOM survive. A block that lost its end marker is prefixed, never overwritten.
-- **Fixed: `faf export --agents` stacked its own output.** 7.1.4–7.11.0 quoted the marker tokens in prose and matched them as substrings, so every re-run appended the old block's tail (58 → 107 → 156 lines). Fixed at both ends; a file already stacked is repaired on its next export.
+- **faf writes its block, you write the rest.** faf touches only its managed block and its own section. A file with no faf markers is always prefixed, never taken over, even one that starts with faf's old stamp.
+- **`project.faf` edits keep your file as written.** Comments, exact values (`1.10` stays `1.10`), anchors and keys faf doesn't know all survive. An edit changes only what it changes, and a no-op writes nothing.
+- **If it's a fact, faf fills the slot.** A typed `None` or `N/A` is an empty slot, and the app-type decides which slots count.
+  - `faf auto` fills a tech slot only from a repo fact. With no fact, the slot stays empty; only `project.type` falls back to `library`, and says so on its line.
+  - With no fact, your words stay in a slot the app-type uses, and that slot scores 0 until filled.
+  - In a slot the app-type leaves out, `faf auto` writes `slotignored` (shown as N/A).
+  - The 6Ws stay yours: faf never replaces your words there, and `faf go` asks for the empty ones.
+- **`faf ai enhance` is retired.** project.faf isn't enhanced: tech slots come from repo facts, and the 6Ws come from you.
+- **Links and encodings are checked first.** faf refuses, in one line, to write:
+  - through a link that leaves the project;
+  - into `.git`, beyond its own hook section and diff driver;
+  - over a whole file faf didn't render;
+  - over a file that isn't UTF-8.
+- **A whole file faf renders is replaced only when it's still exactly what faf wrote.** project.html and the Server and A2A cards now carry a render hash. If you edited one, faf leaves it and says so; `--force` replaces it.
+- **One-time step when upgrading:** faf can't tell whether a project.html, Server Card or A2A card written before 7.13 was edited. The first run that would change one refuses it once, and that run exits 1. Check the file for hand edits, then run the same command once with `--force`; after that faf recognises its own output.
+- **A failed write keeps the original.** faf writes to a temp file and renames it into place, so a full disk or a killed process leaves your file as it was. A file you edit while faf is writing is left alone.
+- **Memory stays yours.**
+  - `soul.fafm` keeps its curated index, its facts and its comments, and etching an id that already exists merges into that fact.
+  - Tri-sync (`FAF_PRO=1`) writes Claude Code's own memory file as one section on top, and Claude's notes stay.
+- **Detection stays inside the project.** Turbo-Cat no longer reads parent folders, so a monorepo root's stack no longer leaks into a package.
+- **For builders.** New exports: `resolveInside`, `safeWriteFile`, `updateFafFile`, `writeClaudeMemory`, `FafDNAManager`, `authorFafFromRepo`, `registryTitle`, `isNonProjectRoot` and `scoreText`. `writeFaf` on an existing file now merges; pass `{ replace: true }` for the old overwrite.
+- **Node 22+.** The engine floor matches CI (22 and 24).
 
 **Recent sprint**
 
+- 🤝 [7.13.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.13.0) The Co-Author Edition
 - 🧩 [7.12.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.12.0) The Open Renderers Edition
 - 🖥️ [7.11.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.11.0) The VS Code Edition
 - 📚 [7.10.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.10.0) The Full-Facts Edition
