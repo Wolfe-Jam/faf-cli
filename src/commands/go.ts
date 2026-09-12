@@ -1,6 +1,6 @@
 import { createInterface } from 'readline';
 import { join } from 'path';
-import { aliasKeptNote, findFafFile, readFaf, readFafRaw, writeFaf } from '../interop/faf.js';
+import { aliasKeptNote, findFafFile, readFaf, readFafRaw, withKernel, writeFaf } from '../interop/faf.js';
 import { SLOTS, SLOTIGNORED, isPlaceholder, isTypedWords } from '../core/slots.js';
 import type { SlotDef } from '../core/types.js';
 import { questionForSlot } from '../core/interview.js';
@@ -130,6 +130,9 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
   }
 
   const data = readFaf(fafPath);
+  // A project.faf the scoring kernel cannot read is refused in one line now,
+  // before the interview and before anything is written.
+  const current = withKernel(fafPath, () => enrichScore(kernel.score(readFafRaw(fafPath))));
 
   // Find empty slots. Typed words — None / N/A / not applicable, unknown —
   // are an empty slot, so they are asked about like any other; the question
@@ -143,8 +146,7 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
 
   if (emptySlots.length === 0) {
     console.log(`${fafCyan('◆')} go  all slots populated — ✪ Trophy`);
-    const result = enrichScore(kernel.score(readFafRaw(fafPath)));
-    displayScore(result, fafPath);
+    displayScore(current, fafPath);
     return;
   }
 
@@ -190,7 +192,7 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
   }
 
   // Show updated score
-  const result = enrichScore(kernel.score(readFafRaw(fafPath)));
+  const result = withKernel(fafPath, () => enrichScore(kernel.score(readFafRaw(fafPath))));
   displayScore(result, fafPath);
 
   // Clean up the session file if we finished all slots (a quit keeps it for

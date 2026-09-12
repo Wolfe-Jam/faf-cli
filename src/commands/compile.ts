@@ -2,6 +2,7 @@ import { statSync } from 'fs';
 import { dirname, resolve } from 'path';
 import { findFafFile, readFafFromString, readFafRaw, withKernel } from '../interop/faf.js';
 import { safeReplaceOwned } from '../core/safe-write.js';
+import { refuseMissingOutputFolder } from '../core/refusal.js';
 import * as kernel from '../wasm/kernel.js';
 import { dim, fafCyan } from '../ui/colors.js';
 
@@ -48,9 +49,10 @@ export function compileCommand(file?: string, options: CompileOptions = {}): voi
   }
 
   const yaml = readFafRaw(fafPath);
-  // Parsed first: text that is not valid YAML is the one-line refusal every
-  // .faf reader gives; what the kernel cannot read is one line too. A
-  // leading BOM is not compiled (kernel.compile), as in faf score.
+  // Parsed first: text that is not valid YAML, or a scalar or a list, is the
+  // one-line refusal every .faf reader gives, and no .fafb is written; what
+  // the kernel cannot read is one line too. A leading BOM is not compiled
+  // (kernel.compile), as in faf score.
   readFafFromString(yaml, fafPath);
   const binary = withKernel(fafPath, () => kernel.compile(yaml));
 
@@ -64,6 +66,8 @@ export function compileCommand(file?: string, options: CompileOptions = {}): voi
     console.error(`faf: ${resolve(outputPath)} is the file being compiled — faf does not write the .fafb over its source, and left it unchanged. Name another output with --output.`);
     process.exit(1);
   }
+  // An --output folder that is not there is one line: faf does not create it.
+  refuseMissingOutputFolder(options.output);
   const root = options.output ? dirname(resolve(outputPath)) : dirname(resolve(fafPath));
   safeReplaceOwned(outputPath, binary, { root, owns: isFafbBytes, mark: FAFB_MARK, force: options.force });
 

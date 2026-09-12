@@ -112,8 +112,9 @@ export function refreshCommand(options: RefreshOptions = {}): void {
 
   // 1. Re-read the LIVE .faf and re-score it — the authoritative current ground.
   const yaml = readFafRaw(fafPath);
-  // Parsed first: text that is not valid YAML is the one-line refusal every
-  // .faf reader gives; what the kernel cannot read is one line too.
+  // Parsed first: text that is not valid YAML, or a scalar or a list, is the
+  // one-line refusal every .faf reader gives — no .fafb, no .faf-dna; what the
+  // kernel cannot read is one line too.
   readFafFromString(yaml, fafPath);
   const result = withKernel(fafPath, () => scoreFafYaml(yaml));
 

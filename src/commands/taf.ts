@@ -1,9 +1,10 @@
 import { existsSync } from 'fs';
 import { dirname, join, resolve } from 'path';
-import { findFafFile, readFaf, readFafRaw } from '../interop/faf.js';
+import { findFafFile, readFaf, readFafRaw, withKernel } from '../interop/faf.js';
 import { scoreFafYaml } from '../core/scorer.js';
 import { makeDirInside, safeWriteFile } from '../core/safe-write.js';
 import { writeRendered } from '../core/render-hash.js';
+import { refuseMissingOutputFolder } from '../core/refusal.js';
 import { fafCyan, dim, bold } from '../ui/colors.js';
 
 export interface TafOptions {
@@ -161,7 +162,7 @@ function tafSnapshot(options: TafOptions): void {
 
   const data = readFaf(fafPath);
   const yaml = readFafRaw(fafPath);
-  const result = scoreFafYaml(yaml);
+  const result = withKernel(fafPath, () => scoreFafYaml(yaml));
 
   const receipt = {
     taf_version: '1.0.0',
@@ -180,6 +181,8 @@ function tafSnapshot(options: TafOptions): void {
   const json = JSON.stringify(receipt, null, 2);
 
   if (options.output) {
+    // An --output folder that is not there is one line: faf does not create it.
+    refuseMissingOutputFolder(options.output);
     // Its own folder is the boundary. The snapshot carries faf's render hash
     // (`_meta["one.faf/render"]`); a file there is replaced only while it is
     // byte for byte what faf last wrote, and anything else is left as it is

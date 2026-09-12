@@ -5,6 +5,8 @@
  * multi-target commands (`faf export`, `faf cards`), which print the line for
  * one target and carry on with the others.
  */
+import { statSync } from 'fs';
+import { dirname, resolve } from 'path';
 import { NotWrittenError, SafePathError } from './safe-write.js';
 
 /** What the line adds after the reason: nothing when the reason already says
@@ -29,4 +31,26 @@ export function isOneLineError(e: unknown): e is SafePathError | NotWrittenError
 /** The one line for `e`: `faf: <reason>` plus {@link refusalTail} for a refusal. */
 export function oneLine(e: SafePathError | NotWrittenError, hasForce: boolean): string {
   return e instanceof SafePathError ? `faf: ${e.message}${refusalTail(e, hasForce)}` : `faf: ${e.message}`;
+}
+
+/** Refuse an --output (or --out) path whose folder is not there, before
+ *  anything is written: a NotWrittenError the CLI prints as one line, exit 1
+ *  — "<folder> does not exist — nothing written", or "<folder> is not a
+ *  folder — nothing written" when a file has that name. Nothing happens when
+ *  `output` is undefined (no --output given) or its folder is there.
+ *  `faf compile`, `faf decompile`, `faf taf`, `faf init`, `faf server-card`
+ *  and `faf git` write into a folder that exists and never create one
+ *  (`faf export --output` does: that folder is the export's own). */
+export function refuseMissingOutputFolder(output: string | undefined): void {
+  if (output === undefined) {return;}
+  const folder = dirname(resolve(output));
+  let why: string | null;
+  try {
+    why = statSync(folder).isDirectory() ? null : 'is not a folder';
+  } catch (e) {
+    const code = (e as NodeJS.ErrnoException | null)?.code;
+    if (code !== 'ENOENT' && code !== 'ENOTDIR') {throw e;}
+    why = 'does not exist';
+  }
+  if (why !== null) {throw new NotWrittenError(resolve(output), `${folder} ${why} — nothing written`);}
 }

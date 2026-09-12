@@ -2,8 +2,9 @@ import { existsSync } from 'fs';
 import { join, resolve } from 'path';
 import { execFileSync } from 'child_process';
 import { makeTempDir, removeTempDir } from '../core/safe-write.js';
+import { refuseMissingOutputFolder } from '../core/refusal.js';
 import { authorFafFromRepo, normalizeGitUrl, repoNameFromUrl } from '../detect/git-repo.js';
-import { writeFaf, readFafRaw, serializeFaf } from '../interop/faf.js';
+import { writeFaf, readFafRaw, serializeFaf, withKernel } from '../interop/faf.js';
 import * as kernel from '../wasm/kernel.js';
 import { enrichScore } from '../core/scorer.js';
 import { displayScore } from '../ui/display.js';
@@ -74,6 +75,9 @@ export function gitCommand(
     process.exit(1);
     return;
   }
+  // An --output folder that is not there is one line, before the clone: faf
+  // does not create it (--stdout writes no file).
+  refuseMissingOutputFolder(target.outputPath === null ? undefined : options.output);
 
   // A fresh temp folder of faf's own (mkdtemp, with faf's marker file in it),
   // removed when the command ends. The clone goes in a subfolder beside the
@@ -111,7 +115,7 @@ export function gitCommand(
     console.log(`${fafCyan('created')} ${target.outputPath}`);
 
     const yaml = readFafRaw(target.outputPath);
-    const result = enrichScore(kernel.score(yaml));
+    const result = withKernel(target.outputPath, () => enrichScore(kernel.score(yaml)));
     displayScore(result, target.outputPath);
   } finally {
     removeTempDir(tmpDir);

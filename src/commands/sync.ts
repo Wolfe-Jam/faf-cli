@@ -1,6 +1,6 @@
 import { existsSync } from 'fs';
 import { join, dirname } from 'path';
-import { aliasKeptNote, findFafFile, readFaf, readFafRaw, writeFaf } from '../interop/faf.js';
+import { aliasKeptNote, findFafFile, readFaf, readFafRaw, withKernel, writeFaf } from '../interop/faf.js';
 import { readClaudeMd, writeClaudeMd, renderClaudeMd, parseClaudeMd } from '../interop/claude.js';
 import { writeClaudeMemory, type ClaudeMemoryAction } from '../interop/claude-memory.js';
 import { legacyStampNoteAt } from '../interop/inject.js';
@@ -67,7 +67,7 @@ function pushSync(fafPath: string, dir: string): void {
   console.log(`${fafCyan('◆')} sync  .faf → CLAUDE.md`);
   if (note) {console.log(dim(`  ${note}`));}
 
-  const result = enrichScore(kernel.score(readFafRaw(fafPath)));
+  const result = withKernel(fafPath, () => enrichScore(kernel.score(readFafRaw(fafPath))));
   displayScore(result, fafPath);
 }
 
@@ -79,7 +79,11 @@ function pullSync(fafPath: string, claudePath: string): void {
   // contradictory text. Pulling it overwrites canonical slots with that text.
   // At Trophy, CLAUDE.md is a complete push-derivation from .faf, so selective
   // re-read is safe. This gate matches the pubpro doctrine: Trophy or nothing.
-  const preScore = enrichScore(kernel.score(readFafRaw(fafPath)));
+  // project.faf is read as a .faf first: text that is not valid YAML, or a
+  // scalar or a list, is the one-line not-yaml refusal, never a score; what
+  // the kernel cannot read is one line too.
+  const existing = readFaf(fafPath);
+  const preScore = withKernel(fafPath, () => enrichScore(kernel.score(readFafRaw(fafPath))));
   if (preScore.tier.name !== 'TROPHY') {
     console.error(`${bold('×')} sync --pull blocked: requires ✪ Trophy (currently ${preScore.score}%)`);
     console.error(dim(`  MD → .faf backfill only runs at 100%. Reach Trophy with 'faf go', then retry.`));
@@ -97,7 +101,6 @@ function pullSync(fafPath: string, claudePath: string): void {
   }
 
   const parsed = parseClaudeMd(claudeContent);
-  const existing = readFaf(fafPath);
 
   if (parsed.project?.name) {existing.project = { ...existing.project, name: parsed.project.name };}
   if (parsed.project?.goal) {existing.project = { ...existing.project, goal: parsed.project.goal };}
@@ -106,7 +109,7 @@ function pullSync(fafPath: string, claudePath: string): void {
   writeFaf(fafPath, existing, { onAliasKept: k => console.log(dim(`  ${aliasKeptNote(k)}`)) });
   console.log(`${fafCyan('◆')} sync  CLAUDE.md → .faf   ${dim('(Trophy-gated)')}`);
 
-  const result = enrichScore(kernel.score(readFafRaw(fafPath)));
+  const result = withKernel(fafPath, () => enrichScore(kernel.score(readFafRaw(fafPath))));
   displayScore(result, fafPath);
 }
 

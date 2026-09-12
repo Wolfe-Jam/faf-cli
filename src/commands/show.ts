@@ -1,6 +1,6 @@
 import { join } from 'path';
 import open from 'open';
-import { findFafFile, readFaf, readFafRaw } from '../interop/faf.js';
+import { findFafFile, readFaf, readFafRaw, withKernel } from '../interop/faf.js';
 import { writeProjectHtml } from '../interop/projecthtml.js';
 import { scoreFafYaml } from '../core/scorer.js';
 import { dim, fafCyan } from '../ui/colors.js';
@@ -41,7 +41,7 @@ export function showCommand(options: ShowOptions = {}): void {
   const dir = process.cwd();
   const data = readFaf(fafPath);
   // Real scorer — never a reimplementation. Same pipeline as export --html.
-  const result = scoreFafYaml(readFafRaw(fafPath));
+  const result = withKernel(fafPath, () => scoreFafYaml(readFafRaw(fafPath)));
   writeProjectHtml(dir, data, result, fafPath, { force: options.force });
 
   const htmlPath = join(dir, 'project.html');

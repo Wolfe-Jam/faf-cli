@@ -36,14 +36,18 @@ function notValidYaml(path: string, err: YAMLParseError): SafePathError {
 }
 
 /** Run `call` — a call into faf's scoring kernel with the text of the .faf
- *  at `path` — and turn a rejection by the kernel into the one-line refusal.
- *  The kernel throws a bare string (or an Error) for text it cannot read,
- *  some of which yaml reads (a 30-digit integer, nesting past the kernel's
- *  depth limit); that becomes a SafePathError (`not-yaml`): "<file>: faf's
- *  scoring kernel could not read it (<reason>) — faf left it unchanged". A
- *  SafePathError from `call` passes through as it is. For `faf score`,
- *  `faf compile` and `faf refresh`, which parse the text with
- *  {@link readFafFromString} first. */
+ *  at `path` (or the bytes of the .fafb there) — and turn a rejection by the
+ *  kernel into the one-line refusal. The kernel throws a bare string (or an
+ *  Error) for text it cannot read, some of which yaml reads (a 30-digit
+ *  integer, nesting past the kernel's depth limit); that becomes a
+ *  SafePathError (`not-yaml`): "<file>: faf's scoring kernel could not read
+ *  it (<reason>) — faf left it unchanged". A SafePathError from `call` passes
+ *  through as it is. Every command that hands project.faf (or a .fafb) to
+ *  the kernel calls it through here, after it has read the file as a .faf
+ *  ({@link readFaf}, or {@link readFafFromString} with the path); one that
+ *  edits project.faf (`faf auto`, `faf go`, `faf sync --direction pull`)
+ *  asks the kernel before it writes, so the line is true. `faf diff` and
+ *  `faf log` score a version the kernel cannot read as 0 instead. */
 export function withKernel<T>(path: string, call: () => T): T {
   try {
     return call();
@@ -147,8 +151,10 @@ export type { KeptAlias };
  * stay in the folder and end at a .faf/.fafm file) and the atomic write of
  * `safeWriteFile` apply; the write itself goes only through a link to a file
  * of the same name. A file that is not valid YAML (SafePathError `not-yaml`,
- * one line), or not UTF-8, is refused (nothing written); so is anything
- * `mutate` throws, and so is a file that changed on disk while faf was writing.
+ * one line), or not UTF-8, is refused (nothing written); so is a file that
+ * parses to a scalar or a list — the same `not-yaml` refusal readFaf gives,
+ * before `mutate` is called — anything `mutate` throws, and a file that
+ * changed on disk while faf was writing.
  */
 export function updateFafFile(path: string, mutate: (doc: Document) => void): UpdateFafResult {
   return updateFaf(path, mutate, undefined);
@@ -172,6 +178,8 @@ function updateFaf(
   let result: ReturnType<typeof editYaml>;
   try {
     result = editYaml(text, doc => {
+      // A scalar or a list is refused before `mutate` sees it.
+      refuseNotMapping(doc, path);
       const before = doc.clone();
       mutate(doc);
       kept = restoreAliases(before, doc);
@@ -227,6 +235,17 @@ function projectType(doc: Document): unknown {
   return isScalar(node) ? node.value : node;
 }
 
+/** A .faf Document whose root is a scalar or a list is refused — the same
+ *  SafePathError (`not-yaml`) {@link readFaf} throws: "<file>: a .faf must be
+ *  a YAML mapping (key: value pairs), but this one is a string ("…"). faf left
+ *  it unchanged — fix it by hand." An empty document passes. */
+function refuseNotMapping(doc: Document, path: string): void {
+  const root = doc.contents;
+  if (root !== null && root !== undefined && !isMap(root)) {
+    throw new SafePathError('not-yaml', resolve(path), `${path}: a .faf must be a YAML mapping (key: value pairs), but this one is ${describeShape(doc.toJS())}. faf left it unchanged — fix it by hand.`);
+  }
+}
+
 /** Make the .faf Document hold `data`, changing only what `data` changes:
  *  the file's own data is read first and only the paths where `data` differs
  *  from it are written ({@link mergeData}) — a value `data` merely repeats
@@ -237,10 +256,8 @@ function projectType(doc: Document): unknown {
  *  rationale is written only next to a `type:` this write fills; a type
  *  already in the file is left exactly as it is. */
 function applyFafData(doc: Document, data: FafData, path: string): void {
+  refuseNotMapping(doc, path);
   const root = doc.contents;
-  if (root !== null && root !== undefined && !isMap(root)) {
-    throw new SafePathError('not-yaml', resolve(path), `${path}: a .faf must be a YAML mapping (key: value pairs), but this one is ${describeShape(doc.toJS())}. faf left it unchanged — fix it by hand.`);
-  }
   const fileHasMeta = isMap(root) && root.items.some(p => isScalar(p.key) && p.key.value === '_meta');
   const { _meta: meta, ...rest } = data as FafData & { _meta?: { found?: string[] } };
   const typeBefore = projectType(doc);
@@ -319,17 +336,21 @@ export function readFafRaw(path: string): string {
 /** Parse .faf data from a YAML string — e.g. the output of `git show <ref>:project.faf`.
  *  The readers above are path-only; `faf diff` needs to parse a version that
  *  lives in git history, never on disk. With `path` (the file the text was
- *  read from), text that is not valid YAML throws a SafePathError
- *  (`not-yaml`) naming it, as {@link readFaf} does; without it, yaml's own
- *  error. */
+ *  read from) the text is read as {@link readFaf} reads a file: text that is
+ *  not valid YAML throws a SafePathError (`not-yaml`) naming it, and so does
+ *  text that parses to a scalar or a list (faf's shape check,
+ *  `asFafMapping`); empty text reads as `{}`. Without `path`, the parsed
+ *  value as it is, or yaml's own error. */
 export function readFafFromString(text: string, path?: string): FafData {
+  let parsed: unknown;
   try {
-    return parse(text) as FafData;
+    parsed = parse(text);
   } catch (e) {
     const yamlError = yamlParseError(e);
     if (path !== undefined && yamlError) {throw notValidYaml(path, yamlError);}
     throw e;
   }
+  return (path === undefined ? parsed : asFafMapping(parsed, path)) as FafData;
 }
 
 /** True when `full` is a .faf faf may read: a regular file, or a link that

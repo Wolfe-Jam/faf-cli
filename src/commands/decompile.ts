@@ -2,6 +2,8 @@ import { readFileSync } from 'fs';
 import { dirname, resolve } from 'path';
 import * as kernel from '../wasm/kernel.js';
 import { writeRendered } from '../core/render-hash.js';
+import { refuseMissingOutputFolder } from '../core/refusal.js';
+import { withKernel } from '../interop/faf.js';
 import { sameFile } from './compile.js';
 import { dim, fafCyan } from '../ui/colors.js';
 
@@ -35,7 +37,8 @@ export function decompileCommand(file: string, options: DecompileOptions = {}): 
     process.exit(3);
   }
 
-  const info = kernel.decompile(bytes);
+  // A .fafb the kernel cannot read (cut short, say) is one line.
+  const info = withKernel(file, () => kernel.decompile(bytes));
   const json = JSON.stringify(info, null, 2);
   if (!options.output) {
     console.log(json);
@@ -46,6 +49,8 @@ export function decompileCommand(file: string, options: DecompileOptions = {}): 
     console.error(`faf: ${resolve(options.output)} is the file being decompiled — faf does not write the JSON over it, and left it unchanged. Name another output with --output.`);
     process.exit(1);
   }
+  // An --output folder that is not there is one line: faf does not create it.
+  refuseMissingOutputFolder(options.output);
   // No decompile output before 7.13 was ever written (--output was ignored),
   // so a file without faf's render hash is not faf's.
   const { result } = writeRendered(options.output, `${json}\n`, {

@@ -26,7 +26,7 @@
 import { createHash } from 'crypto';
 import { readFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
-import { findFafFile, readFafRaw } from '../interop/faf.js';
+import { findFafFile, readFafFromString, readFafRaw, withKernel } from '../interop/faf.js';
 import { readBytesIfPresent, resolveInside, safeReplaceOwned } from '../core/safe-write.js';
 import { scoreFafYaml } from '../core/scorer.js';
 import { SLOTS, readSlotValue, PLACEHOLDERS } from '../core/slots.js';
@@ -327,7 +327,10 @@ export function benchCommand(action?: string, answersFile?: string, options: Ben
     process.exit(2);
   }
   const yaml = readFafRaw(fafPath);
-  const qset = deriveQuestionSet(yaml);
+  // Read as a .faf first (not valid YAML, a scalar or a list: the one-line
+  // refusal); what the scoring kernel cannot read is one line too.
+  readFafFromString(yaml, fafPath);
+  const qset = withKernel(fafPath, () => deriveQuestionSet(yaml));
   const dir = dirname(fafPath);
   const project = (parseYAML(yaml) as Record<string, any>)?.project?.name ?? dir.split('/').pop();
 

@@ -1,5 +1,5 @@
 import { join, resolve } from 'path';
-import { findFafFile, readFaf, readFafRaw } from '../interop/faf.js';
+import { findFafFile, readFaf, readFafRaw, withKernel } from '../interop/faf.js';
 import { writeAgentsMd } from '../interop/agents.js';
 import { enrichFromRepo } from '../detect/enrich.js';
 import { writeCursorrules } from '../interop/cursorrules.js';
@@ -126,7 +126,7 @@ export function exportCommand(options: ExportOptions = {}): void {
     // Render from the CURRENT project.faf — scored via the real scorer,
     // never a reimplementation. project.html is a view, not a format.
     run(() => {
-      const result = scoreFafYaml(readFafRaw(fafPath));
+      const result = withKernel(fafPath, () => scoreFafYaml(readFafRaw(fafPath)));
       writeProjectHtml(dir, data, result, fafPath, { force: options.force });
       console.log(`  project.html`);
     });

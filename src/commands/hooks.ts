@@ -39,6 +39,9 @@ import { computeFafDiff, runnerWorks } from './diff.js';
 
 const START = '# >>> faf >>>';
 const END = '# <<< faf <<<';
+/** The `#!/bin/sh` line install writes on top of faf's section in a hook
+ *  that is blank (or not there). */
+const SHEBANG = '#!/bin/sh\n';
 // Canonical bin name, never the `faf` alias — a `faf` on PATH can be shadowed by
 // another tool of the same name (a Rust `faf`, etc.); `faf-cli` is unambiguous
 // and is installed alongside `faf` by the same package.
@@ -262,7 +265,7 @@ export function installHooks(cwd: string, options: InstallOptions = {}): boolean
   }
   let content: string;
   if (text === null) {
-    content = `#!/bin/sh\n${block}`;
+    content = `${SHEBANG}${block}`;
   } else if (section) {
     // Update faf's own section in place (mode change / re-install) — never duplicate.
     content = text.slice(0, section.start) + block + text.slice(section.end);
@@ -274,7 +277,7 @@ export function installHooks(cwd: string, options: InstallOptions = {}): boolean
       console.error(`Error: ${hookFile} is in a hooks folder outside this repo (${linked.real}) and faf did not write it — faf left it as it is. Add \`${runner}${options.strict ? ' --strict' : ''}\` to it yourself.`);
       return false;
     }
-    if (text.trim() === '') {content = `#!/bin/sh\n${block}${text}`;}
+    if (text.trim() === '') {content = `${SHEBANG}${block}${text}`;}
     else {content = text.endsWith('\n') ? `${text}\n${block}` : `${text}\n\n${block}`;}
   }
 
@@ -288,12 +291,15 @@ export function installHooks(cwd: string, options: InstallOptions = {}): boolean
   return true;
 }
 
-/** `before` (the hook's text up to faf's start marker) without the blank
- *  separator line install writes between your lines and faf's section: one
- *  `\n` after your last line end, when your lines hold more than blank space
- *  (install writes none after a hook that is blank). Anything else before the
- *  marker is left as it is. */
-function withoutSeparator(before: string): string {
+/** `before` (the hook's text up to faf's start marker) without what install
+ *  wrote there: the blank separator line between your lines and faf's
+ *  section — one `\n` after your last line end, when your lines hold more
+ *  than blank space — or, when everything outside faf's section is blank
+ *  (`after` is the text past its end marker), the `#!/bin/sh` line install
+ *  wrote directly above the start marker. Anything else before the marker is
+ *  left as it is. */
+function withoutInstallLines(before: string, after: string): string {
+  if (before === SHEBANG && after.trim() === '') {return '';}
   return before.endsWith('\n\n') && before.slice(0, -1).trim() !== '' ? before.slice(0, -1) : before;
 }
 
@@ -326,8 +332,10 @@ export function uninstallHooks(cwd: string): boolean {
     return true;
   }
   // Only faf's own section goes — with the blank line install put before it
-  // in a hook of yours — and every other byte of the hook stays.
-  const refused = writeHook(hookFile, withoutSeparator(text.slice(0, section.start)) + text.slice(section.end), text, statSync(real).mode & 0o777);
+  // in a hook of yours, or the `#!/bin/sh` line it put on top of a blank
+  // hook — and every other byte of the hook stays.
+  const after = text.slice(section.end);
+  const refused = writeHook(hookFile, withoutInstallLines(text.slice(0, section.start), after) + after, text, statSync(real).mode & 0o777);
   if (refused) {
     console.error(`Error: ${refused}`);
     return false;

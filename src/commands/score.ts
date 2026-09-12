@@ -19,9 +19,10 @@ export function scoreCommand(file?: string, options: ScoreOptions = {}): void {
   }
 
   const yaml = readFafRaw(fafPath);
-  // Parsed first, as every .faf reader does: text that is not valid YAML is
-  // the one-line refusal, never the kernel's parse error. What the kernel
-  // itself cannot read is one line too (withKernel).
+  // Parsed first, as every .faf reader does: text that is not valid YAML, or
+  // that is a scalar or a list, is the one-line refusal — never the kernel's
+  // parse error, never a 0% score. What the kernel itself cannot read is one
+  // line too (withKernel).
   readFafFromString(yaml, fafPath);
   // scoreFafYaml short-circuits on about.represents — see core/scorer.ts.
   // About is a repo role, not an app_type.

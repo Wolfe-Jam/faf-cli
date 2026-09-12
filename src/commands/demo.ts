@@ -1,5 +1,5 @@
 import { join } from 'path';
-import { readFafRaw } from '../interop/faf.js';
+import { readFafRaw, withKernel } from '../interop/faf.js';
 import * as kernel from '../wasm/kernel.js';
 import { enrichScore } from '../core/scorer.js';
 import { displayScore } from '../ui/display.js';
@@ -50,7 +50,7 @@ human_context:
 
   // Step 2: Score it
   console.log(`  ${bold('2.')} Scoring...`);
-  const result = enrichScore(kernel.score(readFafRaw(fafPath)));
+  const result = withKernel(fafPath, () => enrichScore(kernel.score(readFafRaw(fafPath))));
   console.log('');
   displayScore(result, 'project.faf', true);
 

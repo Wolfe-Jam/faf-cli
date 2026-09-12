@@ -1,7 +1,7 @@
 import { existsSync } from 'fs';
 import { join } from 'path';
 import { assembleFreshFaf, updateExistingFaf } from '../detect/assemble.js';
-import { aliasKeptNote, writeFaf, readFaf, readFafRaw } from '../interop/faf.js';
+import { aliasKeptNote, writeFaf, readFaf, readFafRaw, withKernel } from '../interop/faf.js';
 import * as kernel from '../wasm/kernel.js';
 import { enrichScore } from '../core/scorer.js';
 import { typedNoneHints } from '../core/typed-none.js';
@@ -23,8 +23,13 @@ export function autoCommand(): void {
     // Only what changed is written; comments and formatting stay as they are.
     // An alias (`stack: *base`) is never expanded to fill a slot under it —
     // it stays as written, and faf says so in one line.
+    // A project.faf the scoring kernel cannot read is refused in one line
+    // before anything is written — the fill keeps every key, so the kernel
+    // could not read the filled file either.
+    const existing = readFaf(fafPath);
+    withKernel(fafPath, () => kernel.score(readFafRaw(fafPath)));
     const aliases: string[] = [];
-    const written = writeFaf(fafPath, updateExistingFaf(dir, readFaf(fafPath)), {
+    const written = writeFaf(fafPath, updateExistingFaf(dir, existing), {
       onAliasKept: kept => aliases.push(aliasKeptNote(kept)),
     });
     console.log(`${written ? fafCyan('updated') : dim('unchanged')} ${fafPath}`);
@@ -36,7 +41,7 @@ export function autoCommand(): void {
   }
 
   const yaml = readFafRaw(fafPath);
-  const result = enrichScore(kernel.score(yaml));
+  const result = withKernel(fafPath, () => enrichScore(kernel.score(yaml)));
 
   // Record growth on the DNA journey, if a heartbeat exists (faf init births it).
   // A .faf-dna faf did not write is left as it is — say so in one line.

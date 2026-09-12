@@ -6,6 +6,7 @@ import { projectCards } from '../interop/cards.js';
 import { readUtf8, resolveInside, safeWriteFile } from '../core/safe-write.js';
 import { writeRendered } from '../core/render-hash.js';
 import { JsonEditError } from '../core/json-edit.js';
+import { refuseMissingOutputFolder } from '../core/refusal.js';
 import { dim, fafCyan } from '../ui/colors.js';
 
 export interface ServerCardCommandOptions {
@@ -116,6 +117,8 @@ export function serverCardCommand(options: ServerCardCommandOptions = {}): void 
   if (outPath === inPath) {
     if (next.changed) {safeWriteFile(inReal, next.text, { root: inRoot, expect: text });}
   } else {
+    // An --out folder that is not there is one line: faf does not create it.
+    refuseMissingOutputFolder(outPath);
     // A file of faf's own: it carries faf's render hash (`_meta["one.faf/render"]`,
     // which the registry schema allows and the registry drops on publish) and
     // is replaced only while it is byte for byte what faf last wrote there.
