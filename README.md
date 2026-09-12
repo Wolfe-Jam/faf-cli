@@ -75,7 +75,7 @@ brew install wolfe-jam/faf/faf-cli && faf   # Homebrew (auto-taps)
 ## Quick Start
 
 ```bash
-# ANY GitHub repo — no clone, no install, 2 seconds
+# ANY GitHub repo — one shallow clone, no install, 2 seconds
 bunx faf-cli git https://github.com/facebook/react
 
 # Your own project
@@ -101,12 +101,12 @@ Run `faf` with no arguments:
 | Command | What it does |
 |---------|--------------|
 | `faf init` | Create `project.faf` from your local project |
-| `faf git <url>` | Instant `.faf` from any GitHub repo — no clone |
+| `faf git <url>` | Instant `.faf` from any GitHub repo (a shallow clone) |
 | `faf auto` | Detect stack, fill every slot it can, score |
 | `faf go` | Guided interview to fill the human-only slots |
 | `faf score` | Check AI-readiness (0–100%) |
 | `faf export` | Author `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.cursorrules` |
-| `faf sync` | Bi-directional `.faf` ↔ `CLAUDE.md` |
+| `faf sync` | `.faf` → `CLAUDE.md` (pull: Trophy-gated backfill) |
 | `faf memory` | `.fafm` soul ops — convert Claude memory, etch, recall, ls, show |
 | `faf diff` / `log` | Semantic context diff + score timeline across git history |
 | `faf hooks --install` | Pre-commit guard against context regression |

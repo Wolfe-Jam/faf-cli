@@ -2,7 +2,7 @@
 
 **One command. Every agent in your session gets the same accurate, versioned context.**
 
-FAF-CLI (v7.1, "The AGENTS.md Edition") is the canonical tool for the [`.faf` format](https://faf.one): persistent, versioned, AI-readable project context. For Claude it does two things a hand-written file can't: it **bi-syncs `CLAUDE.md` with a single scored source of truth** (`project.faf`), and it exposes live FAF tools to Claude over MCP. Part of the FAF ecosystem — over 100k downloads; see [faf.one/downloads](https://faf.one/downloads) for latest stats.
+FAF-CLI (v7.1, "The AGENTS.md Edition") is the canonical tool for the [`.faf` format](https://faf.one): persistent, versioned, AI-readable project context. For Claude it does two things a hand-written file can't: it **writes `CLAUDE.md` from a single scored source of truth** (`project.faf`), and it exposes live FAF tools to Claude over MCP. Part of the FAF ecosystem — over 100k downloads; see [faf.one/downloads](https://faf.one/downloads) for latest stats.
 
 ---
 
@@ -10,7 +10,7 @@ FAF-CLI (v7.1, "The AGENTS.md Edition") is the canonical tool for the [`.faf` fo
 
 ```bash
 bunx faf                     # auto-detect the stack, write project.faf, score it
-bunx faf sync                # bi-sync .faf ↔ CLAUDE.md (edit either; the other follows)
+bunx faf sync                # write CLAUDE.md from .faf (one way)
 bunx faf export --agents     # also emit AGENTS.md — Claude Code reads it too
 bunx faf score               # AI-readiness score (target: Trophy 100%)
 ```
@@ -33,7 +33,7 @@ project.faf  → structure for any AI  ← the scored source the others project 
 
 Claude Code reads `CLAUDE.md` (and `AGENTS.md`) at the start of every session. FAF makes those a projection of one scored source, not hand-kept files:
 
-1. **Bi-directional sync** — `faf sync` keeps `.faf` ↔ `CLAUDE.md` aligned with mtime auto-direction: edit `CLAUDE.md` and the `.faf` updates; edit the `.faf` and `CLAUDE.md` updates. No manual reconciliation, no drift.
+1. **One-way sync** — `faf sync` writes faf's block in `CLAUDE.md` from `project.faf`: edit the `.faf` and `CLAUDE.md` follows. Nothing flows back into the `.faf` on its own; `faf sync --direction pull` backfills name, goal and language from `CLAUDE.md`, and only at ✪ Trophy.
 2. **Non-destructive** — FAF maintains a labeled block and preserves everything you wrote by hand.
 3. **Scored, not guessed** — `faf score` tells you whether Claude is starting from complete context or filling gaps by hallucination. Target the Trophy (100%) and every session starts from a full picture.
 4. **Git-native** — the `.faf` versions with your code, so context travels with the branch and matches the commit Claude is working on.
@@ -46,12 +46,12 @@ Static files are the baseline; [claude-faf-mcp](https://www.npmjs.com/package/cl
 
 - **Stop hand-editing** — `bunx faf` once, then `faf sync` keeps `CLAUDE.md` honest as the stack evolves.
 - **Onboarding** — a new teammate or a fresh Claude session gets accurate context immediately, not a stale hand-written guess.
-- **Remote work** — `faf git owner/repo` pulls structured, scored context for any repo Claude needs to reason about, no clone required.
+- **Remote work** — `faf git owner/repo` pulls structured, scored context for any repo Claude needs to reason about, from a shallow clone faf makes for you.
 - **One source → many surfaces** — change `project.faf`, and `CLAUDE.md`, `AGENTS.md`, and the MCP tools stay consistent.
 
 ## Why it's a natural fit
 
-FAF-CLI isn't another AI wrapper — it's the canonical, versioned, stack-aware source that `CLAUDE.md` should be authored *from*. The bi-sync means the file Claude reads can't quietly fall out of date, and the MCP server means Claude can act on live context, not just a snapshot. One command (`bunx faf`) turns any project into one Claude can actually understand — measurable, versioned, and consistent.
+FAF-CLI isn't another AI wrapper — it's the canonical, versioned, stack-aware source that `CLAUDE.md` should be authored *from*. One-way sync means the file Claude reads follows the `.faf` instead of quietly falling out of date, and the MCP server means Claude can act on live context, not just a snapshot. One command (`bunx faf`) turns any project into one Claude can actually understand — measurable, versioned, and consistent.
 
 ---
 

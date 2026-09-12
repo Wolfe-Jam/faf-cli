@@ -19,7 +19,7 @@ The credo: **FAF defines. AGENTS.md instructs. AI codes.**
 ## When to activate this skill
 
 - Creating, editing, or scoring `.faf` files
-- Syncing `.faf` ↔ `CLAUDE.md` (or `AGENTS.md`, `.cursorrules`, `GEMINI.md`)
+- Syncing `.faf` → `CLAUDE.md`, or exporting it to `AGENTS.md`, `.cursorrules`, `GEMINI.md`
 - Diagnosing sub-Trophy scores and reaching 🏆 100%
 - Explaining the FCL, tier system, or app-type ladder
 - Connecting `.faf` work to the broader receipts: IANA, Anthropic PR #2759, MCP Registry
@@ -47,7 +47,7 @@ faf init → faf auto → faf go → 🏆 Trophy 100%
 | `faf auto` | Auto-detect stack, fill what's detectable, score |
 | `faf go` | Guided interview to fill the remaining slots → Trophy |
 | `faf score` | Check current AI-readiness (0–100%) |
-| `faf sync` | Push `.faf` → `CLAUDE.md` (and friends) |
+| `faf sync` | Write `CLAUDE.md` from `.faf` (one way) |
 | `faf compile` | `.faf` → `.fafb` binary (sealed, portable, deterministic) |
 | `faf check` | Validate `.faf` structure |
 | `faf info` | Version + system info |
@@ -74,7 +74,7 @@ From v6.6.0 onward, faf-cli recommends **only 🏆 Trophy**.
 ```
 Layer 4   AI tooling          ← AI optimised by complete FCL
 Layer 3   Agents              ← can act because FCL is complete
-Layer 2   MD instructions     ← can be regenerated correctly
+Layer 2   MD instructions     ← can be re-authored correctly
 Layer 1   .faf (FCL)          ← 🏆 Trophy = complete = foundation
 ```
 
@@ -137,18 +137,18 @@ human_context:
 
 v6.6.0 uses **Mk4 canonical slot names** in user-facing docs: `db` (was `database`), `framework` (was `frontend`), `css` (was `css_framework`), `state` (was `state_management`), `api` (was `api_type`), `pkg_manager` (was `package_manager`). 36k+ existing `.faf` files continue scoring correctly via read-time aliasing.
 
-## The bi-sync flow
+## The sync flow — one way
 
 `.faf` is the **canonical Foundational Context Layer (FCL)**. CLAUDE.md / AGENTS.md / .cursorrules / GEMINI.md are downstream prose renders that READ `.faf` to save AI time. They never write back automatically.
 
 ```
-.faf  ←── 8ms ──→  CLAUDE.md     (push: always one-way)
-                   AGENTS.md
-                   .cursorrules
-                   GEMINI.md
+.faf  ──── 8ms ───→  CLAUDE.md     (faf sync)
+                     AGENTS.md     (faf export)
+                     .cursorrules
+                     GEMINI.md
 ```
 
-`faf sync --pull` (MD → .faf backfill) is **Trophy-gated** — blocked below 100% to prevent overwriting canonical slots with prose drift.
+`faf sync --direction pull` (CLAUDE.md → .faf backfill of name, goal and language) is **Trophy-gated** — blocked below 100% to prevent overwriting canonical slots with prose drift.
 
 ## Receipts ladder
 
@@ -164,9 +164,9 @@ v6.6.0 uses **Mk4 canonical slot names** in user-facing docs: `db` (was `databas
 | Install + start using the CLI | [github.com/Wolfe-Jam/faf-cli](https://github.com/Wolfe-Jam/faf-cli) |
 | Read the v6.6 release | [CHANGELOG](https://github.com/Wolfe-Jam/faf-cli/blob/main/CHANGELOG.md) — The Trophy Edition |
 | Understand the FCL / Trophy doctrine | [docs/SCORING.md](https://github.com/Wolfe-Jam/faf-cli/blob/main/docs/SCORING.md) |
-| Set up bi-sync | [docs/SYNC.md](https://github.com/Wolfe-Jam/faf-cli/blob/main/docs/SYNC.md) |
+| Set up sync | [docs/SYNC.md](https://github.com/Wolfe-Jam/faf-cli/blob/main/docs/SYNC.md) |
 | Visit the format home | [faf.one](https://faf.one) |
-| Pin context to AI tools | Run `faf export` — generates AGENTS.md, .cursorrules, GEMINI.md from your `.faf` |
+| Pin context to AI tools | Run `faf export` — authors AGENTS.md, .cursorrules, GEMINI.md from your `.faf` |
 
 ---
 

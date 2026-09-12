@@ -10,9 +10,9 @@ FAF-CLI (v7.1, "The AGENTS.md Edition") is the canonical tool for the [`.faf` fo
 
 ```bash
 bunx faf                     # auto-detect the stack, write project.faf, score it
-bunx faf export --agents     # generate AGENTS.md (+ related files) agents actually read
+bunx faf export --agents     # author AGENTS.md (+ related files) agents actually read
 bunx faf score               # AI-readiness score (target: Trophy 100%)
-bunx faf git owner/repo      # instant, scored context for any remote repo — no clone
+bunx faf git owner/repo      # instant, scored context for any remote repo — one shallow clone
 ```
 
 `npx faf` works too. Add `faf export --agents` to `package.json` scripts, a pre-commit hook, or your agent's bootstrap step, and every session starts from accurate context instead of a guess.
@@ -43,7 +43,7 @@ xAI ships strong agentic capabilities — native tool use, the Agent Tools API, 
 Cursor's Composer and background agents rely on exactly the files FAF authors:
 
 1. **Better context files** — `faf export --agents` produces higher-fidelity `AGENTS.md` / `.cursorrules` than hand-rolled versions, because it scans for real build commands, conventions, guardrails, and Definition of Done.
-2. **Non-destructive + bi-sync** — keep editing the parts you care about; FAF keeps the structured block current.
+2. **Non-destructive, one way** — keep editing the parts you care about; FAF rewrites only its own block, from `project.faf`.
 3. **Live tools over MCP** — wire a FAF MCP server so Cursor agents can call `score`, `validate`, `search`, not just read Markdown.
 4. **Team bootstrap** — new projects/teammates run `bunx faf` once and have the files Cursor expects.
 5. **External work** — `faf git` gives agents instant context on any repo or dependency without a full clone.

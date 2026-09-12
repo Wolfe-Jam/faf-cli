@@ -19,7 +19,7 @@ values, and `faf score` tells you what's still missing.
 cp examples/react-dashboard.faf project.faf   # pick the closest shape
 # edit name / version / goal / stack / human_context for your project
 faf score                                     # see how complete it is
-faf sync                                      # keep it in step with CLAUDE.md
+faf sync                                      # write CLAUDE.md from it (one way)
 ```
 
 ## Shape

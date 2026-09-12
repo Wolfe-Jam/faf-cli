@@ -11,7 +11,7 @@ Every README should answer these questions. Here's ours:
 | **🎯 WHY** do you need it? | 100% context (AI-scored), persists forever, syncs automatically - saves $1000s/developer |
 | **🌍 WHERE** does it work? | Everywhere AI needs context (Claude Code, Gemini CLI, Cursor, etc.) |
 | **⏰ WHEN** should you use it? | New projects (day one), existing projects (now), exploring repos (instantly) |
-| **🚀 HOW** does it work? | `bunx faf-cli git <url>` or `npx faf-cli git <url>` - No install, no clone, 2 seconds |
+| **🚀 HOW** does it work? | `bunx faf-cli git <url>` or `npx faf-cli git <url>` - No install, one shallow clone, 2 seconds |
 
 **For AI:** Read the detailed sections below for full context.
 **For humans:** Use this pattern in YOUR README. Answer these 6 questions clearly.
@@ -159,11 +159,11 @@ faf auto                    # Fill slots from repo facts
 ```
 
 ### Exploring Repos
-**Instantly.** Author context for ANY GitHub repo WITHOUT cloning:
+**Instantly.** Author context for ANY GitHub repo from one shallow clone:
 ```bash
 bunx faf-cli git https://github.com/facebook/react
 # 2 seconds → 95% ◆ Silver score
-# No install. No clone. Just instant context.
+# No install. One shallow clone. Just instant context.
 ```
 
 ### Daily Workflow
@@ -187,7 +187,7 @@ Add to package.json to see FAF status every dev session:
 
 ### Quick Start (No Install Required)
 
-**Zero install, zero clone:**
+**Zero install, one shallow clone:**
 
 ```bash
 # Author AI context for ANY GitHub repo

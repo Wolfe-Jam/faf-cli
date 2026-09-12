@@ -10,9 +10,9 @@ FAF-CLI (v7.1, "The AGENTS.md Edition") is the canonical tool for the [`.faf` fo
 
 ```bash
 bunx faf                     # auto-detect the stack, write project.faf, score it
-bunx faf export --agents     # generate AGENTS.md agents actually read
+bunx faf export --agents     # author AGENTS.md agents actually read
 bunx faf score               # AI-readiness score (target: Trophy 100%)
-bunx faf git owner/repo      # instant, scored context for any remote repo — no clone
+bunx faf git owner/repo      # instant, scored context for any remote repo — one shallow clone
 ```
 
 No `bun add -g` needed — `bunx` runs the latest faf-cli on demand. Add `bunx faf export --agents` to a `package.json` script or a pre-commit hook and context files stay fresh.
