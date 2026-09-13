@@ -6,8 +6,7 @@
  * `project.goal` (overarching/use-case framing).
  */
 
-import { existsSync, readFileSync } from 'fs';
-import { join } from 'path';
+import { readRepoFile } from '../core/safe-write.js';
 import { type ExtractedContext, isValidExtraction } from './types.js';
 
 /** Parse a single TOML field from `[package]` table. Naive but adequate for
@@ -41,15 +40,8 @@ function readPackageField(content: string, field: string): string | null {
 
 /** Read Cargo.toml and extract per-slot content. Returns {} if no Cargo.toml. */
 export function interrogateCargo(dir: string): ExtractedContext {
-  const path = join(dir, 'Cargo.toml');
-  if (!existsSync(path)) {return {};}
-
-  let content: string;
-  try {
-    content = readFileSync(path, 'utf-8');
-  } catch {
-    return {};
-  }
+  const content = readRepoFile(dir, 'Cargo.toml');
+  if (content === null) {return {};}
 
   const description = readPackageField(content, 'description');
   if (description && isValidExtraction(description)) {

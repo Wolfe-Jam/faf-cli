@@ -7,8 +7,8 @@
  * obvious ones. Facts from files, not README prose.
  */
 
-import { existsSync, readFileSync, readdirSync } from 'fs';
 import { join } from 'path';
+import { readRepoDir, readRepoFile, repoExists, withRepoRoot } from '../core/safe-write.js';
 import type { ExtractedContext } from './types.js';
 
 const IGNORE_DIRS = new Set([
@@ -57,35 +57,37 @@ function pick(targets: string[], patterns: RegExp[]): string | null {
 /** Root, then each depth-1 subdir (so a nested `backend/Makefile` is found). */
 function buildFileDirs(dir: string): string[] {
   const dirs = [dir];
-  try {
-    for (const e of readdirSync(dir, { withFileTypes: true })) {
-      if (e.isDirectory() && !e.name.startsWith('.') && !IGNORE_DIRS.has(e.name)) {
-        dirs.push(join(dir, e.name));
-      }
+  for (const e of readRepoDir(dir) ?? []) { // unreadable: root only
+    if (e.isDirectory() && !e.name.startsWith('.') && !IGNORE_DIRS.has(e.name)) {
+      dirs.push(join(dir, e.name));
     }
-  } catch { /* unreadable — root only */ }
+  }
   return dirs;
 }
 
 /** Does `d` look like the primary backend/app dir? (raises its command priority) */
 function looksPrimary(d: string): number {
   let s = 0;
-  if (existsSync(join(d, 'manage.py')) || existsSync(join(d, 'pyproject.toml')) || existsSync(join(d, 'Gemfile'))) {s += 3;}
+  if (repoExists(d, 'manage.py') || repoExists(d, 'pyproject.toml') || repoExists(d, 'Gemfile')) {s += 3;}
   if (/(?:^|\/)(backend|api|server|core|app)$/.test(d)) {s += 2;}
   return s;
 }
 
 export function interrogateBuildFiles(dir: string): ExtractedContext {
+  // The project folder bounds the subfolder reads: a nested Makefile may link
+  // anywhere inside the project, never out of it.
+  return withRepoRoot(dir, () => buildFileContext(dir));
+}
+
+function buildFileContext(dir: string): ExtractedContext {
   const candidates: Array<{ score: number; commands: Record<string, string> }> = [];
 
   for (const scanDir of buildFileDirs(dir)) {
     const isRoot = scanDir === dir;
     const prefix = isRoot ? '' : `cd ${scanDir.slice(dir.length + 1)} && `;
     for (const bf of BUILD_FILES) {
-      const path = join(scanDir, bf.file);
-      if (!existsSync(path)) {continue;}
-      let body: string;
-      try { body = readFileSync(path, 'utf-8'); } catch { continue; }
+      const body = readRepoFile(scanDir, bf.file);
+      if (body === null) {continue;}
       const targets = bf.targets(body);
       if (targets.length === 0) {continue;}
 

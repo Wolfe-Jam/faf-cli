@@ -1,9 +1,9 @@
-import { existsSync, readFileSync } from 'fs';
-import { dirname, join } from 'path';
+import { existsSync } from 'fs';
+import { basename, dirname, join } from 'path';
 import { deprecate } from 'node:util';
 import { parse } from 'yaml';
 import type { FafData } from '../core/types.js';
-import { makeDirInside } from '../core/safe-write.js';
+import { makeDirInside, readUtf8, resolveInside } from '../core/safe-write.js';
 import { writeRendered, type RenderedResult } from '../core/render-hash.js';
 import { upsertJsonRows } from '../core/json-edit.js';
 import {
@@ -124,7 +124,10 @@ export interface ProjectedCards {
 }
 
 export function readFafa(path: string): FafaDoc {
-  return parse(readFileSync(path, 'utf-8')) as FafaDoc;
+  // A .fafa that links out of its folder is refused (SafePathError), never read:
+  // a hostile repo's agent.fafa -> ~/.aws/credentials would otherwise be parsed
+  // and quoted in an error. A link to a same-name file inside the folder is fine.
+  return parse(readUtf8(resolveInside(dirname(path), basename(path)))) as FafaDoc;
 }
 
 /** Discover agent.fafa / .fafa (cwd, then one parent). */

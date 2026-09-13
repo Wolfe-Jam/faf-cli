@@ -5,8 +5,7 @@
  * in `.env`, this file is the template. Fills `security.secrets` + `.example`.
  */
 
-import { existsSync } from 'fs';
-import { join } from 'path';
+import { repoExists } from '../core/safe-write.js';
 import type { ExtractedContext } from './types.js';
 
 const CANDIDATES = [
@@ -16,7 +15,7 @@ const CANDIDATES = [
 
 export function interrogateEnv(dir: string): ExtractedContext {
   for (const rel of CANDIDATES) {
-    if (existsSync(join(dir, rel))) {
+    if (repoExists(dir, rel)) {
       return { security: { secrets: '.env', example: rel } };
     }
   }

@@ -1,5 +1,5 @@
-import { existsSync, readFileSync, readdirSync, statSync } from 'fs';
 import { join } from 'path';
+import { readRepoDir, readRepoFile, repoExists, statRepoFile } from '../core/safe-write.js';
 import spec from './ruby-detection.json';
 
 /**
@@ -36,26 +36,14 @@ const RAILS_LAYOUT = spec.railsLayoutFiles as string[];
 /** True if directory looks like a Ruby project root. */
 export function isRubyRoot(dir: string): boolean {
   return (
-    existsSync(join(dir, 'Gemfile')) ||
-    existsSync(join(dir, 'gems.rb')) ||
+    repoExists(dir, 'Gemfile') ||
+    repoExists(dir, 'gems.rb') ||
     hasGemspec(dir)
   );
 }
 
 function hasGemspec(dir: string): boolean {
-  try {
-    return readdirSync(dir).some(f => f.endsWith('.gemspec'));
-  } catch {
-    return false;
-  }
-}
-
-function readText(path: string): string | null {
-  try {
-    return readFileSync(path, 'utf-8');
-  } catch {
-    return null;
-  }
+  return (readRepoDir(dir) ?? []).some(e => e.name.endsWith('.gemspec'));
 }
 
 /**
@@ -121,30 +109,27 @@ function collectGems(dir: string): { gems: Set<string>; sources: string[] } {
   const sources: string[] = [];
 
   for (const name of ['Gemfile', 'gems.rb']) {
-    const p = join(dir, name);
-    const body = readText(p);
+    const body = readRepoFile(dir, name);
     if (body) {
       for (const g of parseGemfileGems(body)) {gems.add(g);}
       sources.push(name);
     }
   }
 
-  const lock = readText(join(dir, 'Gemfile.lock')) || readText(join(dir, 'gems.locked'));
+  const lock = readRepoFile(dir, 'Gemfile.lock') || readRepoFile(dir, 'gems.locked');
   if (lock) {
     for (const g of parseGemfileLockGems(lock)) {gems.add(g);}
     sources.push('Gemfile.lock');
   }
 
-  try {
-    for (const f of readdirSync(dir)) {
-      if (!f.endsWith('.gemspec')) {continue;}
-      const body = readText(join(dir, f));
-      if (body) {
-        for (const g of parseGemspecGems(body)) {gems.add(g);}
-        sources.push(f);
-      }
+  for (const { name: f } of readRepoDir(dir) ?? []) {
+    if (!f.endsWith('.gemspec')) {continue;}
+    const body = readRepoFile(dir, f);
+    if (body) {
+      for (const g of parseGemspecGems(body)) {gems.add(g);}
+      sources.push(f);
     }
-  } catch { /* skip */ }
+  }
 
   return { gems, sources };
 }
@@ -179,7 +164,7 @@ function findMcp(gems: Set<string>): string | undefined {
 
 function railsLayoutHit(dir: string): string | undefined {
   for (const rel of RAILS_LAYOUT) {
-    if (existsSync(join(dir, rel))) {return rel;}
+    if (repoExists(dir, rel)) {return rel;}
   }
   return undefined;
 }
@@ -189,33 +174,25 @@ function hasCliShape(dir: string, gems: Set<string>): { hit: boolean; why: strin
   const cli = findLabeled(gems, CLI_GEMS);
   if (cli) {return { hit: true, why: cli[0] };}
 
-  try {
-    for (const f of readdirSync(dir)) {
-      if (!f.endsWith('.gemspec')) {continue;}
-      const body = readText(join(dir, f));
-      if (body && /executables\s*=/.test(body) && !/executables\s*=\s*\[\s*\]/.test(body)) {
-        return { hit: true, why: `${f} executables` };
-      }
+  for (const { name: f } of readRepoDir(dir) ?? []) {
+    if (!f.endsWith('.gemspec')) {continue;}
+    const body = readRepoFile(dir, f);
+    if (body && /executables\s*=/.test(body) && !/executables\s*=\s*\[\s*\]/.test(body)) {
+      return { hit: true, why: `${f} executables` };
     }
-  } catch { /* skip */ }
+  }
 
-  const binDir = join(dir, 'bin');
-  if (existsSync(binDir)) {
-    try {
-      const bins = readdirSync(binDir).filter(b => {
-        if (b === 'setup' || b === 'console' || b === 'rake') {return false;}
-        try {
-          return statSync(join(binDir, b)).isFile();
-        } catch {
-          return false;
-        }
-      });
-      // bin/rails alone is Rails, not CLI product
-      const nonRails = bins.filter(b => b !== 'rails');
-      if (nonRails.length > 0 && !hasGem(gems, 'rails') && !railsLayoutHit(dir)) {
-        return { hit: true, why: `bin/${nonRails[0]}` };
-      }
-    } catch { /* skip */ }
+  const binEntries = readRepoDir(dir, 'bin');
+  if (binEntries) {
+    const bins = binEntries.map(e => e.name).filter(b => {
+      if (b === 'setup' || b === 'console' || b === 'rake') {return false;}
+      return statRepoFile(dir, join('bin', b))?.isFile() === true;
+    });
+    // bin/rails alone is Rails, not CLI product
+    const nonRails = bins.filter(b => b !== 'rails');
+    if (nonRails.length > 0 && !hasGem(gems, 'rails') && !railsLayoutHit(dir)) {
+      return { hit: true, why: `bin/${nonRails[0]}` };
+    }
   }
 
   return { hit: false, why: '' };
@@ -240,7 +217,7 @@ export function detectRubyProject(dir: string): RubyProject | null {
   const railsLayout = railsLayoutHit(dir);
   const hasRailsGem = hasGem(gems, 'rails') || hasGem(gems, 'railties');
   const cliShape = hasCliShape(dir, gems);
-  const hasConfigRu = existsSync(join(dir, 'config.ru'));
+  const hasConfigRu = repoExists(dir, 'config.ru');
 
   // Rails is NEVER inferred from Gemfile existence alone.
   // rails gem and/or classic layout required.

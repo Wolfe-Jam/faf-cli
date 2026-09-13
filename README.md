@@ -132,7 +132,16 @@ faf memory etch "a durable fact" --id my-fact
 faf memory show
 ```
 
-### What's New in v7.13.0 — The Co-Author Edition
+### What's New in v7.13.1 — The Co-Author Edition
+
+**A security patch: faf-cli's detection no longer follows a link out of your project, so a hostile repo can't pull a file like `~/.aws/credentials` into project.faf or your AI's context.**
+
+- **Detection reads stay inside the project.** A README.md, package.json or any other repo file that links outside the project is treated as absent. Links inside the project still work.
+- **`faf git` clones with symlinks off**, and never reads a link's path as a file's content.
+- **`faf cards` reads `agent.fafa` safely**: a link out of its folder is refused.
+- **`slotignored` is shown as `slotignored`**, never N/A.
+
+#### v7.13.0 — the Edition release
 
 **You and your AI co-author project.faf — AI fills the tech facts from your repo, you write the 6Ws — and faf-cli only touches what it wrote: links can't lead it outside your project, a failed write keeps the original, and your comments, values and notes stay as you left them.**
 

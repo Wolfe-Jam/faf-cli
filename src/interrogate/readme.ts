@@ -7,8 +7,7 @@
  *   No slot is synthesized from another slot's content.
  */
 
-import { existsSync, readFileSync } from 'fs';
-import { join } from 'path';
+import { readRepoFile, repoExists } from '../core/safe-write.js';
 import { type ExtractedContext, isValidExtraction } from './types.js';
 
 /** Strip badge / image lines + blank lines from the top of a README */
@@ -145,17 +144,12 @@ export function interrogateReadme(dir: string): ExtractedContext {
   const candidates = ['README.md', 'README.MD', 'Readme.md', 'readme.md'];
   let path: string | null = null;
   for (const name of candidates) {
-    const full = join(dir, name);
-    if (existsSync(full)) { path = full; break; }
+    if (repoExists(dir, name)) { path = name; break; }
   }
   if (!path) {return {};}
 
-  let content: string;
-  try {
-    content = readFileSync(path, 'utf-8');
-  } catch {
-    return {};
-  }
+  let content = readRepoFile(dir, path);
+  if (content === null) {return {};}
   // HTML comment blocks (asset notes, TODO markers, marketing briefs) are not
   // prose — strip before any extraction so their text can't seed a slot.
   content = content.replace(/<!--[\s\S]*?-->/g, '');

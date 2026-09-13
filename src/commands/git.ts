@@ -1,7 +1,7 @@
 import { existsSync } from 'fs';
 import { join, resolve } from 'path';
 import { execFileSync } from 'child_process';
-import { makeTempDir, removeTempDir } from '../core/safe-write.js';
+import { makeTempDir, readBytesIfPresent, removeTempDir, safeUnlink } from '../core/safe-write.js';
 import { refuseMissingOutputFolder } from '../core/refusal.js';
 import { authorFafFromRepo, normalizeGitUrl, repoNameFromUrl } from '../detect/git-repo.js';
 import { writeFaf, readFafRaw, serializeFaf, withKernel } from '../interop/faf.js';
@@ -26,11 +26,45 @@ export interface GitCommandOptions {
   stdout?: boolean;
 }
 
+/**
+ * With core.symlinks=false, every path git records as a link (mode 120000)
+ * arrives in the clone as a plain file holding the link's target text. That
+ * text is not the file: detection would read `docs/README.md` as the README
+ * and write it into project.goal. The placeholders are taken out of faf's own
+ * throwaway clone, so detection sees them as absent, as it sees any link.
+ * Returns how many were taken out.
+ */
+export function dropLinkPlaceholders(cloneDir: string): number {
+  let listing: string;
+  try {
+    listing = execFileSync('git', ['-C', cloneDir, 'ls-files', '-s', '-z'], { stdio: ['ignore', 'pipe', 'pipe'] }).toString();
+  } catch {
+    return 0;
+  }
+  let dropped = 0;
+  for (const rec of listing.split('\0')) {
+    if (!rec.startsWith('120000 ')) {continue;}
+    const tab = rec.indexOf('\t');
+    if (tab < 0) {continue;}
+    const full = join(cloneDir, rec.slice(tab + 1));
+    const bytes = readBytesIfPresent(full);
+    if (bytes === null) {continue;}
+    try {
+      if (safeUnlink(full, { root: cloneDir, expect: bytes })) {dropped++;}
+    } catch {
+      // Not a plain placeholder (a folder or something unexpected): leave it.
+    }
+  }
+  return dropped;
+}
+
 /** The `git clone` argv — split out so the --ref plumbing is testable without a network. */
 export function cloneArgs(repoUrl: string, tmpDir: string, ref?: string): string[] {
-  // --depth 1 keeps it instant; --branch pins a branch or tag for versioned context.
-  // `--` stops the URL ever being read as a flag.
-  return ['clone', '--depth', '1', ...(ref ? ['--branch', ref] : []), '--', repoUrl, tmpDir];
+  // core.symlinks=false: a link in the repo arrives as a plain file holding the
+  // link's text, so a README.md that links to ~/.aws/credentials is never
+  // followed. --depth 1 keeps it instant; --branch pins a branch or tag for
+  // versioned context. `--` stops the URL ever being read as a flag.
+  return ['clone', '-c', 'core.symlinks=false', '--depth', '1', ...(ref ? ['--branch', ref] : []), '--', repoUrl, tmpDir];
 }
 
 /**
@@ -103,6 +137,7 @@ export function gitCommand(
     // Full slot-filling pipeline (shared with `faf auto`) — not detectStack alone —
     // named after the REPO, not the throwaway clone dir (a real package.json name
     // is kept). The same function consumers call on a repo they fetched.
+    dropLinkPlaceholders(cloneDir);
     const data = authorFafFromRepo(cloneDir, { repoUrl });
 
     if (target.outputPath === null) {

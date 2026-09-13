@@ -1,6 +1,5 @@
-import { existsSync, readFileSync } from 'fs';
-import { join } from 'path';
 import type { FafData } from '../core/types.js';
+import { readRepoFile, repoExists } from '../core/safe-write.js';
 import { detectCommands, detectKeyFiles } from './scanner.js';
 
 type Pkg = {
@@ -16,14 +15,8 @@ type Pkg = {
  */
 function detectConventions(dir: string, pkg: Pkg): string[] {
   const conv: string[] = [];
-  const has = (f: string): boolean => existsSync(join(dir, f));
-  const read = (f: string): string => {
-    try {
-      return readFileSync(join(dir, f), 'utf-8');
-    } catch {
-      return '';
-    }
-  };
+  const has = (f: string): boolean => repoExists(dir, f);
+  const read = (f: string): string => readRepoFile(dir, f) ?? '';
 
   if (has('tsconfig.json') && /"strict"\s*:\s*true/.test(read('tsconfig.json'))) {
     conv.push('TypeScript strict mode (tsconfig.json)');
@@ -64,10 +57,10 @@ export function enrichFromRepo(dir: string, data: FafData): FafData {
   const out: FafData = { ...data };
 
   let pkg: unknown = null;
-  const pj = join(dir, 'package.json');
-  if (existsSync(pj)) {
+  const pj = readRepoFile(dir, 'package.json');
+  if (pj !== null) {
     try {
-      pkg = JSON.parse(readFileSync(pj, 'utf-8'));
+      pkg = JSON.parse(pj);
     } catch {
       pkg = null;
     }
@@ -90,10 +83,10 @@ export function enrichFromRepo(dir: string, data: FafData): FafData {
   // Security: detect a secrets file (.env), keep hand-authored if present.
   if (!data.security) {
     const envFiles = ['.env', '.env.local', '.env.development'];
-    const secrets = envFiles.find((f) => existsSync(join(dir, f)));
+    const secrets = envFiles.find((f) => repoExists(dir, f));
     if (secrets) {
       const example = ['.env.example', '.env.sample', '.env.template'].find((f) =>
-        existsSync(join(dir, f)),
+        repoExists(dir, f),
       );
       out.security = { secrets, ...(example ? { example } : {}) };
     }

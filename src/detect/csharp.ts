@@ -1,5 +1,4 @@
-import { existsSync, readFileSync, readdirSync } from 'fs';
-import { join } from 'path';
+import { readRepoDir, readRepoFile } from '../core/safe-write.js';
 import spec from './csharp-detection.json';
 
 /**
@@ -260,12 +259,7 @@ export function classifyCsproj(
 
 /** List root-level .csproj filenames in a directory. */
 export function listRootCsprojs(dir: string): string[] {
-  if (!existsSync(dir)) {return [];}
-  try {
-    return readdirSync(dir).filter(f => f.toLowerCase().endsWith('.csproj')).sort();
-  } catch {
-    return [];
-  }
+  return (readRepoDir(dir) ?? []).map(e => e.name).filter(f => f.toLowerCase().endsWith('.csproj')).sort();
 }
 
 /**
@@ -281,13 +275,8 @@ export function detectCsharpProject(dir: string): CsharpProject | null {
   let bestRank = 999;
 
   for (const file of files) {
-    const path = join(dir, file);
-    let content: string;
-    try {
-      content = readFileSync(path, 'utf-8');
-    } catch {
-      continue;
-    }
+    const content = readRepoFile(dir, file);
+    if (content === null) {continue;}
     const parsed = parseCsproj(content);
     const classified = classifyCsproj(parsed, file);
     const r = rank(classified.appType, classified.framework);

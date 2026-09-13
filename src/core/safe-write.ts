@@ -46,11 +46,20 @@
  * byte for byte what faf last wrote (their render hash, render-hash.ts); a
  * `.fafb` must carry the FAFB header (see {@link safeReplaceOwned}). Anything
  * else is refused unless the caller passes `force` (the CLI's `--force`).
+ *
+ * Rule 6 — detection reads stay inside the project. The files faf reads to fill
+ * slots and render context (README.md, package.json, pyproject.toml,
+ * Cargo.toml, go.mod, …) go through {@link repoFile}: resolved on disk, every
+ * link followed. A file whose real path, or the folder it sits in, leaves the
+ * project folder, runs through `.git`, or is a dangling link is absent to
+ * detection: it does not exist, and reading it gives nothing. A link that
+ * stays inside the project is followed (README.md → docs/README.md).
  */
 import {
   accessSync,
   closeSync,
   constants,
+  existsSync,
   fchmodSync,
   fchownSync,
   fsyncSync,
@@ -67,6 +76,8 @@ import {
   statSync,
   unlinkSync,
   writeFileSync,
+  type Dirent,
+  type Stats,
 } from 'fs';
 import { randomBytes } from 'crypto';
 import { tmpdir } from 'os';
@@ -398,6 +409,110 @@ export function readBytesIfPresent(path: string): Buffer | null {
     if (errnoOf(e) === 'ENOENT') {return null;}
     throw e;
   }
+}
+
+/**
+ * Where detection may read `rel` in the project folder `dir` — its real path —
+ * or null when detection treats it as absent (Rule 6). `rel` names a file or a
+ * folder, relative to `dir` (as `join(dir, rel)`). Every link on the way is
+ * followed, the folders included; the result is null when:
+ *   - nothing is there, or a link on the way dangles or loops
+ *   - the real path leaves `dir` (README.md → ~/.aws/credentials, or a folder
+ *     on the way that is a link out)
+ *   - the real path runs through `.git` (README.md → .git/config)
+ * A link that stays inside `dir` is followed. `dir` is the folder detection
+ * was handed: the project, or a folder below it that detection reads on its
+ * own (a subfolder's manifest), so a link may not leave that folder either.
+ */
+export function repoFile(dir: string, rel: string): string | null {
+  const full = resolve(join(dir, rel));
+  if (!existsSync(full)) {return null;} // not there, or a dangling link
+  let root: string;
+  let real: string;
+  try {
+    root = realpath(detectionBoundary(dir));
+    real = realpath(full);
+  } catch {
+    return null; // a loop, or gone meanwhile
+  }
+  if (!isInside(root, real) || inGitDir(relative(root, real))) {return null;}
+  return real;
+}
+
+/** The project folders detection is running in, outermost first (see
+ *  {@link withRepoRoot}). */
+const detectionRoots: string[] = [];
+
+/** The folder a read in `dir` may not leave: the outermost project folder
+ *  detection is running in that holds `dir`, or `dir` itself. */
+function detectionBoundary(dir: string): string {
+  const base = resolve(dir);
+  return detectionRoots.find(r => base === r || base.startsWith(r.endsWith(sep) ? r : r + sep)) ?? base;
+}
+
+/**
+ * Run `scan` with `root` as the project folder for every detection read under
+ * it: a read in a subfolder (web/package.json) may then follow a link to
+ * anywhere inside `root` (../shared/web-package.json), not only inside that
+ * subfolder. A link out of `root` is still absent. Subfolder scans use this.
+ */
+export function withRepoRoot<T>(root: string, scan: () => T): T {
+  detectionRoots.push(resolve(root));
+  try {
+    return scan();
+  } finally {
+    detectionRoots.pop();
+  }
+}
+
+/** True when `rel` (a file or a folder) is in the project folder `dir` for
+ *  detection: see {@link repoFile}. */
+export function repoExists(dir: string, rel: string): boolean {
+  return repoFile(dir, rel) !== null;
+}
+
+/** The text of the file `rel` in the project folder `dir` (UTF-8, read the way
+ *  detection reads it), or null when detection treats it as absent (see
+ *  {@link repoFile}), it is not a regular file, or it cannot be read. */
+export function readRepoFile(dir: string, rel: string): string | null {
+  const real = repoFile(dir, rel);
+  if (real === null) {return null;}
+  try {
+    return statSync(real).isFile() ? readFileSync(real, 'utf-8') : null;
+  } catch {
+    return null;
+  }
+}
+
+/** What `rel` is (its real path's stats) in the project folder `dir`, or null
+ *  when detection treats it as absent (see {@link repoFile}). */
+export function statRepoFile(dir: string, rel: string): Stats | null {
+  const real = repoFile(dir, rel);
+  if (real === null) {return null;}
+  try {
+    return statSync(real);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The entries of the folder `rel` (default: `dir` itself) in the project
+ * folder `dir`, or null when detection treats the folder as absent (see
+ * {@link repoFile}) or it cannot be read. A link among them that leaves `dir`,
+ * dangles, or leads into `.git` is left out: detection does not see it. Each
+ * entry says what it is itself (a link is a link, as readdirSync gives it).
+ */
+export function readRepoDir(dir: string, rel = '.'): Dirent[] | null {
+  const real = repoFile(dir, rel);
+  if (real === null) {return null;}
+  let entries: Dirent[];
+  try {
+    entries = readdirSync(real, { withFileTypes: true });
+  } catch {
+    return null;
+  }
+  return entries.filter(e => !e.isSymbolicLink() || repoFile(dir, join(rel, e.name)) !== null);
 }
 
 /** What to keep from the file already at `target` — its permission bits and

@@ -15,8 +15,9 @@
  * Turbo-Cat fills only the slots still empty (esp. non-npm stacks).
  */
 
-import { readdirSync, readFileSync, statSync, type Dirent } from 'fs';
+import type { Dirent } from 'fs';
 import { join, extname, resolve } from 'path';
+import { readRepoDir, readRepoFile, statRepoFile, withRepoRoot } from '../core/safe-write.js';
 import { KNOWLEDGE_BASE } from './turbo-cat-knowledge.js';
 import { detectDartProject } from './dart.js';
 import { detectGoProject } from './go.js';
@@ -126,9 +127,9 @@ function categoryFor(slots: Record<string, string>, frameworks: string[]): strin
  *   pwa     — start_url/display/icons → assert nothing
  *   unknown/unreadable → assert NOTHING. An honest empty beats a guessed stack.
  */
-function classifyManifestJson(filePath: string): 'chrome' | 'other' {
+function classifyManifestJson(dir: string, name: string): 'chrome' | 'other' {
   try {
-    const m = JSON.parse(readFileSync(filePath, 'utf-8')) as Record<string, unknown>;
+    const m = JSON.parse(readRepoFile(dir, name) ?? '') as Record<string, unknown>;
     const chromeField = ['background', 'content_scripts', 'action', 'browser_action', 'permissions']
       .some((k) => k in m);
     if (typeof m.manifest_version === 'number' && chromeField) {return 'chrome';}
@@ -138,27 +139,20 @@ function classifyManifestJson(filePath: string): 'chrome' | 'other' {
   }
 }
 
-/** A directory entry that is a regular file (a link counts when it leads to one).
+/** A directory entry that is a regular file (a link counts when it leads to one
+ *  inside the project; a dangling link, or one out of it, does not).
  *  A folder named `go.mod` or `package.json` is not evidence of anything. */
 function isFileEntry(dir: string, e: Dirent): boolean {
   if (e.isFile()) {return true;}
   if (!e.isSymbolicLink()) {return false;}
-  try {
-    return statSync(join(dir, e.name)).isFile();
-  } catch {
-    return false; // dangling link
-  }
+  return statRepoFile(dir, e.name)?.isFile() === true;
 }
 
-/** A directory entry that is a folder (a link counts when it leads to one). */
+/** A directory entry that is a folder (a link counts when it leads to one inside the project). */
 function isDirEntry(dir: string, e: Dirent): boolean {
   if (e.isDirectory()) {return true;}
   if (!e.isSymbolicLink()) {return false;}
-  try {
-    return statSync(join(dir, e.name)).isDirectory();
-  } catch {
-    return false;
-  }
+  return statRepoFile(dir, e.name)?.isDirectory() === true;
 }
 
 /** Layer 1A — config files in the project directory only. Never a parent:
@@ -169,12 +163,8 @@ function scanConfigFiles(projectDir: string): FoundFormat[] {
   const cur = resolve(projectDir);
   /** One JVM classification per directory (pom + gradle + settings would triple-fire). */
   const jvmDirsDone = new Set<string>();
-  let entries: Dirent[];
-  try {
-    entries = readdirSync(cur, { withFileTypes: true });
-  } catch {
-    return found;
-  }
+  const entries = readRepoDir(cur);
+  if (!entries) {return found;}
   for (const e of entries) {
     const f = e.name;
     // Content-aware: *.xcodeproj is a folder (checked below); every other
@@ -237,7 +227,7 @@ function scanConfigFiles(projectDir: string): FoundFormat[] {
     if (!k) {continue;}
     // Sourced-only gate: manifest.json only asserts the chrome stack when
     // its CONTENT proves a chrome extension; mcpb/PWA/unknown assert nothing.
-    if (f === 'manifest.json' && classifyManifestJson(join(cur, f)) !== 'chrome') {continue;}
+    if (f === 'manifest.json' && classifyManifestJson(cur, f) !== 'chrome') {continue;}
     // Content-aware: pubspec.yaml backs Flutter apps, Dart CLIs/packages,
     // servers, and MCP servers — branch by deps instead of asserting Flutter
     // for everything (the filename-only flattening this engine used to do).
@@ -383,7 +373,7 @@ function scanConfigFiles(projectDir: string): FoundFormat[] {
  *  come from config files, Layer 1A). */
 function scanExtensions(projectDir: string): FoundFormat[] {
   const found: FoundFormat[] = [];
-  for (const ext of collectExtensions(projectDir, 2, { count: 0 })) {
+  for (const ext of withRepoRoot(projectDir, () => collectExtensions(projectDir, 2, { count: 0 }))) {
     const k = KNOWLEDGE_BASE[`*${ext}`];
     const lang = (k?.slots as Record<string, string> | undefined)?.mainLanguage;
     if (lang) {found.push({ slots: { mainLanguage: lang }, priority: k.priority, frameworks: k.frameworks });}
@@ -453,12 +443,8 @@ export function turboCatSlots(projectDir: string): { project?: Record<string, st
 function collectExtensions(dir: string, depth: number, budget: { count: number }): Set<string> {
   const exts = new Set<string>();
   if (depth < 0 || budget.count > 400) {return exts;}
-  let entries: import('fs').Dirent[];
-  try {
-    entries = readdirSync(dir, { withFileTypes: true });
-  } catch {
-    return exts;
-  }
+  const entries = readRepoDir(dir);
+  if (!entries) {return exts;}
   for (const e of entries) {
     if (budget.count++ > 400) {break;}
     if (!e.isDirectory()) {
