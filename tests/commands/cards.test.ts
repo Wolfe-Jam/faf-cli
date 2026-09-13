@@ -71,10 +71,12 @@ describe('TYRE: faf cards command', () => {
       errSpy.mockRestore();
     }
     const printed = JSON.parse(chunks.join(''));
-    expect(printed.a2a.capabilities.extensions[0].params.faf).toBe(
+    expect(printed.a2a.capabilities.extensions[0].params.provenance.faf).toBe(
       'https://example.com/project.faf',
     );
-    expect(printed.a2a.capabilities.extensions[0].params.iana).toContain('vnd.faf+yaml');
+    expect(printed.a2a.capabilities.extensions[0].params.mediaTypes).toContain(
+      'application/vnd.faf+yaml',
+    );
     expect(printed.mcp._meta['one.faf/context'].faf).toBe('https://example.com/project.faf');
     expect(existsSync(join(testDir, '.well-known', 'agent-card.json'))).toBe(false);
     expect(existsSync(join(testDir, 'server-card'))).toBe(false);
@@ -120,7 +122,7 @@ describe('TYRE: faf cards command', () => {
     }
     const card = JSON.parse(readFileSync(join(testDir, '.well-known', 'agent-card.json'), 'utf-8'));
     expect(card.name).toBe('FAFA — the Voice of FAF');
-    expect(card.capabilities.extensions[0].uri).toBe('https://faf.one/context');
+    expect(card.capabilities.extensions[0].uri).toBe('https://faf.one/ext/context/v1');
     expect(card.capabilities.extensions[0].params.version).toBeUndefined();
   });
 
@@ -150,10 +152,11 @@ describe('ENGINE: fixture golden — projector vs tests/fixtures/cards', () => {
     expect(p.a2a).toBeDefined();
     expect(p.a2a!.supportedInterfaces[0].protocolBinding).toBe('JSONRPC');
     expect(p.a2a!.skills.every((s) => Array.isArray(s.tags))).toBe(true);
-    expect(JSON.stringify(p.a2a!.capabilities.extensions[0].params)).toBe(
-      JSON.stringify(p.mcp!._meta['one.faf/context']),
-    );
-    expect(p.a2a!.capabilities.extensions[0].params.version).toBeUndefined();
+    const params = p.a2a!.capabilities.extensions[0].params as any;
+    const mcpBlock = p.mcp!._meta['one.faf/context'] as any;
+    expect(params.provenance.faf).toBe(mcpBlock.faf);
+    expect(params.provenance.mediaType).toBe(mcpBlock.mediaType);
+    expect(params.version).toBeUndefined();
   });
 });
 
@@ -171,8 +174,8 @@ describe('ENGINE: optional sibling faf-agent golden', () => {
     expect(p.a2a!.name).toBeTruthy();
     expect(p.a2a!.supportedInterfaces.length).toBeGreaterThan(0);
     expect(p.a2a!.skills.length).toBeGreaterThan(0);
-    expect(p.a2a!.capabilities.extensions[0].uri).toBe('https://faf.one/context');
+    expect(p.a2a!.capabilities.extensions[0].uri).toBe('https://faf.one/ext/context/v1');
     expect(p.a2a!.capabilities.extensions[0].params.version).toBeUndefined();
-    expect(p.a2a!.capabilities.extensions[0].params.deterministic).toBe(true);
+    expect((p.a2a!.capabilities.extensions[0].params as any).fafaSpecVersion).toBeTruthy();
   });
 });

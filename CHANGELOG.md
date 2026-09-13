@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **`slotignored` is shown as `slotignored`, never N/A.** A slot has three states: empty (the default), `slotignored` (from the app-type: not required, not scored) and populated. The `faf score` slot breakdown, the `faf show` statline and the typed-words line now say `slotignored`, replacing the N/A label. A typed `N/A` in a slot that needs a fact is still empty and scores 0.
+- **A2A Agent Card's FAF extension carries real agent identity, not just project provenance.** `capabilities.extensions[0]` moves to `https://faf.one/ext/context/v1` and its `params` gain `fafaSpecVersion`, `agentId` (from `.fafa` `agent.id`), the full `mediaTypes` family, and a `passport` URL — nested `provenance.faf`/`provenance.mediaType` replace the flat pointer fields. `defaultInputModes` now includes any FAF media type a skill's `cites_spec` names. `provider` is emitted only when `agent.vendor` and `agent.homepage` are both present — no longer required, no longer thrown on. `capabilities.streaming` stays `false`: endpoint existence was never a real streaming-capability signal. **Breaking for anything reading the old flat A2A extension shape or the old `https://faf.one/context` URI** — MCP Server Cards and registry entries are unaffected (still the plain, byte-identical context block).
 
 ## [7.13.0] - 2026-09-12 — The Co-Author Edition
 

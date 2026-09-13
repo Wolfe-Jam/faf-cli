@@ -159,7 +159,7 @@ export function cardsCommand(options: CardsCommandOptions = {}): void {
   };
   if (projected.a2a) {
     const out = join(dir, '.well-known', 'agent-card.json');
-    run(out, () => writeJson(out, projected.a2a, dir, { owns: hasA2ACardMark, mark: 'FAF context extension (https://faf.one/context)', force }) !== 'unchanged');
+    run(out, () => writeJson(out, projected.a2a, dir, { owns: hasA2ACardMark, mark: `FAF context extension (${A2A_CONTEXT_URI})`, force }) !== 'unchanged');
   }
   if (projected.mcp) {
     const out = join(dir, 'server-card');
