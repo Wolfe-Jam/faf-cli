@@ -2,7 +2,7 @@ import { existsSync } from 'fs';
 import { dirname, join, resolve } from 'path';
 import { findFafFile, readFaf, readFafRaw, withKernel } from '../interop/faf.js';
 import { scoreFafYaml } from '../core/scorer.js';
-import { makeDirInside, safeWriteFile } from '../core/safe-write.js';
+import { makeDirInside, repoExists, safeWriteFile } from '../core/safe-write.js';
 import { writeRendered } from '../core/render-hash.js';
 import { refuseMissingOutputFolder } from '../core/refusal.js';
 import { fafCyan, dim, bold } from '../ui/colors.js';
@@ -55,9 +55,9 @@ export function tafCommand(subcommand?: string | TafOptions, options: TafOptions
 type Runner = 'bun' | 'pnpm' | 'yarn' | 'npm';
 
 function detectRunner(dir: string): Runner {
-  if (existsSync(join(dir, 'bun.lockb')) || existsSync(join(dir, 'bun.lock'))) {return 'bun';}
-  if (existsSync(join(dir, 'pnpm-lock.yaml'))) {return 'pnpm';}
-  if (existsSync(join(dir, 'yarn.lock'))) {return 'yarn';}
+  if (repoExists(dir, 'bun.lockb') || repoExists(dir, 'bun.lock')) {return 'bun';}
+  if (repoExists(dir, 'pnpm-lock.yaml')) {return 'pnpm';}
+  if (repoExists(dir, 'yarn.lock')) {return 'yarn';}
   return 'npm';
 }
 
@@ -94,7 +94,7 @@ function buildTafWorkflow(dir: string): string {
     '      - uses: actions/checkout@v4\n';
 
   let body: string;
-  if (existsSync(join(dir, 'package.json'))) {
+  if (repoExists(dir, 'package.json')) {
     const r = RUNTIME[detectRunner(dir)];
     body =
       `${r.setup}\n` +

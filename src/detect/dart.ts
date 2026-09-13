@@ -1,5 +1,5 @@
-import { existsSync, readFileSync, readdirSync } from 'fs';
 import { join } from 'path';
+import { readRepoDir, readRepoFile, repoExists } from '../core/safe-write.js';
 import spec from './dart-detection.json';
 
 /**
@@ -62,14 +62,8 @@ function pubspecDeps(content: string): Set<string> {
 
 /** Classify a Dart/Flutter project from its pubspec.yaml. Returns null if not Dart. */
 export function detectDartProject(dir: string): DartProject | null {
-  const path = join(dir, 'pubspec.yaml');
-  if (!existsSync(path)) {return null;}
-  let content: string;
-  try {
-    content = readFileSync(path, 'utf-8');
-  } catch {
-    return null;
-  }
+  const content = readRepoFile(dir, 'pubspec.yaml');
+  if (content === null) {return null;}
 
   const deps = pubspecDeps(content);
   const has = (d: string) => deps.has(d.toLowerCase());
@@ -87,10 +81,7 @@ export function detectDartProject(dir: string): DartProject | null {
 
   // CLI: a top-level `executables:` section, or bin/*.dart entry points.
   const hasExecutables = /^executables:\s*$/m.test(content);
-  let hasBinDart = false;
-  try {
-    hasBinDart = readdirSync(join(dir, 'bin')).some(f => f.endsWith('.dart'));
-  } catch { /* no bin/ */ }
+  const hasBinDart = (readRepoDir(dir, 'bin') ?? []).some(e => e.name.endsWith('.dart'));
   const isCli = hasExecutables || hasBinDart;
 
   let appType: DartAppType;
@@ -101,7 +92,7 @@ export function detectDartProject(dir: string): DartProject | null {
     framework = 'Flutter';
     // App vs package: an app has lib/main.dart (the entry) or `publish_to: none`;
     // a reusable Flutter package has neither — it's publishable, lib/ exports only.
-    const isApp = existsSync(join(dir, 'lib', 'main.dart')) || /^publish_to:\s*['"]?none\b/m.test(content);
+    const isApp = repoExists(dir, join('lib', 'main.dart')) || /^publish_to:\s*['"]?none\b/m.test(content);
     if (isApp) {
       appType = 'mobile';
       found = 'pubspec.yaml (Flutter app)';

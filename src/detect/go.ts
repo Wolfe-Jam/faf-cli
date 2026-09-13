@@ -1,5 +1,5 @@
-import { existsSync, readFileSync, readdirSync, statSync } from 'fs';
 import { join } from 'path';
+import { readRepoDir, readRepoFile, statRepoFile } from '../core/safe-write.js';
 import spec from './go-detection.json';
 
 /**
@@ -98,46 +98,28 @@ function extractModulePath(content: string): string {
 
 /** Layout signal: cmd/ with Go files → common CLI / multi-main layout. */
 function hasCmdDir(dir: string): boolean {
-  const cmd = join(dir, 'cmd');
-  if (!existsSync(cmd)) {return false;}
-  try {
-    for (const name of readdirSync(cmd)) {
-      const p = join(cmd, name);
-      try {
-        if (statSync(p).isDirectory()) {
-          const files = readdirSync(p);
-          if (files.some(f => f.endsWith('.go'))) {return true;}
-        } else if (name.endsWith('.go')) {
-          return true;
-        }
-      } catch { /* skip */ }
+  for (const { name } of readRepoDir(dir, 'cmd') ?? []) {
+    const p = join('cmd', name);
+    const st = statRepoFile(dir, p);
+    if (st?.isDirectory()) {
+      if ((readRepoDir(dir, p) ?? []).some(e => e.name.endsWith('.go'))) {return true;}
+    } else if (st && name.endsWith('.go')) {
+      return true;
     }
-  } catch { /* no cmd */ }
+  }
   return false;
 }
 
 /** Root main.go that declares package main. */
 function hasRootMainPackage(dir: string): boolean {
-  const p = join(dir, 'main.go');
-  if (!existsSync(p)) {return false;}
-  try {
-    const body = readFileSync(p, 'utf-8');
-    return /^package\s+main\b/m.test(body);
-  } catch {
-    return false;
-  }
+  const body = readRepoFile(dir, 'main.go');
+  return body !== null && /^package\s+main\b/m.test(body);
 }
 
 /** Classify a Go project from go.mod (+ light layout). Returns null if not Go. */
 export function detectGoProject(dir: string): GoProject | null {
-  const path = join(dir, 'go.mod');
-  if (!existsSync(path)) {return null;}
-  let content: string;
-  try {
-    content = readFileSync(path, 'utf-8');
-  } catch {
-    return null;
-  }
+  const content = readRepoFile(dir, 'go.mod');
+  if (content === null) {return null;}
 
   const modulePath = extractModulePath(content);
   const reqs = goModRequires(content);

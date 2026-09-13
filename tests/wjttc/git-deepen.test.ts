@@ -62,9 +62,9 @@ describe('WJTTC — faf git (deepened) + 7.0 cohesion', () => {
 
   // ── ⚙️ ENGINE — versioned context (--ref) ───────────────────────────────────
   describe('⚙️ ENGINE — cloneArgs', () => {
-    test('no ref → shallow clone, no --branch', () => {
+    test('no ref → shallow clone, links as plain files, no --branch', () => {
       expect(cloneArgs('https://x/y.git', '/tmp/z')).toEqual([
-        'clone', '--depth', '1', '--', 'https://x/y.git', '/tmp/z',
+        'clone', '-c', 'core.symlinks=false', '--depth', '1', '--', 'https://x/y.git', '/tmp/z',
       ]);
     });
     test('ref → --branch pins the branch/tag (versioned context)', () => {

@@ -1,5 +1,5 @@
-import { existsSync, readFileSync, readdirSync, statSync } from 'fs';
 import { join } from 'path';
+import { readRepoDir, readRepoFile, repoExists, statRepoFile } from '../core/safe-write.js';
 import spec from './swift-detection.json';
 
 /**
@@ -55,31 +55,14 @@ export interface PackageSwiftSignals {
 
 /** True if directory looks like a Swift project root. */
 export function isSwiftRoot(dir: string): boolean {
-  return existsSync(join(dir, 'Package.swift')) || listXcodeprojs(dir).length > 0;
+  return repoExists(dir, 'Package.swift') || listXcodeprojs(dir).length > 0;
 }
 
 /** Root-level *.xcodeproj directory names. */
 export function listXcodeprojs(dir: string): string[] {
-  try {
-    return readdirSync(dir).filter(f => {
-      if (!f.endsWith('.xcodeproj')) {return false;}
-      try {
-        return statSync(join(dir, f)).isDirectory();
-      } catch {
-        return false;
-      }
-    });
-  } catch {
-    return [];
-  }
-}
-
-function readText(path: string): string | null {
-  try {
-    return readFileSync(path, 'utf-8');
-  } catch {
-    return null;
-  }
+  return (readRepoDir(dir) ?? [])
+    .map(e => e.name)
+    .filter(f => f.endsWith('.xcodeproj') && statRepoFile(dir, f)?.isDirectory() === true);
 }
 
 /**
@@ -242,8 +225,7 @@ export function scanXcodeProductTypes(dir: string): {
   let hasTool = false;
   let hit: string | undefined;
   for (const xp of listXcodeprojs(dir)) {
-    const pbx = join(dir, xp, 'project.pbxproj');
-    const body = readText(pbx);
+    const body = readRepoFile(dir, join(xp, 'project.pbxproj'));
     if (!body) {continue;}
     for (const t of APP_PRODUCT_TYPES) {
       if (body.includes(t)) {
@@ -263,7 +245,7 @@ export function scanXcodeProductTypes(dir: string): {
 
 function vaporLayoutHit(dir: string): string | undefined {
   for (const rel of VAPOR_LAYOUT) {
-    if (existsSync(join(dir, rel))) {return rel;}
+    if (repoExists(dir, rel)) {return rel;}
   }
   return undefined;
 }
@@ -275,14 +257,13 @@ function vaporLayoutHit(dir: string): string | undefined {
 export function detectSwiftProject(dir: string): SwiftProject | null {
   if (!isSwiftRoot(dir)) {return null;}
 
-  const pkgPath = join(dir, 'Package.swift');
-  const hasPkg = existsSync(pkgPath);
+  const hasPkg = repoExists(dir, 'Package.swift');
   const xcodeprojs = listXcodeprojs(dir);
   const hasXcode = xcodeprojs.length > 0;
 
   let signals: PackageSwiftSignals | null = null;
   if (hasPkg) {
-    const body = readText(pkgPath);
+    const body = readRepoFile(dir, 'Package.swift');
     if (body) {signals = parsePackageSwift(body);}
   }
 

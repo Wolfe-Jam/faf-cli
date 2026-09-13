@@ -1,5 +1,5 @@
-import { existsSync, readFileSync, readdirSync, type Dirent } from 'fs';
 import { join } from 'path';
+import { readRepoDir, readRepoFile, repoExists, withRepoRoot } from '../core/safe-write.js';
 import type { DetectedFramework, Signal } from '../core/types.js';
 import { NO_CLASSIFYING_SIGNALS } from '../core/slots.js';
 import { FRAMEWORKS } from './frameworks.js';
@@ -30,27 +30,16 @@ interface PackageJson {
 
 /** Read [package].name field from Cargo.toml — naive but adequate. */
 function readCargoName(dir: string): string | null {
-  const path = join(dir, 'Cargo.toml');
-  if (!existsSync(path)) {return null;}
-  try {
-    const content = readFileSync(path, 'utf-8');
-    const m = content.match(/^\s*\[package\][\s\S]*?^\s*name\s*=\s*"([^"]+)"/m);
-    return m ? m[1] : null;
-  } catch {
-    return null;
-  }
+  const content = readRepoFile(dir, 'Cargo.toml');
+  if (content === null) {return null;}
+  const m = content.match(/^\s*\[package\][\s\S]*?^\s*name\s*=\s*"([^"]+)"/m);
+  return m ? m[1] : null;
 }
 
 /** True if Cargo.toml declares one or more `[[bin]]` sections — Rust cli marker. */
 function hasCargoBin(dir: string): boolean {
-  const path = join(dir, 'Cargo.toml');
-  if (!existsSync(path)) {return false;}
-  try {
-    const content = readFileSync(path, 'utf-8');
-    return /^\s*\[\[bin\]\]/m.test(content);
-  } catch {
-    return false;
-  }
+  const content = readRepoFile(dir, 'Cargo.toml');
+  return content !== null && /^\s*\[\[bin\]\]/m.test(content);
 }
 
 /** Detect SDK signals — keyword-based per the SDK-priority doctrine.
@@ -86,10 +75,10 @@ function detectExtensionSignal(dir: string): string | null {
     'dist/manifest.json',
   ];
   for (const rel of candidates) {
-    const path = join(dir, rel);
-    if (!existsSync(path)) {continue;}
+    const text = readRepoFile(dir, rel);
+    if (text === null) {continue;}
     try {
-      const parsed = JSON.parse(readFileSync(path, 'utf-8')) as { manifest_version?: unknown };
+      const parsed = JSON.parse(text) as { manifest_version?: unknown };
       if (typeof parsed.manifest_version === 'number') {
         return `${rel} manifest_version ${parsed.manifest_version} (browser extension)`;
       }
@@ -101,21 +90,15 @@ function detectExtensionSignal(dir: string): string | null {
 /** Python data-science dependency detection (pyproject.toml + requirements.txt). */
 function detectDataScienceSignal(dir: string): string | null {
   const dsPatterns = /(numpy|pandas|jupyter|scikit-learn|sklearn|pytorch|tensorflow|matplotlib|scipy)/i;
-  const pyproject = join(dir, 'pyproject.toml');
-  if (existsSync(pyproject)) {
-    try {
-      const content = readFileSync(pyproject, 'utf-8');
-      const match = content.match(dsPatterns);
-      if (match) {return `pyproject.toml depends on ${match[1]}`;}
-    } catch { /* fall through */ }
+  const pyproject = readRepoFile(dir, 'pyproject.toml');
+  if (pyproject !== null) {
+    const match = pyproject.match(dsPatterns);
+    if (match) {return `pyproject.toml depends on ${match[1]}`;}
   }
-  const reqs = join(dir, 'requirements.txt');
-  if (existsSync(reqs)) {
-    try {
-      const content = readFileSync(reqs, 'utf-8');
-      const match = content.match(dsPatterns);
-      if (match) {return `requirements.txt contains ${match[1]}`;}
-    } catch { /* fall through */ }
+  const reqs = readRepoFile(dir, 'requirements.txt');
+  if (reqs !== null) {
+    const match = reqs.match(dsPatterns);
+    if (match) {return `requirements.txt contains ${match[1]}`;}
   }
   return null;
 }
@@ -131,7 +114,7 @@ function detectMobileSignal(dir: string, pkg: PackageJson | null): string | null
       }
     }
   }
-  if (existsSync(join(dir, 'ios')) && existsSync(join(dir, 'android'))) {
+  if (repoExists(dir, 'ios') && repoExists(dir, 'android')) {
     return 'ios/ + android/ dirs';
   }
   return null;
@@ -139,29 +122,21 @@ function detectMobileSignal(dir: string, pkg: PackageJson | null): string | null
 
 /** WASM target detection (Cargo cdylib + wasm32 OR build.zig wasm OR pkg WASM build scripts). */
 function detectWasmSignal(dir: string, pkg: PackageJson | null): string | null {
-  const cargoPath = join(dir, 'Cargo.toml');
-  if (existsSync(cargoPath)) {
-    try {
-      const content = readFileSync(cargoPath, 'utf-8');
-      // crate-type = ["cdylib"] is the canonical wasm-output marker
-      if (/crate-type\s*=\s*\[[^\]]*"cdylib"/.test(content)) {
-        return 'Cargo.toml crate-type = ["cdylib"]';
-      }
-      // wasm-bindgen / wasm-pack as deps
-      if (/wasm-bindgen|wasm-pack/i.test(content)) {
-        return 'Cargo.toml wasm-bindgen/wasm-pack';
-      }
-    } catch { /* fall through */ }
+  const cargo = readRepoFile(dir, 'Cargo.toml');
+  if (cargo !== null) {
+    // crate-type = ["cdylib"] is the canonical wasm-output marker
+    if (/crate-type\s*=\s*\[[^\]]*"cdylib"/.test(cargo)) {
+      return 'Cargo.toml crate-type = ["cdylib"]';
+    }
+    // wasm-bindgen / wasm-pack as deps
+    if (/wasm-bindgen|wasm-pack/i.test(cargo)) {
+      return 'Cargo.toml wasm-bindgen/wasm-pack';
+    }
   }
   // Zig WASM target — build.zig with .wasm or wasm in script
-  const buildZig = join(dir, 'build.zig');
-  if (existsSync(buildZig)) {
-    try {
-      const content = readFileSync(buildZig, 'utf-8');
-      if (/\.wasm\b|wasm32|setOutputFormat\(\.wasm/i.test(content)) {
-        return 'build.zig wasm target';
-      }
-    } catch { /* fall through */ }
+  const buildZig = readRepoFile(dir, 'build.zig');
+  if (buildZig !== null && /\.wasm\b|wasm32|setOutputFormat\(\.wasm/i.test(buildZig)) {
+    return 'build.zig wasm target';
   }
   // pkg keywords contains 'wasm' AND no app frameworks
   if (pkg?.keywords?.some(k => /^wasm(?:-|$)|webassembly/i.test(k))) {
@@ -173,7 +148,7 @@ function detectWasmSignal(dir: string, pkg: PackageJson | null): string | null {
 /** Bare HTML / vanilla site detection. */
 function detectHtmlSignal(dir: string, pkg: PackageJson | null): string | null {
   // Must have index.html at root
-  if (!existsSync(join(dir, 'index.html'))) {return null;}
+  if (!repoExists(dir, 'index.html')) {return null;}
   // Must NOT have any frontend deps (those would classify as frontend/website/etc)
   if (pkg?.dependencies || pkg?.devDependencies) {
     const allDeps = { ...(pkg.dependencies ?? {}), ...(pkg.devDependencies ?? {}) };
@@ -262,7 +237,7 @@ function detectMcpaasSignal(dir: string, pkg: PackageJson | null, frameworks: De
 /** Monorepo-root — private workspace with multiple packages, no single dominant FW. */
 function detectMonorepoRootSignal(dir: string, pkg: PackageJson | null): string | null {
   if (!pkg?.private) {return null;}
-  const hasWorkspaces = !!pkg.workspaces || existsSync(join(dir, 'pnpm-workspace.yaml'));
+  const hasWorkspaces = !!pkg.workspaces || repoExists(dir, 'pnpm-workspace.yaml');
   if (!hasWorkspaces) {return null;}
   return 'private workspace + multi-package';
 }
@@ -299,13 +274,13 @@ const STACK_FW_CATEGORIES = new Set(['frontend', 'backend', 'database', 'css', '
 /** A directory carries a real language manifest (not just tooling/config). */
 function hasLanguageManifest(d: string): boolean {
   if (
-    existsSync(join(d, 'pyproject.toml')) || existsSync(join(d, 'manage.py')) ||
-    existsSync(join(d, 'setup.py')) || fileExists(d, 'requirements*.txt')
+    repoExists(d, 'pyproject.toml') || repoExists(d, 'manage.py') ||
+    repoExists(d, 'setup.py') || fileExists(d, 'requirements*.txt')
   ) {return true;}
-  if (existsSync(join(d, 'go.mod'))) {return true;}
-  if (existsSync(join(d, 'Cargo.toml'))) {return true;}
-  if (existsSync(join(d, 'Gemfile'))) {return true;}
-  if (existsSync(join(d, 'pom.xml')) || fileExists(d, 'build.gradle*')) {return true;}
+  if (repoExists(d, 'go.mod')) {return true;}
+  if (repoExists(d, 'Cargo.toml')) {return true;}
+  if (repoExists(d, 'Gemfile')) {return true;}
+  if (repoExists(d, 'pom.xml') || fileExists(d, 'build.gradle*')) {return true;}
   if (listRootCsprojs(d).length > 0) {return true;}
   const pkg = readPackageJson(d);
   if (pkg && Object.keys(pkg.dependencies ?? {}).length > 0) {return true;}
@@ -317,12 +292,13 @@ function hasLanguageManifest(d: string): boolean {
  *  real language manifest. This is NOT monorepo tooling — it only exists to stop
  *  a repo whose real stack lives in subdirs from falling to the `library` lie. */
 export function detectSubdirStacks(dir: string): SubdirStack[] {
-  let entries: Dirent[];
-  try {
-    entries = readdirSync(dir, { withFileTypes: true });
-  } catch {
-    return [];
-  }
+  // The project folder bounds every read below it: a subfolder's manifest may
+  // link anywhere inside the project, never out of it.
+  return withRepoRoot(dir, () => subdirStacks(dir));
+}
+
+function subdirStacks(dir: string): SubdirStack[] {
+  const entries = readRepoDir(dir) ?? [];
   const out: SubdirStack[] = [];
   for (const e of entries) {
     if (!e.isDirectory() || e.name.startsWith('.') || SUBDIR_IGNORE.has(e.name)) {continue;}
@@ -342,10 +318,10 @@ export function detectSubdirStacks(dir: string): SubdirStack[] {
       backend: !!be || BACKEND_LANG_RE.test(language),
       hasFramework: !!top,
       appRoot:
-        existsSync(join(sub, 'manage.py')) ||
-        existsSync(join(sub, 'config.ru')) ||
-        existsSync(join(sub, 'bin/rails')) ||
-        existsSync(join(sub, 'artisan')),
+        repoExists(sub, 'manage.py') ||
+        repoExists(sub, 'config.ru') ||
+        repoExists(sub, 'bin/rails') ||
+        repoExists(sub, 'artisan'),
     });
   }
   return out;
@@ -354,7 +330,7 @@ export function detectSubdirStacks(dir: string): SubdirStack[] {
 /** Polyglot signal — ≥2 sibling app dirs, ≥2 distinct languages, a frontend AND
  *  a backend among them. Returns the `# found:` evidence string, or null. */
 export function detectPolyglotSignal(dir: string, pkg: PackageJson | null): string | null {
-  if (pkg?.workspaces || existsSync(join(dir, 'pnpm-workspace.yaml'))) {return null;}
+  if (pkg?.workspaces || repoExists(dir, 'pnpm-workspace.yaml')) {return null;}
   const subs = detectSubdirStacks(dir);
   const langs = new Set(subs.map(s => s.language));
   if (subs.length < 2 || langs.size < 2) {return null;}
@@ -387,10 +363,10 @@ export function detectPolyglotLanguage(dir: string): string | null {
 
 /** Read and parse package.json from a directory */
 export function readPackageJson(dir: string): PackageJson | null {
-  const pkgPath = join(dir, 'package.json');
-  if (!existsSync(pkgPath)) {return null;}
+  const text = readRepoFile(dir, 'package.json');
+  if (text === null) {return null;}
   try {
-    return JSON.parse(readFileSync(pkgPath, 'utf-8'));
+    return JSON.parse(text);
   } catch {
     return null;
   }
@@ -400,7 +376,7 @@ export function readPackageJson(dir: string): PackageJson | null {
 function fileExists(dir: string, pattern: string): boolean {
   // Handle simple file checks
   if (!pattern.includes('*')) {
-    return existsSync(join(dir, pattern));
+    return repoExists(dir, pattern);
   }
 
   // Handle glob patterns like "next.config.*" or ".github/workflows/*.yml"
@@ -408,23 +384,15 @@ function fileExists(dir: string, pattern: string): boolean {
   if (parts.length === 1) {
     // Simple wildcard: "next.config.*"
     const prefix = pattern.split('*')[0];
-    try {
-      return readdirSync(dir).some(f => f.startsWith(prefix));
-    } catch {
-      return false;
-    }
+    return (readRepoDir(dir) ?? []).some(e => e.name.startsWith(prefix));
   }
 
   // Multi-level: ".github/workflows/*.yml"
-  const subdir = join(dir, ...parts.slice(0, -1));
+  const subdir = join(...parts.slice(0, -1));
   const filePattern = parts[parts.length - 1];
   const prefix = filePattern.split('*')[0];
   const suffix = filePattern.split('*')[1] || '';
-  try {
-    return readdirSync(subdir).some(f => f.startsWith(prefix) && f.endsWith(suffix));
-  } catch {
-    return false;
-  }
+  return (readRepoDir(dir, subdir) ?? []).some(e => e.name.startsWith(prefix) && e.name.endsWith(suffix));
 }
 
 /** Match a single signal against project data */
@@ -441,18 +409,9 @@ function matchSignal(signal: Signal, pkg: PackageJson | null, dir: string): bool
       // alone never claim Spring Boot — JVM Edition kill line for tech_stack.
       if (!signal.pattern || !signal.key) {return false;}
       if (!fileExists(dir, signal.pattern)) {return false;}
-      try {
-        // Resolve first match for globs like next.config.* via existing helper path
-        const path = join(dir, signal.pattern);
-        if (!existsSync(path)) {
-          // pattern may be a simple relative path that fileExists handled via glob
-          return false;
-        }
-        const body = readFileSync(path, 'utf-8').toLowerCase();
-        return body.includes(signal.key.toLowerCase());
-      } catch {
-        return false;
-      }
+      // A glob pattern names no one file: there is nothing to read, so no match.
+      const body = readRepoFile(dir, signal.pattern);
+      return body !== null && body.toLowerCase().includes(signal.key.toLowerCase());
     }
     default:
       return false;
@@ -480,22 +439,22 @@ export function detectLanguage(dir: string): string {
 
   // Check for TypeScript
   if (pkg?.devDependencies?.typescript || pkg?.dependencies?.typescript) {return 'TypeScript';}
-  if (existsSync(join(dir, 'tsconfig.json'))) {return 'TypeScript';}
+  if (repoExists(dir, 'tsconfig.json')) {return 'TypeScript';}
 
   // Check for common language indicators
-  if (existsSync(join(dir, 'Cargo.toml'))) {return 'Rust';}
-  if (existsSync(join(dir, 'go.mod'))) {return 'Go';}
+  if (repoExists(dir, 'Cargo.toml')) {return 'Rust';}
+  if (repoExists(dir, 'go.mod')) {return 'Go';}
   if (listRootCsprojs(dir).length > 0) {return 'C#';}
-  if (existsSync(join(dir, 'pyproject.toml')) || existsSync(join(dir, 'setup.py'))) {return 'Python';}
-  if (existsSync(join(dir, 'Gemfile'))) {return 'Ruby';}
+  if (repoExists(dir, 'pyproject.toml') || repoExists(dir, 'setup.py')) {return 'Python';}
+  if (repoExists(dir, 'Gemfile')) {return 'Ruby';}
   if (isJvmRoot(dir)) {
     const jvm = detectJvmProject(dir);
     if (jvm) {return jvm.mainLanguage === 'Java/Kotlin' ? 'Kotlin' : jvm.mainLanguage;}
     return 'Java';
   }
-  if (existsSync(join(dir, 'Package.swift'))) {return 'Swift';}
-  if (existsSync(join(dir, 'build.zig'))) {return 'Zig';}
-  if (existsSync(join(dir, 'pubspec.yaml'))) {return 'Dart';}
+  if (repoExists(dir, 'Package.swift')) {return 'Swift';}
+  if (repoExists(dir, 'build.zig')) {return 'Zig';}
+  if (repoExists(dir, 'pubspec.yaml')) {return 'Dart';}
 
   // A package.json with none of the manifests above: JavaScript
   if (pkg) {return 'JavaScript';}
@@ -652,13 +611,13 @@ export function detectProjectTypeWithRationale(dir: string): ProjectTypeDetectio
   // Zig project-type detection — build.zig + entry-file convention.
   // src/main.zig → cli (executable); src/root.zig → library.
   // main.zig wins when both exist (typical: cli with internal lib exports).
-  if (existsSync(join(dir, 'build.zig'))) {
+  if (repoExists(dir, 'build.zig')) {
     found.push('build.zig');
-    if (existsSync(join(dir, 'src/main.zig'))) {
+    if (repoExists(dir, 'src/main.zig')) {
       found.push('src/main.zig');
       return { type: 'cli', found };
     }
-    if (existsSync(join(dir, 'src/root.zig'))) {
+    if (repoExists(dir, 'src/root.zig')) {
       found.push('src/root.zig');
       return { type: 'library', found };
     }
@@ -667,7 +626,7 @@ export function detectProjectTypeWithRationale(dir: string): ProjectTypeDetectio
   // ─── 10. framework — private workspace + Svelte ──────────────────────────
   const hasSvelte = frameworks.some(f => f.slug === 'svelte' || f.slug === 'sveltekit');
   const isPrivateWorkspace = pkg?.private === true && (
-    existsSync(join(dir, 'pnpm-workspace.yaml')) ||
+    repoExists(dir, 'pnpm-workspace.yaml') ||
     pkg?.workspaces !== undefined
   );
   if (isPrivateWorkspace && hasSvelte) {
@@ -687,7 +646,7 @@ export function detectProjectTypeWithRationale(dir: string): ProjectTypeDetectio
   const hasBackendFw = frameworks.some(f => f.category === 'backend');
   if (
     pkg?.private &&
-    (pkg.workspaces || existsSync(join(dir, 'pnpm-workspace.yaml'))) &&
+    (pkg.workspaces || repoExists(dir, 'pnpm-workspace.yaml')) &&
     hasFrontendFw && hasBackendFw
   ) {
     found.push('private workspace + frontend + backend frameworks');
@@ -781,13 +740,13 @@ export function detectProjectType(dir: string): string {
 /** Detect the runtime from a runtime file or manifest — `''` when there is
  *  no evidence. */
 export function detectRuntime(dir: string): string {
-  if (existsSync(join(dir, 'bunfig.toml'))) {return 'Bun';}
-  if (existsSync(join(dir, 'deno.json')) || existsSync(join(dir, 'deno.jsonc'))) {return 'Deno';}
+  if (repoExists(dir, 'bunfig.toml')) {return 'Bun';}
+  if (repoExists(dir, 'deno.json') || repoExists(dir, 'deno.jsonc')) {return 'Deno';}
   if (readPackageJson(dir)) {return 'Node.js';}
-  if (existsSync(join(dir, 'Cargo.toml'))) {return 'Rust';}
-  if (existsSync(join(dir, 'go.mod'))) {return 'Go';}
+  if (repoExists(dir, 'Cargo.toml')) {return 'Rust';}
+  if (repoExists(dir, 'go.mod')) {return 'Go';}
   if (listRootCsprojs(dir).length > 0) {return '.NET';}
-  if (existsSync(join(dir, 'pubspec.yaml'))) {return 'Dart';}
+  if (repoExists(dir, 'pubspec.yaml')) {return 'Dart';}
   return '';
 }
 
@@ -805,12 +764,12 @@ function declaredPackageManager(dir: string): string {
 
 /** The package manager a non-JS manifest implies, or `''`. */
 function manifestPackageManager(dir: string): string {
-  if (existsSync(join(dir, 'pubspec.yaml'))) {return 'pub';}
-  if (existsSync(join(dir, 'go.mod'))) {return 'go modules';}
+  if (repoExists(dir, 'pubspec.yaml')) {return 'pub';}
+  if (repoExists(dir, 'go.mod')) {return 'go modules';}
   if (listRootCsprojs(dir).length > 0) {return 'NuGet';}
-  if (existsSync(join(dir, 'pom.xml'))) {return 'maven';}
+  if (repoExists(dir, 'pom.xml')) {return 'maven';}
   const gradle = ['build.gradle', 'build.gradle.kts', 'settings.gradle', 'settings.gradle.kts'];
-  return gradle.some(f => existsSync(join(dir, f))) ? 'gradle' : '';
+  return gradle.some(f => repoExists(dir, f)) ? 'gradle' : '';
 }
 
 /** The JS package manager a committed lockfile names, or `''`. */
@@ -822,55 +781,50 @@ const LOCKFILES: ReadonlyArray<[file: string, manager: string]> = [
  *  package.json's `packageManager` field, then a lockfile. `''` when there is
  *  no evidence: a package.json alone does not say which manager installs it. */
 export function detectPackageManager(dir: string): string {
-  return manifestPackageManager(dir) || declaredPackageManager(dir) || (LOCKFILES.find(([f]) => existsSync(join(dir, f)))?.[1] ?? '');
+  return manifestPackageManager(dir) || declaredPackageManager(dir) || (LOCKFILES.find(([f]) => repoExists(dir, f))?.[1] ?? '');
 }
 
 /** Detect CI/CD */
 export function detectCicd(dir: string): string | null {
-  if (existsSync(join(dir, '.github/workflows'))) {return 'GitHub Actions';}
-  if (existsSync(join(dir, '.gitlab-ci.yml'))) {return 'GitLab CI';}
-  if (existsSync(join(dir, '.circleci'))) {return 'CircleCI';}
-  if (existsSync(join(dir, 'Jenkinsfile'))) {return 'Jenkins';}
+  if (repoExists(dir, '.github/workflows')) {return 'GitHub Actions';}
+  if (repoExists(dir, '.gitlab-ci.yml')) {return 'GitLab CI';}
+  if (repoExists(dir, '.circleci')) {return 'CircleCI';}
+  if (repoExists(dir, 'Jenkinsfile')) {return 'Jenkins';}
   return null;
 }
 
 /** Detect hosting platform — from a platform's own config file. A bare
  *  Dockerfile is not one: it shows a container build, not where the app runs. */
 export function detectHosting(dir: string): string | null {
-  if (existsSync(join(dir, 'vercel.json'))) {return 'Vercel';}
-  if (existsSync(join(dir, 'netlify.toml'))) {return 'Netlify';}
-  if (existsSync(join(dir, 'wrangler.toml'))) {return 'Cloudflare';}
-  if (existsSync(join(dir, 'fly.toml'))) {return 'Fly.io';}
-  if (existsSync(join(dir, 'render.yaml'))) {return 'Render';}
+  if (repoExists(dir, 'vercel.json')) {return 'Vercel';}
+  if (repoExists(dir, 'netlify.toml')) {return 'Netlify';}
+  if (repoExists(dir, 'wrangler.toml')) {return 'Cloudflare';}
+  if (repoExists(dir, 'fly.toml')) {return 'Fly.io';}
+  if (repoExists(dir, 'render.yaml')) {return 'Render';}
   return null;
 }
 
 /** Detect SvelteKit adapter from svelte.config.js */
 export function detectSvelteAdapter(dir: string): string | null {
-  const configPath = join(dir, 'svelte.config.js');
-  if (!existsSync(configPath)) {return null;}
-  try {
-    const content = readFileSync(configPath, 'utf-8');
-    // Match adapter imports: import adapter from '@sveltejs/adapter-vercel'
-    // Or: import { adapter } from '@sveltejs/adapter-node'
-    // Or: const adapter = require('@sveltejs/adapter-static')
-    const adapterMatch = content.match(/@sveltejs\/adapter-(\w+)/);
-    if (adapterMatch) {
-      const adapter = adapterMatch[1];
-      switch (adapter) {
-        case 'vercel': return 'Vercel';
-        case 'node': return 'Node';
-        case 'static': return 'Static';
-        case 'cloudflare': return 'Cloudflare';
-        case 'netlify': return 'Netlify';
-        case 'auto': return 'Auto';
-        default: return adapter;
-      }
+  const content = readRepoFile(dir, 'svelte.config.js');
+  if (content === null) {return null;}
+  // Match adapter imports: import adapter from '@sveltejs/adapter-vercel'
+  // Or: import { adapter } from '@sveltejs/adapter-node'
+  // Or: const adapter = require('@sveltejs/adapter-static')
+  const adapterMatch = content.match(/@sveltejs\/adapter-(\w+)/);
+  if (adapterMatch) {
+    const adapter = adapterMatch[1];
+    switch (adapter) {
+      case 'vercel': return 'Vercel';
+      case 'node': return 'Node';
+      case 'static': return 'Static';
+      case 'cloudflare': return 'Cloudflare';
+      case 'netlify': return 'Netlify';
+      case 'auto': return 'Auto';
+      default: return adapter;
     }
-    return null;
-  } catch {
-    return null;
   }
+  return null;
 }
 
 /** Detect build tool */
@@ -879,7 +833,7 @@ export function detectBuildTool(dir: string): string | null {
   if (pkg?.devDependencies?.vite || pkg?.dependencies?.vite) {return 'Vite';}
   if (pkg?.devDependencies?.webpack || pkg?.dependencies?.webpack) {return 'webpack';}
   if (pkg?.devDependencies?.esbuild || pkg?.dependencies?.esbuild) {return 'esbuild';}
-  if (existsSync(join(dir, 'tsconfig.json')) && pkg?.devDependencies?.typescript) {return 'TypeScript (tsc)';}
+  if (repoExists(dir, 'tsconfig.json') && pkg?.devDependencies?.typescript) {return 'TypeScript (tsc)';}
   return null;
 }
 
@@ -913,7 +867,7 @@ export function detectKeyFiles(dir: string): string[] {
     // Config
     'tsconfig.json', 'wrangler.toml', 'vercel.json',
   ];
-  return candidates.filter(f => existsSync(join(dir, f)));
+  return candidates.filter(f => repoExists(dir, f));
 }
 
 /** Detect build/test/lint commands for the COMMANDS FAFB section.
@@ -926,7 +880,7 @@ export function detectCommands(dir: string, pkg: PackageJson | null): Record<str
     for (const key of ['build', 'test', 'lint', 'dev', 'start']) {
       if (pkg.scripts[key]) {
         // Determine the runner — prefer bun if available, else npm
-        const runner = existsSync(join(dir, 'bun.lock')) || existsSync(join(dir, 'bun.lockb'))
+        const runner = repoExists(dir, 'bun.lock') || repoExists(dir, 'bun.lockb')
           ? 'bun run'
           : 'npm run';
         commands[key] = `${runner} ${key}`;
@@ -936,7 +890,7 @@ export function detectCommands(dir: string, pkg: PackageJson | null): Record<str
 
   // Rust: cargo builds and tests every Cargo package. Clippy only when the
   // repo configures it — a Cargo.toml alone does not say the project lints with it.
-  if (existsSync(join(dir, 'Cargo.toml'))) {
+  if (repoExists(dir, 'Cargo.toml')) {
     if (!commands.build) {commands.build = 'cargo build --release';}
     if (!commands.test) {commands.test = 'cargo test';}
     if (!commands.lint && configuresClippy(dir)) {commands.lint = 'cargo clippy';}
@@ -944,13 +898,13 @@ export function detectCommands(dir: string, pkg: PackageJson | null): Record<str
 
   // Zig: build.zig is `zig build`'s own script; `zig build test` only when
   // it defines a test step.
-  if (existsSync(join(dir, 'build.zig'))) {
+  if (repoExists(dir, 'build.zig')) {
     if (!commands.build) {commands.build = 'zig build';}
     if (!commands.test && /\.step\(\s*"test"/.test(readText(dir, 'build.zig'))) {commands.test = 'zig build test';}
   }
 
   // Go: the go tool builds and tests every module.
-  if (existsSync(join(dir, 'go.mod'))) {
+  if (repoExists(dir, 'go.mod')) {
     if (!commands.build) {commands.build = 'go build ./...';}
     if (!commands.test) {commands.test = 'go test ./...';}
   }
@@ -964,23 +918,19 @@ export function detectCommands(dir: string, pkg: PackageJson | null): Record<str
 
 /** A file's text, or `''` when it cannot be read. */
 function readText(dir: string, name: string): string {
-  try {
-    return readFileSync(join(dir, name), 'utf-8');
-  } catch {
-    return '';
-  }
+  return readRepoFile(dir, name) ?? '';
 }
 
 /** The repo configures Clippy: a clippy.toml, or a `[lints.clippy]` table in Cargo.toml. */
 function configuresClippy(dir: string): boolean {
-  if (existsSync(join(dir, 'clippy.toml')) || existsSync(join(dir, '.clippy.toml'))) {return true;}
+  if (repoExists(dir, 'clippy.toml') || repoExists(dir, '.clippy.toml')) {return true;}
   return /^\s*\[(workspace\.)?lints\.clippy\]/m.test(readText(dir, 'Cargo.toml'));
 }
 
 /** The repo says pytest: pytest.ini or conftest.py, or pytest named in
  *  pyproject.toml, setup.cfg or tox.ini (its config table or a dependency). */
 function usesPytest(dir: string): boolean {
-  if (existsSync(join(dir, 'pytest.ini')) || existsSync(join(dir, 'conftest.py'))) {return true;}
+  if (repoExists(dir, 'pytest.ini') || repoExists(dir, 'conftest.py')) {return true;}
   return ['pyproject.toml', 'setup.cfg', 'tox.ini'].some(f => /\bpytest\b/.test(readText(dir, f)));
 }
 
@@ -1007,8 +957,8 @@ export function detectTechStack(
   }
 
   // Runtime if non-trivial (Node.js by default for JS — only call out Bun/Deno/etc.)
-  if (existsSync(join(dir, 'bunfig.toml'))) {stack.push('Bun');}
-  else if (existsSync(join(dir, 'deno.json')) || existsSync(join(dir, 'deno.jsonc'))) {stack.push('Deno');}
+  if (repoExists(dir, 'bunfig.toml')) {stack.push('Bun');}
+  else if (repoExists(dir, 'deno.json') || repoExists(dir, 'deno.jsonc')) {stack.push('Deno');}
 
   // Top deps from package.json/Cargo.toml — only if stack is still sparse
   if (stack.length < 3 && pkg?.dependencies) {

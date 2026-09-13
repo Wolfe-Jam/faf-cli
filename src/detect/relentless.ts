@@ -12,8 +12,7 @@
  * this rewrite corrects).
  */
 
-import { existsSync, readFileSync } from 'fs';
-import { join } from 'path';
+import { readRepoFile } from '../core/safe-write.js';
 
 interface PkgJson {
   description?: string;
@@ -103,10 +102,10 @@ export function relentlessContext(dir: string, opts: RelentlessOpts = {}): Seede
 }
 
 function readPkg(dir: string): PkgJson | null {
-  const p = join(dir, 'package.json');
-  if (!existsSync(p)) {return null;}
+  const text = readRepoFile(dir, 'package.json');
+  if (text === null) {return null;}
   try {
-    return JSON.parse(readFileSync(p, 'utf-8')) as PkgJson;
+    return JSON.parse(text) as PkgJson;
   } catch {
     return null;
   }
@@ -114,14 +113,8 @@ function readPkg(dir: string): PkgJson | null {
 
 /** README with HTML tags + badge lines stripped (so we don't seed shields.io noise). */
 function cleanReadme(dir: string): string {
-  const p = join(dir, 'README.md');
-  if (!existsSync(p)) {return '';}
-  let txt: string;
-  try {
-    txt = readFileSync(p, 'utf-8');
-  } catch {
-    return '';
-  }
+  const txt = readRepoFile(dir, 'README.md');
+  if (txt === null) {return '';}
   return txt
     .replace(/<!--[\s\S]*?-->/g, '') // HTML comment blocks (asset notes, TODOs — not prose)
     .split('\n')

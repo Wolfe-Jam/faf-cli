@@ -7,8 +7,8 @@
  * images onto stack slots. Facts, not prose — so these win over README guesses.
  */
 
-import { readFileSync, readdirSync } from 'fs';
 import { join } from 'path';
+import { readRepoDir, readRepoFile } from '../core/safe-write.js';
 import type { ExtractedContext } from './types.js';
 
 /** image name (before ':' tag, after last '/') → { slot, label }. */
@@ -39,20 +39,18 @@ const IGNORE_DIRS = new Set([
   'node_modules', '.git', 'dist', 'build', 'vendor', 'target', 'e2e', 'tests', 'test',
 ]);
 
-/** Every compose file at root + one directory deep. */
+/** Every compose file at root + one directory deep (paths relative to `dir`). */
 function findComposeFiles(dir: string): string[] {
   const out: string[] = [];
   const scan = (d: string, depth: number): void => {
-    let entries: import('fs').Dirent[];
-    try { entries = readdirSync(d, { withFileTypes: true }); } catch { return; }
-    for (const e of entries) {
+    for (const e of readRepoDir(dir, d) ?? []) {
       if (e.isFile() && /^(docker-)?compose.*\.ya?ml$/i.test(e.name)) {out.push(join(d, e.name));}
       else if (e.isDirectory() && depth > 0 && !e.name.startsWith('.') && !IGNORE_DIRS.has(e.name)) {
         scan(join(d, e.name), depth - 1);
       }
     }
   };
-  scan(dir, 1);
+  scan('.', 1);
   return out;
 }
 
@@ -71,8 +69,8 @@ export function interrogateCompose(dir: string): ExtractedContext {
   };
 
   for (const file of files) {
-    let body: string;
-    try { body = readFileSync(file, 'utf-8'); } catch { continue; }
+    const body = readRepoFile(dir, file);
+    if (body === null) {continue;}
     for (const m of body.matchAll(/^\s*image:\s*["']?([^\s"'#]+)/gm)) {
       const ref = m[1].toLowerCase();
       // strip registry host + tag: ghcr.io/foo/redis:7-alpine → redis

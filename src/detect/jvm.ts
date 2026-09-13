@@ -1,5 +1,5 @@
-import { existsSync, readFileSync, readdirSync, statSync } from 'fs';
 import { join } from 'path';
+import { readRepoDir, readRepoFile, repoExists, statRepoFile } from '../core/safe-write.js';
 import spec from './jvm-detection.json';
 
 /**
@@ -79,15 +79,7 @@ const JVM_ROOT_MARKERS = [
 
 /** True if directory looks like a JVM project root (or multi-module root). */
 export function isJvmRoot(dir: string): boolean {
-  return JVM_ROOT_MARKERS.some(f => existsSync(join(dir, f)));
-}
-
-function readText(path: string): string | null {
-  try {
-    return readFileSync(path, 'utf-8');
-  } catch {
-    return null;
-  }
+  return JVM_ROOT_MARKERS.some(f => repoExists(dir, f));
 }
 
 /** Minimal TOML-ish parse for gradle/libs.versions.toml plugins + libraries. */
@@ -153,9 +145,7 @@ export function parseVersionCatalog(content: string): Catalog {
 }
 
 function loadCatalog(root: string): Catalog {
-  const path = join(root, 'gradle', 'libs.versions.toml');
-  if (!existsSync(path)) {return { plugins: new Map(), libraries: new Map() };}
-  const body = readText(path);
+  const body = readRepoFile(root, join('gradle', 'libs.versions.toml'));
   if (!body) {return { plugins: new Map(), libraries: new Map() };}
   return parseVersionCatalog(body);
 }
@@ -337,33 +327,29 @@ function hasMcp(artifacts: Set<string>): string | undefined {
   return best;
 }
 
-function probeSources(dir: string): { kotlin: boolean; java: boolean; hints: Set<string> } {
+/** Source hints under the module folder `rel` of the project folder `root`. */
+function probeSources(root: string, rel: string): { kotlin: boolean; java: boolean; hints: Set<string> } {
   const hints = new Set<string>();
   let kotlin = false;
   let java = false;
   const roots = [
-    join(dir, 'src'),
-    join(dir, 'src', 'main'),
+    join(rel, 'src'),
+    join(rel, 'src', 'main'),
   ];
   const walk = (p: string, depth: number): void => {
-    if (depth > 4 || !existsSync(p)) {return;}
-    let entries: string[];
-    try {
-      entries = readdirSync(p);
-    } catch {
-      return;
-    }
-    for (const name of entries) {
+    if (depth > 4) {return;}
+    const entries = readRepoDir(root, p);
+    if (!entries) {return;}
+    for (const { name } of entries) {
       if (name === 'androidMain' || name === 'commonMain' || name === 'jvmMain' || name === 'iosMain') {
         hints.add(name);
       }
       const full = join(p, name);
-      try {
-        const st = statSync(full);
-        if (st.isDirectory()) {walk(full, depth + 1);}
-        else if (name.endsWith('.kt') || name.endsWith('.kts')) {kotlin = true;}
-        else if (name.endsWith('.java')) {java = true;}
-      } catch { /* skip */ }
+      const st = statRepoFile(root, full);
+      if (!st) {continue;}
+      if (st.isDirectory()) {walk(full, depth + 1);}
+      else if (name.endsWith('.kt') || name.endsWith('.kts')) {kotlin = true;}
+      else if (name.endsWith('.java')) {java = true;}
     }
   };
   for (const r of roots) {walk(r, 0);}
@@ -475,16 +461,15 @@ function rank(appType: JvmAppType, facets: string[]): number {
 }
 
 function collectGradleModule(root: string, rel: string, catalog: Catalog): ModuleSignals | null {
-  const dir = rel ? join(root, rel) : root;
-  const kts = join(dir, 'build.gradle.kts');
-  const groovy = join(dir, 'build.gradle');
-  const path = existsSync(kts) ? kts : existsSync(groovy) ? groovy : null;
+  const kts = join(rel, 'build.gradle.kts');
+  const groovy = join(rel, 'build.gradle');
+  const path = repoExists(root, kts) ? kts : repoExists(root, groovy) ? groovy : null;
   if (!path) {return null;}
-  const content = readText(path);
+  const content = readRepoFile(root, path);
   if (!content) {return null;}
   const plugins = extractGradlePlugins(content, catalog);
   const artifacts = extractGradleArtifacts(content, catalog);
-  const sources = probeSources(dir);
+  const sources = probeSources(root, rel);
   const hasMainClass =
     /mainClass\s*[.=]/.test(content) ||
     /mainClassName\s*=/.test(content) ||
@@ -509,13 +494,10 @@ function collectGradleModule(root: string, rel: string, catalog: Catalog): Modul
 }
 
 function collectMavenModule(root: string, rel: string): ModuleSignals | null {
-  const dir = rel ? join(root, rel) : root;
-  const pomPath = join(dir, 'pom.xml');
-  if (!existsSync(pomPath)) {return null;}
-  const content = readText(pomPath);
+  const content = readRepoFile(root, join(rel, 'pom.xml'));
   if (!content) {return null;}
   const { packaging, parents, artifacts } = extractMavenSignals(content);
-  const sources = probeSources(dir);
+  const sources = probeSources(root, rel);
   return {
     path: rel ? `${rel}/pom.xml` : 'pom.xml',
     plugins: new Set(),
@@ -544,9 +526,8 @@ export function detectJvmProject(dir: string): JvmProject | null {
   // Gradle settings → includes
   let settingsBody: string | null = null;
   for (const s of ['settings.gradle.kts', 'settings.gradle']) {
-    const p = join(dir, s);
-    if (existsSync(p)) {
-      settingsBody = readText(p);
+    if (repoExists(dir, s)) {
+      settingsBody = readRepoFile(dir, s);
       break;
     }
   }
@@ -565,7 +546,7 @@ export function detectJvmProject(dir: string): JvmProject | null {
   const rootPom = collectMavenModule(dir, '');
   if (rootPom) {
     modules.push(rootPom);
-    const pomContent = readText(join(dir, 'pom.xml'));
+    const pomContent = readRepoFile(dir, 'pom.xml');
     if (pomContent) {
       const { modules: mavMods } = extractMavenSignals(pomContent);
       for (const mm of mavMods) {

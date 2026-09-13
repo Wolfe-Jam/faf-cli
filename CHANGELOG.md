@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v7.13.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v7.13.1 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -8,7 +8,14 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [7.13.1] - 2026-09-12 — The Co-Author Edition
+
+**A security patch: faf-cli's detection no longer follows a link out of your project, so a hostile repo can't pull a file like `~/.aws/credentials` into project.faf or your AI's context.**
+
+### Security
+- Detection reads stay inside the project: a README.md, package.json, pyproject.toml or any other repo file that links outside the project, into `.git` or to nothing is treated as absent, so its text never reaches project.faf, CLAUDE.md, AGENTS.md or the output. A link inside the project still works, from the root (README.md → docs/README.md) and from a subfolder (web/package.json → ../shared/web-package.json).
+- `faf git` clones with `core.symlinks=false`, so a cloned repo's links are never followed. Each link then arrives as a plain file holding only the link's path; faf takes those placeholders out of its own temporary clone, so a path like `docs/README.md` is never read as the README or written into project.goal.
+- `faf cards` reads `agent.fafa` through the same safe path as every other faf file: an `agent.fafa` that links out of its folder is refused in one line, never read or quoted.
 
 ### Changed
 - **`slotignored` is shown as `slotignored`, never N/A.** A slot has three states: empty (the default), `slotignored` (from the app-type: not required, not scored) and populated. The `faf score` slot breakdown, the `faf show` statline and the typed-words line now say `slotignored`, replacing the N/A label. A typed `N/A` in a slot that needs a fact is still empty and scores 0.

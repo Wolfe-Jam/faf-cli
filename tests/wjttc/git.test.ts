@@ -23,7 +23,7 @@ import { mkdirSync, writeFileSync, rmSync, existsSync, readFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { execFileSync } from 'child_process';
-import { normalizeGitUrl } from '../../src/commands/git.js';
+import { cloneArgs, normalizeGitUrl } from '../../src/commands/git.js';
 import { tafCommand } from '../../src/commands/taf.js';
 import { assembleFreshFaf } from '../../src/detect/assemble.js';
 import { writeFaf, readFafRaw } from '../../src/interop/faf.js';
@@ -270,7 +270,7 @@ describe('WJTTC TYRE: faf git — the real road (real clone → real .faf → re
       });
 
       // The EXACT no-shell clone path faf git uses — local source, no network.
-      execFileSync('git', ['clone', '--depth', '1', '--', src, dest], { stdio: 'pipe' });
+      execFileSync('git', cloneArgs(src, dest), { stdio: 'pipe' });
       expect(existsSync(join(dest, 'package.json'))).toBe(true);
 
       // The real extraction + scoring pipeline on the cloned repo.
