@@ -132,44 +132,20 @@ faf memory etch "a durable fact" --id my-fact
 faf memory show
 ```
 
-### What's New in v7.13.1 — The Co-Author Edition
+### What's New in v7.14.0 — The Passport Edition
 
-**A security patch: faf-cli's detection no longer follows a link out of your project, so a hostile repo can't pull a file like `~/.aws/credentials` into project.faf or your AI's context.**
+**The A2A Agent Card's FAF extension carries real agent identity now — an `agentId`, a `passport` URL, and the full FAF media-type family — not just project provenance.**
 
-- **Detection reads stay inside the project.** A README.md, package.json or any other repo file that links outside the project is treated as absent. Links inside the project still work.
-- **`faf git` clones with symlinks off**, and never reads a link's path as a file's content.
-- **`faf cards` reads `agent.fafa` safely**: a link out of its folder is refused.
-- **`slotignored` is shown as `slotignored`**, never N/A.
-
-#### v7.13.0 — the Edition release
-
-**You and your AI co-author project.faf — AI fills the tech facts from your repo, you write the 6Ws — and faf-cli only touches what it wrote: links can't lead it outside your project, a failed write keeps the original, and your comments, values and notes stay as you left them.**
-
-- **faf writes its block, you write the rest.** faf touches only its managed block and its own section. A file with no faf markers is always prefixed, never taken over, even one that starts with faf's old stamp.
-- **`project.faf` edits keep your file as written.** Comments, exact values (`1.10` stays `1.10`), anchors and keys faf doesn't know all survive. An edit changes only what it changes, and a no-op writes nothing.
-- **If it's a fact, faf fills the slot.** A typed `None` or `N/A` is an empty slot, and the app-type decides which slots count.
-  - `faf auto` fills a tech slot only from a repo fact. With no fact, the slot stays empty; only `project.type` falls back to `library`, and says so on its line.
-  - With no fact, your words stay in a slot the app-type uses, and that slot scores 0 until filled.
-  - In a slot the app-type leaves out, `faf auto` writes `slotignored`: not required, not scored.
-  - The 6Ws stay yours: faf never replaces your words there, and `faf go` asks for the empty ones.
-- **`faf ai enhance` is retired.** project.faf isn't enhanced: tech slots come from repo facts, and the 6Ws come from you.
-- **Links and encodings are checked first.** faf refuses, in one line, to write:
-  - through a link that leaves the project;
-  - into `.git`, beyond its own hook section and diff driver;
-  - over a whole file faf didn't render;
-  - over a file that isn't UTF-8.
-- **A whole file faf renders is replaced only when it's still exactly what faf wrote.** project.html and the Server and A2A cards now carry a render hash. If you edited one, faf leaves it and says so; `--force` replaces it.
-- **One-time step when upgrading:** faf can't tell whether a project.html, Server Card or A2A card written before 7.13 was edited. The first run that would change one refuses it once, and that run exits 1. Check the file for hand edits, then run the same command once with `--force`; after that faf recognises its own output.
-- **A failed write keeps the original.** faf writes to a temp file and renames it into place, so a full disk or a killed process leaves your file as it was. A file you edit while faf is writing is left alone.
-- **Memory stays yours.**
-  - `soul.fafm` keeps its curated index, its facts and its comments, and etching an id that already exists merges into that fact.
-  - Tri-sync (`FAF_PRO=1`) writes Claude Code's own memory file as one section on top, and Claude's notes stay.
-- **Detection stays inside the project.** Turbo-Cat no longer reads parent folders, so a monorepo root's stack no longer leaks into a package.
-- **For builders.** New exports: `resolveInside`, `safeWriteFile`, `updateFafFile`, `writeClaudeMemory`, `FafDNAManager`, `authorFafFromRepo`, `registryTitle`, `isNonProjectRoot` and `scoreText`. `writeFaf` on an existing file now merges; pass `{ replace: true }` for the old overwrite.
-- **Node 22+.** The engine floor matches CI (22 and 24).
+- **The extension moved to `https://faf.one/ext/context/v1`** and its `params` gained `fafaSpecVersion`, `agentId` (from `.fafa` `agent.id`), the full `mediaTypes` family, and a `passport` URL — nested `provenance.faf`/`provenance.mediaType` replace the old flat pointer fields.
+- **`defaultInputModes` reflects what your skills actually cite.** Any FAF media type a capability's `cites_spec` names now shows up there, and on that skill's own `inputModes`.
+- **`provider` is optional again.** It's emitted only when both `agent.vendor` and `agent.homepage` are present — no longer a hard requirement.
+- **`capabilities.streaming` stays honest at `false`.** Having an A2A endpoint was never proof it supports streaming; this only flips once a real per-door signal exists to key off.
+- Breaking for anything reading the old flat A2A extension shape or the old `https://faf.one/context` URI. MCP Server Cards and registry entries are unaffected.
 
 **Recent sprint**
 
+- 🛂 [7.14.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.14.0) The Passport Edition
+- 🛡️ [7.13.1](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.13.1) security: detection reads stay inside the project
 - 🤝 [7.13.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.13.0) The Co-Author Edition
 - 🧩 [7.12.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.12.0) The Open Renderers Edition
 - 🖥️ [7.11.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.11.0) The VS Code Edition

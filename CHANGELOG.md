@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v7.13.1 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v7.14.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -7,6 +7,13 @@ All notable changes to faf-cli will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [7.14.0] - 2026-09-13 — The Passport Edition
+
+**The A2A Agent Card's FAF extension carries real agent identity now — an `agentId`, a `passport` URL, and the full FAF media-type family — not just project provenance.**
+
+### Changed
+- `capabilities.extensions[0]` moves to `https://faf.one/ext/context/v1` and its `params` gain `fafaSpecVersion`, `agentId` (from `.fafa` `agent.id`), the full `mediaTypes` family, and a `passport` URL — nested `provenance.faf`/`provenance.mediaType` replace the flat pointer fields. `defaultInputModes` now includes any FAF media type a skill's `cites_spec` names. `provider` is emitted only when `agent.vendor` and `agent.homepage` are both present — no longer required, no longer thrown on. `capabilities.streaming` stays `false`: endpoint existence was never a real streaming-capability signal. **Breaking for anything reading the old flat A2A extension shape or the old `https://faf.one/context` URI** — MCP Server Cards and registry entries are unaffected (still the plain, byte-identical context block).
 
 ## [7.13.1] - 2026-09-12 — The Co-Author Edition
 
@@ -19,7 +26,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **`slotignored` is shown as `slotignored`, never N/A.** A slot has three states: empty (the default), `slotignored` (from the app-type: not required, not scored) and populated. The `faf score` slot breakdown, the `faf show` statline and the typed-words line now say `slotignored`, replacing the N/A label. A typed `N/A` in a slot that needs a fact is still empty and scores 0.
-- **A2A Agent Card's FAF extension carries real agent identity, not just project provenance.** `capabilities.extensions[0]` moves to `https://faf.one/ext/context/v1` and its `params` gain `fafaSpecVersion`, `agentId` (from `.fafa` `agent.id`), the full `mediaTypes` family, and a `passport` URL — nested `provenance.faf`/`provenance.mediaType` replace the flat pointer fields. `defaultInputModes` now includes any FAF media type a skill's `cites_spec` names. `provider` is emitted only when `agent.vendor` and `agent.homepage` are both present — no longer required, no longer thrown on. `capabilities.streaming` stays `false`: endpoint existence was never a real streaming-capability signal. **Breaking for anything reading the old flat A2A extension shape or the old `https://faf.one/context` URI** — MCP Server Cards and registry entries are unaffected (still the plain, byte-identical context block).
 
 ## [7.13.0] - 2026-09-12 — The Co-Author Edition
 
