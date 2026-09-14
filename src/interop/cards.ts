@@ -18,9 +18,15 @@ import {
 } from './servercard.js';
 
 /** A2A extension URI — dereference, not the MCP `_meta` key `one.faf/context`. */
-export const A2A_CONTEXT_URI = 'https://faf.one/context';
+export const A2A_CONTEXT_URI = 'https://faf.one/ext/context/v1';
 export const A2A_PROTOCOL_BINDING = 'JSONRPC';
 export const A2A_PROTOCOL_VERSION = '1.0';
+/** The three FAF-family media types the extension advertises, in family order. */
+export const FAF_MEDIA_TYPES = [
+  'application/vnd.faf+yaml',
+  'application/vnd.fafm+yaml',
+  'application/vnd.fafa+yaml',
+] as const;
 
 export type CardTarget = 'a2a' | 'mcp' | 'registry' | 'catalog';
 export const CARD_TARGETS: CardTarget[] = ['a2a', 'mcp', 'registry', 'catalog'];
@@ -39,6 +45,8 @@ export interface FafaCapability {
   name?: string;
   description?: string;
   tags?: unknown;
+  /** MIME type this capability reads, when it's one of the FAF family — drives the skill's `inputModes` and the card's `defaultInputModes`. */
+  cites_spec?: string;
 }
 
 export interface FafaEndpoint {
@@ -49,6 +57,8 @@ export interface FafaEndpoint {
 }
 
 export interface FafaDoc {
+  /** `.fafa` spec version this document is authored against, e.g. `"1.0"` — not `agent.version`. */
+  version?: string;
   agent?: FafaAgent;
   capabilities?: FafaCapability[];
   endpoints?: FafaEndpoint[];
@@ -72,7 +82,8 @@ export interface ProjectedA2A {
     protocolBinding: string;
     protocolVersion: string;
   }>;
-  provider: { organization: string; url: string };
+  /** Omitted entirely when `agent.vendor` or `agent.homepage` is absent — A2A optional, never a guessed org name. */
+  provider?: { organization: string; url: string };
   version: string;
   capabilities: {
     streaming: boolean;
@@ -92,6 +103,7 @@ export interface ProjectedA2A {
     name: string;
     description: string;
     tags: string[];
+    inputModes?: string[];
   }>;
 }
 
@@ -164,6 +176,46 @@ export function a2aDoors(fafa: FafaDoc, opts: ProjectCardsOptions = {}): FafaEnd
   return [];
 }
 
+/**
+ * The A2A extension's own `params` — a superset of {@link fafContextBlock},
+ * enriched with `.fafa`-specific identity that only makes sense for an agent
+ * card (agentId, passport, the full FAF media-type family). Nests the base
+ * block's `faf`/`mediaType` under `provenance` rather than flattening them,
+ * per the extension's own shape (`§7` of the field mapping). Not shared with
+ * the MCP Server Card / registry `_meta` block, which stay on the plain
+ * {@link fafContextBlock} shape — {@link assertSameBlock} checks the two
+ * agree on the underlying pointer, not on being byte-identical.
+ */
+function fafaExtensionParams(
+  fafa: FafaDoc,
+  faf: FafData,
+  opts: ProjectCardsOptions,
+): Record<string, unknown> {
+  const block = fafContextBlock(faf, opts);
+  const agent = fafa.agent ?? {};
+  const params: Record<string, unknown> = {
+    fafaSpecVersion: String(fafa.version ?? A2A_PROTOCOL_VERSION),
+    mediaTypes: [...FAF_MEDIA_TYPES],
+    provenance: { faf: block.faf, mediaType: block.mediaType },
+    generated: block.generated,
+  };
+  if (agent.id) {params.agentId = agent.id;}
+  const passport = homepageWellKnown(fafa, 'fafa');
+  if (passport) {params.passport = passport;}
+  return params;
+}
+
+/** `text/plain` plus any FAF media type a capability's `cites_spec` names. */
+function defaultA2AInputModes(fafa: FafaDoc): string[] {
+  const cited = new Set<string>();
+  for (const c of fafa.capabilities ?? []) {
+    if (c.cites_spec && (FAF_MEDIA_TYPES as readonly string[]).includes(c.cites_spec)) {
+      cited.add(c.cites_spec);
+    }
+  }
+  return ['text/plain', ...cited];
+}
+
 /** Build the A2A Agent Card (JSON) from a .fafa + .faf. */
 export function buildA2ACard(
   fafa: FafaDoc,
@@ -180,24 +232,28 @@ export function buildA2ACard(
   const name = String(agent.displayName ?? fafa.metadata?.persona ?? agent.name ?? '').trim();
   const description = String(agent.description ?? '').trim();
   const version = String(agent.version ?? '').trim();
+  if (!name || !description || !version) {
+    throw new Error('A2A card needs agent.displayName|name, description, version in .fafa');
+  }
+  // provider is A2A-optional: emit it only when both halves are real, never a guessed org name.
   const organization = String(agent.vendor ?? '').trim();
   const homepage = String(agent.homepage ?? '').trim();
-  if (!name || !description || !version || !organization || !homepage) {
-    throw new Error(
-      'A2A card needs agent.displayName|name, description, version, vendor, homepage in .fafa',
-    );
-  }
+  const provider = organization && homepage ? { organization, url: homepage } : undefined;
 
-  const block = fafContextBlock(faf, opts);
   const skills = (fafa.capabilities ?? []).map((c) => {
     const id = String(c.name ?? '').trim();
     if (!id) {throw new Error('A2A skill missing capabilities[].name');}
     const tags = Array.isArray(c.tags) ? c.tags.map(String) : [];
+    const inputModes =
+      c.cites_spec && (FAF_MEDIA_TYPES as readonly string[]).includes(c.cites_spec)
+        ? [c.cites_spec, 'text/plain']
+        : undefined;
     return {
       id,
       name: id,
       description: String(c.description ?? '').trim() || id,
       tags,
+      ...(inputModes ? { inputModes } : {}),
     };
   });
 
@@ -209,23 +265,26 @@ export function buildA2ACard(
       protocolBinding: A2A_PROTOCOL_BINDING,
       protocolVersion: String(e.version ?? A2A_PROTOCOL_VERSION),
     })),
-    provider: { organization, url: homepage },
+    ...(provider ? { provider } : {}),
     version,
     capabilities: {
+      // Endpoint existence isn't streaming support: FAFA's A2A door explicitly
+      // errors message/stream today (-32004). Advertising true would be a
+      // claim the door can't back up. Flip this only once a real per-door
+      // streaming signal exists in .fafa/project.faf to key off of.
       streaming: false,
       pushNotifications: false,
       extendedAgentCard: false,
       extensions: [
         {
           uri: A2A_CONTEXT_URI,
-          description:
-            'FAF context provenance — the durable context block (one context, every door).',
+          description: 'FAF passport and project DNA as typed parts',
           required: false,
-          params: block,
+          params: fafaExtensionParams(fafa, faf, opts),
         },
       ],
     },
-    defaultInputModes: ['text/plain', 'application/json'],
+    defaultInputModes: defaultA2AInputModes(fafa),
     defaultOutputModes: ['text/plain', 'application/json'],
     skills,
   };
@@ -411,13 +470,17 @@ export function projectCards(input: {
   return out;
 }
 
-/** Byte-identical context block on every emitted door. */
+/**
+ * Same underlying context on every emitted door. MCP and registry carry
+ * {@link fafContextBlock} byte-identically. A2A's extension params are a
+ * deliberate, richer superset (agentId, passport, mediaTypes — see
+ * {@link fafaExtensionParams}), so the check there is narrower: its nested
+ * `provenance.faf` / `provenance.mediaType` must match the same block's
+ * `faf` / `mediaType` — the same pointer, not a byte-identical payload.
+ */
 export function assertSameBlock(cards: ProjectedCards): void {
   const want = JSON.stringify(cards.block);
   const got: string[] = [];
-  if (cards.a2a) {
-    got.push(JSON.stringify(cards.a2a.capabilities.extensions[0].params));
-  }
   if (cards.mcp) {
     const meta = cards.mcp._meta as { 'one.faf/context': unknown };
     got.push(JSON.stringify(meta['one.faf/context']));
@@ -431,6 +494,18 @@ export function assertSameBlock(cards: ProjectedCards): void {
   for (const g of got) {
     if (g !== want) {
       throw new Error('context block drifted across card targets — one projector, one block');
+    }
+  }
+  if (cards.a2a) {
+    const params = cards.a2a.capabilities.extensions[0].params as {
+      provenance?: { faf?: unknown; mediaType?: unknown };
+    };
+    const block = cards.block as { faf?: unknown; mediaType?: unknown };
+    if (
+      params.provenance?.faf !== block.faf ||
+      params.provenance?.mediaType !== block.mediaType
+    ) {
+      throw new Error('A2A extension provenance drifted from the context block — one context, every door');
     }
   }
 }

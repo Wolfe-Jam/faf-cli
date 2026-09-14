@@ -44,28 +44,30 @@ const fafa: FafaDoc = {
 };
 
 describe('ENGINE: 🛡️ one projector — faf cards', () => {
-  test('block is byte-identical on A2A params · MCP _meta · registry nest', () => {
+  test('block is byte-identical on MCP _meta · registry nest; A2A carries the same pointer, richer shape', () => {
     const p = projectCards({ faf, fafa });
     const want = JSON.stringify(fafContextBlock(faf));
-    expect(JSON.stringify(p.a2a!.capabilities.extensions[0].params)).toBe(want);
     expect(JSON.stringify((p.mcp!._meta as any)['one.faf/context'])).toBe(want);
     expect(
       JSON.stringify((p.registry!._meta as any)[REGISTRY_PUBLISHER_KEY]['one.faf/context']),
     ).toBe(want);
-    assertSameBlock(p);
+    const a2aParams = p.a2a!.capabilities.extensions[0].params as any;
+    expect(a2aParams.provenance.faf).toBe((p.block as any).faf);
+    expect(a2aParams.provenance.mediaType).toBe((p.block as any).mediaType);
+    assertSameBlock(p); // throws on drift — the real invariant check
   });
 
   test('does NOT bake a score or tier', () => {
     const p = projectCards({ faf, fafa });
     expect(p.block.score).toBeUndefined();
     expect(p.block.tier).toBeUndefined();
-    expect(p.a2a!.capabilities.extensions[0].params.score).toBeUndefined();
+    expect((p.a2a!.capabilities.extensions[0].params as any).score).toBeUndefined();
   });
 
   test('A2A extension URI is the dereference, not the MCP key', () => {
     const card = buildA2ACard(fafa, faf);
     expect(card.capabilities.extensions[0].uri).toBe(A2A_CONTEXT_URI);
-    expect(A2A_CONTEXT_URI).toBe('https://faf.one/context');
+    expect(A2A_CONTEXT_URI).toBe('https://faf.one/ext/context/v1');
   });
 
   test('A2A name prefers displayName', () => {
@@ -139,10 +141,15 @@ describe('ENGINE: 🛡️ one projector — faf cards', () => {
       ...fafa,
       provenance: { faf: 'x', mediaType: 'application/vnd.faf+yaml', version: '2.5.2' },
     };
-    const params = buildA2ACard(dirty, faf).capabilities.extensions[0].params;
+    const params = buildA2ACard(dirty, faf).capabilities.extensions[0].params as any;
     expect(params.version).toBeUndefined();
-    expect(params.mediaType).toBe('application/vnd.faf+yaml');
-    expect(params.deterministic).toBe(true);
+    expect(params.provenance.mediaType).toBe('application/vnd.faf+yaml');
+    expect(params.fafaSpecVersion).toBeTruthy();
+    expect(params.mediaTypes).toEqual([
+      'application/vnd.faf+yaml',
+      'application/vnd.fafm+yaml',
+      'application/vnd.fafa+yaml',
+    ]);
   });
 
   test('upsertCatalog patches faf\'s own A2A row (exact identifier), leaves showcase rows and another agent\'s A2A row', () => {
