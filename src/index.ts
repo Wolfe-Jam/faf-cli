@@ -77,6 +77,25 @@ export {
   A2A_CONTEXT_URI,
 } from './interop/cards.js';
 export type { FafaDoc, CardTarget, ProjectedCards } from './interop/cards.js';
+// The card pack: answers in, a .fafa written from them, and every card it
+// feeds out (A2A, MCP Server Card, registry server.json, AI Catalog, ARD).
+// Pure, so a browser front door runs the same projector. Neutral by default.
+export {
+  answersToFafa,
+  buildPack,
+  projectPack,
+  projectA2ACard,
+  projectServerCard,
+  projectServerJson,
+  projectAiCatalog,
+  projectArd,
+  fafaYaml,
+  fafaDomain,
+  mcpName,
+  SERVER_CARD_SCHEMA,
+  SERVER_JSON_SCHEMA,
+} from './interop/pack.js';
+export type { PackAnswers, PackCard, PackOptions, Pack, PackExtras, A2AExtension } from './interop/pack.js';
 // .fafm knowledge-profile library (TS) — INTEROP with claude-fafm-sdk 1.0
 export {
   Soul as FafmSoul,
