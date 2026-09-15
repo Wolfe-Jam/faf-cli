@@ -3,6 +3,7 @@ import { deprecate } from 'node:util';
 import type { FafData } from '../core/types.js';
 import { writeRendered } from '../core/render-hash.js';
 import { editJsonText } from '../core/json-edit.js';
+import { SERVER_CARD_SCHEMA } from './pack.js';
 
 /**
  * Build an MCP Server Card (SEP-2127) from a .faf.
@@ -33,7 +34,7 @@ export interface ServerCardOptions {
 }
 
 const MEDIA_TYPE = 'application/vnd.faf+yaml';
-const SCHEMA = 'https://static.modelcontextprotocol.io/schemas/v1/server-card.schema.json';
+const SCHEMA = SERVER_CARD_SCHEMA;
 const NAME_RE = /^[a-zA-Z0-9.-]+\/[a-zA-Z0-9._-]+$/;
 
 /** Derive a reverse-DNS `namespace/name` for the card. */
