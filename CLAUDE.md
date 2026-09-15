@@ -1,12 +1,12 @@
 <!-- faf:start -->
-<!-- faf: faf-cli | TypeScript | cli | CLI for IANA-registered `.faf` + `.fafm` — context DNA and portable agent memory. TypeScript, Bun-native since v6. package faf-cli v7.14.0 The Passport Edition. -->
+<!-- faf: faf-cli | TypeScript | cli | CLI for IANA-registered `.faf` + `.fafm` — context DNA and portable agent memory. TypeScript, Bun-native since v6. package faf-cli v7.15.0 The Pack Edition. -->
 <!-- faf: claim=project.faf | family=FAF -->
 
 # CLAUDE.md — faf-cli
 
 ## What This Is
 
-CLI for IANA-registered `.faf` + `.fafm` — context DNA and portable agent memory. TypeScript, Bun-native since v6. package faf-cli v7.14.0 The Passport Edition.
+CLI for IANA-registered `.faf` + `.fafm` — context DNA and portable agent memory. TypeScript, Bun-native since v6. package faf-cli v7.15.0 The Pack Edition.
 
 ## Stack
 
@@ -18,10 +18,10 @@ CLI for IANA-registered `.faf` + `.fafm` — context DNA and portable agent memo
 - **What:** Persistent AI Context Standard — project DNA for AI. IANA-registered. Anthropic-merged.
 - **Why:** Eliminates 91% context re-discovery tax — define once, AI remembers forever
 - **Where:** npm registry, Homebrew, GitHub
-- **When:** Production since September 2025; Bun-native since v6; current package 7.14.0
+- **When:** Production since September 2025; Bun-native since v6; current package 7.15.0
 - **How:** bunx faf-cli auto, then project.faf versions with your code — faf show renders it human-visible
 
 ---
 
-*STATUS: SYNC ACTIVE — 2026-09-13T03:00:16.820Z*
+*STATUS: SYNC ACTIVE — 2026-09-15T23:43:21.683Z*
 <!-- faf:end -->

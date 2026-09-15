@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v7.14.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v7.15.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -7,6 +7,18 @@ All notable changes to faf-cli will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [7.15.0] - 2026-09-15 — The Pack Edition
+
+**Answer a few questions about an agent or MCP server and get every card it needs. faf-cli writes the `.fafa` from the answers and projects it onto the A2A Agent Card, the MCP Server Card, the MCP Registry `server.json`, an AI Catalog and an ARD manifest, in Node or in a browser.**
+
+### Added
+- **The card pack.** `answersToFafa` writes a `.fafa` from a few answers: name, short name, domain, description, version, endpoints and skills. `buildPack` / `projectPack` project it onto the A2A Agent Card, the MCP Server Card, the registry `server.json`, an AI Catalog and an ARD manifest. Facts only some cards carry (repository, icon, keywords, example requests, packages) live in the `.fafa` under `metadata.cards`, so the file stays the one source.
+- **Neutral by default.** A pack card carries no extension and no FAF media type unless the caller passes one. The `.fafa` joins the catalog only with `listFafa`.
+- **`faf-cli/pack`**: the pack as one browser module (`dist/pack.js`, no Node built-ins, types included). In Node, `import { buildPack } from 'faf-cli'` works too.
+
+### Changed
+- The A2A card core moved into the pack as `projectA2ACard`. `buildA2ACard` and `faf cards` keep their signature and output: FAF's own A2A card is unchanged.
 
 ## [7.14.0] - 2026-09-13 — The Passport Edition
 

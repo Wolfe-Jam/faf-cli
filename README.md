@@ -132,18 +132,18 @@ faf memory etch "a durable fact" --id my-fact
 faf memory show
 ```
 
-### What's New in v7.14.0 — The Passport Edition
+### What's New in v7.15.0 — The Pack Edition
 
-**The A2A Agent Card's FAF extension carries real agent identity now — an `agentId`, a `passport` URL, and the full FAF media-type family — not just project provenance.**
+**Answer a few questions about an agent or MCP server and get every card it needs. faf-cli writes the `.fafa` from the answers and projects it onto the A2A Agent Card, the MCP Server Card, the MCP Registry `server.json`, an AI Catalog and an ARD manifest, in Node or in a browser.**
 
-- **The extension moved to `https://faf.one/ext/context/v1`** and its `params` gained `fafaSpecVersion`, `agentId` (from `.fafa` `agent.id`), the full `mediaTypes` family, and a `passport` URL — nested `provenance.faf`/`provenance.mediaType` replace the old flat pointer fields.
-- **`defaultInputModes` reflects what your skills actually cite.** Any FAF media type a capability's `cites_spec` names now shows up there, and on that skill's own `inputModes`.
-- **`provider` is optional again.** It's emitted only when both `agent.vendor` and `agent.homepage` are present — no longer a hard requirement.
-- **`capabilities.streaming` stays honest at `false`.** Having an A2A endpoint was never proof it supports streaming; this only flips once a real per-door signal exists to key off.
-- Breaking for anything reading the old flat A2A extension shape or the old `https://faf.one/context` URI. MCP Server Cards and registry entries are unaffected.
+- **The card pack.** `answersToFafa` writes a `.fafa` from a few answers: name, short name, domain, description, version, endpoints and skills. `buildPack` / `projectPack` project it onto the A2A Agent Card, the MCP Server Card, the registry `server.json`, an AI Catalog and an ARD manifest. Facts only some cards carry (repository, icon, keywords, example requests, packages) live in the `.fafa` under `metadata.cards`, so the file stays the one source.
+- **Neutral by default.** A pack card carries no extension and no FAF media type unless the caller passes one. The `.fafa` joins the catalog only with `listFafa`.
+- **`faf-cli/pack`**: the pack as one browser module (`dist/pack.js`, no Node built-ins, types included). In Node, `import { buildPack } from 'faf-cli'` works too.
+- The A2A card core moved into the pack as `projectA2ACard`. `buildA2ACard` and `faf cards` keep their signature and output: FAF's own A2A card is unchanged.
 
 **Recent sprint**
 
+- 🎴 [7.15.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.15.0) The Pack Edition
 - 🛂 [7.14.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.14.0) The Passport Edition
 - 🛡️ [7.13.1](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.13.1) security: detection reads stay inside the project
 - 🤝 [7.13.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.13.0) The Co-Author Edition
