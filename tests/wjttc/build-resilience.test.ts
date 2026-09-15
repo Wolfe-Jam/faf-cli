@@ -36,7 +36,7 @@ describe('WJTTC BRAKE: build artifact is portable + correct', () => {
 
   // L1
   test('L1: dist/ contains zero build-machine paths', () => {
-    const files = ['cli.js', 'index.js'];
+    const files = ['cli.js', 'index.js', 'pack.js'];
     const patterns = [
       { name: 'macOS user paths', re: /\/Users\// },
       { name: 'GitHub Actions paths', re: /\/home\/runner\// },
@@ -103,6 +103,22 @@ describe('WJTTC BRAKE: build artifact is portable + correct', () => {
     // Both should be parseable as JS (rough check: start with valid char)
     const cliHead = readFileSync(join(DIST, 'cli.js'), 'utf-8').slice(0, 200);
     expect(cliHead).toMatch(/^(#!|\/\/|\/\*|"use|import|var|const|let|function|export)/);
+  });
+
+  // L12 — the card pack ships as a browser module (`faf-cli/pack`)
+  test('L12: faf-cli/pack is browser-safe: no Node built-ins, exports resolve, API loads', async () => {
+    const exp = PKG.exports['./pack'];
+    expect(exp, 'package.json exports["./pack"]').toBeDefined();
+    for (const target of [exp.default, exp.types]) {
+      expect(existsSync(join(ROOT, target)), `${target} must exist`).toBe(true);
+    }
+    const bundle = readFileSync(join(ROOT, exp.default), 'utf-8');
+    const builtins = /(?:from\s*|require\(\s*|import\(\s*)["'](?:node:[\w/]+|fs|path|os|child_process|crypto|url|util)["']/;
+    const hit = bundle.match(builtins);
+    if (hit) {throw new Error(`dist/pack.js reaches for a Node built-in: ${hit[0]}`);}
+    const mod = await import(join(ROOT, exp.default));
+    expect(typeof mod.buildPack).toBe('function');
+    expect(typeof mod.answersToFafa).toBe('function');
   });
 });
 
