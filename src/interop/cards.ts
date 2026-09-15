@@ -7,6 +7,14 @@ import { makeDirInside, readUtf8, resolveInside } from '../core/safe-write.js';
 import { writeRendered, type RenderedResult } from '../core/render-hash.js';
 import { upsertJsonRows } from '../core/json-edit.js';
 import {
+  A2A_PROTOCOL_VERSION,
+  FAF_MEDIA_TYPES,
+  a2aDoors,
+  projectA2ACard,
+  type FafaDoc,
+  type ProjectedA2A,
+} from './pack.js';
+import {
   fafContextBlock,
   buildServerCard,
   hasRegistryMark,
@@ -19,92 +27,25 @@ import {
 
 /** A2A extension URI — dereference, not the MCP `_meta` key `one.faf/context`. */
 export const A2A_CONTEXT_URI = 'https://faf.one/ext/context/v1';
-export const A2A_PROTOCOL_BINDING = 'JSONRPC';
-export const A2A_PROTOCOL_VERSION = '1.0';
-/** The three FAF-family media types the extension advertises, in family order. */
-export const FAF_MEDIA_TYPES = [
-  'application/vnd.faf+yaml',
-  'application/vnd.fafm+yaml',
-  'application/vnd.fafa+yaml',
-] as const;
+// The .fafa types, the A2A card core and its helpers live in pack.ts (pure, no
+// Node built-ins) so the CLI and a browser front door share one projector.
+export {
+  A2A_PROTOCOL_BINDING,
+  A2A_PROTOCOL_VERSION,
+  FAF_MEDIA_TYPES,
+  a2aEndpoints,
+  a2aDoors,
+} from './pack.js';
+export type { FafaAgent, FafaCapability, FafaEndpoint, FafaDoc, ProjectedA2A } from './pack.js';
 
 export type CardTarget = 'a2a' | 'mcp' | 'registry' | 'catalog';
 export const CARD_TARGETS: CardTarget[] = ['a2a', 'mcp', 'registry', 'catalog'];
-
-export interface FafaAgent {
-  name?: string;
-  displayName?: string;
-  id?: string;
-  vendor?: string;
-  version?: string;
-  description?: string;
-  homepage?: string;
-}
-
-export interface FafaCapability {
-  name?: string;
-  description?: string;
-  tags?: unknown;
-  /** MIME type this capability reads, when it's one of the FAF family — drives the skill's `inputModes` and the card's `defaultInputModes`. */
-  cites_spec?: string;
-}
-
-export interface FafaEndpoint {
-  protocol?: string;
-  transport?: string;
-  location?: string;
-  version?: string;
-}
-
-export interface FafaDoc {
-  /** `.fafa` spec version this document is authored against, e.g. `"1.0"` — not `agent.version`. */
-  version?: string;
-  agent?: FafaAgent;
-  capabilities?: FafaCapability[];
-  endpoints?: FafaEndpoint[];
-  provenance?: Record<string, unknown>;
-  metadata?: { persona?: string };
-  [key: string]: unknown;
-}
 
 export interface ProjectCardsOptions extends ServerCardOptions {
   /** Public URL of the emitted A2A card (catalog row). */
   a2aCardUrl?: string;
   /** Caller-supplied A2A door when `.fafa` has no `endpoints[].protocol: a2a`. */
   doorUrl?: string;
-}
-
-export interface ProjectedA2A {
-  name: string;
-  description: string;
-  supportedInterfaces: Array<{
-    url: string;
-    protocolBinding: string;
-    protocolVersion: string;
-  }>;
-  /** Omitted entirely when `agent.vendor` or `agent.homepage` is absent — A2A optional, never a guessed org name. */
-  provider?: { organization: string; url: string };
-  version: string;
-  capabilities: {
-    streaming: boolean;
-    pushNotifications: boolean;
-    extendedAgentCard: boolean;
-    extensions: Array<{
-      uri: string;
-      description: string;
-      required: boolean;
-      params: Record<string, unknown>;
-    }>;
-  };
-  defaultInputModes: string[];
-  defaultOutputModes: string[];
-  skills: Array<{
-    id: string;
-    name: string;
-    description: string;
-    tags: string[];
-    inputModes?: string[];
-  }>;
 }
 
 export interface CatalogEntry {
@@ -159,23 +100,6 @@ export function findFafaFile(dir: string = process.cwd()): string | null {
   return null;
 }
 
-export function a2aEndpoints(fafa: FafaDoc): FafaEndpoint[] {
-  return (fafa.endpoints ?? []).filter(
-    (e) => String(e.protocol ?? '').toLowerCase() === 'a2a' && e.location,
-  );
-}
-
-/** Authored A2A endpoints, else a single `doorUrl`. Never invents a door. */
-export function a2aDoors(fafa: FafaDoc, opts: ProjectCardsOptions = {}): FafaEndpoint[] {
-  const fromDoc = a2aEndpoints(fafa);
-  if (fromDoc.length > 0) {return fromDoc;}
-  const door = opts.doorUrl?.trim();
-  if (door) {
-    return [{ protocol: 'a2a', location: door, version: A2A_PROTOCOL_VERSION }];
-  }
-  return [];
-}
-
 /**
  * The A2A extension's own `params` — a superset of {@link fafContextBlock},
  * enriched with `.fafa`-specific identity that only makes sense for an agent
@@ -205,89 +129,31 @@ function fafaExtensionParams(
   return params;
 }
 
-/** `text/plain` plus any FAF media type a capability's `cites_spec` names. */
-function defaultA2AInputModes(fafa: FafaDoc): string[] {
-  const cited = new Set<string>();
-  for (const c of fafa.capabilities ?? []) {
-    if (c.cites_spec && (FAF_MEDIA_TYPES as readonly string[]).includes(c.cites_spec)) {
-      cited.add(c.cites_spec);
-    }
-  }
-  return ['text/plain', ...cited];
-}
-
-/** Build the A2A Agent Card (JSON) from a .fafa + .faf. */
+/** Build the A2A Agent Card (JSON) from a .fafa + .faf: the core card
+ *  ({@link projectA2ACard}) carrying FAF's context extension. */
 export function buildA2ACard(
   fafa: FafaDoc,
   faf: FafData,
   opts: ProjectCardsOptions = {},
 ): ProjectedA2A {
-  const agent = fafa.agent ?? {};
-  const doors = a2aDoors(fafa, opts);
-  if (doors.length === 0) {
+  // Checked before the extension is built, so a card with no door fails the
+  // same way it always has, before anything reads the .faf.
+  if (a2aDoors(fafa, opts).length === 0) {
     throw new Error(
       "No A2A endpoint in .fafa (need endpoints[].protocol: a2a + location). Will not invent a door.",
     );
   }
-  const name = String(agent.displayName ?? fafa.metadata?.persona ?? agent.name ?? '').trim();
-  const description = String(agent.description ?? '').trim();
-  const version = String(agent.version ?? '').trim();
-  if (!name || !description || !version) {
-    throw new Error('A2A card needs agent.displayName|name, description, version in .fafa');
-  }
-  // provider is A2A-optional: emit it only when both halves are real, never a guessed org name.
-  const organization = String(agent.vendor ?? '').trim();
-  const homepage = String(agent.homepage ?? '').trim();
-  const provider = organization && homepage ? { organization, url: homepage } : undefined;
-
-  const skills = (fafa.capabilities ?? []).map((c) => {
-    const id = String(c.name ?? '').trim();
-    if (!id) {throw new Error('A2A skill missing capabilities[].name');}
-    const tags = Array.isArray(c.tags) ? c.tags.map(String) : [];
-    const inputModes =
-      c.cites_spec && (FAF_MEDIA_TYPES as readonly string[]).includes(c.cites_spec)
-        ? [c.cites_spec, 'text/plain']
-        : undefined;
-    return {
-      id,
-      name: id,
-      description: String(c.description ?? '').trim() || id,
-      tags,
-      ...(inputModes ? { inputModes } : {}),
-    };
+  return projectA2ACard(fafa, {
+    doorUrl: opts.doorUrl,
+    extensions: [
+      {
+        uri: A2A_CONTEXT_URI,
+        description: 'FAF passport and project DNA as typed parts',
+        required: false,
+        params: fafaExtensionParams(fafa, faf, opts),
+      },
+    ],
   });
-
-  return {
-    name,
-    description,
-    supportedInterfaces: doors.map((e) => ({
-      url: String(e.location),
-      protocolBinding: A2A_PROTOCOL_BINDING,
-      protocolVersion: String(e.version ?? A2A_PROTOCOL_VERSION),
-    })),
-    ...(provider ? { provider } : {}),
-    version,
-    capabilities: {
-      // Endpoint existence isn't streaming support: FAFA's A2A door explicitly
-      // errors message/stream today (-32004). Advertising true would be a
-      // claim the door can't back up. Flip this only once a real per-door
-      // streaming signal exists in .fafa/project.faf to key off of.
-      streaming: false,
-      pushNotifications: false,
-      extendedAgentCard: false,
-      extensions: [
-        {
-          uri: A2A_CONTEXT_URI,
-          description: 'FAF passport and project DNA as typed parts',
-          required: false,
-          params: fafaExtensionParams(fafa, faf, opts),
-        },
-      ],
-    },
-    defaultInputModes: defaultA2AInputModes(fafa),
-    defaultOutputModes: ['text/plain', 'application/json'],
-    skills,
-  };
 }
 
 /** @deprecated Use {@link buildA2ACard}. Removed in the next major. */
