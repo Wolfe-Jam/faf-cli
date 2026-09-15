@@ -59,6 +59,14 @@ const installedMcp: PackAnswers = {
   packages: [{ registryType: 'npm', identifier: 'weather-mcp', version: '0.3.1' }],
 };
 
+describe('pack.ts stays pure', () => {
+  test('imports nothing but yaml, so it runs in a browser', () => {
+    const src = readFileSync(join(import.meta.dir, '../../src/interop/pack.ts'), 'utf8');
+    const sources = [...src.matchAll(/^import[^'"]*['"]([^'"]+)['"]/gm)].map((m) => m[1]);
+    expect(sources).toEqual(['yaml']);
+  });
+});
+
 describe('answers → .fafa', () => {
   test('writes a .fafa that passes the .fafa schema', () => {
     for (const a of [agent, hostedMcp, installedMcp]) {
