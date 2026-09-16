@@ -5,12 +5,17 @@ import { parse } from 'yaml';
 import type { FafData } from '../core/types.js';
 import { makeDirInside, readUtf8, resolveInside } from '../core/safe-write.js';
 import { writeRendered, type RenderedResult } from '../core/render-hash.js';
-import { upsertJsonRows } from '../core/json-edit.js';
+import { editJsonText, upsertJsonRows } from '../core/json-edit.js';
 import {
   A2A_PROTOCOL_VERSION,
   FAF_MEDIA_TYPES,
   a2aDoors,
+  ardHints,
+  catalogHost,
+  fafaDomain,
+  fafaHandle,
   projectA2ACard,
+  type CatalogHost,
   type FafaDoc,
   type ProjectedA2A,
 } from './pack.js';
@@ -38,8 +43,8 @@ export {
 } from './pack.js';
 export type { FafaAgent, FafaCapability, FafaEndpoint, FafaDoc, ProjectedA2A } from './pack.js';
 
-export type CardTarget = 'a2a' | 'mcp' | 'registry' | 'catalog';
-export const CARD_TARGETS: CardTarget[] = ['a2a', 'mcp', 'registry', 'catalog'];
+export type CardTarget = 'a2a' | 'mcp' | 'registry' | 'catalog' | 'ard';
+export const CARD_TARGETS: CardTarget[] = ['a2a', 'mcp', 'registry', 'catalog', 'ard'];
 
 export interface ProjectCardsOptions extends ServerCardOptions {
   /** Public URL of the emitted A2A card (catalog row). */
@@ -55,6 +60,9 @@ export interface CatalogEntry {
   description?: string;
   url: string;
   updatedAt?: string;
+  /** ARD's search hints — on the ARD manifest's rows only. */
+  tags?: string[];
+  representativeQueries?: string[];
 }
 
 export interface AiCatalog {
@@ -74,6 +82,11 @@ export interface ProjectedCards {
     _meta: Record<string, unknown>;
   };
   catalog?: CatalogEntry[];
+  /** The same rows, carrying ARD's search hints — the ARD manifest. */
+  ard?: CatalogEntry[];
+  /** Who publishes the catalog — written only into a catalog that names
+   *  nobody yet. An existing `host` is the site's, and is never touched. */
+  catalogHost?: CatalogHost;
 }
 
 export function readFafa(path: string): FafaDoc {
@@ -124,9 +137,20 @@ function fafaExtensionParams(
     generated: block.generated,
   };
   if (agent.id) {params.agentId = agent.id;}
-  const passport = homepageWellKnown(fafa, 'fafa');
+  const passport = fafaPassportUrl(fafa);
   if (passport) {params.passport = passport;}
   return params;
+}
+
+/** Where the `.fafa` itself is served — the same door the catalog's `agent`
+ *  row points at, so a card and a catalog never disagree about it. Left off
+ *  the card, rather than guessed, when the `.fafa` names no domain. */
+function fafaPassportUrl(fafa: FafaDoc): string | undefined {
+  try {
+    return `https://${fafaDomain(fafa)}/.well-known/fafa`;
+  } catch {
+    return undefined;
+  }
 }
 
 /** Build the A2A Agent Card (JSON) from a .fafa + .faf: the core card
@@ -163,41 +187,37 @@ export const generateA2ACard = deprecate(
   'FAF0003',
 );
 
-function catalogHost(fafa: FafaDoc): string {
-  const homepage = fafa.agent?.homepage;
-  if (!homepage) {return 'local';}
-  try {
-    return new URL(homepage).hostname.replace(/^www\./, '');
-  } catch {
-    return 'local';
-  }
-}
-
+/** Where the A2A card is served: what the caller passed (`--a2a-url`), else
+ *  the domain's own well-known door. */
 function catalogA2AUrl(fafa: FafaDoc, opts: ProjectCardsOptions): string {
-  if (opts.a2aCardUrl) {return opts.a2aCardUrl;}
-  const homepage = fafa.agent?.homepage;
-  if (homepage) {
-    try {
-      return new URL('/.well-known/agent-card.json', homepage).href;
-    } catch { /* fall through */ }
-  }
-  return '/.well-known/agent-card.json';
+  return opts.a2aCardUrl ?? `https://${fafaDomain(fafa)}/.well-known/agent-card.json`;
 }
 
+/**
+ * The catalog rows for this agent, keyed exactly as the pack projector keys
+ * them: `urn:air:{publisher}:{namespace}:{name}`, where the publisher is the
+ * domain the `.fafa` *declares* (`agent.id`'s urn:air, `metadata.cards.domain`,
+ * else the homepage host) and the name is the handle — never the display name,
+ * which is free text and may carry spaces a URN may not.
+ *
+ * Throws, rather than inventing either half, when the `.fafa` names no domain:
+ * an identifier is a catalog's primary key, and `urn:air:local:…` published to
+ * the world is worse than a refusal a line of YAML fixes.
+ */
 export function catalogEntriesFor(
   fafa: FafaDoc,
   faf: FafData,
   opts: ProjectCardsOptions = {},
 ): CatalogEntry[] {
-  const host = catalogHost(fafa);
+  const domain = fafaDomain(fafa);
+  const handle = fafaHandle(fafa);
   const agent = fafa.agent ?? {};
-  const slug = String(agent.name ?? 'agent');
   const now = opts.now ?? (faf.generated as string | undefined) ?? new Date().toISOString();
   const entries: CatalogEntry[] = [];
 
   if (a2aDoors(fafa, opts).length > 0) {
     entries.push({
-      identifier: `urn:air:${host}:a2a:${slug}`,
+      identifier: `urn:air:${domain}:a2a:${handle}`,
       displayName: String(agent.displayName ?? agent.name ?? 'A2A Agent Card'),
       type: 'application/a2a-agent-card+json',
       description: 'A2A v1.0 Agent Card. Projected from .fafa.',
@@ -206,29 +226,16 @@ export function catalogEntriesFor(
     });
   }
 
-  const fafaUrl = homepageWellKnown(fafa, 'fafa');
-  if (fafaUrl) {
-    entries.push({
-      identifier: `urn:air:${host}:agent:${slug}`,
-      displayName: String(agent.displayName ?? agent.name ?? '.fafa'),
-      type: 'application/vnd.fafa+yaml',
-      description: 'FAF agent passport (.fafa).',
-      url: fafaUrl,
-      updatedAt: now,
-    });
-  }
+  entries.push({
+    identifier: `urn:air:${domain}:agent:${handle}`,
+    displayName: String(agent.displayName ?? agent.name ?? '.fafa'),
+    type: 'application/vnd.fafa+yaml',
+    description: 'FAF agent passport (.fafa).',
+    url: `https://${domain}/.well-known/fafa`,
+    updatedAt: now,
+  });
 
   return entries;
-}
-
-function homepageWellKnown(fafa: FafaDoc, name: string): string | undefined {
-  const homepage = fafa.agent?.homepage;
-  if (!homepage) {return undefined;}
-  try {
-    return new URL(`/.well-known/${name}`, homepage).href;
-  } catch {
-    return undefined;
-  }
 }
 
 /** The row in `entries` that is faf's own row `row`: the one whose
@@ -242,11 +249,23 @@ function catalogMatchIndex(entries: CatalogEntry[], row: CatalogEntry): number {
 /** Upsert projector entries into an existing catalog. Leaves every other row
  *  alone: a row is faf's only when its identifier is exactly faf's (never by
  *  type or URL). On match, only url / type / updatedAt move — host copy
- *  (title, tags) stays; any other faf row is appended. */
-export function upsertCatalog(existing: AiCatalog | undefined, incoming: CatalogEntry[]): AiCatalog {
-  const base: AiCatalog = existing
+ *  (title, tags) stays; any other faf row is appended. `host` names the
+ *  publisher on a catalog that names none — an existing one is the site's own
+ *  and stays as it is. */
+export function upsertCatalog(
+  existing: AiCatalog | undefined,
+  incoming: CatalogEntry[],
+  host?: CatalogHost,
+): AiCatalog {
+  const opened: AiCatalog = existing
     ? { ...existing, entries: [...(existing.entries ?? [])] }
     : { specVersion: '1.0', entries: [] };
+  // A host the catalog already names is the site's own — never overwritten.
+  // A missing one is added where the spec shows it: straight after specVersion.
+  const base: AiCatalog =
+    host && opened.host === undefined
+      ? (({ specVersion, ...rest }) => ({ specVersion, host: { ...host }, ...rest }))(opened)
+      : opened;
   for (const row of incoming) {
     const i = catalogMatchIndex(base.entries, row);
     if (i >= 0) {
@@ -271,18 +290,40 @@ const CATALOG_ROW_UPDATES = ['url', 'type', 'updatedAt'] as const;
  * (identifier exactly faf's) get their url / type / updatedAt values changed
  * in place, faf's other rows are appended after the last entry, and every
  * other byte — your rows, their order and layout, other keys — stays. With no
- * text (no catalog yet) a new catalog is returned. Throws a JsonEditError,
- * changing nothing, when the catalog cannot be edited that way (not a JSON
- * object, `entries` not an array, faf's row there twice, …).
+ * text (no catalog yet) a new catalog is returned. `host` names the publisher
+ * (AI Catalog Level 2 "discoverable") and is added, after `specVersion`, only
+ * to a catalog that names none: a `host` already in the file is the site's own
+ * and is left byte for byte. Throws a JsonEditError, changing nothing, when
+ * the catalog cannot be edited that way (not a JSON object, `entries` not an
+ * array, faf's row there twice, …).
  */
-export function upsertCatalogText(text: string | null, incoming: CatalogEntry[]): { text: string; changed: boolean } {
+export function upsertCatalogText(
+  text: string | null,
+  incoming: CatalogEntry[],
+  host?: CatalogHost,
+): { text: string; changed: boolean } {
   if (text === null) {
-    return { text: `${JSON.stringify({ specVersion: '1.0', entries: incoming }, null, 2)}\n`, changed: true };
+    const fresh = { specVersion: '1.0', ...(host ? { host } : {}), entries: incoming };
+    return { text: `${JSON.stringify(fresh, null, 2)}\n`, changed: true };
   }
-  return upsertJsonRows(text, 'entries', incoming as unknown as Record<string, unknown>[], {
+  const rows = upsertJsonRows(text, 'entries', incoming as unknown as Record<string, unknown>[], {
     id: 'identifier',
     update: CATALOG_ROW_UPDATES,
   });
+  if (!host || namesHost(rows.text)) {return rows;}
+  const named = editJsonText(rows.text, { host }, { '': { host: ['specVersion'] } });
+  return { text: named.text, changed: rows.changed || named.changed };
+}
+
+/** True when the catalog JSON already names a `host` — any value, including
+ *  null or one the spec would refuse. Whatever is there is the site's. */
+function namesHost(text: string): boolean {
+  try {
+    const doc = JSON.parse(text) as Record<string, unknown>;
+    return Object.prototype.hasOwnProperty.call(doc, 'host');
+  } catch {
+    return true; // Unparseable: add nothing.
+  }
 }
 
 export function projectCards(input: {
@@ -308,10 +349,10 @@ export function projectCards(input: {
     };
   }
 
-  if (wanted.has('a2a') || wanted.has('catalog')) {
+  if (wanted.has('a2a') || wanted.has('catalog') || wanted.has('ard')) {
     if (!input.fafa) {
-      if (input.targets?.includes('a2a') || input.targets?.includes('catalog')) {
-        throw new Error('A2A/catalog require a .fafa (agent.fafa). Will not invent an agent.');
+      if (input.targets?.some((t) => t === 'a2a' || t === 'catalog' || t === 'ard')) {
+        throw new Error('A2A/catalog/ARD require a .fafa (agent.fafa). Will not invent an agent.');
       }
     }
   }
@@ -328,8 +369,17 @@ export function projectCards(input: {
     }
   }
 
-  if (wanted.has('catalog') && input.fafa) {
-    out.catalog = catalogEntriesFor(input.fafa, input.faf, opts);
+  if ((wanted.has('catalog') || wanted.has('ard')) && input.fafa) {
+    const rows = catalogEntriesFor(input.fafa, input.faf, opts);
+    if (wanted.has('catalog')) {out.catalog = rows;}
+    if (wanted.has('ard')) {
+      // ARD builds on ai-catalog: the same rows, carrying the hints its
+      // semantic index is built from.
+      const hints = ardHints(input.fafa);
+      out.ard = rows.map((r) => ({ ...r, ...hints }));
+    }
+    const host = catalogHost(input.fafa);
+    if (host) {out.catalogHost = host;}
   }
 
   assertSameBlock(out);

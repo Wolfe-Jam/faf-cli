@@ -168,17 +168,46 @@ export function cardsCommand(options: CardsCommandOptions = {}): void {
   if (projected.catalog) {
     // The catalog is shared: faf updates only its own rows (identifier
     // exactly faf's) and appends the rest, as a text edit — every other row
-    // and every other byte stays.
+    // and every other byte stays. The one key it may add is `host`, and only
+    // to a catalog that names none: the publisher a catalog needs to be
+    // discoverable rather than merely minimal. A host already there is the
+    // site's own and is never touched.
     const out = join(dir, '.well-known', 'ai-catalog.json');
     const rows = projected.catalog;
     run(out, () => {
       makeDirInside(dir, dirname(out));
       const real = resolveInside(dir, out);
       const text = present(out) ? readUtf8(real) : null;
-      const next = upsertCatalogText(text, rows);
+      const next = upsertCatalogText(text, rows, projected.catalogHost);
       if (next.changed) {safeWriteFile(real, next.text, { root: dir, expect: text });}
       return next.changed;
     }, 'its own rows');
+  }
+  if (projected.ard) {
+    // ARD's own conformance CLI (v0.9.1): "A consumer MUST fetch
+    // /.well-known/ard.json. Consulting the predecessor
+    // /.well-known/ai-catalog.json is permitted (MAY) but not required."
+    // The spec prose still names ai-catalog.json (§4.1, §6.1), so a site
+    // serving both is served by writing both — same rows, ARD's carrying the
+    // hints its semantic index is built from.
+    const out = join(dir, '.well-known', 'ard.json');
+    const rows = projected.ard;
+    run(out, () => {
+      makeDirInside(dir, dirname(out));
+      const real = resolveInside(dir, out);
+      const text = present(out) ? readUtf8(real) : null;
+      const next = upsertCatalogText(text, rows, projected.catalogHost);
+      if (next.changed) {safeWriteFile(real, next.text, { root: dir, expect: text });}
+      return next.changed;
+    }, 'its own rows');
+    // A manifest with no representativeQueries is valid and unfindable:
+    // registries build their semantic index from that term. The spec asks for
+    // 2-5 (ARD v0.9 §Entry). Say so rather than write a card nobody can find.
+    if (!rows.some((r) => r.representativeQueries?.length)) {
+      console.error(
+        `${dim('note')} ${out}: no representativeQueries — registries build their search index from these, so the entries are a valid catalog but will not be found. Add 2-5 to the .fafa as metadata.cards.examples.`,
+      );
+    }
   }
   if (projected.registry) {
     const inPath = join(dir, 'server.json');

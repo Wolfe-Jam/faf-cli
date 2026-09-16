@@ -5,10 +5,14 @@ import {
   assertSameBlock,
   buildA2ACard,
   generateA2ACard,
+  parseTargets,
   projectCards,
   upsertCatalog,
+  upsertCatalogText,
+  type CatalogEntry,
   type FafaDoc,
 } from '../../src/interop/cards.js';
+import { catalogHost, projectAiCatalog } from '../../src/interop/pack.js';
 import { fafContextBlock, REGISTRY_PUBLISHER_KEY } from '../../src/interop/servercard.js';
 
 const faf: FafData = {
@@ -198,5 +202,149 @@ describe('ENGINE: 🛡️ one projector — faf cards', () => {
   test('generateA2ACard is a deprecated alias for buildA2ACard', () => {
     const opts = { now: '2026-08-17T00:00:00.000Z' };
     expect(generateA2ACard(fafa, faf, opts)).toEqual(buildA2ACard(fafa, faf, opts));
+  });
+});
+
+// AI Catalog reads a catalog at Level 1 "minimal" until it names who publishes
+// it; a `host` with a non-empty displayName is what makes it Level 2
+// "discoverable". `faf cards --target catalog` wrote neither, so the CLI's
+// catalog validated a level below the one the pack API's projectAiCatalog
+// produced from the same .fafa. One projector, one host.
+describe('ENGINE: 🛡️ the catalog names its host — faf cards', () => {
+  const rows = () => projectCards({ faf, fafa, targets: ['catalog'] });
+
+  test('projectCards hands the writer a host: displayName from the .fafa, identifier from its domain', () => {
+    expect(rows().catalogHost).toEqual({ displayName: 'WolfeJAM', identifier: 'faf.one' });
+  });
+
+  test('a catalog faf writes from scratch names the host, straight after specVersion', () => {
+    const p = rows();
+    const { text } = upsertCatalogText(null, p.catalog!, p.catalogHost);
+    expect(Object.keys(JSON.parse(text))).toEqual(['specVersion', 'host', 'entries']);
+    expect(JSON.parse(text).host).toEqual({ displayName: 'WolfeJAM', identifier: 'faf.one' });
+  });
+
+  test('an existing catalog that names no host gets one — every other byte untouched', () => {
+    const before = [
+      '{',
+      '  "specVersion": "1.0",',
+      '  "entries": [',
+      '    {',
+      '      "identifier": "urn:air:faf.one:context:zeph",',
+      '      "type": "application/vnd.faf+yaml",',
+      '      "url": "https://example.com/zeph.faf"',
+      '    }',
+      '  ]',
+      '}',
+      '',
+    ].join('\n');
+    const p = rows();
+    const { text, changed } = upsertCatalogText(before, p.catalog!, p.catalogHost);
+    expect(changed).toBe(true);
+    expect(text).toContain('  "host": {\n    "displayName": "WolfeJAM",\n    "identifier": "faf.one"\n  },\n');
+    expect(Object.keys(JSON.parse(text))).toEqual(['specVersion', 'host', 'entries']);
+    // Their row, byte for byte, still there.
+    expect(text).toContain('      "identifier": "urn:air:faf.one:context:zeph",');
+    expect(JSON.parse(text).entries[0]).toEqual(JSON.parse(before).entries[0]);
+  });
+
+  test("a host the catalog already names is the site's own — never overwritten", () => {
+    const before = `{
+  "specVersion": "1.0",
+  "host": { "displayName": "Someone Else", "identifier": "elsewhere.example", "tagline": "theirs" },
+  "entries": []
+}
+`;
+    const p = rows();
+    const { text } = upsertCatalogText(before, p.catalog!, p.catalogHost);
+    expect(text).toContain('"host": { "displayName": "Someone Else", "identifier": "elsewhere.example", "tagline": "theirs" },');
+    expect(JSON.parse(text).host.displayName).toBe('Someone Else');
+  });
+
+  test('a second run over faf\'s own catalog changes nothing', () => {
+    const p = rows();
+    const first = upsertCatalogText(null, p.catalog!, p.catalogHost);
+    const again = upsertCatalogText(first.text, p.catalog!, p.catalogHost);
+    expect(again.changed).toBe(false);
+    expect(again.text).toBe(first.text);
+  });
+
+  test('a .fafa that names nobody gets no host — minimal and valid beats discoverable and invalid', () => {
+    // ai-catalog-cli v0.2.2 on an empty displayName: "host.displayName is
+    // required and must not be empty" — invalid, not merely minimal.
+    expect(catalogHost({ agent: { homepage: 'https://faf.one/agent' } } as FafaDoc)).toBeUndefined();
+    expect(catalogHost({ agent: {} } as FafaDoc)).toBeUndefined();
+    // Named, but saying nowhere it lives: the name alone still earns a host.
+    expect(catalogHost({ agent: { name: 'solo' } } as FafaDoc)).toEqual({ displayName: 'solo' });
+  });
+
+  // The defect this PR really closes: the CLI keyed its rows off the homepage
+  // host and the raw display name, while the pack projector keyed them off the
+  // domain the .fafa declares and the handle. Same .fafa, two primary keys —
+  // and with the host now named, the file contradicted itself.
+  test('the CLI keys its rows exactly as the pack projector does — one catalog, one primary key', () => {
+    const declared: FafaDoc = {
+      ...fafa,
+      agent: {
+        ...fafa.agent,
+        name: 'Weather Bot', // a display string: spaces a URN may not carry
+        id: 'urn:air:weather.acme.example:agent:weather-bot', // the declared publisher
+        homepage: 'https://acme.example/weather', // a different host entirely
+      },
+    };
+    const cli = projectCards({ faf, fafa: declared, targets: ['catalog'] });
+    const pack = projectAiCatalog(declared, ['a2a'], { listFafa: true }) as { entries: CatalogEntry[] };
+    expect(cli.catalog!.map((e) => e.identifier)).toEqual(pack.entries.map((e) => e.identifier));
+    expect(cli.catalog!.map((e) => e.url)).toEqual(pack.entries.map((e) => e.url));
+    // The publisher in every row is the one the host names.
+    expect(cli.catalogHost!.identifier).toBe('weather.acme.example');
+    for (const row of cli.catalog!) {
+      expect(row.identifier.startsWith('urn:air:weather.acme.example:')).toBe(true);
+      expect(row.identifier).not.toContain(' ');
+    }
+  });
+
+  // ARD builds on ai-catalog (ARD v0.9 §4): the same document, entries
+  // carrying the hints registries build their semantic index from. The
+  // conformance CLI is blunt about an entry without them — "a valid catalog
+  // entry but not a discoverable ARD entry".
+  test('the ard target is the catalog plus ARD\'s search hints, off the .fafa', () => {
+    const searchable: FafaDoc = {
+      ...fafa,
+      metadata: { cards: { keywords: ['faf', 'context'], examples: ['what is a .faf file', 'how do I score a repo'] } },
+    };
+    const p = projectCards({ faf, fafa: searchable, targets: ['catalog', 'ard'] });
+    // Same rows, same primary key — only the hints differ.
+    expect(p.ard!.map((e) => e.identifier)).toEqual(p.catalog!.map((e) => e.identifier));
+    expect(p.catalog!.every((e) => e.representativeQueries === undefined)).toBe(true);
+    for (const row of p.ard!) {
+      expect(row.tags).toEqual(['faf', 'context']);
+      expect(row.representativeQueries).toEqual(['what is a .faf file', 'how do I score a repo']);
+    }
+  });
+
+  test('a .fafa with no examples still writes a valid manifest — one without search hints', () => {
+    const p = projectCards({ faf, fafa, targets: ['ard'] });
+    expect(p.ard!.length).toBeGreaterThan(0);
+    expect(p.ard!.every((e) => e.representativeQueries === undefined)).toBe(true);
+  });
+
+  test('ard is a target of its own, and needs a .fafa like the rest', () => {
+    expect(parseTargets('a2a,catalog,ard')).toEqual(['a2a', 'catalog', 'ard']);
+    expect(() => parseTargets('ARD,nope')).toThrow(/unknown card target: nope/);
+    expect(() => projectCards({ faf, targets: ['ard'] })).toThrow(/require a \.fafa/);
+  });
+
+  test('no domain, no invented identifier: faf refuses rather than publish urn:air:local', () => {
+    const nowhere: FafaDoc = { ...fafa, agent: { name: 'solo' } };
+    expect(() => projectCards({ faf, fafa: nowhere, targets: ['catalog'] })).toThrow(/names no domain/);
+  });
+
+  test('upsertCatalog (objects) adds a missing host and keeps an existing one', () => {
+    const p = rows();
+    const added = upsertCatalog(undefined, p.catalog!, p.catalogHost);
+    expect(Object.keys(added)).toEqual(['specVersion', 'host', 'entries']);
+    const theirs = { specVersion: '1.0', host: { displayName: 'Someone Else' }, entries: [] };
+    expect(upsertCatalog(theirs, p.catalog!, p.catalogHost).host).toEqual({ displayName: 'Someone Else' });
   });
 });

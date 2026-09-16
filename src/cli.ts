@@ -210,7 +210,7 @@ program
 program
   .command('cards')
   .description('Project .faf + .fafa onto A2A / MCP / registry / catalog cards — one context block, every door')
-  .option('--target <list>', 'Comma list: a2a,mcp,registry,catalog (default: whatever inputs allow)')
+  .option('--target <list>', 'Comma list: a2a,mcp,registry,catalog,ard (default: whatever inputs allow)')
   .option('--faf <path>', 'project.faf path (default: auto-discover)')
   .option('--fafa <path>', 'agent.fafa path (default: auto-discover)')
   .option('--dir <path>', 'Working directory (default: cwd)')

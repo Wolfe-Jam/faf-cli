@@ -364,6 +364,13 @@ export function fafaDomain(fafa: FafaDoc): string {
   }
 }
 
+/** The stable short name a card is filed under: `agent.name`, lowercased and
+ *  reduced to the characters an identifier may carry. The `{name}` of
+ *  `urn:air:{publisher}:{namespace}:{name}` — never a display string. */
+export function fafaHandle(fafa: FafaDoc): string {
+  return handleOf(fafa);
+}
+
 function handleOf(fafa: FafaDoc): string {
   const h = clean(fafa.agent?.name).toLowerCase().replace(/[^a-z0-9._-]/g, '-').replace(/^-+|-+$/g, '');
   if (!h) {throw new Error('The .fafa needs agent.name (the short name).');}
@@ -488,28 +495,70 @@ export function catalogRows(fafa: FafaDoc, cards: PackCard[], opts: { now?: stri
   return rows;
 }
 
+/** Who publishes a catalog: AI Catalog's `host` object. */
+export interface CatalogHost {
+  displayName: string;
+  identifier?: string;
+}
+
+/**
+ * The catalog's `host` — who publishes these entries. Naming one is what
+ * lifts a catalog from Level 1 "minimal" to Level 2 "discoverable", and
+ * `displayName` is the field that does it: the validator takes an empty one
+ * as *invalid*, not as minimal. So a `.fafa` that names nobody gets no host
+ * at all — a minimal catalog that validates beats a discoverable one that
+ * does not. `identifier` rides along whenever the `.fafa` says where it
+ * lives, and is left off when it does not.
+ */
+export function catalogHost(fafa: FafaDoc): CatalogHost | undefined {
+  const agent = fafa.agent ?? {};
+  const displayName = clean(agent.vendor) || clean(agent.displayName) || clean(agent.name);
+  if (!displayName) {return undefined;}
+  let identifier: string | undefined;
+  try {
+    identifier = fafaDomain(fafa);
+  } catch {
+    identifier = undefined;
+  }
+  return { displayName, ...(identifier ? { identifier } : {}) };
+}
+
 /** The AI Catalog for the domain: every row above, with the host named. */
 export function projectAiCatalog(fafa: FafaDoc, cards: PackCard[], opts: { now?: string; listFafa?: boolean } = {}): Record<string, unknown> {
-  const agent = fafa.agent ?? {};
-  const hostName = clean(agent.vendor) || clean(agent.displayName) || clean(agent.name);
+  const host = catalogHost(fafa);
   return {
     specVersion: AI_CATALOG_SPEC_VERSION,
-    host: { displayName: hostName, identifier: fafaDomain(fafa) },
+    ...(host ? { host } : {}),
     entries: catalogRows(fafa, cards, opts),
   };
 }
 
-/** The ARD manifest: the same rows, plus the search hints ARD reads (keywords, example requests). */
-export function projectArd(fafa: FafaDoc, cards: PackCard[], opts: { now?: string; listFafa?: boolean } = {}): Record<string, unknown> {
+/**
+ * The search hints ARD reads, from the `.fafa`: `metadata.cards.keywords` and
+ * `metadata.cards.examples`. An entry with no `representativeQueries` is, in
+ * the conformance CLI's own words, "a valid catalog entry but not a
+ * discoverable ARD entry" — the semantic index is built from that term.
+ */
+export function ardHints(fafa: FafaDoc): { tags?: string[]; representativeQueries?: string[] } {
   const extras = fafa.metadata?.cards ?? {};
   const tags = list(extras.keywords);
   const queries = list(extras.examples);
   return {
-    entries: catalogRows(fafa, cards, opts).map((r) => ({
-      ...r,
-      ...(tags.length ? { tags } : {}),
-      ...(queries.length ? { representativeQueries: queries } : {}),
-    })),
+    ...(tags.length ? { tags } : {}),
+    ...(queries.length ? { representativeQueries: queries } : {}),
+  };
+}
+
+/** The ARD manifest: the catalog, plus the search hints ARD reads. ARD builds
+ *  on ai-catalog (spec §4), so the document is the same shape — the entries
+ *  carry more. */
+export function projectArd(fafa: FafaDoc, cards: PackCard[], opts: { now?: string; listFafa?: boolean } = {}): Record<string, unknown> {
+  const host = catalogHost(fafa);
+  const hints = ardHints(fafa);
+  return {
+    specVersion: AI_CATALOG_SPEC_VERSION,
+    ...(host ? { host } : {}),
+    entries: catalogRows(fafa, cards, opts).map((r) => ({ ...r, ...hints })),
   };
 }
 
