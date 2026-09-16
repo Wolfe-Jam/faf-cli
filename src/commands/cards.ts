@@ -183,6 +183,32 @@ export function cardsCommand(options: CardsCommandOptions = {}): void {
       return next.changed;
     }, 'its own rows');
   }
+  if (projected.ard) {
+    // ARD's own conformance CLI (v0.9.1): "A consumer MUST fetch
+    // /.well-known/ard.json. Consulting the predecessor
+    // /.well-known/ai-catalog.json is permitted (MAY) but not required."
+    // The spec prose still names ai-catalog.json (§4.1, §6.1), so a site
+    // serving both is served by writing both — same rows, ARD's carrying the
+    // hints its semantic index is built from.
+    const out = join(dir, '.well-known', 'ard.json');
+    const rows = projected.ard;
+    run(out, () => {
+      makeDirInside(dir, dirname(out));
+      const real = resolveInside(dir, out);
+      const text = present(out) ? readUtf8(real) : null;
+      const next = upsertCatalogText(text, rows, projected.catalogHost);
+      if (next.changed) {safeWriteFile(real, next.text, { root: dir, expect: text });}
+      return next.changed;
+    }, 'its own rows');
+    // A manifest with no representativeQueries is valid and unfindable:
+    // registries build their semantic index from that term. The spec asks for
+    // 2-5 (ARD v0.9 §Entry). Say so rather than write a card nobody can find.
+    if (!rows.some((r) => r.representativeQueries?.length)) {
+      console.error(
+        `${dim('note')} ${out}: no representativeQueries — registries build their search index from these, so the entries are a valid catalog but will not be found. Add 2-5 to the .fafa as metadata.cards.examples.`,
+      );
+    }
+  }
   if (projected.registry) {
     const inPath = join(dir, 'server.json');
     if (present(inPath)) {

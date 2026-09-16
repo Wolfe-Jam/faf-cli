@@ -5,6 +5,7 @@ import {
   assertSameBlock,
   buildA2ACard,
   generateA2ACard,
+  parseTargets,
   projectCards,
   upsertCatalog,
   upsertCatalogText,
@@ -301,6 +302,37 @@ describe('ENGINE: 🛡️ the catalog names its host — faf cards', () => {
       expect(row.identifier.startsWith('urn:air:weather.acme.example:')).toBe(true);
       expect(row.identifier).not.toContain(' ');
     }
+  });
+
+  // ARD builds on ai-catalog (ARD v0.9 §4): the same document, entries
+  // carrying the hints registries build their semantic index from. The
+  // conformance CLI is blunt about an entry without them — "a valid catalog
+  // entry but not a discoverable ARD entry".
+  test('the ard target is the catalog plus ARD\'s search hints, off the .fafa', () => {
+    const searchable: FafaDoc = {
+      ...fafa,
+      metadata: { cards: { keywords: ['faf', 'context'], examples: ['what is a .faf file', 'how do I score a repo'] } },
+    };
+    const p = projectCards({ faf, fafa: searchable, targets: ['catalog', 'ard'] });
+    // Same rows, same primary key — only the hints differ.
+    expect(p.ard!.map((e) => e.identifier)).toEqual(p.catalog!.map((e) => e.identifier));
+    expect(p.catalog!.every((e) => e.representativeQueries === undefined)).toBe(true);
+    for (const row of p.ard!) {
+      expect(row.tags).toEqual(['faf', 'context']);
+      expect(row.representativeQueries).toEqual(['what is a .faf file', 'how do I score a repo']);
+    }
+  });
+
+  test('a .fafa with no examples still writes a valid manifest — one without search hints', () => {
+    const p = projectCards({ faf, fafa, targets: ['ard'] });
+    expect(p.ard!.length).toBeGreaterThan(0);
+    expect(p.ard!.every((e) => e.representativeQueries === undefined)).toBe(true);
+  });
+
+  test('ard is a target of its own, and needs a .fafa like the rest', () => {
+    expect(parseTargets('a2a,catalog,ard')).toEqual(['a2a', 'catalog', 'ard']);
+    expect(() => parseTargets('ARD,nope')).toThrow(/unknown card target: nope/);
+    expect(() => projectCards({ faf, targets: ['ard'] })).toThrow(/require a \.fafa/);
   });
 
   test('no domain, no invented identifier: faf refuses rather than publish urn:air:local', () => {

@@ -533,17 +533,32 @@ export function projectAiCatalog(fafa: FafaDoc, cards: PackCard[], opts: { now?:
   };
 }
 
-/** The ARD manifest: the same rows, plus the search hints ARD reads (keywords, example requests). */
-export function projectArd(fafa: FafaDoc, cards: PackCard[], opts: { now?: string; listFafa?: boolean } = {}): Record<string, unknown> {
+/**
+ * The search hints ARD reads, from the `.fafa`: `metadata.cards.keywords` and
+ * `metadata.cards.examples`. An entry with no `representativeQueries` is, in
+ * the conformance CLI's own words, "a valid catalog entry but not a
+ * discoverable ARD entry" — the semantic index is built from that term.
+ */
+export function ardHints(fafa: FafaDoc): { tags?: string[]; representativeQueries?: string[] } {
   const extras = fafa.metadata?.cards ?? {};
   const tags = list(extras.keywords);
   const queries = list(extras.examples);
   return {
-    entries: catalogRows(fafa, cards, opts).map((r) => ({
-      ...r,
-      ...(tags.length ? { tags } : {}),
-      ...(queries.length ? { representativeQueries: queries } : {}),
-    })),
+    ...(tags.length ? { tags } : {}),
+    ...(queries.length ? { representativeQueries: queries } : {}),
+  };
+}
+
+/** The ARD manifest: the catalog, plus the search hints ARD reads. ARD builds
+ *  on ai-catalog (spec §4), so the document is the same shape — the entries
+ *  carry more. */
+export function projectArd(fafa: FafaDoc, cards: PackCard[], opts: { now?: string; listFafa?: boolean } = {}): Record<string, unknown> {
+  const host = catalogHost(fafa);
+  const hints = ardHints(fafa);
+  return {
+    specVersion: AI_CATALOG_SPEC_VERSION,
+    ...(host ? { host } : {}),
+    entries: catalogRows(fafa, cards, opts).map((r) => ({ ...r, ...hints })),
   };
 }
 

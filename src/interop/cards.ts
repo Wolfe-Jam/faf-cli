@@ -10,6 +10,7 @@ import {
   A2A_PROTOCOL_VERSION,
   FAF_MEDIA_TYPES,
   a2aDoors,
+  ardHints,
   catalogHost,
   fafaDomain,
   fafaHandle,
@@ -42,8 +43,8 @@ export {
 } from './pack.js';
 export type { FafaAgent, FafaCapability, FafaEndpoint, FafaDoc, ProjectedA2A } from './pack.js';
 
-export type CardTarget = 'a2a' | 'mcp' | 'registry' | 'catalog';
-export const CARD_TARGETS: CardTarget[] = ['a2a', 'mcp', 'registry', 'catalog'];
+export type CardTarget = 'a2a' | 'mcp' | 'registry' | 'catalog' | 'ard';
+export const CARD_TARGETS: CardTarget[] = ['a2a', 'mcp', 'registry', 'catalog', 'ard'];
 
 export interface ProjectCardsOptions extends ServerCardOptions {
   /** Public URL of the emitted A2A card (catalog row). */
@@ -59,6 +60,9 @@ export interface CatalogEntry {
   description?: string;
   url: string;
   updatedAt?: string;
+  /** ARD's search hints — on the ARD manifest's rows only. */
+  tags?: string[];
+  representativeQueries?: string[];
 }
 
 export interface AiCatalog {
@@ -78,6 +82,8 @@ export interface ProjectedCards {
     _meta: Record<string, unknown>;
   };
   catalog?: CatalogEntry[];
+  /** The same rows, carrying ARD's search hints — the ARD manifest. */
+  ard?: CatalogEntry[];
   /** Who publishes the catalog — written only into a catalog that names
    *  nobody yet. An existing `host` is the site's, and is never touched. */
   catalogHost?: CatalogHost;
@@ -343,10 +349,10 @@ export function projectCards(input: {
     };
   }
 
-  if (wanted.has('a2a') || wanted.has('catalog')) {
+  if (wanted.has('a2a') || wanted.has('catalog') || wanted.has('ard')) {
     if (!input.fafa) {
-      if (input.targets?.includes('a2a') || input.targets?.includes('catalog')) {
-        throw new Error('A2A/catalog require a .fafa (agent.fafa). Will not invent an agent.');
+      if (input.targets?.some((t) => t === 'a2a' || t === 'catalog' || t === 'ard')) {
+        throw new Error('A2A/catalog/ARD require a .fafa (agent.fafa). Will not invent an agent.');
       }
     }
   }
@@ -363,8 +369,15 @@ export function projectCards(input: {
     }
   }
 
-  if (wanted.has('catalog') && input.fafa) {
-    out.catalog = catalogEntriesFor(input.fafa, input.faf, opts);
+  if ((wanted.has('catalog') || wanted.has('ard')) && input.fafa) {
+    const rows = catalogEntriesFor(input.fafa, input.faf, opts);
+    if (wanted.has('catalog')) {out.catalog = rows;}
+    if (wanted.has('ard')) {
+      // ARD builds on ai-catalog: the same rows, carrying the hints its
+      // semantic index is built from.
+      const hints = ardHints(input.fafa);
+      out.ard = rows.map((r) => ({ ...r, ...hints }));
+    }
     const host = catalogHost(input.fafa);
     if (host) {out.catalogHost = host;}
   }
