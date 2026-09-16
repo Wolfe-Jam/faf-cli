@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v7.16.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v7.16.1 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -7,6 +7,14 @@ All notable changes to faf-cli will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [7.16.1] - 2026-09-16
+
+**Patch: `faf` and `faf-cli` ship the same version again, and the published counts match their source.**
+
+### Changed
+- **`faf` is back in step with `faf-cli`.** The two names are one package; 7.16.0 went out as `faf-cli` only, leaving `faf` a minor behind — so `npx faf` / `bunx faf` served a build whose catalog rows carried identifiers ARD refuses. Both names ship 7.16.1.
+- **Counts come from their source.** The README download figure is the one faf.one/downloads publishes, and the TAF badge carries the count from this release's green run.
 
 ## [7.16.0] - 2026-09-16 — The Discoverable Edition
 

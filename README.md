@@ -25,7 +25,7 @@ detected from your real stack, scored, and versioned with your code. No drift. N
 
 <br>
 
-**133k+ downloads** · see [faf.one/downloads](https://faf.one/downloads) for latest stats · **IANA-registered · Anthropic-merged (#2759)**
+**144.4k downloads** · see [faf.one/downloads](https://faf.one/downloads) for latest stats · **IANA-registered · Anthropic-merged (#2759)**
 
 ⭐ Bookmarks it for you, helps other devs find it too.
 
@@ -142,6 +142,7 @@ faf memory show
 
 **Recent sprint**
 
+- 🧭 [7.16.1](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.16.1) `faf` back in step with `faf-cli`
 - 🧭 [7.16.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.16.0) The Discoverable Edition
 - 🎴 [7.15.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.15.0) The Pack Edition
 - 🛂 [7.14.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.14.0) The Passport Edition
