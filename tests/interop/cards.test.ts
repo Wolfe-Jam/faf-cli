@@ -8,8 +8,10 @@ import {
   projectCards,
   upsertCatalog,
   upsertCatalogText,
+  type CatalogEntry,
   type FafaDoc,
 } from '../../src/interop/cards.js';
+import { catalogHost, projectAiCatalog } from '../../src/interop/pack.js';
 import { fafContextBlock, REGISTRY_PUBLISHER_KEY } from '../../src/interop/servercard.js';
 
 const faf: FafData = {
@@ -267,10 +269,43 @@ describe('ENGINE: 🛡️ the catalog names its host — faf cards', () => {
   });
 
   test('a .fafa that names nobody gets no host — minimal and valid beats discoverable and invalid', () => {
-    const anonymous: FafaDoc = { ...fafa, agent: { homepage: 'https://faf.one/agent' } };
-    const p = projectCards({ faf, fafa: anonymous, targets: ['catalog'] });
-    expect(p.catalogHost).toBeUndefined();
-    expect(JSON.parse(upsertCatalogText(null, p.catalog!, p.catalogHost).text).host).toBeUndefined();
+    // ai-catalog-cli v0.2.2 on an empty displayName: "host.displayName is
+    // required and must not be empty" — invalid, not merely minimal.
+    expect(catalogHost({ agent: { homepage: 'https://faf.one/agent' } } as FafaDoc)).toBeUndefined();
+    expect(catalogHost({ agent: {} } as FafaDoc)).toBeUndefined();
+    // Named, but saying nowhere it lives: the name alone still earns a host.
+    expect(catalogHost({ agent: { name: 'solo' } } as FafaDoc)).toEqual({ displayName: 'solo' });
+  });
+
+  // The defect this PR really closes: the CLI keyed its rows off the homepage
+  // host and the raw display name, while the pack projector keyed them off the
+  // domain the .fafa declares and the handle. Same .fafa, two primary keys —
+  // and with the host now named, the file contradicted itself.
+  test('the CLI keys its rows exactly as the pack projector does — one catalog, one primary key', () => {
+    const declared: FafaDoc = {
+      ...fafa,
+      agent: {
+        ...fafa.agent,
+        name: 'Weather Bot', // a display string: spaces a URN may not carry
+        id: 'urn:air:weather.acme.example:agent:weather-bot', // the declared publisher
+        homepage: 'https://acme.example/weather', // a different host entirely
+      },
+    };
+    const cli = projectCards({ faf, fafa: declared, targets: ['catalog'] });
+    const pack = projectAiCatalog(declared, ['a2a'], { listFafa: true }) as { entries: CatalogEntry[] };
+    expect(cli.catalog!.map((e) => e.identifier)).toEqual(pack.entries.map((e) => e.identifier));
+    expect(cli.catalog!.map((e) => e.url)).toEqual(pack.entries.map((e) => e.url));
+    // The publisher in every row is the one the host names.
+    expect(cli.catalogHost!.identifier).toBe('weather.acme.example');
+    for (const row of cli.catalog!) {
+      expect(row.identifier.startsWith('urn:air:weather.acme.example:')).toBe(true);
+      expect(row.identifier).not.toContain(' ');
+    }
+  });
+
+  test('no domain, no invented identifier: faf refuses rather than publish urn:air:local', () => {
+    const nowhere: FafaDoc = { ...fafa, agent: { name: 'solo' } };
+    expect(() => projectCards({ faf, fafa: nowhere, targets: ['catalog'] })).toThrow(/names no domain/);
   });
 
   test('upsertCatalog (objects) adds a missing host and keeps an existing one', () => {

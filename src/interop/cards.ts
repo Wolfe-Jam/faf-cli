@@ -11,6 +11,8 @@ import {
   FAF_MEDIA_TYPES,
   a2aDoors,
   catalogHost,
+  fafaDomain,
+  fafaHandle,
   projectA2ACard,
   type CatalogHost,
   type FafaDoc,
@@ -129,9 +131,20 @@ function fafaExtensionParams(
     generated: block.generated,
   };
   if (agent.id) {params.agentId = agent.id;}
-  const passport = homepageWellKnown(fafa, 'fafa');
+  const passport = fafaPassportUrl(fafa);
   if (passport) {params.passport = passport;}
   return params;
+}
+
+/** Where the `.fafa` itself is served — the same door the catalog's `agent`
+ *  row points at, so a card and a catalog never disagree about it. Left off
+ *  the card, rather than guessed, when the `.fafa` names no domain. */
+function fafaPassportUrl(fafa: FafaDoc): string | undefined {
+  try {
+    return `https://${fafaDomain(fafa)}/.well-known/fafa`;
+  } catch {
+    return undefined;
+  }
 }
 
 /** Build the A2A Agent Card (JSON) from a .fafa + .faf: the core card
@@ -168,43 +181,37 @@ export const generateA2ACard = deprecate(
   'FAF0003',
 );
 
-/** The namespace half of a row's `urn:air:<host>:…` identifier — not the
- *  catalog's `host` object ({@link catalogHost}), which names the publisher. */
-function urnHost(fafa: FafaDoc): string {
-  const homepage = fafa.agent?.homepage;
-  if (!homepage) {return 'local';}
-  try {
-    return new URL(homepage).hostname.replace(/^www\./, '');
-  } catch {
-    return 'local';
-  }
-}
-
+/** Where the A2A card is served: what the caller passed (`--a2a-url`), else
+ *  the domain's own well-known door. */
 function catalogA2AUrl(fafa: FafaDoc, opts: ProjectCardsOptions): string {
-  if (opts.a2aCardUrl) {return opts.a2aCardUrl;}
-  const homepage = fafa.agent?.homepage;
-  if (homepage) {
-    try {
-      return new URL('/.well-known/agent-card.json', homepage).href;
-    } catch { /* fall through */ }
-  }
-  return '/.well-known/agent-card.json';
+  return opts.a2aCardUrl ?? `https://${fafaDomain(fafa)}/.well-known/agent-card.json`;
 }
 
+/**
+ * The catalog rows for this agent, keyed exactly as the pack projector keys
+ * them: `urn:air:{publisher}:{namespace}:{name}`, where the publisher is the
+ * domain the `.fafa` *declares* (`agent.id`'s urn:air, `metadata.cards.domain`,
+ * else the homepage host) and the name is the handle — never the display name,
+ * which is free text and may carry spaces a URN may not.
+ *
+ * Throws, rather than inventing either half, when the `.fafa` names no domain:
+ * an identifier is a catalog's primary key, and `urn:air:local:…` published to
+ * the world is worse than a refusal a line of YAML fixes.
+ */
 export function catalogEntriesFor(
   fafa: FafaDoc,
   faf: FafData,
   opts: ProjectCardsOptions = {},
 ): CatalogEntry[] {
-  const host = urnHost(fafa);
+  const domain = fafaDomain(fafa);
+  const handle = fafaHandle(fafa);
   const agent = fafa.agent ?? {};
-  const slug = String(agent.name ?? 'agent');
   const now = opts.now ?? (faf.generated as string | undefined) ?? new Date().toISOString();
   const entries: CatalogEntry[] = [];
 
   if (a2aDoors(fafa, opts).length > 0) {
     entries.push({
-      identifier: `urn:air:${host}:a2a:${slug}`,
+      identifier: `urn:air:${domain}:a2a:${handle}`,
       displayName: String(agent.displayName ?? agent.name ?? 'A2A Agent Card'),
       type: 'application/a2a-agent-card+json',
       description: 'A2A v1.0 Agent Card. Projected from .fafa.',
@@ -213,29 +220,16 @@ export function catalogEntriesFor(
     });
   }
 
-  const fafaUrl = homepageWellKnown(fafa, 'fafa');
-  if (fafaUrl) {
-    entries.push({
-      identifier: `urn:air:${host}:agent:${slug}`,
-      displayName: String(agent.displayName ?? agent.name ?? '.fafa'),
-      type: 'application/vnd.fafa+yaml',
-      description: 'FAF agent passport (.fafa).',
-      url: fafaUrl,
-      updatedAt: now,
-    });
-  }
+  entries.push({
+    identifier: `urn:air:${domain}:agent:${handle}`,
+    displayName: String(agent.displayName ?? agent.name ?? '.fafa'),
+    type: 'application/vnd.fafa+yaml',
+    description: 'FAF agent passport (.fafa).',
+    url: `https://${domain}/.well-known/fafa`,
+    updatedAt: now,
+  });
 
   return entries;
-}
-
-function homepageWellKnown(fafa: FafaDoc, name: string): string | undefined {
-  const homepage = fafa.agent?.homepage;
-  if (!homepage) {return undefined;}
-  try {
-    return new URL(`/.well-known/${name}`, homepage).href;
-  } catch {
-    return undefined;
-  }
 }
 
 /** The row in `entries` that is faf's own row `row`: the one whose

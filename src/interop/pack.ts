@@ -364,6 +364,13 @@ export function fafaDomain(fafa: FafaDoc): string {
   }
 }
 
+/** The stable short name a card is filed under: `agent.name`, lowercased and
+ *  reduced to the characters an identifier may carry. The `{name}` of
+ *  `urn:air:{publisher}:{namespace}:{name}` — never a display string. */
+export function fafaHandle(fafa: FafaDoc): string {
+  return handleOf(fafa);
+}
+
 function handleOf(fafa: FafaDoc): string {
   const h = clean(fafa.agent?.name).toLowerCase().replace(/[^a-z0-9._-]/g, '-').replace(/^-+|-+$/g, '');
   if (!h) {throw new Error('The .fafa needs agent.name (the short name).');}
