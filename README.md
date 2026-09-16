@@ -132,17 +132,17 @@ faf memory etch "a durable fact" --id my-fact
 faf memory show
 ```
 
-### What's New in v7.15.0 — The Pack Edition
+### What's New in v7.16.0 — The Discoverable Edition
 
-**Answer a few questions about an agent or MCP server and get every card it needs. faf-cli writes the `.fafa` from the answers and projects it onto the A2A Agent Card, the MCP Server Card, the MCP Registry `server.json`, an AI Catalog and an ARD manifest, in Node or in a browser.**
+**A card nobody can find is not a card. The catalog `faf cards` writes now names who publishes it, keys every row the way the specs say to, and can be written as the ARD manifest agent search engines read.**
 
-- **The card pack.** `answersToFafa` writes a `.fafa` from a few answers: name, short name, domain, description, version, endpoints and skills. `buildPack` / `projectPack` project it onto the A2A Agent Card, the MCP Server Card, the registry `server.json`, an AI Catalog and an ARD manifest. Facts only some cards carry (repository, icon, keywords, example requests, packages) live in the `.fafa` under `metadata.cards`, so the file stays the one source.
-- **Neutral by default.** A pack card carries no extension and no FAF media type unless the caller passes one. The `.fafa` joins the catalog only with `listFafa`.
-- **`faf-cli/pack`**: the pack as one browser module (`dist/pack.js`, no Node built-ins, types included). In Node, `import { buildPack } from 'faf-cli'` works too.
-- The A2A card core moved into the pack as `projectA2ACard`. `buildA2ACard` and `faf cards` keep their signature and output: FAF's own A2A card is unchanged.
+- **`faf cards --target ard`** writes `.well-known/ard.json`: the catalog rows carrying the search hints ARD reads from the `.fafa` — `metadata.cards.keywords` as `tags`, `metadata.cards.examples` as `representativeQueries`. A manifest with no `representativeQueries` is valid and unfindable, so `faf cards` says so and names the key to fill in.
+- **The catalog names its host**, so it reads as AI Catalog Level 2 "discoverable" rather than Level 1 "minimal". On a catalog you share, `host` is the one key faf adds, and only when the catalog names none.
+- **One primary key.** Catalog rows are keyed off the domain the `.fafa` declares and the handle — never the homepage host and the raw display name, which could put a space inside a URN and fail ARD conformance. A `.fafa` that names no domain is refused rather than published as `urn:air:local:…`.
 
 **Recent sprint**
 
+- 🧭 [7.16.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.16.0) The Discoverable Edition
 - 🎴 [7.15.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.15.0) The Pack Edition
 - 🛂 [7.14.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.14.0) The Passport Edition
 - 🛡️ [7.13.1](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.13.1) security: detection reads stay inside the project

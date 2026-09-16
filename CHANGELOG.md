@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v7.15.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v7.16.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -7,6 +7,18 @@ All notable changes to faf-cli will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [7.16.0] - 2026-09-16 — The Discoverable Edition
+
+**A card nobody can find is not a card. The catalog `faf cards` writes now names who publishes it, keys every row the way the specs say to, and can be written as the ARD manifest agent search engines read.**
+
+### Added
+- **`faf cards --target ard`** writes `.well-known/ard.json`: the catalog rows carrying the search hints ARD reads from the `.fafa` — `metadata.cards.keywords` as `tags`, `metadata.cards.examples` as `representativeQueries`. A manifest with no `representativeQueries` is valid and unfindable, since registries build their semantic index from that term, so `faf cards` says so in one line and names the key to fill in. ARD v0.9 asks for 2–5.
+- **The catalog names its host.** `faf cards --target catalog` emits the `host` object, so the catalog reads as AI Catalog Level 2 "discoverable" rather than Level 1 "minimal". `host.displayName` is what earns the level; an empty one is invalid rather than minimal, so a `.fafa` that names nobody gets no host at all. On a catalog you share, `host` is the one key faf adds, and only when the catalog names none — a host already there is yours and is left byte for byte.
+
+### Fixed
+- **One primary key.** `faf cards` keyed catalog rows off the homepage host and the raw `agent.name`; the pack projector keyed them off the domain the `.fafa` declares (`agent.id`'s `urn:air`, `metadata.cards.domain`, else the homepage) and the handle. The same `.fafa` produced two different identifiers, and the raw name could put a space inside a URN — which fails ARD conformance outright ("does not match RFC 8141 URN pattern"), though the AI Catalog validator accepts it. Both paths now derive one identifier. **Breaking for a published catalog whose `.fafa` declares a domain other than its homepage host, or whose `agent.name` is not already a handle**: those rows change identifier, and an identifier is a catalog's primary key.
+- A `.fafa` that names no domain is refused in one line rather than published as `urn:air:local:…` — the same stance as "will not invent a door". The A2A card's `passport` URL comes off the same domain, so a card and a catalog never disagree about where the `.fafa` lives.
 
 ## [7.15.0] - 2026-09-15 — The Pack Edition
 
