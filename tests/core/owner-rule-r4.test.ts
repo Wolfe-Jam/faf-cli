@@ -277,8 +277,11 @@ describe('BRAKE: faf cards --target catalog updates only a row whose identifier 
     writeFileSync(f, before);
     expect(run(d, ['cards', '--target', 'catalog']).status).toBe(0);
     const after = read(f);
-    const upToPartner = before.slice(0, before.lastIndexOf('}', before.lastIndexOf(']')) + 1);
-    expect(after.startsWith(upToPartner)).toBe(true);
+    // The partner's row, byte for byte. The one key faf adds to a catalog it
+    // does not own is `host` — and only because this one names none.
+    const partnerText = before.slice(before.indexOf('{', before.indexOf('"entries"')), before.lastIndexOf('}', before.lastIndexOf(']')) + 1);
+    expect(after).toContain(partnerText);
+    expect(after.startsWith('{\n  "specVersion": "1.0",\n  "host": {\n    "displayName": "Example",\n    "identifier": "example.com"\n  },\n')).toBe(true);
     const cat = JSON.parse(after);
     expect(cat.entries[0]).toEqual(partner);
     expect(cat.entries.map((e: { identifier: string }) => e.identifier)).toEqual([partner.identifier, 'urn:air:example.com:a2a:demo-agent', 'urn:air:example.com:agent:demo-agent']);
@@ -290,7 +293,9 @@ describe('BRAKE: faf cards --target catalog updates only a row whose identifier 
     const again = read(f);
     expect(again).toContain('"displayName": "HAND NAME", "tags": ["HAND"]');
     expect(again).toContain('"url": "https://example.com/card.json"');
-    expect(again.startsWith(upToPartner)).toBe(true);
+    expect(again).toContain(partnerText);
+    // The host is written once: the second run finds one and leaves it.
+    expect(again.match(/"host":/g)).toHaveLength(1);
 
     // A catalog faf cannot edit row by row is refused in one line, byte for byte.
     const odd = '{\n  "specVersion": "1.0",\n  "entries": {"HAND": "not a list"}\n}\n';

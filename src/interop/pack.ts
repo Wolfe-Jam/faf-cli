@@ -488,13 +488,40 @@ export function catalogRows(fafa: FafaDoc, cards: PackCard[], opts: { now?: stri
   return rows;
 }
 
+/** Who publishes a catalog: AI Catalog's `host` object. */
+export interface CatalogHost {
+  displayName: string;
+  identifier?: string;
+}
+
+/**
+ * The catalog's `host` — who publishes these entries. Naming one is what
+ * lifts a catalog from Level 1 "minimal" to Level 2 "discoverable", and
+ * `displayName` is the field that does it: the validator takes an empty one
+ * as *invalid*, not as minimal. So a `.fafa` that names nobody gets no host
+ * at all — a minimal catalog that validates beats a discoverable one that
+ * does not. `identifier` rides along whenever the `.fafa` says where it
+ * lives, and is left off when it does not.
+ */
+export function catalogHost(fafa: FafaDoc): CatalogHost | undefined {
+  const agent = fafa.agent ?? {};
+  const displayName = clean(agent.vendor) || clean(agent.displayName) || clean(agent.name);
+  if (!displayName) {return undefined;}
+  let identifier: string | undefined;
+  try {
+    identifier = fafaDomain(fafa);
+  } catch {
+    identifier = undefined;
+  }
+  return { displayName, ...(identifier ? { identifier } : {}) };
+}
+
 /** The AI Catalog for the domain: every row above, with the host named. */
 export function projectAiCatalog(fafa: FafaDoc, cards: PackCard[], opts: { now?: string; listFafa?: boolean } = {}): Record<string, unknown> {
-  const agent = fafa.agent ?? {};
-  const hostName = clean(agent.vendor) || clean(agent.displayName) || clean(agent.name);
+  const host = catalogHost(fafa);
   return {
     specVersion: AI_CATALOG_SPEC_VERSION,
-    host: { displayName: hostName, identifier: fafaDomain(fafa) },
+    ...(host ? { host } : {}),
     entries: catalogRows(fafa, cards, opts),
   };
 }

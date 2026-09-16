@@ -196,9 +196,12 @@ describe('BRAKE: the commands refuse in one line and take --force (show, export,
     writeFileSync(join(d, '.well-known', 'ai-catalog.json'), hand);
     expect(run(d, ['cards', '--target', 'catalog']).status).toBe(0);
     const after = readFileSync(join(d, '.well-known', 'ai-catalog.json'), 'utf-8');
-    // The hand text up to its last row is kept byte for byte; faf's rows follow it.
-    const lastRow = hand.indexOf('}', hand.indexOf('"url"')) + 1;
-    expect(after.startsWith(hand.slice(0, lastRow))).toBe(true);
+    // The hand row is kept byte for byte and faf's rows follow it. The one key
+    // faf adds is `host` (this catalog names none) — laid out in the file's own
+    // four-space indent, not faf's.
+    const handRow = hand.slice(hand.indexOf('{', hand.indexOf('"entries"')), hand.indexOf('}', hand.indexOf('"url"')) + 1);
+    expect(after).toContain(handRow);
+    expect(after).toContain('\n    "host": {\n        "displayName": "Me",\n        "identifier": "example.com"\n    },\n');
     expect(after.endsWith('\n    ]\n}\n')).toBe(true);
     const cat = JSON.parse(after);
     expect(cat.entries[0]).toEqual({ identifier: 'urn:x:mine', type: 'text/html', url: 'https://example.com/HAND' }); // the user's row kept

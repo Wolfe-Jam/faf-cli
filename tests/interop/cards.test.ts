@@ -7,6 +7,7 @@ import {
   generateA2ACard,
   projectCards,
   upsertCatalog,
+  upsertCatalogText,
   type FafaDoc,
 } from '../../src/interop/cards.js';
 import { fafContextBlock, REGISTRY_PUBLISHER_KEY } from '../../src/interop/servercard.js';
@@ -198,5 +199,85 @@ describe('ENGINE: 🛡️ one projector — faf cards', () => {
   test('generateA2ACard is a deprecated alias for buildA2ACard', () => {
     const opts = { now: '2026-08-17T00:00:00.000Z' };
     expect(generateA2ACard(fafa, faf, opts)).toEqual(buildA2ACard(fafa, faf, opts));
+  });
+});
+
+// AI Catalog reads a catalog at Level 1 "minimal" until it names who publishes
+// it; a `host` with a non-empty displayName is what makes it Level 2
+// "discoverable". `faf cards --target catalog` wrote neither, so the CLI's
+// catalog validated a level below the one the pack API's projectAiCatalog
+// produced from the same .fafa. One projector, one host.
+describe('ENGINE: 🛡️ the catalog names its host — faf cards', () => {
+  const rows = () => projectCards({ faf, fafa, targets: ['catalog'] });
+
+  test('projectCards hands the writer a host: displayName from the .fafa, identifier from its domain', () => {
+    expect(rows().catalogHost).toEqual({ displayName: 'WolfeJAM', identifier: 'faf.one' });
+  });
+
+  test('a catalog faf writes from scratch names the host, straight after specVersion', () => {
+    const p = rows();
+    const { text } = upsertCatalogText(null, p.catalog!, p.catalogHost);
+    expect(Object.keys(JSON.parse(text))).toEqual(['specVersion', 'host', 'entries']);
+    expect(JSON.parse(text).host).toEqual({ displayName: 'WolfeJAM', identifier: 'faf.one' });
+  });
+
+  test('an existing catalog that names no host gets one — every other byte untouched', () => {
+    const before = [
+      '{',
+      '  "specVersion": "1.0",',
+      '  "entries": [',
+      '    {',
+      '      "identifier": "urn:air:faf.one:context:zeph",',
+      '      "type": "application/vnd.faf+yaml",',
+      '      "url": "https://example.com/zeph.faf"',
+      '    }',
+      '  ]',
+      '}',
+      '',
+    ].join('\n');
+    const p = rows();
+    const { text, changed } = upsertCatalogText(before, p.catalog!, p.catalogHost);
+    expect(changed).toBe(true);
+    expect(text).toContain('  "host": {\n    "displayName": "WolfeJAM",\n    "identifier": "faf.one"\n  },\n');
+    expect(Object.keys(JSON.parse(text))).toEqual(['specVersion', 'host', 'entries']);
+    // Their row, byte for byte, still there.
+    expect(text).toContain('      "identifier": "urn:air:faf.one:context:zeph",');
+    expect(JSON.parse(text).entries[0]).toEqual(JSON.parse(before).entries[0]);
+  });
+
+  test("a host the catalog already names is the site's own — never overwritten", () => {
+    const before = `{
+  "specVersion": "1.0",
+  "host": { "displayName": "Someone Else", "identifier": "elsewhere.example", "tagline": "theirs" },
+  "entries": []
+}
+`;
+    const p = rows();
+    const { text } = upsertCatalogText(before, p.catalog!, p.catalogHost);
+    expect(text).toContain('"host": { "displayName": "Someone Else", "identifier": "elsewhere.example", "tagline": "theirs" },');
+    expect(JSON.parse(text).host.displayName).toBe('Someone Else');
+  });
+
+  test('a second run over faf\'s own catalog changes nothing', () => {
+    const p = rows();
+    const first = upsertCatalogText(null, p.catalog!, p.catalogHost);
+    const again = upsertCatalogText(first.text, p.catalog!, p.catalogHost);
+    expect(again.changed).toBe(false);
+    expect(again.text).toBe(first.text);
+  });
+
+  test('a .fafa that names nobody gets no host — minimal and valid beats discoverable and invalid', () => {
+    const anonymous: FafaDoc = { ...fafa, agent: { homepage: 'https://faf.one/agent' } };
+    const p = projectCards({ faf, fafa: anonymous, targets: ['catalog'] });
+    expect(p.catalogHost).toBeUndefined();
+    expect(JSON.parse(upsertCatalogText(null, p.catalog!, p.catalogHost).text).host).toBeUndefined();
+  });
+
+  test('upsertCatalog (objects) adds a missing host and keeps an existing one', () => {
+    const p = rows();
+    const added = upsertCatalog(undefined, p.catalog!, p.catalogHost);
+    expect(Object.keys(added)).toEqual(['specVersion', 'host', 'entries']);
+    const theirs = { specVersion: '1.0', host: { displayName: 'Someone Else' }, entries: [] };
+    expect(upsertCatalog(theirs, p.catalog!, p.catalogHost).host).toEqual({ displayName: 'Someone Else' });
   });
 });

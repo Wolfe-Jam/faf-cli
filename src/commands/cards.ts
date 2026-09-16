@@ -168,14 +168,17 @@ export function cardsCommand(options: CardsCommandOptions = {}): void {
   if (projected.catalog) {
     // The catalog is shared: faf updates only its own rows (identifier
     // exactly faf's) and appends the rest, as a text edit — every other row
-    // and every other byte stays.
+    // and every other byte stays. The one key it may add is `host`, and only
+    // to a catalog that names none: the publisher a catalog needs to be
+    // discoverable rather than merely minimal. A host already there is the
+    // site's own and is never touched.
     const out = join(dir, '.well-known', 'ai-catalog.json');
     const rows = projected.catalog;
     run(out, () => {
       makeDirInside(dir, dirname(out));
       const real = resolveInside(dir, out);
       const text = present(out) ? readUtf8(real) : null;
-      const next = upsertCatalogText(text, rows);
+      const next = upsertCatalogText(text, rows, projected.catalogHost);
       if (next.changed) {safeWriteFile(real, next.text, { root: dir, expect: text });}
       return next.changed;
     }, 'its own rows');

@@ -5,12 +5,14 @@ import { parse } from 'yaml';
 import type { FafData } from '../core/types.js';
 import { makeDirInside, readUtf8, resolveInside } from '../core/safe-write.js';
 import { writeRendered, type RenderedResult } from '../core/render-hash.js';
-import { upsertJsonRows } from '../core/json-edit.js';
+import { editJsonText, upsertJsonRows } from '../core/json-edit.js';
 import {
   A2A_PROTOCOL_VERSION,
   FAF_MEDIA_TYPES,
   a2aDoors,
+  catalogHost,
   projectA2ACard,
+  type CatalogHost,
   type FafaDoc,
   type ProjectedA2A,
 } from './pack.js';
@@ -74,6 +76,9 @@ export interface ProjectedCards {
     _meta: Record<string, unknown>;
   };
   catalog?: CatalogEntry[];
+  /** Who publishes the catalog — written only into a catalog that names
+   *  nobody yet. An existing `host` is the site's, and is never touched. */
+  catalogHost?: CatalogHost;
 }
 
 export function readFafa(path: string): FafaDoc {
@@ -163,7 +168,9 @@ export const generateA2ACard = deprecate(
   'FAF0003',
 );
 
-function catalogHost(fafa: FafaDoc): string {
+/** The namespace half of a row's `urn:air:<host>:…` identifier — not the
+ *  catalog's `host` object ({@link catalogHost}), which names the publisher. */
+function urnHost(fafa: FafaDoc): string {
   const homepage = fafa.agent?.homepage;
   if (!homepage) {return 'local';}
   try {
@@ -189,7 +196,7 @@ export function catalogEntriesFor(
   faf: FafData,
   opts: ProjectCardsOptions = {},
 ): CatalogEntry[] {
-  const host = catalogHost(fafa);
+  const host = urnHost(fafa);
   const agent = fafa.agent ?? {};
   const slug = String(agent.name ?? 'agent');
   const now = opts.now ?? (faf.generated as string | undefined) ?? new Date().toISOString();
@@ -242,11 +249,23 @@ function catalogMatchIndex(entries: CatalogEntry[], row: CatalogEntry): number {
 /** Upsert projector entries into an existing catalog. Leaves every other row
  *  alone: a row is faf's only when its identifier is exactly faf's (never by
  *  type or URL). On match, only url / type / updatedAt move — host copy
- *  (title, tags) stays; any other faf row is appended. */
-export function upsertCatalog(existing: AiCatalog | undefined, incoming: CatalogEntry[]): AiCatalog {
-  const base: AiCatalog = existing
+ *  (title, tags) stays; any other faf row is appended. `host` names the
+ *  publisher on a catalog that names none — an existing one is the site's own
+ *  and stays as it is. */
+export function upsertCatalog(
+  existing: AiCatalog | undefined,
+  incoming: CatalogEntry[],
+  host?: CatalogHost,
+): AiCatalog {
+  const opened: AiCatalog = existing
     ? { ...existing, entries: [...(existing.entries ?? [])] }
     : { specVersion: '1.0', entries: [] };
+  // A host the catalog already names is the site's own — never overwritten.
+  // A missing one is added where the spec shows it: straight after specVersion.
+  const base: AiCatalog =
+    host && opened.host === undefined
+      ? (({ specVersion, ...rest }) => ({ specVersion, host: { ...host }, ...rest }))(opened)
+      : opened;
   for (const row of incoming) {
     const i = catalogMatchIndex(base.entries, row);
     if (i >= 0) {
@@ -271,18 +290,40 @@ const CATALOG_ROW_UPDATES = ['url', 'type', 'updatedAt'] as const;
  * (identifier exactly faf's) get their url / type / updatedAt values changed
  * in place, faf's other rows are appended after the last entry, and every
  * other byte — your rows, their order and layout, other keys — stays. With no
- * text (no catalog yet) a new catalog is returned. Throws a JsonEditError,
- * changing nothing, when the catalog cannot be edited that way (not a JSON
- * object, `entries` not an array, faf's row there twice, …).
+ * text (no catalog yet) a new catalog is returned. `host` names the publisher
+ * (AI Catalog Level 2 "discoverable") and is added, after `specVersion`, only
+ * to a catalog that names none: a `host` already in the file is the site's own
+ * and is left byte for byte. Throws a JsonEditError, changing nothing, when
+ * the catalog cannot be edited that way (not a JSON object, `entries` not an
+ * array, faf's row there twice, …).
  */
-export function upsertCatalogText(text: string | null, incoming: CatalogEntry[]): { text: string; changed: boolean } {
+export function upsertCatalogText(
+  text: string | null,
+  incoming: CatalogEntry[],
+  host?: CatalogHost,
+): { text: string; changed: boolean } {
   if (text === null) {
-    return { text: `${JSON.stringify({ specVersion: '1.0', entries: incoming }, null, 2)}\n`, changed: true };
+    const fresh = { specVersion: '1.0', ...(host ? { host } : {}), entries: incoming };
+    return { text: `${JSON.stringify(fresh, null, 2)}\n`, changed: true };
   }
-  return upsertJsonRows(text, 'entries', incoming as unknown as Record<string, unknown>[], {
+  const rows = upsertJsonRows(text, 'entries', incoming as unknown as Record<string, unknown>[], {
     id: 'identifier',
     update: CATALOG_ROW_UPDATES,
   });
+  if (!host || namesHost(rows.text)) {return rows;}
+  const named = editJsonText(rows.text, { host }, { '': { host: ['specVersion'] } });
+  return { text: named.text, changed: rows.changed || named.changed };
+}
+
+/** True when the catalog JSON already names a `host` — any value, including
+ *  null or one the spec would refuse. Whatever is there is the site's. */
+function namesHost(text: string): boolean {
+  try {
+    const doc = JSON.parse(text) as Record<string, unknown>;
+    return Object.prototype.hasOwnProperty.call(doc, 'host');
+  } catch {
+    return true; // Unparseable: add nothing.
+  }
 }
 
 export function projectCards(input: {
@@ -330,6 +371,8 @@ export function projectCards(input: {
 
   if (wanted.has('catalog') && input.fafa) {
     out.catalog = catalogEntriesFor(input.fafa, input.faf, opts);
+    const host = catalogHost(input.fafa);
+    if (host) {out.catalogHost = host;}
   }
 
   assertSameBlock(out);
