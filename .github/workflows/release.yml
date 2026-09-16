@@ -355,4 +355,4 @@ jobs:
         run: |
           echo "❌ FAF CLI ${{ needs.validate.outputs.version }} release failed!"
           echo "🔧 Check the workflow logs for details"
-          echo "🏎️ F1-inspired engineering demands perfection - we'll fix this!"
+          echo "🏎️ We'll fix this!"

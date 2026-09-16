@@ -107,7 +107,7 @@ const PERFORMANCE_TESTS: PerformanceTest[] = [
  * Main performance validation function
  */
 async function runPerformanceValidation(): Promise<void> {
-  console.log(`${FAF_COLORS.fafCyan('⚡ F1-Inspired Performance Validation')}`);
+  console.log(`${FAF_COLORS.fafCyan('⚡ Performance Validation')}`);
   console.log(`${FAF_COLORS.fafCyan('├─')} Championship engineering demands measurable speed`);
   console.log(`${FAF_COLORS.fafCyan('└─')} Validating real-world performance claims`);
   console.log();
@@ -364,7 +364,7 @@ function showChampionshipSummary(results: PerformanceResult[]): void {
   // Championship verdict
   if (score >= 90) {
     console.log(`${FAF_COLORS.fafGreen('🏆 CHAMPIONSHIP PERFORMANCE ACHIEVED!')}`);
-    console.log(`${FAF_COLORS.fafGreen('⚡ F1-inspired engineering delivers on promises!')}`);
+    console.log(`${FAF_COLORS.fafGreen('⚡ Performance targets met!')}`);
   } else if (score >= 70) {
     console.log(`${FAF_COLORS.fafOrange('🥈 SOLID PERFORMANCE - Minor optimizations needed')}`);
     console.log(`${FAF_COLORS.fafOrange('🔧 Some commands could use championship tuning')}`);
@@ -430,7 +430,7 @@ Examples:
 Available Tests:
 ${PERFORMANCE_TESTS.map(t => `  - ${t.name}: ${t.description} (target: ${t.target}ms)`).join('\n')}
 
-🏎️ F1-inspired engineering - Every millisecond matters!
+🏎️ Every millisecond matters!
 `);
 }
 

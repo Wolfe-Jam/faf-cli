@@ -13,7 +13,7 @@ Track `project.faf`, `.fafm`, `.fafa`, `.fafi`, and `.faf-dna`. `.faf-dna` is th
 
 ## Development Philosophy
 
-faf-cli follows F1-inspired engineering standards:
+faf-cli follows these engineering standards:
 
 - **Championship-grade quality** - Zero compromises on reliability
 - **Sub-50ms performance** - Every command must be fast

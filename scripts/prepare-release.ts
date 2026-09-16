@@ -36,7 +36,7 @@ interface ChangelogEntry {
  */
 async function prepareRelease(options: ReleaseOptions): Promise<void> {
   console.log(`${FAF_COLORS.fafCyan('🚀 FAF CLI Release Preparation')}`);
-  console.log(`${FAF_COLORS.fafCyan('├─')} F1-inspired championship engineering`);
+  console.log(`${FAF_COLORS.fafCyan('├─')} Championship engineering`);
   console.log(`${FAF_COLORS.fafCyan('└─')} Release type: ${FAF_COLORS.fafGreen(options.type)}`);
   console.log();
 
@@ -408,7 +408,7 @@ Examples:
   npm run release -- --dry-run      # Preview changes only
   npm run release -- --type prerelease --preid beta  # Beta release
 
-🏎️ F1-inspired engineering - Championship releases every time!
+🏎️ Championship releases every time!
 `);
 }
 

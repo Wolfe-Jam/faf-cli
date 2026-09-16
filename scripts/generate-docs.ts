@@ -287,7 +287,7 @@ FAF (Foundational AI-Context Format) transforms developer psychology from **hope
 ## Core Features
 
 - 🚀 **Universal AI Context** - Works with Claude, ChatGPT, Gemini
-- ⚡ **F1-Inspired Performance** - Championship speed (<40ms status)
+- ⚡ **Performance** - <40ms status
 - 🎯 **Trust-Driven Development** - Eliminate AI anxiety
 - 💎 **Technical Credit System** - Psychology revolution vs debt
 
