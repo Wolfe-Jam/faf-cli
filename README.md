@@ -200,6 +200,7 @@ tri-sync:  .faf  ──── 8ms ───→  CLAUDE.md + Claude Code's MEMORY
 The full manual lives at **[docs.faf.one](https://docs.faf.one)** — facts for devs, faf-cli first. One-page overview: **[faf-cli.vercel.app](https://faf-cli.vercel.app)**.
 
 - [Getting started](https://docs.faf.one/getting-started) — install · run · use
+- [Cards](https://docs.faf.one/cards) — one `.fafa` → A2A · Server Card · registry · AI Catalog · ARD
 - [Custom rules](https://docs.faf.one/custom-rules) — pin instructions your AI must follow
 
 For a specific agent: [Grok, xAI & Cursor 👀](docs/faf-cli-for-agents.md) · [Claude Code 👀](docs/faf-cli-for-claude.md) · [Bun 👀](docs/faf-cli-for-bun.md)
