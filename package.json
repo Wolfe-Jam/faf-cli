@@ -25,7 +25,8 @@
     "dist/**/*",
     "README.md",
     "LICENSE",
-    "project.faf"
+    "project.faf",
+    "vendor/faf-scoring-kernel/**"
   ],
   "scripts": {
     "dev": "bun src/cli.ts",
@@ -74,7 +75,7 @@
   },
   "dependencies": {
     "commander": "^14.0.3",
-    "faf-scoring-kernel": "^2.0.3",
+    "faf-scoring-kernel": "file:./vendor/faf-scoring-kernel",
     "open": "^11.0.0",
     "yaml": "^2.9.0"
   },

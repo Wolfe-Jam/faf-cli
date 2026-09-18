@@ -837,15 +837,15 @@ export function detectBuildTool(dir: string): string | null {
   return null;
 }
 
-/* ─── FAFB section helpers (top-level YAML keys read by compile_fafb) ───────
+/* ─── FAFb v2 chunk helpers (canonical YAML keys read by compile_fafb) ──────
  *
- * These detect content for the FAFB binary's TECH_STACK, KEY_FILES, and
- * COMMANDS sections. ARCHITECTURE and CONTEXT are deliberately left empty
+ * These detect content for the brick's `tech_stack`, `key_files`, and
+ * `commands` chunks. `architecture` and `context` are deliberately left empty
  * for user fill (architecture overlaps with human_context.how; context is
- * deliberately free-form additional signal beyond the 6Ws).
+ * free-form additional signal beyond the 6Ws).
  */
 
-/** Detect a list of important file paths for the KEY_FILES FAFB section.
+/** Detect a list of important file paths for the `key_files` chunk.
  *  Returns up to ~10 entries, ordered by canonical importance. */
 export function detectKeyFiles(dir: string): string[] {
   const candidates = [
@@ -870,7 +870,7 @@ export function detectKeyFiles(dir: string): string[] {
   return candidates.filter(f => repoExists(dir, f));
 }
 
-/** Detect build/test/lint commands for the COMMANDS FAFB section.
+/** Detect build/test/lint commands for the `commands` chunk.
  *  Returns a Record<string, string> mapping command name → shell command. */
 export function detectCommands(dir: string, pkg: PackageJson | null): Record<string, string> {
   const commands: Record<string, string> = {};
@@ -934,9 +934,8 @@ function usesPytest(dir: string): boolean {
   return ['pyproject.toml', 'setup.cfg', 'tox.ini'].some(f => /\bpytest\b/.test(readText(dir, f)));
 }
 
-/** Detect a tech-stack list for the TECH_STACK FAFB section.
- *  Combines language + frameworks + runtime into a flat list of strings
- *  (matching the canonical xai-faf-rust project.faf shape). */
+/** Detect a tech-stack list for the `tech_stack` chunk.
+ *  Combines language + frameworks + runtime into a flat list of strings. */
 export function detectTechStack(
   dir: string,
   pkg: PackageJson | null,

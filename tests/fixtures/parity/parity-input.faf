@@ -1,3 +1,21 @@
-faf_version: "1.0"
+faf_version: 2.5.0
 project:
-  name: parity-fixture
+  name: faf-rust
+  goal: One kernel, many shells
+  main_language: Rust
+stack:
+  build: cargo
+  cicd: GitHub Actions
+human_context:
+  who: Rust devs
+  what: FAF Rust workspace
+  why: Parity by construction
+tech_stack:
+  - Rust
+  - WASM
+key_files:
+  - Cargo.toml
+  - README.md
+commands:
+  build: cargo build --release
+  test: cargo test

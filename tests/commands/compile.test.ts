@@ -38,9 +38,9 @@ describe('TYRE: compile/decompile integration', () => {
   test('compile → scoreFafb returns metadata', () => {
     const yaml = `faf_version: 2.5.0\nproject:\n  name: meta-test\n`;
     const binary = kernel.compile(yaml);
-    const meta = kernel.scoreFafb(binary);
-    expect(meta.source).toBe('fafb_meta');
-    expect(meta.name).toBe('meta-test');
+    const scored = kernel.scoreFafb(binary);
+    expect(scored.score).toBeGreaterThanOrEqual(0);
+    expect(scored.slots['project.name']).toBe('populated');
   });
 
   test('compile → fafbInfo returns header info', () => {

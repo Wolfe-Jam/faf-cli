@@ -1,0 +1,23 @@
+{
+  "name": "faf-scoring-kernel",
+  "version": "2.1.0",
+  "description": "FAF Mk4 Scoring Kernel \u2014 WASM from faf-rust. Scores .faf (21/33) and compiles FAFb v2.",
+  "license": "MIT",
+  "author": "wolfejam <wolfejam@faf.one>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Wolfe-Jam/faf-rust"
+  },
+  "homepage": "https://faf.one",
+  "files": [
+    "faf_wasm_sdk_bg.wasm",
+    "faf_wasm_sdk.js",
+    "faf_wasm_sdk.d.ts",
+    "faf_wasm_sdk_bg.wasm.d.ts"
+  ],
+  "main": "faf_wasm_sdk.js",
+  "types": "faf_wasm_sdk.d.ts",
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

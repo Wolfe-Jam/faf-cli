@@ -8,6 +8,11 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Changed
+- **`faf compile` emits FAFb wire v2.** The WASM kernel is rebuilt from `faf-fafb` (the brick). Brake parity is the faf-fafb golden (`version_major = 2`), not the v1 86-byte META ROM.
+
 ## [7.16.1] - 2026-09-16
 
 **Patch: `faf` and `faf-cli` ship the same version again, and the published counts match their source.**

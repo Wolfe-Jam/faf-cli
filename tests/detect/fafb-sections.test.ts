@@ -3,10 +3,10 @@
  *
  * ENGINE: detectKeyFiles / detectCommands / detectTechStack populate the
  *         top-level YAML keys (tech_stack / key_files / commands) that the
- *         FAFB binary compiler reads. Without these, every cli .fafb is
- *         META-only.
- * BRAKE:  the headline v6.5.0 capability — cli-generated .faf now produces
- *         multi-section .fafb when compiled (verified via section_count > 1).
+ *         FAFb v2 compiler reads as named chunks. Without these, the brick
+ *         still compiles from whatever other canonical keys are present.
+ * BRAKE:  cli-generated .faf produces a multi-chunk .fafb when compiled
+ *         (verified via section_count > 1).
  *
  * Per v6.6.md + faf-auto-no-guess-no-slop: tech_stack /
  * key_files / commands auto-populate from observable signals;
@@ -180,7 +180,7 @@ describe('WJTTC ENGINE: detectTechStack', () => {
   });
 });
 
-describe('WJTTC BRAKE: cli compile produces MULTI-section .fafb (not META-only)', () => {
+describe('WJTTC BRAKE: cli compile produces a multi-chunk FAFb v2 brick', () => {
   test('cli detect+compile flow yields >= 4 sections when project has all signals', () => {
     // Set up a Node cli project with everything detection would catch
     const pkg = {
@@ -202,7 +202,7 @@ describe('WJTTC BRAKE: cli compile produces MULTI-section .fafb (not META-only)'
 
     const bytes = kernel.compile(yaml);
     const decompiled = kernel.decompile(bytes);
-    // META + at least one of tech_stack/key_files/commands = ≥ 2 sections
+    // project/faf_version plus at least one of tech_stack/key_files/commands
     expect(decompiled.sections.length).toBeGreaterThanOrEqual(2);
   });
 

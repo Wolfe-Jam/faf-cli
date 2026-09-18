@@ -161,9 +161,9 @@ export function detectStackWithFacts(dir: string): { data: FafData; facts: Recor
     project.framework = frameworkSubType;
   }
 
-  // FAFB top-level sections (read by faf-rust-sdk's compile_fafb).
-  // Without these, every cli-generated .fafb is META-only.
-  // Per v6.6.md + faf-auto-no-guess-no-slop:
+  // Canonical FAFb v2 chunks (read by faf-fafb compile).
+  // Without these keys the brick still compiles, but only from whatever
+  // other canonical fields are present. Per v6.6.md + faf-auto-no-guess-no-slop:
   // tech_stack/key_files/commands auto-populate from observable signals;
   // architecture/context stay empty (user fill — architecture overlaps with
   // human_context.how, context is free-form additional signal).

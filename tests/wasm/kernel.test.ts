@@ -143,9 +143,8 @@ describe('ENGINE: kernel.scoreFafb', () => {
   test('returns metadata from binary', () => {
     const binary = kernel.compile(FULL_BASE_FAF);
     const result = kernel.scoreFafb(binary);
-    expect(result.source).toBe('fafb_meta');
-    expect(result.name).toBe('test-project');
-    expect(result.faf_version).toBe('2.5.0');
+    expect(result.score).toBeGreaterThan(0);
+    expect(result.slots['project.name']).toBe('populated');
   });
 });
 

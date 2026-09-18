@@ -124,38 +124,38 @@ export interface FafData {
   human_context?: Record<string, unknown>;
   monorepo?: Record<string, unknown>;
   scores?: Record<string, unknown>;
-  // FAFB top-level keys (read by faf-rust-sdk's compile_fafb to produce
-  // multi-section binaries instead of META-only).
-  /** TECH_STACK section content — flat list of technology components */
+  // Canonical FAFb v2 chunks (read by faf-fafb compile).
+  /** `tech_stack` chunk — flat list of technology components */
   tech_stack?: string[];
-  /** KEY_FILES section — list of important file paths */
+  /** `key_files` chunk — list of important file paths */
   key_files?: string[];
-  /** COMMANDS section — build/test/lint/dev command map */
+  /** `commands` chunk — build/test/lint/dev command map */
   commands?: Record<string, string>;
-  /** ARCHITECTURE section — free-form structural description (user-fill) */
+  /** `architecture` chunk — free-form structural description (user-fill) */
   architecture?: string;
-  /** CONTEXT section — free-form additional signal (user-fill, NOT human_context) */
+  /** `context` chunk — free-form additional signal (user-fill, NOT human_context) */
   context?: string;
   [key: string]: unknown;
 }
 
-/** FAFb binary info from kernel */
+/** FAFb v2 info from kernel decompile / fafb_info */
 export interface FafbInfo {
-  header: {
-    magic: string;
-    version: number;
-    flags: number;
-    section_count: number;
-    crc32: number;
-  };
+  version: string;
+  flags: number;
+  section_count: number;
+  total_size: number;
+  source_checksum: string;
+  created?: number;
   sections: Array<{
     name: string;
+    name_index?: number;
     priority: number;
-    offset: number;
+    offset?: number;
     length: number;
+    token_count?: number;
     classification: string;
+    content?: string;
   }>;
-  content?: string;
 }
 
 /** Framework detection result */

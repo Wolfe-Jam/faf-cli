@@ -1,4 +1,5 @@
-import type { KernelScoreResult, FafbInfo } from '../core/types.js';
+import type { KernelScoreResult, FafbInfo, SlotState } from '../core/types.js';
+import { CANONICAL_TO_CURRENT } from '../core/slots.js';
 
 // faf-scoring-kernel is CommonJS with synchronous WASM loading
  
@@ -25,13 +26,22 @@ const withoutBom = (yaml: string): string => (yaml.startsWith('\uFEFF') ? yaml.s
 /** Score a .faf YAML string (21 base slots), as the file is. A typed None /
  *  N/A / not applicable at a slot is an empty slot, as in every engine. A
  *  leading BOM is not scored (`faf auto` and `faf score` read a BOM file). */
+/** Kernel Mk4 names (`stack.css`) → CLI on-wire paths (`stack.css_framework`). */
+function remapScore(result: KernelScoreResult): KernelScoreResult {
+  const slots: Record<string, SlotState> = {};
+  for (const [key, state] of Object.entries(result.slots ?? {})) {
+    slots[CANONICAL_TO_CURRENT.get(key) ?? key] = state;
+  }
+  return { ...result, slots };
+}
+
 export function score(yaml: string): KernelScoreResult {
-  return JSON.parse(getKernel().score_faf(withoutBom(yaml)));
+  return remapScore(JSON.parse(getKernel().score_faf(withoutBom(yaml))));
 }
 
 /** Score a .faf YAML string (33 enterprise slots), as the file is (a leading BOM is not scored). */
 export function scoreEnterprise(yaml: string): KernelScoreResult {
-  return JSON.parse(getKernel().score_faf_enterprise(withoutBom(yaml)));
+  return remapScore(JSON.parse(getKernel().score_faf_enterprise(withoutBom(yaml))));
 }
 
 /** Validate .faf YAML (a leading BOM is left out, as in {@link score}: `faf check` reads a BOM file). */
@@ -55,15 +65,9 @@ export function fafbInfo(bytes: Uint8Array): FafbInfo {
   return JSON.parse(getKernel().fafb_info(bytes));
 }
 
-/** Get FAFb binary metadata (name, version, source) */
-export interface FafbMeta {
-  source: string;
-  name: string;
-  faf_version: string;
-}
-
-export function scoreFafb(bytes: Uint8Array): FafbMeta {
-  return JSON.parse(getKernel().score_fafb(bytes));
+/** Score a compiled .fafb — same JSON shape as {@link score}. */
+export function scoreFafb(bytes: Uint8Array): KernelScoreResult {
+  return remapScore(JSON.parse(getKernel().score_fafb(bytes)));
 }
 
 /** Get WASM SDK version */
