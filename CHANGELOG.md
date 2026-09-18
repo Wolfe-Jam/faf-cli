@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v7.16.1 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v7.16.2 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -8,10 +8,12 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [7.16.2] - 2026-09-18
+
+**`faf compile` emits FAFb wire v2 — same bytes as the faf-fafb golden.** 2050 tests.
 
 ### Changed
-- **`faf compile` emits FAFb wire v2.** The WASM kernel is rebuilt from `faf-fafb` (the brick). Brake parity is the faf-fafb golden (`version_major = 2`), not the v1 86-byte META ROM.
+- **`faf compile` emits FAFb wire v2.** The WASM kernel is rebuilt from `faf-fafb` 1.0.4 and vendored. Brake parity is the faf-fafb golden (`version_major = 2`), not the v1 86-byte META ROM. Score path stays 21-slot default / 33 enterprise.
 
 ## [7.16.1] - 2026-09-16
 

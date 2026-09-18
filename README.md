@@ -134,6 +134,8 @@ faf memory show
 
 ### What's New in v7.16.0 — The Discoverable Edition
 
+**`faf compile` emits FAFb wire v2 — same bytes as the faf-fafb golden.** (7.16.2)
+
 **A card nobody can find is not a card. The catalog `faf cards` writes now names who publishes it, keys every row the way the specs say to, and can be written as the ARD manifest agent search engines read.**
 
 - **`faf cards --target ard`** writes `.well-known/ard.json`: the catalog rows carrying the search hints ARD reads from the `.fafa` — `metadata.cards.keywords` as `tags`, `metadata.cards.examples` as `representativeQueries`. A manifest with no `representativeQueries` is valid and unfindable, so `faf cards` says so and names the key to fill in.
@@ -142,6 +144,7 @@ faf memory show
 
 **Recent sprint**
 
+- 🧱 [7.16.2](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.16.2) `faf compile` emits FAFb wire v2 — same bytes as the faf-fafb golden
 - 🧭 [7.16.1](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.16.1) `faf` back in step with `faf-cli`
 - 🧭 [7.16.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.16.0) The Discoverable Edition
 - 🎴 [7.15.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.15.0) The Pack Edition
