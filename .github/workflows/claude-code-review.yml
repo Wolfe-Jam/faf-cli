@@ -12,12 +12,13 @@ on:
 
 jobs:
   claude-review:
-    # Optional: Filter by PR author
-    # if: |
-    #   github.event.pull_request.user.login == 'external-contributor' ||
-    #   github.event.pull_request.user.login == 'new-developer' ||
-    #   github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR'
-
+    # A Dependabot PR cannot read this repo's Actions secrets — GitHub withholds
+    # them from bot-authored runs — so the action fails its own env validation
+    # and the PR carries a red that says nothing about the change it proposes.
+    # Receipt (faf-cli, 2026-09-23): the last 8 human PRs all passed this
+    # workflow and both Dependabot PRs failed on that error alone. A dependency
+    # bump is Dependabot's diff to justify, not Claude's.
+    if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -36,7 +37,6 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          allowed_bots: 'dependabot[bot]'
           plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
           plugins: 'code-review@claude-code-plugins'
           prompt: '/code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }}'
