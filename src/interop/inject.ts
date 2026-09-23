@@ -375,6 +375,24 @@ function hiddenStart(text: string, start: string): HiddenIn | 'too deep' | null 
   return null;
 }
 
+/** Whether a whole-line START or END of `text` is shown as text in at least
+ *  one reading. Only asked once {@link findFafBlock} has found no block, so a
+ *  marker line still shown there is one faf could not pair up: a truncated
+ *  block an older faf left behind, or a pair the two readings disagree about.
+ *  Markers are compared exactly as findFafBlock compares them — whole line,
+ *  column 0, trailing whitespace making it text. Past the point where the
+ *  file nests more than MAX_OPEN_CONTAINERS containers faf stopped reading,
+ *  so nothing beyond it counts (that region has its own note). */
+function visibleOrphanMarker(text: string, start: string, end: string): boolean {
+  const readers = [new BlockReader(true), new BlockReader(false)];
+  for (const { content } of scanLines(text)) {
+    const hidden = readers.map(r => r.line(content));
+    if (readers[0].tooDeep) {return false;}
+    if ((content === start || content === end) && hidden.some(h => h === null)) {return true;}
+  }
+  return false;
+}
+
 /**
  * The one line the CLI prints when faf's block goes on top of a file that has
  * no block of its own but holds older faf text — or null:
@@ -386,7 +404,14 @@ function hiddenStart(text: string, start: string): HiddenIn | 'too deep' | null 
  *     older block there is an example to faf, and stays below the new one;
  *   - a whole-line START marker sits past more than MAX_OPEN_CONTAINERS
  *     nested lists or quotes: faf did not read that far, and the older block
- *     stays below the new one.
+ *     stays below the new one;
+ *   - a whole-line START or END marker is shown as text with no matching pair
+ *     — a block an older faf truncated, or a pair the two readings read
+ *     differently. faf cannot prove where that block ended, so it is left
+ *     exactly as it is and the new block goes on top. Without this line the
+ *     file is the one case in this family that is prefixed in silence: it
+ *     carries faf's own marker text, so it looks most like faf's to a reader
+ *     and least like it to faf.
  * `label` names the file (`CLAUDE.md`). `existing` is the file's text before
  * the write (null when there was none). faf-mcp and claude-faf-mcp print the
  * same line through this export.
@@ -403,11 +428,16 @@ export function legacyStampNote(
     return `${label}: faf's block is now on top; the old faf text below it is left as you had it — delete it by hand if you no longer want it.`;
   }
   const hidden = hiddenStart(existing, start);
-  if (hidden === null) {return null;}
   if (hidden === 'too deep') {
     return `${label}: faf's block is now on top; the file nests more than ${MAX_OPEN_CONTAINERS} lists or quotes before an older faf block, so faf did not read that far — the older block is left as you had it; delete it by hand if you no longer want it.`;
   }
-  return `${label}: faf's block is now on top; an older faf block below sits inside ${regionName(hidden)} and is left as you had it — delete it by hand if you no longer want it.`;
+  if (hidden !== null) {
+    return `${label}: faf's block is now on top; an older faf block below sits inside ${regionName(hidden)} and is left as you had it — delete it by hand if you no longer want it.`;
+  }
+  if (visibleOrphanMarker(existing, start, end)) {
+    return `${label}: faf's block is now on top; an older faf marker line below it has no matching pair, so the text there is left as you had it — delete it by hand if you no longer want it.`;
+  }
+  return null;
 }
 
 /** {@link legacyStampNote} for the file at `path`, read the way

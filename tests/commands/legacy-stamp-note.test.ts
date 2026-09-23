@@ -26,6 +26,10 @@ const STAMP = '<!-- faf: demo | TypeScript | cli | Demo goal -->\n<!-- faf: clai
 const OLD = `${STAMP}\n# CLAUDE.md — demo\n\n## Architecture\n\nHAND-ARCH: the queue drains before the API.\n`;
 const note = (file: string): string =>
   `${file}: faf's block is now on top; the old faf text below it is left as you had it — delete it by hand if you no longer want it.`;
+const orphanNote = (file: string): string =>
+  `${file}: faf's block is now on top; an older faf marker line below it has no matching pair, so the text there is left as you had it — delete it by hand if you no longer want it.`;
+/** A block an older faf truncated: a START line, no END. */
+const ORPHAN = `${FAF_START}\ntruncated old body\n\n# CLAUDE.md — demo\n\n## Architecture\n\nHAND-ARCH: the queue drains before the API.\n`;
 
 function repo(): { dir: string; home: string } {
   const dir = realpathSync(tempFolders.mkdtemp(join(tmpdir(), 'faf-stamp-')));
@@ -82,7 +86,54 @@ describe('BRAKE: legacyStampNote — the rule behind the line', () => {
     expect(legacyStampNote('CLAUDE.md', null)).toBeNull(); // no file: created, nothing to say
     expect(legacyStampNote('CLAUDE.md', '# Hand-written\n')).toBeNull();
     expect(legacyStampNote('CLAUDE.md', `# Title\n${STAMP}`)).toBeNull(); // the stamp is not the first line
-    expect(legacyStampNote('CLAUDE.md', `${FAF_START}\nlone start, no end\n`)).toBeNull(); // a marker, not a stamp
+    expect(legacyStampNote('CLAUDE.md', `${FAF_START}\nlone start, no end\n`)).toBe(orphanNote('CLAUDE.md')); // a marker, not a stamp: its own line
     expect(legacyStampNote('CLAUDE.md', `${STAMP}${FAF_START}\nbody\n${FAF_END}\n`)).toBeNull(); // the block is updated in place
+  });
+});
+
+/**
+ * The fourth shape, and the one that used to be prefixed in silence.
+ *
+ * A file carrying a START with no END — a block an older faf truncated, or a
+ * pair the two readings read differently — has no complete block, so faf
+ * prefixes it like any user file and never reclaims it: faf cannot prove
+ * where that block ended. It is the one file in this family that is made of
+ * faf's own marker text, so it looks most like faf's to a reader and least
+ * like it to faf, and it was the only one the CLI said nothing about. Now it
+ * gets a line too. Nothing about the write changed — only what is said.
+ */
+describe('BRAKE: an unpaired faf marker is named, not reclaimed', () => {
+  test('legacyStampNote: said for a marker line shown as text with no pair, and only for one', () => {
+    const say = (text: string): string | null => legacyStampNote('CLAUDE.md', text);
+    expect(say(ORPHAN)).toBe(orphanNote('CLAUDE.md'));                              // START at the top
+    expect(say(`# My notes\n\n${FAF_START}\nstub\n`)).toBe(orphanNote('CLAUDE.md')); // START below user text
+    expect(say(`# My notes\ntext\n${FAF_END}\n`)).toBe(orphanNote('CLAUDE.md'));     // an END with no START
+    expect(say(`${FAF_START}\nfirst\n${FAF_START}\nsecond\n`)).toBe(orphanNote('CLAUDE.md'));
+    expect(say(`${FAF_START} \nbody\n${FAF_END} \n`)).toBeNull();     // trailing space: text, never a marker
+    expect(say(`${FAF_START} \nbody\n${FAF_END}\n`)).toBe(orphanNote('CLAUDE.md')); // …so that END is the unpaired one
+    expect(say('# Hand-written\n\nno faf here\n')).toBeNull();        // the user's file, untouched by faf
+    expect(say(`${FAF_START}\nbody\n${FAF_END}\n`)).toBeNull();       // a complete pair: updated in place
+  });
+
+  test('`faf sync` on a truncated CLAUDE.md: block on top, every byte kept, one line said; the rerun says nothing', () => {
+    const { dir, home } = repo();
+    writeFileSync(join(dir, 'CLAUDE.md'), ORPHAN);
+    const first = faf(dir, home, 'sync');
+    expect(first.status).toBe(0);
+    expect(count(first.out, orphanNote('CLAUDE.md'))).toBe(1);
+    const after = readFileSync(join(dir, 'CLAUDE.md'), 'utf-8');
+    expect(after.startsWith(`${FAF_START}\n`)).toBe(true);
+    expect(after.endsWith(`${FAF_END}\n\n${ORPHAN}`)).toBe(true); // reclaimed nothing — the orphan is still the user's
+    expect(after).toContain('HAND-ARCH: the queue drains before the API.');
+    const second = faf(dir, home, 'sync');
+    expect(second.status).toBe(0);
+    expect(second.out).not.toContain("faf's block is now on top"); // said once, when it happened
+    // The second run finds its own pair and updates between the markers; it does not
+    // stack a block, and it does not go near the orphan below (the block's own body
+    // carries a fresh sync timestamp, so the file is not byte-identical run to run).
+    const twice = readFileSync(join(dir, 'CLAUDE.md'), 'utf-8');
+    expect(count(twice, FAF_START)).toBe(2); // faf's own, plus the orphan — not three
+    expect(count(twice, FAF_END)).toBe(1);
+    expect(twice.endsWith(`${FAF_END}\n\n${ORPHAN}`)).toBe(true);
   });
 });

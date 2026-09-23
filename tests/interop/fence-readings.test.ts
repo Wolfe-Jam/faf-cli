@@ -232,7 +232,8 @@ describe('BRAKE: the hint for an older faf block that sits in a code fence (regr
     expect(legacyStampNote('CLAUDE.md', `<!-- old:\n${FAF_START}\nx\n${FAF_END}\n-->\n`)).toContain('sits inside an HTML comment');
     // Hidden only in the column-0 reading (a list-item fence closed at column 2): still in a fence there.
     expect(legacyStampNote('AGENTS.md', `- ${F}bash\n  npm i\n  ${F}\n\n${FAF_START}\nx\n${FAF_END}\n`)).toBe(fenceNote('AGENTS.md'));
-    expect(legacyStampNote('CLAUDE.md', `${FAF_START}\nlone start, no end\n`)).toBeNull();
+    // A START shown as text with no END is not in any region — it gets the unpaired line, not this one.
+    expect(legacyStampNote('CLAUDE.md', `${FAF_START}\nlone start, no end\n`)).toContain('has no matching pair');
     expect(legacyStampNote('CLAUDE.md', `${F}\n<!-- faf:start --> \n${F}\n`)).toBeNull(); // not a whole START line
     expect(legacyStampNote('CLAUDE.md', `# Title\n\n${FAF_START}\nbody\n${FAF_END}\n`)).toBeNull(); // updated in place
   });
