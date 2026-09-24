@@ -68,8 +68,9 @@ export function renderAgentsMd(data: FafData): string {
   // Verify bar: tests first, then lint/typecheck (matches BETTER / agents-md-facts)
   const verifyCmds = [...testCmds, ...lintCmds];
   // Prose and checklists show the command alone — a note belongs in a comment.
+  const buildEntry = setupCmds.find(([k]) => /build/i.test(k));
   const testCmd = testCmds[0] ? commandOnly(testCmds[0][1]) : undefined;
-  const buildCmd = setupCmds.find(([k]) => /build/i.test(k)) ? commandOnly(setupCmds.find(([k]) => /build/i.test(k))![1]) : undefined;
+  const buildCmd = buildEntry ? commandOnly(buildEntry[1]) : undefined;
 
   push(fafMetaTag(data));
   push();
