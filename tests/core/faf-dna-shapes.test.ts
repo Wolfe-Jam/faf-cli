@@ -39,6 +39,31 @@ const CFM_DNA = `${JSON.stringify(
   2,
 )}`;
 
+/** The shape the ORIGINAL DNA system wrote (2025-09-20 → 2026-05-21): the birth
+ *  score is `birthWeight`, not `birthDNA`. Taken from a real file —
+ *  gallery-svelte's, born 2025-09-29 at 12%. It declares faf-dna-v1 like every
+ *  other, which is exactly why the version string cannot be trusted to tell the
+ *  shapes apart. */
+const BIRTHWEIGHT_DNA = `${JSON.stringify(
+  {
+    birthCertificate: {
+      born: '2025-09-29T17:26:24.539Z',
+      birthWeight: 12,
+      birthWeightSource: 'CLAUDE.md',
+      projectDNA: '8e26224285285e82',
+      authenticated: false,
+      certificate: 'FAF-2025-GALLERYS-VNAZ',
+    },
+    versions: [{ version: 'v1.0.0', timestamp: '2025-09-29T17:26:24.540Z', score: 12 }],
+    current: { score: 62, version: 'v1.0.0', lastSync: '2026-09-23T20:00:00.000Z' },
+    growth: { totalGrowth: 50, daysActive: 359, milestones: [] },
+    lastModified: '2026-09-23T20:00:00.000Z',
+    format: 'faf-dna-v1',
+  },
+  null,
+  2,
+)}`;
+
 let dir: string;
 beforeEach(() => {
   dir = mkdtempSync(join(tmpdir(), 'faf-dna-shapes-'));
@@ -75,6 +100,30 @@ describe('BRAKE: a .faf-dna in another shape is read, never rewritten', () => {
     expect(m.recordGrowth(55, ['faf auto'])).toBeNull();
     expect(readFileSync(dnaFile(), 'utf-8')).toBe(CFM_DNA);
     expect(statSync(dnaFile()).ino).toBe(before.ino);
+  });
+
+
+  test('birthWeight shape: the journey reads, and the file is never rewritten', () => {
+    writeFileSync(dnaFile(), BIRTHWEIGHT_DNA);
+    const before = statSync(dnaFile());
+    const m = new FafDNAManager(dir);
+
+    // It reads: a real birth score of 12% survives a field rename it predates.
+    expect(m.load()).not.toBeNull();
+    expect(m.getJourney()).toBe('12% → 62%');
+    expect(m.getBirthDNADisplay()).toEqual({ current: 62, birthDNA: 12, growth: 50, born: '2025-09-29T17:26:24.539Z' });
+
+    // It is NOT faf's shape, so faf adds nothing to it — reading an old file is
+    // the fix; rewriting someone's birth certificate to rename a field is not.
+    expect(m.isFafShape()).toBe(false);
+    expect(m.recordGrowth(70, ['faf auto'])).toBeNull();
+    expect(readFileSync(dnaFile(), 'utf-8')).toBe(BIRTHWEIGHT_DNA);
+    expect(statSync(dnaFile()).ino).toBe(before.ino);
+  });
+
+  test('a birth certificate with neither birthDNA nor birthWeight still reads as no DNA', () => {
+    writeFileSync(dnaFile(), JSON.stringify({ birthCertificate: { born: '2026-01-01T00:00:00.000Z' }, format: 'faf-dna-v1' }));
+    expect(new FafDNAManager(dir).load()).toBeNull();
   });
 
   test('faf\'s own shape still grows, and an extra key in it is kept', () => {

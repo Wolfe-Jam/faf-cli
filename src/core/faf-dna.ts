@@ -90,6 +90,17 @@ function isVersionEntry(v: unknown): v is VersionEntry {
  * `growth.milestones` list of entries. Only such a file is ever added to
  * (unknown extra keys in it are kept).
  */
+/**
+ * The honest first score, whatever the file calls it. faf has written it as
+ * `birthDNA` since 2026-05-21 (fa8dec45); every `.faf-dna` born between
+ * 2025-09-20 and that date carries `birthWeight` instead — and BOTH declare
+ * `format: 'faf-dna-v1'`, so the version string cannot tell them apart. Such a
+ * file is read, never migrated: a birth score is the one value in this format
+ * that cannot be recreated, so faf does not rewrite the file to rename a field.
+ */
+const birthScore = (bc: Json): number | null =>
+  isNum(bc.birthDNA) ? bc.birthDNA : (isNum(bc.birthWeight) ? bc.birthWeight : null);
+
 const birthOk = (bc: unknown): boolean => isObject(bc) && isNum(bc.birthDNA) && isStr(bc.born);
 const versionsOk = (v: unknown): boolean => Array.isArray(v) && v.length > 0 && v.every(isVersionEntry);
 const currentOk = (c: unknown): boolean => isObject(c) && isNum(c.score) && isStr(c.version);
@@ -191,9 +202,10 @@ function readCurrent(cur: Json, last: VersionEntry | undefined, birthDNA: number
 }
 
 function readableView(raw: unknown): FafDNA | null {
-  if (!isObject(raw) || !isObject(raw.birthCertificate) || !isNum(raw.birthCertificate.birthDNA)) {return null;}
+  if (!isObject(raw) || !isObject(raw.birthCertificate)) {return null;}
   const bc = raw.birthCertificate;
-  const birthDNA = bc.birthDNA as number;
+  const birthDNA = birthScore(bc);
+  if (birthDNA === null) {return null;}
   const born = str(bc.born);
   const versions = readVersions(raw.versions, birthDNA);
   const current = readCurrent(isObject(raw.current) ? raw.current : {}, versions[versions.length - 1], birthDNA, born);
@@ -202,7 +214,7 @@ function readableView(raw: unknown): FafDNA | null {
     birthCertificate: {
       born,
       birthDNA,
-      birthDNASource: bc.birthDNASource === 'legacy' ? 'legacy' : 'init',
+      birthDNASource: bc.birthDNASource === 'legacy' || bc.birthWeightSource === 'legacy' ? 'legacy' : 'init',
       projectDNA: str(bc.projectDNA),
       certificate: str(bc.certificate),
     },
