@@ -255,3 +255,47 @@ describe('BRAKE: AGENTS.md export is idempotent and never quotes its own markers
     expect(r1).toContain('hand-sentinel');
   });
 });
+
+/**
+ * BRAKE — a command note is a comment, never part of the command.
+ *
+ * `commands` values may carry `cmd — note` (the convention `key_files` uses for
+ * roles). The note belongs in the authored comment; every prose site that
+ * embeds a command — the Always-OK line, Definition of Done — must show the
+ * command alone. A leaked note authors something a reader would try to run.
+ */
+describe('BRAKE — command notes never leak into a command', () => {
+  const WITH_NOTES: any = {
+    project: { name: 'noted', goal: 'g', main_language: 'TypeScript', type: 'cli', version: '1.0.0' },
+    commands: {
+      build: 'bun run build — clean, bundle, then tsc',
+      test: 'bun run test — must pass before a change is done',
+      lint: 'bun run lint — eslint over src',
+    },
+  };
+
+  test('the note is the comment in Setup and in the verify bar', () => {
+    const md = renderAgentsMd(WITH_NOTES);
+    expect(md).toContain('bun run build    # clean, bundle, then tsc');
+    expect(md).toContain('bun run test    # must pass before a change is done');
+  });
+
+  test('no authored line puts a note inside backticks', () => {
+    const md = renderAgentsMd(WITH_NOTES);
+    for (const quoted of md.match(/`[^`\n]+`/g) ?? []) {
+      expect(quoted).not.toContain(' — ');
+    }
+  });
+
+  test('Definition of Done and Always-OK show the command alone', () => {
+    const md = renderAgentsMd(WITH_NOTES);
+    expect(md).toContain('`bun run lint` exits 0');
+    expect(md).toContain('`bun run test` passes');
+    expect(md).not.toContain('`bun run lint — eslint over src`');
+  });
+
+  test('a command without a note is unchanged — the key is still the comment', () => {
+    const md = renderAgentsMd({ ...WITH_NOTES, commands: { build: 'bun run build' } });
+    expect(md).toContain('bun run build    # build');
+  });
+});

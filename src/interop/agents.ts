@@ -164,7 +164,7 @@ export function renderAgentsMd(data: FafData): string {
   const always: string[] = ['read the tree'];
   if (testCmd) {always.push(`run the tests (\`${testCmd}\`)`);}
   if (buildCmd) {always.push('build the project');}
-  for (const [, v] of lintCmds.slice(0, 1)) {always.push(`\`${v}\``);}
+  for (const [, v] of lintCmds.slice(0, 1)) {always.push(`\`${commandOnly(v)}\``);}
 
   push('## Guardrails');
   push();
@@ -177,8 +177,8 @@ export function renderAgentsMd(data: FafData): string {
 
   // §7 Definition of Done
   const dod: string[] = [];
-  for (const [, v] of lintCmds) {dod.push(`\`${v}\` exits 0`);}
-  for (const [, v] of testCmds) {dod.push(`\`${v}\` passes`);}
+  for (const [, v] of lintCmds) {dod.push(`\`${commandOnly(v)}\` exits 0`);}
+  for (const [, v] of testCmds) {dod.push(`\`${commandOnly(v)}\` passes`);}
   dod.push('changes committed with a conventional message');
   push('## Definition of Done');
   push();
