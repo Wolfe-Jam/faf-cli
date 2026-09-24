@@ -61,6 +61,21 @@ export interface Milestone {
   emoji: string;
 }
 
+/**
+ * A lineage a reset ended. `faf init --force` starts a fresh certificate, and
+ * the life before it is kept here rather than erased — a birth score is the one
+ * value in this format that cannot be recreated, so a reset is a REBIRTH, not a
+ * deletion. Chains: a project reset twice keeps both earlier lives, oldest first.
+ */
+export interface PriorLineage {
+  born: string; // ISO — when that life started
+  birthDNA: number; // its honest first score
+  certificate: string; // FAF-YYYY-PROJECT-XXXX
+  projectDNA: string;
+  lastScore: number; // where it had reached when the reset ended it
+  endedAt: string; // ISO — when the reset happened
+}
+
 export interface FafDNA {
   birthCertificate: BirthCertificate;
   versions: VersionEntry[];
@@ -68,6 +83,8 @@ export interface FafDNA {
   growth: { totalGrowth: number; daysActive: number; milestones: Milestone[] };
   lastModified: string;
   format: 'faf-dna-v1';
+  /** Lives ended by a reset, oldest first. Absent when there has never been one. */
+  priorLineage?: PriorLineage[];
 }
 
 type Json = Record<string, unknown>;
@@ -102,6 +119,9 @@ const birthScore = (bc: Json): number | null =>
   isNum(bc.birthDNA) ? bc.birthDNA : (isNum(bc.birthWeight) ? bc.birthWeight : null);
 
 const birthOk = (bc: unknown): boolean => isObject(bc) && isNum(bc.birthDNA) && isStr(bc.born);
+const isPriorLineage = (v: unknown): v is PriorLineage =>
+  isObject(v) && isStr(v.born) && isNum(v.birthDNA) && isNum(v.lastScore) && isStr(v.endedAt);
+
 const versionsOk = (v: unknown): boolean => Array.isArray(v) && v.length > 0 && v.every(isVersionEntry);
 const currentOk = (c: unknown): boolean => isObject(c) && isNum(c.score) && isStr(c.version);
 const growthOk = (g: unknown): boolean => isObject(g) && Array.isArray(g.milestones) && g.milestones.every(isObject);
@@ -227,6 +247,11 @@ function readableView(raw: unknown): FafDNA | null {
     },
     lastModified: str(raw.lastModified, born),
     format: 'faf-dna-v1',
+    // Carried even out of a shape faf will not write to: losing earlier lives
+    // while merely READING the file would be the very thing this guards against.
+    ...(Array.isArray(raw.priorLineage) && raw.priorLineage.some(isPriorLineage)
+      ? { priorLineage: raw.priorLineage.filter(isPriorLineage) }
+      : {}),
   };
 }
 
@@ -282,7 +307,39 @@ export class FafDNAManager {
    *  load()), a file that appeared since is refused (SafePathError `changed`)
    *  rather than written over; over a `.faf-dna` that is there, birth starts a
    *  fresh lineage (`faf init --force`). */
+  /** The lives this birth is about to end, oldest first — the one already on
+   *  disk, plus any it had itself inherited. Empty when there is no readable
+   *  `.faf-dna`, so a first birth writes no `priorLineage` key at all. */
+  private endingLineage(): PriorLineage[] {
+    // Deliberately NOT load(): that records what this manager has read, and
+    // save()'s guard uses exactly that to refuse a write over a `.faf-dna` which
+    // appeared since. Reading here to carry a lineage forward must not make the
+    // manager believe it has seen the file (owner rule T11).
+    const on = this.dna ?? (() => {
+      const r = this.read();
+      return r === null ? null : readableView(r.raw);
+    })();
+    const view = on;
+    if (!view) {return [];}
+    const bc = view.birthCertificate;
+    return [
+      ...(view.priorLineage ?? []),
+      {
+        born: bc.born,
+        birthDNA: bc.birthDNA,
+        certificate: bc.certificate,
+        projectDNA: bc.projectDNA,
+        lastScore: view.current.score,
+        endedAt: new Date().toISOString(),
+      },
+    ];
+  }
+
   birth(birthDNA: number): FafDNA {
+    // Read what is here BEFORE overwriting it: a reset ends a life, it does not
+    // unhappen one. Any shape faf can read contributes, including the
+    // `birthWeight` files faf itself wrote before 2026-05-21.
+    const priorLineage = this.endingLineage();
     if (!present(this.dnaPath)) {this.sawNoFile = true;}
     const now = new Date().toISOString();
     this.own = true;
@@ -303,6 +360,7 @@ export class FafDNAManager {
       },
       lastModified: now,
       format: 'faf-dna-v1',
+      ...(priorLineage.length > 0 ? { priorLineage } : {}),
     };
     this.save();
     return this.dna;

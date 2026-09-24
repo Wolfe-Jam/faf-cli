@@ -126,6 +126,53 @@ describe('BRAKE: a .faf-dna in another shape is read, never rewritten', () => {
     expect(new FafDNAManager(dir).load()).toBeNull();
   });
 
+
+  test('a reset is a rebirth: `faf init --force` keeps the life it ends', () => {
+    const first = new FafDNAManager(dir);
+    first.birth(12);
+    first.recordGrowth(62, ['faf auto']);
+    const born = JSON.parse(readFileSync(dnaFile(), 'utf-8')).birthCertificate;
+
+    // The reset.
+    const reborn = new FafDNAManager(dir).birth(80);
+
+    expect(reborn.birthCertificate.birthDNA).toBe(80);
+    expect(reborn.priorLineage).toHaveLength(1);
+    expect(reborn.priorLineage?.[0]).toMatchObject({
+      born: born.born,
+      birthDNA: 12,
+      certificate: born.certificate,
+      lastScore: 62, // where it had reached, not where it started
+    });
+    expect(typeof reborn.priorLineage?.[0].endedAt).toBe('string');
+  });
+
+  test('rebirths chain: reset twice and both earlier lives survive, oldest first', () => {
+    new FafDNAManager(dir).birth(10);
+    new FafDNAManager(dir).birth(40);
+    const third = new FafDNAManager(dir).birth(90);
+
+    expect(third.priorLineage?.map((l) => l.birthDNA)).toEqual([10, 40]);
+    expect(new FafDNAManager(dir).load()?.priorLineage).toHaveLength(2);
+  });
+
+  test('a first birth writes no priorLineage key at all', () => {
+    new FafDNAManager(dir).birth(20);
+    expect('priorLineage' in JSON.parse(readFileSync(dnaFile(), 'utf-8'))).toBe(false);
+  });
+
+  test('a birthWeight file resets without losing its 2025 birth score', () => {
+    writeFileSync(dnaFile(), BIRTHWEIGHT_DNA);
+    const reborn = new FafDNAManager(dir).birth(62);
+
+    // The shape faf could not even read a commit ago still survives its own reset.
+    expect(reborn.priorLineage?.[0]).toMatchObject({
+      born: '2025-09-29T17:26:24.539Z',
+      birthDNA: 12,
+      certificate: 'FAF-2025-GALLERYS-VNAZ',
+    });
+  });
+
   test('faf\'s own shape still grows, and an extra key in it is kept', () => {
     const m = new FafDNAManager(dir);
     m.birth(20);
