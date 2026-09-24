@@ -1,6 +1,6 @@
 # AGENTS.md — faf-cli
 
-CLI for IANA-registered `.faf` + `.fafm` (`application/vnd.faf+yaml` · `vnd.fafm+yaml`) — TypeScript · Bun-native since v6 · npm package `faf-cli` **v7.2.0** (The Memory Edition).
+CLI for IANA-registered `.faf` + `.fafm` (`application/vnd.faf+yaml` · `vnd.fafm+yaml`) — TypeScript · Bun-native since v6 · npm package `faf-cli` **v7.16.2** (The Discoverable Edition).
 
 ## Setup & build
 

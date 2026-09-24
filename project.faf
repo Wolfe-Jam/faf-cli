@@ -13,17 +13,17 @@ commands:
   test: bun run test
   lint: bun run lint
 key_files:
-  - src/cli.ts
-  - src/index.ts
-  - src/commands/
-  - src/commands/memory.ts
-  - src/core/
-  - src/detect/
-  - src/fafm/
-  - src/interop/
-  - src/wasm/
-  - package.json
-  - project.faf
+  - src/cli.ts — CLI entry (Commander); builds to the `faf` / `faf-cli` bin
+  - src/index.ts — library entry; builds to `main`, plus the `./pack` export
+  - src/commands/ — one file per faf subcommand (39)
+  - src/commands/memory.ts — `faf memory`, the `.fafm` surface
+  - src/core/ — domain engines (drift, faf-dna, faf-source, cwd-guard)
+  - src/detect/ — stack and project detection, per language
+  - src/fafm/ — the `.fafm` library (soul, from-claude-dir, types)
+  - src/interop/ — the context authors (agents, claude, gemini, cards, copilot)
+  - src/wasm/ — bridge to faf-scoring-kernel; scoring lives there, not in TS
+  - package.json — scripts, and the bin that maps `faf` to dist/cli.js
+  - project.faf — this file; the DNA every author reads from
 instant_context:
   what_building: CLI for IANA-registered .faf context + .fafm memory
   tech_stack: TypeScript · Bun-native since v6
