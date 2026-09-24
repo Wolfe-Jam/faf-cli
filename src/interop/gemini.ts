@@ -4,6 +4,7 @@ import { FAF_CONTEXT_FILES } from '../core/safe-write.js';
 import { fafMetaTag } from './claude.js';
 import { injectFafBlock } from './inject.js';
 import { filled, slotLabel } from './labels.js';
+import { splitCommandNote } from './command-note.js';
 
 /** A value carrying real content — non-empty, not slotignored, non-empty array. */
 const present = (v: unknown): boolean =>
@@ -60,7 +61,10 @@ export function renderGeminiMd(data: FafData): string {
     lines.push('## Setup & build');
     lines.push('');
     lines.push('```bash');
-    for (const [k, v] of setupCmds) {lines.push(`${v}    # ${k}`);}
+    for (const [k, v] of setupCmds) {
+      const { cmd, note } = splitCommandNote(v);
+      lines.push(`${cmd}    # ${note ?? k}`);
+    }
     lines.push('```');
   }
 
@@ -69,7 +73,10 @@ export function renderGeminiMd(data: FafData): string {
     lines.push('## Test & verify');
     lines.push('');
     lines.push('```bash');
-    for (const [, v] of verifyCmds) {lines.push(v);}
+    for (const [, v] of verifyCmds) {
+      const { cmd, note } = splitCommandNote(v);
+      lines.push(note ? `${cmd}    # ${note}` : cmd);
+    }
     lines.push('```');
   }
 

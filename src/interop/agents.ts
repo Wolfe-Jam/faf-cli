@@ -4,6 +4,7 @@ import { FAF_CONTEXT_FILES } from '../core/safe-write.js';
 import { fafMetaTag } from './claude.js';
 import { injectFafBlock } from './inject.js';
 import { filled, slotLabel, titleLabel } from './labels.js';
+import { splitCommandNote, commandOnly } from './command-note.js';
 
 /** A value carrying real content — non-empty, not slotignored, non-empty array. */
 const present = (v: unknown): boolean =>
@@ -66,8 +67,9 @@ export function renderAgentsMd(data: FafData): string {
   const setupCmds = [...setupRaw].sort((a, b) => setupRank(a[0]) - setupRank(b[0]) || a[0].localeCompare(b[0]));
   // Verify bar: tests first, then lint/typecheck (matches BETTER / agents-md-facts)
   const verifyCmds = [...testCmds, ...lintCmds];
-  const testCmd = testCmds[0]?.[1];
-  const buildCmd = setupCmds.find(([k]) => /build/i.test(k))?.[1];
+  // Prose and checklists show the command alone — a note belongs in a comment.
+  const testCmd = testCmds[0] ? commandOnly(testCmds[0][1]) : undefined;
+  const buildCmd = setupCmds.find(([k]) => /build/i.test(k)) ? commandOnly(setupCmds.find(([k]) => /build/i.test(k))![1]) : undefined;
 
   push(fafMetaTag(data));
   push();
@@ -95,7 +97,10 @@ export function renderAgentsMd(data: FafData): string {
     push('## Setup & build');
     push();
     push('```bash');
-    for (const [k, v] of setupCmds) {push(`${v}    # ${k}`);}
+    for (const [k, v] of setupCmds) {
+      const { cmd, note } = splitCommandNote(v);
+      push(`${cmd}    # ${note ?? k}`);
+    }
     push('```');
     push();
   }
@@ -105,7 +110,10 @@ export function renderAgentsMd(data: FafData): string {
     push('## Run the tests');
     push();
     push('```bash');
-    for (const [, v] of verifyCmds) {push(v);}
+    for (const [, v] of verifyCmds) {
+      const { cmd, note } = splitCommandNote(v);
+      push(note ? `${cmd}    # ${note}` : cmd);
+    }
     push('```');
     push();
   }

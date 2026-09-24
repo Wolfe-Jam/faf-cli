@@ -55,6 +55,7 @@ import {
   wrapFafBlock,
 } from './inject.js';
 import { filled, slotLabel } from './labels.js';
+import { commandOnly } from './command-note.js';
 
 /** Claude Code cuts a project id at this length and adds a hash. */
 const MAX_ID = 200;
@@ -272,7 +273,7 @@ export function renderClaudeMemory(data: FafData): string {
     ...section('Commands', Object.entries(data.commands ?? {})
       .filter(([, v]) => filled(v))
       .slice(0, LIST_CAP)
-      .map(([k, v]) => `- ${k}: \`${v}\``)),
+      .map(([k, v]) => `- ${k}: \`${commandOnly(v)}\``)),
     ...section('Key files', keyFiles.filter(filled).slice(0, LIST_CAP).map(f => `- ${f}`)),
     '',
     "*faf keeps this block in step with project.faf. Everything outside it is Claude's own and is kept as written.*",
