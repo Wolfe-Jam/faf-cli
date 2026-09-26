@@ -1,10 +1,10 @@
 <!-- faf:start -->
-<!-- faf: faf-cli | TypeScript | cli | CLI for IANA-registered `.faf` + `.fafm` — context DNA and portable agent memory. TypeScript, Bun-native since v6. package faf-cli v7.16.2 The Discoverable Edition. -->
+<!-- faf: faf-cli | TypeScript | cli | CLI for IANA-registered `.faf` + `.fafm` — context DNA and portable agent memory. TypeScript, Bun-native since v6. package faf-cli v8.0.0 The Always33 Edition — scored by the always-33 engine. -->
 <!-- faf: claim=project.faf | family=FAF -->
 
 # AGENTS.md — faf-cli
 
-CLI for IANA-registered `.faf` + `.fafm` — context DNA and portable agent memory. TypeScript, Bun-native since v6. package faf-cli v7.16.2 The Discoverable Edition. — TypeScript · type: cli · v7.16.2
+CLI for IANA-registered `.faf` + `.fafm` — context DNA and portable agent memory. TypeScript, Bun-native since v6. package faf-cli v8.0.0 The Always33 Edition — scored by the always-33 engine. — TypeScript · type: cli · v8.0.0
 
 > Authored by faf — do not edit the managed block; refresh with `faf export --agents`. Hand-written content outside the managed block is preserved.
 
@@ -48,6 +48,9 @@ bun run check:no-hardcode    # fail if a build-machine path leaked into dist
 - **Testing:** WJTTC — zero errors always; bun test green before any ship.
 - **Runtime:** Bun-native since v6, TypeScript strict, Rust→WASM scoring kernel.
 - **Releases:** Atomic via /pubpro — bump, verify, tag, publish in one motion.
+- TypeScript strict mode (tsconfig.json)
+- ESM modules (`type: module`)
+- Style enforced by ESLint · Prettier — obey the configs
 
 ## Guardrails
 
@@ -74,6 +77,12 @@ Ask a clarifying question, propose a short plan, or open a draft PR with notes �
 - Conventional Commits preferred (`feat:`, `fix:`, `chore:`, …).
 - Branch off `main` and open a PR — never commit to `main` directly.
 - If build/test scripts or layout change, refresh this file in the **same PR** (`faf export --agents`).
+
+## Stack
+
+- **Hosting:** npm + Homebrew
+- **Build:** Bun (bun build) + tsc
+- **CI/CD:** GitHub Actions
 <!-- faf:end -->
 
 ## Ship-adjacent
