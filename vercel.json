@@ -1,0 +1,7 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "echo 'site: no install needed'",
+  "buildCommand": "node scripts/site-stamp.mjs",
+  "outputDirectory": "public",
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- public/ package.json CHANGELOG.md vercel.json scripts/site-stamp.mjs"
+}

@@ -162,3 +162,6 @@ project.html
 /cli.js.map
 .faf-bench.json
 tests/.tmp-fafm*/
+
+# faf-cli page — written at build by scripts/site-stamp.mjs
+public/release.json
