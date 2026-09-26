@@ -132,18 +132,27 @@ faf memory etch "a durable fact" --id my-fact
 faf memory show
 ```
 
-### What's New in v7.16.0 — The Discoverable Edition
+### What's New in v8.0.0 — The Always33 Edition
 
-**`faf compile` emits FAFb wire v2 — same bytes as the faf-fafb golden.** (7.16.2)
+**One engine, one number: faf-cli v8 scores all 33 slots with the always-33 kernel — the same score faf-kernel, faf-rust-sdk and rust-faf-mcp give.**
 
-**A card nobody can find is not a card. The catalog `faf cards` writes now names who publishes it, keys every row the way the specs say to, and can be written as the ARD manifest agent search engines read.**
+- **The always-33 engine.** Every `.faf` is scored against all 33 Mk4 slots by one Rust kernel (`faf-scoring-kernel` 3.0.0, WASM). Verified identical to the reference always-33 scorer on the `project.faf` of all 80 FAF repos.
+- **Your 21 slots, and the 12 enterprise slots in view.** faf-cli fills the 21 base slots. The 12 enterprise slots — infra, app, ops — are marked `slotignored` unless your app-type uses them, and `faf score` shows all 33.
+- **Upgrading from 7.x:** a `.faf` without the 12 enterprise markers now scores against 33, so its number can drop (21 filled = 64%). **Run `faf auto`** — it writes the markers and your score returns.
 
-- **`faf cards --target ard`** writes `.well-known/ard.json`: the catalog rows carrying the search hints ARD reads from the `.fafa` — `metadata.cards.keywords` as `tags`, `metadata.cards.examples` as `representativeQueries`. A manifest with no `representativeQueries` is valid and unfindable, so `faf cards` says so and names the key to fill in.
-- **The catalog names its host**, so it reads as AI Catalog Level 2 "discoverable" rather than Level 1 "minimal". On a catalog you share, `host` is the one key faf adds, and only when the catalog names none.
-- **One primary key.** Catalog rows are keyed off the domain the `.fafa` declares and the handle — never the homepage host and the raw display name, which could put a space inside a URN and fail ARD conformance. A `.fafa` that names no domain is refused rather than published as `urn:air:local:…`.
+```text
+✪ TROPHY 100% 21/21 slots — project.faf
+  ● project.name
+  …
+  ● stack.cicd
+  — stack.monorepo_tool: slotignored
+  …
+  — monorepo.remote_cache: slotignored
+```
 
 **Recent sprint**
 
+- ✪ [8.0.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.0.0) The Always33 Edition — one engine, one number
 - 🧱 [7.16.2](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.16.2) `faf compile` emits FAFb wire v2 — same bytes as the faf-fafb golden
 - 🧭 [7.16.1](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.16.1) `faf` back in step with `faf-cli`
 - 🧭 [7.16.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.16.0) The Discoverable Edition
@@ -185,6 +194,8 @@ Your own rules for the AI — *"use full words in identifiers," "use bun, not np
 | ○ **Red** | <55% | AI working blind |
 | ♡ **White** | 0% | No context at all |
 
+**Always-33.** The score is filled ÷ active across all 33 Mk4 slots. Your app-type decides which slots are active; the rest are `slotignored` and stay visible. Same file, same engine, same number — see [docs/SCORING.md](./docs/SCORING.md).
+
 **One score, three glyphs:** ✪ work (CLI · docs · receipts) · 🏆 social (X · blogs) · Trophy Mark PNG (brand). Source of truth: `src/core/tiers.ts`.
 
 ---
@@ -214,6 +225,7 @@ For a specific agent: [Grok, xAI & Cursor 👀](docs/faf-cli-for-agents.md) · [
 
 Pivotal releases — full history in [CHANGELOG.md](./CHANGELOG.md):
 
+- **v8.0 — Always33** — one engine, one number: every `.faf` scored against all 33 slots.
 - **v7.1 — AGENTS.md** — `faf export --agents` authors a complete, non-destructive `AGENTS.md`.
 - **v7.0 — GIT** — context goes git-native: `faf diff` / `log` / `hooks`.
 - **v6.16 — Know Your Stack** — every emitted file labels your stack identically.
