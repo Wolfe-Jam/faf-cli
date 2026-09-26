@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v7.16.2 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v8.0.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -7,6 +7,27 @@ All notable changes to faf-cli will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [8.0.0] - 2026-09-26 — The Always33 Edition
+
+**One engine, one number: faf-cli v8 scores all 33 slots with the always-33 kernel — the same score faf-kernel, faf-rust-sdk and rust-faf-mcp give.** 2075 tests.
+
+### Changed
+- **The always-33 engine.** faf-cli scores every `.faf` against all 33 Mk4 slots with the vendored `faf-scoring-kernel` 3.0.0 (Rust → WASM, `faf-kernel` 1.1.1). Through 7.16, `faf score` counted only slots 1–21. Verified: the same score as the reference always-33 scorer on the `project.faf` of all 80 FAF repos.
+- **Your 21 slots, and the 12 enterprise slots in view.** faf-cli fills the 21 base slots. `faf init`, `faf auto` and `faf git` mark the 12 enterprise slots (infra, app, ops) `slotignored` unless your app-type uses them, and `faf score` lists all 33.
+- **Breaking — scores can move.** A `.faf` without the 12 enterprise markers now counts them as empty: 21 filled is 21 ÷ 33 = 64%. **Run `faf auto`** — it writes the markers and the score returns (tested on four v7 files: 56 → 100, 56 → 100, 58 → 100, 52 → 100). Anything that gates on `faf score` should re-check its threshold after upgrading.
+- `tbd` and `todo` (any case) are placeholders — they count as empty, in faf-cli and in the kernel.
+- `faf demo` writes its sample the faf-cli way (21 slots + the 12 enterprise markers) and scores ✪ 100%.
+- `docs/SCORING.md` describes always-33; the kernel reads a slot's short and long key.
+
+### Added
+- **A command can carry its own note.** In `project.faf`, `build: bun run build — clean, bundle cli+index, then tsc` authors `bun run build    # clean, bundle cli+index, then tsc` into `AGENTS.md`, the same spaced-em-dash separator `key_files` uses. Notes never leak into prose a reader would run.
+- **`init --force` keeps the life it ends.** A reset writes the old birth record into `priorLineage` (born, birth score, certificate, the score it reached, when it ended), chained oldest first, and `faf dna` prints each earlier life.
+
+### Fixed
+- **`.faf-dna` files that carry `birthWeight`** (the original DNA shape, Sept 2025) now read as the birth score — the file is never rewritten.
+- **An unpaired faf marker** (a whole-line START or END with no match, left by a truncated write) is named in a note instead of being prefixed in silence.
+- Brake R7-1 and R7-6 get their own timeout; the hooks were never red.
 
 ## [7.16.2] - 2026-09-18
 
