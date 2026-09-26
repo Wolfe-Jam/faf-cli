@@ -8,10 +8,11 @@ project:
 # Commands + key_files feed `faf export --agents` (hand values win over detection).
 commands:
   install: bun install
-  build: bun run build
-  dev: bun run dev
-  test: bun run test
-  lint: bun run lint
+  build: bun run build — clean, bundle src/cli.ts to dist, then tsc
+  dev: bun run dev — run the CLI from source, no build
+  test: bun run test — must pass before a change is done
+  lint: bun run lint — eslint over src
+  check:no-hardcode: bun run check:no-hardcode — fail if a build-machine path leaked into dist
 key_files:
   - src/cli.ts — CLI entry (Commander); builds to the `faf` / `faf-cli` bin
   - src/index.ts — library entry; builds to `main`, plus the `./pack` export
@@ -21,6 +22,8 @@ key_files:
   - src/detect/ — stack and project detection, per language
   - src/fafm/ — the `.fafm` library (soul, from-claude-dir, types)
   - src/interop/ — the context authors (agents, claude, gemini, cards, copilot)
+  - src/interrogate/ — extractors that read a repo's own files for facts (readme, cargo, compose, env)
+  - src/ui/ — terminal output (colors, display, progress, star-nudge)
   - src/wasm/ — bridge to faf-scoring-kernel; scoring lives there, not in TS
   - package.json — scripts, and the bin that maps `faf` to dist/cli.js
   - project.faf — this file; the DNA every author reads from

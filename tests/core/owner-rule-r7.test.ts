@@ -127,7 +127,7 @@ describe('BRAKE R7-1: score, status, score --json, compile, refresh, check and s
           expect({ shape, args, files: tree(d) }).toEqual({ shape, args, files: before });
         }
       }
-    });
+    }, 60_000); // every shape × 7 commands is a cold CLI subprocess — bare `bun test` would cut it at 5s
   }
 
   test('faf check: a scalar is the one-line refusal (exit 1); a mapping without faf_version is still check\'s own verdict (exit 3)', () => {
@@ -340,7 +340,7 @@ describe('BRAKE R7-6: faf hooks — install then uninstall leaves a blank hook b
       cycle(d, home, 2);
       expect({ name, after: read(hook) }).toEqual({ name, after: body });
     }
-  });
+  }, 60_000); // 6 repos × (git init + 3 cold CLI runs) — bare `bun test` would cut it at 5s
 
   test('the #!/bin/sh line stays when you wrote lines below faf\'s section; a hook faf created is left empty', () => {
     const { d, home, hook } = repo();

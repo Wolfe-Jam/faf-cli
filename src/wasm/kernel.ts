@@ -23,7 +23,8 @@ function getKernel(): typeof import('faf-scoring-kernel') {
  *  document and throws; the file itself keeps its BOM. */
 const withoutBom = (yaml: string): string => (yaml.startsWith('\uFEFF') ? yaml.slice(1) : yaml);
 
-/** Score a .faf YAML string (21 base slots), as the file is. A typed None /
+/** Score a .faf YAML string (always 33 slots — a 21-slot file carries the 12
+ *  enterprise slots as `slotignored`), as the file is. A typed None /
  *  N/A / not applicable at a slot is an empty slot, as in every engine. A
  *  leading BOM is not scored (`faf auto` and `faf score` read a BOM file). */
 /** Kernel Mk4 names (`stack.css`) → CLI on-wire paths (`stack.css_framework`). */
@@ -39,7 +40,7 @@ export function score(yaml: string): KernelScoreResult {
   return remapScore(JSON.parse(getKernel().score_faf(withoutBom(yaml))));
 }
 
-/** Score a .faf YAML string (33 enterprise slots), as the file is (a leading BOM is not scored). */
+/** Same as {@link score} (always 33) — kept for existing callers (a leading BOM is not scored). */
 export function scoreEnterprise(yaml: string): KernelScoreResult {
   return remapScore(JSON.parse(getKernel().score_faf_enterprise(withoutBom(yaml))));
 }

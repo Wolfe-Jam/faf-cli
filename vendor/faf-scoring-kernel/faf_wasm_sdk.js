@@ -94,7 +94,10 @@ function fafb_info(bytes) {
 exports.fafb_info = fafb_info;
 
 /**
- * Score FAF YAML content — 21-slot base (CLI default). Returns JSON.
+ * Score FAF YAML content with the Mk4 kernel (always-33) — returns JSON.
+ *
+ * Always 33 slots. A 21-slot file carries the 12 enterprise slots as
+ * `slotignored`, so it scores the same here as in every other FAF app.
  * @param {string} yaml
  * @returns {string}
  */
@@ -127,7 +130,7 @@ function score_faf(yaml) {
 exports.score_faf = score_faf;
 
 /**
- * Score FAF YAML content — full 33-slot Mk4. Returns JSON.
+ * Same as [`score_faf`] (always-33). Kept so existing callers keep working.
  * @param {string} yaml
  * @returns {string}
  */
