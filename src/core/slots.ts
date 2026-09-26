@@ -107,7 +107,7 @@ export function slotsByCategory(category: SlotCategory): SlotDef[] {
   return SLOTS.filter(s => s.category === category);
 }
 
-/** Base-tier slots (1-21) — used by score_faf */
+/** Base-tier slots (1-21) — the slots faf-cli fills; the other 12 are `slotignored` */
 export const BASE_SLOTS = SLOTS.filter(s => s.index <= 21);
 
 /** Enterprise-tier slots (1-33) — used by score_faf_enterprise */
@@ -121,6 +121,8 @@ export const PLACEHOLDERS = new Set([
   'null',
   'none',
   'unknown',
+  'tbd',
+  'todo',
   'n/a',
   'not applicable',
 ]);

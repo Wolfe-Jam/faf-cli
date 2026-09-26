@@ -2,7 +2,7 @@
 
 > **Source of truth:** [`src/core/slots.ts`](../src/core/slots.ts) (the 33 slots and the app-type table) · [`src/core/tiers.ts`](../src/core/tiers.ts) (the tiers). The score is computed by the scoring kernel and is deterministic: the same file always gets the same score.
 >
-> **Updated 2026-09-12.** The February 2026 version of this page (v4.2.1) said a typed `None` ignores a slot and gave the formula `(Filled + Ignored) / 21`. Both are superseded — see [What changed](#what-changed).
+> **Updated 2026-09-25 (always-33).** The February 2026 version of this page (v4.2.1) said a typed `None` ignores a slot and gave the formula `(Filled + Ignored) / 21`. Both are superseded — see [What changed](#what-changed).
 
 ## Tier System — Trophy is the target
 
@@ -27,9 +27,9 @@ Work surfaces use ✪ for Trophy (not the social emoji 🏆). Sub-Trophy tiers u
 
 ## How the score works
 
-1. **33 slots.** Every `.faf` uses the same Mk4 slot set: project (3), human context (6), frontend (4), backend (5), universal (3), and enterprise infra, app and ops (12). faf-cli scores the base tier, slots 1–21. The enterprise tier scores all 33.
+1. **33 slots, always.** Every `.faf` uses the same Mk4 slot set: project (3), human context (6), frontend (4), backend (5), universal (3), and enterprise infra, app and ops (12). Every FAF app scores all 33 — faf-cli, the MCP servers, the SDKs — so a file gets the same score everywhere. faf-cli fills the base tier (slots 1–21); the 12 enterprise slots are written as `slotignored` unless your app-type uses them, and they stay visible in `faf score`.
 2. **Your app-type decides which slots count.** `project.type` is your app-type. `faf init`, `faf auto` and `faf git` detect it and write `slotignored` into every slot your app-type doesn't use. These slots are not required and not scored.
-3. **Every other slot is active.** An active slot is either filled or empty. Typing `None`, `N/A`, `null`, `unknown` or `not applicable` doesn't take a slot out of the score — it counts as empty. From faf-cli 7.13, `faf auto` fills such a tech slot when the repo has the fact, and writes `slotignored` over typed words in a slot your app-type leaves out; the 6Ws stay yours (`faf go` asks). See [SLOT-IGNORE.md](./SLOT-IGNORE.md#typed-words).
+3. **Every other slot is active.** An active slot is either filled or empty. Typing `None`, `N/A`, `null`, `unknown`, `TBD`, `TODO` or `not applicable` doesn't take a slot out of the score — it counts as empty. From faf-cli 7.13, `faf auto` fills such a tech slot when the repo has the fact, and writes `slotignored` over typed words in a slot your app-type leaves out; the 6Ws stay yours (`faf go` asks). See [SLOT-IGNORE.md](./SLOT-IGNORE.md#typed-words).
 4. **Score = filled ÷ active**, as a whole percentage.
 
 | App-type | Categories that count | Active slots |
@@ -44,15 +44,17 @@ Work surfaces use ✪ for Trophy (not the social emoji 🏆). Sub-Trophy tiers u
 | `saas` | project, frontend, backend, universal, human, enterprise app | 25 |
 | `enterprise` | all categories | 33 |
 
-An app-type that isn't in this table falls back to `library`. App-types that use enterprise categories are scored in full by the enterprise tier.
+An app-type that isn't in this table falls back to `library`.
+
+**A file without the 12 enterprise markers** counts them as empty: 21 filled with no markers is 21 ÷ 33 = 64%. `faf init`, `faf auto` and `faf git` write the markers for you.
 
 **Example.** A `cli` project has 12 active slots: name, goal, language, the 6 Ws, hosting, build and CI/CD. All 12 filled is 100% ✪. With 10 filled and 2 empty, it's 10 ÷ 12 = 83% ●.
 
 ## Slot keys
 
-Write the keys faf writes. Six slots also have a shorter Mk4 name. faf-cli can read either, but the scoring kernel scores the key faf writes. From faf-cli 7.13, when your file uses the short name, `faf auto` keeps the scored key in step with it (the fact, or `slotignored`), so the score counts what your file says.
+Write the keys faf writes. Six slots also have a shorter Mk4 name, and the scoring kernel reads either. From faf-cli 7.13, when your file uses the short name, `faf auto` keeps the written key in step with it (the fact, or `slotignored`).
 
-| Key faf writes (scored) | Mk4 short name |
+| Key faf writes | Mk4 short name |
 |---|---|
 | `stack.frontend` | `stack.framework` |
 | `stack.css_framework` | `stack.css` |
@@ -67,6 +69,7 @@ Write the keys faf writes. Six slots also have a shorter Mk4 name. faf-cli can r
 |---|---|
 | A typed `None` marks a slot as ignored | A typed `None` / `N/A` counts as **empty**; only the app-type decides `slotignored` |
 | `Score = (Filled + Ignored) / 21` | `Score = filled ÷ active` |
-| 21 slots, always constant | 33 slots; the app-type selects 9–33 of them |
+| 21 slots, always constant | 33 slots, always; the app-type selects 9–33 of them |
+| faf-cli scored slots 1–21 (to 7.16) | Every FAF app scores all 33 (always-33) |
 
 More on `slotignored`: [SLOT-IGNORE.md](./SLOT-IGNORE.md). The February text is in git history.
