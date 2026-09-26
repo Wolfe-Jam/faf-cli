@@ -112,6 +112,9 @@
             margin-bottom: 32px;
         }
 
+        .hero .release { color: var(--dim); font-size: 0.95rem; margin: -0.25rem 0 1.25rem; }
+        .hero .release a { color: var(--accent); text-decoration: none; font-weight: 600; }
+        .hero .release a:hover { color: var(--accent-hover); }
         .hero .tagline .inline-link { color: var(--fg); text-decoration: underline; text-underline-offset: 3px; }
 
         .cta-row { display: flex; gap: 12px; flex-wrap: wrap; }
@@ -265,6 +268,7 @@
                     <div>
                         <h1>faf-cli</h1>
                         <p class="tagline">The command-line tool for the Foundational AI-context Format (<code class="inline">.faf</code>).</p>
+                        <p class="release" id="release" hidden></p>
                         <div class="cta-row">
                             <a href="#how-to-use-it" class="btn btn-primary">Get Started</a>
                             <a href="https://github.com/Wolfe-Jam/faf-cli" class="btn btn-outline" target="_blank" rel="noopener">View on GitHub</a>
@@ -433,6 +437,27 @@ brew install wolfe-jam/faf/faf-cli</span></pre>
         </div>
     </footer>
 
+    <script>
+        // Latest release line — filled from release.json, which
+        // scripts/site-stamp.mjs writes at build time from package.json +
+        // the top CHANGELOG entry. No release.json (e.g. opened locally) → the
+        // line stays hidden. Text only: nothing from the file becomes HTML.
+        fetch('/release.json', { cache: 'no-store' })
+            .then((r) => (r.ok ? r.json() : null))
+            .then((rel) => {
+                if (!rel || !rel.version) return;
+                const el = document.getElementById('release');
+                const a = document.createElement('a');
+                a.href = `https://github.com/Wolfe-Jam/faf-cli/releases/tag/v${rel.version}`;
+                a.target = '_blank';
+                a.rel = 'noopener';
+                a.textContent = `v${rel.version}${rel.edition ? ` — ${rel.edition}` : ''}`;
+                el.append('Latest: ', a);
+                if (rel.oneliner) el.append(` · ${rel.oneliner}`);
+                el.hidden = false;
+            })
+            .catch(() => {});
+    </script>
     <script>
         // Live npm download count — dormant on this page by design (the
         // 2026-08-22 content rewrite deliberately dropped vanity-metric
