@@ -64,6 +64,19 @@ stack:
   hosting: slotignored
   build: slotignored
   cicd: slotignored
+  monorepo_tool: slotignored
+  package_manager: slotignored
+  workspaces: slotignored
+  admin: slotignored
+  cache: slotignored
+  search: slotignored
+  storage: slotignored
+monorepo:
+  packages_count: slotignored
+  build_orchestrator: slotignored
+  versioning_strategy: slotignored
+  shared_configs: slotignored
+  remote_cache: slotignored
 human_context:
   who: developer
   what: CLI tool

@@ -83,7 +83,7 @@ describe('TYRE: init command integration', () => {
     expect(kernel.validate(yaml)).toBe(true);
 
     const result = kernel.score(yaml);
-    expect(result.total).toBe(21);
+    expect(result.total).toBe(33); // always-33
   });
 
   test('slotignored math is correct for CLI (v6.5.0 — universal extension)', () => {
@@ -97,9 +97,11 @@ describe('TYRE: init command integration', () => {
     writeFaf(fafPath, data);
 
     const result = kernel.score(readFafRaw(fafPath));
-    // CLI: 12 active slots (project=3, human=6, universal=3), 9 slotignored in base tier.
+    // CLI: 12 active slots (project=3, human=6, universal=3). Always-33: init writes
+    // the 9 unused base slots AND the 12 enterprise slots as slotignored (21 ignored).
     // v6.5.0 added `universal` to cli — it ships/builds/CIs somewhere.
     expect(result.active).toBe(12);
-    expect(result.ignored).toBe(9);
+    expect(result.ignored).toBe(21);
+    expect(result.total).toBe(33);
   });
 });
