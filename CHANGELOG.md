@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [8.0.0] - 2026-09-26 — The Always33 Edition
 
-**One engine, one number: faf-cli v8 scores all 33 slots with the always-33 kernel — the same score faf-kernel, faf-rust-sdk and rust-faf-mcp give.** 2075 tests.
+**One engine, one number: faf-cli v8 scores with the always-33 kernel — the same score faf-kernel, faf-rust-sdk and rust-faf-mcp give.** 2075 tests.
 
 ### Changed
 - **The always-33 engine.** faf-cli scores every `.faf` against all 33 Mk4 slots with the vendored `faf-scoring-kernel` 3.0.0 (Rust → WASM, `faf-kernel` 1.1.1). Through 7.16, `faf score` counted only slots 1–21. Verified: the same score as the reference always-33 scorer on the `project.faf` of all 80 FAF repos.

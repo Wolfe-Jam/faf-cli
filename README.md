@@ -134,7 +134,7 @@ faf memory show
 
 ### What's New in v8.0.0 — The Always33 Edition
 
-**One engine, one number: faf-cli v8 scores all 33 slots with the always-33 kernel — the same score faf-kernel, faf-rust-sdk and rust-faf-mcp give.**
+**One engine, one number: faf-cli v8 scores with the always-33 kernel — the same score faf-kernel, faf-rust-sdk and rust-faf-mcp give.**
 
 - **The always-33 engine.** Every `.faf` is scored against all 33 Mk4 slots by one Rust kernel (`faf-scoring-kernel` 3.0.0, WASM). Verified identical to the reference always-33 scorer on the `project.faf` of all 80 FAF repos.
 - **Your 21 slots, and the 12 enterprise slots in view.** faf-cli fills the 21 base slots. The 12 enterprise slots — infra, app, ops — are marked `slotignored` unless your app-type uses them, and `faf score` shows all 33.
@@ -225,7 +225,7 @@ For a specific agent: [Grok, xAI & Cursor 👀](docs/faf-cli-for-agents.md) · [
 
 Pivotal releases — full history in [CHANGELOG.md](./CHANGELOG.md):
 
-- **v8.0 — Always33** — one engine, one number: every `.faf` scored against all 33 slots.
+- **v8.0 — Always33** — one engine, one number: the same score everywhere.
 - **v7.1 — AGENTS.md** — `faf export --agents` authors a complete, non-destructive `AGENTS.md`.
 - **v7.0 — GIT** — context goes git-native: `faf diff` / `log` / `hooks`.
 - **v6.16 — Know Your Stack** — every emitted file labels your stack identically.
