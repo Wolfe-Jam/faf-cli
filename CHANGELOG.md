@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [8.0.1] - 2026-09-30
 
-**pnpm installs work: faf-cli depends on faf-scoring-kernel from npm, not a vendored folder.** Patch — inherits The Always33 Edition.
+**pnpm installs work: faf-cli depends on faf-scoring-kernel from npm, not a vendored folder.** Patch — inherits The Always33 Edition. 2079 tests.
 
 ### Fixed
 - **pnpm installs of anything that depends on faf-cli 8.0.0 failed** with `ERR_PNPM_LINKED_PKG_DIR_NOT_FOUND`. 8.0.0 declared `"faf-scoring-kernel": "file:./vendor/faf-scoring-kernel"`: npm resolves that inside faf-cli, pnpm resolves it from the consumer's project root, where no such folder exists. faf-cli now depends on `faf-scoring-kernel` `^3.0.0` from npm, the same files byte for byte, and no longer ships `vendor/`.

@@ -1,10 +1,10 @@
 <!-- faf:start -->
-<!-- faf: faf-cli | TypeScript | cli | CLI for IANA-registered `.faf` + `.fafm` — context DNA and portable agent memory. TypeScript, Bun-native since v6. package faf-cli v8.0.0 The Always33 Edition — scored by the always-33 engine. -->
+<!-- faf: faf-cli | TypeScript | cli | CLI for IANA-registered `.faf` + `.fafm` — context DNA and portable agent memory. TypeScript, Bun-native since v6. package faf-cli v8.0.1 The Always33 Edition — scored by the always-33 engine. -->
 <!-- faf: claim=project.faf | family=FAF -->
 
 # AGENTS.md — faf-cli
 
-CLI for IANA-registered `.faf` + `.fafm` — context DNA and portable agent memory. TypeScript, Bun-native since v6. package faf-cli v8.0.0 The Always33 Edition — scored by the always-33 engine. — TypeScript · type: cli · v8.0.0
+CLI for IANA-registered `.faf` + `.fafm` — context DNA and portable agent memory. TypeScript, Bun-native since v6. package faf-cli v8.0.1 The Always33 Edition — scored by the always-33 engine. — TypeScript · type: cli · v8.0.1
 
 > Authored by faf — do not edit the managed block; refresh with `faf export --agents`. Hand-written content outside the managed block is preserved.
 
