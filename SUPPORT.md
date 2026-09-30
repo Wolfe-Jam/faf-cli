@@ -39,6 +39,7 @@ Global install didn't complete or PATH is wrong:
 ```bash
 bunx faf                       # Run without installing (Bun)
 npx faf                        # Run without installing (npm)
+pnpm dlx faf                   # Run without installing (pnpm)
 npm install -g faf-cli         # Install globally
 which faf                      # Should resolve to a real path
 ```

@@ -15,7 +15,7 @@ bunx faf score               # AI-readiness score (target: Trophy 100%)
 bunx faf git owner/repo      # instant, scored context for any remote repo — one shallow clone
 ```
 
-`npx faf` works too. Add `faf export --agents` to `package.json` scripts, a pre-commit hook, or your agent's bootstrap step, and every session starts from accurate context instead of a guess.
+`npx faf` and `pnpm dlx faf` work too. Add `faf export --agents` to `package.json` scripts, a pre-commit hook, or your agent's bootstrap step, and every session starts from accurate context instead of a guess.
 
 ---
 
