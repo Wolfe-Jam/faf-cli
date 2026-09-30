@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v8.0.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v8.0.1 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -7,6 +7,13 @@ All notable changes to faf-cli will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [8.0.1] - 2026-09-30
+
+**pnpm and Yarn installs work: faf-cli depends on faf-scoring-kernel from npm, not a vendored folder.** Patch — inherits The Always33 Edition.
+
+### Fixed
+- **pnpm installs of anything that depends on faf-cli 8.0.0 failed** with `ERR_PNPM_LINKED_PKG_DIR_NOT_FOUND`. 8.0.0 declared `"faf-scoring-kernel": "file:./vendor/faf-scoring-kernel"`: npm resolves that inside faf-cli, pnpm resolves it from the consumer's project root, where no such folder exists. faf-cli now depends on `faf-scoring-kernel` `^3.0.0` from npm, the same files byte for byte, and no longer ships `vendor/`.
 
 ## [8.0.0] - 2026-09-26 — The Always33 Edition
 
