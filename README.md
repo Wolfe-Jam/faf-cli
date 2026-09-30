@@ -133,7 +133,15 @@ faf memory etch "a durable fact" --id my-fact
 faf memory show
 ```
 
-### What's New in v8.0.0 — The Always33 Edition
+### What's New in v8.0.1 — The Always33 Edition
+
+**pnpm installs work: faf-cli depends on faf-scoring-kernel from npm, not a vendored folder.**
+
+- **The fix.** 8.0.0 pointed at a `vendor/` folder inside faf-cli. npm found it; pnpm looked in your project instead and stopped with `ERR_PNPM_LINKED_PKG_DIR_NOT_FOUND`. faf-cli now gets `faf-scoring-kernel` from npm, the same files byte for byte.
+- **Run without installing:** `bunx faf`, `npx faf` and now `pnpm dlx faf`.
+- **Checked on every change:** CI installs the packed package with npm, pnpm and bun, then runs `faf --version` and `faf score`.
+
+### The Always33 Edition (8.0)
 
 **One engine, one number: faf-cli v8 scores with the always-33 kernel — the same score faf-kernel, faf-rust-sdk and rust-faf-mcp give.**
 
@@ -153,6 +161,7 @@ faf memory show
 
 **Recent sprint**
 
+- ✪ [8.0.1](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.0.1) pnpm installs work — faf-scoring-kernel from npm
 - ✪ [8.0.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.0.0) The Always33 Edition — one engine, one number
 - 🧱 [7.16.2](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.16.2) `faf compile` emits FAFb wire v2 — same bytes as the faf-fafb golden
 - 🧭 [7.16.1](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.16.1) `faf` back in step with `faf-cli`
