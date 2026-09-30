@@ -11,7 +11,7 @@ Every README should answer these questions. Here's ours:
 | **🎯 WHY** do you need it? | 100% context (AI-scored), persists forever, syncs automatically - saves $1000s/developer |
 | **🌍 WHERE** does it work? | Everywhere AI needs context (Claude Code, Gemini CLI, Cursor, etc.) |
 | **⏰ WHEN** should you use it? | New projects (day one), existing projects (now), exploring repos (instantly) |
-| **🚀 HOW** does it work? | `bunx faf-cli git <url>` or `npx faf-cli git <url>` - No install, one shallow clone, 2 seconds |
+| **🚀 HOW** does it work? | `bunx faf-cli git <url>`, `npx faf-cli git <url>` or `pnpm dlx faf git <url>` - No install, one shallow clone, 2 seconds |
 
 **For AI:** Read the detailed sections below for full context.
 **For humans:** Use this pattern in YOUR README. Answer these 6 questions clearly.

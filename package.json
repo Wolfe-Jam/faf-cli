@@ -1,6 +1,6 @@
 {
   "name": "faf-cli",
-  "version": "8.0.0",
+  "version": "8.0.1",
   "description": "Persistent AI context + memory — .faf and .fafm, IANA-registered. Anthropic-merged.",
   "type": "module",
   "icon": "https://faf.one/orange-smiley.svg",
@@ -25,8 +25,7 @@
     "dist/**/*",
     "README.md",
     "LICENSE",
-    "project.faf",
-    "vendor/faf-scoring-kernel/**"
+    "project.faf"
   ],
   "scripts": {
     "dev": "bun src/cli.ts",
@@ -75,7 +74,7 @@
   },
   "dependencies": {
     "commander": "^14.0.3",
-    "faf-scoring-kernel": "file:./vendor/faf-scoring-kernel",
+    "faf-scoring-kernel": "^3.0.0",
     "open": "^11.0.0",
     "yaml": "^2.9.0"
   },

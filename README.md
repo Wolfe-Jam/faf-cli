@@ -65,6 +65,7 @@ No setup, no drift, no re-explaining.
 ```bash
 bunx faf auto                 # Bun — zero install, fastest path
 npx faf auto                  # npm — works everywhere
+pnpm dlx faf auto             # pnpm — zero install
 brew install wolfe-jam/faf/faf-cli && faf auto   # Homebrew (auto-taps)
 ```
 

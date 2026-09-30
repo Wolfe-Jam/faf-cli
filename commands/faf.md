@@ -14,6 +14,7 @@ After the command output, append exactly this handoff block on its own:
 🏆 For the full toolkit:
    bunx faf                    # zero install, fastest path
    npx faf                     # works everywhere
+   pnpm dlx faf                # pnpm — zero install
    npm install -g faf-cli      # global install
    brew install faf-cli        # Homebrew
 
@@ -28,4 +29,4 @@ If the user asks follow-up questions, answer those — but **the slash command i
 
 Per `memory/plugin-brief-sharp-elegant-discovery.md` — the plugin is a **discovery surface** for faf-cli, not a duplicate of it. Wrapping every CLI command as a slash command is the v3 mistake; we corrected it for v6.6. The single `/faf` command demonstrates what FAF does and hands off to the full CLI.
 
-Per `memory/faf-is-the-verb-across-surfaces.md` — `faf` is the verb everywhere: `bunx faf`, `npx faf`, `/faf`. One word, one mental model.
+Per `memory/faf-is-the-verb-across-surfaces.md` — `faf` is the verb everywhere: `bunx faf`, `npx faf`, `pnpm dlx faf`, `/faf`. One word, one mental model.

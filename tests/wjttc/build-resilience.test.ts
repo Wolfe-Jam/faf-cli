@@ -120,6 +120,20 @@ describe('WJTTC BRAKE: build artifact is portable + correct', () => {
     expect(typeof mod.buildPack).toBe('function');
     expect(typeof mod.answersToFafa).toBe('function');
   });
+
+  // L13 — 8.0.0 shipped "faf-scoring-kernel": "file:./vendor/faf-scoring-kernel".
+  // npm resolved it inside faf-cli; pnpm resolved it from the consumer's root and
+  // failed (ERR_PNPM_LINKED_PKG_DIR_NOT_FOUND), breaking pnpm builds of faf-mcp.
+  test('L13: published dependencies use registry ranges (no file:, link: or workspace:)', () => {
+    const local = /^(file|link|workspace):/;
+    const offenders: string[] = [];
+    for (const field of ['dependencies', 'optionalDependencies', 'peerDependencies']) {
+      for (const [name, spec] of Object.entries((PKG[field] ?? {}) as Record<string, string>)) {
+        if (local.test(spec)) {offenders.push(`${field}.${name}: ${spec}`);}
+      }
+    }
+    expect(offenders, 'local specifiers break pnpm, Yarn and bun consumers').toEqual([]);
+  });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
