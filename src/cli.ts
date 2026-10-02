@@ -13,6 +13,7 @@ import { checkCommand } from './commands/check.js';
 import { exportCommand } from './commands/export.js';
 import { serverCardCommand } from './commands/server-card.js';
 import { cardsCommand } from './commands/cards.js';
+import { cardInitCommand } from './commands/card.js';
 import { showCommand } from './commands/show.js';
 import { gitCommand } from './commands/git.js';
 import { diffCommand, diffDriverCommand } from './commands/diff.js';
@@ -220,6 +221,28 @@ program
   .option('--check', 'Print projected cards to stdout, do not write')
   .option('--force', 'Replace a card file faf cannot prove it wrote (edited since, or not faf\'s)')
   .action((options) => cardsCommand(options));
+
+const repeat = (value: string, previous: string[] = []) => [...previous, value];
+
+const card = program.command('card').description('One card at a time');
+
+card
+  .command('init')
+  .description('Write an agent.fafa from seven answers: name, short name, domain, what it does, version, where it runs, what it can do')
+  .option('--name <name>', 'Name people see, e.g. "Weather Agent"')
+  .option('--short-name <handle>', 'Short name, lowercase (default: from --name)')
+  .option('--domain <domain>', 'Domain it is published under, e.g. example.com')
+  .option('--description <text>', 'What it does, one sentence')
+  .option('--set-version <version>', 'Its version. NOTE: not --version, which is the global CLI-version flag')
+  .option('--url <url>', 'Where it runs: a URL people call')
+  .option('--protocol <protocol>', 'Protocol at --url: a2a or mcp (default: a2a)')
+  .option('--package <name>', 'Where it runs: an npm package people install')
+  .option('--skill <skill>', 'What it can do, "Name: description" (repeatable)', repeat)
+  .option('--example <question>', 'A question people ask it; search finds it by these (repeatable, 2-5)', repeat)
+  .option('--dir <path>', 'Working directory (default: cwd)')
+  .option('--out <path>', 'Output path (default: ./agent.fafa)')
+  .option('--force', 'Replace an existing agent.fafa')
+  .action((options) => cardInitCommand(options));
 
 program
   .command('check [file]')
