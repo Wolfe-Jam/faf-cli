@@ -133,13 +133,24 @@ faf memory etch "a durable fact" --id my-fact
 faf memory show
 ```
 
-### What's New in v8.0.1 — The Always33 Edition
+### What's New in v8.1.0 — The Always33+ Edition
 
-**pnpm installs work: faf-cli depends on faf-scoring-kernel from npm, not a vendored folder.**
+**From nothing to listed in one command: `faf card init` asks seven questions and writes your agent.fafa, your AI Catalog entry and your ARD entry.**
 
-- **The fix.** 8.0.0 pointed at a `vendor/` folder inside faf-cli. npm found it; pnpm looked in your project instead and stopped with `ERR_PNPM_LINKED_PKG_DIR_NOT_FOUND`. faf-cli now gets `faf-scoring-kernel` from npm, the same files byte for byte.
-- **Run without installing:** `bunx faf`, `npx faf` and now `pnpm dlx faf`.
-- **Checked on every change:** CI installs the packed package with npm, pnpm and bun, then runs `faf --version` and `faf score`.
+The same always-33 engine, plus cards.
+
+```bash
+npx faf-cli@latest card init     # seven questions → agent.fafa → AI Catalog + ARD
+```
+
+| You have | `faf cards` gives you |
+|---|---|
+| `agent.fafa` | AI Catalog + ARD |
+| + `project.faf` | + A2A, MCP and registry cards |
+| `project.faf` filled out | the full context behind every card |
+
+- **Scripts ask nothing:** every answer is a flag (`--name`, `--domain`, `--url` or `--package`, `--skill`, `--example`, `--set-version`).
+- **Help says what each command touches,** with a "What touches what" footer and [docs.faf.one/side-effects](https://docs.faf.one/side-effects).
 
 ### The Always33 Edition (8.0)
 
@@ -161,6 +172,7 @@ faf memory show
 
 **Recent sprint**
 
+- ✪ [8.1.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.1.0) The Always33+ Edition — from nothing to listed in one command
 - ✪ [8.0.1](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.0.1) pnpm installs work — faf-scoring-kernel from npm
 - ✪ [8.0.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.0.0) The Always33 Edition — one engine, one number
 - 🧱 [7.16.2](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.16.2) `faf compile` emits FAFb wire v2 — same bytes as the faf-fafb golden
