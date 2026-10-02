@@ -11,6 +11,7 @@ import { join, resolve } from 'path';
 import { createInterface } from 'readline';
 import { answersToFafa, fafaYaml, type PackAnswers } from '../interop/pack.js';
 import { findFafFile } from '../interop/faf.js';
+import { cardsCommand } from './cards.js';
 import { safeWriteFile } from '../core/safe-write.js';
 import { dim, fafCyan } from '../ui/colors.js';
 
@@ -159,19 +160,12 @@ function complete(o: CardInitOptions): boolean {
   return Boolean(o.name && o.domain && o.description && o.setVersion && (o.url || o.package) && o.skill?.length);
 }
 
-/** The answers: flags first, then questions for the rest (at a terminal, or via `ask`). */
-async function gatherAnswers(options: CardInitOptions, dir: string, ask?: Ask): Promise<PackAnswers> {
-  const answers = answersFromFlags(options);
-  if (complete(options)) {return answers;}
-  if (ask) {return askMissing(answers, ask, dir);}
-  if (!process.stdin.isTTY) {return answers;}
-  console.log(`${fafCyan('card init')} ${dim('— seven answers, one agent.fafa')}\n`);
+/** A person at a terminal (or a test's `ask`), or nobody to ask. */
+function asker(ask?: Ask): { ask?: Ask; close: () => void } {
+  if (ask) {return { ask, close: () => {} };}
+  if (!process.stdin.isTTY) {return { close: () => {} };}
   const rl = createInterface({ input: process.stdin, output: process.stdout });
-  try {
-    return await askMissing(answers, (q) => new Promise((r) => rl.question(q, r)), dir);
-  } finally {
-    rl.close();
-  }
+  return { ask: (q) => new Promise((r) => rl.question(q, r)), close: () => rl.close() };
 }
 
 export async function cardInitCommand(options: CardInitOptions = {}, ask?: Ask): Promise<void> {
@@ -183,21 +177,42 @@ export async function cardInitCommand(options: CardInitOptions = {}, ask?: Ask):
     process.exit(2);
   }
 
-  const answers = await gatherAnswers(options, dir, ask);
-  let text: string;
+  // Flags first; a person at a terminal is asked for the rest.
+  const person = complete(options) ? { close: () => {} } : asker(ask);
   try {
-    text = fafaFromAnswers(answers);
-  } catch (e) {
-    console.error(`Error: ${(e as Error).message}`);
-    process.exit(2);
-  }
+    let answers = answersFromFlags(options);
+    if (person.ask) {
+      if (!ask) {console.log(`${fafCyan('card init')} ${dim('— seven answers, one agent.fafa')}\n`);}
+      answers = await askMissing(answers, person.ask, dir);
+    }
 
-  safeWriteFile(out, text, { root: dir });
-  console.log(`${fafCyan('✓')} ${out}`);
-  if ((answers.example_requests ?? []).length < 2) {
-    console.error(`${dim('note')} add 2-5 questions people ask it (metadata.cards.examples) — search finds it by these.`);
+    let text: string;
+    try {
+      text = fafaFromAnswers(answers);
+    } catch (e) {
+      console.error(`Error: ${(e as Error).message}`);
+      process.exit(2);
+    }
+
+    safeWriteFile(out, text, { root: dir });
+    console.log(`${fafCyan('✓')} ${out}`);
+    if ((answers.example_requests ?? []).length < 2) {
+      console.error(`${dim('note')} add 2-5 questions people ask it (metadata.cards.examples) — search finds it by these.`);
+    }
+
+    // Good: the catalog and ARD come from this file alone. Offered, not assumed.
+    if (person.ask) {
+      const go = (await person.ask(`Write your AI Catalog and ARD entries now? ${dim('(Y/n)')} `)).trim().toLowerCase();
+      if (go === '' || go.startsWith('y')) {
+        cardsCommand({ dir, fafa: out, target: 'catalog,ard' });
+        return;
+      }
+    }
+    console.log(dim('  next: faf cards --target catalog,ard'));
+    if (!findFafFile(dir)) {
+      console.log(dim('  better: add your project.faf (faf init): the A2A, MCP and registry cards come from it.'));
+    }
+  } finally {
+    person.close();
   }
-  // faf cards reads the .fafa beside a project.faf; say so when there isn't one.
-  const next = findFafFile(dir) ? 'faf cards --target catalog,ard' : 'faf init, then faf cards --target catalog,ard';
-  console.log(dim(`  next: ${next}`));
 }

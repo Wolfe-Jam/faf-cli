@@ -140,6 +140,49 @@ describe('TYRE: faf cards command', () => {
   });
 });
 
+describe('TYRE: faf cards — an agent.fafa with no project.faf (Good)', () => {
+  let testDir: string;
+  let errors: string[];
+  let errSpy: ReturnType<typeof spyOn>;
+
+  beforeEach(() => {
+    testDir = join(tmpdir(), `faf-cards-good-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    mkdirSync(testDir, { recursive: true });
+    writeFileSync(join(testDir, 'agent.fafa'), readFileSync(join(FIX, 'agent.fafa'), 'utf-8'));
+    errors = [];
+    errSpy = spyOn(console, 'error').mockImplementation((m: unknown) => {
+      errors.push(String(m));
+    });
+  });
+
+  afterEach(() => {
+    errSpy.mockRestore();
+    rmSync(testDir, { recursive: true, force: true });
+  });
+
+  test('writes the catalog and ARD, and points at the better step', () => {
+    cardsCommand({ dir: testDir });
+    expect(existsSync(join(testDir, '.well-known', 'ai-catalog.json'))).toBe(true);
+    expect(existsSync(join(testDir, '.well-known', 'ard.json'))).toBe(true);
+    expect(existsSync(join(testDir, '.well-known', 'agent-card.json'))).toBe(false);
+    expect(errors.join('\n')).toContain('better');
+  });
+
+  test('cards that point at project.faf still need one, and say how to get just these two', () => {
+    errSpy.mockRestore();
+    expectExit(2, () => cardsCommand({ dir: testDir, target: 'a2a' }));
+    errSpy = spyOn(console, 'error').mockImplementation(() => {});
+    expect(existsSync(join(testDir, '.well-known'))).toBe(false);
+  });
+
+  test('neither file: project.faf not found, as before', () => {
+    rmSync(join(testDir, 'agent.fafa'));
+    errSpy.mockRestore();
+    expectExit(2, () => cardsCommand({ dir: testDir, target: 'catalog' }));
+    errSpy = spyOn(console, 'error').mockImplementation(() => {});
+  });
+});
+
 describe('ENGINE: fixture golden — projector vs tests/fixtures/cards', () => {
   test('real fixture files project a proto-complete A2A card + identical block', () => {
     const faf = readFaf(join(FIX, 'project.faf'));

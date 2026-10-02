@@ -131,9 +131,18 @@ describe('TYRE: faf card init', () => {
       'Will it rain in Leeds tomorrow?',
       'What is the forecast for Tokyo this weekend?',
       '', // no more questions
+      '', // write the catalog and ARD now: accept yes
     ]);
-    await cardInitCommand({ dir }, ask);
-    expect(asked.length).toBe(13);
+    const errSpy = spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      await cardInitCommand({ dir }, ask);
+    } finally {
+      errSpy.mockRestore();
+    }
+    expect(asked.length).toBe(14);
+    // Good, in one command: the agent.fafa, then the catalog and ARD from it.
+    expect(existsSync(join(dir, '.well-known', 'ai-catalog.json'))).toBe(true);
+    expect(existsSync(join(dir, '.well-known', 'ard.json'))).toBe(true);
     const fromFlags = parseYaml(readFileSync(join(dir, 'from-flags.fafa'), 'utf-8'));
     const fromQuestions = parseYaml(readFileSync(join(dir, 'agent.fafa'), 'utf-8'));
     expect(fromQuestions).toEqual(fromFlags);
@@ -182,13 +191,23 @@ describe('TYRE: faf card init', () => {
     expect(existsSync(join(dir, 'agent.fafa'))).toBe(false);
   });
 
-  test('the next step names faf init when there is no project.faf yet', async () => {
+  test('from flags: names the next step, and the better one when there is no project.faf', async () => {
     const lines: string[] = [];
     logSpy.mockImplementation((m: unknown) => {
       lines.push(String(m));
     });
     await cardInitCommand({ ...WEATHER, dir });
-    expect(lines.join('\n')).toContain('faf init, then faf cards --target catalog,ard');
+    const said = lines.join('\n');
+    expect(said).toContain('next: faf cards --target catalog,ard');
+    expect(said).toContain('better: add your project.faf (faf init)');
+    expect(existsSync(join(dir, '.well-known'))).toBe(false); // flags never write more than asked
+  });
+
+  test('declining the offer writes only the agent.fafa', async () => {
+    const { ask } = scripted(['1.2.0', 'n']); // version asked, then the offer declined
+    await cardInitCommand({ ...WEATHER, setVersion: undefined, dir }, ask);
+    expect(existsSync(join(dir, 'agent.fafa'))).toBe(true);
+    expect(existsSync(join(dir, '.well-known'))).toBe(false);
   });
 
   test('short names and skills parse as people type them', () => {

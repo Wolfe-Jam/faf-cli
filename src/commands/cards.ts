@@ -1,6 +1,7 @@
 import { existsSync, lstatSync } from 'fs';
 import { dirname, join, resolve } from 'path';
 import { findFafFile, readFaf } from '../interop/faf.js';
+import type { FafData } from '../core/types.js';
 import {
   A2A_CONTEXT_URI,
   findFafaFile,
@@ -30,6 +31,9 @@ export interface CardsCommandOptions {
   /** Replace a card file faf cannot prove it wrote (edited since, or no faf mark). */
   force?: boolean;
 }
+
+/** The targets an agent.fafa can project with no project.faf. */
+const FAFA_ONLY: CardTarget[] = ['catalog', 'ard'];
 
 /** True when something is at `path` — a file, or a link (even a dangling one). */
 function present(path: string): boolean {
@@ -99,15 +103,24 @@ export function cardsCommand(options: CardsCommandOptions = {}): void {
     process.exit(2);
   }
 
-  const fafPath = options.faf ? resolve(options.faf) : findFafFile(dir);
-  if (!fafPath || !existsSync(fafPath)) {
-    console.error("Error: project.faf not found\n\n  Run 'faf init' to create one.");
-    process.exit(2);
-  }
-  const faf = readFaf(fafPath);
-
   const fafaPath = options.fafa ? resolve(options.fafa) : findFafaFile(dir);
   const fafa = fafaPath && existsSync(fafaPath) ? readFafa(fafaPath) : undefined;
+
+  // The catalog and ARD come from the .fafa alone; A2A, MCP and registry cards
+  // point at project.faf. So with no project.faf, an agent.fafa still gets
+  // the catalog and ARD, and nothing that would point at a missing file.
+  const fafPath = options.faf ? resolve(options.faf) : findFafFile(dir);
+  const hasFaf = Boolean(fafPath && existsSync(fafPath));
+  if (!hasFaf) {
+    const wanted = targets ?? (fafa ? FAFA_ONLY : undefined);
+    if (!fafa || !wanted || wanted.some((t) => !FAFA_ONLY.includes(t))) {
+      const alone = fafa ? '\n  With only an agent.fafa: faf cards --target catalog,ard' : '';
+      console.error(`Error: project.faf not found\n\n  Run 'faf init' to create one.${alone}`);
+      process.exit(2);
+    }
+    targets = wanted;
+  }
+  const faf: FafData = hasFaf ? readFaf(fafPath as string) : {};
 
   let projected;
   try {
@@ -237,6 +250,9 @@ export function cardsCommand(options: CardsCommandOptions = {}): void {
   }
   for (const { out, changed } of written) {
     console.error(`${fafCyan('✓')} ${out}${changed ? '' : ` ${dim('(unchanged)')}`}`);
+  }
+  if (!hasFaf) {
+    console.error(dim('better: add your project.faf (faf init): the A2A, MCP and registry cards come from it.'));
   }
   if (refused > 0) {process.exit(1);}
 }
