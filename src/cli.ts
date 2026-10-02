@@ -94,14 +94,14 @@ program
 
 program
   .command('bench [action] [answersFile]')
-  .description('AI-grounding benchmark — cold vs with-faf (the .faf is the answer key)')
+  .description('AI-grounding benchmark — cold vs with-faf (the .faf is the answer key; grade saves .faf-bench.json)')
   .option('--json', 'Output as JSON')
   .option('--cold', 'Grade as the without-context run')
   .option('--faf', 'Grade as the with-context run')
   .option('--tokens <n>', 'Tokens used in the run (reported by the agent)')
   .option('--model <name>', 'Model that answered (reported)')
   .option('--file <path>', 'Path to project.faf (default: discovered)')
-  .option('--submit', 'Submit the full-pair receipt to the public bench ledger')
+  .option('--submit', 'Submit the full-pair receipt to the public bench ledger (mcpaas.live; --endpoint to change)')
   .option('--endpoint <url>', 'Override the submit endpoint')
   .action((action, answersFile, options) => benchCommand(action, answersFile, options));
 
@@ -113,7 +113,7 @@ program
 
 program
   .command('sync')
-  .description('.faf → CLAUDE.md (--direction pull: Trophy-gated backfill into .faf)')
+  .description('.faf → CLAUDE.md — writes faf\'s block only; Pro also updates Claude Code\'s MEMORY.md (--direction pull: Trophy-gated backfill into .faf)')
   .option('--watch', 'Watch for changes')
   .option('--direction <dir>', 'auto|push write CLAUDE.md from .faf; pull backfills .faf at ✪ Trophy', 'auto')
   .action((options) => syncCommand(options));
@@ -129,14 +129,14 @@ program
 
 program
   .command('decompile <file>')
-  .description('Decompile .fafb to JSON')
+  .description('Decompile .fafb to JSON (prints; --output writes a file)')
   .option('--output <path>', 'Output path')
   .option('--force', 'With --output: replace a file faf cannot prove it wrote (edited since, or not a faf decompile)')
   .action((file, options) => decompileCommand(file, options));
 
 program
   .command('git <url>')
-  .description('Instant scored context from any GitHub repo (any branch/tag with --ref)')
+  .description('Instant scored context from any GitHub repo (any branch/tag with --ref) — shallow-clones to a temp dir, writes ./project.faf (--stdout to print)')
   .option('--ref <ref>', 'Clone at a specific branch or tag (versioned context)')
   .option('--output <path>', 'Write to a custom path (default: ./project.faf)')
   .option('--force', 'Overwrite an existing project.faf')
@@ -181,12 +181,12 @@ program
 
 program
   .command('export')
-  .description('Export context files from .faf')
+  .description('Write agent files from .faf — bare: AGENTS.md, .cursorrules, GEMINI.md, Copilot instructions, project.html')
   .option('--agents', 'Author AGENTS.md')
   .option('--cursor', 'Author .cursorrules')
   .option('--gemini', 'Author GEMINI.md')
   .option('--copilot', 'Author .github/copilot-instructions.md (GitHub Copilot)')
-  .option('--grok', 'Wire grok-faf-mcp into .grok/config.toml')
+  .option('--grok', 'Wire grok-faf-mcp into .grok/config.toml (opt-in; never on --all)')
   .option('--llms', 'Author llms.txt (llmstxt.org view of authored 6Ws — opt-in)')
   .option('--conductor', 'Author conductor config')
   .option('--html', 'Author project.html (visual render of project.faf)')
@@ -272,12 +272,12 @@ program
 
 program
   .command('clear')
-  .description('Clear cached data')
+  .description('Delete faf\'s cached clones (faf-git-* temp dirs)')
   .action(() => clearCommand());
 
 program
   .command('convert')
-  .description('Convert .faf to other formats')
+  .description('Print .faf as YAML or JSON (writes nothing)')
   .option('--json', 'Output as JSON')
   .action((options) => convertCommand(options));
 
@@ -318,12 +318,12 @@ program
 
 program
   .command('pro [subcommand]')
-  .description('Pro features & licensing')
+  .description('Pro features & licensing (activate opens faf.one/pro)')
   .action((subcommand) => proCommand(subcommand));
 
 program
   .command('share')
-  .description('Share .faf via URL')
+  .description('Print a faf.one share link for .faf (built locally — nothing is sent)')
   .option('--copy', 'Copy to clipboard')
   .option('--raw', 'Output encoded string only')
   .action((options) => shareCommand(options));
@@ -342,7 +342,7 @@ program
 
 program
   .command('taf [subcommand]')
-  .description('TAF Receipts — `faf taf setup` wires the CI receipt printer; bare snapshot deprecated → faf score --json')
+  .description('TAF Receipts — `faf taf setup` prints the CI receipt workflow (--write creates it); bare snapshot deprecated → faf score --json')
   .option('--output <path>', 'Write score snapshot to file')
   .option('--write', 'taf setup: create .github/workflows/taf.yml')
   .option('--force', 'With --output: replace a file faf cannot prove it wrote (edited since, or not a TAF snapshot)')
@@ -352,12 +352,12 @@ program
 
 program
   .command('ai [subcommand]')
-  .description('Ask Claude for suggestions about project.faf (analyze)')
+  .description('Ask Claude for suggestions about project.faf (analyze) — sends it to the Anthropic API, writes nothing')
   .action((subcommand) => aiCommand(subcommand));
 
 program
   .command('conductor [subcommand] [path]')
-  .description('Conductor integration')
+  .description('Conductor config — import <path> merges into .faf; export prints it')
   .action((subcommand, path) => conductorCommand(subcommand, path));
 
 program
@@ -370,7 +370,7 @@ program
 
 program
   .command('memory [subcommand] [arg]')
-  .description('.fafm soul ops — convert Claude memory, etch, recall, ls, show')
+  .description('.fafm soul ops — convert Claude memory, etch, recall, ls, show (etch and convert write soul.fafm)')
   .option('-f, --file <path>', 'Soul file (default: ./soul.fafm)')
   .option('-o, --output <path>', 'Output path (convert)')
   .option('--namepoint <handle>', 'Namepoint for new/converted soul')
@@ -392,7 +392,7 @@ program.command('cursor', { hidden: true }).action(() => exportCommand({ cursor:
 program.command('gemini', { hidden: true }).action(() => exportCommand({ gemini: true }));
 program.command('grok', { hidden: true }).action(() => exportCommand({ grok: true }));
 program.command('llms', { hidden: true }).action(() => exportCommand({ llms: true }));
-program.command('validate', { hidden: true }).action((file: string) => checkCommand(file));
+program.command('validate [file]', { hidden: true }).action((file?: string) => checkCommand(file));
 program.command('yolo', { hidden: true }).action(() => initCommand({ yolo: true }));
 
 // === Parse and run ===
@@ -449,6 +449,11 @@ if (process.argv.length <= 2) {
       '  faf git <url> [--ref]       instant scored context from any repo, any branch/tag',
       '',
       '  "FAF is to Context what Git is to Versions."',
+      '',
+      'What touches what:',
+      '  read-only     score check dna context drift log convert search share, diff (no --install-driver)',
+      '  sends data    ai analyze (Anthropic API) · bench --submit (mcpaas.live)',
+      '  every command https://docs.faf.one/side-effects',
       '',
     ].join('\n'),
   );
