@@ -89,7 +89,7 @@ describe('AERO: facts-not-bloat curation', () => {
   });
 });
 
-describe('faf meta tag + refresh hint', () => {
+describe('AERO: faf meta tag + refresh hint', () => {
   test('includes the refresh command', () => {
     const md = renderGeminiMd(BARE);
     expect(md).toContain('faf export --gemini');

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'bun:test';
 import { splitCommandNote, commandOnly, NOTE_SEPARATOR } from '../../src/interop/command-note.js';
 
-describe('splitCommandNote', () => {
+describe('ENGINE: splitCommandNote', () => {
   it('returns the command and no note when the value carries none', () => {
     expect(splitCommandNote('bun run build')).toEqual({ cmd: 'bun run build', note: null });
   });
@@ -49,7 +49,7 @@ describe('splitCommandNote', () => {
   });
 });
 
-describe('commandOnly', () => {
+describe('ENGINE: commandOnly', () => {
   it('drops a note so prose never shows one', () => {
     expect(commandOnly('bun run test — must pass before a change is done')).toBe('bun run test');
   });

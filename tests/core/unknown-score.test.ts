@@ -2,7 +2,7 @@
  * WJTTC BRAKE — an About Repo with no source_score has an UNKNOWN score, and
  * nothing renders it as a number (#47).
  *
- * scoreFafYaml returns score -1 for it ("honest unknown"), but nothing said so:
+ * scoreFafYaml returns score -1 for it, an "honest unknown", but nothing said so:
  * `faf score` printed "♡ -1%", claude-faf-mcp showed "-1/100 (-1%)" and
  * attested it valid, and `faf refresh` recorded -1 as the Birth DNA. The result
  * now carries `unknown: true`, `scoreText` renders "unknown (—)", and faf's own
