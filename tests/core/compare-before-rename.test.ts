@@ -78,7 +78,7 @@ function editDuringWrite(file: string, edit: string | null, fn: () => unknown): 
 }
 
 describe('BRAKE: safeWriteFile({ expect }) writes only over the bytes the caller read', () => {
-  test('bytes that still match are written; bytes that no longer match are refused in one line, the file on disk kept', () => {
+  test('BRAKE: bytes that still match are written; bytes that no longer match are refused in one line, the file on disk kept', () => {
     const d = tmp();
     const f = join(d, 'notes.md');
     writeFileSync(f, 'one\n');
@@ -94,7 +94,7 @@ describe('BRAKE: safeWriteFile({ expect }) writes only over the bytes the caller
     expect(temps(d)).toEqual([]);
   });
 
-  test('expect null: a missing file stays missing only if nothing appeared; a deleted file is not re-created', () => {
+  test('BRAKE: expect null: a missing file stays missing only if nothing appeared; a deleted file is not re-created', () => {
     const d = tmp();
     const f = join(d, 'new.md');
     safeWriteFile(f, 'created\n', { expect: null });

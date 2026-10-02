@@ -6,7 +6,7 @@ import { releaseFrom } from '../scripts/site-stamp.mjs';
 
 const root = join(import.meta.dir, '..');
 
-describe('site-stamp: the page shows the current release', () => {
+describe('PIT: site-stamp: the page shows the current release', () => {
   test('reads version, edition and oneliner from the real CHANGELOG', () => {
     const { version } = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
     const rel = releaseFrom(readFileSync(join(root, 'CHANGELOG.md'), 'utf8'), version);

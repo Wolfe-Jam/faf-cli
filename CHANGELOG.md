@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v8.0.1 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v8.1.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -7,6 +7,22 @@ All notable changes to faf-cli will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [8.1.0] - 2026-10-02 — The Always33+ Edition
+
+**From nothing to listed in one command: `faf card init` asks seven questions and writes your agent.fafa, your AI Catalog entry and your ARD entry.** 2100 tests.
+
+### Added
+- **`faf card init`.** Asks for name, short name, domain, what it does, version, where it runs (a URL, or an npm package) and what it can do, plus 2-5 questions people ask it, and writes `agent.fafa` with the pack projector's `answersToFafa`. At a terminal it then offers to write `.well-known/ai-catalog.json` and `.well-known/ard.json` (Enter = yes). Every answer is also a flag (`--name`, `--domain`, `--url` or `--package`, `--skill "Name: description"`, `--example`, `--set-version`), so scripts ask nothing and get only the `agent.fafa`. It never replaces an existing `agent.fafa` without `--force`; a missing answer is named and nothing is written.
+- **Help says what each command touches** (#143): `share` sends nothing, `convert` writes nothing, `ai analyze` sends `project.faf` to the Anthropic API, and the rest. A "What touches what" footer in `faf --help` links https://docs.faf.one/side-effects.
+
+### Changed
+- **Good, Better, Best for `faf cards`.** An `agent.fafa` alone now gets the AI Catalog and ARD entries; `project.faf` is no longer required for those two, which never used it. Add `project.faf` for the A2A, MCP and registry cards, which point at it. With no `project.faf`, `faf cards` writes the two it can and names the better step; asking for A2A, MCP or registry without one still says to run `faf init`.
+- `faf cards --help` says what it writes, Good to Better.
+- Every test in `tests/` carries a WJTTC tier: `faf wjttc` reports 0 untiered (was 51).
+
+### Fixed
+- **The hidden `faf validate` alias crashed** with `ERR_INVALID_ARG_TYPE` (#143). It takes `[file]` like `check`.
 
 ## [8.0.1] - 2026-09-30
 

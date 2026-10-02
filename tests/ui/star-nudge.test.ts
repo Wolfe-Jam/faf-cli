@@ -20,7 +20,7 @@ const ctx = (o: Partial<NudgeContext> = {}): NudgeContext => ({
   ...o,
 });
 
-describe('shouldNudge — fires on a genuine win', () => {
+describe('AERO: shouldNudge — fires on a genuine win', () => {
   test('win + interactive + not-CI + never-shown → true', () => {
     expect(shouldNudge(ctx())).toBe(true);
   });
@@ -29,7 +29,7 @@ describe('shouldNudge — fires on a genuine win', () => {
   });
 });
 
-describe('shouldNudge — every guard blocks it', () => {
+describe('AERO: shouldNudge — every guard blocks it', () => {
   test('below the win threshold (94) → false', () => {
     expect(shouldNudge(ctx({ score: 94 }))).toBe(false);
   });
@@ -44,7 +44,7 @@ describe('shouldNudge — every guard blocks it', () => {
   });
 });
 
-describe('shouldNudge — throttle window', () => {
+describe('AERO: shouldNudge — throttle window', () => {
   test('shown 10 days ago (< 30) → false', () => {
     expect(shouldNudge(ctx({ lastShownMs: NOW - 10 * DAY }))).toBe(false);
   });
@@ -60,7 +60,7 @@ describe('shouldNudge — throttle window', () => {
   });
 });
 
-describe('shouldNudge — lifetime cap (we can\'t detect a star, so we stop asking)', () => {
+describe('AERO: shouldNudge — lifetime cap (we can\'t detect a star, so we stop asking)', () => {
   test('under the cap → true', () => {
     expect(shouldNudge(ctx({ shownCount: 2 }))).toBe(true);
   });
