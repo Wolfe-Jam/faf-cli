@@ -47,7 +47,6 @@ jest.config.js
 .gitignore
 
 # Never publish secret sauce repos
-faf-engine/
 faf-engine-private/
 engine-mk2/
 

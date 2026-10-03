@@ -49,6 +49,6 @@ export default tseslint.config(
     },
   },
   {
-    ignores: ['dist/**', 'node_modules/**', 'coverage/**', 'faf-engine/**', '**/*.js'],
+    ignores: ['dist/**', 'node_modules/**', 'coverage/**', '**/*.js'],
   }
 );
