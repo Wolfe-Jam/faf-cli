@@ -88,6 +88,15 @@ describe('PIT: YOLO Infrastructure Safety', () => {
     expect(pkg.scripts?.test).toMatch(/^bun test\b/);
   });
 
+  test('the Claude Code plugin manifest carries the package version and the team address', () => {
+    // .claude-plugin/plugin.json is what Claude Code shows when faf-cli is installed as a plugin.
+    // It sat at 6.6.1 through v8.1.0; a release that forgets to bump it fails here.
+    const pkg = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf-8'));
+    const plugin = JSON.parse(readFileSync(join(__dirname, '../.claude-plugin/plugin.json'), 'utf-8'));
+    expect(plugin.version).toBe(pkg.version);
+    expect(plugin.author?.email).toBe('team@faf.one');
+  });
+
   test('source files are in correct directories', () => {
     const srcDirs = readdirSync(join(__dirname, '../src'), { withFileTypes: true })
       .filter(d => d.isDirectory())
