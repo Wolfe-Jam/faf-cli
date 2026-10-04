@@ -21,11 +21,11 @@ describe('PIT: FRAMEWORKS catalog', () => {
   });
 
   test('all signals have valid types', () => {
-    const validTypes = new Set(['dependency', 'devDependency', 'file', 'content']);
+    const validTypes = new Set(['dependency', 'devDependency', 'anyDependency', 'file', 'content']);
     for (const fw of FRAMEWORKS) {
       for (const signal of fw.signals) {
         expect(validTypes.has(signal.type)).toBe(true);
-        if (signal.type === 'dependency' || signal.type === 'devDependency') {
+        if (signal.type === 'dependency' || signal.type === 'devDependency' || signal.type === 'anyDependency') {
           expect(signal.key).toBeTruthy();
         }
         if (signal.type === 'file') {

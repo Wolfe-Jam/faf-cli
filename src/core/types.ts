@@ -168,7 +168,7 @@ export interface DetectedFramework {
 }
 
 /** Signal types for framework detection */
-export type SignalType = 'dependency' | 'file' | 'devDependency' | 'content';
+export type SignalType = 'dependency' | 'file' | 'devDependency' | 'anyDependency' | 'content';
 
 export interface Signal {
   type: SignalType;
