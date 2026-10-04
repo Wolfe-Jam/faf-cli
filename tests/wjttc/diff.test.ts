@@ -276,7 +276,8 @@ describe('WJTTC — faf diff', () => {
       g(['add', 'project.faf']); g(['commit', '-q', '-m', 'a']);
       // install the driver, pointed at the LOCAL cli (end users get the global `faf`)
       const cli = join(import.meta.dir, '../../src/cli.ts');
-      g(['config', 'diff.faf.command', `bun ${cli} diff-driver`]);
+      // Forward slashes: git runs the driver through sh, which reads backslashes as escapes.
+      g(['config', 'diff.faf.command', `bun ${cli.replace(/\\/g, '/')} diff-driver`]);
       writeFileSync(join(dir, '.gitattributes'), '*.faf diff=faf\n');
       writeFileSync(join(dir, 'project.faf'), yaml(B)); // uncommitted edit
       const out = execFileSync('git', ['diff'], { cwd: dir, encoding: 'utf-8' });

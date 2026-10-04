@@ -2,7 +2,7 @@ import { describe, test, expect, beforeEach, afterEach, spyOn } from 'bun:test';
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'fs';
 import { createRequire } from 'module';
 import { tmpdir } from 'os';
-import { dirname, join } from 'path';
+import { dirname, join, basename } from 'path';
 import { parse as parseYaml } from 'yaml';
 import Ajv2020 from 'ajv/dist/2020.js';
 import {
@@ -286,7 +286,7 @@ describe('BRAKE: faf card init — refuses what it must not write', () => {
 
   test('--out outside the folder — refused, nothing written there', async () => {
     const outside = join(tmpdir(), `faf-card-escape-${Date.now()}.fafa`);
-    await expect(cardInitCommand({ ...WEATHER, dir: t.dir(), out: `../${outside.split('/').pop()}` })).rejects.toThrow(/outside/);
+    await expect(cardInitCommand({ ...WEATHER, dir: t.dir(), out: `../${basename(outside)}` })).rejects.toThrow(/outside/);
     expect(existsSync(outside)).toBe(false);
   });
 

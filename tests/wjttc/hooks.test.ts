@@ -70,7 +70,8 @@ describe('WJTTC — faf hooks', () => {
         expect(hook).toContain('command -v'); // PATH guard — skip if faf absent
         expect(hook).toContain('grep -qE'); // only run when a .faf is staged
         expect(hook).toContain('|| true'); // warn mode never blocks
-        expect(statSync(hookPath(dir)).mode & 0o111).toBeGreaterThan(0); // executable
+        // Executable bit — POSIX only; Windows has none, and git runs hooks there through sh.
+        if (process.platform !== 'win32') {expect(statSync(hookPath(dir)).mode & 0o111).toBeGreaterThan(0);}
       } finally { rmSync(dir, { recursive: true, force: true }); }
     });
 
