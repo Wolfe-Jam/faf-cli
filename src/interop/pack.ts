@@ -293,6 +293,9 @@ export interface PackAnswers {
 }
 
 const HANDLE_RE = /^[a-z0-9][a-z0-9._-]*$/;
+/** npm's own package-name rule: lowercase, URL-safe, optionally `@scope/`. */
+const NPM_NAME_RE = /^(@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/;
+const ENDPOINT_PROTOCOLS = ['a2a', 'mcp'];
 const DOMAIN_RE = /^(?=.{1,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/;
 
 function clean(s: unknown): string {
@@ -327,9 +330,13 @@ function capabilitiesFrom(a: PackAnswers, keywords: string[]): FafaCapability[] 
     }));
 }
 
+/** A package people install: an npm one must carry npm's own name — the `.fafa`
+ *  names it as the MCP server's stdio command, so nothing else gets through. */
 function packagesFrom(a: PackAnswers): PackPackage[] {
-  return (a.packages ?? [])
-    .filter((p) => clean(p.registryType) && clean(p.identifier))
+  const packages = (a.packages ?? []).filter((p) => clean(p.registryType) && clean(p.identifier));
+  const bad = packages.find((p) => clean(p.registryType) === 'npm' && !NPM_NAME_RE.test(clean(p.identifier)));
+  if (bad) {throw new Error(`Package "${clean(bad.identifier)}" is not an npm package name (e.g. weather-mcp or @acme/weather).`);}
+  return packages
     .map((p) => ({
       registryType: clean(p.registryType),
       identifier: clean(p.identifier),
@@ -337,11 +344,21 @@ function packagesFrom(a: PackAnswers): PackPackage[] {
     }));
 }
 
+/** A URL people call: http(s) only, speaking a2a or mcp. */
+function checkEndpoint(e: { protocol: string; url: string }): void {
+  if (!/^https?:\/\/[^\s/]+/i.test(clean(e.url))) {
+    throw new Error(`Where it runs: "${clean(e.url)}" is not an http(s) URL (or give an npm package).`);
+  }
+  if (!ENDPOINT_PROTOCOLS.includes(clean(e.protocol).toLowerCase())) {
+    throw new Error(`Protocol "${clean(e.protocol)}": a2a or mcp.`);
+  }
+}
+
 function endpointsFrom(a: PackAnswers, packages: PackPackage[]): FafaEndpoint[] {
+  const urls = (a.endpoints ?? []).filter((e) => clean(e.url));
+  urls.forEach(checkEndpoint);
   const endpoints: FafaEndpoint[] = [
-    ...(a.endpoints ?? [])
-      .filter((e) => clean(e.url))
-      .map((e) => ({ protocol: clean(e.protocol).toLowerCase(), transport: 'http', location: clean(e.url) })),
+    ...urls.map((e) => ({ protocol: clean(e.protocol).toLowerCase(), transport: 'http', location: clean(e.url) })),
     ...packages.map((p) => ({ protocol: 'mcp', transport: 'stdio', location: p.identifier })),
   ];
   if (endpoints.length === 0) {throw new Error('Missing answer: endpoints (a URL, or a package people install)');}

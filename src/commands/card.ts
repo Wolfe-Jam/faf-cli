@@ -73,9 +73,10 @@ function packageVersion(dir: string): string | undefined {
   }
 }
 
-/** "Where it runs": a URL becomes an endpoint, anything else an npm package. */
+/** "Where it runs": anything with a scheme is a URL (npm names never carry a
+ *  `:`), so `javascript:…` is refused as a URL, not kept as a package. */
 function whereItRuns(answers: PackAnswers, where: string, protocol: string): void {
-  if (/^https?:\/\//i.test(where)) {
+  if (where.includes(':')) {
     answers.endpoints = [{ protocol, url: where }];
   } else {
     answers.packages = [{ registryType: 'npm', identifier: where }];

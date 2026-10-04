@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - With no `project.faf`, a second `faf cards` rewrote the AI Catalog and ARD with a new `updatedAt`. It now keeps the stamp, so a run that changes nothing writes nothing.
 - `faf card init` with an npm package never offers the registry step without a `server.json` to patch.
+- **`faf card init` and `buildPack` refuse what a card must not carry:** a "where it runs" that is not an http(s) URL (`javascript:`, `ftp:`, `file:` used to become an npm package), an npm package that is not an npm package name (`rm -rf /` used to become the MCP server's stdio command), and a protocol other than `a2a` or `mcp` from flags.
 
 ## [8.1.1] - 2026-10-04
 
