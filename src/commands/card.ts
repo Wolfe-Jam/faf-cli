@@ -12,6 +12,7 @@ import { createInterface } from 'readline';
 import { answersToFafa, fafaYaml, type PackAnswers } from '../interop/pack.js';
 import { findFafFile } from '../interop/faf.js';
 import { cardsCommand } from './cards.js';
+import { betterTargets, readFafa, type CardTarget } from '../interop/cards.js';
 import { safeWriteFile } from '../core/safe-write.js';
 import { dim, fafCyan } from '../ui/colors.js';
 
@@ -35,6 +36,15 @@ export interface CardInitOptions {
 export type Ask = (question: string) => Promise<string>;
 
 const PROTOCOLS = ['a2a', 'mcp'];
+
+/** Each card's name, as a person reads it. */
+const CARD_NAMES: Record<CardTarget, string> = {
+  a2a: 'A2A card',
+  mcp: 'MCP Server Card',
+  registry: 'registry server.json',
+  catalog: 'AI Catalog',
+  ard: 'ARD',
+};
 
 /** "Weather Agent" → "weather-agent": the short name a URN can carry. */
 export function shortNameFrom(name: string): string {
@@ -63,9 +73,10 @@ function packageVersion(dir: string): string | undefined {
   }
 }
 
-/** "Where it runs": a URL becomes an endpoint, anything else an npm package. */
+/** "Where it runs": anything with a scheme is a URL (npm names never carry a
+ *  `:`), so `javascript:…` is refused as a URL, not kept as a package. */
 function whereItRuns(answers: PackAnswers, where: string, protocol: string): void {
-  if (/^https?:\/\//i.test(where)) {
+  if (where.includes(':')) {
     answers.endpoints = [{ protocol, url: where }];
   } else {
     answers.packages = [{ registryType: 'npm', identifier: where }];
@@ -200,17 +211,19 @@ export async function cardInitCommand(options: CardInitOptions = {}, ask?: Ask):
       console.error(`${dim('note')} add 2-5 questions people ask it (metadata.cards.examples) — search finds it by these.`);
     }
 
-    // Good: the catalog and ARD come from this file alone. Offered, not assumed.
+    // BETTER: the cards this file gives alone, offered (registry only patches a server.json already there).
+    const better = betterTargets(readFafa(out)).filter((t) => t !== 'registry' || existsSync(join(dir, 'server.json')));
+    const named = better.map((t) => CARD_NAMES[t]).join(', ');
     if (person.ask) {
-      const go = (await person.ask(`Write your AI Catalog and ARD entries now? ${dim('(Y/n)')} `)).trim().toLowerCase();
+      const go = (await person.ask(`Write your ${named} now? ${dim('(Y/n)')} `)).trim().toLowerCase();
       if (go === '' || go.startsWith('y')) {
-        cardsCommand({ dir, fafa: out, target: 'catalog,ard' });
+        cardsCommand({ dir, fafa: out, target: better.join(',') });
         return;
       }
     }
-    console.log(dim('  next: faf cards --target catalog,ard'));
+    console.log(dim(`  next: faf cards --target ${better.join(',')}`));
     if (!findFafFile(dir)) {
-      console.log(dim('  better: add your project.faf (faf init): the A2A, MCP and registry cards come from it.'));
+      console.log(dim('  BEST: add your project.faf (faf init) for FAF context on every card.'));
     }
   } finally {
     person.close();

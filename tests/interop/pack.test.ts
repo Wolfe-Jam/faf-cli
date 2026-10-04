@@ -21,6 +21,7 @@ import {
   SERVER_CARD_SCHEMA,
   SERVER_JSON_SCHEMA,
   type PackAnswers,
+  type PackOptions,
 } from '../../src/interop/pack.js';
 import { buildA2ACard, A2A_CONTEXT_URI } from '../../src/interop/cards.js';
 
@@ -60,10 +61,18 @@ const installedMcp: PackAnswers = {
 };
 
 describe('BRAKE: pack.ts stays pure', () => {
-  test('imports nothing but yaml, so it runs in a browser', () => {
-    const src = readFileSync(join(import.meta.dir, '../../src/interop/pack.ts'), 'utf8');
-    const sources = [...src.matchAll(/^import[^'"]*['"]([^'"]+)['"]/gm)].map((m) => m[1]);
-    expect(sources).toEqual(['yaml']);
+  // Runtime imports only: `import type` is erased at build time.
+  const runtimeImports = (file: string): string[] => {
+    const src = readFileSync(join(import.meta.dir, '../../src/interop', file), 'utf8');
+    return [...src.matchAll(/^import(?! type)[^'"]*['"]([^'"]+)['"]/gm)].map((m) => m[1]);
+  };
+
+  test('imports nothing but yaml and the pure context block, so it runs in a browser', () => {
+    expect(runtimeImports('pack.ts')).toEqual(['yaml', './context-block.js']);
+  });
+
+  test('the context block imports nothing at run time', () => {
+    expect(runtimeImports('context-block.ts')).toEqual([]);
   });
 });
 
@@ -176,6 +185,7 @@ describe('ENGINE: .fafa → cards', () => {
     expect(entries.map((e) => [e.identifier, e.type, e.url])).toEqual([
       ['urn:air:example.com:a2a:weather', 'application/a2a-agent-card+json', 'https://example.com/.well-known/agent-card.json'],
       ['urn:air:example.com:mcp:weather', 'application/mcp-server-card+json', 'https://mcp.example.com/mcp/server-card'],
+      ['urn:air:example.com:agent:weather', 'application/vnd.fafa+yaml', 'https://example.com/.well-known/fafa'],
     ]);
     expect(entries.every((e) => e.displayName === 'Weather MCP')).toBe(true);
     const ard = (pack.ard as { entries: Array<Record<string, unknown>> }).entries;
@@ -183,24 +193,44 @@ describe('ENGINE: .fafa → cards', () => {
     expect(pack.ai_catalog).toMatchObject({ specVersion: '1.0', host: { displayName: 'Weather MCP', identifier: 'example.com' } });
   });
 
-  test('the .fafa is listed only when asked', () => {
+  test('the .fafa is listed by default — it is the source of the cards; listFafa: false leaves it out', () => {
     const fafa = answersToFafa(agent);
-    const plain = projectPack(fafa, { cards: ['a2a', 'ai_catalog'], now: NOW });
-    const listed = projectPack(fafa, { cards: ['a2a', 'ai_catalog'], now: NOW, listFafa: true });
+    const listed = projectPack(fafa, { cards: ['a2a', 'ai_catalog'], now: NOW });
+    const plain = projectPack(fafa, { cards: ['a2a', 'ai_catalog'], now: NOW, listFafa: false });
     const types = (p: typeof plain) => (p.ai_catalog as { entries: Array<{ type: string }> }).entries.map((e) => e.type);
-    expect(types(plain)).toEqual(['application/a2a-agent-card+json']);
     expect(types(listed)).toEqual(['application/a2a-agent-card+json', 'application/vnd.fafa+yaml']);
+    expect(types(plain)).toEqual(['application/a2a-agent-card+json']);
   });
 
-  test('neutral by default: no FAF extension, media type or domain in any card', () => {
-    const pack = buildPack(
+  const everyCard = (opts: Partial<PackOptions> = {}) =>
+    buildPack(
       { ...hostedMcp, endpoints: [...hostedMcp.endpoints!, { protocol: 'a2a', url: 'https://example.com/a2a' }], packages: installedMcp.packages },
-      { cards: ['a2a', 'server_card', 'server_json', 'ai_catalog', 'ard'], now: NOW },
+      { cards: ['a2a', 'server_card', 'server_json', 'ai_catalog', 'ard'], now: NOW, ...opts },
     );
+
+  test('BETTER (no project.faf): no FAF context in any card — nothing points at a project.faf', () => {
+    const pack = everyCard();
     const cards = JSON.stringify([pack.a2a, pack.server_card, pack.server_json, pack.ai_catalog, pack.ard]);
     expect(cards).not.toContain('faf.one');
-    expect(cards).not.toContain('vnd.faf');
+    expect(cards).not.toContain('vnd.faf+yaml');
+    expect(cards).not.toContain('project.faf');
     expect(cards).not.toContain('one.faf/context');
+    expect(pack.a2a!.capabilities.extensions).toEqual([]);
+  });
+
+  test('BEST (+ project.faf): the same cards plus FAF context; identity stays the .fafa', () => {
+    const better = everyCard();
+    const best = everyCard({ faf: { project: { name: 'other-name', goal: 'Something else' } }, now: NOW });
+    expect(best.a2a!.capabilities.extensions.map((e) => e.uri)).toEqual(['https://faf.one/ext/context/v1']);
+    expect((best.server_card!._meta as Record<string, unknown>)['one.faf/context']).toMatchObject({ faf: './project.faf', mediaType: 'application/vnd.faf+yaml' });
+    expect(JSON.stringify(best.server_json!._meta)).toContain('one.faf/context');
+    // identity from the .fafa at both rungs
+    for (const k of ['name', 'version', 'description', 'title']) {
+      expect(best.server_card![k]).toEqual(better.server_card![k]);
+      expect(best.server_json![k]).toEqual(better.server_json![k]);
+    }
+    expect(best.a2a!.name).toBe(better.a2a!.name);
+    expect(best.ai_catalog).toEqual(better.ai_catalog);
   });
 
   test('mcpName reverses the domain', () => {

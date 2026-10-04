@@ -4,11 +4,21 @@
  * Card, the MCP Registry `server.json`, an AI Catalog and an ARD manifest.
  *
  * Pure: no filesystem and no Node built-ins, so the same code runs in the CLI,
- * in a browser front door and in tests. Neutral by default: a card carries an
- * extension (FAF's or anyone's) only when the caller passes one. `faf cards`
- * passes FAF's own for FAF's agent (see `buildA2ACard` in cards.ts).
+ * in a browser front door and in tests.
+ *
+ * The cards ladder, the same as `faf cards`: the `.fafa` is the source of every
+ * card and gives the plain cards (BETTER); a project.faf, passed as `faf`, adds
+ * FAF's context block to each of them (BEST). A card's identity always comes
+ * from the `.fafa`, so moving up to BEST never rewrites it.
  */
 import { stringify } from 'yaml';
+import type { FafData } from '../core/types.js';
+import {
+  A2A_CONTEXT_URI,
+  fafContextBlock,
+  registryMeta,
+  type ContextBlockOptions,
+} from './context-block.js';
 
 export const A2A_PROTOCOL_BINDING = 'JSONRPC';
 export const A2A_PROTOCOL_VERSION = '1.0';
@@ -138,6 +148,46 @@ export function a2aDoors(fafa: FafaDoc, opts: { doorUrl?: string } = {}): FafaEn
   return [];
 }
 
+/** Where the `.fafa` itself is served — the same door the catalog's `agent`
+ *  row points at, so a card and a catalog never disagree about it. Left off
+ *  the card, rather than guessed, when the `.fafa` names no domain. */
+function fafaPassportUrl(fafa: FafaDoc): string | undefined {
+  try {
+    return `https://${fafaDomain(fafa)}/.well-known/fafa`;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * FAF's context extension for the A2A card (BEST). Its `params` are a superset
+ * of {@link fafContextBlock}, enriched with `.fafa`-specific identity that only
+ * makes sense for an agent card (agentId, passport, the full FAF media-type
+ * family). Nests the base block's `faf`/`mediaType` under `provenance` rather
+ * than flattening them, per the extension's own shape (`§7` of the field
+ * mapping). The Server Card and registry `_meta` stay on the plain
+ * {@link fafContextBlock} shape.
+ */
+export function fafaContextExtension(fafa: FafaDoc, faf: FafData, opts: ContextBlockOptions = {}): A2AExtension {
+  const block = fafContextBlock(faf, opts);
+  const agent = fafa.agent ?? {};
+  const params: Record<string, unknown> = {
+    fafaSpecVersion: String(fafa.version ?? FAFA_SPEC_VERSION),
+    mediaTypes: [...FAF_MEDIA_TYPES],
+    provenance: { faf: block.faf, mediaType: block.mediaType },
+    generated: block.generated,
+  };
+  if (agent.id) {params.agentId = agent.id;}
+  const passport = fafaPassportUrl(fafa);
+  if (passport) {params.passport = passport;}
+  return {
+    uri: A2A_CONTEXT_URI,
+    description: 'FAF passport and project DNA as typed parts',
+    required: false,
+    params,
+  };
+}
+
 /** `text/plain` plus any FAF media type a capability's `cites_spec` names. */
 function defaultA2AInputModes(fafa: FafaDoc): string[] {
   const cited = new Set<string>();
@@ -243,6 +293,9 @@ export interface PackAnswers {
 }
 
 const HANDLE_RE = /^[a-z0-9][a-z0-9._-]*$/;
+/** npm's own package-name rule: lowercase, URL-safe, optionally `@scope/`. */
+const NPM_NAME_RE = /^(@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/;
+const ENDPOINT_PROTOCOLS = ['a2a', 'mcp'];
 const DOMAIN_RE = /^(?=.{1,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/;
 
 function clean(s: unknown): string {
@@ -277,9 +330,13 @@ function capabilitiesFrom(a: PackAnswers, keywords: string[]): FafaCapability[] 
     }));
 }
 
+/** A package people install: an npm one must carry npm's own name — the `.fafa`
+ *  names it as the MCP server's stdio command, so nothing else gets through. */
 function packagesFrom(a: PackAnswers): PackPackage[] {
-  return (a.packages ?? [])
-    .filter((p) => clean(p.registryType) && clean(p.identifier))
+  const packages = (a.packages ?? []).filter((p) => clean(p.registryType) && clean(p.identifier));
+  const bad = packages.find((p) => clean(p.registryType) === 'npm' && !NPM_NAME_RE.test(clean(p.identifier)));
+  if (bad) {throw new Error(`Package "${clean(bad.identifier)}" is not an npm package name (e.g. weather-mcp or @acme/weather).`);}
+  return packages
     .map((p) => ({
       registryType: clean(p.registryType),
       identifier: clean(p.identifier),
@@ -287,11 +344,21 @@ function packagesFrom(a: PackAnswers): PackPackage[] {
     }));
 }
 
+/** A URL people call: http(s) only, speaking a2a or mcp. */
+function checkEndpoint(e: { protocol: string; url: string }): void {
+  if (!/^https?:\/\/[^\s/]+/i.test(clean(e.url))) {
+    throw new Error(`Where it runs: "${clean(e.url)}" is not an http(s) URL (or give an npm package).`);
+  }
+  if (!ENDPOINT_PROTOCOLS.includes(clean(e.protocol).toLowerCase())) {
+    throw new Error(`Protocol "${clean(e.protocol)}": a2a or mcp.`);
+  }
+}
+
 function endpointsFrom(a: PackAnswers, packages: PackPackage[]): FafaEndpoint[] {
+  const urls = (a.endpoints ?? []).filter((e) => clean(e.url));
+  urls.forEach(checkEndpoint);
   const endpoints: FafaEndpoint[] = [
-    ...(a.endpoints ?? [])
-      .filter((e) => clean(e.url))
-      .map((e) => ({ protocol: clean(e.protocol).toLowerCase(), transport: 'http', location: clean(e.url) })),
+    ...urls.map((e) => ({ protocol: clean(e.protocol).toLowerCase(), transport: 'http', location: clean(e.url) })),
     ...packages.map((p) => ({ protocol: 'mcp', transport: 'stdio', location: p.identifier })),
   ];
   if (endpoints.length === 0) {throw new Error('Missing answer: endpoints (a URL, or a package people install)');}
@@ -388,7 +455,8 @@ function cap100(s: string): string {
   return t.length <= 100 ? t : `${t.slice(0, 97).trimEnd()}...`;
 }
 
-function mcpRemotes(fafa: FafaDoc): Array<{ type: string; url: string }> {
+/** The `.fafa`'s MCP endpoints at an http(s) URL — what a Server Card describes. */
+export function mcpRemotes(fafa: FafaDoc): Array<{ type: string; url: string }> {
   return (fafa.endpoints ?? [])
     .filter((e) => clean(e.protocol).toLowerCase() === 'mcp' && /^https?:\/\//.test(clean(e.location)))
     .map((e) => ({ type: 'streamable-http', url: clean(e.location) }));
@@ -426,24 +494,48 @@ function mcpIdentity(fafa: FafaDoc): Record<string, unknown> {
   return out;
 }
 
-/** The MCP Server Card for a remote MCP server. */
-export function projectServerCard(fafa: FafaDoc): Record<string, unknown> {
-  const remotes = mcpRemotes(fafa);
-  if (remotes.length === 0) {
-    throw new Error('A Server Card describes a remote MCP server: the .fafa has no mcp endpoint at an http(s) URL.');
-  }
-  return { $schema: SERVER_CARD_SCHEMA, ...mcpIdentity(fafa), remotes };
-}
-
-/** The MCP Registry `server.json` (publishing it stays the owner's step). */
-export function projectServerJson(fafa: FafaDoc): Record<string, unknown> {
-  const remotes = mcpRemotes(fafa);
-  const packages = (fafa.metadata?.cards?.packages ?? []).map((p) => ({
+/** The packages people install, from the `.fafa`, as a registry entry lists them. */
+function registryPackages(fafa: FafaDoc): Array<Record<string, unknown>> {
+  return (fafa.metadata?.cards?.packages ?? []).map((p) => ({
     registryType: clean(p.registryType),
     identifier: clean(p.identifier),
     ...(clean(p.version) ? { version: clean(p.version) } : {}),
     transport: { type: 'stdio' },
   }));
+}
+
+/** True when the `.fafa` gives a registry entry: a package or a remote MCP URL. */
+export function hasRegistryEntry(fafa: FafaDoc): boolean {
+  return mcpRemotes(fafa).length > 0 || registryPackages(fafa).length > 0;
+}
+
+/** The registry identity from the `.fafa`: `name`, and `title` when it has one. */
+export function registryIdentity(fafa: FafaDoc): { name: string; title?: string } {
+  const title = clean(fafa.agent?.displayName);
+  return { name: mcpName(fafa), ...(title ? { title: cap100(title) } : {}) };
+}
+
+/** The MCP Server Card for a remote MCP server. With a project.faf (`faf`,
+ *  BEST) it carries FAF's context block at `_meta["one.faf/context"]`. */
+export function projectServerCard(fafa: FafaDoc, faf?: FafData, opts: ContextBlockOptions = {}): Record<string, unknown> {
+  const remotes = mcpRemotes(fafa);
+  if (remotes.length === 0) {
+    throw new Error('A Server Card describes a remote MCP server: the .fafa has no mcp endpoint at an http(s) URL.');
+  }
+  return {
+    $schema: SERVER_CARD_SCHEMA,
+    ...mcpIdentity(fafa),
+    remotes,
+    ...(faf ? { _meta: { 'one.faf/context': fafContextBlock(faf, opts) } } : {}),
+  };
+}
+
+/** The MCP Registry `server.json` (publishing it stays the owner's step). With
+ *  a project.faf (`faf`, BEST) it carries FAF's context block in the registry's
+ *  publisher-provided `_meta`. */
+export function projectServerJson(fafa: FafaDoc, faf?: FafData, opts: ContextBlockOptions = {}): Record<string, unknown> {
+  const remotes = mcpRemotes(fafa);
+  const packages = registryPackages(fafa);
   if (remotes.length === 0 && packages.length === 0) {
     throw new Error('A registry entry needs a package people install or a remote MCP URL.');
   }
@@ -452,6 +544,7 @@ export function projectServerJson(fafa: FafaDoc): Record<string, unknown> {
     ...mcpIdentity(fafa),
     ...(packages.length ? { packages } : {}),
     ...(remotes.length ? { remotes } : {}),
+    ...(faf ? { _meta: registryMeta(faf, opts) } : {}),
   };
 }
 
@@ -467,8 +560,29 @@ export interface CatalogRow {
   updatedAt: string;
 }
 
-/** One row per card the domain serves: the A2A card, the Server Card, and the `.fafa` only when asked. */
-export function catalogRows(fafa: FafaDoc, cards: PackCard[], opts: { now?: string; listFafa?: boolean } = {}): CatalogRow[] {
+/** Options for the catalog rows. */
+export interface CatalogRowOptions {
+  /** `updatedAt` for the rows; otherwise now. */
+  now?: string;
+  /** List the `.fafa` itself (served at /.well-known/fafa). Default true: it is
+   *  the source of the cards — what makes them BETTER. */
+  listFafa?: boolean;
+  /** Public URL of the A2A card; default the domain's /.well-known/agent-card.json. */
+  a2aCardUrl?: string;
+  /** An A2A door when the `.fafa` names none (as `faf cards --door-url`). */
+  doorUrl?: string;
+}
+
+/** Where the A2A card is served — only when it is asked for and the `.fafa`
+ *  names an A2A door, so a catalog never lists a card nobody wrote. */
+function a2aCardUrlFor(fafa: FafaDoc, cards: PackCard[], opts: CatalogRowOptions): string | undefined {
+  if (!cards.includes('a2a') || a2aDoors(fafa, opts).length === 0) {return undefined;}
+  return opts.a2aCardUrl ?? `https://${fafaDomain(fafa)}/.well-known/agent-card.json`;
+}
+
+/** One row per card the domain serves: the A2A card (when the `.fafa` names an
+ *  A2A door), the Server Card (when it names a remote MCP URL), and the `.fafa`. */
+export function catalogRows(fafa: FafaDoc, cards: PackCard[], opts: CatalogRowOptions = {}): CatalogRow[] {
   const domain = fafaDomain(fafa);
   const handle = handleOf(fafa);
   const agent = fafa.agent ?? {};
@@ -486,12 +600,13 @@ export function catalogRows(fafa: FafaDoc, cards: PackCard[], opts: { now?: stri
     updatedAt: now,
   });
   const rows: CatalogRow[] = [];
-  if (cards.includes('a2a')) {rows.push(row('a2a', CARD_MEDIA_TYPES.a2a, `https://${domain}/.well-known/agent-card.json`));}
+  const a2aUrl = a2aCardUrlFor(fafa, cards, opts);
+  if (a2aUrl) {rows.push(row('a2a', CARD_MEDIA_TYPES.a2a, a2aUrl));}
   if (cards.includes('server_card')) {
     const remote = mcpRemotes(fafa)[0];
     if (remote) {rows.push(row('mcp', CARD_MEDIA_TYPES.server_card, `${remote.url.replace(/\/+$/, '')}/server-card`));}
   }
-  if (opts.listFafa) {rows.push(row('agent', CARD_MEDIA_TYPES.fafa, `https://${domain}/.well-known/fafa`));}
+  if (opts.listFafa !== false) {rows.push(row('agent', CARD_MEDIA_TYPES.fafa, `https://${domain}/.well-known/fafa`));}
   return rows;
 }
 
@@ -524,7 +639,7 @@ export function catalogHost(fafa: FafaDoc): CatalogHost | undefined {
 }
 
 /** The AI Catalog for the domain: every row above, with the host named. */
-export function projectAiCatalog(fafa: FafaDoc, cards: PackCard[], opts: { now?: string; listFafa?: boolean } = {}): Record<string, unknown> {
+export function projectAiCatalog(fafa: FafaDoc, cards: PackCard[], opts: CatalogRowOptions = {}): Record<string, unknown> {
   const host = catalogHost(fafa);
   return {
     specVersion: AI_CATALOG_SPEC_VERSION,
@@ -552,7 +667,7 @@ export function ardHints(fafa: FafaDoc): { tags?: string[]; representativeQuerie
 /** The ARD manifest: the catalog, plus the search hints ARD reads. ARD builds
  *  on ai-catalog (spec §4), so the document is the same shape — the entries
  *  carry more. */
-export function projectArd(fafa: FafaDoc, cards: PackCard[], opts: { now?: string; listFafa?: boolean } = {}): Record<string, unknown> {
+export function projectArd(fafa: FafaDoc, cards: PackCard[], opts: CatalogRowOptions = {}): Record<string, unknown> {
   const host = catalogHost(fafa);
   const hints = ardHints(fafa);
   return {
@@ -562,15 +677,19 @@ export function projectArd(fafa: FafaDoc, cards: PackCard[], opts: { now?: strin
   };
 }
 
-export interface PackOptions {
+export interface PackOptions extends ContextBlockOptions {
   /** Which cards to build; the `.fafa` is always written. */
   cards: PackCard[];
   /** `updatedAt` for catalog rows (tests); otherwise now. */
   now?: string;
-  /** List the `.fafa` itself in the catalog and ARD manifest (it is then served at /.well-known/fafa). */
+  /** List the `.fafa` itself in the catalog and ARD manifest (it is then served
+   *  at /.well-known/fafa). Default true; `false` leaves it out. */
   listFafa?: boolean;
-  /** Extensions to put on the A2A card; none by default. */
+  /** Extensions to put on the A2A card, besides FAF's own (added with `faf`). */
   a2aExtensions?: A2AExtension[];
+  /** project.faf (BEST): adds FAF's context block to the A2A card, the Server
+   *  Card and server.json. Without it the cards are plain (BETTER). */
+  faf?: FafData;
 }
 
 export interface Pack {
@@ -587,9 +706,13 @@ export interface Pack {
 export function projectPack(fafa: FafaDoc, opts: PackOptions): Pack {
   const want = new Set(opts.cards);
   const pack: Pack = { fafa, fafaText: fafaYaml(fafa) };
-  if (want.has('a2a')) {pack.a2a = projectA2ACard(fafa, { extensions: opts.a2aExtensions });}
-  if (want.has('server_card')) {pack.server_card = projectServerCard(fafa);}
-  if (want.has('server_json')) {pack.server_json = projectServerJson(fafa);}
+  const { faf } = opts;
+  if (want.has('a2a')) {
+    const extensions = [...(opts.a2aExtensions ?? []), ...(faf ? [fafaContextExtension(fafa, faf, opts)] : [])];
+    pack.a2a = projectA2ACard(fafa, { extensions });
+  }
+  if (want.has('server_card')) {pack.server_card = projectServerCard(fafa, faf, opts);}
+  if (want.has('server_json')) {pack.server_json = projectServerJson(fafa, faf, opts);}
   const rowOpts = { now: opts.now, listFafa: opts.listFafa };
   if (want.has('ai_catalog')) {pack.ai_catalog = projectAiCatalog(fafa, opts.cards, rowOpts);}
   if (want.has('ard')) {pack.ard = projectArd(fafa, opts.cards, rowOpts);}
