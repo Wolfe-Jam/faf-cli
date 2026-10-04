@@ -172,6 +172,10 @@ jobs:
   windows:
     name: Windows (Node ${{ matrix.node }})
     runs-on: windows-latest
+    # A green run takes ~3 min. The suite has hung here (2026-10-04: 47 min and
+    # ~2 h) with every test inside its 2-min limit, so the process outlives the
+    # tests. Fail fast instead of holding the runner for GitHub's 6 h default.
+    timeout-minutes: 15
     strategy:
       matrix:
         node: [22.x, 24.x]
@@ -241,6 +245,7 @@ jobs:
           mv project.faf.orig project.faf
 
       - name: Full test suite
+        timeout-minutes: 10
         run: bun test --timeout=120000
 
   # Package managers — the packed tarball must install and run under npm, pnpm
