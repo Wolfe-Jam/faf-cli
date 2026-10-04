@@ -844,10 +844,18 @@ export function detectSvelteAdapter(dir: string): string | null {
   return null;
 }
 
+/** "Vite 8" from the vite range package.json declares (`^8.3.2` → 8), or
+ *  plain "Vite" when the range carries no version number (`latest`). */
+export function viteLabel(pkg: PackageJson | null): string {
+  const range = pkg?.devDependencies?.vite ?? pkg?.dependencies?.vite;
+  const major = typeof range === 'string' ? /\d+/.exec(range)?.[0] : undefined;
+  return major === undefined ? 'Vite' : `Vite ${major}`;
+}
+
 /** Detect build tool */
 export function detectBuildTool(dir: string): string | null {
   const pkg = readPackageJson(dir);
-  if (pkg?.devDependencies?.vite || pkg?.dependencies?.vite) {return 'Vite';}
+  if (pkg?.devDependencies?.vite || pkg?.dependencies?.vite) {return viteLabel(pkg);}
   if (pkg?.devDependencies?.webpack || pkg?.dependencies?.webpack) {return 'webpack';}
   if (pkg?.devDependencies?.esbuild || pkg?.dependencies?.esbuild) {return 'esbuild';}
   if (repoExists(dir, 'tsconfig.json') && pkg?.devDependencies?.typescript) {return 'TypeScript (tsc)';}

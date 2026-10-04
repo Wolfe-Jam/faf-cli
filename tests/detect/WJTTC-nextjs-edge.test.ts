@@ -223,7 +223,7 @@ describe('AERO: WJTTC — Next.js Edge Cases', () => {
 
     test('Vite build detected over TypeScript', () => {
       writePkg({}, { vite: '^5.0.0', typescript: '^5.0.0' });
-      expect(detectBuildTool(testDir)).toBe('Vite');
+      expect(detectBuildTool(testDir)).toBe('Vite 5');
     });
   });
 

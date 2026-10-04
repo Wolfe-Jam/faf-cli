@@ -203,7 +203,7 @@ describe('🏎️ ENGINE TIER - Svelte Smart Defaults', () => {
     writePkg({ svelte: '^5.0.0' });
     expect(detectStack(testDir).stack?.build).toBe(''); // Rollup, webpack and Vite all build Svelte
     writePkg({ svelte: '^5.0.0' }, { vite: '^5.0.0' });
-    expect(detectStack(testDir).stack?.build).toBe('Vite');
+    expect(detectStack(testDir).stack?.build).toBe('Vite 5');
   });
 
   test('ENGINE-S008: Svelte build is Vite even without vite in deps', () => {
