@@ -8,19 +8,25 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- **Cards follow one ladder: BETTER is `.fafa`, BEST is `project.faf`.** An `agent.fafa` alone now gets the A2A card too, written plain: no FAF context extension, nothing pointing at a `project.faf`. Add `project.faf` and the same A2A card carries the FAF context extension, and the MCP Server Card and registry cards come from it. `faf card init`, `faf cards` and `--help` name the steps BETTER and BEST (8.1.0 called them Good and Better).
+- Asking for the MCP or registry card with no `project.faf` says to run `faf init`, and names the cards an `agent.fafa` gives alone.
+
+### Fixed
+- With no `project.faf`, a second `faf cards` rewrote the AI Catalog and ARD with a new `updatedAt`. It now keeps the stamp, so a run that changes nothing writes nothing.
+
 ## [8.1.1] - 2026-10-04
 
-**faf-cli reads SvelteKit 3 projects: SvelteKit, its adapter and its hosting, from vite.config and devDependencies. Cards follow one ladder: BETTER is `.fafa`, BEST is `project.faf`.** Patch — inherits The Always33+ Edition. 2111 tests.
+**faf-cli reads SvelteKit 3 projects: SvelteKit, its adapter and its hosting, from vite.config and devDependencies.** Patch — inherits The Always33+ Edition. 2109 tests.
 
 ### Fixed
 - **SvelteKit 3 projects read as plain Svelte** (#147). SvelteKit 3 (2026-10-01) moves its config, adapter included, from `svelte.config.js` into `vite.config.*`, and SvelteKit apps list `@sveltejs/kit` as a devDependency. faf-cli knew the kit only from `dependencies` or a `svelte.config.*` file, so a SvelteKit 3 app came out frontend `Svelte`, backend and hosting empty. It now reads frontend and backend `SvelteKit` and the hosting from the adapter: `svelte.config.js` first, then `vite.config.{ts,js,mts,mjs}`, then the `@sveltejs/adapter-*` package in package.json. SvelteKit 2 projects read exactly as before.
 - **The Claude Code plugin manifest** says the package version and `team@faf.one` (#145); a test keeps the two versions equal.
-- **Cards:** with no `project.faf`, a second `faf cards` rewrote the AI Catalog and ARD with a new `updatedAt`. It now keeps the stamp, so a run that changes nothing writes nothing.
 
 ### Changed
 - **The build slot names Vite's major version** from package.json: `Vite 8` for `^8.3.2`. A range with no version number (`latest`) stays `Vite`.
-- **Cards follow one ladder: BETTER is `.fafa`, BEST is `project.faf`** (#149). An `agent.fafa` alone now gets the A2A card too, written plain: no FAF context extension, nothing pointing at a `project.faf`. Add `project.faf` and the same A2A card carries the FAF context extension, and the MCP Server Card and registry cards come from it. `faf card init`, `faf cards` and `--help` name the steps BETTER and BEST (8.1.0 called them Good and Better).
-- Asking for the MCP or registry card with no `project.faf` says to run `faf init`, and names the cards an `agent.fafa` gives alone.
 
 ## [8.1.0] - 2026-10-02 — The Always33+ Edition
 
