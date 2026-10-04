@@ -88,8 +88,8 @@ jobs:
   # Windows excluded — MIRRORS ci.yml's documented decision ("bunx tests timeout on
   # Windows CI"); kept consistent here per the gate-coverage rule (a split where
   # ci.yml excludes Windows but release.yml gates on it = the exact post-tag-only
-  # leak that shipped a Windows bug in 7.0). Product Windows-robustness lives in
-  # gitRepoRel; standing up a real pre-merge Windows gate is a tracked follow-up.
+  # leak that shipped a Windows bug in 7.0). The pre-merge Windows gate is the
+  # `windows` job in ci.yml (build, CLI, packed-tarball install, faf auto, detection tests).
   test-matrix:
     name: 🧪 Cross-Platform Testing
     needs: validate
