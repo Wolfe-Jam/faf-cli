@@ -43,7 +43,8 @@ jobs:
           base: ${{ github.event.repository.default_branch }}
 
   # Primary Test Suite — Bun
-  # Windows excluded: bunx tests timeout on Windows CI (Node smoke test covers Windows)
+  # The full Bun suite does not run on Windows (bunx subprocess tests time out there);
+  # Windows is covered before shipping by the `windows` job below.
   test:
     name: Bun Test Suite
     runs-on: ${{ matrix.os }}
@@ -164,6 +165,76 @@ jobs:
           echo "::group::faf info"
           "$BIN" info
           echo "::endgroup::"
+
+  # Windows — a real pre-ship gate (the full Bun suite is not run here; its
+  # bunx subprocess tests time out on Windows runners). Builds on Windows, runs
+  # the CLI, installs the packed tarball as a user would, runs `faf auto` on this
+  # repo (real Windows paths), and runs the detection tests.
+  windows:
+    name: Windows (Node ${{ matrix.node }})
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        node: [22.x, 24.x]
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Setup Node.js ${{ matrix.node }}
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build TypeScript
+        run: npm run build
+
+      - name: CLI smoke test
+        run: |
+          set -euo pipefail
+          node dist/cli.js --version
+          node dist/cli.js --help > /dev/null
+          node dist/cli.js init --force --output test.faf
+          node dist/cli.js score test.faf
+          node dist/cli.js check test.faf
+
+      - name: Packed-tarball install
+        run: |
+          set -euo pipefail
+          TARBALL_DIR=$(mktemp -d)
+          npm pack --pack-destination "$TARBALL_DIR" > /dev/null
+          TARBALL=$(ls "$TARBALL_DIR"/faf-cli-*.tgz | head -1)
+          INSTALL_PREFIX=$(mktemp -d)
+          npm install --prefix "$INSTALL_PREFIX" --no-save --no-audit --no-fund "$TARBALL"
+          EXPECTED=$(node -p "require('./package.json').version")
+          ACTUAL=$("$INSTALL_PREFIX/node_modules/.bin/faf" --version)
+          if [ "$EXPECTED" != "$ACTUAL" ]; then
+            echo "::error::Version mismatch from packed tarball on Windows — expected '$EXPECTED', got '$ACTUAL'"
+            exit 1
+          fi
+          echo "✓ faf --version on Windows: $ACTUAL"
+
+      - name: faf auto on this repo (real Windows paths)
+        run: |
+          set -euo pipefail
+          cp project.faf project.faf.orig
+          node dist/cli.js auto
+          node dist/cli.js score
+          mv project.faf.orig project.faf
+
+      - name: Detection tests
+        run: bun test --timeout=120000 tests/detect
 
   # Package managers — the packed tarball must install and run under npm, pnpm
   # and bun. 8.0.0 shipped a file: dependency that npm resolved inside faf-cli
@@ -319,7 +390,7 @@ jobs:
   status:
     name: Championship Status
     runs-on: ubuntu-latest
-    needs: [security, test, node-compat, package-managers, quality]
+    needs: [security, test, node-compat, windows, package-managers, quality]
     if: always()
 
     steps:
@@ -349,6 +420,13 @@ jobs:
             failed=1
           else
             echo "PASS Node Compat: 22.x, 24.x"
+          fi
+
+          if [ "${{ needs.windows.result }}" != "success" ]; then
+            echo "FAIL Windows: ${{ needs.windows.result }}"
+            failed=1
+          else
+            echo "PASS Windows: 22.x, 24.x"
           fi
 
           if [ "${{ needs.package-managers.result }}" != "success" ]; then
