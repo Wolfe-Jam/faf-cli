@@ -4,7 +4,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import { cardsCommand } from '../../src/commands/cards.js';
 import { readFaf } from '../../src/interop/faf.js';
-import { projectCards, readFafa } from '../../src/interop/cards.js';
+import { A2A_CONTEXT_URI, projectCards, readFafa } from '../../src/interop/cards.js';
 
 const FIX = join(import.meta.dir, '../fixtures/cards');
 
@@ -140,7 +140,7 @@ describe('TYRE: faf cards command', () => {
   });
 });
 
-describe('TYRE: faf cards — an agent.fafa with no project.faf (Good)', () => {
+describe('TYRE: faf cards — an agent.fafa with no project.faf (BETTER)', () => {
   let testDir: string;
   let errors: string[];
   let errSpy: ReturnType<typeof spyOn>;
@@ -160,17 +160,43 @@ describe('TYRE: faf cards — an agent.fafa with no project.faf (Good)', () => {
     rmSync(testDir, { recursive: true, force: true });
   });
 
-  test('writes the catalog and ARD, and points at the better step', () => {
+  test('writes the plain A2A card, the catalog and ARD, and names the BEST step', () => {
     cardsCommand({ dir: testDir });
+    const card = readFileSync(join(testDir, '.well-known', 'agent-card.json'), 'utf-8');
     expect(existsSync(join(testDir, '.well-known', 'ai-catalog.json'))).toBe(true);
     expect(existsSync(join(testDir, '.well-known', 'ard.json'))).toBe(true);
-    expect(existsSync(join(testDir, '.well-known', 'agent-card.json'))).toBe(false);
-    expect(errors.join('\n')).toContain('better');
+    expect(existsSync(join(testDir, 'server-card'))).toBe(false);
+    // BETTER: no FAF context extension, nothing pointing at a project.faf.
+    expect(JSON.parse(card).capabilities.extensions).toEqual([]);
+    expect(card).not.toContain('project.faf');
+    expect(card).not.toContain('faf.one/ext/context');
+    // The catalog still lists the .fafa: it is what makes these cards BETTER.
+    expect(readFileSync(join(testDir, '.well-known', 'ai-catalog.json'), 'utf-8')).toContain('application/vnd.fafa+yaml');
+    expect(errors.join('\n')).toContain('BEST: add your project.faf');
   });
 
-  test('cards that point at project.faf still need one, and say how to get just these two', () => {
+  test('a second run changes nothing: faf owns the plain card by its render hash', () => {
+    cardsCommand({ dir: testDir });
+    errors.length = 0;
+    cardsCommand({ dir: testDir });
+    const said = errors.join('\n');
+    for (const f of ['agent-card.json', 'ai-catalog.json', 'ard.json']) {
+      expect(said).toMatch(new RegExp(`${f.replace('.', '\\.')}\\S* .*\\(unchanged\\)`));
+    }
+  });
+
+  test('adding project.faf moves the A2A card up to BEST: the FAF context extension is added', () => {
+    cardsCommand({ dir: testDir });
+    writeFileSync(join(testDir, 'project.faf'), readFileSync(join(FIX, 'project.faf'), 'utf-8'));
+    cardsCommand({ dir: testDir, target: 'a2a' });
+    const card = JSON.parse(readFileSync(join(testDir, '.well-known', 'agent-card.json'), 'utf-8'));
+    expect(card.capabilities.extensions[0].uri).toBe(A2A_CONTEXT_URI);
+  });
+
+  test('the MCP and registry cards come from project.faf: asked for without one, refused', () => {
     errSpy.mockRestore();
-    expectExit(2, () => cardsCommand({ dir: testDir, target: 'a2a' }));
+    expectExit(2, () => cardsCommand({ dir: testDir, target: 'mcp' }));
+    expectExit(2, () => cardsCommand({ dir: testDir, target: 'a2a,registry' }));
     errSpy = spyOn(console, 'error').mockImplementation(() => {});
     expect(existsSync(join(testDir, '.well-known'))).toBe(false);
   });

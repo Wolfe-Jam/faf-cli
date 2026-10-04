@@ -73,7 +73,8 @@ export interface AiCatalog {
 }
 
 export interface ProjectedCards {
-  block: Record<string, unknown>;
+  /** faf's context block — only when a project.faf was given (BEST). */
+  block?: Record<string, unknown>;
   a2a?: ProjectedA2A;
   mcp?: Record<string, unknown>;
   registry?: {
@@ -153,11 +154,13 @@ function fafaPassportUrl(fafa: FafaDoc): string | undefined {
   }
 }
 
-/** Build the A2A Agent Card (JSON) from a .fafa + .faf: the core card
- *  ({@link projectA2ACard}) carrying FAF's context extension. */
+/** Build the A2A Agent Card (JSON) from a .fafa: the core card
+ *  ({@link projectA2ACard}). With a project.faf (BEST) it carries FAF's
+ *  context extension; with none (BETTER) it is the plain A2A card — the
+ *  .fafa is its source, and nothing on it points at a project.faf. */
 export function buildA2ACard(
   fafa: FafaDoc,
-  faf: FafData,
+  faf?: FafData,
   opts: ProjectCardsOptions = {},
 ): ProjectedA2A {
   // Checked before the extension is built, so a card with no door fails the
@@ -167,6 +170,7 @@ export function buildA2ACard(
       "No A2A endpoint in .fafa (need endpoints[].protocol: a2a + location). Will not invent a door.",
     );
   }
+  if (!faf) {return projectA2ACard(fafa, { doorUrl: opts.doorUrl });}
   return projectA2ACard(fafa, {
     doorUrl: opts.doorUrl,
     extensions: [
@@ -206,7 +210,7 @@ function catalogA2AUrl(fafa: FafaDoc, opts: ProjectCardsOptions): string {
  */
 export function catalogEntriesFor(
   fafa: FafaDoc,
-  faf: FafData,
+  faf: FafData = {},
   opts: ProjectCardsOptions = {},
 ): CatalogEntry[] {
   const domain = fafaDomain(fafa);
@@ -326,26 +330,49 @@ function namesHost(text: string): boolean {
   }
 }
 
+/** The cards an agent.fafa gives with no project.faf (BETTER): the A2A card
+ *  (when the .fafa names an A2A door), the AI Catalog and ARD. */
+export function betterTargets(fafa: FafaDoc, opts: ProjectCardsOptions = {}): CardTarget[] {
+  return a2aDoors(fafa, opts).length > 0 ? ['a2a', 'catalog', 'ard'] : ['catalog', 'ard'];
+}
+
+/** The cards that come from project.faf (BEST): the MCP Server Card and the
+ *  registry server.json. */
+export const BEST_ONLY: CardTarget[] = ['mcp', 'registry'];
+
+/**
+ * Project the cards. The ladder: an agent.fafa alone gives BETTER — the plain
+ * A2A card, AI Catalog, ARD ({@link betterTargets}). A project.faf, resident
+ * and used, gives BEST — the same cards plus FAF's context extension on the
+ * A2A card, the MCP Server Card and the registry server.json. With no `faf`,
+ * a BEST target throws rather than point at a project.faf that is not there.
+ */
 export function projectCards(input: {
-  faf: FafData;
+  /** project.faf — absent means BETTER. */
+  faf?: FafData;
   fafa?: FafaDoc;
   targets?: CardTarget[];
   opts?: ProjectCardsOptions;
 }): ProjectedCards {
   const opts = input.opts ?? {};
-  const wanted = new Set(input.targets?.length ? input.targets : CARD_TARGETS);
-  const block = fafContextBlock(input.faf, opts);
-  const out: ProjectedCards = { block };
+  const faf = input.faf;
+  const all = faf ? CARD_TARGETS : input.fafa ? betterTargets(input.fafa, opts) : [];
+  const wanted = new Set(input.targets?.length ? input.targets : all);
+  const out: ProjectedCards = {};
+  if (faf) {out.block = fafContextBlock(faf, opts);}
 
-  if (wanted.has('mcp')) {
-    out.mcp = buildServerCard(input.faf, opts);
+  if (!faf && BEST_ONLY.some((t) => wanted.has(t))) {
+    throw new Error('MCP and registry cards come from project.faf. Run \'faf init\' to create one.');
   }
-  if (wanted.has('registry')) {
-    const title = registryTitle(input.faf);
+  if (faf && wanted.has('mcp')) {
+    out.mcp = buildServerCard(faf, opts);
+  }
+  if (faf && wanted.has('registry')) {
+    const title = registryTitle(faf);
     out.registry = {
-      name: registryName(input.faf),
+      name: registryName(faf),
       ...(title ? { title } : {}),
-      _meta: registryMeta(input.faf, opts),
+      _meta: registryMeta(faf, opts),
     };
   }
 
@@ -365,12 +392,12 @@ export function projectCards(input: {
         );
       }
     } else {
-      out.a2a = buildA2ACard(input.fafa, input.faf, opts);
+      out.a2a = buildA2ACard(input.fafa, faf, opts);
     }
   }
 
   if ((wanted.has('catalog') || wanted.has('ard')) && input.fafa) {
-    const rows = catalogEntriesFor(input.fafa, input.faf, opts);
+    const rows = catalogEntriesFor(input.fafa, faf, opts);
     if (wanted.has('catalog')) {out.catalog = rows;}
     if (wanted.has('ard')) {
       // ARD builds on ai-catalog: the same rows, carrying the hints its
@@ -395,6 +422,8 @@ export function projectCards(input: {
  * `faf` / `mediaType` — the same pointer, not a byte-identical payload.
  */
 export function assertSameBlock(cards: ProjectedCards): void {
+  // BETTER: no project.faf, so no block on any card.
+  if (!cards.block) {return;}
   const want = JSON.stringify(cards.block);
   const got: string[] = [];
   if (cards.mcp) {
@@ -413,7 +442,9 @@ export function assertSameBlock(cards: ProjectedCards): void {
     }
   }
   if (cards.a2a) {
-    const params = cards.a2a.capabilities.extensions[0].params as {
+    const ext = cards.a2a.capabilities.extensions?.find((e) => e.uri === A2A_CONTEXT_URI);
+    if (!ext) {throw new Error('A2A card has no FAF context extension, but a project.faf was given');}
+    const params = ext.params as {
       provenance?: { faf?: unknown; mediaType?: unknown };
     };
     const block = cards.block as { faf?: unknown; mediaType?: unknown };

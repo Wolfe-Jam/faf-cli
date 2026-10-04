@@ -191,15 +191,15 @@ describe('TYRE: faf card init', () => {
     expect(existsSync(join(dir, 'agent.fafa'))).toBe(false);
   });
 
-  test('from flags: names the next step, and the better one when there is no project.faf', async () => {
+  test('from flags: names the next step, and the BEST one when there is no project.faf', async () => {
     const lines: string[] = [];
     logSpy.mockImplementation((m: unknown) => {
       lines.push(String(m));
     });
     await cardInitCommand({ ...WEATHER, dir });
     const said = lines.join('\n');
-    expect(said).toContain('next: faf cards --target catalog,ard');
-    expect(said).toContain('better: add your project.faf (faf init)');
+    expect(said).toContain('next: faf cards --target a2a,catalog,ard');
+    expect(said).toContain('BEST: add your project.faf (faf init)');
     expect(existsSync(join(dir, '.well-known'))).toBe(false); // flags never write more than asked
   });
 

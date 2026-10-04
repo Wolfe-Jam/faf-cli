@@ -155,14 +155,13 @@ frontend: SvelteKit · backend: SvelteKit · hosting: Cloudflare · build: Vite 
 The same always-33 engine, plus cards.
 
 ```bash
-npx faf-cli@latest card init     # seven questions → agent.fafa → AI Catalog + ARD
+npx faf-cli@latest card init     # seven questions → agent.fafa → A2A card, AI Catalog, ARD
 ```
 
-| You have | `faf cards` gives you |
-|---|---|
-| `agent.fafa` | AI Catalog + ARD |
-| + `project.faf` | + A2A, MCP and registry cards |
-| `project.faf` filled out | the full context behind every card |
+| You have | `faf cards` gives you | Rung |
+|---|---|---|
+| `agent.fafa` | A2A card, AI Catalog, ARD | BETTER |
+| + `project.faf` | + FAF context on the A2A card, MCP Server Card, registry | BEST |
 
 - **Scripts ask nothing:** every answer is a flag (`--name`, `--domain`, `--url` or `--package`, `--skill`, `--example`, `--set-version`).
 - **Help says what each command touches,** with a "What touches what" footer and [docs.faf.one/side-effects](https://docs.faf.one/side-effects).

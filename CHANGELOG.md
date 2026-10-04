@@ -8,6 +8,15 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- **Cards follow one ladder: BETTER is `.fafa`, BEST is `project.faf`.** An `agent.fafa` alone now gets the A2A card too, written plain: no FAF context extension, nothing pointing at a `project.faf`. Add `project.faf` and the same A2A card carries the FAF context extension, and the MCP Server Card and registry cards come from it. `faf card init`, `faf cards` and `--help` name the steps BETTER and BEST (8.1.0 called them Good and Better).
+- Asking for the MCP or registry card with no `project.faf` says to run `faf init`, and names the cards an `agent.fafa` gives alone.
+
+### Fixed
+- With no `project.faf`, a second `faf cards` rewrote the AI Catalog and ARD with a new `updatedAt`. It now keeps the stamp, so a run that changes nothing writes nothing.
+
 ## [8.1.1] - 2026-10-04
 
 **faf-cli reads SvelteKit 3 projects: SvelteKit, its adapter and its hosting, from vite.config and devDependencies.** Patch — inherits The Always33+ Edition. 2109 tests.

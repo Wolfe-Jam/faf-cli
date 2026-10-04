@@ -4,6 +4,8 @@ import { findFafFile, readFaf } from '../interop/faf.js';
 import type { FafData } from '../core/types.js';
 import {
   A2A_CONTEXT_URI,
+  BEST_ONLY,
+  betterTargets,
   findFafaFile,
   hasA2ACardMark,
   parseTargets,
@@ -32,9 +34,6 @@ export interface CardsCommandOptions {
   force?: boolean;
 }
 
-/** The targets an agent.fafa can project with no project.faf. */
-const FAFA_ONLY: CardTarget[] = ['catalog', 'ard'];
-
 /** True when something is at `path` — a file, or a link (even a dangling one). */
 function present(path: string): boolean {
   try {
@@ -47,6 +46,12 @@ function present(path: string): boolean {
 
 type Json = Record<string, unknown>;
 const obj = (v: unknown): Json | undefined => (typeof v === 'object' && v !== null && !Array.isArray(v) ? (v as Json) : undefined);
+
+/** The `updatedAt` of the .fafa row faf writes into a catalog or ARD file. */
+function fafaRowStamp(j: Json): unknown {
+  const rows = Array.isArray(j.entries) ? j.entries.map(obj) : [];
+  return rows.find((r) => r?.type === 'application/vnd.fafa+yaml' && /^urn:air:[^:]+:agent:/.test(String(r?.identifier)))?.updatedAt;
+}
 
 /** Where each card file keeps the `generated` stamp of faf's context block. */
 const STAMPS: Array<{ target: CardTarget; file: string[]; stamp: (j: Json) => unknown }> = [
@@ -62,6 +67,10 @@ const STAMPS: Array<{ target: CardTarget; file: string[]; stamp: (j: Json) => un
       return obj(ext?.params)?.generated;
     },
   },
+  // BETTER has no context block: the catalog and ARD keep the `updatedAt` of
+  // faf's own .fafa row, so a run that changes nothing writes nothing.
+  { target: 'catalog', file: ['.well-known', 'ai-catalog.json'], stamp: fafaRowStamp },
+  { target: 'ard', file: ['.well-known', 'ard.json'], stamp: fafaRowStamp },
 ];
 
 /** The `generated` stamp faf's context block already has in a card file this
@@ -87,7 +96,7 @@ function keptStamp(dir: string, targets: CardTarget[] | undefined): string | und
 }
 
 /**
- * `faf cards` — one projector. .faf + optional .fafa → A2A · MCP · registry · catalog.
+ * `faf cards` — one projector. .fafa → A2A · catalog · ARD (BETTER); + project.faf → FAF context · MCP · registry (BEST).
  * Same fafContextBlock on every door. Does not invent a door or an agent.
  * The block's `generated` stamp is the one the card files already carry
  * (see {@link keptStamp}), else the time of this run; a card that would not
@@ -106,21 +115,21 @@ export function cardsCommand(options: CardsCommandOptions = {}): void {
   const fafaPath = options.fafa ? resolve(options.fafa) : findFafaFile(dir);
   const fafa = fafaPath && existsSync(fafaPath) ? readFafa(fafaPath) : undefined;
 
-  // The catalog and ARD come from the .fafa alone; A2A, MCP and registry cards
-  // point at project.faf. So with no project.faf, an agent.fafa still gets
-  // the catalog and ARD, and nothing that would point at a missing file.
+  // The ladder. BETTER: an agent.fafa alone gives the plain A2A card, the AI
+  // Catalog and ARD. BEST: a project.faf, resident and used, adds FAF's
+  // context extension to the A2A card, the MCP Server Card and the registry
+  // server.json. With no project.faf, nothing points at one.
   const fafPath = options.faf ? resolve(options.faf) : findFafFile(dir);
   const hasFaf = Boolean(fafPath && existsSync(fafPath));
   if (!hasFaf) {
-    const wanted = targets ?? (fafa ? FAFA_ONLY : undefined);
-    if (!fafa || !wanted || wanted.some((t) => !FAFA_ONLY.includes(t))) {
-      const alone = fafa ? '\n  With only an agent.fafa: faf cards --target catalog,ard' : '';
+    const asked = targets?.filter((t) => BEST_ONLY.includes(t)) ?? [];
+    if (!fafa || asked.length > 0) {
+      const alone = fafa ? `\n  With only an agent.fafa: faf cards --target ${betterTargets(fafa, { doorUrl: options.doorUrl }).join(',')}` : '';
       console.error(`Error: project.faf not found\n\n  Run 'faf init' to create one.${alone}`);
       process.exit(2);
     }
-    targets = wanted;
   }
-  const faf: FafData = hasFaf ? readFaf(fafPath as string) : {};
+  const faf: FafData | undefined = hasFaf ? readFaf(fafPath as string) : undefined;
 
   let projected;
   try {
@@ -172,7 +181,7 @@ export function cardsCommand(options: CardsCommandOptions = {}): void {
   };
   if (projected.a2a) {
     const out = join(dir, '.well-known', 'agent-card.json');
-    run(out, () => writeJson(out, projected.a2a, dir, { owns: hasA2ACardMark, mark: `FAF context extension (${A2A_CONTEXT_URI})`, force }) !== 'unchanged');
+    run(out, () => writeJson(out, projected.a2a, dir, { owns: hasA2ACardMark, mark: `faf render hash or FAF context extension (${A2A_CONTEXT_URI})`, force }) !== 'unchanged');
   }
   if (projected.mcp) {
     const out = join(dir, 'server-card');
@@ -244,7 +253,7 @@ export function cardsCommand(options: CardsCommandOptions = {}): void {
 
   if (written.length === 0 && refused === 0) {
     console.error(
-      `${fafCyan('faf cards')} ${dim('nothing to write — need .fafa for A2A/catalog; server.json for registry')}`,
+      `${fafCyan('faf cards')} ${dim('nothing to write — need .fafa for A2A/catalog/ARD; server.json for registry')}`,
     );
     return;
   }
@@ -252,7 +261,7 @@ export function cardsCommand(options: CardsCommandOptions = {}): void {
     console.error(`${fafCyan('✓')} ${out}${changed ? '' : ` ${dim('(unchanged)')}`}`);
   }
   if (!hasFaf) {
-    console.error(dim('better: add your project.faf (faf init): the A2A, MCP and registry cards come from it.'));
+    console.error(dim('BETTER: cards from your agent.fafa. BEST: add your project.faf (faf init) for the FAF context, MCP and registry cards.'));
   }
   if (refused > 0) {process.exit(1);}
 }
