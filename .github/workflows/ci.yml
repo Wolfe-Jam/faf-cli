@@ -171,11 +171,13 @@ jobs:
   # the CLI, installs the packed tarball as a user would, runs `faf auto` on this
   # repo (real Windows paths), and runs the detection tests.
   windows:
-    name: Windows (Node ${{ matrix.node }})
+    name: Windows (Node ${{ matrix.node }}, Bun ${{ matrix.bun }})
     runs-on: windows-latest
     strategy:
+      fail-fast: false
       matrix:
-        node: [22.x, 24.x]
+        node: [24.x]
+        bun: ['1.3.13', '1.4.2']
     defaults:
       run:
         shell: bash
@@ -186,7 +188,7 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: ${{ env.BUN_VERSION }}
+          bun-version: ${{ matrix.bun }}
 
       - name: Setup Node.js ${{ matrix.node }}
         uses: actions/setup-node@v7
@@ -233,8 +235,8 @@ jobs:
           node dist/cli.js score
           mv project.faf.orig project.faf
 
-      - name: Detection tests
-        run: bun test --timeout=120000 tests/detect
+      - name: FULL Bun suite on Windows (probe)
+        run: bun test --timeout=120000
 
   # Package managers — the packed tarball must install and run under npm, pnpm
   # and bun. 8.0.0 shipped a file: dependency that npm resolved inside faf-cli
