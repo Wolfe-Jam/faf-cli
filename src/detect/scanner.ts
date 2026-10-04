@@ -402,6 +402,10 @@ function matchSignal(signal: Signal, pkg: PackageJson | null, dir: string): bool
       return !!(pkg?.dependencies?.[signal.key!]);
     case 'devDependency':
       return !!(pkg?.devDependencies?.[signal.key!]);
+    case 'anyDependency': {
+      const key = signal.key ?? '';
+      return !!(pkg?.dependencies?.[key] || pkg?.devDependencies?.[key]);
+    }
     case 'file':
       return fileExists(dir, signal.pattern!);
     case 'content': {
@@ -804,16 +808,29 @@ export function detectHosting(dir: string): string | null {
   return null;
 }
 
-/** Detect SvelteKit adapter from svelte.config.js */
-export function detectSvelteAdapter(dir: string): string | null {
-  const content = readRepoFile(dir, 'svelte.config.js');
-  if (content === null) {return null;}
+/** Config files that can name a SvelteKit adapter: svelte.config.js up to
+ *  SvelteKit 2, vite.config.* from SvelteKit 3. */
+const SVELTE_ADAPTER_CONFIGS = ['svelte.config.js', 'vite.config.ts', 'vite.config.js', 'vite.config.mts', 'vite.config.mjs'];
+
+/** The adapter package's suffix (`vercel`, `node`), from the first config
+ *  that imports one, else from package.json; null when nothing names one. */
+function svelteAdapterName(dir: string): string | null {
   // Match adapter imports: import adapter from '@sveltejs/adapter-vercel'
   // Or: import { adapter } from '@sveltejs/adapter-node'
   // Or: const adapter = require('@sveltejs/adapter-static')
-  const adapterMatch = content.match(/@sveltejs\/adapter-(\w+)/);
-  if (adapterMatch) {
-    const adapter = adapterMatch[1];
+  for (const file of SVELTE_ADAPTER_CONFIGS) {
+    const match = readRepoFile(dir, file)?.match(/@sveltejs\/adapter-(\w+)/);
+    if (match) {return match[1];}
+  }
+  const pkg = readPackageJson(dir);
+  const deps = Object.keys({ ...pkg?.dependencies, ...pkg?.devDependencies });
+  return deps.map(d => /^@sveltejs\/adapter-(\w+)$/.exec(d)?.[1]).find(Boolean) ?? null;
+}
+
+/** Detect SvelteKit adapter from svelte.config.js, vite.config.* or package.json */
+export function detectSvelteAdapter(dir: string): string | null {
+  const adapter = svelteAdapterName(dir);
+  if (adapter) {
     switch (adapter) {
       case 'vercel': return 'Vercel';
       case 'node': return 'Node';

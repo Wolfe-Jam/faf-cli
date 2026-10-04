@@ -100,6 +100,56 @@ export default { kit: { adapter: adapter() } };
     });
   });
 
+  // --- SvelteKit 3: config lives in vite.config, the kit is a devDependency ---
+
+  describe('ENGINE: SvelteKit 3 projects', () => {
+    function writeViteConfig(adapter: string, file = 'vite.config.ts'): void {
+      writeFileSync(join(testDir, file), `
+import { sveltekit } from '@sveltejs/kit/vite';
+import adapter from '@sveltejs/adapter-${adapter}';
+import { defineConfig } from 'vite';
+export default defineConfig({ plugins: [sveltekit({ adapter: adapter() })] });
+`);
+    }
+
+    test('detects SvelteKit from @sveltejs/kit in devDependencies', () => {
+      writePkg({}, { '@sveltejs/kit': '^3.0.0', svelte: '^5.57.1' });
+      writeViteConfig('cloudflare');
+      expect(detectFrameworks(testDir).some(f => f.slug === 'sveltekit')).toBe(true);
+    });
+
+    test('reads the adapter from vite.config.ts', () => {
+      writeViteConfig('cloudflare');
+      expect(detectSvelteAdapter(testDir)).toBe('Cloudflare');
+    });
+
+    test('reads the adapter from vite.config.js', () => {
+      writeViteConfig('vercel', 'vite.config.js');
+      expect(detectSvelteAdapter(testDir)).toBe('Vercel');
+    });
+
+    test('falls back to the adapter package in package.json', () => {
+      writePkg({}, { '@sveltejs/kit': '^3.0.0', '@sveltejs/adapter-node': '^6.0.0' });
+      expect(detectSvelteAdapter(testDir)).toBe('Node');
+    });
+
+    test('svelte.config.js still wins when present (SvelteKit 2)', () => {
+      writeSvelteConfig('netlify');
+      writeViteConfig('vercel');
+      expect(detectSvelteAdapter(testDir)).toBe('Netlify');
+    });
+
+    test('detectStack fills frontend, backend and hosting for a SvelteKit 3 app', () => {
+      writePkg({}, { '@sveltejs/kit': '^3.0.0', '@sveltejs/adapter-cloudflare': '^8.0.0', svelte: '^5.57.1', vite: '^8.0.12' });
+      writeViteConfig('cloudflare');
+      const data = detectStack(testDir);
+      expect(data.project?.type).toBe('svelte');
+      expect(data.stack?.frontend).toBe('SvelteKit');
+      expect(data.stack?.backend).toBe('SvelteKit');
+      expect(data.stack?.hosting).toBe('Cloudflare');
+    });
+  });
+
   // --- Framework Detection ---
 
   describe('ENGINE: detectFrameworks', () => {

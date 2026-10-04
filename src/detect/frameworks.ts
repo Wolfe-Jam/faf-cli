@@ -10,8 +10,10 @@ export const FRAMEWORKS: FrameworkSignature[] = [
   { name: 'React', slug: 'react', category: 'frontend', signals: [
     { type: 'dependency', key: 'react' },
   ]},
+  // SvelteKit apps list the kit as a devDependency, and SvelteKit 3 has no
+  // svelte.config.js, so the kit in either place is the signal.
   { name: 'SvelteKit', slug: 'sveltekit', category: 'frontend', signals: [
-    { type: 'dependency', key: '@sveltejs/kit' },
+    { type: 'anyDependency', key: '@sveltejs/kit' },
     { type: 'file', pattern: 'svelte.config.*' },
   ]},
   { name: 'Svelte', slug: 'svelte', category: 'frontend', signals: [

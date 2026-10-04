@@ -57,7 +57,8 @@ export function detectStackWithFacts(dir: string): { data: FafData; facts: Recor
   const buildTool = detectBuildTool(dir);
 
   // Find specific frameworks by category
-  const frontendFw = frameworks.find(f => f.category === 'frontend');
+  // A project with the kit is a SvelteKit project, whatever plain Svelte scores.
+  const frontendFw = frameworks.find(f => f.slug === 'sveltekit') ?? frameworks.find(f => f.category === 'frontend');
   const cssFw = frameworks.find(f => f.category === 'css');
   const uiFw = frameworks.find(f => f.category === 'ui');
   const stateFw = frameworks.find(f => f.category === 'state');
