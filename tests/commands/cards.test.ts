@@ -5,6 +5,7 @@ import { join } from 'path';
 import { cardsCommand } from '../../src/commands/cards.js';
 import { readFaf } from '../../src/interop/faf.js';
 import { A2A_CONTEXT_URI, projectCards, readFafa } from '../../src/interop/cards.js';
+import { projectPack } from '../../src/interop/pack.js';
 
 const FIX = join(import.meta.dir, '../fixtures/cards');
 
@@ -215,6 +216,80 @@ describe('TYRE: faf cards — an agent.fafa with no project.faf (BETTER)', () =>
     exitSpy.mockRestore();
     expect(said.join('\n')).toContain('faf card init');
   });
+});
+
+describe('TYRE: faf cards — an MCP server named in the .fafa', () => {
+  let testDir: string;
+  let errSpy: ReturnType<typeof spyOn>;
+  const HOSTED = [
+    'version: "1.0"',
+    'agent:',
+    '  name: weather',
+    '  displayName: Weather MCP',
+    '  description: Forecasts for anywhere.',
+    '  version: 2.0.0',
+    '  homepage: https://example.com',
+    'endpoints:',
+    '  - protocol: mcp',
+    '    location: https://mcp.example.com/mcp',
+    '',
+  ].join('\n');
+
+  beforeEach(() => {
+    testDir = join(tmpdir(), `faf-cards-mcp-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    mkdirSync(testDir, { recursive: true });
+    writeFileSync(join(testDir, 'agent.fafa'), HOSTED);
+    errSpy = spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    errSpy.mockRestore();
+    rmSync(testDir, { recursive: true, force: true });
+  });
+
+  test('BETTER: a plain Server Card from the .fafa, no FAF context', () => {
+    cardsCommand({ dir: testDir });
+    const text = readFileSync(join(testDir, 'server-card'), 'utf-8');
+    const card = JSON.parse(text);
+    expect(card.name).toBe('com.example/weather');
+    expect(card.remotes).toEqual([{ type: 'streamable-http', url: 'https://mcp.example.com/mcp' }]);
+    expect(text).not.toContain('one.faf/context');
+    expect(text).not.toContain('project.faf');
+    const catalog = readFileSync(join(testDir, '.well-known', 'ai-catalog.json'), 'utf-8');
+    expect(catalog).toContain('application/mcp-server-card+json');
+  });
+
+  test('BEST: the same Server Card plus FAF context; identity stays the .fafa', () => {
+    cardsCommand({ dir: testDir });
+    const before = JSON.parse(readFileSync(join(testDir, 'server-card'), 'utf-8'));
+    writeFileSync(join(testDir, 'project.faf'), 'project:\n  name: something-else\n  goal: Another goal\n');
+    cardsCommand({ dir: testDir, target: 'mcp' });
+    const after = JSON.parse(readFileSync(join(testDir, 'server-card'), 'utf-8'));
+    for (const k of ['name', 'version', 'description', 'title', 'remotes']) {expect(after[k]).toEqual(before[k]);}
+    expect(after._meta['one.faf/context'].faf).toBe('./project.faf');
+  });
+});
+
+describe('ENGINE: one truth — faf cards and the pack projector write the same cards', () => {
+  const NOW = '2026-10-04T00:00:00.000Z';
+  const fafa = readFafa(join(FIX, 'agent.fafa'));
+  // The fixture names an A2A door; add a remote MCP URL so every card is in play.
+  const both = { ...fafa, endpoints: [...(fafa.endpoints ?? []), { protocol: 'mcp', location: 'https://mcp.example.com/mcp' }] };
+  const strip = (rows: unknown) => JSON.parse(JSON.stringify(rows));
+
+  for (const [rung, faf] of [['BETTER', undefined], ['BEST', readFaf(join(FIX, 'project.faf'))]] as const) {
+    test(`${rung}: A2A card, Server Card, registry identity and catalog rows match`, () => {
+      const cli = projectCards({ faf, fafa: both, opts: { now: NOW } });
+      const pack = projectPack(both, { cards: ['a2a', 'server_card', 'server_json', 'ai_catalog', 'ard'], faf, now: NOW });
+      expect(cli.a2a).toEqual(pack.a2a);
+      expect(cli.mcp).toEqual(pack.server_card);
+      expect(cli.registry!.name).toBe(pack.server_json!.name);
+      expect(cli.registry!.title).toBe(pack.server_json!.title as string | undefined);
+      expect(cli.registry!._meta).toEqual(pack.server_json!._meta);
+      expect(strip(cli.catalog)).toEqual((pack.ai_catalog as { entries: unknown[] }).entries);
+      expect(strip(cli.ard)).toEqual((pack.ard as { entries: unknown[] }).entries);
+    });
+  }
 });
 
 describe('ENGINE: fixture golden — projector vs tests/fixtures/cards', () => {

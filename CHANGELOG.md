@@ -11,12 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
-- **Cards follow one ladder: BETTER is `.fafa`, BEST is `project.faf`.** An `agent.fafa` alone now gets the A2A card too, written plain: no FAF context extension, nothing pointing at a `project.faf`. Add `project.faf` and the same A2A card carries the FAF context extension, and the MCP Server Card and registry cards come from it. `faf card init`, `faf cards` and `--help` name the steps BETTER and BEST (8.1.0 called them Good and Better).
-- Asking for the MCP or registry card with no `project.faf` says to run `faf init`, and names the cards an `agent.fafa` gives alone.
+- **Cards follow one ladder: BETTER is `.fafa`, BEST is `project.faf`** (#149). The `.fafa` is the source of every card: an `agent.fafa` alone gives the plain cards its endpoints allow — the A2A card (an A2A endpoint), the MCP Server Card (a remote MCP URL), the registry `server.json` identity (a remote or a package), the AI Catalog and ARD — with no FAF context and nothing pointing at a `project.faf`. Add `project.faf` and the same cards carry FAF's context (the A2A extension, the Server Card's and `server.json`'s `_meta`). A card's identity comes from the `.fafa` at both rungs. `faf card init`, `faf cards` and `--help` name the steps BETTER and BEST (8.1.0 called them Good and Better).
+- **The pack projector (`projectPack`, `buildPack`) writes the same cards as `faf cards`.** A new `faf` option adds FAF's context (BEST); the `.fafa` is listed in the AI Catalog and ARD by default (`listFafa: false` leaves it out); an A2A row only when the `.fafa` names an A2A door. `faf cards` lists the Server Card in the catalog when it writes one.
+- An MCP repo with `project.faf` and no MCP endpoint in its `.fafa` gets its Server Card and registry identity from `project.faf`, as `faf server-card` writes them.
 - `faf cards` in a folder with neither file names `faf card init`, where cards start (it said only `faf init`).
 
 ### Fixed
 - With no `project.faf`, a second `faf cards` rewrote the AI Catalog and ARD with a new `updatedAt`. It now keeps the stamp, so a run that changes nothing writes nothing.
+- `faf card init` with an npm package never offers the registry step without a `server.json` to patch.
 
 ## [8.1.1] - 2026-10-04
 

@@ -210,8 +210,8 @@ export async function cardInitCommand(options: CardInitOptions = {}, ask?: Ask):
       console.error(`${dim('note')} add 2-5 questions people ask it (metadata.cards.examples) — search finds it by these.`);
     }
 
-    // BETTER: the A2A card (if it names an A2A door), catalog and ARD, from this file alone. Offered.
-    const better = betterTargets(readFafa(out));
+    // BETTER: the cards this file gives alone, offered (registry only patches a server.json already there).
+    const better = betterTargets(readFafa(out)).filter((t) => t !== 'registry' || existsSync(join(dir, 'server.json')));
     const named = better.map((t) => CARD_NAMES[t]).join(', ');
     if (person.ask) {
       const go = (await person.ask(`Write your ${named} now? ${dim('(Y/n)')} `)).trim().toLowerCase();
@@ -222,7 +222,7 @@ export async function cardInitCommand(options: CardInitOptions = {}, ask?: Ask):
     }
     console.log(dim(`  next: faf cards --target ${better.join(',')}`));
     if (!findFafFile(dir)) {
-      console.log(dim('  BEST: add your project.faf (faf init) for the FAF context, MCP and registry cards.'));
+      console.log(dim('  BEST: add your project.faf (faf init) for FAF context on every card.'));
     }
   } finally {
     person.close();

@@ -161,6 +161,14 @@ describe('TYRE: faf card init', () => {
     expect(doc.endpoints).toEqual([{ protocol: 'mcp', transport: 'stdio', location: 'weather-mcp' }]);
   });
 
+  test('an npm package, offer taken: catalog and ARD, and no registry step without a server.json', async () => {
+    const { ask } = scripted(['1.2.0', '']); // version asked, then the offer taken
+    await cardInitCommand({ ...WEATHER, url: undefined, package: 'weather-mcp', setVersion: undefined, dir }, ask);
+    expect(existsSync(join(dir, '.well-known', 'ai-catalog.json'))).toBe(true);
+    expect(existsSync(join(dir, '.well-known', 'ard.json'))).toBe(true);
+    expect(existsSync(join(dir, 'server.json'))).toBe(false);
+  });
+
   test('the version defaults to package.json when asked', async () => {
     writeFileSync(join(dir, 'package.json'), JSON.stringify({ version: '3.4.5' }));
     const { ask } = scripted(['']); // accept the default version

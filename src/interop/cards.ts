@@ -7,14 +7,16 @@ import { makeDirInside, readUtf8, resolveInside } from '../core/safe-write.js';
 import { writeRendered, type RenderedResult } from '../core/render-hash.js';
 import { editJsonText, upsertJsonRows } from '../core/json-edit.js';
 import {
-  A2A_PROTOCOL_VERSION,
-  FAF_MEDIA_TYPES,
   a2aDoors,
   ardHints,
   catalogHost,
-  fafaDomain,
-  fafaHandle,
+  catalogRows,
+  fafaContextExtension,
+  hasRegistryEntry,
+  mcpRemotes,
   projectA2ACard,
+  projectServerCard,
+  registryIdentity,
   type CatalogHost,
   type FafaDoc,
   type ProjectedA2A,
@@ -29,9 +31,9 @@ import {
   registryTitle,
   type ServerCardOptions,
 } from './servercard.js';
+import { A2A_CONTEXT_URI } from './context-block.js';
 
-/** A2A extension URI — dereference, not the MCP `_meta` key `one.faf/context`. */
-export const A2A_CONTEXT_URI = 'https://faf.one/ext/context/v1';
+export { A2A_CONTEXT_URI } from './context-block.js';
 // The .fafa types, the A2A card core and its helpers live in pack.ts (pure, no
 // Node built-ins) so the CLI and a browser front door share one projector.
 export {
@@ -80,7 +82,8 @@ export interface ProjectedCards {
   registry?: {
     name: string;
     title?: string;
-    _meta: Record<string, unknown>;
+    /** FAF's context block (BEST); absent from a plain registry identity (BETTER). */
+    _meta?: Record<string, unknown>;
   };
   catalog?: CatalogEntry[];
   /** The same rows, carrying ARD's search hints — the ARD manifest. */
@@ -114,46 +117,6 @@ export function findFafaFile(dir: string = process.cwd()): string | null {
   return null;
 }
 
-/**
- * The A2A extension's own `params` — a superset of {@link fafContextBlock},
- * enriched with `.fafa`-specific identity that only makes sense for an agent
- * card (agentId, passport, the full FAF media-type family). Nests the base
- * block's `faf`/`mediaType` under `provenance` rather than flattening them,
- * per the extension's own shape (`§7` of the field mapping). Not shared with
- * the MCP Server Card / registry `_meta` block, which stay on the plain
- * {@link fafContextBlock} shape — {@link assertSameBlock} checks the two
- * agree on the underlying pointer, not on being byte-identical.
- */
-function fafaExtensionParams(
-  fafa: FafaDoc,
-  faf: FafData,
-  opts: ProjectCardsOptions,
-): Record<string, unknown> {
-  const block = fafContextBlock(faf, opts);
-  const agent = fafa.agent ?? {};
-  const params: Record<string, unknown> = {
-    fafaSpecVersion: String(fafa.version ?? A2A_PROTOCOL_VERSION),
-    mediaTypes: [...FAF_MEDIA_TYPES],
-    provenance: { faf: block.faf, mediaType: block.mediaType },
-    generated: block.generated,
-  };
-  if (agent.id) {params.agentId = agent.id;}
-  const passport = fafaPassportUrl(fafa);
-  if (passport) {params.passport = passport;}
-  return params;
-}
-
-/** Where the `.fafa` itself is served — the same door the catalog's `agent`
- *  row points at, so a card and a catalog never disagree about it. Left off
- *  the card, rather than guessed, when the `.fafa` names no domain. */
-function fafaPassportUrl(fafa: FafaDoc): string | undefined {
-  try {
-    return `https://${fafaDomain(fafa)}/.well-known/fafa`;
-  } catch {
-    return undefined;
-  }
-}
-
 /** Build the A2A Agent Card (JSON) from a .fafa: the core card
  *  ({@link projectA2ACard}). With a project.faf (BEST) it carries FAF's
  *  context extension; with none (BETTER) it is the plain A2A card — the
@@ -170,17 +133,9 @@ export function buildA2ACard(
       "No A2A endpoint in .fafa (need endpoints[].protocol: a2a + location). Will not invent a door.",
     );
   }
-  if (!faf) {return projectA2ACard(fafa, { doorUrl: opts.doorUrl });}
   return projectA2ACard(fafa, {
     doorUrl: opts.doorUrl,
-    extensions: [
-      {
-        uri: A2A_CONTEXT_URI,
-        description: 'FAF passport and project DNA as typed parts',
-        required: false,
-        params: fafaExtensionParams(fafa, faf, opts),
-      },
-    ],
+    extensions: faf ? [fafaContextExtension(fafa, faf, opts)] : [],
   });
 }
 
@@ -191,18 +146,14 @@ export const generateA2ACard = deprecate(
   'FAF0003',
 );
 
-/** Where the A2A card is served: what the caller passed (`--a2a-url`), else
- *  the domain's own well-known door. */
-function catalogA2AUrl(fafa: FafaDoc, opts: ProjectCardsOptions): string {
-  return opts.a2aCardUrl ?? `https://${fafaDomain(fafa)}/.well-known/agent-card.json`;
-}
-
 /**
- * The catalog rows for this agent, keyed exactly as the pack projector keys
- * them: `urn:air:{publisher}:{namespace}:{name}`, where the publisher is the
- * domain the `.fafa` *declares* (`agent.id`'s urn:air, `metadata.cards.domain`,
- * else the homepage host) and the name is the handle — never the display name,
- * which is free text and may carry spaces a URN may not.
+ * The catalog rows for this agent — the pack projector's own
+ * ({@link catalogRows}), so `faf cards` and the pack list the same rows: the
+ * A2A card (when the `.fafa` names an A2A door), the Server Card (when it names
+ * a remote MCP URL) and the `.fafa` itself, keyed
+ * `urn:air:{publisher}:{namespace}:{name}`, where the publisher is the domain
+ * the `.fafa` *declares* (`agent.id`'s urn:air, `metadata.cards.domain`, else
+ * the homepage host) and the name is the handle.
  *
  * Throws, rather than inventing either half, when the `.fafa` names no domain:
  * an identifier is a catalog's primary key, and `urn:air:local:…` published to
@@ -213,33 +164,11 @@ export function catalogEntriesFor(
   faf: FafData = {},
   opts: ProjectCardsOptions = {},
 ): CatalogEntry[] {
-  const domain = fafaDomain(fafa);
-  const handle = fafaHandle(fafa);
-  const agent = fafa.agent ?? {};
-  const now = opts.now ?? (faf.generated as string | undefined) ?? new Date().toISOString();
-  const entries: CatalogEntry[] = [];
-
-  if (a2aDoors(fafa, opts).length > 0) {
-    entries.push({
-      identifier: `urn:air:${domain}:a2a:${handle}`,
-      displayName: String(agent.displayName ?? agent.name ?? 'A2A Agent Card'),
-      type: 'application/a2a-agent-card+json',
-      description: 'A2A v1.0 Agent Card. Projected from .fafa.',
-      url: catalogA2AUrl(fafa, opts),
-      updatedAt: now,
-    });
-  }
-
-  entries.push({
-    identifier: `urn:air:${domain}:agent:${handle}`,
-    displayName: String(agent.displayName ?? agent.name ?? '.fafa'),
-    type: 'application/vnd.fafa+yaml',
-    description: 'FAF agent passport (.fafa).',
-    url: `https://${domain}/.well-known/fafa`,
-    updatedAt: now,
+  return catalogRows(fafa, ['a2a', 'server_card'], {
+    now: opts.now ?? (faf.generated as string | undefined) ?? new Date().toISOString(),
+    a2aCardUrl: opts.a2aCardUrl,
+    doorUrl: opts.doorUrl,
   });
-
-  return entries;
 }
 
 /** The row in `entries` that is faf's own row `row`: the one whose
@@ -331,21 +260,26 @@ function namesHost(text: string): boolean {
 }
 
 /** The cards an agent.fafa gives with no project.faf (BETTER): the A2A card
- *  (when the .fafa names an A2A door), the AI Catalog and ARD. */
+ *  (when it names an A2A door), the MCP Server Card (when it names a remote MCP
+ *  URL), the registry server.json (a remote or a package), the AI Catalog, ARD. */
 export function betterTargets(fafa: FafaDoc, opts: ProjectCardsOptions = {}): CardTarget[] {
-  return a2aDoors(fafa, opts).length > 0 ? ['a2a', 'catalog', 'ard'] : ['catalog', 'ard'];
+  return [
+    ...(a2aDoors(fafa, opts).length > 0 ? ['a2a' as const] : []),
+    ...(mcpRemotes(fafa).length > 0 ? ['mcp' as const] : []),
+    ...(hasRegistryEntry(fafa) ? ['registry' as const] : []),
+    'catalog',
+    'ard',
+  ];
 }
 
-/** The cards that come from project.faf (BEST): the MCP Server Card and the
- *  registry server.json. */
-export const BEST_ONLY: CardTarget[] = ['mcp', 'registry'];
-
 /**
- * Project the cards. The ladder: an agent.fafa alone gives BETTER — the plain
- * A2A card, AI Catalog, ARD ({@link betterTargets}). A project.faf, resident
- * and used, gives BEST — the same cards plus FAF's context extension on the
- * A2A card, the MCP Server Card and the registry server.json. With no `faf`,
- * a BEST target throws rather than point at a project.faf that is not there.
+ * Project the cards. The ladder — BETTER is the .fafa, BEST is project.faf:
+ * an agent.fafa alone gives the plain cards ({@link betterTargets}); a
+ * project.faf, resident and used, adds FAF's context block to each (the A2A
+ * card's extension, the Server Card's and server.json's `_meta`). A card's
+ * identity comes from the .fafa at both rungs. With a project.faf and no MCP
+ * endpoint in the .fafa (an MCP server's own repo), the Server Card and the
+ * registry identity come from project.faf, as `faf server-card` writes them.
  */
 export function projectCards(input: {
   /** project.faf — absent means BETTER. */
@@ -356,24 +290,34 @@ export function projectCards(input: {
 }): ProjectedCards {
   const opts = input.opts ?? {};
   const faf = input.faf;
-  const all = faf ? CARD_TARGETS : input.fafa ? betterTargets(input.fafa, opts) : [];
+  const fafa = input.fafa;
+  const all = faf ? CARD_TARGETS : fafa ? betterTargets(fafa, opts) : [];
   const wanted = new Set(input.targets?.length ? input.targets : all);
   const out: ProjectedCards = {};
   if (faf) {out.block = fafContextBlock(faf, opts);}
 
-  if (!faf && BEST_ONLY.some((t) => wanted.has(t))) {
-    throw new Error('MCP and registry cards come from project.faf. Run \'faf init\' to create one.');
+  if (wanted.has('mcp')) {
+    if (fafa && mcpRemotes(fafa).length > 0) {
+      out.mcp = projectServerCard(fafa, faf, opts);
+    } else if (faf) {
+      out.mcp = buildServerCard(faf, opts);
+    } else {
+      throw new Error('A Server Card needs an MCP endpoint at an http(s) URL in the .fafa, or a project.faf.');
+    }
   }
-  if (faf && wanted.has('mcp')) {
-    out.mcp = buildServerCard(faf, opts);
-  }
-  if (faf && wanted.has('registry')) {
-    const title = registryTitle(faf);
-    out.registry = {
-      name: registryName(faf),
-      ...(title ? { title } : {}),
-      _meta: registryMeta(faf, opts),
-    };
+  if (wanted.has('registry')) {
+    if (fafa && hasRegistryEntry(fafa)) {
+      out.registry = { ...registryIdentity(fafa), ...(faf ? { _meta: registryMeta(faf, opts) } : {}) };
+    } else if (faf) {
+      const title = registryTitle(faf);
+      out.registry = {
+        name: registryName(faf),
+        ...(title ? { title } : {}),
+        _meta: registryMeta(faf, opts),
+      };
+    } else {
+      throw new Error('A registry entry needs a package or a remote MCP URL in the .fafa, or a project.faf.');
+    }
   }
 
   if (wanted.has('a2a') || wanted.has('catalog') || wanted.has('ard')) {
@@ -430,7 +374,7 @@ export function assertSameBlock(cards: ProjectedCards): void {
     const meta = cards.mcp._meta as { 'one.faf/context': unknown };
     got.push(JSON.stringify(meta['one.faf/context']));
   }
-  if (cards.registry) {
+  if (cards.registry?._meta) {
     const pp = cards.registry._meta['io.modelcontextprotocol.registry/publisher-provided'] as {
       'one.faf/context': unknown;
     };

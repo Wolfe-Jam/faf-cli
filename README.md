@@ -160,8 +160,8 @@ npx faf-cli@latest card init     # seven questions → agent.fafa → A2A card, 
 
 | You have | `faf cards` gives you | Rung |
 |---|---|---|
-| `agent.fafa` | A2A card, AI Catalog, ARD | BETTER |
-| + `project.faf` | + FAF context on the A2A card, MCP Server Card, registry | BEST |
+| `agent.fafa` | A2A card, MCP Server Card, registry, AI Catalog, ARD (as its endpoints allow) | BETTER |
+| + `project.faf` | the same cards, with FAF context | BEST |
 
 - **Scripts ask nothing:** every answer is a flag (`--name`, `--domain`, `--url` or `--package`, `--skill`, `--example`, `--set-version`).
 - **Help says what each command touches,** with a "What touches what" footer and [docs.faf.one/side-effects](https://docs.faf.one/side-effects).
