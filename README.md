@@ -25,7 +25,7 @@ detected from your real stack, scored, and versioned with your code. No drift. N
 
 <br>
 
-**144.4k downloads** · see [faf.one/downloads](https://faf.one/downloads) for latest stats · **IANA-registered · Anthropic-merged (#2759)**
+[![FAF downloads](https://img.shields.io/endpoint?url=https://faf.one/api/downloads.json)](https://faf.one/downloads) · across npm, PyPI and crates.io · **IANA-registered · Anthropic-merged (#2759)**
 
 ⭐ Bookmarks it for you, helps other devs find it too.
 
