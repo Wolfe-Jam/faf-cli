@@ -201,11 +201,19 @@ describe('TYRE: faf cards — an agent.fafa with no project.faf (BETTER)', () =>
     expect(existsSync(join(testDir, '.well-known'))).toBe(false);
   });
 
-  test('neither file: project.faf not found, as before', () => {
+  test('neither file: names faf card init, where cards start', () => {
     rmSync(join(testDir, 'agent.fafa'));
     errSpy.mockRestore();
-    expectExit(2, () => cardsCommand({ dir: testDir, target: 'catalog' }));
-    errSpy = spyOn(console, 'error').mockImplementation(() => {});
+    const said: string[] = [];
+    const exitSpy = spyOn(process, 'exit').mockImplementation(((c?: number) => {
+      throw new Error(`__exit_${c}__`);
+    }) as never);
+    errSpy = spyOn(console, 'error').mockImplementation((m: unknown) => {
+      said.push(String(m));
+    });
+    expect(() => cardsCommand({ dir: testDir })).toThrow('__exit_2__');
+    exitSpy.mockRestore();
+    expect(said.join('\n')).toContain('faf card init');
   });
 });
 

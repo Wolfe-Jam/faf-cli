@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **Cards follow one ladder: BETTER is `.fafa`, BEST is `project.faf`.** An `agent.fafa` alone now gets the A2A card too, written plain: no FAF context extension, nothing pointing at a `project.faf`. Add `project.faf` and the same A2A card carries the FAF context extension, and the MCP Server Card and registry cards come from it. `faf card init`, `faf cards` and `--help` name the steps BETTER and BEST (8.1.0 called them Good and Better).
 - Asking for the MCP or registry card with no `project.faf` says to run `faf init`, and names the cards an `agent.fafa` gives alone.
+- `faf cards` in a folder with neither file names `faf card init`, where cards start (it said only `faf init`).
 
 ### Fixed
 - With no `project.faf`, a second `faf cards` rewrote the AI Catalog and ARD with a new `updatedAt`. It now keeps the stamp, so a run that changes nothing writes nothing.

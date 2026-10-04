@@ -123,8 +123,12 @@ export function cardsCommand(options: CardsCommandOptions = {}): void {
   const hasFaf = Boolean(fafPath && existsSync(fafPath));
   if (!hasFaf) {
     const asked = targets?.filter((t) => BEST_ONLY.includes(t)) ?? [];
-    if (!fafa || asked.length > 0) {
-      const alone = fafa ? `\n  With only an agent.fafa: faf cards --target ${betterTargets(fafa, { doorUrl: options.doorUrl }).join(',')}` : '';
+    if (!fafa) {
+      console.error(`Error: no agent.fafa or project.faf here\n\n  Cards start from an agent.fafa: faf card init\n  For project.faf: faf init`);
+      process.exit(2);
+    }
+    if (asked.length > 0) {
+      const alone = `\n  With only an agent.fafa: faf cards --target ${betterTargets(fafa, { doorUrl: options.doorUrl }).join(',')}`;
       console.error(`Error: project.faf not found\n\n  Run 'faf init' to create one.${alone}`);
       process.exit(2);
     }
