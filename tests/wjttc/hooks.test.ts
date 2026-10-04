@@ -25,7 +25,9 @@ const MIN = `project:\n  name: demo\n  goal: a tool\n  type: cli\n`;
 const FULL = `project:\n  name: demo\n  goal: a tool that ships\n  main_language: TypeScript\n  type: cli\nstack:\n  build: vite\n  cicd: GitHub Actions\nhuman_context:\n  who: devs\n  why: ship faster\n`;
 
 const CLI = join(import.meta.dir, '../../src/cli.ts');
-const LOCAL_RUNNER = `${process.execPath} ${CLI} hooks-run`; // points the hook at THIS cli
+// Forward slashes: the hook is a sh script, and sh reads a Windows path's backslashes as escapes.
+const shPath = (p: string): string => p.replace(/\\/g, '/');
+const LOCAL_RUNNER = `${shPath(process.execPath)} ${shPath(CLI)} hooks-run`; // points the hook at THIS cli
 
 const mk = (tag: string) => {
   let dir = join(tmpdir(), `faf-hooks-${tag}-${Date.now()}-${Math.random().toString(36).slice(2)}`);
