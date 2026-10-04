@@ -178,15 +178,17 @@ jobs:
     defaults:
       run:
         shell: bash
-    env:
-      # The runner's default TEMP is an 8.3 short path (C:\Users\RUNNER~1\...).
-      # faf prints real paths (runneradmin), so tests comparing against tmpdir()
-      # would differ by name only. runner.temp has no short alias.
-      TEMP: ${{ runner.temp }}
-      TMP: ${{ runner.temp }}
 
     steps:
       - uses: actions/checkout@v7
+
+      # The runner's default TEMP is an 8.3 short path (C:\Users\RUNNER~1\...).
+      # faf prints real paths (runneradmin), so tests comparing against tmpdir()
+      # would differ by name only. RUNNER_TEMP has no short alias.
+      - name: Use a temp folder without a short-name alias
+        run: |
+          echo "TEMP=$RUNNER_TEMP" >> "$GITHUB_ENV"
+          echo "TMP=$RUNNER_TEMP" >> "$GITHUB_ENV"
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
