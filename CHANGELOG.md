@@ -15,8 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **The pack projector (`projectPack`, `buildPack`) writes the same cards as `faf cards`.** A new `faf` option adds FAF's context (BEST); the `.fafa` is listed in the AI Catalog and ARD by default (`listFafa: false` leaves it out); an A2A row only when the `.fafa` names an A2A door. `faf cards` lists the Server Card in the catalog when it writes one.
 - An MCP repo with `project.faf` and no MCP endpoint in its `.fafa` gets its Server Card and registry identity from `project.faf`, as `faf server-card` writes them.
 - `faf cards` in a folder with neither file names `faf card init`, where cards start (it said only `faf init`).
+- **An existing `server.json` keeps the name it was published under.** The registry identity now comes from the `.fafa`; when that gives a different name than `server.json` carries, `faf cards` refuses to rename it (exit 1, the file left as it is), because a rename moves the next registry publish to another namespace. `--force` renames it.
+- **With an MCP endpoint in the `.fafa`, the Server Card is built from the `.fafa`** (8.1 built it from `project.faf`). faf owns the Server Card it wrote, so the first `faf cards` after upgrading rewrites it from the `.fafa`.
+- **Library:** `ProjectedCards.block`, the registry entry's `_meta` and `ServerJsonIdentity.meta` are optional (absent at BETTER, with no `project.faf`). `faf cards --check` prints no `block` key at BETTER.
 
 ### Fixed
+- **A package identifier is never read as an option.** An npm name can no longer start with `-` (`--yes`, `-rf` were accepted); a PyPI name must follow PyPI's name rule; any other registry's identifier must start with a letter or digit and have no spaces.
 - With no `project.faf`, a second `faf cards` rewrote the AI Catalog and ARD with a new `updatedAt`. It now keeps the stamp, so a run that changes nothing writes nothing.
 - `faf card init` with an npm package never offers the registry step without a `server.json` to patch.
 - **`faf card init` and `buildPack` refuse what a card must not carry:** a "where it runs" that is not an http(s) URL (`javascript:`, `ftp:`, `file:` used to become an npm package), an npm package that is not an npm package name (`rm -rf /` used to become the MCP server's stdio command), and a protocol other than `a2a` or `mcp` from flags.

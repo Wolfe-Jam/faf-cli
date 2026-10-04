@@ -244,3 +244,20 @@ describe('ENGINE: .fafa → cards', () => {
     );
   });
 });
+
+describe('BRAKE: a package identifier is never read as an option (8.2.0 review, finding 3)', () => {
+  const withPackage = (registryType: string, identifier: string): PackAnswers =>
+    ({ ...installedMcp, packages: [{ registryType, identifier, version: '0.3.1' }] });
+
+  for (const [type, id] of [['pypi', '-rf'], ['pypi', 'bad name'], ['oci', '--privileged'], ['oci', 'image name'], ['nuget', '-x']] as const) {
+    test(`${type} ${JSON.stringify(id)}: refused`, () => {
+      expect(() => answersToFafa(withPackage(type, id))).toThrow(/package/i);
+    });
+  }
+
+  for (const [type, id] of [['pypi', 'weather_mcp'], ['pypi', 'Weather.MCP-2'], ['oci', 'ghcr.io/acme/weather:1.0'], ['nuget', 'Acme.Weather']] as const) {
+    test(`${type} ${JSON.stringify(id)}: accepted`, () => {
+      expect(() => answersToFafa(withPackage(type, id))).not.toThrow();
+    });
+  }
+});
