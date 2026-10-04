@@ -293,8 +293,15 @@ export interface PackAnswers {
 }
 
 const HANDLE_RE = /^[a-z0-9][a-z0-9._-]*$/;
-/** npm's own package-name rule: lowercase, URL-safe, optionally `@scope/`. */
-const NPM_NAME_RE = /^(@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/;
+/** npm's own package-name rule: lowercase, URL-safe, optionally `@scope/`, and
+ *  never starting with `-`, `.` or `_` (a leading `-` would be read as an option). */
+const NPM_NAME_RE = /^(@[a-z0-9~][a-z0-9-._~]*\/)?[a-z0-9~][a-z0-9-._~]*$/;
+/** PyPI's project-name rule (PEP 508): letters, digits, `.`, `_`, `-`, starting and
+ *  ending with a letter or digit. */
+const PYPI_NAME_RE = /^[A-Za-z0-9]([A-Za-z0-9._-]*[A-Za-z0-9])?$/;
+/** Any other registry's identifier (oci, nuget, ...): no whitespace, and it starts
+ *  with a letter or digit, so it is never read as an option. */
+const PACKAGE_ID_RE = /^[A-Za-z0-9][^\s]*$/;
 const ENDPOINT_PROTOCOLS = ['a2a', 'mcp'];
 const DOMAIN_RE = /^(?=.{1,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/;
 
@@ -330,12 +337,24 @@ function capabilitiesFrom(a: PackAnswers, keywords: string[]): FafaCapability[] 
     }));
 }
 
-/** A package people install: an npm one must carry npm's own name — the `.fafa`
- *  names it as the MCP server's stdio command, so nothing else gets through. */
+/** A package people install: an npm one must carry npm's own name, a PyPI one
+ *  PyPI's, and any other an identifier that cannot be read as an option — the
+ *  `.fafa` names it as the MCP server's stdio command, so nothing else gets through. */
 function packagesFrom(a: PackAnswers): PackPackage[] {
   const packages = (a.packages ?? []).filter((p) => clean(p.registryType) && clean(p.identifier));
-  const bad = packages.find((p) => clean(p.registryType) === 'npm' && !NPM_NAME_RE.test(clean(p.identifier)));
-  if (bad) {throw new Error(`Package "${clean(bad.identifier)}" is not an npm package name (e.g. weather-mcp or @acme/weather).`);}
+  for (const p of packages) {
+    const type = clean(p.registryType);
+    const id = clean(p.identifier);
+    if (type === 'npm' && !NPM_NAME_RE.test(id)) {
+      throw new Error(`Package "${id}" is not an npm package name (e.g. weather-mcp or @acme/weather).`);
+    }
+    if (type === 'pypi' && !PYPI_NAME_RE.test(id)) {
+      throw new Error(`Package "${id}" is not a PyPI package name (e.g. weather-mcp or weather_mcp).`);
+    }
+    if (type !== 'npm' && type !== 'pypi' && !PACKAGE_ID_RE.test(id)) {
+      throw new Error(`Package "${id}" is not a ${type} package identifier: it must start with a letter or digit and have no spaces.`);
+    }
+  }
   return packages
     .map((p) => ({
       registryType: clean(p.registryType),

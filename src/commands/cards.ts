@@ -15,10 +15,22 @@ import {
   type CardTarget,
 } from '../interop/cards.js';
 import { REGISTRY_PUBLISHER_KEY, hasServerCardMark, patchServerJson } from '../interop/servercard.js';
-import { makeDirInside, readUtf8, resolveInside, safeWriteFile } from '../core/safe-write.js';
+import { hasRegistryEntry } from '../interop/pack.js';
+import { SafePathError, makeDirInside, readUtf8, resolveInside, safeWriteFile } from '../core/safe-write.js';
 import { JsonEditError } from '../core/json-edit.js';
 import { isOneLineError, oneLine } from '../core/refusal.js';
 import { dim, fafCyan } from '../ui/colors.js';
+
+/** The `name` an existing server.json carries, or null when it has none (or
+ *  is not JSON: patchServerJson reports that). */
+function publishedName(text: string): string | null {
+  try {
+    const name = (JSON.parse(text) as { name?: unknown }).name;
+    return typeof name === 'string' && name !== '' ? name : null;
+  } catch {
+    return null;
+  }
+}
 
 export interface CardsCommandOptions {
   target?: string;
@@ -243,6 +255,19 @@ export function cardsCommand(options: CardsCommandOptions = {}): void {
       run(inPath, () => {
         const real = resolveInside(dir, inPath);
         const text = readUtf8(real);
+        // A published server.json keeps its name when the identity comes from the
+        // .fafa (new in 8.2): a rename moves the next registry publish to another
+        // namespace, so it takes --force. A project.faf identity sets the name as
+        // `faf server-card` always has.
+        const published = publishedName(text);
+        const fromFafa = fafa !== undefined && hasRegistryEntry(fafa);
+        if (!force && fromFafa && published && published !== registry.name) {
+          throw new SafePathError(
+            'not-owned',
+            real,
+            `${inPath} is published as "${published}" and the .fafa gives "${registry.name}" — faf left the name as it is, because a rename moves the next registry publish to another namespace. Use --force to rename it.`,
+          );
+        }
         const next = patchServerJson(text, { name: registry.name, title: registry.title, meta: registry._meta });
         if (next.changed) {safeWriteFile(real, next.text, { root: dir, expect: text });}
         return next.changed;
