@@ -25,7 +25,9 @@ const MIN = `project:\n  name: demo\n  goal: a tool\n  type: cli\n`;
 const FULL = `project:\n  name: demo\n  goal: a tool that ships\n  main_language: TypeScript\n  type: cli\nstack:\n  build: vite\n  cicd: GitHub Actions\nhuman_context:\n  who: devs\n  why: ship faster\n`;
 
 const CLI = join(import.meta.dir, '../../src/cli.ts');
-const LOCAL_RUNNER = `${process.execPath} ${CLI} hooks-run`; // points the hook at THIS cli
+// Forward slashes: the hook is a sh script, and sh reads a Windows path's backslashes as escapes.
+const shPath = (p: string): string => p.replace(/\\/g, '/');
+const LOCAL_RUNNER = `${shPath(process.execPath)} ${shPath(CLI)} hooks-run`; // points the hook at THIS cli
 
 const mk = (tag: string) => {
   let dir = join(tmpdir(), `faf-hooks-${tag}-${Date.now()}-${Math.random().toString(36).slice(2)}`);
@@ -68,7 +70,8 @@ describe('WJTTC — faf hooks', () => {
         expect(hook).toContain('command -v'); // PATH guard — skip if faf absent
         expect(hook).toContain('grep -qE'); // only run when a .faf is staged
         expect(hook).toContain('|| true'); // warn mode never blocks
-        expect(statSync(hookPath(dir)).mode & 0o111).toBeGreaterThan(0); // executable
+        // Executable bit — POSIX only; Windows has none, and git runs hooks there through sh.
+        if (process.platform !== 'win32') {expect(statSync(hookPath(dir)).mode & 0o111).toBeGreaterThan(0);}
       } finally { rmSync(dir, { recursive: true, force: true }); }
     });
 

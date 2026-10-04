@@ -87,7 +87,7 @@ describe('TYRE: faf cards command', () => {
     writeFileSync(join(testDir, 'project.faf'), readFileSync(join(FIX, 'project.faf'), 'utf-8'));
     writeFileSync(
       join(testDir, 'agent.fafa'),
-      readFileSync(join(FIX, 'agent.fafa'), 'utf-8').replace(
+      readFileSync(join(FIX, 'agent.fafa'), 'utf-8').replace(/\r\n/g, '\n').replace(
         /  - protocol: a2a\n    transport: http\n    location: https:\/\/faf-voice\.vercel\.app\/api\/a2a\n    version: "1.0"\n/,
         '',
       ),

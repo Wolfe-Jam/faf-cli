@@ -43,8 +43,8 @@ jobs:
           base: ${{ github.event.repository.default_branch }}
 
   # Primary Test Suite — Bun
-  # The full Bun suite does not run on Windows (bunx subprocess tests time out there);
-  # Windows is covered before shipping by the `windows` job below.
+  # Windows runs the full suite in the `windows` job below (its own steps: TEMP
+  # setup, packed-tarball install, faf auto).
   test:
     name: Bun Test Suite
     runs-on: ${{ matrix.os }}
@@ -166,10 +166,9 @@ jobs:
           "$BIN" info
           echo "::endgroup::"
 
-  # Windows — a real pre-ship gate (the full Bun suite is not run here; its
-  # bunx subprocess tests time out on Windows runners). Builds on Windows, runs
-  # the CLI, installs the packed tarball as a user would, runs `faf auto` on this
-  # repo (real Windows paths), and runs the detection tests.
+  # Windows — a real pre-ship gate. Builds on Windows, runs the CLI, installs the
+  # packed tarball as a user would, runs `faf auto` on this repo (real Windows
+  # paths), and runs the full test suite.
   windows:
     name: Windows (Node ${{ matrix.node }})
     runs-on: windows-latest
@@ -182,6 +181,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+
+      # The runner's default TEMP is an 8.3 short path (C:\Users\RUNNER~1\...).
+      # faf prints real paths (runneradmin), so tests comparing against tmpdir()
+      # would differ by name only. RUNNER_TEMP has no short alias.
+      - name: Use a temp folder without a short-name alias
+        run: |
+          echo "TEMP=$RUNNER_TEMP" >> "$GITHUB_ENV"
+          echo "TMP=$RUNNER_TEMP" >> "$GITHUB_ENV"
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -233,8 +240,8 @@ jobs:
           node dist/cli.js score
           mv project.faf.orig project.faf
 
-      - name: Detection tests
-        run: bun test --timeout=120000 tests/detect
+      - name: Full test suite
+        run: bun test --timeout=120000
 
   # Package managers — the packed tarball must install and run under npm, pnpm
   # and bun. 8.0.0 shipped a file: dependency that npm resolved inside faf-cli
