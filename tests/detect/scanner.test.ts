@@ -280,7 +280,7 @@ describe('scanner', () => {
   describe('ENGINE: detectBuildTool', () => {
     test('detects Vite', () => {
       writePkg({}, { vite: '^5.0.0' });
-      expect(detectBuildTool(testDir)).toBe('Vite');
+      expect(detectBuildTool(testDir)).toBe('Vite 5');
     });
 
     test('detects TypeScript', () => {

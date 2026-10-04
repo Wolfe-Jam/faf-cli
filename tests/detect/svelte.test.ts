@@ -147,6 +147,17 @@ export default defineConfig({ plugins: [sveltekit({ adapter: adapter() })] });
       expect(data.stack?.frontend).toBe('SvelteKit');
       expect(data.stack?.backend).toBe('SvelteKit');
       expect(data.stack?.hosting).toBe('Cloudflare');
+      expect(data.stack?.build).toBe('Vite 8');
+    });
+
+    test('build names Vite\'s major version from package.json', () => {
+      writePkg({}, { '@sveltejs/kit': '^3.0.0', vite: '^8.3.2' });
+      expect(detectStack(testDir).stack?.build).toBe('Vite 8');
+    });
+
+    test('build stays "Vite" when the range carries no version number', () => {
+      writePkg({}, { '@sveltejs/kit': '^3.0.0', vite: 'latest' });
+      expect(detectStack(testDir).stack?.build).toBe('Vite');
     });
   });
 
@@ -300,7 +311,7 @@ export default defineConfig({ plugins: [sveltekit({ adapter: adapter() })] });
       expect(data.stack?.state_management).toBe('Runes');
       expect(data.stack?.backend).toBe('SvelteKit');
       expect(data.stack?.api_type).toBe('Server Routes');
-      expect(data.stack?.build).toBe('Vite');
+      expect(data.stack?.build).toBe('Vite 5');
       expect(data.stack?.hosting).toBe('Vercel');
       expect(data.stack?.cicd).toBe('GitHub Actions');
       expect(data.stack?.database).toBe('');

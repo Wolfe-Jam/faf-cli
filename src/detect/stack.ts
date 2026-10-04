@@ -17,6 +17,7 @@ import {
   detectKeyFiles,
   detectCommands,
   detectTechStack,
+  viteLabel,
 } from './scanner.js';
 
 /** The major version of the `svelte` dependency package.json names
@@ -120,7 +121,7 @@ export function detectStackWithFacts(dir: string): { data: FafData; facts: Recor
         break;
       case 'build':
         // SvelteKit always builds with Vite; plain Svelte only when the repo says so
-        facts[field] = hasSvelteKit ? 'Vite' : (buildTool ?? '');
+        facts[field] = hasSvelteKit ? viteLabel(pkg) : (buildTool ?? '');
         break;
       case 'cicd': facts[field] = cicd ?? ''; break;
       case 'package_manager': facts[field] = pkgManager; break;

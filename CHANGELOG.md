@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v8.1.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v8.1.1 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -7,6 +7,17 @@ All notable changes to faf-cli will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [8.1.1] - 2026-10-04
+
+**faf-cli reads SvelteKit 3 projects: SvelteKit, its adapter and its hosting, from vite.config and devDependencies.** Patch — inherits The Always33+ Edition. 2109 tests.
+
+### Fixed
+- **SvelteKit 3 projects read as plain Svelte** (#147). SvelteKit 3 (2026-10-01) moves its config, adapter included, from `svelte.config.js` into `vite.config.*`, and SvelteKit apps list `@sveltejs/kit` as a devDependency. faf-cli knew the kit only from `dependencies` or a `svelte.config.*` file, so a SvelteKit 3 app came out frontend `Svelte`, backend and hosting empty. It now reads frontend and backend `SvelteKit` and the hosting from the adapter: `svelte.config.js` first, then `vite.config.{ts,js,mts,mjs}`, then the `@sveltejs/adapter-*` package in package.json. SvelteKit 2 projects read exactly as before.
+- **The Claude Code plugin manifest** says the package version and `team@faf.one` (#145); a test keeps the two versions equal.
+
+### Changed
+- **The build slot names Vite's major version** from package.json: `Vite 8` for `^8.3.2`. A range with no version number (`latest`) stays `Vite`.
 
 ## [8.1.0] - 2026-10-02 — The Always33+ Edition
 

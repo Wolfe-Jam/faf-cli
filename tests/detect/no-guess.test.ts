@@ -99,7 +99,7 @@ describe('BRAKE: Svelte — Runes and Vite only from facts', () => {
     expect(detectStack(repo({ 'package.json': JSON.stringify({ dependencies: { svelte: '^4.2.0' } }) })).stack?.state_management).toBe('');
     expect(detectStack(repo({ 'package.json': JSON.stringify({ dependencies: { svelte: '^5.0.0' } }) })).stack?.state_management).toBe('Runes');
     expect(detectStack(repo({ 'package.json': JSON.stringify({ dependencies: { svelte: '^5.0.0' } }) })).stack?.build).toBe('');
-    expect(detectStack(repo({ 'package.json': JSON.stringify({ dependencies: { svelte: '^5.0.0' }, devDependencies: { vite: '^5' } }) })).stack?.build).toBe('Vite');
+    expect(detectStack(repo({ 'package.json': JSON.stringify({ dependencies: { svelte: '^5.0.0' }, devDependencies: { vite: '^5' } }) })).stack?.build).toBe('Vite 5');
     // SvelteKit builds with Vite: that is a fact of SvelteKit.
     expect(detectStack(repo({ 'package.json': JSON.stringify({ dependencies: { svelte: '^5.0.0', '@sveltejs/kit': '^2' } }), 'svelte.config.js': 'export default {}' })).stack?.build).toBe('Vite');
   });

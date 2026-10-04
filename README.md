@@ -133,7 +133,22 @@ faf memory etch "a durable fact" --id my-fact
 faf memory show
 ```
 
-### What's New in v8.1.0 — The Always33+ Edition
+### What's New in v8.1.1 — The Always33+ Edition
+
+**faf-cli reads SvelteKit 3 projects: SvelteKit, its adapter and its hosting, from vite.config and devDependencies.**
+
+```bash
+npx faf-cli@latest auto     # in a SvelteKit 3 app
+```
+
+```text
+frontend: SvelteKit · backend: SvelteKit · hosting: Cloudflare · build: Vite 8
+```
+
+- **SvelteKit 3 moved its config into `vite.config`.** faf-cli reads the adapter there (and still in `svelte.config.js` for SvelteKit 2), and finds the kit in devDependencies, where SvelteKit apps list it.
+- **The build slot names Vite's major version:** `Vite 8`.
+
+### The Always33+ Edition (8.1)
 
 **From nothing to listed in one command: `faf card init` asks seven questions and writes your agent.fafa, your AI Catalog entry and your ARD entry.**
 
@@ -172,6 +187,7 @@ npx faf-cli@latest card init     # seven questions → agent.fafa → AI Catalog
 
 **Recent sprint**
 
+- ✪ [8.1.1](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.1.1) SvelteKit 3 read in full — kit, adapter, Vite 8
 - ✪ [8.1.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.1.0) The Always33+ Edition — from nothing to listed in one command
 - ✪ [8.0.1](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.0.1) pnpm installs work — faf-scoring-kernel from npm
 - ✪ [8.0.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.0.0) The Always33 Edition — one engine, one number
