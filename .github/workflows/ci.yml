@@ -244,9 +244,21 @@ jobs:
           node dist/cli.js score
           mv project.faf.orig project.faf
 
+      # A green run takes ~2.5 min. The suite sometimes hangs on Windows runners
+      # (a Bun process that never exits, not a failing test). A hang retries once;
+      # a test failure fails at once, as always.
       - name: Full test suite
-        timeout-minutes: 10
-        run: bun test --timeout=120000
+        timeout-minutes: 12
+        run: |
+          for attempt in 1 2; do
+            set +e
+            timeout 300 bun test --timeout=120000
+            code=$?
+            set -e
+            if [ "$code" -ne 124 ]; then exit "$code"; fi
+            echo "::warning::Windows test run hung (attempt $attempt of 2), not a test failure"
+          done
+          exit 124
 
   # Package managers — the packed tarball must install and run under npm, pnpm
   # and bun. 8.0.0 shipped a file: dependency that npm resolved inside faf-cli

@@ -33,7 +33,7 @@ const mk = (tag: string) => {
   let dir = join(tmpdir(), `faf-hooks-${tag}-${Date.now()}-${Math.random().toString(36).slice(2)}`);
   mkdirSync(dir, { recursive: true });
   dir = realpathSync.native(dir); // resolve symlinks AND Windows 8.3 short names (RUNNER~1) → matches git
-  const g = (a: string[]) => execFileSync('git', a, { cwd: dir, stdio: 'pipe', encoding: 'utf-8' });
+  const g = (a: string[]) => execFileSync('git', a, { cwd: dir, stdio: 'pipe', encoding: 'utf-8', timeout: 30_000 });
   g(['init', '-q']); g(['config', 'user.email', 't@t.t']); g(['config', 'user.name', 't']);
   return { dir, g };
 };
@@ -44,7 +44,9 @@ const stage = (dir: string, g: (a: string[]) => string, body: string) => {
 const commit = (dir: string, msg: string, flags: string[] = []): { ok: boolean; out: string } => {
   // spawnSync (not execFileSync) so we capture BOTH streams on success AND failure —
   // the warn-mode ⚠ lands on the hook's stderr even when the commit is allowed.
-  const r = spawnSync('git', ['commit', '-m', msg, ...flags], { cwd: dir, encoding: 'utf-8' });
+  // A timeout turns a hook that never exits into a named failure, not a stalled suite.
+  const r = spawnSync('git', ['commit', '-m', msg, ...flags], { cwd: dir, encoding: 'utf-8', timeout: 60_000 });
+  if (r.error) {throw new Error(`git commit did not finish (${r.error.message}); output so far: ${r.stdout ?? ''}${r.stderr ?? ''}`);}
   return { ok: r.status === 0, out: `${r.stdout ?? ''}${r.stderr ?? ''}` };
 };
 const capture = (fn: () => void): string => {
