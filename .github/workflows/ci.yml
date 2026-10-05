@@ -244,6 +244,16 @@ jobs:
           node dist/cli.js score
           mv project.faf.orig project.faf
 
+      - name: PROBE (temporary) hooks tests x10
+        continue-on-error: true
+        run: |
+          for i in 1 2 3 4 5 6 7 8 9 10; do
+            start=$(date +%s)
+            if timeout 180 bun test --timeout=120000 tests/wjttc/hooks.test.ts > "hooks-$i.log" 2>&1; then r=ok; else r="FAIL($?)"; fi
+            echo "run $i: $r in $(( $(date +%s) - start ))s"
+            grep -E "\(fail\)|did not finish" "hooks-$i.log" | head -5 || true
+          done
+
       - name: Full test suite
         timeout-minutes: 10
         run: bun test --timeout=120000
