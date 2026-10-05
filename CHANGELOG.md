@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v8.1.1 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v8.2.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -8,7 +8,9 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [8.2.0] - 2026-10-05 — The Ladder Edition
+
+**One ladder for every card: an agent.fafa gives the plain cards, and project.faf adds FAF's context.** 2160 tests.
 
 ### Changed
 - **Cards follow one ladder: BETTER is `.fafa`, BEST is `project.faf`** (#149). The `.fafa` is the source of every card: an `agent.fafa` alone gives the plain cards its endpoints allow — the A2A card (an A2A endpoint), the MCP Server Card (a remote MCP URL), the registry `server.json` identity (a remote or a package), the AI Catalog and ARD — with no FAF context and nothing pointing at a `project.faf`. Add `project.faf` and the same cards carry FAF's context (the A2A extension, the Server Card's and `server.json`'s `_meta`). A card's identity comes from the `.fafa` at both rungs. `faf card init`, `faf cards` and `--help` name the steps BETTER and BEST (8.1.0 called them Good and Better).
