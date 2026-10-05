@@ -244,19 +244,21 @@ jobs:
           node dist/cli.js score
           mv project.faf.orig project.faf
 
-      - name: PROBE (temporary) hooks tests x10
-        continue-on-error: true
-        run: |
-          for i in 1 2 3 4 5 6 7 8 9 10; do
-            start=$(date +%s)
-            if timeout 180 bun test --timeout=120000 tests/wjttc/hooks.test.ts > "hooks-$i.log" 2>&1; then r=ok; else r="FAIL($?)"; fi
-            echo "run $i: $r in $(( $(date +%s) - start ))s"
-            grep -E "\(fail\)|did not finish" "hooks-$i.log" | head -5 || true
-          done
-
+      # A green run takes ~2.5 min. The suite sometimes hangs on Windows runners
+      # (a Bun process that never exits, not a failing test). A hang retries once;
+      # a test failure fails at once, as always.
       - name: Full test suite
-        timeout-minutes: 10
-        run: bun test --timeout=120000
+        timeout-minutes: 12
+        run: |
+          for attempt in 1 2; do
+            set +e
+            timeout 300 bun test --timeout=120000
+            code=$?
+            set -e
+            if [ "$code" -ne 124 ]; then exit "$code"; fi
+            echo "::warning::Windows test run hung (attempt $attempt of 2), not a test failure"
+          done
+          exit 124
 
   # Package managers — the packed tarball must install and run under npm, pnpm
   # and bun. 8.0.0 shipped a file: dependency that npm resolved inside faf-cli
