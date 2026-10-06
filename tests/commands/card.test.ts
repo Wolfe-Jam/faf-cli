@@ -163,7 +163,16 @@ describe('TYRE: faf card init', () => {
 
   test('an npm package, offer taken: catalog and ARD, and no registry step without a server.json', async () => {
     const { ask } = scripted(['1.2.0', '']); // version asked, then the offer taken
-    await cardInitCommand({ ...WEATHER, url: undefined, package: 'weather-mcp', setVersion: undefined, dir }, ask);
+    // An exit here (the registry step run with no server.json to patch) fails this
+    // test by name, instead of ending the whole run mid-way.
+    const exit = spyOn(process, 'exit').mockImplementation(((c?: number) => {
+      throw new Error(`card init exited (${c}) — the registry step ran without a server.json`);
+    }) as never);
+    try {
+      await cardInitCommand({ ...WEATHER, url: undefined, package: 'weather-mcp', setVersion: undefined, dir }, ask);
+    } finally {
+      exit.mockRestore();
+    }
     expect(existsSync(join(dir, '.well-known', 'ai-catalog.json'))).toBe(true);
     expect(existsSync(join(dir, '.well-known', 'ard.json'))).toBe(true);
     expect(existsSync(join(dir, 'server.json'))).toBe(false);
@@ -262,7 +271,7 @@ function filesIn(dir: string): string[] {
 describe('BRAKE: faf card init — refuses what it must not write', () => {
   const t = freshDir('brake');
 
-  for (const url of ['javascript:alert(1)', 'ftp://example.com/x', 'file:///etc/passwd', 'data:text/plain,hi']) {
+  for (const url of ['javascript:alert(1)', 'ftp://example.com/x', 'file:///etc/passwd', 'data:text/plain,hi', 'https://ok.example.com/x y', 'https://', 'https:// example.com']) {
     test(`--url ${url}: not an http(s) URL — refused, nothing written`, async () => {
       const err = await expectExit(2, () => cardInitCommand({ ...WEATHER, url, dir: t.dir() }));
       expect(err).toContain('http(s)');

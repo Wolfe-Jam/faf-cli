@@ -8,6 +8,19 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- **A catalog or ARD row that changes gets a new `updatedAt`.** 8.2.0 kept the first run's stamp on faf's rows so that a run changing nothing writes nothing, but it kept it even when a row's `url` or `type` changed (e.g. `faf cards --a2a-url <new url>`), so a reader that refreshes on `updatedAt` missed the change. A row that changes is now stamped with the time of the run; a row that doesn't keeps its stamp.
+- **An endpoint URL must be a whole http(s) URL.** `faf card init` and `buildPack` checked only how a URL started, so `https://ok.example.com/x y` was accepted and written into the cards. URLs are now parsed, need a host, and may not contain whitespace.
+
+### Changed
+- **Correction to 8.2.0's note on the catalog.** `faf cards` lists the Server Card in the AI Catalog when the `.fafa` names a remote MCP URL: the row points at `<url>/server-card`, where the MCP server serves it. It does not depend on whether this run writes the card. A Server Card built from `project.faf` has no URL to list, so it gets no row.
+
+### Tests
+- The guard "an A2A catalog row only when the `.fafa` names an A2A door" now has its own test; removing the guard fails it by name.
+- The `faf card init` registry-step test fails by name when card init exits, instead of ending the test run.
+
 ## [8.2.0] - 2026-10-05 — The Ladder Edition
 
 **One ladder for every card: agent.fafa builds the plain cards, and project.faf adds FAF's context.** 2160 tests.
