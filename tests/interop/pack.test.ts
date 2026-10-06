@@ -12,6 +12,7 @@ import Ajv2020 from 'ajv/dist/2020.js';
 import {
   answersToFafa,
   buildPack,
+  catalogRows,
   fafaYaml,
   mcpName,
   projectA2ACard,
@@ -260,4 +261,18 @@ describe('BRAKE: a package identifier is never read as an option (8.2.0 review, 
       expect(() => answersToFafa(withPackage(type, id))).not.toThrow();
     });
   }
+});
+
+describe('BRAKE: an A2A catalog row only when the .fafa names an A2A door (8.2.0 review, finding 9)', () => {
+  const noDoor = answersToFafa(installedMcp); // an installed MCP server: no A2A endpoint
+
+  test('no A2A door: no A2A row, even when the a2a card is asked for', () => {
+    const rows = catalogRows(noDoor, ['a2a', 'server_card']);
+    expect(rows.some((r) => r.identifier.includes(':a2a:'))).toBe(false);
+  });
+
+  test('a door given with doorUrl: the A2A row is listed', () => {
+    const rows = catalogRows(noDoor, ['a2a', 'server_card'], { doorUrl: 'https://example.com/a2a' });
+    expect(rows.some((r) => r.identifier.includes(':a2a:'))).toBe(true);
+  });
 });

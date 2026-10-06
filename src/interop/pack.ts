@@ -363,9 +363,21 @@ function packagesFrom(a: PackAnswers): PackPackage[] {
     }));
 }
 
+/** True for a whole http(s) URL with a host and no whitespace anywhere — not
+ *  just one that starts like one (`https://ok.example.com/x y` is refused). */
+function isHttpUrl(s: string): boolean {
+  if (/\s/.test(s)) {return false;}
+  try {
+    const u = new URL(s);
+    return (u.protocol === 'http:' || u.protocol === 'https:') && u.hostname !== '';
+  } catch {
+    return false;
+  }
+}
+
 /** A URL people call: http(s) only, speaking a2a or mcp. */
 function checkEndpoint(e: { protocol: string; url: string }): void {
-  if (!/^https?:\/\/[^\s/]+/i.test(clean(e.url))) {
+  if (!isHttpUrl(clean(e.url))) {
     throw new Error(`Where it runs: "${clean(e.url)}" is not an http(s) URL (or give an npm package).`);
   }
   if (!ENDPOINT_PROTOCOLS.includes(clean(e.protocol).toLowerCase())) {

@@ -218,6 +218,27 @@ export function upsertCatalog(
 /** The keys of a catalog row faf updates in place (its own row only). */
 const CATALOG_ROW_UPDATES = ['url', 'type', 'updatedAt'] as const;
 
+/** faf's rows as they will be written over `text`'s: a row whose url and type
+ *  are unchanged keeps the updatedAt it has (a run that changes nothing writes
+ *  nothing); a row whose url or type changed is stamped `changedAt`, so a
+ *  reader that refreshes on updatedAt sees the change. New rows keep their own.
+ *  `text` that is not JSON is left to upsertJsonRows, which reports it. */
+function restamp(text: string, incoming: CatalogEntry[], changedAt: string): CatalogEntry[] {
+  let existing: CatalogEntry[] = [];
+  try {
+    const entries = (JSON.parse(text.replace(/^\uFEFF/, '')) as { entries?: unknown }).entries;
+    existing = Array.isArray(entries) ? (entries as CatalogEntry[]) : [];
+  } catch {
+    return incoming;
+  }
+  return incoming.map((row) => {
+    const old = existing.find((e) => e && typeof e === 'object' && e.identifier === row.identifier);
+    if (!old) {return row;}
+    const same = old.url === row.url && old.type === row.type;
+    return { ...row, updatedAt: same ? (old.updatedAt ?? row.updatedAt) : changedAt };
+  });
+}
+
 /**
  * {@link upsertCatalog} as a text edit of the catalog's JSON: faf's own rows
  * (identifier exactly faf's) get their url / type / updatedAt values changed
@@ -234,12 +255,13 @@ export function upsertCatalogText(
   text: string | null,
   incoming: CatalogEntry[],
   host?: CatalogHost,
+  changedAt: string = new Date().toISOString(),
 ): { text: string; changed: boolean } {
   if (text === null) {
     const fresh = { specVersion: '1.0', ...(host ? { host } : {}), entries: incoming };
     return { text: `${JSON.stringify(fresh, null, 2)}\n`, changed: true };
   }
-  const rows = upsertJsonRows(text, 'entries', incoming as unknown as Record<string, unknown>[], {
+  const rows = upsertJsonRows(text, 'entries', restamp(text, incoming, changedAt) as unknown as Record<string, unknown>[], {
     id: 'identifier',
     update: CATALOG_ROW_UPDATES,
   });
