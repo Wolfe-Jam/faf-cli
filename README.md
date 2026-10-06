@@ -135,7 +135,7 @@ faf memory show
 
 ### What's New in v8.2.0 — The Ladder Edition
 
-**One ladder for every card: an agent.fafa gives the plain cards, and project.faf adds FAF's context.**
+**One ladder for every card: agent.fafa builds the plain cards, and project.faf adds FAF's context.**
 
 | You have | `faf cards` gives you |
 |---|---|
