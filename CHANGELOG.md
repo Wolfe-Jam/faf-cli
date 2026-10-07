@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v8.2.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v8.2.1 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [8.2.1] - 2026-10-07
+
+**Cards stay honest: a catalog or ARD row that changes gets a new `updatedAt`, and an endpoint URL must be a whole http(s) URL.** Patch — inherits The Ladder Edition. 2166 tests.
 
 ### Fixed
 - **A catalog or ARD row that changes gets a new `updatedAt`.** 8.2.0 kept the first run's stamp on faf's rows so that a run changing nothing writes nothing, but it kept it even when a row's `url` or `type` changed (e.g. `faf cards --a2a-url <new url>`), so a reader that refreshes on `updatedAt` missed the change. A row that changes is now stamped with the time of the run; a row that doesn't keeps its stamp.

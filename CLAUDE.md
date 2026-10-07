@@ -1,12 +1,12 @@
 <!-- faf:start -->
-<!-- faf: faf-cli | TypeScript | cli | CLI for IANA-registered `.faf` + `.fafm` — context DNA and portable agent memory. TypeScript, Bun-native since v6. package faf-cli v8.2.0 The Ladder Edition — scored by the always-33 engine. -->
+<!-- faf: faf-cli | TypeScript | cli | CLI for IANA-registered `.faf` + `.fafm` — context DNA and portable agent memory. TypeScript, Bun-native since v6. package faf-cli v8.2.1 The Ladder Edition — scored by the always-33 engine. -->
 <!-- faf: claim=project.faf | family=FAF -->
 
 # CLAUDE.md — faf-cli
 
 ## What This Is
 
-CLI for IANA-registered `.faf` + `.fafm` — context DNA and portable agent memory. TypeScript, Bun-native since v6. package faf-cli v8.2.0 The Ladder Edition — scored by the always-33 engine.
+CLI for IANA-registered `.faf` + `.fafm` — context DNA and portable agent memory. TypeScript, Bun-native since v6. package faf-cli v8.2.1 The Ladder Edition — scored by the always-33 engine.
 
 ## Stack
 
@@ -26,5 +26,5 @@ CLI for IANA-registered `.faf` + `.fafm` — context DNA and portable agent memo
 
 ---
 
-*STATUS: SYNC ACTIVE — 2026-10-05T03:26:19.176Z*
+*STATUS: SYNC ACTIVE — 2026-10-07T21:50:22.023Z*
 <!-- faf:end -->

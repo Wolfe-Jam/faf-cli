@@ -2,7 +2,7 @@ faf_version: "3.0"
 project:
   name: faf-cli
   version: "8.2.0"
-  goal: "CLI for IANA-registered `.faf` + `.fafm` — context DNA and portable agent memory. TypeScript, Bun-native since v6. package faf-cli v8.2.0 The Ladder Edition — scored by the always-33 engine."
+  goal: "CLI for IANA-registered `.faf` + `.fafm` — context DNA and portable agent memory. TypeScript, Bun-native since v6. package faf-cli v8.2.1 The Ladder Edition — scored by the always-33 engine."
   main_language: TypeScript
   type: cli  # found: package.json bin
 # Commands + key_files feed `faf export --agents` (hand values win over detection).
