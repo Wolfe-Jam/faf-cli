@@ -184,6 +184,7 @@ npx faf-cli@latest card init     # seven questions → agent.fafa → A2A card, 
 
 **Recent sprint**
 
+- ✪ [8.2.1](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.2.1) Cards stay honest — `updatedAt` moves only on a change; whole http(s) URLs
 - ✪ [8.2.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.2.0) The Ladder Edition — one ladder for every card
 - ✪ [8.1.1](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.1.1) SvelteKit 3 read in full — kit, adapter, Vite 8
 - ✪ [8.1.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.1.0) The Always33+ Edition — from nothing to listed in one command
