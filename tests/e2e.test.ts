@@ -95,7 +95,7 @@ describe('TYRE: faf e2e — full lifecycle', () => {
 
   test('sync generates CLAUDE.md', () => {
     run('auto');
-    run('sync --direction push');
+    run('sync');
     expect(existsSync(join(testDir, 'CLAUDE.md'))).toBe(true);
     const claude = readFileSync(join(testDir, 'CLAUDE.md'), 'utf-8');
     expect(claude).toContain('e2e-test-app');
@@ -168,7 +168,7 @@ describe('TYRE: faf e2e — full lifecycle', () => {
 
   test('recover recreates .faf from CLAUDE.md', () => {
     run('auto');
-    run('sync --direction push');
+    run('sync');
     // Delete .faf, keep CLAUDE.md
     rmSync(join(testDir, 'project.faf'));
     expect(existsSync(join(testDir, 'project.faf'))).toBe(false);
@@ -255,7 +255,7 @@ describe('TYRE: faf e2e — full lifecycle', () => {
     expect(score2.score).toBeGreaterThanOrEqual(score1.score);
 
     // 5. Sync to CLAUDE.md
-    run('sync --direction push');
+    run('sync');
     expect(existsSync(join(testDir, 'CLAUDE.md'))).toBe(true);
 
     // 6. Export all formats

@@ -113,9 +113,8 @@ program
 
 program
   .command('sync')
-  .description('.faf → CLAUDE.md — writes faf\'s block only; Pro also updates Claude Code\'s MEMORY.md (--direction pull: Trophy-gated backfill into .faf)')
+  .description('.faf → CLAUDE.md — one way; writes faf\'s block only; Pro also updates Claude Code\'s MEMORY.md')
   .option('--watch', 'Watch for changes')
-  .option('--direction <dir>', 'auto|push write CLAUDE.md from .faf; pull backfills .faf at ✪ Trophy', 'auto')
   .action((options) => syncCommand(options));
 
 // === Power Commands ===
@@ -385,7 +384,6 @@ program
 
 // === Soft Deprecation Aliases (v5.x compat) ===
 
-program.command('bi-sync', { hidden: true }).action(() => syncCommand());
 program.command('status', { hidden: true }).action(() => scoreCommand(undefined, { status: true }));
 program.command('agents', { hidden: true }).action(() => exportCommand({ agents: true }));
 program.command('cursor', { hidden: true }).action(() => exportCommand({ cursor: true }));

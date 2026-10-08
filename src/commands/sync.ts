@@ -1,7 +1,7 @@
 import { existsSync } from 'fs';
-import { join, dirname } from 'path';
-import { aliasKeptNote, findFafFile, readFaf, readFafRaw, withKernel, writeFaf } from '../interop/faf.js';
-import { readClaudeMd, writeClaudeMd, renderClaudeMd, parseClaudeMd } from '../interop/claude.js';
+import { join } from 'path';
+import { findFafFile, readFaf, readFafRaw, withKernel } from '../interop/faf.js';
+import { writeClaudeMd, renderClaudeMd } from '../interop/claude.js';
 import { writeClaudeMemory, type ClaudeMemoryAction } from '../interop/claude-memory.js';
 import { legacyStampNoteAt } from '../interop/inject.js';
 import * as kernel from '../wasm/kernel.js';
@@ -12,7 +12,6 @@ import { isPro } from '../core/pro.js';
 
 export interface SyncOptions {
   watch?: boolean;
-  direction?: 'auto' | 'push' | 'pull';
 }
 
 export function syncCommand(options: SyncOptions = {}): void {
@@ -25,16 +24,9 @@ export function syncCommand(options: SyncOptions = {}): void {
   }
 
   const claudePath = join(dir, 'CLAUDE.md');
-  const direction = options.direction ?? 'auto';
 
-  // sync: .faf ↔ CLAUDE.md
-  if (direction === 'auto') {
-    autoSync(fafPath, claudePath, dir);
-  } else if (direction === 'push') {
-    pushSync(fafPath, dir);
-  } else if (direction === 'pull') {
-    pullSync(fafPath, claudePath);
-  }
+  // sync is one-way: .faf → CLAUDE.md. Nothing is read back into .faf.
+  pushSync(fafPath, dir);
 
   // tri-sync: .faf → Claude Code's MEMORY.md (Pro)
   if (isPro()) {
@@ -47,16 +39,6 @@ export function syncCommand(options: SyncOptions = {}): void {
   }
 }
 
-function autoSync(fafPath: string, claudePath: string, dir: string): void {
-  // .faf is the FCL — the canonical truth. CLAUDE.md is a downstream prose
-  // surface that READS .faf to save AI time. They are not peers. mtime-based
-  // "newer wins" auto-direction silently overwrote canonical .faf content
-  // when a user edited CLAUDE.md prose (issue #63). FAF fills its own slots.
-  // Use `faf sync --pull` for the explicit legacy bootstrap case.
-  void claudePath;
-  pushSync(fafPath, dir);
-}
-
 function pushSync(fafPath: string, dir: string): void {
   const data = readFaf(fafPath);
   const content = renderClaudeMd(data);
@@ -66,48 +48,6 @@ function pushSync(fafPath: string, dir: string): void {
   writeClaudeMd(dir, content);
   console.log(`${fafCyan('◆')} sync  .faf → CLAUDE.md`);
   if (note) {console.log(dim(`  ${note}`));}
-
-  const result = withKernel(fafPath, () => enrichScore(kernel.score(readFafRaw(fafPath))));
-  displayScore(result, fafPath);
-}
-
-function pullSync(fafPath: string, claudePath: string): void {
-  // Trophy gate (v6.6.0+ — per memory/trophy-is-the-target.md):
-  // MD → .faf backfill is the bi-directional flow that's only safe at ✪ Trophy.
-  // Below Trophy, the .faf is incomplete by definition; CLAUDE.md prose is
-  // not a derivation from .faf (since .faf has gaps) and may contain stale or
-  // contradictory text. Pulling it overwrites canonical slots with that text.
-  // At Trophy, CLAUDE.md is a complete push-derivation from .faf, so selective
-  // re-read is safe. This gate matches the pubpro doctrine: Trophy or nothing.
-  // project.faf is read as a .faf first: text that is not valid YAML, or a
-  // scalar or a list, is the one-line not-yaml refusal, never a score; what
-  // the kernel cannot read is one line too.
-  const existing = readFaf(fafPath);
-  const preScore = withKernel(fafPath, () => enrichScore(kernel.score(readFafRaw(fafPath))));
-  if (preScore.tier.name !== 'TROPHY') {
-    console.error(`${bold('×')} sync --pull blocked: requires ✪ Trophy (currently ${preScore.score}%)`);
-    console.error(dim(`  MD → .faf backfill only runs at 100%. Reach Trophy with 'faf go', then retry.`));
-    process.exit(1);
-  }
-
-  // Use dirname() to extract the directory portably — claudePath comes from
-  // join(dir, 'CLAUDE.md') which produces backslashes on Windows. The previous
-  // claudePath.replace('/CLAUDE.md', '') only worked on POSIX path separators
-  // and silently returned the unchanged path on Windows, breaking pull-sync.
-  const claudeContent = readClaudeMd(dirname(claudePath));
-  if (!claudeContent) {
-    console.error('CLAUDE.md not found.');
-    return;
-  }
-
-  const parsed = parseClaudeMd(claudeContent);
-
-  if (parsed.project?.name) {existing.project = { ...existing.project, name: parsed.project.name };}
-  if (parsed.project?.goal) {existing.project = { ...existing.project, goal: parsed.project.goal };}
-  if (parsed.project?.main_language) {existing.project = { ...existing.project, main_language: parsed.project.main_language };}
-
-  writeFaf(fafPath, existing, { onAliasKept: k => console.log(dim(`  ${aliasKeptNote(k)}`)) });
-  console.log(`${fafCyan('◆')} sync  CLAUDE.md → .faf   ${dim('(Trophy-gated)')}`);
 
   const result = withKernel(fafPath, () => enrichScore(kernel.score(readFafRaw(fafPath))));
   displayScore(result, fafPath);
@@ -147,7 +87,7 @@ function watchSync(fafPath: string, claudePath: string, dir: string): void {
     if (debounce) {clearTimeout(debounce);}
     debounce = setTimeout(() => {
       console.log(dim('change detected...'));
-      autoSync(fafPath, claudePath, dir);
+      pushSync(fafPath, dir);
       if (isPro()) {triSync(fafPath, dir);}
     }, 200);
   };
