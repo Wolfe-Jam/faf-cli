@@ -12,15 +12,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [8.2.2] - 2026-10-07
 
-**`faf sync` goes one way: project.faf → CLAUDE.md. Nothing in CLAUDE.md is ever written back into project.faf.** Patch — inherits The Ladder Edition. 2165 tests.
+**Markdown never writes project.faf: `faf sync` goes one way (project.faf → CLAUDE.md), and `faf recover` is gone.** Patch — inherits The Ladder Edition. 2158 tests.
 
 ### Removed
 - **`faf sync --direction pull`.** It copied the name, goal and main language from CLAUDE.md into project.faf (Trophy-gated), so prose could overwrite the source of truth and still score ✪ 100%. FAF tried bi-directional sync and retired it; this was the last path left. `--direction` is gone, so `faf sync --direction pull` (or `push`) is refused as an unknown option and writes nothing. Plain `faf sync` did and does the push.
 - **The hidden `faf bi-sync` alias.** It ran plain `sync`; the name said otherwise. It is no longer a command.
+- **`faf recover`.** It read CLAUDE.md, AGENTS.md, GEMINI.md and .cursorrules and filled empty project.faf slots (name, goal, language) from that prose — the same Markdown → `.faf` direction. A lost `project.faf` is rebuilt fresh instead: `faf init` → `faf auto` → `faf go`. Fresh = fresh data.
 
 ### Tests
 - `tests/commands/sync-one-way.test.ts` runs the real CLI: `sync --direction pull` and `bi-sync` are refused and leave project.faf and CLAUDE.md byte for byte; plain `sync` rewrites CLAUDE.md and leaves project.faf unchanged.
-- The two pull tests are gone; the owner-rule tests that covered `sync --direction pull` now cover plain `sync`.
+- The two pull tests are gone; the owner-rule tests that covered `sync --direction pull` now cover plain `sync`. The `recover` tests (unit, e2e, owner rules R4 and R5) are retired with the command.
 
 ## [8.2.1] - 2026-10-07
 

@@ -22,8 +22,8 @@
  * writing a file it was never asked to write. A read of project context
  * through a link must land on a .faf or .fafm file instead, so `project.faf →
  * .env` is refused even though .env is in the project — or, for a read of an
- * AI context file, on another AI context file (`faf recover` reads CLAUDE.md →
- * AGENTS.md), the rule the writers use.
+ * AI context file, on another AI context file (CLAUDE.md → AGENTS.md), the
+ * rule the writers use.
  *
  * Rule 3 — never leave a half-written file. A write goes to a temp file in the
  * same folder, is flushed to disk (fsync), then renamed over the original in

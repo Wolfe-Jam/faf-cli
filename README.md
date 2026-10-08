@@ -113,7 +113,6 @@ Run `faf` with no arguments:
 | `faf hooks --install` | Pre-commit guard against context regression |
 | `faf compile` / `decompile` | `.faf` → `.fafb` **v2** sealed brick; `decompile` shows sections as JSON |
 | `faf check` | Validate a `.faf` file |
-| `faf recover` | Rebuild `.faf` from an existing `CLAUDE.md` / `AGENTS.md` |
 | `faf show` | Render `project.faf` to a browsable HTML page |
 | `faf formats` | List supported stacks and formats |
 
@@ -184,7 +183,7 @@ npx faf-cli@latest card init     # seven questions → agent.fafa → A2A card, 
 
 **Recent sprint**
 
-- ✪ [8.2.2](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.2.2) `faf sync` is one way — CLAUDE.md never writes back into project.faf
+- ✪ [8.2.2](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.2.2) Markdown never writes project.faf — `sync` is one way, `recover` is gone
 - ✪ [8.2.1](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.2.1) Cards stay honest — `updatedAt` moves only on a change; whole http(s) URLs
 - ✪ [8.2.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.2.0) The Ladder Edition — one ladder for every card
 - ✪ [8.1.1](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.1.1) SvelteKit 3 read in full — kit, adapter, Vite 8

@@ -26,7 +26,6 @@ import { convertCommand } from './commands/convert.js';
 import { contextCommand } from './commands/context.js';
 import { driftCommand } from './commands/drift.js';
 import { editCommand } from './commands/edit.js';
-import { recoverCommand } from './commands/recover.js';
 import { migrateCommand } from './commands/migrate.js';
 import { proCommand } from './commands/pro.js';
 import { shareCommand } from './commands/share.js';
@@ -303,11 +302,6 @@ program
   .action((path, value) => editCommand(path, value));
 
 // === Phase B Commands ===
-
-program
-  .command('recover')
-  .description('Recover .faf from context files')
-  .action(() => recoverCommand());
 
 program
   .command('migrate')
