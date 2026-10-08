@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [8.2.2] - 2026-10-07
+## [8.2.2] - 2026-10-08
 
 **Markdown never writes project.faf: `faf sync` goes one way (project.faf → CLAUDE.md), and `faf recover` is gone.** Patch — inherits The Ladder Edition. 2158 tests.
 
