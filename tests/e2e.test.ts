@@ -9,7 +9,7 @@ import { FAF_VERSION } from '../src/core/version.js';
 /**
  * Full end-to-end test: exercises the entire CLI flow as a user would.
  * init → score → auto → sync → export → check → edit → drift → convert →
- * compile → decompile → taf → search → share → recover → migrate → demo → info → formats
+ * compile → decompile → taf → search → share → migrate → demo → info → formats
  */
 describe('TYRE: faf e2e — full lifecycle', () => {
   let testDir: string;
@@ -95,7 +95,7 @@ describe('TYRE: faf e2e — full lifecycle', () => {
 
   test('sync generates CLAUDE.md', () => {
     run('auto');
-    run('sync --direction push');
+    run('sync');
     expect(existsSync(join(testDir, 'CLAUDE.md'))).toBe(true);
     const claude = readFileSync(join(testDir, 'CLAUDE.md'), 'utf-8');
     expect(claude).toContain('e2e-test-app');
@@ -164,20 +164,7 @@ describe('TYRE: faf e2e — full lifecycle', () => {
     expect(out).toContain('TypeScript');
   });
 
-  // --- Phase 8: Recover & Migrate ---
-
-  test('recover recreates .faf from CLAUDE.md', () => {
-    run('auto');
-    run('sync --direction push');
-    // Delete .faf, keep CLAUDE.md
-    rmSync(join(testDir, 'project.faf'));
-    expect(existsSync(join(testDir, 'project.faf'))).toBe(false);
-
-    run('recover');
-    expect(existsSync(join(testDir, 'project.faf'))).toBe(true);
-    const faf = parse(readFileSync(join(testDir, 'project.faf'), 'utf-8'));
-    expect(faf.project.name).toBe('e2e-test-app');
-  });
+  // --- Phase 8: Migrate ---
 
   test('migrate on current version is no-op', () => {
     run('auto');
@@ -255,7 +242,7 @@ describe('TYRE: faf e2e — full lifecycle', () => {
     expect(score2.score).toBeGreaterThanOrEqual(score1.score);
 
     // 5. Sync to CLAUDE.md
-    run('sync --direction push');
+    run('sync');
     expect(existsSync(join(testDir, 'CLAUDE.md'))).toBe(true);
 
     // 6. Export all formats

@@ -11,8 +11,8 @@ const SYNC_MARKER = 'STATUS: SYNC ACTIVE';
 /** Read CLAUDE.md from a directory. A CLAUDE.md link that leaves the
  *  directory, or leads to a file that is not an AI context file, is refused
  *  (SafePathError) and nothing is read; CLAUDE.md → AGENTS.md is read
- *  through. A CLAUDE.md that is not UTF-8 is refused too (`faf sync --direction
- *  pull` writes what it reads into project.faf). */
+ *  through. A CLAUDE.md that is not UTF-8 is refused too. Library export;
+ *  `faf sync` never reads CLAUDE.md back into project.faf. */
 export function readClaudeMd(dir: string): string | null {
   const path = join(dir, CLAUDE_MD);
   if (!existsSync(path)) {return null;}

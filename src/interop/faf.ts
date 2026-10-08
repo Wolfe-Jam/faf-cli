@@ -45,7 +45,7 @@ function notValidYaml(path: string, err: YAMLParseError): SafePathError {
  *  through as it is. Every command that hands project.faf (or a .fafb) to
  *  the kernel calls it through here, after it has read the file as a .faf
  *  ({@link readFaf}, or {@link readFafFromString} with the path); one that
- *  edits project.faf (`faf auto`, `faf go`, `faf sync --direction pull`)
+ *  edits project.faf (`faf auto`, `faf go`)
  *  asks the kernel before it writes, so the line is true. `faf diff` and
  *  `faf log` score a version the kernel cannot read as 0 instead. */
 export function withKernel<T>(path: string, call: () => T): T {

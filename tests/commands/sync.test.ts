@@ -124,7 +124,7 @@ describe('BRAKE: sync command — error paths', () => {
   });
 });
 
-describe('TYRE: sync command — direction logic (auto / push / pull)', () => {
+describe('TYRE: sync command — one way, .faf → CLAUDE.md', () => {
   let testDir: string;
   let originalCwd: string;
 
@@ -140,7 +140,7 @@ describe('TYRE: sync command — direction logic (auto / push / pull)', () => {
     try { rmSync(testDir, { recursive: true, force: true }); } catch {}
   });
 
-  test('auto sync writes CLAUDE.md when none exists (push direction)', async () => {
+  test('sync writes CLAUDE.md when none exists', async () => {
     writeFaf(join(testDir, 'project.faf'), {
       faf_version: '2.5.0',
       project: { name: 'auto-test', main_language: 'TypeScript' },
@@ -149,13 +149,13 @@ describe('TYRE: sync command — direction logic (auto / push / pull)', () => {
 
     const { syncCommand } = await import('../../src/commands/sync.js');
     const logSpy = spyOn(console, 'log').mockImplementation(() => {});
-    syncCommand({ direction: 'auto' });
+    syncCommand({});
     logSpy.mockRestore();
 
     expect(existsSync(join(testDir, 'CLAUDE.md'))).toBe(true);
   });
 
-  test('explicit push regenerates the faf block from .faf, preserves user content', async () => {
+  test('sync regenerates the faf block from .faf, preserves user content', async () => {
     writeFaf(join(testDir, 'project.faf'), {
       faf_version: '2.5.0',
       project: { name: 'push-test' },
@@ -168,7 +168,7 @@ describe('TYRE: sync command — direction logic (auto / push / pull)', () => {
 
     const { syncCommand } = await import('../../src/commands/sync.js');
     const logSpy = spyOn(console, 'log').mockImplementation(() => {});
-    syncCommand({ direction: 'push' });
+    syncCommand({});
     logSpy.mockRestore();
 
     const md = readFileSync(join(testDir, 'CLAUDE.md'), 'utf-8');
@@ -177,83 +177,13 @@ describe('TYRE: sync command — direction logic (auto / push / pull)', () => {
     expect(md).toContain('KEEP THIS');          // user content preserved (non-destructive)
   });
 
-  // v6.6.0+ Trophy gate: pull (MD → .faf) is Trophy-gated. Below 100%, the
-  // gate blocks with a helpful message and exits 1. At 100%, pull unlocks.
-  // Per memory/trophy-is-the-target.md — "Bi-sync — formalised as a
-  // Trophy-gated unlocked feature."
-
-  test('pull at sub-Trophy is blocked with helpful message (v6.6 gate)', async () => {
-    writeFaf(join(testDir, 'project.faf'), {
-      faf_version: '2.5.0',
-      project: { name: 'old-name' }, // sub-Trophy by design
-    });
-    const newData = { faf_version: '2.5.0', project: { name: 'new-name', goal: 'pulled goal' } };
-    writeFileSync(join(testDir, 'CLAUDE.md'), renderClaudeMd(newData));
-
-    const { syncCommand } = await import('../../src/commands/sync.js');
-    const errs: string[] = [];
-    const errSpy = spyOn(console, 'error').mockImplementation((s: string) => { errs.push(s); });
-    const logSpy = spyOn(console, 'log').mockImplementation(() => {});
-    const exitSpy = spyOn(process, 'exit').mockImplementation(((code?: number) => {
-      throw new Error(`__exit_${code}__`);
-    }) as never);
-
-    try {
-      syncCommand({ direction: 'pull' });
-      throw new Error('expected process.exit');
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      expect(msg).toContain('__exit_1__');
-    }
-    errSpy.mockRestore();
-    logSpy.mockRestore();
-    exitSpy.mockRestore();
-
-    expect(errs.join('\n')).toMatch(/blocked.*Trophy/);
-    expect(errs.join('\n')).toMatch(/backfill only runs at 100%/);
-
-    // .faf should be UNCHANGED — gate fires before any write.
-    const unchanged = readFaf(join(testDir, 'project.faf'));
-    expect(unchanged.project?.name).toBe('old-name');
-  });
-
-  test('pull at sub-Trophy with no CLAUDE.md still blocks on Trophy gate first', async () => {
-    // Gate fires before CLAUDE.md existence check — the partial-.faf is the
-    // safety failure, not the missing MD. Order matters.
-    writeFaf(join(testDir, 'project.faf'), {
-      faf_version: '2.5.0',
-      project: { name: 'lonely' },
-    });
-    expect(existsSync(join(testDir, 'CLAUDE.md'))).toBe(false);
-
-    const { syncCommand } = await import('../../src/commands/sync.js');
-    const errs: string[] = [];
-    const errSpy = spyOn(console, 'error').mockImplementation((s: string) => { errs.push(s); });
-    const logSpy = spyOn(console, 'log').mockImplementation(() => {});
-    const exitSpy = spyOn(process, 'exit').mockImplementation(((code?: number) => {
-      throw new Error(`__exit_${code}__`);
-    }) as never);
-
-    try {
-      syncCommand({ direction: 'pull' });
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      expect(msg).toContain('__exit_1__');
-    }
-    errSpy.mockRestore();
-    logSpy.mockRestore();
-    exitSpy.mockRestore();
-
-    expect(errs.join('\n')).toMatch(/blocked.*Trophy/);
-  });
-
   // ─── #63: auto sync is one-way push (.faf → CLAUDE.md), regardless of mtime ───
   // Doctrine: "FAF defines. AGENTS.md instructs." — .faf is the FCL canonical truth;
   // CLAUDE.md is a downstream prose surface that READS .faf. mtime-based "newer
   // wins" silently overwrote canonical .faf content (issue #63).
-  // Use `faf sync --pull` for the explicit legacy bootstrap case.
+  // 8.2.2: the opt-in `--direction pull` (Trophy-gated MD → .faf) is gone too.
 
-  test('#63: auto sync never pulls from CLAUDE.md, even when CLAUDE.md is newer', async () => {
+  test('#63: sync never pulls from CLAUDE.md, even when CLAUDE.md is newer', async () => {
     // Write .faf with canonical content
     writeFaf(join(testDir, 'project.faf'), {
       faf_version: '2.5.0',
@@ -269,7 +199,7 @@ describe('TYRE: sync command — direction logic (auto / push / pull)', () => {
 
     const { syncCommand } = await import('../../src/commands/sync.js');
     const logSpy = spyOn(console, 'log').mockImplementation(() => {});
-    syncCommand({ direction: 'auto' });
+    syncCommand({});
     logSpy.mockRestore();
 
     // Critical: .faf must NOT be overwritten by the newer CLAUDE.md.
@@ -295,7 +225,7 @@ describe('TYRE: sync command — direction logic (auto / push / pull)', () => {
 
     const { syncCommand } = await import('../../src/commands/sync.js');
     const logSpy = spyOn(console, 'log').mockImplementation(() => {});
-    syncCommand({ direction: 'auto' });
+    syncCommand({});
     logSpy.mockRestore();
 
     // The faf block must reflect .faf (push), not its own previous content; user content stays

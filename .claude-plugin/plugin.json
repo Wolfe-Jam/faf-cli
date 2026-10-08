@@ -1,6 +1,6 @@
 {
   "name": "faf",
-  "version": "8.2.1",
+  "version": "8.2.2",
   "description": "Persistent Project Context for AI — IANA-registered .faf format. Run /faf to score your project in Claude Code; install the CLI via `bunx faf` or `npm install -g faf-cli` for the full toolkit.",
   "author": {
     "name": "wolfejam",

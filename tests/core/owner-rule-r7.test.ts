@@ -3,13 +3,12 @@
  * true at every edge:
  *
  *   1  a project.faf that is a scalar or a list: `faf score`, `status`,
- *      `score --json`, `compile`, `refresh`, `check` and `sync --direction
- *      pull` scored it 0%, compiled it into a .fafb, wrote a .faf-dna, or
+ *      `score --json`, `compile`, `refresh`, `check` and `sync` scored
+ *      it 0%, compiled it into a .fafb, wrote a .faf-dna, or
  *      called it invalid in two lines (exit 3). They refuse it in one line,
  *      exit 1, and create no file.
- *   2  `faf sync --direction pull` handed a project.faf that is not valid
- *      YAML to the scoring kernel: under Node an UnhandledPromiseRejection.
- *      It reads the file first; a kernel rejection is one line.
+ *   2  (retired in 8.2.2 with `faf sync --direction pull`, which it guarded;
+ *      `sync` is one way now — see tests/commands/sync-one-way.test.ts.)
  *   3  an --output (or --out) folder that is not there: a stack trace from
  *      `faf compile`, `decompile`, `taf`, `init`, `server-card` and `git`.
  *      It is one line: "<folder> does not exist — nothing written".
@@ -108,8 +107,8 @@ const SHAPES: Array<[string, string, string]> = [
 
 // ── 1: a scalar or a list project.faf ──────────────────────────────────────────
 
-describe('BRAKE R7-1: score, status, score --json, compile, refresh, check and sync --direction pull refuse a scalar or a list in one line', () => {
-  const COMMANDS = [['score'], ['status'], ['score', '--json'], ['compile'], ['refresh'], ['check'], ['sync', '--direction', 'pull']];
+describe('BRAKE R7-1: score, status, score --json, compile, refresh, check and sync refuse a scalar or a list in one line', () => {
+  const COMMANDS = [['score'], ['status'], ['score', '--json'], ['compile'], ['refresh'], ['check'], ['sync']];
   for (const [name, runner] of runners) {
     testFor(name)(`${name}: exit 1, exactly the shape line, the file byte for byte, no project.fafb, no .faf-dna, no file at all`, () => {
       for (const [shape, text, desc] of SHAPES) {
@@ -142,37 +141,6 @@ describe('BRAKE R7-1: score, status, score --json, compile, refresh, check and s
     expect(invalid.status).toBe(3);
     expect(printed(invalid)).toEqual([`invalid ${p}`, '  x Missing required field: faf_version']);
   });
-});
-
-// ── 2: faf sync --direction pull on invalid YAML ───────────────────────────────
-
-describe('BRAKE R7-2: faf sync --direction pull reads project.faf before the kernel sees it', () => {
-  const DUP = 'faf_version: 2.5.0\nproject:\n  name: m\n  goal: g\nstack:\n  frontend: None\n  frontend: React\n';
-  const BAD = 'faf_version: 2.5.0\nproject:\n  name: "unterminated\n  goal: g\n';
-  const BIG = 'faf_version: 2.5.0\nproject:\n  name: m\n  goal: g\n  build_id: 123456789012345678901234567890\n';
-  for (const [name, runner] of runners) {
-    testFor(name)(`${name}: a repeated key, an unclosed quote and a 30-digit integer — one line, exit 1, nothing written`, () => {
-      const cases: Array<[string, string, (p: string, line: string) => boolean]> = [
-        ['dup', DUP, (p, l) => l === `faf: ${p} is not valid YAML (Map keys must be unique, line 7) — faf left it unchanged`],
-        ['bad', BAD, (p, l) => l.startsWith(`faf: ${p} is not valid YAML (`) && l.endsWith(') — faf left it unchanged')],
-        ['big', BIG, (p, l) => l.startsWith(`faf: ${p}: faf's scoring kernel could not read it (`) && l.includes('123456789012345678901234567890') && l.endsWith(') — faf left it unchanged')],
-      ];
-      for (const [tag, text, ok] of cases) {
-        const d = mk(tag);
-        const p = join(d, 'project.faf');
-        writeFileSync(p, text);
-        writeFileSync(join(d, 'CLAUDE.md'), '# Hand\n');
-        const before = tree(d);
-        const r = runner(d, ['sync', '--direction', 'pull']);
-        expect({ tag, status: r.status, stack: hasStack(r) }).toEqual({ tag, status: 1, stack: false });
-        const got = printed(r);
-        expect({ tag, count: got.length }).toEqual({ tag, count: 1 });
-        expect({ tag, line: got[0], ok: ok(p, got[0]) }).toEqual({ tag, line: got[0], ok: true });
-        expect(read(p)).toBe(text);
-        expect(tree(d)).toEqual(before);
-      }
-    });
-  }
 });
 
 // ── 3: an --output folder that is not there ────────────────────────────────────

@@ -16,8 +16,7 @@
  *        as the output, and --force wrote the binary over the source.
  *   G01-G03  `faf diff --install-driver` / `--uninstall-driver` overwrote or
  *        unset a `diff.faf.command` of the user's own.
- *   recover  `faf recover` read AGENTS.md through a link out of the project
- *        (a secret became project.name) and read cp1252 text as U+FFFD.
+ *   recover  (retired in 8.2.2 with `faf recover` itself)
  *   CL1  `faf clear` removed any `faf-git-*` folder in TMPDIR.
  *   J15/J16  `faf server-card` replaced an object or array `title`/`name`.
  *   H12  a read-only hook (and any "not written; original kept" failure at
@@ -378,38 +377,6 @@ describe('BRAKE: faf diff --install-driver / --uninstall-driver touch only faf\'
     expect(u.status).toBe(1);
     expect(lines(u.err)).toHaveLength(1);
     expect(read(join(d, '.git', 'config'))).toBe(cfg);
-  });
-});
-
-describe('BRAKE: faf recover reads its sources inside the project, as UTF-8', () => {
-  test.skipIf(!posix)('AGENTS.md linked to a secret outside the project is refused in one line; nothing of it reaches project.faf', () => {
-    const b = mk('rec');
-    mkdirSync(join(b, 'outside'));
-    mkdirSync(join(b, 'proj'));
-    writeFileSync(join(b, 'outside', 'secret.md'), '# SECRET-TOKEN-abc123\naws_secret_access_key = hunter2\n');
-    symlinkSync('../outside/secret.md', join(b, 'proj', 'AGENTS.md'));
-    const r = run(join(b, 'proj'), ['recover']);
-    expect(r.status).toBe(1);
-    expect(lines(r.err)[0]).toBe(
-      `faf: ${join(b, 'proj', 'AGENTS.md')} is a link to ${join(b, 'outside', 'secret.md')}, outside ${join(b, 'proj')} — refused. Nothing was read from or written to it.`,
-    );
-    expect(existsSync(join(b, 'proj', 'project.faf'))).toBe(false);
-    expect(r.out + r.err).not.toContain('SECRET-TOKEN');
-  });
-
-  test('a cp1252 AGENTS.md is refused as not UTF-8 and skipped — never turned into U+FFFD', () => {
-    const d = mk('rec');
-    writeFileSync(join(d, 'AGENTS.md'), Buffer.from('# Caf\xe9 app\n', 'latin1'));
-    const r = run(d, ['recover']);
-    expect(r.status).toBe(1);
-    expect(lines(r.err)[0]).toBe(`faf: ${join(d, 'AGENTS.md')} is not UTF-8 — faf left it unchanged`);
-    expect(existsSync(join(d, 'project.faf'))).toBe(false);
-
-    writeFileSync(join(d, 'CLAUDE.md'), '# Notes\n- **Name:** real-name\n');
-    const s = run(d, ['recover']);
-    expect(s.status).toBe(0);
-    expect(read(join(d, 'project.faf'))).toContain('name: real-name');
-    expect(read(join(d, 'project.faf'))).not.toContain('�');
   });
 });
 

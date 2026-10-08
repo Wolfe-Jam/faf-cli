@@ -20,7 +20,7 @@
  *   RH06/RH13  a faf-render line not in faf's exact form said "written
  *        before 7.13"; it was edited since faf wrote it.
  *   CRLF  a whole file git checked out with CRLF line ends was refused.
- *   recover  a read through CLAUDE.md → AGENTS.md was refused.
+ *   recover  (retired in 8.2.2 with `faf recover` itself)
  *   ST11/SX01  the fill added a `stack.database` twin next to the file's
  *        `stack.db`, and wrote `''` into a slot the file's type uses where
  *        the repo has a fact for it.
@@ -437,41 +437,6 @@ describe('BRAKE: a whole file faf renders — an edited render line, and CRLF fr
     expect(e.status).toBe(1);
     expect(lines(e.err)).toEqual([edited(html)]);
     expect(read(html)).toBe(hand);
-  });
-});
-
-// ── faf recover: links between context files ─────────────────────────────────
-
-describe('BRAKE: faf recover reads through a link from one AI context file to another (the writers\' rule)', () => {
-  test.skipIf(!posix)('CLAUDE.md → AGENTS.md is read; CLAUDE.md → README.md stays refused', () => {
-    const d = mk('rec');
-    writeFileSync(join(d, 'AGENTS.md'), '# linked-name\n');
-    symlinkSync('AGENTS.md', join(d, 'CLAUDE.md'));
-    const r = run(d, ['recover']);
-    expect(r.status).toBe(0);
-    expect(lines(r.err)).toEqual([]);
-    expect(r.out).toContain('sources: CLAUDE.md, AGENTS.md');
-    expect((parse(read(join(d, 'project.faf'))) as { project: { name: string } }).project.name).toBe('linked-name');
-    expect(resolveInside(d, 'CLAUDE.md', { read: true })).toBe(realpathSync(join(d, 'AGENTS.md')));
-
-    const o = mk('rec');
-    writeFileSync(join(o, 'README.md'), '# README-SECRET-NAME\n');
-    symlinkSync('README.md', join(o, 'CLAUDE.md'));
-    const s = run(o, ['recover']);
-    expect(s.status).toBe(1);
-    expect(lines(s.err)[0]).toBe(
-      `faf: ${join(o, 'CLAUDE.md')} is a link to ${join(o, 'README.md')}, which is not a .faf or .fafm file, nor another AI context file — refused. Nothing was read from or written to it.`,
-    );
-    expect(existsSync(join(o, 'project.faf'))).toBe(false);
-    // Any other read through a link stays refused: project.faf → AGENTS.md.
-    symlinkSync('AGENTS.md', join(d, 'project.faf.link'));
-    let err: unknown;
-    try {
-      resolveInside(d, 'project.faf.link', { read: true });
-    } catch (e) {
-      err = e;
-    }
-    expect((err as SafePathError).reason).toBe('not-faf');
   });
 });
 
