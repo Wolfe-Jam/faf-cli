@@ -1,0 +1,65 @@
+version: "1.0"
+agent:
+  name: faf-cli
+  displayName: faf-cli
+  id: urn:air:faf.one:agent:faf-cli
+  version: 8.2.2
+  description: "CLI for the IANA-registered .faf format: it detects a repo's stack into project.faf, scores it, and writes AGENTS.md, CLAUDE.md, GEMINI.md and .cursorrules from it."
+  homepage: https://faf.one
+capabilities:
+  - name: init
+    type: tool
+    description: Create project.faf from your project
+    tags:
+      - init
+  - name: auto
+    type: tool
+    description: Fill every tech slot from the repo, then score
+    tags:
+      - auto
+  - name: score
+    type: tool
+    description: Score a .faf file from 0 to 100% with its tier
+    tags:
+      - score
+  - name: go
+    type: tool
+    description: Guided interview for the slots only a human can answer
+    tags:
+      - go
+  - name: sync
+    type: tool
+    description: Write project.faf into CLAUDE.md as a faf-managed block
+    tags:
+      - sync
+  - name: export
+    type: tool
+    description: Write AGENTS.md, .cursorrules, GEMINI.md and Copilot instructions from project.faf
+    tags:
+      - export
+  - name: git
+    type: tool
+    description: Scored context from any public GitHub repo, from a shallow clone
+    tags:
+      - git
+  - name: cards
+    type: tool
+    description: Write the agent cards your files allow, such as the A2A card and MCP Server Card, from agent.fafa
+    tags:
+      - cards
+endpoints:
+  - protocol: cli
+    transport: stdio
+    location: faf-cli
+metadata:
+  cards:
+    accent: "#00B8B8"
+    domain: faf.one
+    examples:
+      - How do I create a project.faf for my repo?
+      - What is my project's AI context score?
+      - How do I generate AGENTS.md and CLAUDE.md from one file?
+      - How do I score a GitHub repo without cloning it myself?
+    packages:
+      - registryType: npm
+        identifier: faf-cli
