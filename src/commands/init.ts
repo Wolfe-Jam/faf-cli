@@ -52,4 +52,17 @@ export function initCommand(options: InitOptions = {}): void {
   if (result.score < 100) {
     console.log(dim(`\n  run ${bold("'faf go'")} to fill empty slots`));
   }
+  offerBusinessCard(dir, result.score < 100);
+}
+
+/** The business card is the step after project.faf, offered only to a repo
+ *  that has none yet. It writes nothing. */
+function offerBusinessCard(dir: string, afterHint: boolean): void {
+  if (hasBusinessCard(dir)) {return;}
+  console.log(dim(`${afterHint ? '' : '\n'}  next: ${bold("'faf card init'")} — your repo's business card`));
+}
+
+/** True when the project already has a .fafa: agent.fafa, .fafa or .well-known/fafa. */
+function hasBusinessCard(dir: string): boolean {
+  return [['agent.fafa'], ['.fafa'], ['.well-known', 'fafa']].some((p) => existsSync(join(dir, ...p)));
 }

@@ -4,7 +4,9 @@ import { findFafFile, readFaf } from '../interop/faf.js';
 import type { FafData } from '../core/types.js';
 import {
   A2A_CONTEXT_URI,
+  NO_MCP_ENDPOINT,
   betterTargets,
+  fafaSkipsMcp,
   findFafaFile,
   hasA2ACardMark,
   parseTargets,
@@ -15,7 +17,7 @@ import {
   type CardTarget,
 } from '../interop/cards.js';
 import { REGISTRY_PUBLISHER_KEY, hasServerCardMark, patchServerJson } from '../interop/servercard.js';
-import { hasRegistryEntry } from '../interop/pack.js';
+import { hasRegistryEntry, type FafaDoc } from '../interop/pack.js';
 import { SafePathError, makeDirInside, readUtf8, resolveInside, safeWriteFile } from '../core/safe-write.js';
 import { JsonEditError } from '../core/json-edit.js';
 import { isOneLineError, oneLine } from '../core/refusal.js';
@@ -106,6 +108,21 @@ function keptStamp(dir: string, targets: CardTarget[] | undefined): string | und
   return undefined;
 }
 
+/** A .fafa with no mcp endpoint is not an MCP server: no Server Card, no
+ *  registry server.json. Asked for by name, that is an error; otherwise one
+ *  line says why they are not written (when they would have been before). */
+function noMcpCards(fafa: FafaDoc, targets: CardTarget[] | undefined, hasFaf: boolean): void {
+  const asked = targets?.filter((t) => t === 'mcp' || t === 'registry') ?? [];
+  if (asked.length) {
+    console.error(`Error: --target ${asked.join(',')}: ${NO_MCP_ENDPOINT} — these cards describe an MCP server.`);
+    process.exit(2);
+  }
+  const hadPackages = Boolean(fafa.metadata?.cards?.packages?.length);
+  if (!targets?.length && (hasFaf || hadPackages)) {
+    console.error(dim(`skipped MCP Server Card and registry server.json: ${NO_MCP_ENDPOINT}`));
+  }
+}
+
 /**
  * `faf cards` — one projector. .fafa → A2A · MCP · registry · catalog · ARD (BETTER); + project.faf → FAF context on each (BEST).
  * Same fafContextBlock on every door. Does not invent a door or an agent.
@@ -132,6 +149,7 @@ export function cardsCommand(options: CardsCommandOptions = {}): void {
   // block to each. With no project.faf, nothing points at one.
   const fafPath = options.faf ? resolve(options.faf) : findFafFile(dir);
   const hasFaf = Boolean(fafPath && existsSync(fafPath));
+  if (fafa && fafaSkipsMcp(fafa)) {noMcpCards(fafa, targets, hasFaf);}
   if (!hasFaf) {
     if (!fafa) {
       console.error(`Error: no agent.fafa or project.faf here\n\n  Cards start from an agent.fafa: faf card init\n  For project.faf: faf init`);

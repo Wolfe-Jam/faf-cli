@@ -10,6 +10,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+**Business cards say what the repo is: a package can be a CLI or a library, from npm, PyPI or crates.io, and only an MCP server gets MCP cards.** Found rolling the card out to 14 repos with 8.2.2.
+
+### Added
+- **`faf card init --kind <mcp|cli|library>`.** Says what `--package` is. The endpoint protocol follows the kind, over stdio. `mcp` is the default, so `--package` alone writes what it did before. An unknown kind is refused by name, and `--kind` without `--package` is refused.
+- **Registry prefixes on `--package`:** `npm:<name>`, `pypi:<name>`, `crates:<name>`. A bare name is still npm. Crates are recorded as `registryType: cargo` (the package-URL type for crates.io; the MCP registry names no Rust type) and checked against the crate-name rule.
+- **`faf card init --homepage <url>`.** Sets `agent.homepage`. It must be an http(s) URL. Without it, the homepage is still `https://<domain>`.
+- **The interactive flow asks what a package is** (mcp, cli or library; Enter keeps mcp), and takes `pypi:` and `crates:` names.
+- **`faf init` offers the business card.** When the project has no `agent.fafa`, `.fafa` or `.well-known/fafa`, init ends with `next: 'faf card init' — your repo's business card`. It writes nothing for the card.
+
+### Changed
+- **`faf cards` writes MCP cards only for an MCP server.** When the agent.fafa has no `mcp` endpoint, it skips the MCP Server Card and the registry server.json, beside a project.faf too, and says so in one line. `--target mcp` or `--target registry` on such a file is refused with the reason. A .fafa with an `mcp` endpoint works as before.
+- **`--url` help** says it is for a live endpoint people call, and points things people install at `--package`. The default protocol stays a2a.
+
 ## [8.2.2] - 2026-10-08
 
 **Markdown never writes project.faf: `faf sync` goes one way (project.faf → CLAUDE.md), and `faf recover` is gone.** Patch — inherits The Ladder Edition. 2158 tests.

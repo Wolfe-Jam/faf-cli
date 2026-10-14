@@ -290,7 +290,14 @@ export interface PackAnswers {
   tags?: string[];
   example_requests?: string[];
   packages?: PackPackage[];
+  /** What the packages are: an MCP server (default), a CLI or a library. It is
+   *  the protocol of each package's stdio endpoint. */
+  package_kind?: string;
 }
+
+/** What a package can be. The `.fafa` endpoint protocol is an open vocabulary;
+ *  these are the ones faf writes for a package. */
+export const PACKAGE_KINDS = ['mcp', 'cli', 'library'] as const;
 
 const HANDLE_RE = /^[a-z0-9][a-z0-9._-]*$/;
 /** npm's own package-name rule: lowercase, URL-safe, optionally `@scope/`, and
@@ -302,6 +309,9 @@ const PYPI_NAME_RE = /^[A-Za-z0-9]([A-Za-z0-9._-]*[A-Za-z0-9])?$/;
 /** Any other registry's identifier (oci, nuget, ...): no whitespace, and it starts
  *  with a letter or digit, so it is never read as an option. */
 const PACKAGE_ID_RE = /^[A-Za-z0-9][^\s]*$/;
+/** crates.io's crate-name rule: ASCII letters, digits, `-` and `_`, starting with
+ *  a letter, at most 64 characters. */
+const CRATE_NAME_RE = /^[A-Za-z][A-Za-z0-9_-]{0,63}$/;
 const ENDPOINT_PROTOCOLS = ['a2a', 'mcp'];
 const DOMAIN_RE = /^(?=.{1,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/;
 
@@ -338,7 +348,7 @@ function capabilitiesFrom(a: PackAnswers, keywords: string[]): FafaCapability[] 
 }
 
 /** A package people install: an npm one must carry npm's own name, a PyPI one
- *  PyPI's, and any other an identifier that cannot be read as an option — the
+ *  PyPI's, a crate (`cargo`) crates.io's, and any other an identifier that cannot be read as an option — the
  *  `.fafa` names it as the MCP server's stdio command, so nothing else gets through. */
 function packagesFrom(a: PackAnswers): PackPackage[] {
   const packages = (a.packages ?? []).filter((p) => clean(p.registryType) && clean(p.identifier));
@@ -351,7 +361,10 @@ function packagesFrom(a: PackAnswers): PackPackage[] {
     if (type === 'pypi' && !PYPI_NAME_RE.test(id)) {
       throw new Error(`Package "${id}" is not a PyPI package name (e.g. weather-mcp or weather_mcp).`);
     }
-    if (type !== 'npm' && type !== 'pypi' && !PACKAGE_ID_RE.test(id)) {
+    if (type === 'cargo' && !CRATE_NAME_RE.test(id)) {
+      throw new Error(`Package "${id}" is not a crate name (e.g. weather-mcp or weather_mcp).`);
+    }
+    if (type !== 'npm' && type !== 'pypi' && type !== 'cargo' && !PACKAGE_ID_RE.test(id)) {
       throw new Error(`Package "${id}" is not a ${type} package identifier: it must start with a letter or digit and have no spaces.`);
     }
   }
@@ -385,12 +398,22 @@ function checkEndpoint(e: { protocol: string; url: string }): void {
   }
 }
 
+/** The kind of package, as the endpoint protocol: mcp when not given. */
+function packageKind(a: PackAnswers): string {
+  const kind = clean(a.package_kind).toLowerCase() || 'mcp';
+  if (!(PACKAGE_KINDS as readonly string[]).includes(kind)) {
+    throw new Error(`Kind "${clean(a.package_kind)}" is not one faf knows: mcp, cli or library.`);
+  }
+  return kind;
+}
+
 function endpointsFrom(a: PackAnswers, packages: PackPackage[]): FafaEndpoint[] {
   const urls = (a.endpoints ?? []).filter((e) => clean(e.url));
   urls.forEach(checkEndpoint);
+  const kind = packageKind(a);
   const endpoints: FafaEndpoint[] = [
     ...urls.map((e) => ({ protocol: clean(e.protocol).toLowerCase(), transport: 'http', location: clean(e.url) })),
-    ...packages.map((p) => ({ protocol: 'mcp', transport: 'stdio', location: p.identifier })),
+    ...packages.map((p) => ({ protocol: kind, transport: 'stdio', location: p.identifier })),
   ];
   if (endpoints.length === 0) {throw new Error('Missing answer: endpoints (a URL, or a package people install)');}
   return endpoints;
@@ -420,6 +443,10 @@ export function answersToFafa(a: PackAnswers): FafaDoc {
   checkIdentity(a, handle, domain);
   const keywords = list(a.tags);
   const packages = packagesFrom(a);
+  const homepage = clean(a.homepage);
+  if (homepage && !isHttpUrl(homepage)) {
+    throw new Error(`Homepage: "${homepage}" is not an http(s) URL.`);
+  }
   const agent: FafaAgent = {
     name: handle,
     displayName: clean(a.display_name),
@@ -427,7 +454,7 @@ export function answersToFafa(a: PackAnswers): FafaDoc {
     ...(clean(a.organization) ? { vendor: clean(a.organization) } : {}),
     version: clean(a.version),
     description: clean(a.description),
-    homepage: clean(a.homepage) || `https://${domain}`,
+    homepage: homepage || `https://${domain}`,
     ...(clean(a.license) ? { license: clean(a.license) } : {}),
   };
   return {
@@ -535,9 +562,16 @@ function registryPackages(fafa: FafaDoc): Array<Record<string, unknown>> {
   }));
 }
 
-/** True when the `.fafa` gives a registry entry: a package or a remote MCP URL. */
+/** True when the `.fafa` names an MCP endpoint, at a URL or as a package. A
+ *  CLI, a library or an A2A agent has none, and gets no MCP card. */
+export function hasMcpEndpoint(fafa: FafaDoc): boolean {
+  return (fafa.endpoints ?? []).some((e) => clean(e.protocol).toLowerCase() === 'mcp');
+}
+
+/** True when the `.fafa` gives a registry entry: an MCP endpoint, and a package
+ *  or a remote MCP URL. */
 export function hasRegistryEntry(fafa: FafaDoc): boolean {
-  return mcpRemotes(fafa).length > 0 || registryPackages(fafa).length > 0;
+  return hasMcpEndpoint(fafa) && (mcpRemotes(fafa).length > 0 || registryPackages(fafa).length > 0);
 }
 
 /** The registry identity from the `.fafa`: `name`, and `title` when it has one. */
@@ -569,6 +603,9 @@ export function projectServerJson(fafa: FafaDoc, faf?: FafData, opts: ContextBlo
   const packages = registryPackages(fafa);
   if (remotes.length === 0 && packages.length === 0) {
     throw new Error('A registry entry needs a package people install or a remote MCP URL.');
+  }
+  if (!hasMcpEndpoint(fafa)) {
+    throw new Error('A registry entry describes an MCP server: the .fafa has no mcp endpoint.');
   }
   return {
     $schema: SERVER_JSON_SCHEMA,

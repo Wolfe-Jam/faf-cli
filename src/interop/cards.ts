@@ -12,6 +12,7 @@ import {
   catalogHost,
   catalogRows,
   fafaContextExtension,
+  hasMcpEndpoint,
   hasRegistryEntry,
   mcpRemotes,
   projectA2ACard,
@@ -281,6 +282,15 @@ function namesHost(text: string): boolean {
   }
 }
 
+/** Why a .fafa gets no MCP Server Card and no registry server.json. */
+export const NO_MCP_ENDPOINT = 'no mcp endpoint in agent.fafa';
+
+/** True when the .fafa says it is not an MCP server: it names no mcp endpoint.
+ *  Then neither MCP card is written, even beside a project.faf. */
+export function fafaSkipsMcp(fafa: FafaDoc | undefined): boolean {
+  return fafa !== undefined && !hasMcpEndpoint(fafa);
+}
+
 /** The cards an agent.fafa gives with no project.faf (BETTER): the A2A card
  *  (when it names an A2A door), the MCP Server Card (when it names a remote MCP
  *  URL), the registry server.json (a remote or a package), the AI Catalog, ARD. */
@@ -299,9 +309,11 @@ export function betterTargets(fafa: FafaDoc, opts: ProjectCardsOptions = {}): Ca
  * an agent.fafa alone gives the plain cards ({@link betterTargets}); a
  * project.faf, resident and used, adds FAF's context block to each (the A2A
  * card's extension, the Server Card's and server.json's `_meta`). A card's
- * identity comes from the .fafa at both rungs. With a project.faf and no MCP
- * endpoint in the .fafa (an MCP server's own repo), the Server Card and the
- * registry identity come from project.faf, as `faf server-card` writes them.
+ * identity comes from the .fafa at both rungs. A .fafa with no mcp endpoint
+ * (a CLI, a library, an A2A agent) gets no Server Card and no registry entry,
+ * and asking for one is refused. With a project.faf and no .fafa, the Server
+ * Card and the registry identity come from project.faf, as `faf server-card`
+ * writes them.
  */
 export function projectCards(input: {
   /** project.faf — absent means BETTER. */
@@ -313,7 +325,13 @@ export function projectCards(input: {
   const opts = input.opts ?? {};
   const faf = input.faf;
   const fafa = input.fafa;
-  const all = faf ? CARD_TARGETS : fafa ? betterTargets(fafa, opts) : [];
+  const skipMcp = fafaSkipsMcp(fafa);
+  const asked = input.targets?.filter((t) => t === 'mcp' || t === 'registry') ?? [];
+  if (skipMcp && asked.length) {
+    throw new Error(`${asked.join(', ')}: ${NO_MCP_ENDPOINT} — these cards describe an MCP server.`);
+  }
+  const all = (faf ? CARD_TARGETS : fafa ? betterTargets(fafa, opts) : [])
+    .filter((t) => !skipMcp || (t !== 'mcp' && t !== 'registry'));
   const wanted = new Set(input.targets?.length ? input.targets : all);
   const out: ProjectedCards = {};
   if (faf) {out.block = fafContextBlock(faf, opts);}

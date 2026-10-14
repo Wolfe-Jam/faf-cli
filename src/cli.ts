@@ -208,7 +208,7 @@ program
 
 program
   .command('cards')
-  .description('Write the cards your files allow. BETTER: an agent.fafa → A2A card, MCP Server Card, registry, AI Catalog, ARD (as its endpoints allow). BEST: + project.faf → the same cards with FAF context (--check prints, writes nothing)')
+  .description('Write the cards your files allow. BETTER: an agent.fafa → A2A card, MCP Server Card, registry, AI Catalog, ARD (as its endpoints allow). BEST: + project.faf → the same cards with FAF context. An agent.fafa with no mcp endpoint gets no MCP Server Card or registry server.json (--check prints, writes nothing)')
   .option('--target <list>', 'Comma list: a2a,mcp,registry,catalog,ard (default: whatever inputs allow)')
   .option('--faf <path>', 'project.faf path (default: auto-discover)')
   .option('--fafa <path>', 'agent.fafa path (default: auto-discover)')
@@ -232,9 +232,11 @@ card
   .option('--domain <domain>', 'Domain it is published under, e.g. example.com')
   .option('--description <text>', 'What it does, one sentence')
   .option('--set-version <version>', 'Its version. NOTE: not --version, which is the global CLI-version flag')
-  .option('--url <url>', 'Where it runs: a URL people call')
+  .option('--url <url>', 'Where it runs: a live endpoint people call over http(s). For something people install (a CLI, a library, a stdio MCP server), use --package')
   .option('--protocol <protocol>', 'Protocol at --url: a2a or mcp (default: a2a)')
-  .option('--package <name>', 'Where it runs: an npm package people install')
+  .option('--package <name>', 'Where it runs: a package people install. A bare name is npm; or npm:<name>, pypi:<name>, crates:<name>')
+  .option('--kind <kind>', 'What --package is: mcp (an MCP server, the default), cli or library. Only mcp gets MCP cards')
+  .option('--homepage <url>', 'Its homepage, an http(s) URL (default: https://<domain>)')
   .option('--skill <skill>', 'What it can do, "Name: description" (repeatable)', repeat)
   .option('--example <question>', 'A question people ask it; search finds it by these (repeatable, 2-5)', repeat)
   .option('--dir <path>', 'Working directory (default: cwd)')
