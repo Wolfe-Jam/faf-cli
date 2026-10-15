@@ -7,6 +7,7 @@ import { parse as parseYaml } from 'yaml';
 import Ajv2020 from 'ajv/dist/2020.js';
 import {
   cardInitCommand,
+  parsePackage,
   parseSkill,
   shortNameFrom,
   type Ask,
@@ -406,5 +407,129 @@ describe('PIT: faf card init — clean refusals, safe re-runs', () => {
     cardsCommand({ dir: t.dir(), target: 'a2a,catalog,ard' });
     errSpy.mockRestore();
     expect(errs.filter((l) => l.includes('✓')).every((l) => l.includes('unchanged'))).toBe(true);
+  });
+});
+
+describe('ENGINE: faf card init — package kinds, registries, homepage', () => {
+  const t = freshDir('kinds');
+  const PKG: CardInitOptions = { ...WEATHER, url: undefined, package: 'weather-tool' };
+  const fafa = () => parseYaml(readFileSync(join(t.dir(), 'agent.fafa'), 'utf-8'));
+
+  for (const [kind, protocol] of [[undefined, 'mcp'], ['mcp', 'mcp'], ['cli', 'cli'], ['library', 'library'], ['CLI', 'cli']] as const) {
+    test(`--kind ${kind ?? '(none)'}: the package's endpoint speaks ${protocol}, over stdio`, async () => {
+      await cardInitCommand({ ...PKG, kind, dir: t.dir() });
+      const doc = fafa();
+      expect(validateFafa(doc)).toBe(true);
+      expect(doc.endpoints).toEqual([{ protocol, transport: 'stdio', location: 'weather-tool' }]);
+    });
+  }
+
+  test('an unknown --kind is refused by name, nothing written', async () => {
+    const err = await expectExit(2, () => cardInitCommand({ ...PKG, kind: 'daemon', dir: t.dir() }));
+    expect(err).toContain('Kind "daemon" is not one faf knows: mcp, cli or library');
+    expect(filesIn(t.dir())).toEqual([]);
+  });
+
+  test('--kind without --package is refused, nothing written', async () => {
+    const err = await expectExit(2, () => cardInitCommand({ ...WEATHER, kind: 'cli', dir: t.dir() }));
+    expect(err).toContain('--kind says what a --package is');
+    expect(filesIn(t.dir())).toEqual([]);
+  });
+
+  for (const [raw, registryType, identifier] of [
+    ['weather-tool', 'npm', 'weather-tool'],
+    ['@acme/weather', 'npm', '@acme/weather'],
+    ['npm:weather-tool', 'npm', 'weather-tool'],
+    ['pypi:weather_tool', 'pypi', 'weather_tool'],
+    ['PyPI:Weather.Tool', 'pypi', 'Weather.Tool'],
+    ['crates:weather-tool', 'cargo', 'weather-tool'],
+  ] as const) {
+    test(`--package ${raw}: recorded as ${registryType} ${identifier}`, async () => {
+      expect(parsePackage(raw)).toEqual({ registryType, identifier });
+      await cardInitCommand({ ...PKG, package: raw, kind: 'cli', dir: t.dir() });
+      const doc = fafa();
+      expect(validateFafa(doc)).toBe(true);
+      expect(doc.metadata.cards.packages).toEqual([{ registryType, identifier }]);
+      expect(doc.endpoints).toEqual([{ protocol: 'cli', transport: 'stdio', location: identifier }]);
+    });
+  }
+
+  for (const [raw, says] of [
+    ['gem:weather', 'registry "gem" is not one faf knows'],
+    ['pypi:-rf', 'not a PyPI package name'],
+    ['crates:9lives', 'not a crate name'],
+    ['crates:weather tool', 'not a crate name'],
+    ['npm:UPPER', 'not an npm package name'],
+  ] as const) {
+    test(`--package ${raw}: refused (${says}), nothing written`, async () => {
+      const err = await expectExit(2, () => cardInitCommand({ ...PKG, package: raw, dir: t.dir() }));
+      expect(err).toContain(says);
+      expect(filesIn(t.dir())).toEqual([]);
+    });
+  }
+
+  test('--homepage sets agent.homepage; without it, the homepage is https://<domain>', async () => {
+    await cardInitCommand({ ...WEATHER, homepage: 'https://weather.example.org/docs', dir: t.dir(), out: 'a.fafa' });
+    await cardInitCommand({ ...WEATHER, dir: t.dir(), out: 'b.fafa' });
+    const a = parseYaml(readFileSync(join(t.dir(), 'a.fafa'), 'utf-8'));
+    const b = parseYaml(readFileSync(join(t.dir(), 'b.fafa'), 'utf-8'));
+    expect(validateFafa(a)).toBe(true);
+    expect(a.agent.homepage).toBe('https://weather.example.org/docs');
+    expect(b.agent.homepage).toBe('https://example.com');
+  });
+
+  for (const homepage of ['example.org', 'ftp://example.org', 'javascript:alert(1)', 'https://ok.example.org/x y']) {
+    test(`--homepage ${homepage}: not an http(s) URL — refused, nothing written`, async () => {
+      const err = await expectExit(2, () => cardInitCommand({ ...WEATHER, homepage, dir: t.dir() }));
+      expect(err).toContain('Homepage');
+      expect(err).toContain('http(s)');
+      expect(filesIn(t.dir())).toEqual([]);
+    });
+  }
+
+  test('asked interactively: a package is followed by what it is', async () => {
+    const { ask, asked } = scripted([
+      'pypi:weather-tool', // where it runs
+      'daemon', // not a kind: asked again
+      'cli', // what it is
+    ]);
+    const errSpy = spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      await cardInitCommand({ ...WEATHER, url: undefined, dir: t.dir() }, ask);
+    } finally {
+      errSpy.mockRestore();
+    }
+    expect(asked.filter((q) => q.startsWith('What it is')).length).toBe(2);
+    const doc = fafa();
+    expect(doc.endpoints).toEqual([{ protocol: 'cli', transport: 'stdio', location: 'weather-tool' }]);
+    expect(doc.metadata.cards.packages).toEqual([{ registryType: 'pypi', identifier: 'weather-tool' }]);
+  });
+
+  test('asked interactively: Enter on what it is keeps mcp', async () => {
+    const { ask } = scripted(['weather-tool', '']);
+    const errSpy = spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      await cardInitCommand({ ...WEATHER, url: undefined, dir: t.dir() }, ask);
+    } finally {
+      errSpy.mockRestore();
+    }
+    expect(fafa().endpoints).toEqual([{ protocol: 'mcp', transport: 'stdio', location: 'weather-tool' }]);
+  });
+
+  test('a URL people call is never asked what kind of package it is', async () => {
+    const { ask, asked } = scripted(['https://example.com/a2a', '']);
+    const errSpy = spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      await cardInitCommand({ ...WEATHER, url: undefined, dir: t.dir() }, ask);
+    } finally {
+      errSpy.mockRestore();
+    }
+    expect(asked.some((q) => q.startsWith('What it is'))).toBe(false);
+  });
+
+  test('a CLI package: next names only the catalog and ARD — no MCP card', async () => {
+    writeFileSync(join(t.dir(), 'server.json'), '{}\n');
+    await cardInitCommand({ ...PKG, kind: 'cli', dir: t.dir() });
+    expect(t.said()).toContain('next: faf cards --target catalog,ard');
   });
 });

@@ -14,6 +14,8 @@ import {
   buildPack,
   catalogRows,
   fafaYaml,
+  hasMcpEndpoint,
+  hasRegistryEntry,
   mcpName,
   projectA2ACard,
   projectPack,
@@ -274,5 +276,38 @@ describe('BRAKE: an A2A catalog row only when the .fafa names an A2A door (8.2.0
   test('a door given with doorUrl: the A2A row is listed', () => {
     const rows = catalogRows(noDoor, ['a2a', 'server_card'], { doorUrl: 'https://example.com/a2a' });
     expect(rows.some((r) => r.identifier.includes(':a2a:'))).toBe(true);
+  });
+});
+
+describe('ENGINE: package kinds — only an MCP package is an MCP server', () => {
+  for (const [kind, protocol] of [[undefined, 'mcp'], ['mcp', 'mcp'], ['cli', 'cli'], ['library', 'library']] as const) {
+    test(`kind ${kind ?? '(none)'} → a ${protocol} endpoint over stdio`, () => {
+      const fafa = answersToFafa({ ...installedMcp, package_kind: kind });
+      expect(validateFafa(fafa)).toBe(true);
+      expect(fafa.endpoints).toEqual([{ protocol, transport: 'stdio', location: 'weather-mcp' }]);
+      expect(hasMcpEndpoint(fafa)).toBe(protocol === 'mcp');
+      expect(hasRegistryEntry(fafa)).toBe(protocol === 'mcp');
+    });
+  }
+
+  test('an unknown kind is refused by name', () => {
+    expect(() => answersToFafa({ ...installedMcp, package_kind: 'daemon' })).toThrow('Kind "daemon" is not one faf knows');
+  });
+
+  test('a CLI package gives no registry entry: it is not an MCP server', () => {
+    const fafa = answersToFafa({ ...installedMcp, package_kind: 'cli' });
+    expect(() => projectServerJson(fafa)).toThrow('no mcp endpoint');
+  });
+
+  test('a crate is recorded as cargo and checked against the crate-name rule', () => {
+    const fafa = answersToFafa({ ...installedMcp, packages: [{ registryType: 'cargo', identifier: 'weather_mcp' }] });
+    expect(fafa.metadata?.cards?.packages).toEqual([{ registryType: 'cargo', identifier: 'weather_mcp' }]);
+    expect(() => answersToFafa({ ...installedMcp, packages: [{ registryType: 'cargo', identifier: '_weather' }] })).toThrow('not a crate name');
+  });
+
+  test('a homepage given is kept; one that is not http(s) is refused', () => {
+    expect(answersToFafa({ ...agent, homepage: 'https://weather.example.org' }).agent?.homepage).toBe('https://weather.example.org');
+    expect(answersToFafa(agent).agent?.homepage).toBe('https://example.com');
+    expect(() => answersToFafa({ ...agent, homepage: 'weather.example.org' })).toThrow('Homepage');
   });
 });

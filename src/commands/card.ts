@@ -9,7 +9,7 @@
 import { existsSync, readFileSync } from 'fs';
 import { join, resolve } from 'path';
 import { createInterface } from 'readline';
-import { answersToFafa, fafaYaml, type PackAnswers } from '../interop/pack.js';
+import { PACKAGE_KINDS, answersToFafa, fafaYaml, type PackAnswers, type PackPackage } from '../interop/pack.js';
 import { findFafFile } from '../interop/faf.js';
 import { cardsCommand } from './cards.js';
 import { betterTargets, readFafa, type CardTarget } from '../interop/cards.js';
@@ -25,6 +25,8 @@ export interface CardInitOptions {
   url?: string;
   protocol?: string;
   package?: string;
+  kind?: string;
+  homepage?: string;
   skill?: string[];
   example?: string[];
   dir?: string;
@@ -73,13 +75,34 @@ function packageVersion(dir: string): string | undefined {
   }
 }
 
-/** "Where it runs": anything with a scheme is a URL (npm names never carry a
+/** The registries a package can name, as `<prefix>:<name>`, and the
+ *  `registryType` each is recorded under. A bare name is npm. Rust crates use
+ *  `cargo`, the package-URL (purl) type for crates.io; the MCP registry names
+ *  no Rust type. */
+const REGISTRIES: Record<string, string> = { npm: 'npm', pypi: 'pypi', crates: 'cargo' };
+const PREFIX_RE = new RegExp(`^(${Object.keys(REGISTRIES).join('|')}):`, 'i');
+
+/** "pypi:weather-mcp" → { registryType: 'pypi', identifier: 'weather-mcp' }.
+ *  npm names never carry a `:`, so any other prefix is refused, by name. */
+export function parsePackage(raw: string): PackPackage {
+  const i = raw.indexOf(':');
+  if (i < 0) {return { registryType: 'npm', identifier: raw.trim() };}
+  const prefix = raw.slice(0, i).trim().toLowerCase();
+  const registryType = REGISTRIES[prefix];
+  if (!registryType) {
+    throw new Error(`Package "${raw}": registry "${prefix}" is not one faf knows — npm:<name> (the default), pypi:<name> or crates:<name>.`);
+  }
+  return { registryType, identifier: raw.slice(i + 1).trim() };
+}
+
+/** "Where it runs": a registry prefix (`pypi:`, `crates:`, `npm:`) is a
+ *  package; anything else with a scheme is a URL (npm names never carry a
  *  `:`), so `javascript:…` is refused as a URL, not kept as a package. */
 function whereItRuns(answers: PackAnswers, where: string, protocol: string): void {
-  if (where.includes(':')) {
+  if (where.includes(':') && !PREFIX_RE.test(where)) {
     answers.endpoints = [{ protocol, url: where }];
   } else {
-    answers.packages = [{ registryType: 'npm', identifier: where }];
+    answers.packages = [parsePackage(where)];
   }
 }
 
@@ -100,8 +123,13 @@ export function answersFromFlags(o: CardInitOptions): PackAnswers {
     skills: (o.skill ?? []).map(parseSkill).filter((s) => s.name),
     example_requests: (o.example ?? []).map(flag).filter(Boolean),
   };
+  if (flag(o.homepage)) {answers.homepage = flag(o.homepage);}
   if (o.url) {whereItRuns(answers, flag(o.url), flag(o.protocol).toLowerCase() || 'a2a');}
-  if (o.package) {answers.packages = [{ registryType: 'npm', identifier: flag(o.package) }];}
+  if (o.package) {answers.packages = [parsePackage(flag(o.package))];}
+  if (flag(o.kind)) {
+    if (!o.package) {throw new Error('--kind says what a --package is: give --package too.');}
+    answers.package_kind = flag(o.kind).toLowerCase();
+  }
   return answers;
 }
 
@@ -123,7 +151,7 @@ async function askList(ask: Ask, first: string, more: string, max: number): Prom
 
 async function askWhere(a: PackAnswers, ask: Ask): Promise<void> {
   const q = withDefault(ask);
-  const where = await q('Where it runs — a URL people call, or an npm package');
+  const where = await q('Where it runs — a URL people call, or a package (npm name, pypi:name or crates:name)');
   if (!where) {return;}
   let protocol = 'a2a';
   if (/^https?:\/\//i.test(where)) {
@@ -131,6 +159,16 @@ async function askWhere(a: PackAnswers, ask: Ask): Promise<void> {
     protocol = PROTOCOLS.includes(said) ? said : 'a2a';
   }
   whereItRuns(a, where, protocol);
+  if (a.packages?.length && !a.package_kind) {
+    // Asked until it is one of the kinds; Enter takes mcp.
+    for (;;) {
+      const said = (await q(`What it is — ${PACKAGE_KINDS.join(', ')}`, 'mcp')).toLowerCase();
+      if ((PACKAGE_KINDS as readonly string[]).includes(said)) {
+        a.package_kind = said;
+        break;
+      }
+    }
+  }
 }
 
 async function askSkills(ask: Ask): Promise<Array<{ name: string; description?: string }>> {
@@ -188,10 +226,17 @@ export async function cardInitCommand(options: CardInitOptions = {}, ask?: Ask):
     process.exit(2);
   }
 
+  let answers: PackAnswers;
+  try {
+    answers = answersFromFlags(options);
+  } catch (e) {
+    console.error(`Error: ${(e as Error).message}`);
+    process.exit(2);
+  }
+
   // Flags first; a person at a terminal is asked for the rest.
   const person = complete(options) ? { close: () => {} } : asker(ask);
   try {
-    let answers = answersFromFlags(options);
     if (person.ask) {
       if (!ask) {console.log(`${fafCyan('card init')} ${dim('— seven answers, one agent.fafa')}\n`);}
       answers = await askMissing(answers, person.ask, dir);

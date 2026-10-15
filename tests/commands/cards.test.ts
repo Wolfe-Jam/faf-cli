@@ -331,3 +331,143 @@ describe('ENGINE: optional sibling faf-agent golden', () => {
     expect((p.a2a!.capabilities.extensions[0].params as any).fafaSpecVersion).toBeTruthy();
   });
 });
+
+describe('BRAKE: faf cards — no MCP cards for an agent.fafa with no mcp endpoint', () => {
+  let testDir: string;
+  let errors: string[];
+  let errSpy: ReturnType<typeof spyOn>;
+  /** A CLI people install from npm, as `faf card init --package x --kind cli` writes it. */
+  const cliFafa = (protocol: string) => [
+    'version: "1.0"',
+    'agent:',
+    '  name: weather',
+    '  displayName: Weather Tool',
+    '  id: urn:air:example.com:agent:weather',
+    '  description: Forecasts for anywhere.',
+    '  version: 2.0.0',
+    '  homepage: https://example.com',
+    'capabilities:',
+    '  - name: Get forecast',
+    '    type: tool',
+    '    description: A three-day forecast.',
+    '    tags: [get forecast]',
+    'endpoints:',
+    `  - protocol: ${protocol}`,
+    '    transport: stdio',
+    '    location: weather-tool',
+    'metadata:',
+    '  cards:',
+    '    domain: example.com',
+    '    examples: [Will it rain in Leeds tomorrow?, What is the forecast for Tokyo?]',
+    '    packages:',
+    '      - registryType: npm',
+    '        identifier: weather-tool',
+    '',
+  ].join('\n');
+  const SERVER_JSON = `${JSON.stringify({ name: 'com.example/weather', version: '2.0.0', description: 'x' }, null, 2)}\n`;
+
+  beforeEach(() => {
+    testDir = join(tmpdir(), `faf-cards-nomcp-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    mkdirSync(testDir, { recursive: true });
+    errors = [];
+    errSpy = spyOn(console, 'error').mockImplementation((m: unknown) => {
+      errors.push(String(m));
+    });
+  });
+
+  afterEach(() => {
+    errSpy.mockRestore();
+    rmSync(testDir, { recursive: true, force: true });
+  });
+
+  const said = () => errors.join('\n').replace(/\x1b\[[0-9;]*m/g, '');
+
+  for (const kind of ['cli', 'library']) {
+    test(`BEST, a ${kind}: no Server Card, server.json untouched, one line says why`, () => {
+      writeFileSync(join(testDir, 'agent.fafa'), cliFafa(kind));
+      writeFileSync(join(testDir, 'project.faf'), readFileSync(join(FIX, 'project.faf'), 'utf-8'));
+      writeFileSync(join(testDir, 'server.json'), SERVER_JSON);
+      cardsCommand({ dir: testDir });
+      expect(existsSync(join(testDir, 'server-card'))).toBe(false);
+      expect(readFileSync(join(testDir, 'server.json'), 'utf-8')).toBe(SERVER_JSON);
+      expect(existsSync(join(testDir, '.well-known', 'ai-catalog.json'))).toBe(true);
+      expect(existsSync(join(testDir, '.well-known', 'ard.json'))).toBe(true);
+      expect(said()).toContain('skipped MCP Server Card and registry server.json: no mcp endpoint in agent.fafa');
+    });
+  }
+
+  test('BETTER, a CLI package: no registry step, one line says why', () => {
+    writeFileSync(join(testDir, 'agent.fafa'), cliFafa('cli'));
+    writeFileSync(join(testDir, 'server.json'), SERVER_JSON);
+    cardsCommand({ dir: testDir });
+    expect(readFileSync(join(testDir, 'server.json'), 'utf-8')).toBe(SERVER_JSON);
+    expect(said()).toContain('skipped MCP Server Card and registry server.json: no mcp endpoint in agent.fafa');
+  });
+
+  test('--check: no mcp or registry in the projection, and the reason on stderr', () => {
+    writeFileSync(join(testDir, 'agent.fafa'), cliFafa('cli'));
+    writeFileSync(join(testDir, 'project.faf'), readFileSync(join(FIX, 'project.faf'), 'utf-8'));
+    const chunks: string[] = [];
+    const outSpy = spyOn(process.stdout, 'write').mockImplementation(((s: string) => {
+      chunks.push(s);
+      return true;
+    }) as never);
+    try {
+      cardsCommand({ dir: testDir, check: true });
+    } finally {
+      outSpy.mockRestore();
+    }
+    const printed = JSON.parse(chunks.join(''));
+    expect(printed.mcp).toBeUndefined();
+    expect(printed.registry).toBeUndefined();
+    expect(printed.catalog).toBeDefined();
+    expect(said()).toContain('no mcp endpoint in agent.fafa');
+  });
+
+  for (const target of ['mcp', 'registry', 'mcp,catalog']) {
+    for (const best of [false, true]) {
+      test(`--target ${target}${best ? ' beside a project.faf' : ''}: refused with the reason, nothing written`, () => {
+        writeFileSync(join(testDir, 'agent.fafa'), cliFafa('cli'));
+        if (best) {writeFileSync(join(testDir, 'project.faf'), readFileSync(join(FIX, 'project.faf'), 'utf-8'));}
+        writeFileSync(join(testDir, 'server.json'), SERVER_JSON);
+        const exitSpy = spyOn(process, 'exit').mockImplementation(((c?: number) => {
+          throw new Error(`__exit_${c}__`);
+        }) as never);
+        try {
+          expect(() => cardsCommand({ dir: testDir, target })).toThrow('__exit_2__');
+        } finally {
+          exitSpy.mockRestore();
+        }
+        expect(said()).toContain('no mcp endpoint in agent.fafa');
+        expect(existsSync(join(testDir, 'server-card'))).toBe(false);
+        expect(existsSync(join(testDir, '.well-known'))).toBe(false);
+        expect(readFileSync(join(testDir, 'server.json'), 'utf-8')).toBe(SERVER_JSON);
+      });
+    }
+  }
+
+  test('projectCards refuses an MCP target for a .fafa with no mcp endpoint', () => {
+    writeFileSync(join(testDir, 'agent.fafa'), cliFafa('cli'));
+    const fafa = readFafa(join(testDir, 'agent.fafa'));
+    expect(() => projectCards({ fafa, targets: ['registry'] })).toThrow('no mcp endpoint in agent.fafa');
+  });
+
+  test('an MCP package (stdio) still gets its registry server.json patched', () => {
+    writeFileSync(join(testDir, 'agent.fafa'), cliFafa('mcp'));
+    writeFileSync(join(testDir, 'server.json'), SERVER_JSON);
+    cardsCommand({ dir: testDir, force: true });
+    expect(JSON.parse(readFileSync(join(testDir, 'server.json'), 'utf-8')).name).toBe('com.example/weather');
+    expect(said()).not.toContain('skipped');
+    expect(said()).toContain('server.json');
+  });
+
+  test('an MCP package beside a project.faf still gets the Server Card and server.json', () => {
+    writeFileSync(join(testDir, 'agent.fafa'), cliFafa('mcp'));
+    writeFileSync(join(testDir, 'project.faf'), readFileSync(join(FIX, 'project.faf'), 'utf-8'));
+    writeFileSync(join(testDir, 'server.json'), SERVER_JSON);
+    cardsCommand({ dir: testDir, force: true });
+    expect(existsSync(join(testDir, 'server-card'))).toBe(true);
+    expect(readFileSync(join(testDir, 'server.json'), 'utf-8')).not.toBe(SERVER_JSON);
+    expect(said()).not.toContain('skipped');
+  });
+});
