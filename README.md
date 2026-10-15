@@ -133,7 +133,21 @@ faf memory etch "a durable fact" --id my-fact
 faf memory show
 ```
 
-### What's New in v8.2.0 — The Ladder Edition
+### What's New in v8.3.0 — The Business Card Edition
+
+**Business cards say what the repo is: a package can be a CLI or a library, from npm, PyPI or crates.io, and only an MCP server gets MCP cards.**
+
+```bash
+npx faf-cli@latest card init --package pypi:my-lib --kind library
+```
+
+- **`--kind mcp|cli|library`** says what `--package` is. `mcp` stays the default.
+- **`npm:`, `pypi:` and `crates:`** name the registry. A bare name is still npm.
+- **`--homepage <url>`** sets the business card's homepage.
+- **`faf cards` writes MCP cards only for an MCP server.** A CLI or a library gets its plain cards and a one-line reason.
+- **`faf init` offers the business card** when the repo has none: `next: 'faf card init'`. It writes nothing for it.
+
+### The Ladder Edition (8.2)
 
 **One ladder for every card: agent.fafa builds the plain cards, and project.faf adds FAF's context.**
 
@@ -184,6 +198,7 @@ npx faf-cli@latest card init     # seven questions → agent.fafa → A2A card, 
 
 **Recent sprint**
 
+- ✪ [8.3.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.3.0) The Business Card Edition — CLI, library or MCP server, from npm, PyPI or crates.io
 - ✪ [8.2.2](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.2.2) Markdown never writes project.faf — `sync` is one way, `recover` is gone
 - ✪ [8.2.1](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.2.1) Cards stay honest — `updatedAt` moves only on a change; whole http(s) URLs
 - ✪ [8.2.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.2.0) The Ladder Edition — one ladder for every card

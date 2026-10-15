@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v8.2.2 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v8.3.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -8,9 +8,9 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [8.3.0] - 2026-10-15 — The Business Card Edition
 
-**Business cards say what the repo is: a package can be a CLI or a library, from npm, PyPI or crates.io, and only an MCP server gets MCP cards.** Found rolling the card out to 14 repos with 8.2.2.
+**Business cards say what the repo is: a package can be a CLI or a library, from npm, PyPI or crates.io, and only an MCP server gets MCP cards.** Found rolling the card out to 14 repos with 8.2.2. 2209 tests.
 
 ### Added
 - **`faf card init --kind <mcp|cli|library>`.** Says what `--package` is. The endpoint protocol follows the kind, over stdio. `mcp` is the default, so `--package` alone writes what it did before. An unknown kind is refused by name, and `--kind` without `--package` is refused.
