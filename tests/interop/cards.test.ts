@@ -3,6 +3,7 @@ import type { FafData } from '../../src/core/types.js';
 import {
   A2A_CONTEXT_URI,
   assertSameBlock,
+  fafSkipsMcp,
   buildA2ACard,
   generateA2ACard,
   parseTargets,
@@ -107,6 +108,28 @@ describe('ENGINE: 🛡️ one projector — faf cards', () => {
     expect(p.mcp).toBeDefined();
     expect(p.registry).toBeDefined();
     expect(p.a2a).toBeUndefined();
+  });
+
+  test('no .fafa: a project.faf typed library, cli, … gets no MCP cards unless asked for', () => {
+    for (const type of ['library', 'cli', 'frontend']) {
+      const typed: FafData = { ...faf, project: { ...faf.project, type } };
+      expect(fafSkipsMcp(typed, undefined)).toBe(true);
+      const p = projectCards({ faf: typed });
+      expect(p.mcp).toBeUndefined();
+      expect(p.registry).toBeUndefined();
+      // Asked for by name, they are still written.
+      expect(projectCards({ faf: typed, targets: ['mcp'] }).mcp).toBeDefined();
+    }
+  });
+
+  test('no .fafa: a project.faf typed mcp (or naming no type) keeps its MCP cards', () => {
+    for (const type of ['mcp', 'mcp-server', undefined]) {
+      const typed: FafData = { ...faf, app_type: undefined, project: { ...faf.project, type } };
+      expect(fafSkipsMcp(typed, undefined)).toBe(false);
+      expect(projectCards({ faf: typed }).mcp).toBeDefined();
+    }
+    // app_type counts when project.type is absent.
+    expect(fafSkipsMcp(faf, undefined)).toBe(true);
   });
 
   test('no a2a endpoint + explicit a2a target throws (no invented door)', () => {

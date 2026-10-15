@@ -4,8 +4,10 @@ import { findFafFile, readFaf } from '../interop/faf.js';
 import type { FafData } from '../core/types.js';
 import {
   A2A_CONTEXT_URI,
+  NOT_AN_MCP_SERVER,
   NO_MCP_ENDPOINT,
   betterTargets,
+  fafSkipsMcp,
   fafaSkipsMcp,
   findFafaFile,
   hasA2ACardMark,
@@ -164,6 +166,11 @@ export function cardsCommand(options: CardsCommandOptions = {}): void {
     }
   }
   const faf: FafData | undefined = hasFaf ? readFaf(fafPath as string) : undefined;
+  const notMcp = !targets?.length && fafSkipsMcp(faf, fafa);
+  if (notMcp) {
+    console.error(dim(`skipped MCP Server Card and registry server.json: ${NOT_AN_MCP_SERVER}`));
+    console.error(dim(`  for its business card: faf card init · an MCP server after all: faf cards --target mcp`));
+  }
 
   let projected;
   try {
@@ -299,6 +306,8 @@ export function cardsCommand(options: CardsCommandOptions = {}): void {
   }
 
   if (written.length === 0 && refused === 0) {
+    // The skipped line above already said why, and what to run.
+    if (notMcp) {return;}
     console.error(
       `${fafCyan('faf cards')} ${dim('nothing to write — need .fafa for A2A/catalog/ARD; server.json for registry')}`,
     );

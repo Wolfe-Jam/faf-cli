@@ -291,6 +291,25 @@ export function fafaSkipsMcp(fafa: FafaDoc | undefined): boolean {
   return fafa !== undefined && !hasMcpEndpoint(fafa);
 }
 
+/** Why a project.faf with no .fafa gets no MCP Server Card and no registry server.json. */
+export const NOT_AN_MCP_SERVER = 'project.faf type is not an MCP server';
+
+/** The project type project.faf names: `project.type`, else `app_type`. */
+function fafType(faf: FafData): string | undefined {
+  const t = faf.project?.type ?? faf.app_type;
+  return typeof t === 'string' && t.trim() !== '' ? t.trim() : undefined;
+}
+
+/** True when, with no .fafa, project.faf says the project is not an MCP
+ *  server: it names a type (cli, library, …) that is not mcp. Then neither MCP
+ *  card is written unless asked for by name. A project.faf with no type keeps
+ *  them, as before. */
+export function fafSkipsMcp(faf: FafData | undefined, fafa: FafaDoc | undefined): boolean {
+  if (faf === undefined || fafa !== undefined) {return false;}
+  const type = fafType(faf);
+  return type !== undefined && !/^mcp/i.test(type);
+}
+
 /** The cards an agent.fafa gives with no project.faf (BETTER): the A2A card
  *  (when it names an A2A door), the MCP Server Card (when it names a remote MCP
  *  URL), the registry server.json (a remote or a package), the AI Catalog, ARD. */
@@ -313,7 +332,8 @@ export function betterTargets(fafa: FafaDoc, opts: ProjectCardsOptions = {}): Ca
  * (a CLI, a library, an A2A agent) gets no Server Card and no registry entry,
  * and asking for one is refused. With a project.faf and no .fafa, the Server
  * Card and the registry identity come from project.faf, as `faf server-card`
- * writes them.
+ * writes them, when its type is an MCP server (or it names none); for any
+ * other type they are written only when asked for by name.
  */
 export function projectCards(input: {
   /** project.faf — absent means BETTER. */
@@ -330,8 +350,11 @@ export function projectCards(input: {
   if (skipMcp && asked.length) {
     throw new Error(`${asked.join(', ')}: ${NO_MCP_ENDPOINT} — these cards describe an MCP server.`);
   }
+  // With no .fafa, a project.faf typed cli, library, … is not an MCP server:
+  // its MCP cards are written only when asked for by name.
+  const fafSkip = fafSkipsMcp(faf, fafa);
   const all = (faf ? CARD_TARGETS : fafa ? betterTargets(fafa, opts) : [])
-    .filter((t) => !skipMcp || (t !== 'mcp' && t !== 'registry'));
+    .filter((t) => !(skipMcp || fafSkip) || (t !== 'mcp' && t !== 'registry'));
   const wanted = new Set(input.targets?.length ? input.targets : all);
   const out: ProjectedCards = {};
   if (faf) {out.block = fafContextBlock(faf, opts);}

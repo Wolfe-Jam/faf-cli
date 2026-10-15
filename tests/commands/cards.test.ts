@@ -47,6 +47,38 @@ describe('TYRE: faf cards command', () => {
     expectExit(2, () => cardsCommand({ dir: testDir, target: 'mcp' }));
   });
 
+  test('project.faf alone, typed library: no MCP Server Card, and one line says why', () => {
+    writeFileSync(join(testDir, 'project.faf'), 'faf_version: 2.5.2\nproject:\n  name: my-lib\n  goal: A small test library\n  type: library\n');
+    const errors: string[] = [];
+    const errSpy = spyOn(console, 'error').mockImplementation((...a: unknown[]) => { errors.push(a.join(' ')); });
+    try {
+      cardsCommand({ dir: testDir });
+    } finally {
+      errSpy.mockRestore();
+    }
+    expect(existsSync(join(testDir, 'server-card'))).toBe(false);
+    expect(errors.join('\n')).toContain('project.faf type is not an MCP server');
+    // Asked for by name, it is written.
+    const quiet = spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      cardsCommand({ dir: testDir, target: 'mcp' });
+    } finally {
+      quiet.mockRestore();
+    }
+    expect(existsSync(join(testDir, 'server-card'))).toBe(true);
+  });
+
+  test('project.faf alone, typed mcp: the MCP Server Card is written', () => {
+    writeFileSync(join(testDir, 'project.faf'), 'faf_version: 2.5.2\nproject:\n  name: my-server\n  goal: A small MCP server\n  type: mcp\n');
+    const quiet = spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      cardsCommand({ dir: testDir });
+    } finally {
+      quiet.mockRestore();
+    }
+    expect(existsSync(join(testDir, 'server-card'))).toBe(true);
+  });
+
   test('--target a2a without .fafa exits 2', () => {
     writeFileSync(join(testDir, 'project.faf'), readFileSync(join(FIX, 'project.faf'), 'utf-8'));
     expectExit(2, () => cardsCommand({ dir: testDir, target: 'a2a' }));
