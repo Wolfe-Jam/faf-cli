@@ -16,7 +16,8 @@
  */
 import { describe, test, expect } from 'bun:test';
 import { execFileSync, spawnSync } from 'child_process';
-import { mkdirSync, writeFileSync, rmSync, readFileSync, existsSync, statSync, chmodSync, realpathSync } from 'fs';
+import { mkdirSync, writeFileSync, readFileSync, existsSync, statSync, chmodSync, realpathSync } from 'fs';
+import { removeTemp, spawnLimit, windowsPr } from '../helpers/windows-timing.js';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { installHooks, uninstallHooks, hooksRun, hooksStatus } from '../../src/commands/hooks.js';
@@ -33,7 +34,7 @@ const mk = (tag: string) => {
   let dir = join(tmpdir(), `faf-hooks-${tag}-${Date.now()}-${Math.random().toString(36).slice(2)}`);
   mkdirSync(dir, { recursive: true });
   dir = realpathSync.native(dir); // resolve symlinks AND Windows 8.3 short names (RUNNER~1) → matches git
-  const g = (a: string[]) => execFileSync('git', a, { cwd: dir, stdio: 'pipe', encoding: 'utf-8', timeout: 30_000 });
+  const g = (a: string[]) => execFileSync('git', a, { cwd: dir, stdio: 'pipe', encoding: 'utf-8', timeout: spawnLimit(30_000) });
   g(['init', '-q']); g(['config', 'user.email', 't@t.t']); g(['config', 'user.name', 't']);
   return { dir, g };
 };
@@ -45,7 +46,7 @@ const commit = (dir: string, msg: string, flags: string[] = []): { ok: boolean; 
   // spawnSync (not execFileSync) so we capture BOTH streams on success AND failure —
   // the warn-mode ⚠ lands on the hook's stderr even when the commit is allowed.
   // A timeout turns a hook that never exits into a named failure, not a stalled suite.
-  const r = spawnSync('git', ['commit', '-m', msg, ...flags], { cwd: dir, encoding: 'utf-8', timeout: 60_000 });
+  const r = spawnSync('git', ['commit', '-m', msg, ...flags], { cwd: dir, encoding: 'utf-8', timeout: spawnLimit(60_000) });
   if (r.error) {throw new Error(`git commit did not finish (${r.error.message}); output so far: ${r.stdout ?? ''}${r.stderr ?? ''}`);}
   return { ok: r.status === 0, out: `${r.stdout ?? ''}${r.stderr ?? ''}` };
 };
@@ -74,7 +75,7 @@ describe('WJTTC — faf hooks', () => {
         expect(hook).toContain('|| true'); // warn mode never blocks
         // Executable bit — POSIX only; Windows has none, and git runs hooks there through sh.
         if (process.platform !== 'win32') {expect(statSync(hookPath(dir)).mode & 0o111).toBeGreaterThan(0);}
-      } finally { rmSync(dir, { recursive: true, force: true }); }
+      } finally { removeTemp(dir); }
     });
 
     test('--strict writes a blocking line; re-install switches mode in place (no dup)', () => {
@@ -86,7 +87,7 @@ describe('WJTTC — faf hooks', () => {
         expect(hook).toContain('--strict || exit 1');
         expect(hook).not.toContain('|| true');                       // mode replaced, not appended
         expect(hook.match(/# >>> faf >>>/g)).toHaveLength(1);         // exactly one block
-      } finally { rmSync(dir, { recursive: true, force: true }); }
+      } finally { removeTemp(dir); }
     });
 
     test('NEVER clobbers an existing user pre-commit hook', () => {
@@ -103,7 +104,7 @@ describe('WJTTC — faf hooks', () => {
         const after = readFileSync(hookPath(dir), 'utf-8');
         expect(after).toContain('echo "my linter"');
         expect(after).not.toContain('# >>> faf >>>');
-      } finally { rmSync(dir, { recursive: true, force: true }); }
+      } finally { removeTemp(dir); }
     });
 
     test('REFUSES when core.hooksPath is set (husky/lefthook own hooks) — writes nothing', () => {
@@ -115,7 +116,7 @@ describe('WJTTC — faf hooks', () => {
         });
         expect(out).toMatch(/core\.hooksPath/);
         expect(existsSync(hookPath(dir))).toBe(false); // did not touch the default hooks dir
-      } finally { rmSync(dir, { recursive: true, force: true }); }
+      } finally { removeTemp(dir); }
     });
 
     test('REFUSES a --strict install when the runner lacks hooks-run (would block commits)', () => {
@@ -126,7 +127,7 @@ describe('WJTTC — faf hooks', () => {
         expect(ok).toBe(false);                       // refused
         expect(out).toMatch(/BLOCK/i);                // told why
         expect(existsSync(hookPath(dir))).toBe(false); // no dangerous hook written
-      } finally { rmSync(dir, { recursive: true, force: true }); }
+      } finally { removeTemp(dir); }
     });
 
     test('warn install with an unsupported runner still installs, but warns', () => {
@@ -136,7 +137,7 @@ describe('WJTTC — faf hooks', () => {
         const out = capture(() => { ok = installHooks(dir, { runnerCmd: 'faf-NOPE hooks-run' }); });
         expect(ok).toBe(true);                          // warn mode is harmless → still installs
         expect(out).toMatch(/no-ops until you upgrade/i);
-      } finally { rmSync(dir, { recursive: true, force: true }); }
+      } finally { removeTemp(dir); }
     });
 
     test('install outside a git repo returns false, no crash', () => {
@@ -144,7 +145,7 @@ describe('WJTTC — faf hooks', () => {
       try {
         const out = capture(() => expect(installHooks(dir, { runnerCmd: LOCAL_RUNNER })).toBe(false));
         expect(out).toMatch(/not a git repository/i);
-      } finally { rmSync(dir, { recursive: true, force: true }); }
+      } finally { removeTemp(dir); }
     });
   });
 
@@ -157,7 +158,7 @@ describe('WJTTC — faf hooks', () => {
         let captured = '';
         captured = capture(() => hooksRun({ strict: true }, dir));
         expect(captured).toBe(''); // not in index → nothing to guard
-      } finally { rmSync(dir, { recursive: true, force: true }); }
+      } finally { removeTemp(dir); }
     });
 
     test('born-here (no HEAD version) is an improvement, never a regression', () => {
@@ -168,7 +169,7 @@ describe('WJTTC — faf hooks', () => {
         let out = '';
         out = capture(() => hooksRun({ strict: true }, dir));
         expect(out).toContain('✓'); // 0% → N%, not a block
-      } finally { rmSync(dir, { recursive: true, force: true }); }
+      } finally { removeTemp(dir); }
     });
 
     test('not-a-git-repo → hooksRun is a silent no-op', () => {
@@ -178,7 +179,7 @@ describe('WJTTC — faf hooks', () => {
         let out = '';
         out = capture(() => hooksRun({ strict: true }, dir));
         expect(out).toBe('');
-      } finally { rmSync(dir, { recursive: true, force: true }); }
+      } finally { removeTemp(dir); }
     });
   });
 
@@ -192,12 +193,13 @@ describe('WJTTC — faf hooks', () => {
         installHooks(dir, { strict: true, runnerCmd: LOCAL_RUNNER });
         out = capture(() => hooksStatus(dir));
         expect(out).toMatch(/strict/i);
-      } finally { rmSync(dir, { recursive: true, force: true }); }
+      } finally { removeTemp(dir); }
     });
   });
 
   // ── 🛞 TYRE — REAL git commits ──────────────────────────────────────────────
-  describe('🛞 TYRE — real git commit behaviour', () => {
+  // Real commits run the hook, which starts the CLI: nightly-only on Windows.
+  describe.skipIf(windowsPr)('🛞 TYRE — real git commit behaviour', () => {
     test('STRICT blocks a commit that regresses the score', () => {
       const { dir, g } = mk();
       try {
@@ -207,7 +209,7 @@ describe('WJTTC — faf hooks', () => {
         const r = commit(dir, 'drop context');
         expect(r.ok).toBe(false);            // commit BLOCKED
         expect(r.out).toMatch(/regress|blocked/i);
-      } finally { rmSync(dir, { recursive: true, force: true }); }
+      } finally { removeTemp(dir); }
     });
 
     test('WARN informs but never blocks the same regression', () => {
@@ -219,7 +221,7 @@ describe('WJTTC — faf hooks', () => {
         const r = commit(dir, 'drop context');
         expect(r.ok).toBe(true);             // commit ALLOWED
         expect(r.out).toMatch(/regress/i);   // but warned
-      } finally { rmSync(dir, { recursive: true, force: true }); }
+      } finally { removeTemp(dir); }
     });
 
     test('STRICT lets an improving commit through', () => {
@@ -230,7 +232,7 @@ describe('WJTTC — faf hooks', () => {
         stage(dir, g, FULL); // improve
         const r = commit(dir, 'enrich context');
         expect(r.ok).toBe(true);
-      } finally { rmSync(dir, { recursive: true, force: true }); }
+      } finally { removeTemp(dir); }
     });
 
     test('faf NOT on PATH → the guard skips, commit proceeds even in strict', () => {
@@ -241,7 +243,7 @@ describe('WJTTC — faf hooks', () => {
         stage(dir, g, MIN); // would regress IF the guard ran
         const r = commit(dir, 'drop context, no faf');
         expect(r.ok).toBe(true); // command -v guard skipped it — never break a commit over a missing tool
-      } finally { rmSync(dir, { recursive: true, force: true }); }
+      } finally { removeTemp(dir); }
     });
 
     test('--no-verify bypasses the strict guard (git-native escape hatch)', () => {
@@ -253,7 +255,7 @@ describe('WJTTC — faf hooks', () => {
         const r = commit(dir, 'override', ['--no-verify']);
         expect(r.ok).toBe(true);
         expect(r.out).not.toMatch(/regress/i); // hook never ran
-      } finally { rmSync(dir, { recursive: true, force: true }); }
+      } finally { removeTemp(dir); }
     });
 
     test('an existing user hook STILL runs alongside the faf block', () => {
@@ -268,7 +270,7 @@ describe('WJTTC — faf hooks', () => {
         const r = commit(dir, 'change');
         expect(r.ok).toBe(true);
         expect(existsSync(join(dir, 'USER_HOOK_RAN'))).toBe(true); // user hook preserved + executed
-      } finally { rmSync(dir, { recursive: true, force: true }); }
+      } finally { removeTemp(dir); }
     });
   });
 });

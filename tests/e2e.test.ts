@@ -1,23 +1,25 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
-import { mkdirSync, writeFileSync, rmSync, existsSync, readFileSync } from 'fs';
+import { mkdirSync, writeFileSync, existsSync, readFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { parse } from 'yaml';
 import { execSync } from 'child_process';
 import { FAF_VERSION } from '../src/core/version.js';
+import { removeTemp, spawnLimit, windowsPr } from './helpers/windows-timing.js';
 
 /**
  * Full end-to-end test: exercises the entire CLI flow as a user would.
  * init → score → auto → sync → export → check → edit → drift → convert →
  * compile → decompile → taf → search → share → migrate → demo → info → formats
  */
-describe('TYRE: faf e2e — full lifecycle', () => {
+// Starts the CLI ~40 times: nightly-only on Windows (see helpers/windows-timing.ts).
+describe.skipIf(windowsPr)('TYRE: faf e2e — full lifecycle', () => {
   let testDir: string;
   let originalCwd: string;
   const cli = join(__dirname, '../src/cli.ts');
   // 30s timeout — Windows CI runners have slower Bun startup than Linux/macOS;
   // 15s was tight enough that `score --status` flaked on windows-latest/Node 22.
-  const run = (cmd: string) => execSync(`bun ${cli} ${cmd}`, { cwd: testDir, encoding: 'utf-8', timeout: 30000 });
+  const run = (cmd: string) => execSync(`bun ${cli} ${cmd}`, { cwd: testDir, encoding: 'utf-8', timeout: spawnLimit(30000) });
 
   beforeEach(() => {
     testDir = join(tmpdir(), `faf-e2e-${Date.now()}`);
@@ -34,7 +36,7 @@ describe('TYRE: faf e2e — full lifecycle', () => {
 
   afterEach(() => {
     process.chdir(originalCwd);
-    rmSync(testDir, { recursive: true, force: true });
+    removeTemp(testDir);
   });
 
   // --- Phase 1: Create ---
