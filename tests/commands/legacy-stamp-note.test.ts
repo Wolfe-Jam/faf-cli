@@ -17,6 +17,7 @@ import { tmpdir } from 'os';
 import { spawnSync } from 'child_process';
 import { FAF_END, FAF_START, legacyStampNote } from '../../src/interop/inject.js';
 import { tempDirs } from '../helpers/temp-dirs.js';
+import { spawnLimit, windowsPr } from '../helpers/windows-timing.js';
 
 const tempFolders = tempDirs();
 afterAll(() => tempFolders.removeAll());
@@ -39,13 +40,14 @@ function repo(): { dir: string; home: string } {
 }
 
 function faf(dir: string, home: string, ...args: string[]): { status: number | null; out: string } {
-  const r = spawnSync(process.execPath, [CLI, ...args], { cwd: dir, encoding: 'utf-8', env: { ...process.env, HOME: home, NO_COLOR: '1' } });
+  const r = spawnSync(process.execPath, [CLI, ...args], { cwd: dir, encoding: 'utf-8', env: { ...process.env, HOME: home, NO_COLOR: '1' }, timeout: spawnLimit(60_000) });
   return { status: r.status, out: `${r.stdout}${r.stderr}`.replace(/\x1b\[[0-9;]*m/g, '') };
 }
 
 const count = (hay: string, needle: string): number => hay.split(needle).length - 1;
 
-describe('BRAKE: `faf sync` and `faf export` name a stamp-led file they prefix, once', () => {
+// Starts the CLI: nightly-only on Windows (see helpers/windows-timing.ts).
+describe.skipIf(windowsPr)('BRAKE: `faf sync` and `faf export` name a stamp-led file they prefix, once', () => {
   test('`faf sync` on a stamp-led CLAUDE.md: block on top, old text kept, one line said; the rerun says nothing', () => {
     const { dir, home } = repo();
     writeFileSync(join(dir, 'CLAUDE.md'), OLD);
