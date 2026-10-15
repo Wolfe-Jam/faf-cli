@@ -208,7 +208,7 @@ program
 
 program
   .command('cards')
-  .description('Write the cards your files allow. BETTER: an agent.fafa → A2A card, MCP Server Card, registry, AI Catalog, ARD (as its endpoints allow). BEST: + project.faf → the same cards with FAF context. An agent.fafa with no mcp endpoint gets no MCP Server Card or registry server.json (--check prints, writes nothing)')
+  .description('Write the cards your files allow. BETTER: an agent.fafa → A2A card, MCP Server Card, registry, AI Catalog, ARD (as its endpoints allow). BEST: + project.faf → the same cards with FAF context. An agent.fafa with no mcp endpoint gets no MCP Server Card or registry server.json; nor does a project.faf alone whose type is not mcp, unless asked for with --target (--check prints, writes nothing)')
   .option('--target <list>', 'Comma list: a2a,mcp,registry,catalog,ard (default: whatever inputs allow)')
   .option('--faf <path>', 'project.faf path (default: auto-discover)')
   .option('--fafa <path>', 'agent.fafa path (default: auto-discover)')
