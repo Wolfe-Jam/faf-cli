@@ -4,8 +4,10 @@ name: Windows Nightly
 # Atlanta, and on demand. It runs the tests the PR job leaves to it (the ones
 # that start the CLI as a child), and a release waits for it to be green on the
 # release commit. A child process that hasn't exited in 2 minutes has hung (the
-# slowest healthy one takes about 6 s), so it fails there, named, and the rest
-# of the suite still runs (#167). Each run saves a per-test timing report.
+# slowest healthy one takes about 6 s), so it fails there, named. Each test file
+# runs on its own under a 5-minute limit: a hang bun can't time out (a child
+# started with execSync) kills only that file, named, and the next file runs
+# (#167). Each run saves a per-test timing report.
 on:
   schedule:
     # 08:17 UTC. GitHub delays runs set on the hour; ours started 5–9 h late.
@@ -22,7 +24,7 @@ jobs:
   windows:
     name: Windows nightly (Node ${{ matrix.node }})
     runs-on: windows-latest
-    timeout-minutes: 60
+    timeout-minutes: 75
     strategy:
       fail-fast: false
       matrix:
@@ -58,10 +60,11 @@ jobs:
         run: npm run build
 
       - name: Full test suite
-        timeout-minutes: 45
+        timeout-minutes: 60
         env:
           FAF_TEST_SPAWN_LIMIT_MS: '120000'
-        run: bun test --timeout=600000 --reporter=junit --reporter-outfile=junit.xml
+          FAF_TEST_FILE_LIMIT_MS: '300000'
+        run: node scripts/test-per-file.mjs
 
       - name: Test timings
         if: always()
