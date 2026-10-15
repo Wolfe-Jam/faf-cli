@@ -1,11 +1,11 @@
 name: Windows Nightly
 
 # The full test suite on Windows, while nobody is waiting on it: about 4am in
-# Atlanta, and on demand. It takes as long as it needs: no 5-minute kill, and
-# every child process gets a long limit (FAF_TEST_SPAWN_LIMIT_MS). It runs the
-# tests the PR job leaves to it (the ones that start the CLI as a child), and
-# a release waits for it to be green on the release commit. Each run saves a
-# per-test timing report, so a slow test and a hang can be told apart.
+# Atlanta, and on demand. It runs the tests the PR job leaves to it (the ones
+# that start the CLI as a child), and a release waits for it to be green on the
+# release commit. A child process that hasn't exited in 2 minutes has hung (the
+# slowest healthy one takes about 6 s), so it fails there, named, and the rest
+# of the suite still runs (#167). Each run saves a per-test timing report.
 on:
   schedule:
     # 08:17 UTC. GitHub delays runs set on the hour; ours started 5–9 h late.
@@ -22,7 +22,7 @@ jobs:
   windows:
     name: Windows nightly (Node ${{ matrix.node }})
     runs-on: windows-latest
-    timeout-minutes: 120
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -57,11 +57,11 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Full test suite (no time pressure)
-        timeout-minutes: 100
+      - name: Full test suite
+        timeout-minutes: 45
         env:
-          FAF_TEST_SPAWN_LIMIT_MS: '1800000'
-        run: bun test --timeout=1800000 --reporter=junit --reporter-outfile=junit.xml
+          FAF_TEST_SPAWN_LIMIT_MS: '120000'
+        run: bun test --timeout=600000 --reporter=junit --reporter-outfile=junit.xml
 
       - name: Test timings
         if: always()
