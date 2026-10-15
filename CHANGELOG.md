@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v8.3.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v8.3.1 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -7,6 +7,13 @@ All notable changes to faf-cli will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [8.3.1] - 2026-10-15
+
+**`faf cards` gives MCP cards to a project.faf alone only when its type is mcp.** Found by a clean-folder run of 8.3.0. 2216 tests.
+
+### Fixed
+- **A library with only a project.faf no longer gets an MCP Server Card.** With no agent.fafa, `faf cards` wrote `server-card` for any project. Now a project.faf typed cli, library or anything else that isn't mcp gets no MCP Server Card or registry `server.json`, and one line says why and what to run. `--target mcp` still writes them. A project.faf typed `mcp` or `mcp-server`, or naming no type, keeps them. 8.2.2 did the same, so this wasn't new in 8.3.0. (#170)
 
 ## [8.3.0] - 2026-10-15 — The Business Card Edition
 
