@@ -3,7 +3,9 @@
 // execSync blocks bun itself, so bun's own per-test limit can't fire when that
 // child hangs; a limit on the whole file can. A file that runs out of time is
 // killed, reported by name, and the next file runs.
-//   node scripts/test-per-file.mjs [file ...]   (default: every tests/**/*.test.ts)
+//   node scripts/test-per-file.mjs [file ...]       (default: every tests/**/*.test.ts)
+//   node scripts/test-per-file.mjs --nightly-only   only the files with tests the
+//     Windows PR job skips (they use `windowsPr`); the PR job runs the rest
 //   FAF_TEST_FILE_LIMIT_MS   the limit per file (default 300000, 5 minutes)
 // Writes junit.xml (all files merged) after every file, so a run that is cut
 // off still leaves a report. Exits 1 if any file failed or ran out of time.
@@ -89,7 +91,17 @@ function writeReport(results) {
   writeFileSync('junit.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<testsuites name="bun test" tests="${tests}" failures="${failures}" time="${time}">\n${suites.join('\n')}\n</testsuites>\n`);
 }
 
-const files = process.argv.length > 2 ? process.argv.slice(2) : testFiles('tests');
+const args = process.argv.slice(2);
+const nightlyOnly = args.includes('--nightly-only');
+const named = args.filter((a) => a !== '--nightly-only');
+const files = named.length > 0
+  ? named
+  : testFiles('tests').filter((f) => !nightlyOnly || readFileSync(f, 'utf-8').includes('windowsPr'));
+if (files.length === 0) {
+  console.log('No test files to run.');
+  process.exit(1);
+}
+console.log(`${files.length} test file(s)${nightlyOnly ? ' with nightly-only tests' : ''}`);
 rmSync(outDir, { recursive: true, force: true });
 mkdirSync(outDir, { recursive: true });
 
