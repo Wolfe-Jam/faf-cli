@@ -5,7 +5,7 @@ import { join } from 'path';
 import { parse } from 'yaml';
 import { execSync } from 'child_process';
 import { FAF_VERSION } from '../src/core/version.js';
-import { removeTemp, spawnLimit, windowsPr } from './helpers/windows-timing.js';
+import { namedHang, removeTemp, spawnLimit, windowsPr } from './helpers/windows-timing.js';
 
 /**
  * Full end-to-end test: exercises the entire CLI flow as a user would.
@@ -19,7 +19,7 @@ describe.skipIf(windowsPr)('TYRE: faf e2e — full lifecycle', () => {
   const cli = join(__dirname, '../src/cli.ts');
   // 30s timeout — Windows CI runners have slower Bun startup than Linux/macOS;
   // 15s was tight enough that `score --status` flaked on windows-latest/Node 22.
-  const run = (cmd: string) => execSync(`bun ${cli} ${cmd}`, { cwd: testDir, encoding: 'utf-8', timeout: spawnLimit(30000) });
+  const run = (cmd: string) => namedHang(`faf ${cmd}`, () => execSync(`bun ${cli} ${cmd}`, { cwd: testDir, encoding: 'utf-8', timeout: spawnLimit(30000) }));
 
   beforeEach(() => {
     testDir = join(tmpdir(), `faf-e2e-${Date.now()}`);

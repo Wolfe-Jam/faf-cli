@@ -32,6 +32,7 @@ import { tmpdir } from 'os';
 import { execFileSync, spawnSync } from 'child_process';
 import { SafePathError } from '../../src/core/safe-write.js';
 import { updateFafFile } from '../../src/interop/faf.js';
+import { namedHang, spawnLimit } from '../helpers/windows-timing.js';
 
 const ROOT = join(import.meta.dir, '../..');
 const CLI = join(ROOT, 'src/cli.ts');
@@ -53,9 +54,14 @@ function env(extra: Record<string, string> = {}): Record<string, string> {
   for (const k of ['FAF_PRO', 'ANTHROPIC_API_KEY', 'CLAUDE_API_KEY', 'CLAUDE_CONFIG_DIR']) {delete e[k];}
   return { ...e, HOME: mk('home'), TMPDIR: mk('tmp'), NO_COLOR: '1', CI: '1', GIT_CONFIG_NOSYSTEM: '1', GIT_TERMINAL_PROMPT: '0', ...extra };
 }
+/** spawnSync's result, or its error (a time limit reached) thrown for namedHang. */
+function spawned<T extends { error?: Error }>(r: T): T {
+  if (r.error) {throw r.error;}
+  return r;
+}
 /** The CLI from source, under bun. */
 function run(cwd: string, args: string[], extra: Record<string, string> = {}): Run {
-  const r = spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf-8', env: env(extra), stdio: ['ignore', 'pipe', 'pipe'] });
+  const r = namedHang(`bun faf ${args.join(' ')}`, () => spawned(spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf-8', env: env(extra), stdio: ['ignore', 'pipe', 'pipe'], timeout: spawnLimit(60_000) })));
   return { status: r.status, out: r.stdout ?? '', err: r.stderr ?? '' };
 }
 
@@ -63,7 +69,7 @@ const hasNode = spawnSync('node', ['--version'], { encoding: 'utf-8' }).status =
 let NODE_CLI = '';
 /** The CLI built for Node (as `npm run build` builds dist/cli.js), run with node. */
 function runNode(cwd: string, args: string[]): Run {
-  const r = spawnSync('node', [NODE_CLI, ...args], { cwd, encoding: 'utf-8', env: env(), stdio: ['ignore', 'pipe', 'pipe'] });
+  const r = namedHang(`node faf ${args.join(' ')}`, () => spawned(spawnSync('node', [NODE_CLI, ...args], { cwd, encoding: 'utf-8', env: env(), stdio: ['ignore', 'pipe', 'pipe'], timeout: spawnLimit(60_000) })));
   return { status: r.status, out: r.stdout ?? '', err: r.stderr ?? '' };
 }
 beforeAll(() => {
