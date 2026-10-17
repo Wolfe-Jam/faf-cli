@@ -3,7 +3,9 @@
 // execSync blocks bun itself, so bun's own per-test limit can't fire when that
 // child hangs; a limit on the whole file can. A file that runs out of time is
 // killed, reported by name, and the next file runs.
-//   node scripts/test-per-file.mjs [file ...]   (default: every tests/**/*.test.ts)
+//   node scripts/test-per-file.mjs [file ...]       (default: every tests/**/*.test.ts)
+//   node scripts/test-per-file.mjs --nightly-only   only the files with tests the
+//     Windows PR job skips (they use `windowsPr`); the PR job runs the rest
 //   FAF_TEST_FILE_LIMIT_MS   the limit per file (default 300000, 5 minutes)
 // Writes junit.xml (all files merged) after every file, so a run that is cut
 // off still leaves a report. Exits 1 if any file failed or ran out of time.
@@ -20,14 +22,21 @@ function testFiles(dir) {
     .sort();
 }
 
-/** Stop a file's bun and every process it started. */
+/** Stop a file's bun and every process it started. Returns what the kill reported. */
 function killTree(child) {
   if (process.platform === 'win32') {
-    spawnSync('taskkill', ['/pid', String(child.pid), '/T', '/F'], { stdio: 'ignore' });
-  } else {
-    try { process.kill(-child.pid, 'SIGKILL'); } catch { child.kill('SIGKILL'); }
+    const r = spawnSync('taskkill', ['/pid', String(child.pid), '/T', '/F'], { encoding: 'utf-8', timeout: 30_000 });
+    return `taskkill exit ${r.status ?? r.error?.code}: ${(r.stdout + r.stderr).trim().replace(/\s+/g, ' ') || '(no output)'}`;
   }
+  try { process.kill(-child.pid, 'SIGKILL'); } catch { child.kill('SIGKILL'); }
+  return 'SIGKILL sent';
 }
+
+// After the kill, how long to wait for the process to confirm it exited. The
+// 10-16 nightly showed a bun that printed its summary and never exited, and a
+// kill that never confirmed; the runner waited on it until the step limit. So
+// after this grace the runner moves on whether or not the exit arrives.
+const KILL_GRACE_MS = 15_000;
 
 function runFile(file, out) {
   return new Promise((resolve) => {
@@ -37,11 +46,24 @@ function runFile(file, out) {
       detached: process.platform !== 'win32',
     });
     let hung = false;
-    const timer = setTimeout(() => { hung = true; killTree(child); }, limit);
-    child.on('exit', (code) => {
+    let done = false;
+    const finish = (code) => {
+      if (done) {return;}
+      done = true;
       clearTimeout(timer);
-      resolve({ file, code, hung, secs: (Date.now() - started) / 1000 });
-    });
+      // A report on disk means bun ran the tests and then didn't exit.
+      resolve({ file, code, hung, reported: existsSync(out), secs: (Date.now() - started) / 1000 });
+    };
+    const timer = setTimeout(() => {
+      hung = true;
+      console.log(`\nHUNG (#167): ${file} did not finish within ${limit / 1000}s; killing it`);
+      console.log(`  ${killTree(child)}`);
+      setTimeout(() => {
+        if (!done) {console.log(`  no exit within ${KILL_GRACE_MS / 1000}s of the kill; moving on without it`);}
+        finish(null);
+      }, KILL_GRACE_MS);
+    }, limit);
+    child.on('exit', (code) => finish(code));
   });
 }
 
@@ -60,14 +82,26 @@ function writeReport(results) {
       return (xml.match(/<testsuite\b[\s\S]*<\/testsuite>/) ?? [''])[0];
     }
     tests += 1; failures += 1;
-    const why = r.hung ? `did not finish within ${limit / 1000}s: a hung child process (#167)` : `exited ${r.code} without a report`;
+    const why = r.hung
+      ? (r.reported ? `ran its tests but did not exit within ${limit / 1000}s (#167)` : `did not finish within ${limit / 1000}s (#167)`)
+      : `exited ${r.code} without a report`;
     return `<testsuite name="${esc(r.file)}" tests="1" failures="1" time="${r.secs}">` +
       `<testcase name="${esc(`${r.file} ${why}`)}" file="${esc(r.file)}" time="${r.secs}"><failure message="${esc(why)}"/></testcase></testsuite>`;
   });
   writeFileSync('junit.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<testsuites name="bun test" tests="${tests}" failures="${failures}" time="${time}">\n${suites.join('\n')}\n</testsuites>\n`);
 }
 
-const files = process.argv.length > 2 ? process.argv.slice(2) : testFiles('tests');
+const args = process.argv.slice(2);
+const nightlyOnly = args.includes('--nightly-only');
+const named = args.filter((a) => a !== '--nightly-only');
+const files = named.length > 0
+  ? named
+  : testFiles('tests').filter((f) => !nightlyOnly || readFileSync(f, 'utf-8').includes('windowsPr'));
+if (files.length === 0) {
+  console.log('No test files to run.');
+  process.exit(1);
+}
+console.log(`${files.length} test file(s)${nightlyOnly ? ' with nightly-only tests' : ''}`);
 rmSync(outDir, { recursive: true, force: true });
 mkdirSync(outDir, { recursive: true });
 
@@ -76,7 +110,6 @@ for (const [index, file] of files.entries()) {
   const rel = relative('.', file).replace(/\\/g, '/');
   const r = { index, ...(await runFile(rel, join(outDir, `${index}.xml`))) };
   results.push(r);
-  if (r.hung) {console.log(`\nHUNG (#167): ${rel} did not finish within ${limit / 1000}s; killed, moving on\n`);}
   writeReport(results);
 }
 

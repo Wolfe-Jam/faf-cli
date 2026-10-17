@@ -32,7 +32,7 @@ import { tmpdir } from 'os';
 import { execFileSync, spawnSync } from 'child_process';
 import { SafePathError } from '../../src/core/safe-write.js';
 import { updateFafFile } from '../../src/interop/faf.js';
-import { namedHang, spawnLimit } from '../helpers/windows-timing.js';
+import { namedHang, spawnLimit, windowsPr } from '../helpers/windows-timing.js';
 
 const ROOT = join(import.meta.dir, '../..');
 const CLI = join(ROOT, 'src/cli.ts');
@@ -212,7 +212,9 @@ describe('BRAKE R7-3: an --output folder that is not there is one line — "<fol
 
 // ── 4: a kernel rejection is one line in every command ─────────────────────────
 
-describe('BRAKE R7-4: a kernel rejection is one line in every command — and faf auto, go and loop write nothing', () => {
+// Starts the CLI 16 times (8 commands, 2 runners); a child hung here on 2 of 2
+// Windows PR runs on 10-16 (#167): nightly-only on Windows (see helpers/windows-timing.ts).
+describe.skipIf(windowsPr)('BRAKE R7-4: a kernel rejection is one line in every command — and faf auto, go and loop write nothing', () => {
   const BIG = 'faf_version: 2.5.0\nproject:\n  name: m\n  goal: g\n  main_language: TypeScript\n  build_id: 123456789012345678901234567890\n';
   const kernelLine = (p: string, l: string): boolean =>
     l.startsWith(`faf: ${p}: faf's scoring kernel could not read it (`) && l.endsWith(') — faf left it unchanged');

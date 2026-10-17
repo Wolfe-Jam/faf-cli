@@ -1,14 +1,17 @@
 name: Windows Nightly
 
-# The full test suite on Windows, while nobody is waiting on it: about 4am in
-# Atlanta, and on demand. It runs the tests the PR job leaves to it (the ones
-# that start the CLI as a child). Node 22 decides: a release waits for it to be
-# green on the release commit. Node 24 runs as a watch: it reports a hung file
-# but can't fail the run (#167). A child process that hasn't exited in 2 minutes has hung (the
-# slowest healthy one takes about 6 s), so it fails there, named. Each test file
-# runs on its own under a 5-minute limit: a hang bun can't time out (a child
-# started with execSync) kills only that file, named, and the next file runs
-# (#167). Each run saves a per-test timing report.
+# The tests the Windows PR job leaves to it (the ones that start the CLI as a
+# child, marked with `windowsPr`), while nobody is waiting on it: about 4am in
+# Atlanta, and on demand. Everything else already runs on Windows in every PR's
+# `windows` job, so the nightly doesn't repeat it: each extra file was another
+# chance for bun to finish its tests and never exit (#167, 10-16). Node 22
+# decides: a release waits for it to be green on the release commit. Node 24
+# runs as a watch: it reports a hung file but can't fail the run. A child
+# process that hasn't exited in 2 minutes has hung (the slowest healthy one
+# takes about 6 s), so it fails there, named. Each test file runs on its own
+# under a 5-minute limit; a file that runs out of time is killed, named, and the
+# next file runs, even if the kill never confirms (#167). Each run saves a
+# per-test timing report.
 on:
   schedule:
     # 08:17 UTC. GitHub delays runs set on the hour; ours started 5–9 h late.
@@ -25,7 +28,7 @@ jobs:
   windows:
     name: Windows nightly (Node ${{ matrix.node }})
     runs-on: windows-latest
-    timeout-minutes: 75
+    timeout-minutes: 40
     # Node 24 is a watch, not a gate (#167): its job shows red, the run stays green.
     continue-on-error: ${{ matrix.node == '24.x' }}
     strategy:
@@ -62,12 +65,12 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Full test suite
-        timeout-minutes: 60
+      - name: Nightly-only tests
+        timeout-minutes: 30
         env:
           FAF_TEST_SPAWN_LIMIT_MS: '120000'
           FAF_TEST_FILE_LIMIT_MS: '300000'
-        run: node scripts/test-per-file.mjs
+        run: node scripts/test-per-file.mjs --nightly-only
 
       - name: Test timings
         if: always()
