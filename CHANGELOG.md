@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v8.3.1 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v8.3.2 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -7,6 +7,16 @@ All notable changes to faf-cli will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [8.3.2] - 2026-10-17
+
+**`faf check` warns when a key_files path no longer exists.** Windows CI names a stuck test and moves on. 2222 tests.
+
+### Fixed
+- **`faf check` looks at the disk for `key_files`.** Each path in `key_files` (or the older `instant_context.key_files`) is checked against the folder the .faf lives in. A path that's gone prints `! key_files: <path> not found`. It's a warning only: the file stays valid, and the exit code and the score don't change. A ` — role` note is ignored, a folder counts as present, and a pattern like `crates/*` is listed as not checked. (#173)
+
+### CI
+- **The Windows nightly names a stuck test and moves on.** A hung child process fails at 2 minutes with the command named. A test file that doesn't finish in 5 minutes is killed, and if the kill never confirms, the next file runs 15 seconds later. The nightly now runs only the tests the PR job leaves out; every PR's Windows job runs the rest. (#167, #172, #174)
 
 ## [8.3.1] - 2026-10-15
 
