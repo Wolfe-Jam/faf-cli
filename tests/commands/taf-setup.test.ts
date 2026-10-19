@@ -30,12 +30,28 @@ describe('PIT: faf taf setup', () => {
   };
   const wfPath = () => join(testDir, '.github', 'workflows', 'taf.yml');
 
+  // faf-cli's own CI pin. Dependabot bumps it on each faf-taf-git release; the
+  // pin `faf taf setup` gives users is a string Dependabot can't see.
+  const ciPin = () => {
+    const ci = readFileSync(join(import.meta.dir, '..', '..', '.github', 'workflows', 'ci.yml'), 'utf-8');
+    return ci.match(/Wolfe-Jam\/faf-taf-git@v[\d.]+/)?.[0];
+  };
+
+  test('setup pins the same faf-taf-git version as faf-cli CI (no drift)', () => {
+    const pin = ciPin();
+    expect(pin).toBeDefined();
+    writeFileSync(join(testDir, 'package.json'), '{"name":"x","scripts":{"test":"echo ok"}}');
+    taf('setup', { write: true });
+    // Red here after a Dependabot bump? Update FAF_TAF_GIT in src/commands/taf.ts.
+    expect(readFileSync(wfPath(), 'utf-8')).toContain(pin!);
+  });
+
   test('--write creates a workflow wired to faf-taf-git + the taf-receipts branch', () => {
     writeFileSync(join(testDir, 'package.json'), '{"name":"x","scripts":{"test":"echo ok"}}');
     taf('setup', { write: true });
     expect(existsSync(wfPath())).toBe(true);
     const wf = readFileSync(wfPath(), 'utf-8');
-    expect(wf).toContain('Wolfe-Jam/faf-taf-git@v2.2.0');
+    expect(wf).toContain('Wolfe-Jam/faf-taf-git@v2.3.1');
     expect(wf).toContain('test-output.txt');
     expect(wf).toContain('target-branch: taf-receipts');
   });
