@@ -175,7 +175,15 @@ program
   .command('hooks-run', { hidden: true })
   .description('Internal: the pre-commit context guard the git hook invokes')
   .option('--strict', 'Exit non-zero on a score regression')
-  .action((options) => hooksRun(options));
+  .action((options) => {
+    hooksRun(options);
+    // The guard runs inside `git commit`: once its line is written, exit, so it
+    // can never hold a commit open waiting on a handle (#167). The blocked path
+    // already exits inside hooksRun; every path that returns here allows the commit.
+    const done = (): never => process.exit(0);
+    setTimeout(done, 2000).unref();
+    process.stdout.write('', () => process.stderr.write('', done));
+  });
 
 program
   .command('export')
