@@ -30,7 +30,7 @@ const CLI = join(import.meta.dir, '../../src/cli.ts');
 const shPath = (p: string): string => p.replace(/\\/g, '/');
 const LOCAL_RUNNER = `${shPath(process.execPath)} ${shPath(CLI)} hooks-run`; // points the hook at THIS cli
 
-const mk = (tag: string) => {
+const mk = (tag = 'case') => {
   let dir = join(tmpdir(), `faf-hooks-${tag}-${Date.now()}-${Math.random().toString(36).slice(2)}`);
   mkdirSync(dir, { recursive: true });
   dir = realpathSync.native(dir); // resolve symlinks AND Windows 8.3 short names (RUNNER~1) → matches git
@@ -47,7 +47,7 @@ const commit = (dir: string, msg: string, flags: string[] = []): { ok: boolean; 
   // the warn-mode ⚠ lands on the hook's stderr even when the commit is allowed.
   // A timeout turns a hook that never exits into a named failure, not a stalled suite.
   const r = spawnSync('git', ['commit', '-m', msg, ...flags], { cwd: dir, encoding: 'utf-8', timeout: spawnLimit(60_000) });
-  if (r.error) {throw new Error(`git commit did not finish (${r.error.message}); output so far: ${r.stdout ?? ''}${r.stderr ?? ''}`);}
+  if (r.error) {throw new Error(`hung child process (#167): git commit did not finish (${r.error.message}); output so far: ${r.stdout ?? ''}${r.stderr ?? ''}`);}
   return { ok: r.status === 0, out: `${r.stdout ?? ''}${r.stderr ?? ''}` };
 };
 const capture = (fn: () => void): string => {
