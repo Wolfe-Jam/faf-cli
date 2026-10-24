@@ -55,6 +55,23 @@ Like `package.json` tells npm about dependencies, `project.faf` tells AI about y
 
 **91% fewer tokens. Zero risk. No drift.**
 
+### What goes in a slot
+
+There are always 33 slots. Each one holds **one succinct fact**: text, or a number.
+
+| ☑️ One fact | Not one fact: write one fact instead |
+|-----------|----------------------------------------|
+| `name: faf-cli` | `name: {a: 1}` (a mapping) |
+| `goal: Score project context` | `goal: [fast, small]` (a list) |
+| `runtime: Bun` | `who: true` (true / false) |
+| `when: 2026` | |
+
+Words that hold no fact count as empty until you fill the slot: `runtime: TBD`, `database: None`.
+
+**The app-type decides which slots count.** `type: cli` → 12 slots count; the other 21 are `slotignored`. `faf auto` writes `slotignored` for you, from the app-type; you don't write it yourself.
+
+Write the app-type's own name: `type: cli`, not `cli-tool`; `type: mcp`, not `mcp-server`. A name faf doesn't know is treated as `library`. No type yet? `faf auto` detects it.
+
 ---
 
 ## 🎯 WHY do you need it?
