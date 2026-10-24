@@ -70,7 +70,7 @@ Words that hold no fact count as empty until you fill the slot: `runtime: TBD`, 
 
 **The app-type decides which slots count.** `type: cli` → 12 slots count; the other 21 are `slotignored`. `faf auto` writes `slotignored` for you, from the app-type; you don't write it yourself.
 
-Use an app-type faf knows: `type: cli-tool` is not one, and faf treats it as `library`. No type yet? `faf auto` detects it.
+Write the app-type's own name: `type: cli`, not `cli-tool`; `type: mcp`, not `mcp-server`. A name faf doesn't know is treated as `library`. No type yet? `faf auto` detects it.
 
 ---
 
