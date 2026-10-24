@@ -133,7 +133,23 @@ faf memory etch "a durable fact" --id my-fact
 faf memory show
 ```
 
-### What's New in v8.3.0 — The Business Card Edition
+### What's New in v8.4.0 — The Skills Edition
+
+FAF has known Skills for a while; we both speak YAML. Now it's official: FAF adds Skills to the CLI.
+
+**faf knows skills: a SKILL.md repo is `skills` (9 slots), one shipped as a plugin is `skills-plugin` (12).**
+
+```yaml
+project:
+  type: skills-plugin   # or: skills
+```
+
+- **`skills`**: plain-English instructions for AI, `SKILL.md` folders with no pipeline. Project + human context: 9 slots.
+- **`skills-plugin`**: skills published as a plugin, with a build and CI. Adds hosting, build and CI/CD: 12 slots.
+- **App-types are types of projects, not types of file.** Write the type's own name (`cli`, not `cli-tool`); see [What goes in a slot](docs/GUIDE.md).
+- **A .faf whose aliases expand too far** is now one line, not a stack trace.
+
+### The Business Card Edition (8.3)
 
 **Business cards say what the repo is: a package can be a CLI or a library, from npm, PyPI or crates.io, and only an MCP server gets MCP cards.**
 
@@ -198,6 +214,7 @@ npx faf-cli@latest card init     # seven questions → agent.fafa → A2A card, 
 
 **Recent sprint**
 
+- ✪ [8.4.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.4.0) The Skills Edition — `skills` (9) and `skills-plugin` (12) app-types
 - ✪ [8.3.2](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.3.2) `faf check` warns when a key_files path no longer exists
 - ✪ [8.3.1](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.3.1) `faf cards` gives MCP cards to a project.faf alone only when its type is mcp
 - ✪ [8.3.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.3.0) The Business Card Edition — CLI, library or MCP server, from npm, PyPI or crates.io
