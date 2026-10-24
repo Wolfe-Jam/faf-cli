@@ -18,18 +18,31 @@ function fafToRead(path: string): string {
   return resolveInside(dirname(full), full, { read: true });
 }
 
-/** yaml's YAMLParseError behind `e` (thrown by yaml, or the cause of
- *  parseForEdit's refusal), or null. */
-function yamlParseError(e: unknown): YAMLParseError | null {
-  if (e instanceof YAMLParseError) {return e;}
+/** What yaml refuses a .faf with: a YAMLParseError, or the ReferenceError its
+ *  alias limit throws from `toJS()` when aliases expand too far (a "billion
+ *  laughs" file). */
+type YamlRefusal = { message: string; linePos?: YAMLParseError['linePos'] };
+
+/** yaml's alias limit: "Excessive alias count indicates a resource exhaustion
+ *  attack", thrown while the data is built, after the parse succeeded. */
+function isAliasLimit(e: unknown): e is ReferenceError {
+  return e instanceof ReferenceError && /Excessive alias count/.test(e.message);
+}
+
+/** yaml's refusal behind `e` (thrown by yaml, or the cause of parseForEdit's
+ *  refusal), or null. */
+function yamlParseError(e: unknown): YamlRefusal | null {
+  if (e instanceof YAMLParseError || isAliasLimit(e)) {return e;}
   const cause = (e as { cause?: unknown } | null)?.cause;
-  return cause instanceof YAMLParseError ? cause : null;
+  return cause instanceof YAMLParseError || isAliasLimit(cause) ? cause : null;
 }
 
 /** A .faf that is not valid YAML, as one line (SafePathError `not-yaml`):
  *  "<file> is not valid YAML (<reason>, line N) — faf left it unchanged". */
-function notValidYaml(path: string, err: YAMLParseError): SafePathError {
-  const reason = err.message.split('\n')[0].replace(/ at line \d+, column \d+:?\s*$/, '').replace(/:\s*$/, '');
+function notValidYaml(path: string, err: YamlRefusal): SafePathError {
+  const reason = isAliasLimit(err)
+    ? 'its aliases expand too far'
+    : err.message.split('\n')[0].replace(/ at line \d+, column \d+:?\s*$/, '').replace(/:\s*$/, '');
   const line = err.linePos?.[0]?.line;
   const full = resolve(path);
   return new SafePathError('not-yaml', full, `${full} is not valid YAML (${reason}${line === undefined ? '' : `, line ${line}`}) — faf left it unchanged`, { cause: err });
