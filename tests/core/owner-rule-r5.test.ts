@@ -336,6 +336,27 @@ describe('BRAKE: a block faf cannot place is a one-line refusal, the file untouc
 
 // ── .faf readers: invalid YAML, a BOM ────────────────────────────────────────
 
+describe('BRAKE: a project.faf whose aliases expand too far is one line, never a stack trace', () => {
+  // A "billion laughs" file: nine levels of ten aliases each. yaml stops it
+  // with a ReferenceError from toJS(), which escaped the one-line refusal
+  // (a screen of minified source and a stack trace, 8.3.2).
+  const text = 'faf_version: "3.0"\na0: &a0 ["lol","lol","lol","lol","lol","lol","lol","lol","lol","lol"]\n'
+    + Array.from({ length: 8 }, (_, k) => `a${k + 1}: &a${k + 1} [${Array(10).fill(`*a${k}`).join(',')}]\n`).join('')
+    + 'project:\n  name: *a8\n';
+
+  test('faf score and faf check: "<file> is not valid YAML (its aliases expand too far) — faf left it unchanged", exit 1, the file byte for byte', () => {
+    const d = mk('aliases');
+    const f = join(d, 'project.faf');
+    writeFileSync(f, text);
+    for (const args of [['score'], ['check']]) {
+      const r = run(d, args);
+      expect(r.status).toBe(1);
+      expect(lines(r.err)).toEqual([`faf: ${f} is not valid YAML (its aliases expand too far) — faf left it unchanged`]);
+      expect(read(f)).toBe(text);
+    }
+  });
+});
+
 describe('BRAKE: a project.faf that is not valid YAML is one line, never a stack trace (ST27)', () => {
   const text = 'project:\n  name: demo\n  goal: A demo tool\n  main_language: Go\n  type: cli\nstack:\n  database: None\n  database: MySQL # HAND-DUP\n';
 
