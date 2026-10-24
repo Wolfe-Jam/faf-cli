@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v8.3.2 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v8.4.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -7,6 +7,21 @@ All notable changes to faf-cli will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [8.4.0] - 2026-10-24 — The Skills Edition
+
+FAF has known Skills for a while; we both speak YAML. Now it's official: FAF adds Skills to the CLI.
+
+**faf knows skills: a SKILL.md repo is `skills` (9 slots), one shipped as a plugin is `skills-plugin` (12).** 2226 tests.
+
+### Added
+- **App-types `skills` and `skills-plugin`** (#181). `skills` is plain-English instructions for AI (SKILL.md folders, no pipeline): project + human, 9 slots. `skills-plugin` is skills published as a plugin with a build and CI: project + human + universal, 12 slots. The ladder is 26 types. The `faf-expert` skill now points to `docs/SCORING.md` for the table instead of keeping its own list.
+- **`docs/GUIDE.md`: What goes in a slot** (#180). A slot holds one succinct fact (text or a number). Write the app-type's own name: `cli`, not `cli-tool`; `mcp`, not `mcp-server`.
+
+### Fixed
+- **A .faf whose aliases expand too far is one line, not a stack trace** (#178): "`<file>` is not valid YAML (its aliases expand too far) — faf left it unchanged". It was already safe (yaml stops the expansion); now `faf score` and `faf check` say so in one line.
+- **`faf hooks-run` exits once its line is written** (#177, #167).
+- **`faf taf setup` pins faf-taf-git v2.3.1** (#176).
 
 ## [8.3.2] - 2026-10-17
 
