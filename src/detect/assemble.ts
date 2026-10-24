@@ -18,6 +18,7 @@ import {
   SLOT_BY_PATH,
   SLOTIGNORED,
   appTypeUsesSlot,
+  normalizeAppType,
   isPlaceholder,
   isTypedWords,
 } from '../core/slots.js';
@@ -236,11 +237,15 @@ function scoredNamesInStep(decided: Record<string, unknown>, base: Record<string
 function applyAppType(filled: Record<string, unknown>, base: Record<string, unknown>, facts: Record<string, string> = {}): Record<string, unknown> {
   const project = filled.project;
   const type = isMapping(project) ? project.type : undefined;
+  const known = normalizeAppType(type);
   const out = { ...filled };
+  // A spelling of a type faf knows (`FullStack`, ` cli `) is written as the type.
+  if (known !== null && type !== known && isMapping(project)) {out.project = { ...project, type: known };}
   for (const slot of SLOTS) {
     if (slot.category === 'human' || slot.category === 'project') {continue;}
-    const uses = appTypeUsesSlot(type, slot);
-    if (uses === null) {return filled;}
+    // A type faf does not know (yet) leaves no slot out: every slot is
+    // required, so detection's `slotignored` never stays.
+    const uses = known === null ? true : appTypeUsesSlot(known, slot);
     if (uses) {
       keepUsedSlot(out, base, slot, slot.path.startsWith('stack.') ? facts[slot.path.slice('stack.'.length)] : undefined);
     } else {
@@ -292,8 +297,10 @@ function liftScalarProject(data: Record<string, unknown>): Record<string, unknow
 
 /** Mark slots outside the app-type's active categories as `slotignored`. */
 function applySlotIgnore(seeded: Record<string, unknown>): void {
-  const projectType = (seeded.project as { type?: string } | undefined)?.type ?? 'library';
-  const activeCategories = APP_TYPE_CATEGORIES[projectType] || APP_TYPE_CATEGORIES.library;
+  // Detection names the type; one it does not know leaves no slot out.
+  const projectType = normalizeAppType((seeded.project as { type?: string } | undefined)?.type ?? 'library');
+  if (projectType === null) {return;}
+  const activeCategories = APP_TYPE_CATEGORIES[projectType];
   for (const slot of SLOTS) {
     if (activeCategories.includes(slot.category)) {continue;}
     const [section, field] = slot.path.split('.');

@@ -1,6 +1,7 @@
 import type { KernelScoreResult, ScoreResult } from './types.js';
 import { getTier, TIERS } from './tiers.js';
 import * as kernel from '../wasm/kernel.js';
+import { verifiedYaml } from './verify.js';
 import { aboutFromYaml } from './about.js';
 
 /** A score as text for display: `85%`, or `unknown (—)` when the result says
@@ -58,5 +59,6 @@ export function scoreFafYaml(yaml: string): ScoreResult {
     };
   }
 
-  return enrichScore(kernel.score(yaml));
+  // The kernel counts the file with The Rules applied (core/verify.ts).
+  return enrichScore(kernel.score(verifiedYaml(yaml)));
 }

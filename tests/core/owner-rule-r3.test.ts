@@ -91,8 +91,9 @@ describe('BRAKE: Q8 — a typed None / N/A is an empty slot: no fact keeps the w
       expect([r.score, r.active, r.ignored, r.empty]).toEqual([empty.score, empty.active, empty.ignored, empty.empty]);
       expect(r.score).toBeLessThan(100);
     }
-    // Only the app-type's word takes a slot out.
-    expect(scoreFafYaml(base('slotignored')).slots['stack.database']).toBe('slotignored');
+    // slotignored comes only from the app-type: fullstack requires a database,
+    // so a slotignored written there is empty until populated (The Rules).
+    expect(scoreFafYaml(base('slotignored')).slots['stack.database']).toBe('empty');
   });
 });
 

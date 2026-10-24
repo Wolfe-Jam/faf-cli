@@ -1,6 +1,7 @@
 import { findFafFile, readFafRaw, readFaf, readFafFromString, withKernel } from '../interop/faf.js';
 import { scoreFafYaml, scoreText } from '../core/scorer.js';
 import { typedNoneHints } from '../core/typed-none.js';
+import { describeIssues, verifySlots } from '../core/verify.js';
 import { displayScore } from '../ui/display.js';
 import { tierBadge } from '../core/tiers.js';
 import { bold } from '../ui/colors.js';
@@ -52,5 +53,7 @@ export function scoreCommand(file?: string, options: ScoreOptions = {}): void {
   // Typed words in a slot — None, N/A, unknown — count as empty: say so
   // under the score, one line per slot (a slot the app-type leaves out: faf
   // auto marks it slotignored). Nothing is written.
-  displayScore(result, fafPath, options.verbose, typedNoneHints(yaml, result));
+  // Where the file breaks The Rules (core/verify.ts): one line each.
+  const issues = result.inherited ? [] : describeIssues(verifySlots(readFaf(fafPath) as Record<string, unknown>).issues);
+  displayScore(result, fafPath, options.verbose, [...issues, ...typedNoneHints(yaml, result)]);
 }

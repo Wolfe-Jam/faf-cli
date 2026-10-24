@@ -184,9 +184,19 @@ const FRAMEWORK_LEAVES_OUT: ReadonlySet<string> = new Set([
  *  leaves out. `null` when `type` is not an app-type faf knows (then faf
  *  cannot tell, and decides nothing from it). */
 export function appTypeUsesSlot(type: unknown, slot: SlotDef): boolean | null {
-  if (typeof type !== 'string' || !Object.prototype.hasOwnProperty.call(APP_TYPE_CATEGORIES, type)) {return null;}
-  if (!APP_TYPE_CATEGORIES[type].includes(slot.category)) {return false;}
-  return !(type === 'framework' && FRAMEWORK_LEAVES_OUT.has(slot.path));
+  const t = normalizeAppType(type);
+  if (t === null) {return null;}
+  if (!APP_TYPE_CATEGORIES[t].includes(slot.category)) {return false;}
+  return !(t === 'framework' && FRAMEWORK_LEAVES_OUT.has(slot.path));
+}
+
+/** The app-type `value` names, trimmed and lowercase (`FullStack` →
+ *  `fullstack`), when that is a type faf knows; otherwise null. A list, a
+ *  mapping or a number is not an app-type. */
+export function normalizeAppType(value: unknown): string | null {
+  if (typeof value !== 'string') {return null;}
+  const t = value.trim().toLowerCase();
+  return Object.prototype.hasOwnProperty.call(APP_TYPE_CATEGORIES, t) ? t : null;
 }
 
 /** App-type to active category mapping. The canonical 24-type ladder —

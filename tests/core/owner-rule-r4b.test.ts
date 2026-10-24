@@ -164,7 +164,7 @@ describe('BRAKE: R04 — every typed word is handled like a typed none', () => {
       '',
     ].join('\n');
     const dir = repo({ 'project.faf': text });
-    expect(scoreOf(dir)).toBeLessThan(100); // the kernel does not read the app-type: None is empty
+    expect(scoreOf(dir)).toBe(100); // frontend does not require a database: slotignored by The Rules, before and after faf auto
     expect(faf(dir, 'auto').status).toBe(0);
     const lines = read(dir).split('\n');
     expect(lines).toContain('  database: slotignored # a static site (DB-NONE)');

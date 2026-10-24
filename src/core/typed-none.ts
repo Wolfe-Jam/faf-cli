@@ -83,7 +83,10 @@ export function typedNoneHints(yaml: string, result: Pick<ScoreResult, 'slots'>,
   const lines: string[] = [];
   for (const slot of SLOTS) {
     const value = valueAt(data, slot.path);
-    if (result.slots[slot.path] !== 'empty' || !isTypedWords(value)) {continue;}
+    // Typed words in a slot that counts as empty, or in one the app-type
+    // leaves out (slotignored by The Rules although the file says words).
+    const state = result.slots[slot.path];
+    if ((state !== 'empty' && state !== 'slotignored') || !isTypedWords(value)) {continue;}
     const inLibrary = APP_TYPE_CATEGORIES.library.includes(slot.category);
     const line = hintFor(slot.path, String(value).trim(), appTypeUsesSlot(type, slot), inLibrary, opts.outOfType !== false);
     if (line !== null) {lines.push(line);}

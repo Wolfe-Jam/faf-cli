@@ -5,6 +5,7 @@ import { validateFaf } from '../core/schema.js';
 import type { FafData } from '../core/types.js';
 import * as kernel from '../wasm/kernel.js';
 import { scoreFafYaml } from '../core/scorer.js';
+import { describeIssues, verifySlots, type SlotIssue } from '../core/verify.js';
 import { displayScore } from '../ui/display.js';
 import { bold, dim, fafCyan } from '../ui/colors.js';
 
@@ -44,7 +45,20 @@ export function checkCommand(file?: string, options: CheckOptions = {}): void {
     process.exit(3);
   }
 
+  // The Rules (core/verify.ts): a slot that breaks them makes the file
+  // invalid. A missing or unknown type, a spelling faf auto fixes, or a value
+  // in a slot the type does not require, is a note.
+  const notes: SlotIssue['kind'][] = ['type-missing', 'type-unknown', 'type-spelling', 'not-required'];
+  const issues = (data as { about?: unknown }).about ? [] : verifySlots(data as Record<string, unknown>).issues;
+  const breaks = issues.filter(i => !notes.includes(i.kind));
+  if (breaks.length > 0) {
+    console.log(`${bold('invalid')} ${fafPath}`);
+    for (const line of describeIssues(breaks)) {console.log(`  ${dim('x')} ${line}`);}
+    for (const line of describeIssues(issues.filter(i => notes.includes(i.kind)))) {console.log(`  ${dim('!')} ${line}`);}
+    process.exit(3);
+  }
   console.log(`${fafCyan('valid')} ${fafPath}`);
+  for (const line of describeIssues(issues)) {console.log(`  ${bold('!')} ${line}`);}
 
   // A key_files path that no longer exists is context that went stale: say
   // so, but as a warning. The file is still valid and the score is unchanged.
