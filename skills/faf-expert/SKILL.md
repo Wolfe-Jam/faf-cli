@@ -82,15 +82,13 @@ Layer 1   .faf (FCL)          ← 🏆 Trophy = complete = foundation
 
 🏆 is the only emoji. Sub-Trophy tiers use geometric Unicode (★ ◆ ◇ ● ○ ♡). The retired medal ladder (🥇🥈🥉🟢🟡🔴🤍) is history.
 
-## The 21 app-types
+## The app-types
 
-v6.6.0 ships a 21-type canonical ladder — 19 detectable + 1 owner-attested + 1 curated-knowledge:
+The app-type answers one question: what does this repo ship? It sets which of the 33 slots count; the rest are `slotignored`. App-types are types of projects, not types of file (a CLAUDE.md or a SKILL.md sits inside a project of some type).
 
-**Detectable:** documentation · cli · library · sdk · wasm · html · frontend · website · mobile · mcp · backend · data-science · fullstack · svelte · framework · monorepo-root · mcpaas · saas · enterprise
+The full table, with each type's slots, is in [docs/SCORING.md](https://github.com/Wolfe-Jam/faf-cli/blob/main/docs/SCORING.md). Write the type's own name (`cli`, not `cli-tool`); a name faf doesn't know is treated as `library`.
 
 **About (not an app_type):** declare `about.represents: owner/repo`. Inherits `about.source_score`. Do not set `app_type: about`.
-
-**Curated knowledge:** `encyclopedia` — structured, git-versioned knowledge surface (FAFipedia and similar). Project + human slots, 9 active. Content is `.fafi` files (inclusion markers, same parser as `.faf`).
 
 The CLI auto-detects via `# found:` rationale next to `type:`:
 
