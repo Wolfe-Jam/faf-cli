@@ -189,7 +189,7 @@ export function appTypeUsesSlot(type: unknown, slot: SlotDef): boolean | null {
   return !(type === 'framework' && FRAMEWORK_LEAVES_OUT.has(slot.path));
 }
 
-/** App-type to active category mapping. The canonical 24-type ladder —
+/** App-type to active category mapping. The canonical 26-type ladder —
  *  detectable apps + `encyclopedia` (curated knowledge) + `intent` (seed).
  *  About is NOT an app_type — it is a repo role (`about.represents`).
  *  (See v6.6.md doctrine memory + fafipedia-vs-grokipedia-architecture.)
@@ -217,9 +217,15 @@ export const APP_TYPE_CATEGORIES: Record<string, SlotCategory[]> = {
   // structured, git-versioned, agent-consumable knowledge layer. Each .fafi
   // file under an encyclopedia repo is itself a valid .faf (inclusion marker).
   encyclopedia: ['project', 'human'],
+  // skills: plain-English instructions for AI — SKILL.md folders, no
+  // pipeline. Same 9 slots as documentation, named for what it is.
+  skills: ['project', 'human'],
 
   // 12 slots — project + human + universal (build/ci/hosting matters)
   cli: ['project', 'human', 'universal'],
+  // skills-plugin: skills published as a plugin (a directory, a
+  // marketplace) with a build and CI — the cli shape.
+  'skills-plugin': ['project', 'human', 'universal'],
   library: ['project', 'human', 'universal'],
   sdk: ['project', 'human', 'universal'],
   wasm: ['project', 'human', 'universal'],
