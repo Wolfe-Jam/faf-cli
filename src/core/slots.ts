@@ -179,11 +179,12 @@ const FRAMEWORK_LEAVES_OUT: ReadonlySet<string> = new Set([
   'stack.css_framework', 'stack.ui_library', 'stack.database', 'stack.connection', 'stack.hosting',
 ]);
 
-/** The slots a type uses although their categories are not active. A
- *  `skills-plugin` names its framework (the skills format it ships: Agent
- *  Skills, a Claude Code plugin) and its runtime (what runs its build and
- *  scripts): 12 slots by category + 2 = 14. */
+/** The slots a type uses although their categories are not active. Both
+ *  skills types name their framework (the skills format they ship: Agent
+ *  Skills, a Claude Code plugin): `skills` 9 + 1 = 10. A `skills-plugin`
+ *  also names its runtime (what runs its build and scripts): 12 + 2 = 14. */
 export const APP_TYPE_ADDS: Readonly<Record<string, ReadonlySet<string>>> = {
+  skills: new Set(['stack.frontend']),
   'skills-plugin': new Set(['stack.frontend', 'stack.runtime']),
 };
 
@@ -227,7 +228,8 @@ export const APP_TYPE_CATEGORIES: Record<string, SlotCategory[]> = {
   // file under an encyclopedia repo is itself a valid .faf (inclusion marker).
   encyclopedia: ['project', 'human'],
   // skills: plain-English instructions for AI — SKILL.md folders, no
-  // pipeline. Same 9 slots as documentation, named for what it is.
+  // pipeline. The 9 slots of documentation, plus framework (APP_TYPE_ADDS):
+  // 10 slots.
   skills: ['project', 'human'],
 
   // 12 slots — project + human + universal (build/ci/hosting matters)

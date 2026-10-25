@@ -11,7 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
-- **`skills-plugin` is 14 slots** (was 12). It keeps project, human and universal, and adds two slots from outside those categories: the framework (the skills format it ships, such as Agent Skills or a Claude Code plugin) and the runtime (what runs its build and scripts). `faf auto` no longer writes `slotignored` over them. A type can now add single slots (`APP_TYPE_ADDS`), the reverse of the slots a `framework` repo leaves out. `skills` stays 9.
+- **The skills app-types name their framework and runtime.** `skills` is 10 slots (was 9): project + human, plus the framework (the skills format, such as Agent Skills or a Claude Code plugin). `skills-plugin` is 14 (was 12): project + human + universal, plus the framework and the runtime (what runs its build and scripts). A type can now add single slots from outside its categories (`APP_TYPE_ADDS`), the reverse of the slots a `framework` repo leaves out.
+- **`faf auto` opens a slot the type adds by name**, even where the file says `slotignored` (a file from `faf init`, before its type was set). When the slot's other name holds a real value, the stale name is removed. Other types keep the file's own `slotignored`, as before.
 
 ## [8.4.0] - 2026-10-24 — The Skills Edition
 

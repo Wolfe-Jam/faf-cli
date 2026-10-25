@@ -63,7 +63,7 @@ describe('WJTTC ENGINE: per-type slot allocation', () => {
     intent: 9,
     documentation: 9,
     encyclopedia: 9,
-    skills: 9,
+    skills: 10,
     cli: 12,
     library: 12,
     sdk: 12,
@@ -106,7 +106,12 @@ describe('WJTTC ENGINE: slots a type adds beyond its categories', () => {
       expect(appTypeUsesSlot('cli', slot(path))).toBe(false);
     }
   });
-  test('skills-plugin uses exactly 14 slots', () => {
+  test('skills uses framework but not runtime', () => {
+    expect(appTypeUsesSlot('skills', slot('stack.framework'))).toBe(true);
+    expect(appTypeUsesSlot('skills', slot('stack.runtime'))).toBe(false);
+  });
+  test('skills uses 10 slots and skills-plugin 14', () => {
+    expect(SLOTS.filter(s => appTypeUsesSlot('skills', s)).length).toBe(10);
     expect(SLOTS.filter(s => appTypeUsesSlot('skills-plugin', s)).length).toBe(14);
   });
   test('an added slot sits outside the type\'s categories', () => {
