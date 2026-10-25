@@ -12,6 +12,7 @@ import { interrogateRepo } from '../interrogate/index.js';
 import { turboCatSlots } from './turbo-cat.js';
 import { relentlessContext } from './relentless.js';
 import {
+  APP_TYPE_ADDS,
   APP_TYPE_CATEGORIES,
   NO_CLASSIFYING_SIGNALS,
   SLOTS,
@@ -242,7 +243,8 @@ function applyAppType(filled: Record<string, unknown>, base: Record<string, unkn
     const uses = appTypeUsesSlot(type, slot);
     if (uses === null) {return filled;}
     if (uses) {
-      keepUsedSlot(out, base, slot, slot.path.startsWith('stack.') ? facts[slot.path.slice('stack.'.length)] : undefined);
+      const added = typeof type === 'string' && APP_TYPE_ADDS[type]?.has(slot.path) === true;
+      keepUsedSlot(out, base, slot, slot.path.startsWith('stack.') ? facts[slot.path.slice('stack.'.length)] : undefined, added);
     } else {
       markLeftOutSlot(out, slot);
     }
@@ -251,16 +253,24 @@ function applyAppType(filled: Record<string, unknown>, base: Record<string, unkn
 }
 
 /** A slot the app-type uses takes no `slotignored` from detection: each name
- *  of it gets back what `base` had there (`''` when it had nothing). Then,
+ *  of it gets back what `base` had there (`''` when it had nothing). A slot
+ *  the type adds by name (`added`) takes none from the file either. Then,
  *  when the repo has a fact for the slot (`fact`, detection's value whatever
  *  the type) and the slot holds no real value under any of its names, each
  *  name the file has that holds none — empty, or typed words, never the
  *  file's own `slotignored` — gets the fact (the on-wire name when it has
  *  neither): "if it's a fact, fill the slot". */
-function keepUsedSlot(out: Record<string, unknown>, base: Record<string, unknown>, slot: SlotDef, fact: string | undefined): void {
+function keepUsedSlot(out: Record<string, unknown>, base: Record<string, unknown>, slot: SlotDef, fact: string | undefined, added = false): void {
   const locs = slotLocations(slot);
+  const real = (loc: string): boolean => !isPlaceholder(fieldAt(out, loc)) && !isSlotIgnored(fieldAt(out, loc));
   for (const loc of locs) {
-    if (isSlotIgnored(fieldAt(out, loc)) && !isSlotIgnored(fieldAt(base, loc))) {
+    if (!isSlotIgnored(fieldAt(out, loc))) {continue;}
+    if (added) {
+      // A slot the type adds by name (APP_TYPE_ADDS) is required by name, so
+      // the file's own `slotignored` there contradicts the type: it opens
+      // (empty), or goes when the slot's other name holds a real value.
+      putField(out, loc, locs.some(real) ? undefined : '');
+    } else if (!isSlotIgnored(fieldAt(base, loc))) {
       putField(out, loc, hasField(base, loc) ? fieldAt(base, loc) : '');
     }
   }
@@ -290,12 +300,13 @@ function liftScalarProject(data: Record<string, unknown>): Record<string, unknow
   return { ...data, project: { name: String(project) } };
 }
 
-/** Mark slots outside the app-type's active categories as `slotignored`. */
+/** Mark slots outside the app-type's active categories, and not added by
+ *  the type, as `slotignored`. */
 function applySlotIgnore(seeded: Record<string, unknown>): void {
   const projectType = (seeded.project as { type?: string } | undefined)?.type ?? 'library';
   const activeCategories = APP_TYPE_CATEGORIES[projectType] || APP_TYPE_CATEGORIES.library;
   for (const slot of SLOTS) {
-    if (activeCategories.includes(slot.category)) {continue;}
+    if (activeCategories.includes(slot.category) || APP_TYPE_ADDS[projectType]?.has(slot.path)) {continue;}
     const [section, field] = slot.path.split('.');
     if (section === 'stack' && seeded.stack) {
       (seeded.stack as Record<string, string>)[field] = 'slotignored';
