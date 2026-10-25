@@ -8,6 +8,11 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- **`skills-plugin` is 14 slots** (was 12). It keeps project, human and universal, and adds two slots from outside those categories: the framework (the skills format it ships, such as Agent Skills or a Claude Code plugin) and the runtime (what runs its build and scripts). `faf auto` no longer writes `slotignored` over them. A type can now add single slots (`APP_TYPE_ADDS`), the reverse of the slots a `framework` repo leaves out. `skills` stays 9.
+
 ## [8.4.0] - 2026-10-24 — The Skills Edition
 
 FAF has known Skills for a while; we both speak YAML. Now it's official: FAF adds Skills to the CLI.

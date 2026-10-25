@@ -137,7 +137,7 @@ faf memory show
 
 FAF has known Skills for a while; we both speak YAML. Now it's official: FAF adds Skills to the CLI.
 
-**faf knows skills: a SKILL.md repo is `skills` (9 slots), one shipped as a plugin is `skills-plugin` (12).**
+**faf knows skills: a SKILL.md repo is `skills` (9 slots), one shipped as a plugin is `skills-plugin` (14).**
 
 ```yaml
 project:
@@ -145,7 +145,7 @@ project:
 ```
 
 - **`skills`**: plain-English instructions for AI, `SKILL.md` folders with no pipeline. Project + human context: 9 slots.
-- **`skills-plugin`**: skills published as a plugin, with a build and CI. Adds hosting, build and CI/CD: 12 slots.
+- **`skills-plugin`**: skills published as a plugin, with a build and CI. Adds hosting, build and CI/CD, plus the framework (the skills format it ships) and the runtime (what runs its build): 14 slots.
 - **App-types are types of projects, not types of file.** Write the type's own name (`cli`, not `cli-tool`); see [What goes in a slot](docs/GUIDE.md).
 - **A .faf whose aliases expand too far** is now one line, not a stack trace.
 

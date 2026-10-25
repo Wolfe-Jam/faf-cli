@@ -12,7 +12,7 @@
  */
 
 import { describe, test, expect } from 'bun:test';
-import { APP_TYPE_CATEGORIES, SLOTS } from '../../src/core/slots.js';
+import { APP_TYPE_ADDS, APP_TYPE_CATEGORIES, SLOTS, SLOT_BY_PATH, appTypeUsesSlot } from '../../src/core/slots.js';
 import type { SlotCategory } from '../../src/core/types.js';
 
 /** Slot count per category (derived from SLOTS) — kept in sync with the
@@ -70,7 +70,7 @@ describe('WJTTC ENGINE: per-type slot allocation', () => {
     wasm: 12,
     html: 12,
     'server-card': 12,
-    'skills-plugin': 12,
+    'skills-plugin': 14,
     frontend: 16,
     website: 16,
     mobile: 16,
@@ -92,10 +92,30 @@ describe('WJTTC ENGINE: per-type slot allocation', () => {
     test(`${type} → ${expectedCount} active slots`, () => {
       const cats = APP_TYPE_CATEGORIES[type];
       expect(cats).toBeDefined();
-      const count = cats.reduce((sum, cat) => sum + CATEGORY_SIZES[cat], 0);
+      const count = cats.reduce((sum, cat) => sum + CATEGORY_SIZES[cat], 0) + (APP_TYPE_ADDS[type]?.size ?? 0);
       expect(count).toBe(expectedCount);
     });
   }
+});
+
+describe('WJTTC ENGINE: slots a type adds beyond its categories', () => {
+  const slot = (path: string) => SLOT_BY_PATH.get(path)!;
+  test('skills-plugin uses framework and runtime; cli does not', () => {
+    for (const path of ['stack.framework', 'stack.runtime']) {
+      expect(appTypeUsesSlot('skills-plugin', slot(path))).toBe(true);
+      expect(appTypeUsesSlot('cli', slot(path))).toBe(false);
+    }
+  });
+  test('skills-plugin uses exactly 14 slots', () => {
+    expect(SLOTS.filter(s => appTypeUsesSlot('skills-plugin', s)).length).toBe(14);
+  });
+  test('an added slot sits outside the type\'s categories', () => {
+    for (const [type, paths] of Object.entries(APP_TYPE_ADDS)) {
+      for (const path of paths) {
+        expect(APP_TYPE_CATEGORIES[type]).not.toContain(slot(path).category);
+      }
+    }
+  });
 });
 
 describe('WJTTC ENGINE: universal-category extension (Phase 2 — small types now build/ci/host aware)', () => {

@@ -12,6 +12,7 @@ import { interrogateRepo } from '../interrogate/index.js';
 import { turboCatSlots } from './turbo-cat.js';
 import { relentlessContext } from './relentless.js';
 import {
+  APP_TYPE_ADDS,
   APP_TYPE_CATEGORIES,
   NO_CLASSIFYING_SIGNALS,
   SLOTS,
@@ -290,12 +291,13 @@ function liftScalarProject(data: Record<string, unknown>): Record<string, unknow
   return { ...data, project: { name: String(project) } };
 }
 
-/** Mark slots outside the app-type's active categories as `slotignored`. */
+/** Mark slots outside the app-type's active categories, and not added by
+ *  the type, as `slotignored`. */
 function applySlotIgnore(seeded: Record<string, unknown>): void {
   const projectType = (seeded.project as { type?: string } | undefined)?.type ?? 'library';
   const activeCategories = APP_TYPE_CATEGORIES[projectType] || APP_TYPE_CATEGORIES.library;
   for (const slot of SLOTS) {
-    if (activeCategories.includes(slot.category)) {continue;}
+    if (activeCategories.includes(slot.category) || APP_TYPE_ADDS[projectType]?.has(slot.path)) {continue;}
     const [section, field] = slot.path.split('.');
     if (section === 'stack' && seeded.stack) {
       (seeded.stack as Record<string, string>)[field] = 'slotignored';

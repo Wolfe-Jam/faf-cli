@@ -35,7 +35,8 @@ Work surfaces use ✪ for Trophy (not the social emoji 🏆). Sub-Trophy tiers u
 | App-type | Categories that count | Active slots |
 |---|---|---|
 | `documentation` · `intent` · `encyclopedia` · `skills` | project, human | 9 |
-| `cli` · `library` · `sdk` · `wasm` · `html` · `server-card` · `skills-plugin` | project, human, universal | 12 |
+| `cli` · `library` · `sdk` · `wasm` · `html` · `server-card` | project, human, universal | 12 |
+| `skills-plugin` | project, human, universal + framework, runtime | 14 |
 | `frontend` · `website` · `mobile` · `app` · `extension` | project, frontend, human, universal | 16 |
 | `mcp` · `backend` · `data-science` | project, backend, human, universal | 17 |
 | `fullstack` · `svelte` · `framework` | project, frontend, backend, universal, human | 21 |

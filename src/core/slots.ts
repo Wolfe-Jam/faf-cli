@@ -179,12 +179,21 @@ const FRAMEWORK_LEAVES_OUT: ReadonlySet<string> = new Set([
   'stack.css_framework', 'stack.ui_library', 'stack.database', 'stack.connection', 'stack.hosting',
 ]);
 
+/** The slots a type uses although their categories are not active. A
+ *  `skills-plugin` names its framework (the skills format it ships: Agent
+ *  Skills, a Claude Code plugin) and its runtime (what runs its build and
+ *  scripts): 12 slots by category + 2 = 14. */
+export const APP_TYPE_ADDS: Readonly<Record<string, ReadonlySet<string>>> = {
+  'skills-plugin': new Set(['stack.frontend', 'stack.runtime']),
+};
+
 /** Whether the app-type `type` uses `slot` — the one rule for which slots
- *  count: the type's active categories, less the slots a `framework` repo
- *  leaves out. `null` when `type` is not an app-type faf knows (then faf
- *  cannot tell, and decides nothing from it). */
+ *  count: the type's active categories, plus the slots it adds, less the
+ *  slots a `framework` repo leaves out. `null` when `type` is not an
+ *  app-type faf knows (then faf cannot tell, and decides nothing from it). */
 export function appTypeUsesSlot(type: unknown, slot: SlotDef): boolean | null {
   if (typeof type !== 'string' || !Object.prototype.hasOwnProperty.call(APP_TYPE_CATEGORIES, type)) {return null;}
+  if (APP_TYPE_ADDS[type]?.has(slot.path)) {return true;}
   if (!APP_TYPE_CATEGORIES[type].includes(slot.category)) {return false;}
   return !(type === 'framework' && FRAMEWORK_LEAVES_OUT.has(slot.path));
 }
@@ -224,7 +233,8 @@ export const APP_TYPE_CATEGORIES: Record<string, SlotCategory[]> = {
   // 12 slots — project + human + universal (build/ci/hosting matters)
   cli: ['project', 'human', 'universal'],
   // skills-plugin: skills published as a plugin (a directory, a
-  // marketplace) with a build and CI — the cli shape.
+  // marketplace) with a build and CI — the cli shape, plus framework and
+  // runtime (APP_TYPE_ADDS): 14 slots.
   'skills-plugin': ['project', 'human', 'universal'],
   library: ['project', 'human', 'universal'],
   sdk: ['project', 'human', 'universal'],
