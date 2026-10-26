@@ -477,6 +477,45 @@ export interface ProjectTypeDetection {
   found: string[];
 }
 
+/** The SKILL.md files a repo ships: one at the root (a single skill), or one
+ *  per skill folder, under `skills/` or at the top level (the Agent Skills
+ *  layout: a folder per skill). Dot folders are left out — `.claude/skills`
+ *  holds a project's own skills, not what the repo ships. */
+export function findSkillFiles(dir: string): string[] {
+  const files: string[] = [];
+  if (repoExists(dir, 'SKILL.md')) {files.push('SKILL.md');}
+  for (const base of ['skills', '']) {
+    for (const entry of readRepoDir(dir, base || '.') ?? []) {
+      if (!entry.isDirectory() || entry.name.startsWith('.') || entry.name === 'node_modules') {continue;}
+      if (base === '' && entry.name === 'skills') {continue;}
+      const rel = base ? `${base}/${entry.name}/SKILL.md` : `${entry.name}/SKILL.md`;
+      if (repoExists(dir, rel)) {files.push(rel);}
+    }
+  }
+  return files;
+}
+
+/** A skills repo: it ships SKILL.md files. With a Claude Code plugin
+ *  manifest the skills ship as a plugin (`skills-plugin`). */
+function detectSkillsSignal(dir: string): ProjectTypeDetection | null {
+  const files = findSkillFiles(dir);
+  if (files.length === 0) {return null;}
+  const found = [files.length === 1 ? files[0] : `${files.length} SKILL.md folders`];
+  if (repoExists(dir, '.claude-plugin/plugin.json')) {
+    found.push('.claude-plugin/plugin.json');
+    return { type: 'skills-plugin', found };
+  }
+  return { type: 'skills', found };
+}
+
+/** The skills format a repo ships — the framework slot of the skills
+ *  app-types: `Claude Code plugin` with a plugin manifest, `Agent Skills`
+ *  for SKILL.md files alone, `''` when it ships none. */
+export function detectSkillsFormat(dir: string): string {
+  if (findSkillFiles(dir).length === 0) {return '';}
+  return repoExists(dir, '.claude-plugin/plugin.json') ? 'Claude Code plugin' : 'Agent Skills';
+}
+
 /** Detect the project type with rationale. The `found` list captures every
  *  positive signal that contributed to the classification — used downstream
  *  by `writeFaf` to render `# found: <list>` next to `type:` in the .faf.
@@ -725,6 +764,15 @@ export function detectProjectTypeWithRationale(dir: string): ProjectTypeDetectio
   if (pkg?.main && !pkg?.bin) {
     found.push('package.json main (no bin)');
     return { type: 'library', found };
+  }
+
+  // ─── 21. skills — SKILL.md folders and no code signal above. Last before
+  //         the fallback, so a CLI that ships a skill (faf-cli's
+  //         skills/faf-expert) stays a CLI. ─────────────────────────────────
+  const skills = detectSkillsSignal(dir);
+  if (skills) {
+    found.push(...skills.found);
+    return { type: skills.type, found };
   }
 
   // Default — bare repo with no classifying signals. The type is a
