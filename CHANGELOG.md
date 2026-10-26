@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v8.4.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v8.5.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [8.5.0] - 2026-10-26 — The Agent Skills Edition
+
+**faf knows a skills repo when it sees one, and the skills types name their framework: `skills` is 10 slots, `skills-plugin` is 14.** 2246 tests.
 
 ### Added
 - **faf knows a skills repo when it sees one.** `faf init` reads a repo that ships `SKILL.md` folders (under `skills/`, at the top level, or one `SKILL.md` at the root) as `skills`, and one with a Claude Code plugin manifest (`.claude-plugin/plugin.json`) as `skills-plugin`: `# found: 7 SKILL.md folders + .claude-plugin/plugin.json`. The framework slot names the format: `Agent Skills`, or `Claude Code plugin`. Skills are checked last, after every code signal, so a CLI or library that ships a skill keeps its type (faf-cli ships `skills/faf-expert` and stays `cli`). A project's own `.claude/skills`, and SKILL.md files deeper down (test fixtures), don't count. `faf auto` keeps the type a file already has.
