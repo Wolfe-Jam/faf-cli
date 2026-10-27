@@ -133,7 +133,17 @@ faf memory etch "a durable fact" --id my-fact
 faf memory show
 ```
 
-### What's New in v8.4.0 — The Skills Edition
+### What's New in v8.5.0 — The Agent Skills Edition
+
+**faf knows a skills repo when it sees one, and the skills types name their framework: `skills` is 10 slots, `skills-plugin` is 14.**
+
+- **`faf init` detects skills repos**: `SKILL.md` folders make a repo `skills`; add a Claude Code plugin manifest and it's `skills-plugin`. A CLI or library that ships a skill keeps its type.
+- **`skills`**: project + human, plus the framework (the skills format, such as Agent Skills or a Claude Code plugin).
+- **`skills-plugin`**: project + human + universal, plus the framework and the runtime.
+- **`faf auto` fills a slot the type adds**, even where an older file says `slotignored`.
+- **Check the skills themselves with [skills-ladder](https://www.npmjs.com/package/skills-ladder):** it rates each `SKILL.md` GOOD, BETTER or BEST. `npx skills-ladder .`
+
+### The Skills Edition (8.4)
 
 FAF has known Skills for a while; we both speak YAML. Now it's official: FAF adds Skills to the CLI.
 
@@ -214,6 +224,7 @@ npx faf-cli@latest card init     # seven questions → agent.fafa → A2A card, 
 
 **Recent sprint**
 
+- ✪ [8.5.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.5.0) The Agent Skills Edition — faf detects skills repos; `skills` (10) and `skills-plugin` (14) name their framework
 - ✪ [8.4.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.4.0) The Skills Edition — `skills` (9) and `skills-plugin` (12) app-types
 - ✪ [8.3.2](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.3.2) `faf check` warns when a key_files path no longer exists
 - ✪ [8.3.1](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.3.1) `faf cards` gives MCP cards to a project.faf alone only when its type is mcp
