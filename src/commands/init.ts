@@ -13,6 +13,7 @@ export interface InitOptions {
   yolo?: boolean;
   quick?: boolean;
   force?: boolean;
+  new?: boolean;
   output?: string;
 }
 
@@ -23,8 +24,13 @@ export function initCommand(options: InitOptions = {}): void {
     ? (options.output.endsWith('.faf') ? options.output : join(dir, options.output))
     : join(dir, 'project.faf');
 
-  if (existsSync(outputPath) && !options.force) {
-    console.error(`project.faf already exists. Use ${bold('--force')} to overwrite.`);
+  if (options.new && options.force) {
+    console.error(`Pick one: ${bold('--new')} keeps .faf-dna, ${bold('--force')} starts a new birth.`);
+    process.exit(1);
+  }
+  const replace = options.force === true || options.new === true;
+  if (existsSync(outputPath) && !replace) {
+    console.error(`project.faf already exists. Use ${bold('--new')} for a fresh one (keeps .faf-dna), or ${bold('--force')} to start over with a new birth.`);
     process.exit(1);
   }
   // An --output folder that is not there is one line: faf does not create it.
@@ -32,22 +38,27 @@ export function initCommand(options: InitOptions = {}): void {
 
   // Full slot-filling pipeline (shared with `faf auto` + `faf git`).
   const data = assembleFreshFaf(dir);
-  // --force is the explicit overwrite: a fresh file, not an update of the old one.
-  writeFaf(outputPath, data, { replace: options.force === true });
+  // --new and --force are the explicit overwrite: a fresh file, not an update of the old one.
+  writeFaf(outputPath, data, { replace });
 
   const yaml = readFafRaw(outputPath);
   const result = withKernel(outputPath, () => scoreFafYaml(yaml));
 
   // Birth DNA — the first heartbeat. Records the honest first score (even 0%)
   // in a separate .faf-dna lineage file (keeps the .faf itself clean).
+  // A .faf-dna that is there is the birth certificate, which cannot be
+  // recreated: only --force starts a new birth. --new never touches it.
   const dna = new FafDNAManager(dir);
-  if (!dna.exists() || options.force) {
+  const born = !dna.exists() || options.force === true;
+  if (born) {
     dna.birth(result.score);
   }
 
   console.log(`${fafCyan('created')} ${outputPath}`);
   displayScore(result, outputPath);
-  console.log(dim(`  🧬 Birth DNA ${result.score}% — your journey starts here (faf dna)`));
+  console.log(dim(born
+    ? `  🧬 Birth DNA ${result.score}% — your journey starts here (faf dna)`
+    : '  🧬 .faf-dna kept as it is — your birth certificate (faf dna)'));
 
   if (result.score < 100) {
     console.log(dim(`\n  run ${bold("'faf go'")} to fill empty slots`));
