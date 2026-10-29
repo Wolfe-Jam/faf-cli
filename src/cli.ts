@@ -57,7 +57,8 @@ program
   .description('Create .faf from your project')
   .option('--yolo', 'Quick init with sensible defaults')
   .option('--quick', 'Alias for --yolo')
-  .option('--force', 'Overwrite existing project.faf')
+  .option('--new', 'Replace project.faf with a fresh one; .faf-dna is kept as it is')
+  .option('--force', 'Start over: replace project.faf and start a new birth in .faf-dna')
   .option('--output <path>', 'Output path')
   .action((options) => initCommand(options));
 

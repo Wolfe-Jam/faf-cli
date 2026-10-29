@@ -28,7 +28,7 @@ detected from your real stack, scored, and versioned with your code. No drift. N
 
 [![FAF downloads](https://img.shields.io/endpoint?url=https://faf.one/api/downloads.json)](https://faf.one/downloads) · across npm, PyPI and crates.io · **IANA-registered · Anthropic-merged (#2759)**
 
-⭐ Bookmarks it for you, helps other devs find it too.
+⭐ [Star it on GitHub](https://github.com/Wolfe-Jam/faf-cli): bookmarks it for you, helps other devs find it too.
 
 <!-- ② papers · funnel · testing — one line -->
 [![DOI: Context paper](https://img.shields.io/badge/DOI-Context%20paper-FF6B35)](https://doi.org/10.5281/zenodo.18251362)
