@@ -1,4 +1,9 @@
-import { aliasKeptNote, findFafFile, readFaf, writeFaf } from '../interop/faf.js';
+import { dirname } from 'path';
+import { aliasKeptNote, findFafFile, readFaf, readFafRaw, writeFaf } from '../interop/faf.js';
+import { enrichScore } from '../core/scorer.js';
+import * as kernel from '../wasm/kernel.js';
+import { FafDNAManager } from '../core/faf-dna.js';
+import { sayWhyDnaIsLeft } from './dna.js';
 import { blockingStep, blockedMessage, setNestedValue } from '../core/dot-path.js';
 import { fafCyan, dim } from '../ui/colors.js';
 
@@ -41,4 +46,21 @@ export function editCommand(path: string, value: string): void {
   }
 
   console.log(`${fafCyan('updated')} ${path} ${dim('→')} ${value}`);
+  recordEditGrowth(fafPath, path);
+}
+
+/** A slot filled by hand moves the score too: record it on the DNA journey,
+ *  next to the project.faf. The edit is already written, so a file the kernel
+ *  cannot score just leaves the DNA as it is. */
+function recordEditGrowth(fafPath: string, path: string): void {
+  const dna = new FafDNAManager(dirname(fafPath));
+  if (!dna.exists()) {return;}
+  let score: number;
+  try {
+    score = enrichScore(kernel.score(readFafRaw(fafPath))).score;
+  } catch {
+    return;
+  }
+  dna.recordGrowth(score, [`faf edit ${path}`]);
+  sayWhyDnaIsLeft(dna);
 }

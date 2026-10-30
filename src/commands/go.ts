@@ -1,5 +1,5 @@
 import { createInterface } from 'readline';
-import { join } from 'path';
+import { dirname, join } from 'path';
 import { aliasKeptNote, findFafFile, readFaf, readFafRaw, withKernel, writeFaf } from '../interop/faf.js';
 import { SLOTS, SLOTIGNORED, isPlaceholder, isTypedWords } from '../core/slots.js';
 import type { SlotDef } from '../core/types.js';
@@ -8,6 +8,8 @@ import { getNestedValue, setNestedValue, blockingStep, blockedMessage } from '..
 import * as kernel from '../wasm/kernel.js';
 import { enrichScore } from '../core/scorer.js';
 import { displayScore } from '../ui/display.js';
+import { FafDNAManager } from '../core/faf-dna.js';
+import { sayWhyDnaIsLeft } from './dna.js';
 import { bold, dim, fafCyan } from '../ui/colors.js';
 import { assertProjectCwd } from '../core/cwd-guard.js';
 import { readBytesIfPresent, resolveInside, SafePathError, safeReplaceOwned, safeUnlink } from '../core/safe-write.js';
@@ -195,7 +197,19 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
   const result = withKernel(fafPath, () => enrichScore(kernel.score(readFafRaw(fafPath))));
   displayScore(result, fafPath);
 
+  if (filled > 0) {recordGoGrowth(fafPath, result.score, filled);}
+
   // Clean up the session file if we finished all slots (a quit keeps it for
   // --resume); only a session faf wrote is removed.
   if (!quit) {clearSession(dir);}
+}
+
+/** The interview is the biggest climb on the journey: record it on the DNA,
+ *  next to the project.faf it filled. A .faf-dna faf did not write is left
+ *  as it is — say so in one line. */
+function recordGoGrowth(fafPath: string, score: number, filled: number): void {
+  const dna = new FafDNAManager(dirname(fafPath));
+  if (!dna.exists()) {return;}
+  dna.recordGrowth(score, [`faf go — filled ${filled} slot${filled === 1 ? '' : 's'}`]);
+  sayWhyDnaIsLeft(dna);
 }

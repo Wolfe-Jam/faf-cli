@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **`faf init --new`:** replaces project.faf with a fresh one from the repo and leaves `.faf-dna` exactly as it is. Use it to rebuild a stale or bloated project.faf without touching the birth certificate. `--force` still means start over: a new birth, with the old one kept in `priorLineage`. A project with no `.faf-dna` gets its first birth either way. `--new` and `--force` together are refused, and the "already exists" message now names both. `tests/commands/init-new.test.ts`.
 
+### Fixed
+- **`faf go` and `faf edit` record growth in `.faf-dna`.** Only `faf auto` and `faf refresh` did, so the guided interview (the biggest climb to ✪ Trophy) never showed in `faf dna`. Each now adds a version when the score moves; no version when it doesn't, and neither ever creates a `.faf-dna`
+
 ## [8.5.0] - 2026-10-26 — The Agent Skills Edition
 
 **faf knows a skills repo when it sees one, and the skills types name their framework: `skills` is 10 slots, `skills-plugin` is 14.** 2246 tests.
