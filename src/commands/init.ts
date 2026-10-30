@@ -31,7 +31,7 @@ export function initCommand(options: InitOptions = {}): void {
   }
   const replace = options.force === true || options.new === true;
   if (existsSync(outputPath) && !replace) {
-    console.error(`project.faf already exists. Use ${bold('--new')} for a fresh one (keeps .faf-dna), or ${bold('--force')} to start over with a new birth.`);
+    console.error(`project.faf already exists. Use ${bold('--new')} for a fresh one; .faf-dna is kept as it is.`);
     process.exit(1);
   }
   // An --output folder that is not there is one line: faf does not create it.

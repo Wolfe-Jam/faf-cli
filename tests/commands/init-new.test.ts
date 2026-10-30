@@ -86,3 +86,39 @@ describe('BRAKE: faf init --new keeps .faf-dna', () => {
     expect(readFileSync(fafFile(), 'utf-8')).toContain('stale_block');
   });
 });
+
+describe('BRAKE: faf never offers to reissue a birth certificate', () => {
+  // --force still works until 9.0, but no message suggests it: a birth
+  // certificate is one per project, never changed or reissued.
+  let dir: string;
+
+  beforeEach(() => {
+    dir = mkdtempSync(join(tmpdir(), 'faf-no-reissue-'));
+    writeFileSync(join(dir, 'package.json'), '{"name":"p","version":"1.0.0"}');
+  });
+
+  afterEach(() => {
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  test('an existing project.faf: the refusal names --new, never --force', () => {
+    expect(run(dir, ['init']).status).toBe(0);
+    const r = run(dir, ['init']);
+    expect(r.status).toBe(1);
+    expect(r.stderr).toContain('--new');
+    expect(r.stderr).not.toContain('--force');
+  });
+
+  test('a frozen .faf-dna: faf dna says it is protected, and offers no reset', () => {
+    new FafDNAManager(dir).birth(22);
+    const path = join(dir, '.faf-dna');
+    const frozen = readFileSync(path, 'utf-8').trimEnd(); // no final newline: not faf's exact text
+    writeFileSync(path, frozen);
+
+    const r = run(dir, ['dna']);
+    expect(r.status).toBe(0);
+    expect(r.stdout).toContain('Your birth certificate is protected: faf never changes it.');
+    expect(r.stdout).not.toContain('--force');
+    expect(readFileSync(path, 'utf-8')).toBe(frozen);
+  });
+});

@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - **`faf go` and `faf edit` record growth in `.faf-dna`.** Only `faf auto` and `faf refresh` did, so the guided interview (the biggest climb to ✪ Trophy) never showed in `faf dna`. Each now adds a version when the score moves; no version when it doesn't, and neither ever creates a `.faf-dna`
 
+### Changed
+- **faf no longer offers to reissue a birth certificate.** A birth certificate is one per project: never changed or reissued. `faf dna` on a `.faf-dna` faf did not write now says "Your birth certificate is protected: faf never changes it." instead of suggesting `faf init --force`. `faf init` on an existing project.faf names `--new` only. `--force` still works in 8.x and is removed in 9.0
+
 ## [8.5.0] - 2026-10-26 — The Agent Skills Edition
 
 **faf knows a skills repo when it sees one, and the skills types name their framework: `skills` is 10 slots, `skills-plugin` is 14.** 2246 tests.
