@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **`faf init --new`:** replaces project.faf with a fresh one from the repo and leaves `.faf-dna` exactly as it is. Use it to rebuild a stale or bloated project.faf without touching the birth certificate. `--force` still means start over: a new birth, with the old one kept in `priorLineage`. A project with no `.faf-dna` gets its first birth either way. `--new` and `--force` together are refused, and the "already exists" message now names both. `tests/commands/init-new.test.ts`.
+- **`faf dna --json`:** the lineage as data: birth, certificate, current score, growth, peak, the journey line, every version with its changes, and the earlier lives a reset ended. `faf_written` and `note` flag a `.faf-dna` faf did not write. The same file gives the same JSON
 
 ### Fixed
 - **`faf go` and `faf edit` record growth in `.faf-dna`.** Only `faf auto` and `faf refresh` did, so the guided interview (the biggest climb to ✪ Trophy) never showed in `faf dna`. Each now adds a version when the score moves; no version when it doesn't, and neither ever creates a `.faf-dna`
