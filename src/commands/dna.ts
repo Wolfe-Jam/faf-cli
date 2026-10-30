@@ -1,5 +1,6 @@
 import { FafDNAManager, type FafDNA } from '../core/faf-dna.js';
 import { bold, dim, fafCyan, orange } from '../ui/colors.js';
+import { dnaGitignoreWarning, dnaIgnoredWithoutReason } from '../core/dna-gitignore.js';
 
 /** After recording growth: when the `.faf-dna` is one faf did not write (and
  *  so was left as it is), say why on stderr, in one line. */
@@ -41,6 +42,7 @@ export function dnaJson(dna: FafDNAManager, data: FafDNA): Record<string, unknow
       ended_at: l.endedAt,
       certificate: l.certificate,
     })),
+    gitignored: dnaIgnoredWithoutReason(process.cwd()) !== null,
     faf_written: dna.readOnlyReason() === null,
     note: dna.readOnlyReason(),
   };
@@ -85,6 +87,9 @@ export function dnaCommand(options: DnaOptions = {}): void {
     // and the record, which is no longer the trade.
     console.log(dim(`   ${why} ${bold("'faf init --force'")} starts a fresh lineage and keeps this one.`));
   }
+
+  const ignored = dnaGitignoreWarning(process.cwd());
+  if (ignored) {console.log(dim(`   ⚠ ${ignored}`));}
 
   const log = dna.getLog();
   if (log.length > 1) {
