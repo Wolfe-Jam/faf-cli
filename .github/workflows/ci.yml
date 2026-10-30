@@ -380,7 +380,9 @@ jobs:
     name: TAF Receipt
     runs-on: ubuntu-latest
     needs: test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # !cancelled(): runs when the tests fail too, so a red run gets a FAILED receipt
+    # instead of a gap (it runs the suite itself; no pipefail, so it always reaches the receipt)
+    if: "!cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/main'"
     permissions:
       contents: write
 
@@ -424,7 +426,7 @@ jobs:
           fi
 
       - name: Generate TAF Receipt
-        uses: Wolfe-Jam/faf-taf-git@v2.3.1
+        uses: Wolfe-Jam/faf-taf-git@v2.4.2
         with:
           test-output-file: /tmp/test-output.txt
           auto-commit: 'true'
