@@ -65,7 +65,8 @@ program
 program
   .command('dna')
   .description('🧬 Show your FAF DNA journey (birth → growth)')
-  .action(() => dnaCommand());
+  .option('--json', 'Output the lineage as JSON')
+  .action((options) => dnaCommand(options));
 
 program
   .command('auto')
