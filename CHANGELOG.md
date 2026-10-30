@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v8.5.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v8.6.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -8,7 +8,9 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [8.6.0] - 2026-10-30 — The Birth Certificate Edition
+
+**One birth certificate per project, protected: `init --new` rebuilds project.faf without touching it, `go` and `edit` record every climb, and `faf dna --json` shows the lineage.** 2272 tests.
 
 ### Added
 - **`faf init --new`:** replaces project.faf with a fresh one from the repo and leaves `.faf-dna` exactly as it is. Use it to rebuild a stale or bloated project.faf without touching the birth certificate. `--force` still means start over: a new birth, with the old one kept in `priorLineage`. A project with no `.faf-dna` gets its first birth either way. `--new` and `--force` together are refused, and the "already exists" message now names both. `tests/commands/init-new.test.ts`.

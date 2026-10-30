@@ -133,7 +133,19 @@ faf memory etch "a durable fact" --id my-fact
 faf memory show
 ```
 
-### What's New in v8.5.0 — The Agent Skills Edition
+### What's New in v8.6.0 — The Birth Certificate Edition
+
+**One birth certificate per project, protected: `init --new` rebuilds project.faf without touching it, `go` and `edit` record every climb, and `faf dna --json` shows the lineage.**
+
+`.faf-dna` is the project's birth certificate: its first score, recorded once, the way a baby's birth weight is. A project gets one. faf keeps it, and records what happens after.
+
+- **`faf init --new`** replaces a stale project.faf with a fresh one from the repo. `.faf-dna` stays exactly as it is.
+- **`faf go` and `faf edit` record every climb** on the DNA, alongside `faf auto` and `faf refresh`. `faf dna` shows the whole journey.
+- **`faf dna --json`** gives the lineage as data: birth, certificate, current score, growth, peak, every version, and any earlier lives.
+- **Gitignored? faf says so.** If `.faf-dna` is gitignored, a fresh clone loses it. `faf init` and `faf dna` name the rule. Put the reason in a `#` comment above it, and faf stays quiet.
+- **Protected, never reissued.** A `.faf-dna` faf didn't write is read and left as it is. faf no longer suggests replacing it.
+
+### The Agent Skills Edition (8.5)
 
 **faf knows a skills repo when it sees one, and the skills types name their framework: `skills` is 10 slots, `skills-plugin` is 14.**
 
@@ -224,6 +236,7 @@ npx faf-cli@latest card init     # seven questions → agent.fafa → A2A card, 
 
 **Recent sprint**
 
+- ✪ [8.6.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.6.0) The Birth Certificate Edition — `init --new` keeps `.faf-dna`; `go`/`edit` record growth; `faf dna --json`
 - ✪ [8.5.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.5.0) The Agent Skills Edition — faf detects skills repos; `skills` (10) and `skills-plugin` (14) name their framework
 - ✪ [8.4.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.4.0) The Skills Edition — `skills` (9) and `skills-plugin` (12) app-types
 - ✪ [8.3.2](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.3.2) `faf check` warns when a key_files path no longer exists
