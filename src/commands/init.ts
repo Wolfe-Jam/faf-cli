@@ -4,6 +4,7 @@ import { assembleFreshFaf } from '../detect/assemble.js';
 import { writeFaf, readFafRaw, withKernel } from '../interop/faf.js';
 import { scoreFafYaml } from '../core/scorer.js';
 import { FafDNAManager } from '../core/faf-dna.js';
+import { dnaGitignoreWarning } from '../core/dna-gitignore.js';
 import { displayScore } from '../ui/display.js';
 import { bold, dim, fafCyan } from '../ui/colors.js';
 import { assertProjectCwd } from '../core/cwd-guard.js';
@@ -30,7 +31,7 @@ export function initCommand(options: InitOptions = {}): void {
   }
   const replace = options.force === true || options.new === true;
   if (existsSync(outputPath) && !replace) {
-    console.error(`project.faf already exists. Use ${bold('--new')} for a fresh one (keeps .faf-dna), or ${bold('--force')} to start over with a new birth.`);
+    console.error(`project.faf already exists. Use ${bold('--new')} for a fresh one; .faf-dna is kept as it is.`);
     process.exit(1);
   }
   // An --output folder that is not there is one line: faf does not create it.
@@ -59,6 +60,8 @@ export function initCommand(options: InitOptions = {}): void {
   console.log(dim(born
     ? `  🧬 Birth DNA ${result.score}% — your journey starts here (faf dna)`
     : '  🧬 .faf-dna kept as it is — your birth certificate (faf dna)'));
+  const ignored = dnaGitignoreWarning(dir);
+  if (ignored) {console.error(`faf: ${ignored}`);}
 
   if (result.score < 100) {
     console.log(dim(`\n  run ${bold("'faf go'")} to fill empty slots`));

@@ -1,9 +1,10 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
-import { mkdirSync, writeFileSync, rmSync } from 'fs';
+import { existsSync, mkdirSync, writeFileSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { editCommand } from '../../src/commands/edit.js';
 import { readFaf } from '../../src/interop/faf.js';
+import { FafDNAManager } from '../../src/core/faf-dna.js';
 
 describe('TYRE: edit command', () => {
   let testDir: string;
@@ -60,5 +61,53 @@ describe('TYRE: edit command', () => {
     }
     const data = readFaf(join(testDir, 'project.faf'));
     expect(data.stack?.frontend).toBe('Svelte');
+  });
+});
+
+describe('ENGINE: edit records growth on the DNA journey', () => {
+  let testDir: string;
+  let origCwd: () => string;
+
+  beforeEach(() => {
+    testDir = join(tmpdir(), `faf-test-edit-dna-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    mkdirSync(testDir, { recursive: true });
+    writeFileSync(join(testDir, 'project.faf'), `faf_version: 2.5.0\nproject:\n  name: edit-dna\n`);
+    origCwd = process.cwd;
+    process.cwd = () => testDir;
+  });
+
+  afterEach(() => {
+    process.cwd = origCwd;
+    rmSync(testDir, { recursive: true, force: true });
+  });
+
+  const quiet = (fn: () => void) => {
+    const orig = console.log;
+    console.log = () => {};
+    try { fn(); } finally { console.log = orig; }
+  };
+
+  test('a slot filled by hand adds a version; the birth certificate is untouched', () => {
+    new FafDNAManager(testDir).birth(0);
+    const before = new FafDNAManager(testDir).load()!;
+    quiet(() => editCommand('project.goal', 'Record every climb'));
+    const after = new FafDNAManager(testDir).load()!;
+    expect(after.current.score).toBeGreaterThan(before.current.score);
+    expect(after.versions.length).toBe(before.versions.length + 1);
+    expect(after.versions.at(-1)!.changes).toEqual(['faf edit project.goal']);
+    expect(after.birthCertificate).toEqual(before.birthCertificate);
+  });
+
+  test('no .faf-dna → edit never creates one', () => {
+    quiet(() => editCommand('project.goal', 'No birth here'));
+    expect(existsSync(join(testDir, '.faf-dna'))).toBe(false);
+  });
+
+  test('an edit that leaves the score where it is adds no version', () => {
+    new FafDNAManager(testDir).birth(0);
+    quiet(() => editCommand('project.goal', 'First'));
+    const once = new FafDNAManager(testDir).load()!;
+    quiet(() => editCommand('project.goal', 'Second wording, same slot'));
+    expect(new FafDNAManager(testDir).load()!.versions.length).toBe(once.versions.length);
   });
 });

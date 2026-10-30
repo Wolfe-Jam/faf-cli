@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v8.5.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v8.6.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -10,11 +10,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-- **`faf init --new`:** replaces project.faf with a fresh one from the repo and leaves `.faf-dna` exactly as it is. Use it to rebuild a stale or bloated project.faf without touching the birth certificate. `--force` still means start over: a new birth, with the old one kept in `priorLineage`. A project with no `.faf-dna` gets its first birth either way. `--new` and `--force` together are refused, and the "already exists" message now names both. `tests/commands/init-new.test.ts`.
-
 ### Changed
 - **`faf taf setup` writes the faf-taf-git recipe:** a failed test run now gets a receipt too (the test step keeps going, then the job fails at the end), only `main` is recorded, `contents: write` is granted, and a concurrency group stops two runs racing for the receipt push. The old template recorded green runs only. Actions moved to checkout/setup-node v6 and Node 24. "cannot be gamed" is gone from its output. `tests/commands/taf-setup.test.ts`. It pins faf-taf-git v2.4.2 (JUnit XML parser, patched undici), the same as faf-cli's own CI.
+
+## [8.6.0] - 2026-10-30 — The Birth Certificate Edition
+
+**One birth certificate per project, protected: `init --new` rebuilds project.faf without touching it, `go` and `edit` record every climb, and `faf dna --json` shows the lineage.** 2272 tests.
+
+### Added
+- **`faf init --new`:** replaces project.faf with a fresh one from the repo and leaves `.faf-dna` exactly as it is. Use it to rebuild a stale or bloated project.faf without touching the birth certificate. `--force` still means start over: a new birth, with the old one kept in `priorLineage`. A project with no `.faf-dna` gets its first birth either way. `--new` and `--force` together are refused, and the "already exists" message now names both. `tests/commands/init-new.test.ts`.
+- **`faf dna --json`:** the lineage as data: birth, certificate, current score, growth, peak, the journey line, every version with its changes, and the earlier lives a reset ended. `faf_written` and `note` flag a `.faf-dna` faf did not write. The same file gives the same JSON
+- **`.faf-dna` gitignored? faf says so.** `faf init` writes one line to stderr and `faf dna` shows it, naming the rule (`.gitignore:2: .faf-dna`): a fresh clone loses the birth certificate. A `#` comment on the line above the rule is the named reason, and faf stays quiet. A tracked `.faf-dna` is never flagged. `faf dna --json` carries `gitignored`
+
+### Fixed
+- **`faf go` and `faf edit` record growth in `.faf-dna`.** Only `faf auto` and `faf refresh` did, so the guided interview (the biggest climb to ✪ Trophy) never showed in `faf dna`. Each now adds a version when the score moves; no version when it doesn't, and neither ever creates a `.faf-dna`
+
+### Changed
+- **faf no longer offers to reissue a birth certificate.** A birth certificate is one per project: never changed or reissued. `faf dna` on a `.faf-dna` faf did not write now says "Your birth certificate is protected: faf never changes it." instead of suggesting `faf init --force`. `faf init` on an existing project.faf names `--new` only. `--force` still works in 8.x and is removed in 9.0
 
 ## [8.5.0] - 2026-10-26 — The Agent Skills Edition
 
