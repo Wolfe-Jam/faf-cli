@@ -56,6 +56,27 @@ describe('PIT: faf taf setup', () => {
     expect(wf).toContain('target-branch: taf-receipts');
   });
 
+  test('the recipe: red runs get a receipt, only main is recorded, the job still goes red', () => {
+    writeFileSync(join(testDir, 'package.json'), '{"name":"x","scripts":{"test":"echo ok"}}');
+    taf('setup', { write: true });
+    const wf = readFileSync(wfPath(), 'utf-8');
+    expect(wf).toContain('continue-on-error: true');
+    expect(wf).toContain('set -o pipefail');
+    expect(wf).toContain("if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'");
+    expect(wf).toContain("if: steps.tests.outcome == 'failure'");
+    expect(wf).toContain('contents: write');
+    expect(wf).toContain('group: taf-${{ github.ref }}');
+    expect(wf).not.toContain('cannot be gamed');
+  });
+
+  test('the workflow is valid YAML with the steps in order', () => {
+    writeFileSync(join(testDir, 'package.json'), '{"name":"x"}');
+    taf('setup', { write: true });
+    const { parse } = require('yaml');
+    const steps = parse(readFileSync(wfPath(), 'utf-8')).jobs.taf.steps.map((s: { name?: string }) => s.name).filter(Boolean);
+    expect(steps).toEqual(['Run tests', 'Print the receipt', 'Fail the job if the tests failed']);
+  });
+
   test('detects the bun runner from bun.lockb', () => {
     writeFileSync(join(testDir, 'package.json'), '{"name":"x"}');
     writeFileSync(join(testDir, 'bun.lockb'), '');

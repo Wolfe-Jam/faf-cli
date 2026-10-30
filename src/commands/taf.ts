@@ -68,58 +68,66 @@ const RUNTIME: Record<Runner, { setup: string; install: string; test: string }> 
     test: 'bun run test',
   },
   pnpm: {
-    setup: '      - uses: pnpm/action-setup@v4\n      - uses: actions/setup-node@v4\n        with:\n          node-version: 20',
+    setup: "      - uses: pnpm/action-setup@v4\n      - uses: actions/setup-node@v6\n        with:\n          node-version: '24.x'",
     install: 'pnpm install --frozen-lockfile',
     test: 'pnpm test',
   },
   yarn: {
-    setup: '      - uses: actions/setup-node@v4\n        with:\n          node-version: 20',
+    setup: "      - uses: actions/setup-node@v6\n        with:\n          node-version: '24.x'",
     install: 'yarn install --frozen-lockfile',
     test: 'yarn test',
   },
   npm: {
-    setup: '      - uses: actions/setup-node@v4\n        with:\n          node-version: 20',
+    setup: "      - uses: actions/setup-node@v6\n        with:\n          node-version: '24.x'",
     install: 'npm ci',
     test: 'npm test',
   },
 };
 
+// The recipe in the faf-taf-git README: a failed run gets a receipt too (the
+// test step keeps going), only main is recorded, the job still goes red, and
+// one run at a time per branch so two receipts never race for the push.
 function buildTafWorkflow(dir: string): string {
   const head =
     'name: TAF Receipts\n' +
-    '# Prints a Test Receipt (.taf) on every push — proof over time, cannot be gamed.\n' +
+    '# Prints a Test Receipt (.taf) for every run on main: proof over time.\n' +
     '# Written by `faf taf setup`. Docs: https://github.com/Wolfe-Jam/faf-taf-git\n' +
-    'on:\n  push:\n  pull_request:\n\n' +
-    'jobs:\n  taf:\n    runs-on: ubuntu-latest\n    steps:\n' +
-    '      - uses: actions/checkout@v4\n';
+    'on:\n  push:\n    branches: [main]\n  pull_request:\n  workflow_dispatch:\n\n' +
+    'concurrency:\n  group: taf-${{ github.ref }}   # one run at a time per branch, so receipts never collide\n\n' +
+    'jobs:\n  taf:\n    runs-on: ubuntu-latest\n' +
+    '    permissions:\n      contents: write              # lets the action save receipts\n' +
+    '    steps:\n' +
+    '      - uses: actions/checkout@v6\n';
+
+  const runTests = (cmd: string) =>
+    '      - name: Run tests\n' +
+    '        id: tests\n' +
+    '        continue-on-error: true    # keep going, so a failed run still gets a receipt\n' +
+    '        run: |\n' +
+    '          set -o pipefail\n' +
+    `          ${cmd}\n`;
 
   let body: string;
   if (repoExists(dir, 'package.json')) {
     const r = RUNTIME[detectRunner(dir)];
-    body =
-      `${r.setup}\n` +
-      `      - run: ${r.install}\n` +
-      '      - name: Run tests\n' +
-      `        run: ${r.test} 2>&1 | tee test-output.txt\n`;
+    body = `${r.setup}\n      - run: ${r.install}\n${runTests(`${r.test} 2>&1 | tee test-output.txt`)}`;
   } else {
     // Non-JS repo — TAF is language-agnostic; leave a clear, honest placeholder.
-    body =
-      '      # TODO: set up your toolchain, then run your tests writing output to test-output.txt\n' +
-      '      - name: Run tests\n' +
-      '        run: |\n' +
-      '          # e.g. pytest -q 2>&1 | tee test-output.txt   (or your test command)\n' +
-      '          echo "TODO: your test command" 2>&1 | tee test-output.txt\n';
+    // pytest, cargo, Go and Java can write JUnit XML, which faf-taf-git reads.
+    const placeholder = 'echo "TODO: your test command" 2>&1 | tee test-output.txt   # e.g. pytest -q 2>&1 | tee test-output.txt';
+    body = `      # TODO: set up your toolchain, then run your tests writing output to test-output.txt\n${runTests(placeholder)}`;
   }
 
   const receipt =
-    '      - name: Print TAF receipt\n' +
-    '        if: github.event_name == \'push\'\n' +
+    '      - name: Print the receipt\n' +
+    "        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'\n" +
     `        uses: ${FAF_TAF_GIT}\n` +
     '        with:\n' +
     '          test-output-file: test-output.txt\n' +
-    "          auto-commit: 'true'\n" +
-    "          commit-message: 'chore(taf): update .taf receipt [skip ci]'\n" +
-    '          target-branch: taf-receipts\n';
+    '          target-branch: taf-receipts\n' +
+    '      - name: Fail the job if the tests failed\n' +
+    "        if: steps.tests.outcome == 'failure'\n" +
+    '        run: exit 1\n';
 
   return head + body + receipt;
 }
@@ -144,10 +152,10 @@ function tafSetup(options: TafOptions): void {
     return;
   }
 
-  console.log(`${fafCyan('TAF setup')} ${dim('— Test Receipt Printer: proof over time, cannot be gamed')}\n`);
+  console.log(`${fafCyan('TAF setup')} ${dim('— Test Receipt Printer: proof over time')}\n`);
   console.log(dim('Run `faf taf setup --write` to create this, or paste it into a workflow:\n'));
   console.log(workflow);
-  console.log(dim('Then commit + push. One receipt appends to .taf (taf-receipts branch) per CI run.'));
+  console.log(dim('Then commit + push. One receipt appends to .taf (taf-receipts branch) per CI run on main, red runs included.'));
 }
 
 // ── faf taf (default) — score snapshot ──────────────────────────────────────
