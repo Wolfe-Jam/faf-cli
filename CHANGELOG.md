@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Colour only in a terminal; `NO_COLOR` and `FORCE_COLOR` respected.** Piped output, CI logs and agent tools now get plain text, with no escape codes. `NO_COLOR` (any value, no-color.org) turns colour off; `FORCE_COLOR` turns it on, even when piped. Bare `faf` without colour prints a one-line header in place of the Nelly pixel art
+
 ### Changed
 - **`faf taf setup` writes the faf-taf-git recipe:** a failed test run now gets a receipt too (the test step keeps going, then the job fails at the end), only `main` is recorded, `contents: write` is granted, and a concurrency group stops two runs racing for the receipt push. The old template recorded green runs only. Actions moved to checkout/setup-node v6 and Node 24. "cannot be gamed" is gone from its output. `tests/commands/taf-setup.test.ts`. It pins faf-taf-git v2.4.2 (JUnit XML parser, patched undici), the same as faf-cli's own CI.
 
