@@ -89,20 +89,47 @@ function readPackageJson(dir: string): Record<string, unknown> {
   }
 }
 
-/** faf-taf-git reads Jest, Vitest and Bun output (its README's runner table).
- *  True when the repo's tests run on one of them. */
-function readableJsRunner(pkg: Record<string, unknown>, runner: Runner): boolean {
-  const deps = { ...(pkg.devDependencies as object), ...(pkg.dependencies as object) };
-  if ('jest' in deps || 'vitest' in deps) {return true;}
-  const test = (pkg.scripts as Record<string, unknown> | undefined)?.test;
-  if (typeof test !== 'string') {return false;}
-  return /\b(jest|vitest)\b/.test(test) || (runner === 'bun' && /\bbun test\b/.test(test));
+/** A command word in a script: `jest`, not `jest-junit` or `myjest`. */
+const names = (script: string, word: string) => new RegExp(`(^|[\\s;&|(])${word}(?![\\w-])`).test(script);
+
+/** `npm run x`, `pnpm x`, `yarn x`, `bun run x`: the script it hands over to. */
+const DELEGATE = /^\s*(?:npm run|pnpm(?: run)?|yarn(?: run)?|bun run)\s+([\w:.-]+)\s*$/;
+
+/** The command the `test` script ends up running, following up to three
+ *  hand-offs; `null` when it hands over to a script that isn't there. */
+function testCommand(scripts: Record<string, unknown>): string | null | undefined {
+  let script = scripts.test;
+  for (let hop = 0; hop < 3 && typeof script === 'string'; hop++) {
+    const next = DELEGATE.exec(script)?.[1];
+    if (!next) {break;}
+    script = scripts[next];
+    if (typeof script !== 'string') {return null;}
+  }
+  return typeof script === 'string' ? script : undefined;
 }
 
-/** pnpm/action-setup needs a version unless package.json pins one. */
+/** faf-taf-git reads Jest, Vitest and Bun output (its README's runner table).
+ *  True when the repo's `test` script runs one of them. The script decides;
+ *  the dependencies only when it hands over to a script faf can't follow. */
+function readableJsRunner(pkg: Record<string, unknown>, runner: Runner): boolean {
+  const scripts = (pkg.scripts && typeof pkg.scripts === 'object' ? pkg.scripts : {}) as Record<string, unknown>;
+  const script = testCommand(scripts);
+  if (script === null) {
+    const deps = { ...(pkg.devDependencies as object), ...(pkg.dependencies as object) };
+    return 'jest' in deps || 'vitest' in deps;
+  }
+  if (script === undefined) {return false;}
+  return names(script, 'jest') || names(script, 'vitest') || (runner === 'bun' && names(script, 'bun test'));
+}
+
+/** pnpm/action-setup needs a version unless package.json pins pnpm, read the
+ *  way the action reads it: `packageManager: pnpm@…`, or devEngines naming
+ *  pnpm with a version. Both would make it throw. */
 function pnpmSetup(pkg: Record<string, unknown>): string {
-  const pinned = typeof pkg.packageManager === 'string' ||
-    (pkg.devEngines as { packageManager?: unknown } | undefined)?.packageManager !== undefined;
+  const pm = pkg.packageManager;
+  const de = (pkg.devEngines as { packageManager?: { name?: unknown; version?: unknown } } | undefined)?.packageManager;
+  const pinned = (typeof pm === 'string' && pm.startsWith('pnpm@')) ||
+    (de?.name === 'pnpm' && typeof de.version === 'string' && de.version !== '');
   return pinned ? '      - uses: pnpm/action-setup@v6' : '      - uses: pnpm/action-setup@v6\n        with:\n          version: 10';
 }
 
@@ -186,31 +213,49 @@ ${runTests(`echo "TODO: your test command" 2>&1 | tee test-output.txt   # e.g. $
   return `${setup}\n      - run: ${r.install}\n${tests}`;
 }
 
-/** The branch receipts are recorded for: the repo's default branch (origin's
- *  HEAD), else the current branch, else main. */
-function defaultBranch(dir: string): string {
+interface Branch {
+  name: string;
+  /** Why faf isn't sure, when it isn't. */
+  guess?: string;
+}
+
+/** The branch receipts are recorded for, without touching the network:
+ *  origin's HEAD; else origin's main or master; else origin's only branch;
+ *  else the current branch, said to be a guess; else main. */
+function defaultBranch(dir: string): Branch {
   const git = (args: string[]) => {
     const r = spawnSync('git', args, { cwd: dir, encoding: 'utf-8' });
     return r.status === 0 ? r.stdout.trim() : '';
   };
-  const name = git(['symbolic-ref', '--short', 'refs/remotes/origin/HEAD']).replace(/^origin\//, '') ||
-    git(['branch', '--show-current']);
-  // Only a plain branch name goes into the YAML.
-  return /^[\w./-]+$/.test(name) ? name : 'main';
+  const head = git(['symbolic-ref', '--short', 'refs/remotes/origin/HEAD']).replace(/^origin\//, '');
+  if (head) {return { name: head };}
+  for (const b of ['main', 'master']) {
+    if (git(['rev-parse', '--verify', '--quiet', `refs/remotes/origin/${b}`])) {return { name: b };}
+  }
+  const remote = git(['for-each-ref', '--format=%(refname:lstrip=3)', 'refs/remotes/origin/']).split('\n')
+    .filter((b) => b && b !== 'HEAD');
+  if (remote.length === 1) {return { name: remote[0] };}
+  const current = git(['branch', '--show-current']);
+  if (current) {return { name: current, guess: 'origin/HEAD is not set, so this is the current branch' };}
+  return { name: 'main', guess: 'no branch found' };
 }
+
+/** The name for `branches:`. GitHub reads `* ? + [ ] !` there as a pattern,
+ *  so those are escaped, and such a name is quoted. */
+const branchFilter = (name: string) =>
+  /^[\w./-]+$/.test(name) ? name : `'${name.replace(/[*?+[\]!]/g, '\\$&')}'`;
 
 // The recipe in the faf-taf-git README: a failed run gets a receipt too (the
 // test step keeps going), only the default branch is recorded, and the job
 // still goes red. No concurrency group: GitHub cancels a waiting run when a
 // newer one joins, so that run would get no receipt. faf-taf-git retries a
 // push that lost a race instead.
-function buildTafWorkflow(dir: string): string {
-  const branch = defaultBranch(dir);
+function buildTafWorkflow(dir: string, branch: string): string {
   const head =
     'name: TAF Receipts\n' +
     `# Prints a Test Receipt (.taf) for every run on ${branch}: proof over time.\n` +
     '# Written by `faf taf setup`. Docs: https://github.com/Wolfe-Jam/faf-taf-git\n' +
-    `on:\n  push:\n    branches: [${branch}]\n  pull_request:\n  workflow_dispatch:\n\n` +
+    `on:\n  push:\n    branches: [${branchFilter(branch)}]\n  pull_request:\n  workflow_dispatch:\n\n` +
     'jobs:\n  taf:\n    runs-on: ubuntu-latest\n' +
     '    permissions:\n      contents: write              # lets the action save receipts\n' +
     '    steps:\n' +
@@ -248,7 +293,13 @@ function buildTafWorkflow(dir: string): string {
 
 function tafSetup(options: TafOptions): void {
   const dir = process.cwd();
-  const workflow = buildTafWorkflow(dir);
+  const branch = defaultBranch(dir);
+  // A name with a quote can't go in the receipt step's `if:`: never swap it silently.
+  const usable = !/['\n\r]/.test(branch.name);
+  const name = usable ? branch.name : 'main';
+  const workflow = buildTafWorkflow(dir, name);
+  const guess = usable ? branch.guess : `"${branch.name}" can't go in the workflow`;
+  const note = guess ? dim(`  Records ${name} (${guess}). Check \`branches:\` before you commit.`) : '';
   const wfPath = join(dir, '.github', 'workflows', 'taf.yml');
 
   if (options.write) {
@@ -264,13 +315,15 @@ function tafSetup(options: TafOptions): void {
     safeWriteFile(wfPath, workflow, { root: dir, expect: null });
     console.log(`${fafCyan('◆')} taf  wrote .github/workflows/taf.yml`);
     console.log(dim('  commit + push → your first Test Receipt prints to the taf-receipts branch.'));
+    if (note) {console.log(note);}
     return;
   }
 
   console.log(`${fafCyan('TAF setup')} ${dim('— Test Receipt Printer: proof over time')}\n`);
   console.log(dim('Run `faf taf setup --write` to create this, or paste it into a workflow:\n'));
   console.log(workflow);
-  console.log(dim('Then commit + push. One receipt appends to .taf (taf-receipts branch) per CI run on your default branch, red runs included.'));
+  if (note) {console.log(`${note}\n`);}
+  console.log(dim(`Then commit + push. One receipt appends to .taf (taf-receipts branch) per CI run on ${name}, red runs included.`));
 }
 
 // ── faf taf (default) — score snapshot ──────────────────────────────────────

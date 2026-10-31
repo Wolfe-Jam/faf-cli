@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
+import { describe, test, expect, beforeEach, afterEach, spyOn } from 'bun:test';
 import { spawnSync } from 'child_process';
 import { mkdirSync, writeFileSync, rmSync, existsSync, readFileSync } from 'fs';
 import { tmpdir } from 'os';
@@ -211,6 +211,38 @@ describe('PIT: faf taf setup', () => {
     }
   });
 
+  // The test script decides, not the dependencies (review W3).
+  for (const [label, pkg, step] of [
+    ['jest installed, the script runs mocha', '{"devDependencies":{"jest":"1","mocha":"1"},"scripts":{"test":"mocha"}}', false],
+    ['vitest installed, no test script', '{"devDependencies":{"vitest":"1"}}', false],
+    ['jest-junit is not jest', '{"scripts":{"test":"node --test --test-reporter=jest-junit"}}', false],
+    ['the script hands over to one that runs jest', '{"scripts":{"test":"npm run test:unit","test:unit":"jest --ci"}}', true],
+    ['the script hands over to one that runs mocha', '{"devDependencies":{"jest":"1"},"scripts":{"test":"pnpm test:unit","test:unit":"mocha"}}', false],
+    ['the script hands over to one that is not there; jest installed', '{"devDependencies":{"jest":"1"},"scripts":{"test":"npm run unit"}}', true],
+    ['jest after another command', '{"scripts":{"test":"tsc && jest"}}', true],
+  ] as const) {
+    test(`JS, ${label}: ${step ? 'the test step' : 'the placeholder'}`, () => {
+      writeFileSync(join(testDir, 'package.json'), pkg);
+      taf('setup', { write: true });
+      expect(readFileSync(wfPath(), 'utf-8').includes('TODO: your test command')).toBe(!step);
+    });
+  }
+
+  test('pnpm: npm\'s packageManager, or devEngines without a pnpm version, is not a pnpm pin', () => {
+    writeFileSync(join(testDir, 'pnpm-lock.yaml'), '');
+    for (const pkg of [
+      { packageManager: 'npm@10.9.0' },
+      { devEngines: { packageManager: { name: 'npm', version: '10.x' } } },
+      { devEngines: { packageManager: { name: 'pnpm' } } },
+    ]) {
+      rmSync(join(testDir, '.github'), { recursive: true, force: true });
+      writeFileSync(join(testDir, 'package.json'), JSON.stringify({ name: 'x', scripts: { test: 'jest' }, ...pkg }));
+      taf('setup', { write: true });
+      const action = steps().find((st) => String(st.uses).startsWith('pnpm/action-setup')) as { with?: Record<string, unknown> };
+      expect(action.with?.version).toBe(10);
+    }
+  });
+
   test('pnpm: a version for the action unless package.json pins one', () => {
     writeFileSync(join(testDir, 'pnpm-lock.yaml'), '');
     writeFileSync(join(testDir, 'package.json'), '{"name":"x","scripts":{"test":"vitest"}}');
@@ -234,6 +266,62 @@ describe('PIT: faf taf setup', () => {
     const wf = parse(readFileSync(wfPath(), 'utf-8'));
     expect(wf.on.push.branches).toEqual(['trunk']);
     expect(wf.jobs.taf.steps.find((st: { name?: string }) => st.name === 'Print the receipt').if).toContain("'refs/heads/trunk'");
+  });
+
+  /** A bare origin with these branches, cloned into testDir (origin/HEAD removed when asked). */
+  const cloneWith = (branches: string[], keepHead = true) => {
+    const g = (cwd: string, ...a: string[]) => spawnSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...a], { cwd, encoding: 'utf-8' });
+    const origin = `${testDir}-origin.git`;
+    const seed = `${testDir}-seed`;
+    g(tmpdir(), 'init', '-q', '--bare', '-b', branches[0], origin);
+    g(tmpdir(), 'init', '-q', '-b', branches[0], seed);
+    writeFileSync(join(seed, 'x'), 'x');
+    g(seed, 'add', 'x');
+    g(seed, 'commit', '-q', '-m', 'i');
+    for (const b of branches) {g(seed, 'push', '-q', origin, `HEAD:refs/heads/${b}`);}
+    g(testDir, 'clone', '-q', origin, '.');
+    if (!keepHead) {g(testDir, 'remote', 'set-head', 'origin', '-d');}
+    g(testDir, 'checkout', '-q', '-b', 'feat/x');
+    writeFileSync(join(testDir, 'package.json'), '{"name":"x"}');
+    return () => { rmSync(origin, { recursive: true, force: true }); rmSync(seed, { recursive: true, force: true }); };
+  };
+
+  test('on a feature branch, origin/HEAD decides', () => {
+    const done = cloneWith(['trunk']);
+    taf('setup', { write: true });
+    expect(readFileSync(wfPath(), 'utf-8')).toContain('branches: [trunk]');
+    done();
+  });
+
+  // No origin/HEAD (a clone made with init + fetch never gets one): never the feature branch.
+  for (const [branches, want] of [[['main', 'dev'], 'main'], [['master', 'dev'], 'master'], [['trunk'], 'trunk']] as const) {
+    test(`no origin/HEAD, origin has ${branches.join(' + ')}: records ${want}`, () => {
+      const done = cloneWith([...branches], false);
+      taf('setup', { write: true });
+      expect(readFileSync(wfPath(), 'utf-8')).toContain(`branches: [${want}]`);
+      done();
+    });
+  }
+
+  test('a guess is said out loud', () => {
+    const done = cloneWith(['dev', 'trunk'], false); // no origin/HEAD, no main or master, two branches
+    const log = spyOn(console, 'log').mockImplementation(() => {});
+    taf('setup', {});
+    const out = log.mock.calls.map((c) => String(c[0])).join('\n');
+    log.mockRestore();
+    expect(out).toContain('branches: [feat/x]');
+    expect(out).toContain('Records feat/x (origin/HEAD is not set, so this is the current branch)');
+    done();
+  });
+
+  test('a branch name GitHub reads as a pattern is escaped, never swapped for main', () => {
+    spawnSync('git', ['init', '-q', '-b', 'release/v1+x'], { cwd: testDir });
+    writeFileSync(join(testDir, 'package.json'), '{"name":"x"}');
+    taf('setup', { write: true });
+    const { parse } = require('yaml');
+    const wf = parse(readFileSync(wfPath(), 'utf-8'));
+    expect(wf.on.push.branches).toEqual(['release/v1\\+x']);
+    expect(wf.jobs.taf.steps.find((st: { name?: string }) => st.name === 'Print the receipt').if).toContain("'refs/heads/release/v1+x'");
   });
 
   test('outside git it records main', () => {

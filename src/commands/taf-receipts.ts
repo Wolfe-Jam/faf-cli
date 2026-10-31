@@ -43,6 +43,11 @@ function toReceipt(raw: unknown): Receipt | null {
   };
 }
 
+/** A date-time with no zone is read as UTC, so the result never depends on
+ *  the machine's time zone. */
+const ZONELESS = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(:\d{2}(\.\d+)?)?$/;
+const utcTime = (stamp: string) => Date.parse(ZONELESS.test(stamp) ? `${stamp.replace(' ', 'T')}Z` : stamp);
+
 /** The receipts in a .taf, newest first. Entries without a timestamp are left out. */
 export function receiptsFrom(tafYaml: string): { project: string | null; receipts: Receipt[] } {
   const doc = parse(tafYaml) as Record<string, unknown> | null;
@@ -50,7 +55,7 @@ export function receiptsFrom(tafYaml: string): { project: string | null; receipt
   const receipts = history.map(toReceipt).filter((r): r is Receipt => r !== null);
   // By time, not by text: hand-written receipts mix offsets and formats.
   // A timestamp that isn't a date goes last.
-  const at = (r: Receipt) => Date.parse(r.timestamp);
+  const at = (r: Receipt) => utcTime(r.timestamp);
   receipts.sort((a, b) => (Number.isNaN(at(b)) ? -Infinity : at(b)) - (Number.isNaN(at(a)) ? -Infinity : at(a)) || b.timestamp.localeCompare(a.timestamp));
   return { project: str(doc?.project), receipts };
 }
@@ -61,7 +66,7 @@ function readTaf(dir: string, ref?: string): { text: string; source: string } | 
   const refs = ref ? [ref] : ['origin/taf-receipts', 'taf-receipts'];
   for (const r of refs) {
     // --end-of-options: a ref is never read as a git option (--output= writes a file).
-    // GIT_NO_LAZY_FETCH: a partial clone fetches a missing blob otherwise (git 2.44+).
+    // GIT_NO_LAZY_FETCH: a partial clone fetches a missing blob otherwise.
     const out = spawnSync('git', ['show', '--end-of-options', `${r}:.taf`], {
       cwd: dir, encoding: 'utf-8', maxBuffer: 64 * 1024 * 1024, env: { ...process.env, GIT_NO_LAZY_FETCH: '1' },
     });
@@ -72,9 +77,21 @@ function readTaf(dir: string, ref?: string): { text: string; source: string } | 
   return null;
 }
 
+/** The first ref whose tree lists a .taf that git can't show: its blob was
+ *  left out of a partial clone. */
+function blobLeftOut(dir: string, ref?: string): string | null {
+  for (const r of ref ? [ref] : ['origin/taf-receipts', 'taf-receipts']) {
+    const ls = spawnSync('git', ['ls-tree', '--name-only', '--end-of-options', r, '--', '.taf'], {
+      cwd: dir, encoding: 'utf-8', env: { ...process.env, GIT_NO_LAZY_FETCH: '1' },
+    });
+    if (ls.status === 0 && ls.stdout.trim() === '.taf') {return r;}
+  }
+  return null;
+}
+
 /** The time in UTC, to the minute; a date-only or unreadable stamp as written. */
 const day = (stamp: string) => {
-  const t = Date.parse(stamp);
+  const t = utcTime(stamp);
   if (/^\d{4}-\d{2}-\d{2}$/.test(stamp) || Number.isNaN(t)) {return stamp;}
   return new Date(t).toISOString().replace('T', ' ').slice(0, 16);
 };
@@ -102,6 +119,12 @@ function loadReceipts(dir: string, ref?: string): { source: string; project: str
   }
   const found = readTaf(dir, ref);
   if (!found) {
+    const leftOut = blobLeftOut(dir, ref);
+    if (leftOut) {
+      // A fetch keeps the clone's blob filter, so "fetch them" wouldn't help.
+      console.error(`${bold('×')} ${leftOut} is here, its .taf is not (a partial clone). Get it once: git show ${leftOut}:.taf > /dev/null`);
+      process.exit(1);
+    }
     const where = ref ? `${ref}:.taf` : 'origin/taf-receipts, taf-receipts or ./.taf';
     console.error(`${bold('×')} No receipts found (looked in ${where}). Fetch them: git fetch origin taf-receipts`);
     process.exit(1);
