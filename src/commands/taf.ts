@@ -101,6 +101,37 @@ const RUNTIME: Record<Runner, { setup: string; install: string; test: string }> 
   },
 };
 
+// Not JavaScript: faf-taf-git reads JUnit XML (its README's runner table), so
+// each recipe has its runner write a report (both checked end to end against
+// faf-taf-git's parser). Checked in this order.
+type Language = 'go' | 'python';
+
+function detectLanguage(dir: string): Language | null {
+  if (repoExists(dir, 'go.mod')) {return 'go';}
+  if (['pyproject.toml', 'setup.py', 'setup.cfg', 'requirements.txt', 'pytest.ini'].some((f) => repoExists(dir, f))) {return 'python';}
+  return null;
+}
+
+const LANGUAGE: Record<Language, { setup: string; test: string; report: string }> = {
+  python: {
+    setup:
+      "      - uses: actions/setup-python@v6\n        with:\n          python-version: '3.x'\n" +
+      '      - run: |\n' +
+      '          python -m pip install --upgrade pip pytest\n' +
+      '          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi\n' +
+      '          if [ -f pyproject.toml ] || [ -f setup.py ]; then pip install -e .; fi',
+    test: 'pytest --junitxml=report.xml',
+    report: 'report.xml',
+  },
+  go: {
+    setup:
+      '      - uses: actions/setup-go@v6\n        with:\n          go-version-file: go.mod\n' +
+      '      - run: go install gotest.tools/gotestsum@latest',
+    test: 'gotestsum --junitfile report.xml -- ./...',
+    report: 'report.xml',
+  },
+};
+
 // The recipe in the faf-taf-git README: a failed run gets a receipt too (the
 // test step keeps going), only main is recorded, the job still goes red, and
 // one run at a time per branch so two receipts never race for the push.
@@ -125,13 +156,19 @@ function buildTafWorkflow(dir: string): string {
     `          ${cmd}\n`;
 
   let body: string;
+  let report = 'test-output.txt';
+  const lang = repoExists(dir, 'package.json') ? null : detectLanguage(dir);
   if (repoExists(dir, 'package.json')) {
     const r = RUNTIME[detectRunner(dir)];
     body = `${r.setup}\n      - run: ${r.install}\n${runTests(`${r.test} 2>&1 | tee test-output.txt`)}`;
+  } else if (lang) {
+    // faf-taf-git reads JUnit XML for these: each recipe writes one.
+    const l = LANGUAGE[lang];
+    report = l.report;
+    body = `${l.setup}\n${runTests(l.test)}`;
   } else {
-    // Non-JS repo — TAF is language-agnostic; leave a clear, honest placeholder.
-    // pytest, cargo, Go and Java can write JUnit XML, which faf-taf-git reads.
-    const placeholder = 'echo "TODO: your test command" 2>&1 | tee test-output.txt   # e.g. pytest -q 2>&1 | tee test-output.txt';
+    // No runner faf knows. TAF is language-agnostic; leave a clear, honest placeholder.
+    const placeholder = 'echo "TODO: your test command" 2>&1 | tee test-output.txt   # or any runner that writes JUnit XML';
     body = `      # TODO: set up your toolchain, then run your tests writing output to test-output.txt\n${runTests(placeholder)}`;
   }
 
@@ -140,7 +177,7 @@ function buildTafWorkflow(dir: string): string {
     "        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'\n" +
     `        uses: ${FAF_TAF_GIT}\n` +
     '        with:\n' +
-    '          test-output-file: test-output.txt\n' +
+    `          test-output-file: ${report}\n` +
     '          target-branch: taf-receipts\n' +
     '      - name: Fail the job if the tests failed\n' +
     "        if: steps.tests.outcome == 'failure'\n" +
@@ -158,6 +195,7 @@ function tafSetup(options: TafOptions): void {
     if (existsSync(wfPath)) {
       console.error(`${bold('×')} .github/workflows/taf.yml already exists — not overwriting.`);
       console.error(dim(`  Add the faf-taf-git step to your existing workflow, or remove taf.yml and re-run.`));
+      process.exitCode = 1; // refused: nothing written, and scripts can tell
       return; // non-destructive: refuse, never clobber
     }
     // Never through a linked .github or a taf.yml link (dangling included), and
