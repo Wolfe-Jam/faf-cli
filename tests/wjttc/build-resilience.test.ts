@@ -16,6 +16,9 @@
 import { describe, test, expect, beforeAll } from 'bun:test';
 import { existsSync, readFileSync, statSync } from 'fs';
 import { join } from 'path';
+
+/** L7: how long `npm ci --dry-run` may wait on the npm registry. */
+const L7_TIMEOUT_MS = 180_000;
 import { execSync } from 'child_process';
 
 const ROOT = join(__dirname, '../..');
@@ -207,24 +210,33 @@ describe('WJTTC ENGINE: build pipeline integrity', () => {
 
   // L7
   // npm ci --dry-run hits the npm registry. Most days < 15s; on slow registry
-  // days observed up to 42s. Match the subprocess timeout (60s) so the inner
-  // error message wins over a meaningless bun-test wall.
+  // days observed up to 42s, and a busy, swapping machine has passed 60s (three
+  // local runs on 2026-10-31). The subprocess gets 180s and the test a little
+  // more, so the inner message wins. A timeout is named as a timeout: it says
+  // nothing about the lockfile either way, so it still fails, but never as
+  // "out of sync".
   test('L7: package.json + package-lock.json are in sync (npm ci would pass)', () => {
     try {
       execSync('npm ci --dry-run', {
         cwd: ROOT,
         stdio: 'pipe',
-        timeout: 60_000,
+        timeout: L7_TIMEOUT_MS,
       });
     } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      const stderr = (err as { stderr?: Buffer }).stderr?.toString() ?? '';
+      const e = err as { code?: string; signal?: string; stderr?: Buffer; message?: string };
+      if (e.code === 'ETIMEDOUT' || e.signal === 'SIGTERM') {
+        throw new Error(
+          `npm ci --dry-run got no answer from the npm registry within ${L7_TIMEOUT_MS / 1000}s. ` +
+          'That is the network, not the lockfile: re-run L7 on its own.'
+        );
+      }
+      const stderr = e.stderr?.toString() ?? '';
       throw new Error(
         `package.json + package-lock.json out of sync. ` +
-        `Run \`npm install\` to resync.\n${stderr || msg}`
+        `Run \`npm install\` to resync.\n${stderr || e.message || String(err)}`
       );
     }
-  }, 60_000);
+  }, L7_TIMEOUT_MS + 10_000);
 
   // L10
   test('L10: ESLint config dependencies are resolvable', () => {
