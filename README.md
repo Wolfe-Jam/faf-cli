@@ -135,7 +135,18 @@ faf memory etch "a durable fact" --id my-fact
 faf memory show
 ```
 
-### What's New in v8.6.0 — The Birth Certificate Edition
+### What's New in v8.7.0 — The Receipts Edition
+
+**Your Test Receipts, in your terminal: `faf taf receipts` shows them, `taf setup` writes the recipe for JavaScript (Jest, Vitest, Bun), Python and Go, and every test run on your default branch gets one, red ones too.**
+
+A Test Receipt is one line of proof that your tests ran: when, the result, passed/total. [faf-taf-git](https://github.com/Wolfe-Jam/faf-taf-git) appends one to `.taf` on a `taf-receipts` branch for every CI run, so the record stays in git after the CI logs expire.
+
+- **`faf taf receipts`** shows them in your terminal, newest first, with a tally. `--limit`, `--json` and `--ref`. It reads git and never fetches or writes.
+- **`faf taf setup`** writes the workflow: JavaScript with Jest, Vitest or Bun, Python with pytest, and Go with gotestsum. Any other repo gets a placeholder to fill in.
+- **Red runs get a receipt too**, and the job still goes red. Only your default branch is recorded; pull requests run the tests and print none.
+- **Plain text when piped.** Colour shows only in a terminal; `NO_COLOR` and `FORCE_COLOR` are respected.
+
+### The Birth Certificate Edition (8.6)
 
 **One birth certificate per project, protected: `init --new` rebuilds project.faf without touching it, `go` and `edit` record every climb, and `faf dna --json` shows the lineage.**
 
@@ -238,6 +249,7 @@ npx faf-cli@latest card init     # seven questions → agent.fafa → A2A card, 
 
 **Recent sprint**
 
+- ✪ [8.7.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.7.0) The Receipts Edition — `faf taf receipts`; `taf setup` for JavaScript, Python and Go; red runs get a receipt
 - ✪ [8.6.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.6.0) The Birth Certificate Edition — `init --new` keeps `.faf-dna`; `go`/`edit` record growth; `faf dna --json`
 - ✪ [8.5.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.5.0) The Agent Skills Edition — faf detects skills repos; `skills` (10) and `skills-plugin` (14) name their framework
 - ✪ [8.4.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.4.0) The Skills Edition — `skills` (9) and `skills-plugin` (12) app-types
