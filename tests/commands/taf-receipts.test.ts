@@ -49,6 +49,19 @@ describe('ENGINE: receiptsFrom', () => {
     expect(receiptsFrom(mixed).receipts.map((r) => r.result)).toEqual(['LATE', 'NOON', 'DAY', 'ODD']);
   });
 
+  test('a date-time with no zone is read as UTC, whatever the machine\'s zone', () => {
+    const tz = process.env.TZ;
+    const order: string[][] = [];
+    const taf = 'test_history:\n  - timestamp: "2026-10-31 12:00"\n    result: NOZONE\n' +
+      '  - timestamp: "2026-10-31T13:00:00Z"\n    result: LATER\n  - timestamp: "2026-10-31T11:00:00Z"\n    result: EARLIER\n';
+    for (const zone of ['UTC', 'America/New_York', 'Asia/Tokyo']) {
+      process.env.TZ = zone;
+      order.push(receiptsFrom(taf).receipts.map((r) => r.result));
+    }
+    if (tz === undefined) {delete process.env.TZ;} else {process.env.TZ = tz;}
+    for (const o of order) {expect(o).toEqual(['LATER', 'NOZONE', 'EARLIER']);}
+  });
+
   test('a .taf with no test_history has no receipts', () => {
     expect(receiptsFrom('format_version: 1.0.0\n').receipts).toEqual([]);
   });
@@ -144,6 +157,26 @@ describe('BRAKE: faf taf receipts', () => {
   test('times show in UTC, whatever offset the receipt was written with', () => {
     onBranch('test_history:\n  - timestamp: "2026-10-31T09:00:00-04:00"\n    result: PASSED\n');
     expect(faf(dir, 'receipts').stdout).toContain('  2026-10-31 13:00  PASSED');
+  });
+
+  test('a no-zone time shows the same in every zone', () => {
+    onBranch('test_history:\n  - timestamp: "2026-10-31 12:00"\n    result: PASSED\n');
+    for (const zone of ['UTC', 'America/New_York', 'Asia/Tokyo']) {
+      const r = spawnSync(process.execPath, [CLI, 'taf', 'receipts'], { cwd: dir, encoding: 'utf-8', env: { ...process.env, NO_COLOR: '1', TZ: zone } });
+      expect(r.stdout).toContain('  2026-10-31 12:00  PASSED');
+    }
+  });
+
+  test('the branch is here but its .taf blob is not (partial clone): says so, and how to get it', () => {
+    onBranch(TAF);
+    // What a blob:none clone leaves: the tree lists .taf, the object is missing.
+    const blob = git(dir, 'rev-parse', 'taf-receipts:.taf').stdout.trim();
+    rmSync(join(dir, '.git', 'objects', blob.slice(0, 2), blob.slice(2)));
+    const r = faf(dir, 'receipts');
+    expect(r.status).toBe(1);
+    expect(r.stderr.trim().split('\n')).toHaveLength(1);
+    expect(r.stderr).toContain('taf-receipts is here, its .taf is not (a partial clone)');
+    expect(r.stderr).toContain('git show taf-receipts:.taf');
   });
 
   test('--limit must be a whole number, 1 or more', () => {
