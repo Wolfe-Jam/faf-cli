@@ -104,6 +104,69 @@ describe('PIT: faf taf setup', () => {
     writeFileSync(wfPath(), 'name: my own workflow\n');
     taf('setup', { write: true });
     expect(readFileSync(wfPath(), 'utf-8')).toBe('name: my own workflow\n'); // untouched
+    expect(process.exitCode).toBe(1); // refused, so scripts and CI can tell nothing was written
+    process.exitCode = 0;
+  });
+
+  test('a fresh --write leaves the exit code alone', () => {
+    writeFileSync(join(testDir, 'package.json'), '{"name":"x"}');
+    process.exitCode = 0;
+    taf('setup', { write: true });
+    expect(process.exitCode).toBe(0);
+  });
+
+  // Not JavaScript: faf-taf-git reads JUnit XML, so each recipe writes a report
+  // and points the receipt step at it.
+  const steps = () => {
+    const { parse } = require('yaml');
+    return parse(readFileSync(wfPath(), 'utf-8')).jobs.taf.steps as Array<Record<string, unknown>>;
+  };
+
+  for (const marker of ['pyproject.toml', 'setup.py', 'requirements.txt', 'pytest.ini']) {
+    test(`Python (${marker}): pytest writes JUnit XML and the receipt reads it`, () => {
+      writeFileSync(join(testDir, marker), '');
+      taf('setup', { write: true });
+      const wf = readFileSync(wfPath(), 'utf-8');
+      expect(wf).toContain('actions/setup-python@v6');
+      expect(wf).toContain('pytest --junitxml=report.xml');
+      expect(wf).not.toContain('TODO');
+      const receipt = steps().find((s) => s.name === 'Print the receipt') as { with: Record<string, string> };
+      expect(receipt.with['test-output-file']).toBe('report.xml');
+    });
+  }
+
+  test('Go (go.mod): gotestsum writes JUnit XML and the receipt reads it', () => {
+    writeFileSync(join(testDir, 'go.mod'), 'module x\n');
+    taf('setup', { write: true });
+    const wf = readFileSync(wfPath(), 'utf-8');
+    expect(wf).toContain('actions/setup-go@v6');
+    expect(wf).toContain('go-version-file: go.mod');
+    expect(wf).toContain('gotestsum --junitfile report.xml -- ./...');
+    const receipt = steps().find((s) => s.name === 'Print the receipt') as { with: Record<string, string> };
+    expect(receipt.with['test-output-file']).toBe('report.xml');
+  });
+
+  test('Python and Go recipes keep the red-run recipe and are valid YAML', () => {
+    writeFileSync(join(testDir, 'go.mod'), 'module x\n');
+    taf('setup', { write: true });
+    const names = steps().map((s) => s.name).filter(Boolean);
+    expect(names).toEqual(['Run tests', 'Print the receipt', 'Fail the job if the tests failed']);
+    expect(readFileSync(wfPath(), 'utf-8')).toContain('continue-on-error: true');
+  });
+
+  test('package.json wins over a Python marker (a JS repo with a requirements.txt)', () => {
+    writeFileSync(join(testDir, 'package.json'), '{"name":"x"}');
+    writeFileSync(join(testDir, 'requirements.txt'), '');
+    taf('setup', { write: true });
+    const wf = readFileSync(wfPath(), 'utf-8');
+    expect(wf).toContain('npm ci');
+    expect(wf).not.toContain('pytest');
+  });
+
+  test('Rust (Cargo.toml) keeps the placeholder: no recipe faf has checked yet', () => {
+    writeFileSync(join(testDir, 'Cargo.toml'), '[package]\nname = "x"\n');
+    taf('setup', { write: true });
+    expect(readFileSync(wfPath(), 'utf-8')).toContain('TODO: your test command');
   });
 
   test('default (no --write) prints only — writes nothing', () => {
