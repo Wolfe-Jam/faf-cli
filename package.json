@@ -95,7 +95,7 @@
   },
   "overrides": {
     "brace-expansion": "^1.1.18",
-    "fast-uri": "^3.1.5",
+    "fast-uri": "^3.1.9",
     "picomatch": "^4.0.5"
   },
   "engines": {
