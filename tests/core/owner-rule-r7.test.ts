@@ -151,7 +151,10 @@ describe('BRAKE R7-1: score, status, score --json, compile, refresh, check and s
 
 // ── 3: an --output folder that is not there ────────────────────────────────────
 
-describe('BRAKE R7-3: an --output folder that is not there is one line — "<folder> does not exist — nothing written"', () => {
+// Starts the CLI per command and runner; `faf compile --output` hung here on 2 of 2
+// Windows PR attempts on 10-31 (#167, faf-cli #200): nightly-only on Windows,
+// like R7-4 (see helpers/windows-timing.ts).
+describe.skipIf(windowsPr)('BRAKE R7-3: an --output folder that is not there is one line — "<folder> does not exist — nothing written"', () => {
   const FAF = 'faf_version: 2.5.0\nproject:\n  name: demo\n  goal: A demo tool\n  main_language: TypeScript\n';
   const SERVER = '{\n  "name": "io.github.example/demo",\n  "description": "Hand",\n  "version": "1.0.0"\n}\n';
   const project = (): string => {
