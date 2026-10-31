@@ -3,7 +3,7 @@ agent:
   name: faf-cli
   displayName: faf-cli
   id: urn:air:faf.one:agent:faf-cli
-  version: 8.6.0
+  version: 8.7.0
   description: "CLI for the IANA-registered .faf format: it detects a repo's stack into project.faf, scores it, and writes AGENTS.md, CLAUDE.md, GEMINI.md and .cursorrules from it."
   homepage: https://faf.one
 capabilities:

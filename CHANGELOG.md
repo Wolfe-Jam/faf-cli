@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v8.6.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v8.7.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [8.7.0] - 2026-10-31 — The Receipts Edition
+
+**Your Test Receipts, in your terminal: `faf taf receipts` shows them, `taf setup` writes the recipe for JavaScript (Jest, Vitest, Bun), Python and Go, and every test run on your default branch gets one, red ones too.** 2333 tests.
 
 ### Added
 - **`faf taf setup` writes real test steps for Python and Go.** Python (`pyproject.toml`, `setup.py`, `setup.cfg`, `requirements.txt` or `pytest.ini`): `pytest --junitxml=report.xml`. Go (`go.mod`): `gotestsum --junitfile report.xml`, installed with `GOTOOLCHAIN=auto` and pinned to v1.13.0, so a `go.mod` below Go 1.24 still gets it. Each points the receipt at its JUnit report, the format faf-taf-git reads for these runners. Rust and other repos keep the placeholder
