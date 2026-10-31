@@ -133,6 +133,29 @@ key_files:
     expect(out).not.toContain('key_files: project.faf');
     expect(exited).toBe(0);
   });
+
+  test('--strict exits 1 below 100%, and not at 100%', () => {
+    const fafPath = join(testDir, 'project.faf');
+    writeFileSync(fafPath, `faf_version: 2.5.0\nproject:\n  name: strict-test\n  goal: Test\n  main_language: TypeScript\n`);
+    const logSpy = spyOn(console, 'log').mockImplementation(() => {});
+    const exitSpy = spyOn(process, 'exit').mockImplementation((() => undefined) as never);
+
+    checkCommand(fafPath, { strict: true });
+    const below = exitSpy.mock.calls.map((c) => c[0]);
+    const out = logSpy.mock.calls.map((c) => String(c[0])).join('\n');
+
+    exitSpy.mockClear();
+    // This repo's own project.faf: every release ships at Trophy 100%.
+    checkCommand(join(import.meta.dir, '..', '..', 'project.faf'), { strict: true });
+    const trophy = exitSpy.mock.calls.length;
+
+    logSpy.mockRestore();
+    exitSpy.mockRestore();
+
+    expect(below).toEqual([1]);
+    expect(out).toContain('--strict requires 100%');
+    expect(trophy).toBe(0);
+  });
 });
 
 function readFafFromYaml(yaml: string) {

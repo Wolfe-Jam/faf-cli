@@ -1,4 +1,5 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
+import { spawnSync } from 'child_process';
 import { mkdirSync, writeFileSync, rmSync, existsSync, readFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
@@ -51,7 +52,7 @@ describe('PIT: faf taf setup', () => {
     taf('setup', { write: true });
     expect(existsSync(wfPath())).toBe(true);
     const wf = readFileSync(wfPath(), 'utf-8');
-    expect(wf).toContain('Wolfe-Jam/faf-taf-git@v2.4.2');
+    expect(wf).toContain('Wolfe-Jam/faf-taf-git@v2.4.3');
     expect(wf).toContain('test-output.txt');
     expect(wf).toContain('target-branch: taf-receipts');
   });
@@ -65,7 +66,9 @@ describe('PIT: faf taf setup', () => {
     expect(wf).toContain("if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'");
     expect(wf).toContain("if: steps.tests.outcome == 'failure'");
     expect(wf).toContain('contents: write');
-    expect(wf).toContain('group: taf-${{ github.ref }}');
+    // No concurrency group: GitHub cancels a waiting run when a newer one
+    // joins, and that run gets no receipt. faf-taf-git retries the push instead.
+    expect(wf).not.toContain('concurrency');
     expect(wf).not.toContain('cannot be gamed');
   });
 
@@ -122,12 +125,13 @@ describe('PIT: faf taf setup', () => {
     return parse(readFileSync(wfPath(), 'utf-8')).jobs.taf.steps as Array<Record<string, unknown>>;
   };
 
-  for (const marker of ['pyproject.toml', 'setup.py', 'requirements.txt', 'pytest.ini']) {
+  for (const marker of ['pyproject.toml', 'setup.py', 'setup.cfg', 'requirements.txt', 'pytest.ini']) {
     test(`Python (${marker}): pytest writes JUnit XML and the receipt reads it`, () => {
       writeFileSync(join(testDir, marker), '');
       taf('setup', { write: true });
       const wf = readFileSync(wfPath(), 'utf-8');
-      expect(wf).toContain('actions/setup-python@v6');
+      expect(wf).toContain('actions/setup-python@v7');
+      expect(wf).toContain('pip install --upgrade pip pytest');
       expect(wf).toContain('pytest --junitxml=report.xml');
       expect(wf).not.toContain('TODO');
       const receipt = steps().find((s) => s.name === 'Print the receipt') as { with: Record<string, string> };
@@ -139,8 +143,12 @@ describe('PIT: faf taf setup', () => {
     writeFileSync(join(testDir, 'go.mod'), 'module x\n');
     taf('setup', { write: true });
     const wf = readFileSync(wfPath(), 'utf-8');
-    expect(wf).toContain('actions/setup-go@v6');
+    expect(wf).toContain('actions/setup-go@v7');
     expect(wf).toContain('go-version-file: go.mod');
+    // setup-go pins the go.mod toolchain (GOTOOLCHAIN=local) and gotestsum
+    // needs Go 1.24: the install fetches a newer one, and the version is pinned.
+    expect(wf).toContain('GOTOOLCHAIN=auto go install gotest.tools/gotestsum@v1.13.0');
+    expect(wf).not.toContain('@latest');
     expect(wf).toContain('gotestsum --junitfile report.xml -- ./...');
     const receipt = steps().find((s) => s.name === 'Print the receipt') as { with: Record<string, string> };
     expect(receipt.with['test-output-file']).toBe('report.xml');
@@ -167,6 +175,85 @@ describe('PIT: faf taf setup', () => {
     writeFileSync(join(testDir, 'Cargo.toml'), '[package]\nname = "x"\n');
     taf('setup', { write: true });
     expect(readFileSync(wfPath(), 'utf-8')).toContain('TODO: your test command');
+  });
+
+  // faf-taf-git reads Jest, Vitest and Bun output. Any other JS runner gets the
+  // placeholder, never a step whose output can't be read (red on every run).
+  for (const [label, pkg] of [
+    ['jest in devDependencies', '{"name":"x","devDependencies":{"jest":"^30.0.0"},"scripts":{"test":"jest"}}'],
+    ['vitest in the test script', '{"name":"x","scripts":{"test":"vitest run"}}'],
+  ] as const) {
+    test(`JS, ${label}: runs the tests into test-output.txt`, () => {
+      writeFileSync(join(testDir, 'package.json'), pkg);
+      taf('setup', { write: true });
+      const wf = readFileSync(wfPath(), 'utf-8');
+      expect(wf).toContain('npm test 2>&1 | tee test-output.txt');
+      expect(wf).not.toContain('TODO');
+    });
+  }
+
+  test('JS, bun test with bun: runs the tests', () => {
+    writeFileSync(join(testDir, 'package.json'), '{"name":"x","scripts":{"test":"bun test"}}');
+    writeFileSync(join(testDir, 'bun.lock'), '');
+    taf('setup', { write: true });
+    expect(readFileSync(wfPath(), 'utf-8')).toContain('bun run test 2>&1 | tee test-output.txt');
+  });
+
+  test('JS, node:test or mocha: the placeholder, not a step faf-taf-git cannot read', () => {
+    for (const script of ['node --test', 'mocha']) {
+      rmSync(join(testDir, '.github'), { recursive: true, force: true });
+      writeFileSync(join(testDir, 'package.json'), JSON.stringify({ name: 'x', scripts: { test: script } }));
+      taf('setup', { write: true });
+      const wf = readFileSync(wfPath(), 'utf-8');
+      expect(wf).toContain('npm ci');
+      expect(wf).toContain('TODO: your test command');
+      expect(wf).toContain('faf-taf-git reads Jest, Vitest and Bun output, or JUnit XML');
+    }
+  });
+
+  test('pnpm: a version for the action unless package.json pins one', () => {
+    writeFileSync(join(testDir, 'pnpm-lock.yaml'), '');
+    writeFileSync(join(testDir, 'package.json'), '{"name":"x","scripts":{"test":"vitest"}}');
+    taf('setup', { write: true });
+    const loose = steps().find((st) => String(st.uses).startsWith('pnpm/action-setup')) as { uses: string; with?: Record<string, unknown> };
+    expect(loose.uses).toBe('pnpm/action-setup@v6');
+    expect(loose.with?.version).toBe(10);
+
+    rmSync(join(testDir, '.github'), { recursive: true, force: true });
+    writeFileSync(join(testDir, 'package.json'), '{"name":"x","packageManager":"pnpm@10.4.1","scripts":{"test":"vitest"}}');
+    taf('setup', { write: true });
+    const pinned = steps().find((st) => String(st.uses).startsWith('pnpm/action-setup')) as { with?: unknown };
+    expect(pinned.with).toBeUndefined(); // two versions would fail the action
+  });
+
+  test('records the default branch, not always main', () => {
+    spawnSync('git', ['init', '-q', '-b', 'trunk'], { cwd: testDir });
+    writeFileSync(join(testDir, 'package.json'), '{"name":"x"}');
+    taf('setup', { write: true });
+    const { parse } = require('yaml');
+    const wf = parse(readFileSync(wfPath(), 'utf-8'));
+    expect(wf.on.push.branches).toEqual(['trunk']);
+    expect(wf.jobs.taf.steps.find((st: { name?: string }) => st.name === 'Print the receipt').if).toContain("'refs/heads/trunk'");
+  });
+
+  test('outside git it records main', () => {
+    writeFileSync(join(testDir, 'package.json'), '{"name":"x"}');
+    taf('setup', { write: true });
+    expect(readFileSync(wfPath(), 'utf-8')).toContain('branches: [main]');
+  });
+
+  test('every action in every recipe is on its current major', () => {
+    const recipes: Array<[string, string]> = [['package.json', '{"name":"x"}'], ['go.mod', 'module x\n'], ['pyproject.toml', '']];
+    for (const [file, body] of recipes) {
+      // Never remove testDir itself: it is the cwd, and Windows refuses that.
+      rmSync(join(testDir, '.github'), { recursive: true, force: true });
+      writeFileSync(join(testDir, file), body);
+      taf('setup', { write: true });
+      const wf = readFileSync(wfPath(), 'utf-8');
+      rmSync(join(testDir, file));
+      expect(wf).toContain('actions/checkout@v7');
+      expect(wf).not.toMatch(/actions\/[a-z-]+@v6/);
+    }
   });
 
   test('default (no --write) prints only — writes nothing', () => {

@@ -426,7 +426,7 @@ jobs:
           fi
 
       - name: Generate TAF Receipt
-        uses: Wolfe-Jam/faf-taf-git@v2.4.2
+        uses: Wolfe-Jam/faf-taf-git@v2.4.3
         with:
           test-output-file: /tmp/test-output.txt
           auto-commit: 'true'

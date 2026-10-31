@@ -1,4 +1,5 @@
-import { existsSync } from 'fs';
+import { spawnSync } from 'child_process';
+import { existsSync, readFileSync } from 'fs';
 import { dirname, join, resolve } from 'path';
 import { findFafFile, readFaf, readFafRaw, withKernel } from '../interop/faf.js';
 import { scoreFafYaml } from '../core/scorer.js';
@@ -32,7 +33,7 @@ export function isTafSnapshot(bytes: Uint8Array): boolean {
   }
 }
 
-const FAF_TAF_GIT = 'Wolfe-Jam/faf-taf-git@v2.4.2';
+const FAF_TAF_GIT = 'Wolfe-Jam/faf-taf-git@v2.4.3';
 
 /**
  * `faf taf [subcommand]`
@@ -78,6 +79,33 @@ function detectRunner(dir: string): Runner {
   return 'npm';
 }
 
+/** package.json, or {} when it can't be read. */
+function readPackageJson(dir: string): Record<string, unknown> {
+  try {
+    const pkg = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf-8')) as unknown;
+    return pkg && typeof pkg === 'object' && !Array.isArray(pkg) ? (pkg as Record<string, unknown>) : {};
+  } catch {
+    return {};
+  }
+}
+
+/** faf-taf-git reads Jest, Vitest and Bun output (its README's runner table).
+ *  True when the repo's tests run on one of them. */
+function readableJsRunner(pkg: Record<string, unknown>, runner: Runner): boolean {
+  const deps = { ...(pkg.devDependencies as object), ...(pkg.dependencies as object) };
+  if ('jest' in deps || 'vitest' in deps) {return true;}
+  const test = (pkg.scripts as Record<string, unknown> | undefined)?.test;
+  if (typeof test !== 'string') {return false;}
+  return /\b(jest|vitest)\b/.test(test) || (runner === 'bun' && /\bbun test\b/.test(test));
+}
+
+/** pnpm/action-setup needs a version unless package.json pins one. */
+function pnpmSetup(pkg: Record<string, unknown>): string {
+  const pinned = typeof pkg.packageManager === 'string' ||
+    (pkg.devEngines as { packageManager?: unknown } | undefined)?.packageManager !== undefined;
+  return pinned ? '      - uses: pnpm/action-setup@v6' : '      - uses: pnpm/action-setup@v6\n        with:\n          version: 10';
+}
+
 const RUNTIME: Record<Runner, { setup: string; install: string; test: string }> = {
   bun: {
     setup: '      - uses: oven-sh/setup-bun@v2',
@@ -85,17 +113,17 @@ const RUNTIME: Record<Runner, { setup: string; install: string; test: string }> 
     test: 'bun run test',
   },
   pnpm: {
-    setup: "      - uses: pnpm/action-setup@v4\n      - uses: actions/setup-node@v6\n        with:\n          node-version: '24.x'",
+    setup: "      - uses: actions/setup-node@v7\n        with:\n          node-version: '24.x'",
     install: 'pnpm install --frozen-lockfile',
     test: 'pnpm test',
   },
   yarn: {
-    setup: "      - uses: actions/setup-node@v6\n        with:\n          node-version: '24.x'",
+    setup: "      - uses: actions/setup-node@v7\n        with:\n          node-version: '24.x'",
     install: 'yarn install --frozen-lockfile',
     test: 'yarn test',
   },
   npm: {
-    setup: "      - uses: actions/setup-node@v6\n        with:\n          node-version: '24.x'",
+    setup: "      - uses: actions/setup-node@v7\n        with:\n          node-version: '24.x'",
     install: 'npm ci',
     test: 'npm test',
   },
@@ -115,7 +143,7 @@ function detectLanguage(dir: string): Language | null {
 const LANGUAGE: Record<Language, { setup: string; test: string; report: string }> = {
   python: {
     setup:
-      "      - uses: actions/setup-python@v6\n        with:\n          python-version: '3.x'\n" +
+      "      - uses: actions/setup-python@v7\n        with:\n          python-version: '3.x'\n" +
       '      - run: |\n' +
       '          python -m pip install --upgrade pip pytest\n' +
       '          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi\n' +
@@ -125,42 +153,74 @@ const LANGUAGE: Record<Language, { setup: string; test: string; report: string }
   },
   go: {
     setup:
-      '      - uses: actions/setup-go@v6\n        with:\n          go-version-file: go.mod\n' +
-      '      - run: go install gotest.tools/gotestsum@latest',
+      '      - uses: actions/setup-go@v7\n        with:\n          go-version-file: go.mod\n' +
+      // setup-go sets GOTOOLCHAIN=local, and gotestsum needs Go 1.24: auto
+      // fetches a newer toolchain for this install only.
+      '      - run: GOTOOLCHAIN=auto go install gotest.tools/gotestsum@v1.13.0',
     test: 'gotestsum --junitfile report.xml -- ./...',
     report: 'report.xml',
   },
 };
 
+const runTests = (cmd: string) =>
+  '      - name: Run tests\n' +
+  '        id: tests\n' +
+  '        continue-on-error: true    # keep going, so a failed run still gets a receipt\n' +
+  '        run: |\n' +
+  '          set -o pipefail\n' +
+  `          ${cmd}\n`;
+
+/** Setup, install and test steps for a repo with a package.json. */
+function jsBody(dir: string): string {
+  const runner = detectRunner(dir);
+  const pkg = readPackageJson(dir);
+  const r = RUNTIME[runner];
+  const setup = runner === 'pnpm' ? `${pnpmSetup(pkg)}\n${r.setup}` : r.setup;
+  // Not Jest, Vitest or Bun: faf-taf-git can't read the output, and every run
+  // would go red. Leave the step to the user, like an unknown language.
+  const tests = readableJsRunner(pkg, runner)
+    ? runTests(`${r.test} 2>&1 | tee test-output.txt`)
+    : `      # TODO: faf-taf-git reads Jest, Vitest and Bun output, or JUnit XML.
+      # Run your tests so they write one of those, and point test-output-file at it.
+${runTests(`echo "TODO: your test command" 2>&1 | tee test-output.txt   # e.g. ${r.test} 2>&1 | tee test-output.txt`)}`;
+  return `${setup}\n      - run: ${r.install}\n${tests}`;
+}
+
+/** The branch receipts are recorded for: the repo's default branch (origin's
+ *  HEAD), else the current branch, else main. */
+function defaultBranch(dir: string): string {
+  const git = (args: string[]) => {
+    const r = spawnSync('git', args, { cwd: dir, encoding: 'utf-8' });
+    return r.status === 0 ? r.stdout.trim() : '';
+  };
+  const name = git(['symbolic-ref', '--short', 'refs/remotes/origin/HEAD']).replace(/^origin\//, '') ||
+    git(['branch', '--show-current']);
+  // Only a plain branch name goes into the YAML.
+  return /^[\w./-]+$/.test(name) ? name : 'main';
+}
+
 // The recipe in the faf-taf-git README: a failed run gets a receipt too (the
-// test step keeps going), only main is recorded, the job still goes red, and
-// one run at a time per branch so two receipts never race for the push.
+// test step keeps going), only the default branch is recorded, and the job
+// still goes red. No concurrency group: GitHub cancels a waiting run when a
+// newer one joins, so that run would get no receipt. faf-taf-git retries a
+// push that lost a race instead.
 function buildTafWorkflow(dir: string): string {
+  const branch = defaultBranch(dir);
   const head =
     'name: TAF Receipts\n' +
-    '# Prints a Test Receipt (.taf) for every run on main: proof over time.\n' +
+    `# Prints a Test Receipt (.taf) for every run on ${branch}: proof over time.\n` +
     '# Written by `faf taf setup`. Docs: https://github.com/Wolfe-Jam/faf-taf-git\n' +
-    'on:\n  push:\n    branches: [main]\n  pull_request:\n  workflow_dispatch:\n\n' +
-    'concurrency:\n  group: taf-${{ github.ref }}   # one run at a time per branch, so receipts never collide\n\n' +
+    `on:\n  push:\n    branches: [${branch}]\n  pull_request:\n  workflow_dispatch:\n\n` +
     'jobs:\n  taf:\n    runs-on: ubuntu-latest\n' +
     '    permissions:\n      contents: write              # lets the action save receipts\n' +
     '    steps:\n' +
-    '      - uses: actions/checkout@v6\n';
-
-  const runTests = (cmd: string) =>
-    '      - name: Run tests\n' +
-    '        id: tests\n' +
-    '        continue-on-error: true    # keep going, so a failed run still gets a receipt\n' +
-    '        run: |\n' +
-    '          set -o pipefail\n' +
-    `          ${cmd}\n`;
+    '      - uses: actions/checkout@v7\n';
 
   let body: string;
   let report = 'test-output.txt';
   const lang = repoExists(dir, 'package.json') ? null : detectLanguage(dir);
   if (repoExists(dir, 'package.json')) {
-    const r = RUNTIME[detectRunner(dir)];
-    body = `${r.setup}\n      - run: ${r.install}\n${runTests(`${r.test} 2>&1 | tee test-output.txt`)}`;
+    body = jsBody(dir);
   } else if (lang) {
     // faf-taf-git reads JUnit XML for these: each recipe writes one.
     const l = LANGUAGE[lang];
@@ -174,7 +234,7 @@ function buildTafWorkflow(dir: string): string {
 
   const receipt =
     '      - name: Print the receipt\n' +
-    "        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'\n" +
+    `        if: github.ref == 'refs/heads/${branch}' && github.event_name != 'pull_request'\n` +
     `        uses: ${FAF_TAF_GIT}\n` +
     '        with:\n' +
     `          test-output-file: ${report}\n` +
@@ -210,7 +270,7 @@ function tafSetup(options: TafOptions): void {
   console.log(`${fafCyan('TAF setup')} ${dim('— Test Receipt Printer: proof over time')}\n`);
   console.log(dim('Run `faf taf setup --write` to create this, or paste it into a workflow:\n'));
   console.log(workflow);
-  console.log(dim('Then commit + push. One receipt appends to .taf (taf-receipts branch) per CI run on main, red runs included.'));
+  console.log(dim('Then commit + push. One receipt appends to .taf (taf-receipts branch) per CI run on your default branch, red runs included.'));
 }
 
 // ── faf taf (default) — score snapshot ──────────────────────────────────────

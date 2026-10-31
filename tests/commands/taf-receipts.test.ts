@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
-import { mkdtempSync, rmSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { spawnSync } from 'child_process';
@@ -40,6 +40,15 @@ describe('ENGINE: receiptsFrom', () => {
     expect([old.passed, old.total, old.trigger]).toEqual([null, null, null]);
   });
 
+  test('sorted by time, not by text: offsets and date-only stamps', () => {
+    const mixed = 'test_history:\n' +
+      '  - timestamp: "2026-10-31T09:00:00-04:00"\n    result: LATE\n' + // 13:00 UTC
+      '  - timestamp: "2026-10-31T12:00:00Z"\n    result: NOON\n' +
+      '  - timestamp: "2026-10-30"\n    result: DAY\n' +
+      '  - timestamp: "not a date"\n    result: ODD\n';
+    expect(receiptsFrom(mixed).receipts.map((r) => r.result)).toEqual(['LATE', 'NOON', 'DAY', 'ODD']);
+  });
+
   test('a .taf with no test_history has no receipts', () => {
     expect(receiptsFrom('format_version: 1.0.0\n').receipts).toEqual([]);
   });
@@ -75,7 +84,7 @@ describe('BRAKE: faf taf receipts', () => {
     const r = faf(dir, 'receipts');
     expect(r.status).toBe(0);
     const lines = r.stdout.trim().split('\n');
-    expect(lines[0]).toBe('TAF receipts — demo · 4 on taf-receipts');
+    expect(lines[0]).toBe('TAF receipts — demo · 4 on taf-receipts · times in UTC');
     expect(lines[1]).toBe('  2026-10-31 10:00  PASSED    11/12  1 skipped');
     expect(lines[2]).toBe('  2026-10-30 10:00  FAILED    9/12  3 failed');
     expect(lines[4]).toBe('  2025-10-27 14:32  IMPROVED  —');
@@ -112,6 +121,29 @@ describe('BRAKE: faf taf receipts', () => {
     expect(r.stdout).toBe('');
     expect(r.stderr.trim().split('\n')).toHaveLength(1);
     expect(r.stderr).toContain('git fetch origin taf-receipts');
+  });
+
+  test('--ref is never passed to git as an option: refused, nothing written', () => {
+    onBranch(TAF);
+    const out = join(dir, 'inj');
+    const r = faf(dir, 'receipts', '--ref', `--output=${out}`);
+    expect(r.status).toBe(1);
+    expect(r.stderr).toContain('--ref takes a git ref, not an option');
+    expect(existsSync(`${out}:.taf`)).toBe(false);
+    expect(readdirSync(dir).filter((f) => f.startsWith('inj'))).toEqual([]);
+  });
+
+  test('a .taf that is a folder: one line, exit 1, no stack trace', () => {
+    mkdirSync(join(dir, '.taf'));
+    const r = faf(dir, 'receipts');
+    expect(r.status).toBe(1);
+    expect(r.stderr.trim().split('\n')).toHaveLength(1);
+    expect(r.stderr).not.toContain('EISDIR');
+  });
+
+  test('times show in UTC, whatever offset the receipt was written with', () => {
+    onBranch('test_history:\n  - timestamp: "2026-10-31T09:00:00-04:00"\n    result: PASSED\n');
+    expect(faf(dir, 'receipts').stdout).toContain('  2026-10-31 13:00  PASSED');
   });
 
   test('--limit must be a whole number, 1 or more', () => {

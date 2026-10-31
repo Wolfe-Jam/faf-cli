@@ -112,6 +112,8 @@ Run `faf` with no arguments:
 | `faf memory` | `.fafm` soul ops — convert Claude memory, etch, recall, ls, show |
 | `faf diff` / `log` | Semantic context diff + score timeline across git history |
 | `faf hooks --install` | Pre-commit guard against context regression |
+| `faf taf setup` | Write the CI workflow that prints a Test Receipt for every run (JavaScript with Jest, Vitest or Bun; Python; Go) |
+| `faf taf receipts` | Your Test Receipts in the terminal, newest first |
 | `faf compile` / `decompile` | `.faf` → `.fafb` **v2** sealed brick; `decompile` shows sections as JSON |
 | `faf check` | Validate a `.faf` file |
 | `faf show` | Render `project.faf` to a browsable HTML page |
