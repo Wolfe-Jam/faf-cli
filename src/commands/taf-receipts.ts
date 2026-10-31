@@ -1,5 +1,5 @@
 import { spawnSync } from 'child_process';
-import { existsSync, readFileSync } from 'fs';
+import { readFileSync, statSync } from 'fs';
 import { join } from 'path';
 import { parse } from 'yaml';
 import { bold, dim, fafCyan } from '../ui/colors.js';
@@ -48,7 +48,10 @@ export function receiptsFrom(tafYaml: string): { project: string | null; receipt
   const doc = parse(tafYaml) as Record<string, unknown> | null;
   const history: unknown[] = Array.isArray(doc?.test_history) ? doc.test_history : [];
   const receipts = history.map(toReceipt).filter((r): r is Receipt => r !== null);
-  receipts.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+  // By time, not by text: hand-written receipts mix offsets and formats.
+  // A timestamp that isn't a date goes last.
+  const at = (r: Receipt) => Date.parse(r.timestamp);
+  receipts.sort((a, b) => (Number.isNaN(at(b)) ? -Infinity : at(b)) - (Number.isNaN(at(a)) ? -Infinity : at(a)) || b.timestamp.localeCompare(a.timestamp));
   return { project: str(doc?.project), receipts };
 }
 
@@ -57,14 +60,24 @@ export function receiptsFrom(tafYaml: string): { project: string | null; receipt
 function readTaf(dir: string, ref?: string): { text: string; source: string } | null {
   const refs = ref ? [ref] : ['origin/taf-receipts', 'taf-receipts'];
   for (const r of refs) {
-    const out = spawnSync('git', ['show', `${r}:.taf`], { cwd: dir, encoding: 'utf-8', maxBuffer: 64 * 1024 * 1024 });
+    // --end-of-options: a ref is never read as a git option (--output= writes a file).
+    // GIT_NO_LAZY_FETCH: a partial clone fetches a missing blob otherwise (git 2.44+).
+    const out = spawnSync('git', ['show', '--end-of-options', `${r}:.taf`], {
+      cwd: dir, encoding: 'utf-8', maxBuffer: 64 * 1024 * 1024, env: { ...process.env, GIT_NO_LAZY_FETCH: '1' },
+    });
     if (out.status === 0 && typeof out.stdout === 'string') {return { text: out.stdout, source: r };}
   }
-  if (!ref && existsSync(join(dir, '.taf'))) {return { text: readFileSync(join(dir, '.taf'), 'utf-8'), source: '.taf' };}
+  const local = join(dir, '.taf');
+  if (!ref && statSync(local, { throwIfNoEntry: false })?.isFile()) {return { text: readFileSync(local, 'utf-8'), source: '.taf' };}
   return null;
 }
 
-const day = (iso: string) => iso.replace('T', ' ').slice(0, 16);
+/** The time in UTC, to the minute; a date-only or unreadable stamp as written. */
+const day = (stamp: string) => {
+  const t = Date.parse(stamp);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(stamp) || Number.isNaN(t)) {return stamp;}
+  return new Date(t).toISOString().replace('T', ' ').slice(0, 16);
+};
 const counts = (r: Receipt) => {
   if (r.passed === null || r.total === null) {return '—';}
   const extra = [r.failed ? `${r.failed} failed` : '', r.skipped ? `${r.skipped} skipped` : ''].filter(Boolean).join(', ');
@@ -83,6 +96,10 @@ function limitOf(raw: string | number | undefined): number {
 
 /** The receipts in the .taf found, or one line and exit 1. */
 function loadReceipts(dir: string, ref?: string): { source: string; project: string | null; receipts: Receipt[] } {
+  if (ref?.startsWith('-')) {
+    console.error(`${bold('×')} --ref takes a git ref, not an option: ${ref}`);
+    process.exit(1);
+  }
   const found = readTaf(dir, ref);
   if (!found) {
     const where = ref ? `${ref}:.taf` : 'origin/taf-receipts, taf-receipts or ./.taf';
@@ -99,7 +116,7 @@ function loadReceipts(dir: string, ref?: string): { source: string; project: str
 
 function printReceipts(source: string, project: string | null, total: number, shown: Receipt[]): void {
   const name = project ? ` — ${project}` : '';
-  console.log(`${fafCyan('TAF receipts')}${name} ${dim(`· ${total} on ${source}`)}`);
+  console.log(`${fafCyan('TAF receipts')}${name} ${dim(`· ${total} on ${source} · times in UTC`)}`);
   if (shown.length === 0) {
     console.log(dim('  no receipts yet'));
     return;
