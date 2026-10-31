@@ -347,7 +347,10 @@ program
 
 program
   .command('taf [subcommand]')
-  .description('TAF Receipts — `faf taf setup` prints the CI receipt workflow (--write creates it); bare snapshot deprecated → faf score --json')
+  .description('TAF Receipts — `faf taf setup` prints the CI receipt workflow (--write creates it); `faf taf receipts` shows them; bare snapshot deprecated → faf score --json')
+  .option('--limit <n>', 'taf receipts: how many to show (default 10)')
+  .option('--json', 'taf receipts: output as JSON')
+  .option('--ref <ref>', 'taf receipts: git ref to read .taf from (default origin/taf-receipts)')
   .option('--output <path>', 'Write score snapshot to file')
   .option('--write', 'taf setup: create .github/workflows/taf.yml')
   .option('--force', 'With --output: replace a file faf cannot prove it wrote (edited since, or not a TAF snapshot)')

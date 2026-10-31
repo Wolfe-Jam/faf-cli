@@ -11,9 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **`faf taf receipts`:** your Test Receipts in the terminal, newest first: date, result, passed/total, skipped. A tally line, `--limit` (default 10), `--json` and `--ref`. It reads `origin/taf-receipts`, then `taf-receipts`, then a `.taf` in the folder, and never fetches. Older hand-written receipts show `—` where they kept no counts
 - **Colour only in a terminal; `NO_COLOR` and `FORCE_COLOR` respected.** Piped output, CI logs and agent tools now get plain text, with no escape codes. `NO_COLOR` (any value, no-color.org) turns colour off; `FORCE_COLOR` turns it on, even when piped. Bare `faf` without colour prints a one-line header in place of the Nelly pixel art
 
 ### Changed
+- **`faf taf <unknown>` is refused in one line.** A typo (`faf taf receipt`) used to run the deprecated score snapshot without a word
 - **`faf taf setup` writes the faf-taf-git recipe:** a failed test run now gets a receipt too (the test step keeps going, then the job fails at the end), only `main` is recorded, `contents: write` is granted, and a concurrency group stops two runs racing for the receipt push. The old template recorded green runs only. Actions moved to checkout/setup-node v6 and Node 24. "cannot be gamed" is gone from its output. `tests/commands/taf-setup.test.ts`. It pins faf-taf-git v2.4.2 (JUnit XML parser, patched undici), the same as faf-cli's own CI.
 
 ## [8.6.0] - 2026-10-30 — The Birth Certificate Edition
