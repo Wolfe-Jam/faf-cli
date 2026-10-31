@@ -1,5 +1,6 @@
-import { FafDNAManager } from '../core/faf-dna.js';
+import { FafDNAManager, type FafDNA } from '../core/faf-dna.js';
 import { bold, dim, fafCyan, orange } from '../ui/colors.js';
+import { dnaGitignoreWarning, dnaIgnoredWithoutReason } from '../core/dna-gitignore.js';
 
 /** After recording growth: when the `.faf-dna` is one faf did not write (and
  *  so was left as it is), say why on stderr, in one line. */
@@ -8,14 +9,59 @@ export function sayWhyDnaIsLeft(dna: FafDNAManager): void {
   if (why) {console.error(`faf: ${why}`);}
 }
 
+export interface DnaOptions {
+  json?: boolean;
+}
+
+/** The lineage as data: `faf dna --json`. Birth, where it is now, every
+ *  version, and the earlier lives a reset ended. Written from the file as
+ *  read, so the same .faf-dna gives the same JSON. `faf_written` is false for
+ *  a .faf-dna faf did not write, and `note` says why. */
+export function dnaJson(dna: FafDNAManager, data: FafDNA): Record<string, unknown> {
+  const birth = data.birthCertificate;
+  const peak = data.growth.milestones.find((m) => m.type === 'peak');
+  return {
+    born: birth.born,
+    birth_dna: birth.birthDNA,
+    certificate: birth.certificate,
+    current: data.current.score,
+    version: data.current.version,
+    growth: data.current.score - birth.birthDNA,
+    peak: peak ? peak.score : Math.max(birth.birthDNA, ...data.versions.map((v) => v.score)),
+    journey: dna.getJourney(),
+    versions: data.versions.map((v) => ({
+      version: v.version,
+      score: v.score,
+      timestamp: v.timestamp,
+      changes: Array.isArray(v.changes) ? v.changes : [],
+    })),
+    prior_lives: (data.priorLineage ?? []).map((l) => ({
+      born: l.born,
+      birth_dna: l.birthDNA,
+      last_score: l.lastScore,
+      ended_at: l.endedAt,
+      certificate: l.certificate,
+    })),
+    gitignored: dnaIgnoredWithoutReason(process.cwd()) !== null,
+    faf_written: dna.readOnlyReason() === null,
+    note: dna.readOnlyReason(),
+  };
+}
+
 /** `faf dna` — show your FAF DNA journey at a glance: 22% → 85% → 99% ← 92%. */
-export function dnaCommand(): void {
+export function dnaCommand(options: DnaOptions = {}): void {
   const dna = new FafDNAManager(process.cwd());
-  if (!dna.load()) {
+  const data = dna.load();
+  if (!data) {
     // A .faf-dna that is there but cannot be read (not UTF-8, not JSON, …) says why.
     const why = dna.readOnlyReason();
     console.error(why ? `${bold('×')} ${why}` : `${bold('×')} No FAF DNA found. Run ${bold("'faf init'")} to start your journey.`);
     process.exit(1);
+  }
+
+  if (options.json) {
+    console.log(JSON.stringify(dnaJson(dna, data), null, 2));
+    return;
   }
 
   const journey = dna.getJourney();
@@ -35,12 +81,13 @@ export function dnaCommand(): void {
   if (why) {
     // faf did not write this .faf-dna (another tool's shape, or text faf cannot
     // prove it wrote). faf reads what it can and never rewrites it; growth is
-    // not recorded into it. The offer of --force says "and keeps this one"
-    // because since a3b400d6 a reset carries the life it ends into
-    // `priorLineage` — the old wording read as a choice between a fresh start
-    // and the record, which is no longer the trade.
-    console.log(dim(`   ${why} ${bold("'faf init --force'")} starts a fresh lineage and keeps this one.`));
+    // not recorded into it. That is the protection, not a fault: a birth
+    // certificate is never changed or reissued, so faf offers no way round it.
+    console.log(dim(`   ${why} Your birth certificate is protected: faf never changes it.`));
   }
+
+  const ignored = dnaGitignoreWarning(process.cwd());
+  if (ignored) {console.log(dim(`   ⚠ ${ignored}`));}
 
   const log = dna.getLog();
   if (log.length > 1) {
