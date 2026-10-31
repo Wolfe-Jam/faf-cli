@@ -6,9 +6,16 @@ import { makeDirInside, repoExists, safeWriteFile } from '../core/safe-write.js'
 import { writeRendered } from '../core/render-hash.js';
 import { refuseMissingOutputFolder } from '../core/refusal.js';
 import { fafCyan, dim, bold } from '../ui/colors.js';
+import { tafReceipts } from './taf-receipts.js';
 
 export interface TafOptions {
   output?: string;
+  /** taf receipts: how many to show (default 10). */
+  limit?: string;
+  /** taf receipts: JSON for scripts. */
+  json?: boolean;
+  /** taf receipts: the git ref whose .taf to read (default origin/taf-receipts, then taf-receipts, then ./.taf). */
+  ref?: string;
   write?: boolean;
   /** With --output: replace a file faf cannot prove it wrote (edited since, or not a TAF snapshot). */
   force?: boolean;
@@ -30,7 +37,8 @@ const FAF_TAF_GIT = 'Wolfe-Jam/faf-taf-git@v2.4.2';
 /**
  * `faf taf [subcommand]`
  *   (none)  — score snapshot — DEPRECATED, folded into `faf score --json` (alias kept one release)
- *   setup   — write/print the CI step that activates the TAF Receipt Printer
+ *   setup     — write/print the CI step that activates the TAF Receipt Printer
+ *   receipts  — show the Test Receipts, newest first
  */
 export function tafCommand(subcommand?: string | TafOptions, options: TafOptions = {}): void {
   // Back-compat: legacy/direct callers pass options as the first arg
@@ -42,6 +50,15 @@ export function tafCommand(subcommand?: string | TafOptions, options: TafOptions
   if (subcommand === 'setup') {
     tafSetup(options);
     return;
+  }
+  if (subcommand === 'receipts') {
+    tafReceipts(options);
+    return;
+  }
+  if (subcommand !== undefined) {
+    // A typo used to fall through to the deprecated snapshot without a word.
+    console.error(`${bold('×')} Unknown: faf taf ${subcommand}. Use ${bold('faf taf setup')} or ${bold('faf taf receipts')}.`);
+    process.exit(1);
   }
   tafSnapshot(options);
 }
