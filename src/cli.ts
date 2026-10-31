@@ -406,32 +406,37 @@ if (process.argv.length <= 2) {
   // Wrap top-level await in an async IIFE so `bun build --compile` accepts it.
   // (Plain `bun build` tolerates top-level await; --compile is stricter.)
   (async () => {
-    const { bold, dim, fafCyan } = await import('./ui/colors.js');
+    const { bold, dim, fafCyan, colorOn } = await import('./ui/colors.js');
     const cwd = process.cwd().replace(process.env.HOME ?? '', '~');
 
-    // Nelly — pixel-art elephant (10×6 grid, half-block rendering)
-    const G = '\x1b[38;2;150;150;150m';   // gray fg
-    const GB = '\x1b[48;2;150;150;150m';  // gray bg
-    const DF = '\x1b[38;2;29;29;29m';     // dark fg (▄ trick)
-    const DB = '\x1b[48;2;29;29;29m';     // dark bg
-    const RS = '\x1b[0m';
-    console.log('');
-    // Row 1: back arc — canonical (March 23, commit 7eb1042)
-    // Row 2: body — cell 3 is a SOLID DARK block (DF█ on GB bg) = the eye.
-    // The canonical's `${DB}${G}▀` head-curve at cell 3 already put the eye
-    // there as a subtle dark-bottom-half. Replacing with a full dark cell
-    // makes the eye visible in any rendering (monochrome too) without changing
-    // the silhouette width — `█` and `█` are the same character, just
-    // re-coloured.
-    console.log(`${DB} ${G}▄${GB}███████${DB}${G}▄${RS}`);
-    console.log(`${DB} ${GB}${G}█${DF}█${G}███████${RS}  ${fafCyan(bold('faf'))} ${dim(`v${VERSION}`)}`);
-    const GR = '\x1b[38;2;39;174;96m';    // grass green
-    // Restore Nelly's clean dark gaps between legs (pre-grass-between-feet).
-    // The fa74012 fix ("restore Nelly's eye — revert grass between feet") was
-    // accidentally re-regressed somewhere between v6.0.12 and v6.3.3 (likely the
-    // IIFE wrap copied an older line). Pinning the canonical here.
-    console.log(`${DB}${G}▀${GB}${DF}▀${DB} ${GB}${G}██${DB}  ${GB}${G}██${DB} ${RS}  ${dim('Nelly Never Forgets')}`);
-    console.log(`${GR}▔▔▔▔▔▔▔▔▔▔▔▔${RS}`);
+    if (!colorOn()) {
+      // Nelly is drawn in colour; without it she is a jumble of blocks.
+      console.log(`${fafCyan(bold('faf'))} ${dim(`v${VERSION}`)}  ${dim('Nelly Never Forgets')}`);
+    } else {
+      // Nelly — pixel-art elephant (10×6 grid, half-block rendering)
+      const G = '\x1b[38;2;150;150;150m';   // gray fg
+      const GB = '\x1b[48;2;150;150;150m';  // gray bg
+      const DF = '\x1b[38;2;29;29;29m';     // dark fg (▄ trick)
+      const DB = '\x1b[48;2;29;29;29m';     // dark bg
+      const RS = '\x1b[0m';
+      console.log('');
+      // Row 1: back arc — canonical (March 23, commit 7eb1042)
+      // Row 2: body — cell 3 is a SOLID DARK block (DF█ on GB bg) = the eye.
+      // The canonical's `${DB}${G}▀` head-curve at cell 3 already put the eye
+      // there as a subtle dark-bottom-half. Replacing with a full dark cell
+      // makes the eye visible in any rendering (monochrome too) without changing
+      // the silhouette width — `█` and `█` are the same character, just
+      // re-coloured.
+      console.log(`${DB} ${G}▄${GB}███████${DB}${G}▄${RS}`);
+      console.log(`${DB} ${GB}${G}█${DF}█${G}███████${RS}  ${fafCyan(bold('faf'))} ${dim(`v${VERSION}`)}`);
+      const GR = '\x1b[38;2;39;174;96m';    // grass green
+      // Restore Nelly's clean dark gaps between legs (pre-grass-between-feet).
+      // The fa74012 fix ("restore Nelly's eye — revert grass between feet") was
+      // accidentally re-regressed somewhere between v6.0.12 and v6.3.3 (likely the
+      // IIFE wrap copied an older line). Pinning the canonical here.
+      console.log(`${DB}${G}▀${GB}${DF}▀${DB} ${GB}${G}██${DB}  ${GB}${G}██${DB} ${RS}  ${dim('Nelly Never Forgets')}`);
+      console.log(`${GR}▔▔▔▔▔▔▔▔▔▔▔▔${RS}`);
+    }
     console.log(`${dim(`  ${  cwd}`)}`);
     console.log('');
     try { await scoreCommand(undefined, { status: true }); } catch {}
