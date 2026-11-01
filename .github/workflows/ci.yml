@@ -77,7 +77,16 @@ jobs:
         run: npm run build
 
       - name: Run tests (bun)
-        run: bun test --timeout=120000
+        shell: bash   # -o pipefail: tee must not hide a red run
+        run: bun test --timeout=120000 2>&1 | tee test-output.txt
+
+      # The TAF job prints its receipt from this run's output: one run, one receipt.
+      - name: Keep the test output for the receipt
+        uses: actions/upload-artifact@v6
+        if: "!cancelled() && matrix.os == 'ubuntu-latest'"
+        with:
+          name: test-output
+          path: test-output.txt
 
       - name: Test CLI functionality
         run: |
@@ -381,7 +390,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
     # !cancelled(): runs when the tests fail too, so a red run gets a FAILED receipt
-    # instead of a gap (it runs the suite itself; no pipefail, so it always reaches the receipt)
+    # instead of a gap. The receipt is the test job's own run (ubuntu), not a second one.
     if: "!cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/main'"
     permissions:
       contents: write
@@ -391,42 +400,14 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Get the test output
+        uses: actions/download-artifact@v7
         with:
-          bun-version: ${{ env.BUN_VERSION }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build
-        run: npm run build
-
-      - name: Run Tests and Capture Output
-        run: bun test --timeout=120000 2>&1 | tee /tmp/test-output.txt
-
-      - name: Convert Bun output to Jest format for TAF
-        run: |
-          # Extract bun test summary (e.g., " 1232 pass", " 0 fail")
-          passed=$(grep -oP '^\s*\K\d+(?=\s+pass)' /tmp/test-output.txt || echo "0")
-          failed=$(grep -oP '^\s*\K\d+(?=\s+fail)' /tmp/test-output.txt || echo "0")
-          total=$((passed + failed))
-          # Append Jest-compatible summary line for TAF parser
-          echo "" >> /tmp/test-output.txt
-          if [ "$failed" -gt 0 ]; then
-            echo "Tests: $failed failed, $passed passed, $total total" >> /tmp/test-output.txt
-          else
-            echo "Tests: $passed passed, $total total" >> /tmp/test-output.txt
-          fi
+          name: test-output
+          path: /tmp
 
       - name: Generate TAF Receipt
-        uses: Wolfe-Jam/faf-taf-git@v2.4.3
+        uses: Wolfe-Jam/faf-taf-git@v2.4.4
         with:
           test-output-file: /tmp/test-output.txt
           auto-commit: 'true'

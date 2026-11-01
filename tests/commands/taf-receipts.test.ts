@@ -191,3 +191,32 @@ describe('BRAKE: faf taf receipts', () => {
     expect(r.stdout).toBe('');
   });
 });
+
+describe('TYRE: an option the form does not read gets a note, not silence', () => {
+  let dir: string;
+  beforeEach(() => {
+    dir = mkdtempSync(join(tmpdir(), 'faf-taf-ignored-'));
+    writeFileSync(join(dir, '.taf'), TAF);
+  });
+  afterEach(() => rmSync(dir, { recursive: true, force: true }));
+
+  test('faf taf setup --json says --json does nothing', () => {
+    const r = faf(dir, 'setup', '--json');
+    expect(r.stderr).toContain('note: --json does nothing with faf taf setup (ignored)');
+    expect(r.stdout).toContain('faf-taf-git');
+  });
+
+  test('faf taf receipts --write says --write does nothing', () => {
+    const r = faf(dir, 'receipts', '--write', '--ref', 'HEAD');
+    expect(r.stderr).toContain('note: --write does nothing with faf taf receipts (ignored)');
+  });
+
+  test('faf taf --limit 3 (the old snapshot) says --limit does nothing', () => {
+    const r = faf(dir, '--limit', '3');
+    expect(r.stderr).toContain('note: --limit does nothing with faf taf (ignored)');
+  });
+
+  test('options the form reads get no note', () => {
+    expect(faf(dir, 'receipts', '--limit', '1', '--json').stderr).not.toContain('does nothing');
+  });
+});
