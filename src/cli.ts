@@ -40,8 +40,14 @@ import { benchCommand } from './commands/bench.js';
 import { refreshCommand } from './commands/refresh.js';
 import { memoryCommand } from './commands/memory.js';
 import { isOneLineError, oneLine } from './core/refusal.js';
+import { plainOnStderr } from './ui/colors.js';
 
 const { version: VERSION } = require('../package.json');
+
+// Messages are coloured for stdout; stderr gets colour only when it is a terminal too.
+const writeError = console.error.bind(console);
+console.error = (...args: unknown[]) =>
+  writeError(...args.map((a) => (typeof a === 'string' ? plainOnStderr(a) : a)));
 
 const program = new Command();
 
