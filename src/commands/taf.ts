@@ -49,7 +49,7 @@ export function tafCommand(subcommand?: string | TafOptions, options: TafOptions
     subcommand = undefined;
   }
   const name = subcommand ?? '';
-  if (!Object.hasOwn(TAF_FORMS, name)) {
+  if (subcommand === '' || !Object.hasOwn(TAF_FORMS, name)) {
     // A typo used to fall through to the deprecated snapshot without a word.
     console.error(`${bold('×')} Unknown: faf taf ${name}. Use ${bold('faf taf setup')} or ${bold('faf taf receipts')}.`);
     process.exit(1);
@@ -184,34 +184,49 @@ function detectLanguage(dir: string): Language | null {
   return null;
 }
 
-/** The pyproject.toml extra that holds the test tools (pytest plugins), if any. */
-function testExtra(dir: string): string | null {
-  if (!repoExists(dir, 'pyproject.toml')) {return null;}
+const TEST_NAMES = ['test', 'tests', 'dev'];
+
+/** The first of test, tests, dev that is a key of this pyproject.toml table. */
+function tableKey(toml: string, table: string): string | null {
+  const header = new RegExp(`^\\[${table.replace(/[.-]/g, '\\$&')}\\][ \\t]*(?:#[^\\r\\n]*)?\\r?$`, 'm');
+  const at = header.exec(toml);
+  if (!at) {return null;}
+  const rest = toml.slice(at.index + at[0].length);
+  const end = rest.search(/^\[/m);
+  const body = end === -1 ? rest : rest.slice(0, end);
+  const keys = new Set([...body.matchAll(/^\s*["']?([\w.-]+)["']?\s*=/gm)].map((m) => m[1]));
+  return TEST_NAMES.find((k) => keys.has(k)) ?? null;
+}
+
+/** Where the test tools (pytest plugins) live: an extra (`.[test]`), or a
+ *  PEP 735 dependency group (`pip install --group test`, pip 25.1+). */
+function testDeps(dir: string): { extra: string | null; group: string | null } {
+  if (!repoExists(dir, 'pyproject.toml')) {return { extra: null, group: null };}
   let toml: string;
   try {
     toml = readFileSync(join(dir, 'pyproject.toml'), 'utf-8');
   } catch {
-    return null;
+    return { extra: null, group: null };
   }
-  const table = /^\[project\.optional-dependencies\]\s*$([\s\S]*?)(?=^\[|(?![\s\S]))/m.exec(toml)?.[1] ?? '';
-  const keys = new Set([...table.matchAll(/^\s*([\w-]+)\s*=/gm)].map((m) => m[1]));
-  return ['test', 'tests', 'dev'].find((k) => keys.has(k)) ?? null;
+  return { extra: tableKey(toml, 'project.optional-dependencies'), group: tableKey(toml, 'dependency-groups') };
 }
 
 /** Python setup: pip installs requirements and the package, with its test
- *  extra when it has one. Poetry, uv and PDM keep dev dependencies their own
- *  way: the recipe says so rather than guessing their commands. */
+ *  extra or dependency group when it has one. Poetry, uv and PDM keep dev
+ *  dependencies their own way: the recipe says so rather than guessing their
+ *  commands. */
 function pythonSetup(dir: string): string {
-  const extra = testExtra(dir);
+  const { extra, group } = testDeps(dir);
   const tool = ['poetry.lock', 'uv.lock', 'pdm.lock'].find((f) => repoExists(dir, f));
   const note = tool ? `      # ${tool} found: install your dev dependencies with that tool here, before pytest.\n` : '';
+  const groupLine = group ? `\n          pip install --group ${group}` : '';
   return `      - uses: actions/setup-python@v7
         with:
           python-version: '3.x'
 ${note}      - run: |
           python -m pip install --upgrade pip pytest
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          if [ -f pyproject.toml ] || [ -f setup.py ]; then pip install -e ${extra ? `".[${extra}]"` : '.'}; fi`;
+          if [ -f pyproject.toml ] || [ -f setup.py ]; then pip install -e ${extra ? `".[${extra}]"` : '.'}; fi${groupLine}`;
 }
 
 const LANGUAGE: Record<Language, { setup: (dir: string) => string; test: string; report: string }> = {
@@ -240,23 +255,28 @@ const runTests = (cmd: string) =>
   `          ${cmd}\n`;
 
 /** node:test and mocha print nothing faf-taf-git reads, but each can write
- *  JUnit XML. When the test script is one plain `node --test` or `mocha`
- *  command, the recipe runs it with that report added. */
-const NODE_TEST = /^\s*node\s+--test(?![\w-])([^;&|]*)$/;
-const MOCHA = /^\s*mocha(?![\w-])([^;&|]*)$/;
+ *  JUnit XML. The recipe still runs the project's own test command, so
+ *  `pretest` and `posttest` run: node:test takes its reporters from
+ *  NODE_OPTIONS (through any hand-off); mocha takes them as arguments, so
+ *  only when the `test` script is mocha itself. */
+const NODE_TEST = /^\s*node\s+--test(?![\w-])[^;&|]*$/;
+const MOCHA = /^\s*mocha(?![\w-])[^;&|]*$/;
+const OWN_REPORTER = /--(?:test-)?reporter\b/;
 
-function junitCommand(pkg: Record<string, unknown>): string | null {
+function junitCommand(pkg: Record<string, unknown>, runner: Runner): string | null {
   const scripts = (pkg.scripts && typeof pkg.scripts === 'object' ? pkg.scripts : {}) as Record<string, unknown>;
   const script = testCommand(scripts);
   // A script that already picks its own reporter keeps it: leave it to the user.
-  if (typeof script !== 'string' || /--(?:test-)?reporter\b/.test(script)) {return null;}
-  const node = NODE_TEST.exec(script);
-  if (node) {
-    return 'node --test --test-reporter=spec --test-reporter-destination=stdout ' +
-      `--test-reporter=junit --test-reporter-destination=report.xml${node[1].trimEnd()}`;
+  if (typeof script !== 'string' || OWN_REPORTER.test(script)) {return null;}
+  const test = RUNTIME[runner].test;
+  if (NODE_TEST.test(script)) {
+    return 'NODE_OPTIONS="--test-reporter=spec --test-reporter-destination=stdout ' +
+      `--test-reporter=junit --test-reporter-destination=report.xml" ${test}`;
   }
-  const mocha = MOCHA.exec(script);
-  if (mocha) {return `npx mocha${mocha[1].trimEnd()} --reporter xunit --reporter-option output=report.xml`;}
+  if (typeof scripts.test === 'string' && MOCHA.test(scripts.test)) {
+    // npm needs `--` to hand arguments to the script; pnpm, yarn and bun pass them on.
+    return `${test}${runner === 'npm' ? ' --' : ''} --reporter xunit --reporter-option output=report.xml`;
+  }
   return null;
 }
 
@@ -267,10 +287,10 @@ function jsBody(dir: string): { body: string; report: string } {
   const pkg = readPackageJson(dir);
   const r = RUNTIME[runner];
   const setup = runner === 'pnpm' ? `${pnpmSetup(pkg)}\n${r.setup}` : r.setup;
-  const junit = readableJsRunner(pkg, runner) ? null : junitCommand(pkg);
+  const junit = readableJsRunner(pkg, runner) ? null : junitCommand(pkg, runner);
   if (junit) {
     return {
-      body: `${setup}\n      - run: ${r.install}\n      # Your test script, run with a JUnit report added (faf-taf-git reads it).\n${runTests(junit)}`,
+      body: `${setup}\n      - run: ${r.install}\n      # Your test command, with a JUnit report added (faf-taf-git reads it).\n${runTests(junit)}`,
       report: 'report.xml',
     };
   }

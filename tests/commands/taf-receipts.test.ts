@@ -216,6 +216,13 @@ describe('TYRE: an option the form does not read gets a note, not silence', () =
     expect(r.stderr).toContain('note: --limit does nothing with faf taf (ignored)');
   });
 
+  test("faf taf '' is unknown, not the old snapshot", () => {
+    const r = faf(dir, '');
+    expect(r.status).toBe(1);
+    expect(r.stderr).toContain('Unknown: faf taf');
+    expect(r.stderr).not.toContain('deprecated');
+  });
+
   test('options the form reads get no note', () => {
     expect(faf(dir, 'receipts', '--limit', '1', '--json').stderr).not.toContain('does nothing');
   });

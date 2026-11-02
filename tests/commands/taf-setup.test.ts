@@ -145,6 +145,10 @@ describe('PIT: faf taf setup', () => {
     ['a dev extra', '[project.optional-dependencies]\ndev = ["pytest-mock"]\n', 'pip install -e ".[dev]"'],
     ['no extras', '[project]\nname = "x"\n', 'pip install -e .; fi'],
     ['a dev key in another table', '[tool.poetry.group.dev.dependencies]\ndev = "1"\n', 'pip install -e .; fi'],
+    ['a quoted extra name', '[project.optional-dependencies]\n"test" = ["pytest-cov"]\n', 'pip install -e ".[test]"'],
+    ['a comment on the table header', '[project.optional-dependencies] # the test tools\ntest = ["pytest-cov"]\n', 'pip install -e ".[test]"'],
+    ['a PEP 735 test group', '[project]\nname = "x"\n\n[dependency-groups]\ntest = ["pytest-cov"]\n', 'pip install --group test'],
+    ['CRLF line endings', '[project.optional-dependencies]\r\ntest = ["pytest-cov"]\r\n', 'pip install -e ".[test]"'],
   ] as const) {
     test(`Python, pyproject with ${label}: ${want}`, () => {
       writeFileSync(join(testDir, 'pyproject.toml'), toml);
@@ -224,18 +228,24 @@ describe('PIT: faf taf setup', () => {
     expect(readFileSync(wfPath(), 'utf-8')).toContain('bun run test 2>&1 | tee test-output.txt');
   });
 
-  // node:test and mocha write JUnit XML when asked: the recipe asks.
-  for (const [script, run] of [
-    ['node --test', 'node --test --test-reporter=spec --test-reporter-destination=stdout --test-reporter=junit --test-reporter-destination=report.xml'],
-    ['node --test "test/**/*.test.js"', 'node --test --test-reporter=spec --test-reporter-destination=stdout --test-reporter=junit --test-reporter-destination=report.xml "test/**/*.test.js"'],
-    ['mocha', 'npx mocha --reporter xunit --reporter-option output=report.xml'],
-    ['mocha --recursive', 'npx mocha --recursive --reporter xunit --reporter-option output=report.xml'],
+  // node:test and mocha write JUnit XML when asked. The recipe runs the
+  // project's own test command, so pretest/posttest run (review 3e).
+  const NODE_JUNIT = 'NODE_OPTIONS="--test-reporter=spec --test-reporter-destination=stdout --test-reporter=junit --test-reporter-destination=report.xml"';
+  for (const [label, scripts, lock, run] of [
+    ['node --test', { test: 'node --test' }, null, `${NODE_JUNIT} npm test`],
+    ['node --test with a glob', { test: 'node --test "test/**/*.test.js"' }, null, `${NODE_JUNIT} npm test`],
+    ['node --test behind a hand-off', { test: 'npm run unit', unit: 'node --test' }, null, `${NODE_JUNIT} npm test`],
+    ['node --test with pnpm', { test: 'node --test' }, 'pnpm-lock.yaml', `${NODE_JUNIT} pnpm test`],
+    ['mocha', { test: 'mocha' }, null, 'npm test -- --reporter xunit --reporter-option output=report.xml'],
+    ['mocha --recursive', { test: 'mocha --recursive' }, null, 'npm test -- --reporter xunit --reporter-option output=report.xml'],
+    ['mocha with pnpm', { test: 'mocha' }, 'pnpm-lock.yaml', 'pnpm test --reporter xunit --reporter-option output=report.xml'],
+    ['mocha with yarn', { test: 'mocha' }, 'yarn.lock', 'yarn test --reporter xunit --reporter-option output=report.xml'],
   ] as const) {
-    test(`JS, ${script}: runs it with a JUnit report and reads report.xml`, () => {
-      writeFileSync(join(testDir, 'package.json'), JSON.stringify({ name: 'x', scripts: { test: script } }));
+    test(`JS, ${label}: runs the test command with a JUnit report and reads report.xml`, () => {
+      writeFileSync(join(testDir, 'package.json'), JSON.stringify({ name: 'x', scripts }));
+      if (lock) {writeFileSync(join(testDir, lock), '');}
       taf('setup', { write: true });
       const wf = readFileSync(wfPath(), 'utf-8');
-      expect(wf).toContain('npm ci');
       expect(wf).toContain(run);
       expect(wf).not.toContain('TODO');
       const receipt = steps().find((s) => s.name === 'Print the receipt') as { with: Record<string, string> };
@@ -260,7 +270,7 @@ describe('PIT: faf taf setup', () => {
     ['vitest installed, no test script', '{"devDependencies":{"vitest":"1"}}', false],
     ['jest-junit is not jest', '{"scripts":{"test":"node --test --test-reporter=jest-junit"}}', false],
     ['the script hands over to one that runs jest', '{"scripts":{"test":"npm run test:unit","test:unit":"jest --ci"}}', true],
-    ['the script hands over to one that runs mocha', '{"devDependencies":{"jest":"1"},"scripts":{"test":"pnpm test:unit","test:unit":"mocha"}}', true],
+    ['the script hands over to one that runs mocha (mocha flags would skip pretest)', '{"devDependencies":{"jest":"1"},"scripts":{"test":"pnpm test:unit","test:unit":"mocha"}}', false],
     ['the script hands over to one that is not there; jest installed', '{"devDependencies":{"jest":"1"},"scripts":{"test":"npm run unit"}}', true],
     ['jest after another command', '{"scripts":{"test":"tsc && jest"}}', true],
   ] as const) {
