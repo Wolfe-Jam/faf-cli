@@ -249,6 +249,7 @@ npx faf-cli@latest card init     # seven questions → agent.fafa → A2A card, 
 
 **Recent sprint**
 
+- ✪ [8.7.1](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.7.1) `taf setup` for node:test and mocha; Python test extras; colour follows `FORCE_COLOR` and stderr
 - ✪ [8.7.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.7.0) The Receipts Edition — `faf taf receipts`; `taf setup` for JavaScript, Python and Go; red runs get a receipt
 - ✪ [8.6.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.6.0) The Birth Certificate Edition — `init --new` keeps `.faf-dna`; `go`/`edit` record growth; `faf dna --json`
 - ✪ [8.5.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.5.0) The Agent Skills Edition — faf detects skills repos; `skills` (10) and `skills-plugin` (14) name their framework
