@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - `FORCE_COLOR=0` or `false` turns colour off, even in a terminal; an empty `FORCE_COLOR` turns it on (Node's rule).
 - Error messages are coloured only when stderr is a terminal: `faf … 2>err.txt` writes plain text.
-- faf-cli's own CI: the receipt is printed from the test job's run, not from a second run of the suite, so a flaky red run can't be recorded as PASSED.
+- faf-cli's own CI: the receipt is printed from the ubuntu test run itself, not from a second run of the suite, so a flaky red ubuntu run can't be recorded as PASSED. The test matrix no longer cancels ubuntu when macOS fails first.
 - The README badge shows the real passed count: 2332/2333 passing (1 skipped).
 
 ## [8.7.0] - 2026-10-31 — The Receipts Edition

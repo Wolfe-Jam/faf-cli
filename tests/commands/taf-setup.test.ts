@@ -149,6 +149,10 @@ describe('PIT: faf taf setup', () => {
     ['a comment on the table header', '[project.optional-dependencies] # the test tools\ntest = ["pytest-cov"]\n', 'pip install -e ".[test]"'],
     ['a PEP 735 test group', '[project]\nname = "x"\n\n[dependency-groups]\ntest = ["pytest-cov"]\n', 'pip install --group test'],
     ['CRLF line endings', '[project.optional-dependencies]\r\ntest = ["pytest-cov"]\r\n', 'pip install -e ".[test]"'],
+    ['a spaced header', '[ project.optional-dependencies ]\ntest = ["pytest-cov"]\n', 'pip install -e ".[test]"'],
+    ['an inline table in [project]', '[project]\nname = "x"\noptional-dependencies = { docs = ["a"], test = ["pytest-cov"] }\n', 'pip install -e ".[test]"'],
+    ['a dotted key in [project]', '[project]\nname = "x"\noptional-dependencies.test = ["pytest-cov"]\n', 'pip install -e ".[test]"'],
+    ['a multi-line array, then a later table with a test key', '[project.optional-dependencies]\ndocs = [\n  "mkdocs",\n]\n\n[tool.x]\ntest = 1\n', 'pip install -e .; fi'],
   ] as const) {
     test(`Python, pyproject with ${label}: ${want}`, () => {
       writeFileSync(join(testDir, 'pyproject.toml'), toml);

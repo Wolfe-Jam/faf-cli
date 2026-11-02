@@ -49,6 +49,8 @@ jobs:
     name: Bun Test Suite
     runs-on: ${{ matrix.os }}
     strategy:
+      # A red macOS leg must not cancel ubuntu: the TAF receipt comes from ubuntu's run.
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
 

@@ -186,16 +186,38 @@ function detectLanguage(dir: string): Language | null {
 
 const TEST_NAMES = ['test', 'tests', 'dev'];
 
-/** The first of test, tests, dev that is a key of this pyproject.toml table. */
-function tableKey(toml: string, table: string): string | null {
-  const header = new RegExp(`^\\[${table.replace(/[.-]/g, '\\$&')}\\][ \\t]*(?:#[^\\r\\n]*)?\\r?$`, 'm');
-  const at = header.exec(toml);
+const TOML_KEY = String.raw`["']?([\w.-]+)["']?`;
+
+/** The body of a pyproject.toml table, up to the next table header. */
+function tableBody(toml: string, table: string): string | null {
+  const name = table.split('.').map((p) => p.replace(/-/g, '\\-')).join(String.raw`\s*\.\s*`);
+  const at = new RegExp(String.raw`^\[\s*${name}\s*\][ \t]*(?:#[^\r\n]*)?\r?$`, 'm').exec(toml);
   if (!at) {return null;}
   const rest = toml.slice(at.index + at[0].length);
-  const end = rest.search(/^\[/m);
-  const body = end === -1 ? rest : rest.slice(0, end);
-  const keys = new Set([...body.matchAll(/^\s*["']?([\w.-]+)["']?\s*=/gm)].map((m) => m[1]));
-  return TEST_NAMES.find((k) => keys.has(k)) ?? null;
+  const end = rest.search(/^[ \t]*\[/m);
+  return end === -1 ? rest : rest.slice(0, end);
+}
+
+/** The first of test, tests, dev that is a key in `keys`. */
+const firstTestName = (keys: Iterable<string>) => {
+  const found = new Set(keys);
+  return TEST_NAMES.find((k) => found.has(k)) ?? null;
+};
+
+/** Keys at the start of each line of a table body. */
+const lineKeys = (body: string) => [...body.matchAll(new RegExp(String.raw`^\s*${TOML_KEY}\s*=`, 'gm'))].map((m) => m[1]);
+
+/** The test extra, written as its own table, as an inline table in [project]
+ *  (`optional-dependencies = { test = [...] }`), or as dotted keys in [project]
+ *  (`optional-dependencies.test = [...]`). */
+function extraName(toml: string): string | null {
+  const own = tableBody(toml, 'project.optional-dependencies');
+  if (own !== null) {return firstTestName(lineKeys(own));}
+  const project = tableBody(toml, 'project') ?? '';
+  const inline = /^\s*optional-dependencies\s*=\s*\{([^}\r\n]*)\}/m.exec(project)?.[1] ?? '';
+  const inlineKeys = [...inline.matchAll(new RegExp(String.raw`(?:^|,)\s*${TOML_KEY}\s*=`, 'g'))].map((m) => m[1]);
+  const dotted = [...project.matchAll(new RegExp(String.raw`^\s*optional-dependencies\s*\.\s*${TOML_KEY}\s*=`, 'gm'))].map((m) => m[1]);
+  return firstTestName([...inlineKeys, ...dotted]);
 }
 
 /** Where the test tools (pytest plugins) live: an extra (`.[test]`), or a
@@ -208,7 +230,8 @@ function testDeps(dir: string): { extra: string | null; group: string | null } {
   } catch {
     return { extra: null, group: null };
   }
-  return { extra: tableKey(toml, 'project.optional-dependencies'), group: tableKey(toml, 'dependency-groups') };
+  const groups = tableBody(toml, 'dependency-groups');
+  return { extra: extraName(toml), group: groups === null ? null : firstTestName(lineKeys(groups)) };
 }
 
 /** Python setup: pip installs requirements and the package, with its test
@@ -290,7 +313,8 @@ function jsBody(dir: string): { body: string; report: string } {
   const junit = readableJsRunner(pkg, runner) ? null : junitCommand(pkg, runner);
   if (junit) {
     return {
-      body: `${setup}\n      - run: ${r.install}\n      # Your test command, with a JUnit report added (faf-taf-git reads it).\n${runTests(junit)}`,
+      body: `${setup}\n      - run: ${r.install}\n      # Your test command, with a JUnit report added (faf-taf-git reads it).\n${
+        junit.includes('xunit') ? '      # mocha writes only the report: failure details are in report.xml.\n' : ''}${runTests(junit)}`,
       report: 'report.xml',
     };
   }
