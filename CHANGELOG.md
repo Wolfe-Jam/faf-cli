@@ -11,11 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- `faf taf setup` writes the test step for node:test and mocha. The step runs your own test command (so `pretest` and `posttest` run) with a JUnit report added, and the receipt reads `report.xml`. node:test: when the `test` script, or one it hands over to, is a single `node --test` command; the reporters go in `NODE_OPTIONS`. mocha: when the `test` script itself is `mocha`; mocha's built-in `xunit` reporter, nothing installed. A script that picks its own reporter, runs after another command, or hands over to mocha still gets the placeholder. Nested `describe`s are counted right from faf-taf-git 2.4.5.
+- `faf taf setup` writes the test step for node:test and mocha. The step runs your own test command (so `pretest` and `posttest` run) with a JUnit report added, and the receipt reads `report.xml`. node:test: when the `test` script, or one it hands over to, is a single `node --test` command; the reporters go in `NODE_OPTIONS`. mocha: when the `test` script itself is `mocha`; mocha's built-in `xunit` reporter, nothing installed. A script that picks its own reporter, runs after another command, or hands over to mocha still gets the placeholder. faf-taf-git 2.4.5 counts node:test reports with a `describe` test by test.
 - Python: when `pyproject.toml` has a `test`, `tests` or `dev` extra in `[project.optional-dependencies]`, the recipe installs it (`pip install -e ".[test]"`); a PEP 735 group of that name in `[dependency-groups]` is installed with `pip install --group test`. So pytest plugins are there. With `poetry.lock`, `uv.lock` or `pdm.lock`, a comment says to install dev dependencies with that tool. (`setup.cfg` is detected too, since 8.7.0.)
 
 ### Changed
-- `faf taf setup` pins faf-taf-git v2.4.4: a run where every test was skipped is recorded as SKIPPED, and receipts say where they ran.
+- `faf taf setup` pins faf-taf-git v2.4.5: a run where every test was skipped is recorded as SKIPPED, receipts say where they ran, and node:test reports with a `describe` are counted test by test.
 - An option a `faf taf` form doesn't read gets a one-line note instead of being ignored in silence (`faf taf setup --json`). The `faf taf` deprecation note names `faf taf receipts` too.
 
 ### Fixed
