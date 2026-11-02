@@ -3,7 +3,7 @@ import { mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { spawnSync } from 'child_process';
-import { bold, colorOn, dim, fafCyan, fafCyanDeep, italic, orange } from '../../src/ui/colors.js';
+import { bold, colorOn, dim, fafCyan, fafCyanDeep, italic, orange, plainOnStderr } from '../../src/ui/colors.js';
 
 // Colour only where a person reads it. NO_COLOR (no-color.org) turns it off,
 // FORCE_COLOR turns it on, otherwise only a terminal gets it: piped output,
@@ -63,6 +63,31 @@ describe('BRAKE: colours follow NO_COLOR, FORCE_COLOR and the terminal', () => {
   test('FORCE_COLOR=0 does not force', () => {
     set(false, { FORCE_COLOR: '0' });
     expect(orange('x')).toBe('x');
+  });
+
+  test('FORCE_COLOR=0 or false turns it off, even in a terminal', () => {
+    set(true, { FORCE_COLOR: '0' });
+    expect(orange('x')).toBe('x');
+    set(true, { FORCE_COLOR: 'false' });
+    expect(orange('x')).toBe('x');
+  });
+
+  test('an empty FORCE_COLOR forces it on (Node)', () => {
+    set(false, { FORCE_COLOR: '' });
+    expect(orange('x')).toContain(ESC);
+  });
+
+  test('stdout a terminal, stderr a file: error text loses its colour', () => {
+    const errTTY = process.stderr.isTTY;
+    try {
+      set(true, {});
+      Object.defineProperty(process.stderr, 'isTTY', { value: false, configurable: true });
+      expect(plainOnStderr(bold('×'))).toBe('×');
+      Object.defineProperty(process.stderr, 'isTTY', { value: true, configurable: true });
+      expect(plainOnStderr(bold('×'))).toContain(ESC);
+    } finally {
+      Object.defineProperty(process.stderr, 'isTTY', { value: errTTY, configurable: true });
+    }
   });
 });
 

@@ -33,7 +33,7 @@ export function isTafSnapshot(bytes: Uint8Array): boolean {
   }
 }
 
-const FAF_TAF_GIT = 'Wolfe-Jam/faf-taf-git@v2.4.3';
+const FAF_TAF_GIT = 'Wolfe-Jam/faf-taf-git@v2.4.5';
 
 /**
  * `faf taf [subcommand]`
@@ -48,20 +48,37 @@ export function tafCommand(subcommand?: string | TafOptions, options: TafOptions
     options = subcommand;
     subcommand = undefined;
   }
-  if (subcommand === 'setup') {
-    tafSetup(options);
-    return;
-  }
-  if (subcommand === 'receipts') {
-    tafReceipts(options);
-    return;
-  }
-  if (subcommand !== undefined) {
+  const name = subcommand ?? '';
+  if (subcommand === '' || !Object.hasOwn(TAF_FORMS, name)) {
     // A typo used to fall through to the deprecated snapshot without a word.
-    console.error(`${bold('×')} Unknown: faf taf ${subcommand}. Use ${bold('faf taf setup')} or ${bold('faf taf receipts')}.`);
+    console.error(`${bold('×')} Unknown: faf taf ${name}. Use ${bold('faf taf setup')} or ${bold('faf taf receipts')}.`);
     process.exit(1);
   }
-  tafSnapshot(options);
+  warnIgnored(name, options);
+  TAF_FORMS[name](options);
+}
+
+/** The options each `faf taf` form reads; any other one it was given does nothing. */
+const TAF_OPTIONS: Record<string, ReadonlyArray<keyof TafOptions>> = {
+  setup: ['write'],
+  receipts: ['limit', 'json', 'ref'],
+  '': ['output', 'force'],
+};
+
+/** `faf taf <form>`: the bare form is the deprecated snapshot. */
+const TAF_FORMS: Record<string, (options: TafOptions) => void> = {
+  setup: (o) => tafSetup(o),
+  receipts: (o) => tafReceipts(o),
+  '': (o) => tafSnapshot(o),
+};
+
+/** Say so, instead of silently ignoring an option this form doesn't read. */
+function warnIgnored(subcommand: string, options: TafOptions): void {
+  const ignored = (Object.keys(options) as Array<keyof TafOptions>)
+    .filter((k) => options[k] !== undefined && !TAF_OPTIONS[subcommand].includes(k));
+  if (ignored.length === 0) {return;}
+  const flags = ignored.map((k) => `--${k}`).join(', ');
+  console.error(dim(`note: ${flags} ${ignored.length === 1 ? 'does' : 'do'} nothing with faf taf${subcommand ? ` ${subcommand}` : ''} (ignored)`));
 }
 
 // ── faf taf setup — the activation bridge ──────────────────────────────────
@@ -167,19 +184,82 @@ function detectLanguage(dir: string): Language | null {
   return null;
 }
 
-const LANGUAGE: Record<Language, { setup: string; test: string; report: string }> = {
+const TEST_NAMES = ['test', 'tests', 'dev'];
+
+const TOML_KEY = String.raw`["']?([\w.-]+)["']?`;
+
+/** The body of a pyproject.toml table, up to the next table header. */
+function tableBody(toml: string, table: string): string | null {
+  const name = table.split('.').map((p) => p.replace(/-/g, '\\-')).join(String.raw`\s*\.\s*`);
+  const at = new RegExp(String.raw`^\[\s*${name}\s*\][ \t]*(?:#[^\r\n]*)?\r?$`, 'm').exec(toml);
+  if (!at) {return null;}
+  const rest = toml.slice(at.index + at[0].length);
+  const end = rest.search(/^[ \t]*\[/m);
+  return end === -1 ? rest : rest.slice(0, end);
+}
+
+/** The first of test, tests, dev that is a key in `keys`. */
+const firstTestName = (keys: Iterable<string>) => {
+  const found = new Set(keys);
+  return TEST_NAMES.find((k) => found.has(k)) ?? null;
+};
+
+/** Keys at the start of each line of a table body. */
+const lineKeys = (body: string) => [...body.matchAll(new RegExp(String.raw`^\s*${TOML_KEY}\s*=`, 'gm'))].map((m) => m[1]);
+
+/** The test extra, written as its own table, as an inline table in [project]
+ *  (`optional-dependencies = { test = [...] }`), or as dotted keys in [project]
+ *  (`optional-dependencies.test = [...]`). */
+function extraName(toml: string): string | null {
+  const own = tableBody(toml, 'project.optional-dependencies');
+  if (own !== null) {return firstTestName(lineKeys(own));}
+  const project = tableBody(toml, 'project') ?? '';
+  const inline = /^\s*optional-dependencies\s*=\s*\{([^}\r\n]*)\}/m.exec(project)?.[1] ?? '';
+  const inlineKeys = [...inline.matchAll(new RegExp(String.raw`(?:^|,)\s*${TOML_KEY}\s*=`, 'g'))].map((m) => m[1]);
+  const dotted = [...project.matchAll(new RegExp(String.raw`^\s*optional-dependencies\s*\.\s*${TOML_KEY}\s*=`, 'gm'))].map((m) => m[1]);
+  return firstTestName([...inlineKeys, ...dotted]);
+}
+
+/** Where the test tools (pytest plugins) live: an extra (`.[test]`), or a
+ *  PEP 735 dependency group (`pip install --group test`, pip 25.1+). */
+function testDeps(dir: string): { extra: string | null; group: string | null } {
+  if (!repoExists(dir, 'pyproject.toml')) {return { extra: null, group: null };}
+  let toml: string;
+  try {
+    toml = readFileSync(join(dir, 'pyproject.toml'), 'utf-8');
+  } catch {
+    return { extra: null, group: null };
+  }
+  const groups = tableBody(toml, 'dependency-groups');
+  return { extra: extraName(toml), group: groups === null ? null : firstTestName(lineKeys(groups)) };
+}
+
+/** Python setup: pip installs requirements and the package, with its test
+ *  extra or dependency group when it has one. Poetry, uv and PDM keep dev
+ *  dependencies their own way: the recipe says so rather than guessing their
+ *  commands. */
+function pythonSetup(dir: string): string {
+  const { extra, group } = testDeps(dir);
+  const tool = ['poetry.lock', 'uv.lock', 'pdm.lock'].find((f) => repoExists(dir, f));
+  const note = tool ? `      # ${tool} found: install your dev dependencies with that tool here, before pytest.\n` : '';
+  const groupLine = group ? `\n          pip install --group ${group}` : '';
+  return `      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+${note}      - run: |
+          python -m pip install --upgrade pip pytest
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f pyproject.toml ] || [ -f setup.py ]; then pip install -e ${extra ? `".[${extra}]"` : '.'}; fi${groupLine}`;
+}
+
+const LANGUAGE: Record<Language, { setup: (dir: string) => string; test: string; report: string }> = {
   python: {
-    setup:
-      "      - uses: actions/setup-python@v7\n        with:\n          python-version: '3.x'\n" +
-      '      - run: |\n' +
-      '          python -m pip install --upgrade pip pytest\n' +
-      '          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi\n' +
-      '          if [ -f pyproject.toml ] || [ -f setup.py ]; then pip install -e .; fi',
+    setup: pythonSetup,
     test: 'pytest --junitxml=report.xml',
     report: 'report.xml',
   },
   go: {
-    setup:
+    setup: () =>
       '      - uses: actions/setup-go@v7\n        with:\n          go-version-file: go.mod\n' +
       // setup-go sets GOTOOLCHAIN=local, and gotestsum needs Go 1.24: auto
       // fetches a newer toolchain for this install only.
@@ -197,20 +277,56 @@ const runTests = (cmd: string) =>
   '          set -o pipefail\n' +
   `          ${cmd}\n`;
 
-/** Setup, install and test steps for a repo with a package.json. */
-function jsBody(dir: string): string {
+/** node:test and mocha print nothing faf-taf-git reads, but each can write
+ *  JUnit XML. The recipe still runs the project's own test command, so
+ *  `pretest` and `posttest` run: node:test takes its reporters from
+ *  NODE_OPTIONS (through any hand-off); mocha takes them as arguments, so
+ *  only when the `test` script is mocha itself. */
+const NODE_TEST = /^\s*node\s+--test(?![\w-])[^;&|]*$/;
+const MOCHA = /^\s*mocha(?![\w-])[^;&|]*$/;
+const OWN_REPORTER = /--(?:test-)?reporter\b/;
+
+function junitCommand(pkg: Record<string, unknown>, runner: Runner): string | null {
+  const scripts = (pkg.scripts && typeof pkg.scripts === 'object' ? pkg.scripts : {}) as Record<string, unknown>;
+  const script = testCommand(scripts);
+  // A script that already picks its own reporter keeps it: leave it to the user.
+  if (typeof script !== 'string' || OWN_REPORTER.test(script)) {return null;}
+  const test = RUNTIME[runner].test;
+  if (NODE_TEST.test(script)) {
+    return 'NODE_OPTIONS="--test-reporter=spec --test-reporter-destination=stdout ' +
+      `--test-reporter=junit --test-reporter-destination=report.xml" ${test}`;
+  }
+  if (typeof scripts.test === 'string' && MOCHA.test(scripts.test)) {
+    // npm needs `--` to hand arguments to the script; pnpm, yarn and bun pass them on.
+    return `${test}${runner === 'npm' ? ' --' : ''} --reporter xunit --reporter-option output=report.xml`;
+  }
+  return null;
+}
+
+/** Setup, install and test steps for a repo with a package.json, and the
+ *  file faf-taf-git reads. */
+function jsBody(dir: string): { body: string; report: string } {
   const runner = detectRunner(dir);
   const pkg = readPackageJson(dir);
   const r = RUNTIME[runner];
   const setup = runner === 'pnpm' ? `${pnpmSetup(pkg)}\n${r.setup}` : r.setup;
+  const junit = readableJsRunner(pkg, runner) ? null : junitCommand(pkg, runner);
+  if (junit) {
+    return {
+      body: `${setup}\n      - run: ${r.install}\n      # Your test command, with a JUnit report added (faf-taf-git reads it).\n${
+        junit.includes('xunit') ? '      # mocha writes only the report: failure details are in report.xml.\n' : ''}${runTests(junit)}`,
+      report: 'report.xml',
+    };
+  }
   // Not Jest, Vitest or Bun: faf-taf-git can't read the output, and every run
   // would go red. Leave the step to the user, like an unknown language.
   const tests = readableJsRunner(pkg, runner)
     ? runTests(`${r.test} 2>&1 | tee test-output.txt`)
-    : `      # TODO: faf-taf-git reads Jest, Vitest and Bun output, or JUnit XML.
+    : `      # TODO: faf-taf-git reads Jest, Vitest and Bun output, or JUnit XML
+      # (node --test: --test-reporter=junit; mocha: --reporter xunit).
       # Run your tests so they write one of those, and point test-output-file at it.
 ${runTests(`echo "TODO: your test command" 2>&1 | tee test-output.txt   # e.g. ${r.test} 2>&1 | tee test-output.txt`)}`;
-  return `${setup}\n      - run: ${r.install}\n${tests}`;
+  return { body: `${setup}\n      - run: ${r.install}\n${tests}`, report: 'test-output.txt' };
 }
 
 interface Branch {
@@ -265,12 +381,12 @@ function buildTafWorkflow(dir: string, branch: string): string {
   let report = 'test-output.txt';
   const lang = repoExists(dir, 'package.json') ? null : detectLanguage(dir);
   if (repoExists(dir, 'package.json')) {
-    body = jsBody(dir);
+    ({ body, report } = jsBody(dir));
   } else if (lang) {
     // faf-taf-git reads JUnit XML for these: each recipe writes one.
     const l = LANGUAGE[lang];
     report = l.report;
-    body = `${l.setup}\n${runTests(l.test)}`;
+    body = `${l.setup(dir)}\n${runTests(l.test)}`;
   } else {
     // No runner faf knows. TAF is language-agnostic; leave a clear, honest placeholder.
     const placeholder = 'echo "TODO: your test command" 2>&1 | tee test-output.txt   # or any runner that writes JUnit XML';
@@ -329,7 +445,7 @@ function tafSetup(options: TafOptions): void {
 // ── faf taf (default) — score snapshot ──────────────────────────────────────
 /** Generate a TAF score snapshot of the current .faf — DEPRECATED, use `faf score --json`. */
 function tafSnapshot(options: TafOptions): void {
-  console.error(dim('note: `faf taf` (score snapshot) is deprecated — use `faf score --json`. (`faf taf setup` wires the Receipt Printer.)'));
+  console.error(dim('note: `faf taf` (score snapshot) is deprecated — use `faf score --json`. (`faf taf setup` wires the Receipt Printer; `faf taf receipts` shows the receipts.)'));
   const fafPath = findFafFile();
   if (!fafPath) {
     console.error("Error: project.faf not found\n\n  Run 'faf init' to create one.");

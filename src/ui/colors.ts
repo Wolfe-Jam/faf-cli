@@ -1,15 +1,24 @@
 // ANSI color helpers — zero deps
 // Design: black/white text by default. Cyan + orange are the only brand colors.
 
-/** Colour only where a person reads it: a terminal. FORCE_COLOR (any value
- *  but 0) turns it on; NO_COLOR (any value, no-color.org) turns it off;
- *  otherwise only when stdout is a TTY, so piped output, CI logs and agent
- *  tools get plain text. Read on every call: tests set the env at runtime. */
-export function colorOn(): boolean {
+/** Colour only where a person reads it: a terminal. FORCE_COLOR decides first
+ *  (Node's rule: 0 or false turns it off, any other value, even empty, on);
+ *  then NO_COLOR (any value, no-color.org) turns it off; otherwise only when
+ *  the stream is a TTY, so piped output, CI logs and agent tools get plain
+ *  text. Read on every call: tests set the env at runtime. */
+export function colorOn(stream: { isTTY?: boolean } = process.stdout): boolean {
   const force = process.env.FORCE_COLOR;
-  if (force !== undefined && force !== '' && force !== '0' && force !== 'false') {return true;}
+  if (force !== undefined) {return force !== '0' && force !== 'false';}
   if (process.env.NO_COLOR !== undefined && process.env.NO_COLOR !== '') {return false;}
-  return Boolean(process.stdout.isTTY);
+  return Boolean(stream.isTTY);
+}
+
+const ANSI = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, 'g');
+
+/** Text is coloured for stdout. Error output goes to stderr, which can be a
+ *  file while stdout is a terminal: there, drop the colour. */
+export function plainOnStderr(text: string): string {
+  return colorOn(process.stderr) ? text : text.replace(ANSI, '');
 }
 
 const paint = (open: string, s: string) => (colorOn() ? `\x1b[${open}m${s}\x1b[0m` : s);

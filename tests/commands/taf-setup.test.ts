@@ -52,7 +52,7 @@ describe('PIT: faf taf setup', () => {
     taf('setup', { write: true });
     expect(existsSync(wfPath())).toBe(true);
     const wf = readFileSync(wfPath(), 'utf-8');
-    expect(wf).toContain('Wolfe-Jam/faf-taf-git@v2.4.3');
+    expect(wf).toContain('Wolfe-Jam/faf-taf-git@v2.4.5');
     expect(wf).toContain('test-output.txt');
     expect(wf).toContain('target-branch: taf-receipts');
   });
@@ -139,6 +139,39 @@ describe('PIT: faf taf setup', () => {
     });
   }
 
+  // Test tools (pytest plugins) often live in an extra; pip installs it (review N8).
+  for (const [label, toml, want] of [
+    ['a test extra', '[project]\nname = "x"\n\n[project.optional-dependencies]\ntest = ["pytest-cov"]\ndocs = ["mkdocs"]\n', 'pip install -e ".[test]"'],
+    ['a dev extra', '[project.optional-dependencies]\ndev = ["pytest-mock"]\n', 'pip install -e ".[dev]"'],
+    ['no extras', '[project]\nname = "x"\n', 'pip install -e .; fi'],
+    ['a dev key in another table', '[tool.poetry.group.dev.dependencies]\ndev = "1"\n', 'pip install -e .; fi'],
+    ['a quoted extra name', '[project.optional-dependencies]\n"test" = ["pytest-cov"]\n', 'pip install -e ".[test]"'],
+    ['a comment on the table header', '[project.optional-dependencies] # the test tools\ntest = ["pytest-cov"]\n', 'pip install -e ".[test]"'],
+    ['a PEP 735 test group', '[project]\nname = "x"\n\n[dependency-groups]\ntest = ["pytest-cov"]\n', 'pip install --group test'],
+    ['CRLF line endings', '[project.optional-dependencies]\r\ntest = ["pytest-cov"]\r\n', 'pip install -e ".[test]"'],
+    ['a spaced header', '[ project.optional-dependencies ]\ntest = ["pytest-cov"]\n', 'pip install -e ".[test]"'],
+    ['an inline table in [project]', '[project]\nname = "x"\noptional-dependencies = { docs = ["a"], test = ["pytest-cov"] }\n', 'pip install -e ".[test]"'],
+    ['a dotted key in [project]', '[project]\nname = "x"\noptional-dependencies.test = ["pytest-cov"]\n', 'pip install -e ".[test]"'],
+    ['a multi-line array, then a later table with a test key', '[project.optional-dependencies]\ndocs = [\n  "mkdocs",\n]\n\n[tool.x]\ntest = 1\n', 'pip install -e .; fi'],
+  ] as const) {
+    test(`Python, pyproject with ${label}: ${want}`, () => {
+      writeFileSync(join(testDir, 'pyproject.toml'), toml);
+      taf('setup', { write: true });
+      expect(readFileSync(wfPath(), 'utf-8')).toContain(want);
+    });
+  }
+
+  test('Python with poetry.lock, uv.lock or pdm.lock: a note to install dev dependencies with that tool', () => {
+    for (const lock of ['poetry.lock', 'uv.lock', 'pdm.lock']) {
+      rmSync(join(testDir, '.github'), { recursive: true, force: true });
+      for (const l of ['poetry.lock', 'uv.lock', 'pdm.lock']) {rmSync(join(testDir, l), { force: true });}
+      writeFileSync(join(testDir, 'pyproject.toml'), '[project]\nname = "x"\n');
+      writeFileSync(join(testDir, lock), '');
+      taf('setup', { write: true });
+      expect(readFileSync(wfPath(), 'utf-8')).toContain(`# ${lock} found: install your dev dependencies with that tool here, before pytest.`);
+    }
+  });
+
   test('Go (go.mod): gotestsum writes JUnit XML and the receipt reads it', () => {
     writeFileSync(join(testDir, 'go.mod'), 'module x\n');
     taf('setup', { write: true });
@@ -199,25 +232,49 @@ describe('PIT: faf taf setup', () => {
     expect(readFileSync(wfPath(), 'utf-8')).toContain('bun run test 2>&1 | tee test-output.txt');
   });
 
-  test('JS, node:test or mocha: the placeholder, not a step faf-taf-git cannot read', () => {
-    for (const script of ['node --test', 'mocha']) {
+  // node:test and mocha write JUnit XML when asked. The recipe runs the
+  // project's own test command, so pretest/posttest run (review 3e).
+  const NODE_JUNIT = 'NODE_OPTIONS="--test-reporter=spec --test-reporter-destination=stdout --test-reporter=junit --test-reporter-destination=report.xml"';
+  for (const [label, scripts, lock, run] of [
+    ['node --test', { test: 'node --test' }, null, `${NODE_JUNIT} npm test`],
+    ['node --test with a glob', { test: 'node --test "test/**/*.test.js"' }, null, `${NODE_JUNIT} npm test`],
+    ['node --test behind a hand-off', { test: 'npm run unit', unit: 'node --test' }, null, `${NODE_JUNIT} npm test`],
+    ['node --test with pnpm', { test: 'node --test' }, 'pnpm-lock.yaml', `${NODE_JUNIT} pnpm test`],
+    ['mocha', { test: 'mocha' }, null, 'npm test -- --reporter xunit --reporter-option output=report.xml'],
+    ['mocha --recursive', { test: 'mocha --recursive' }, null, 'npm test -- --reporter xunit --reporter-option output=report.xml'],
+    ['mocha with pnpm', { test: 'mocha' }, 'pnpm-lock.yaml', 'pnpm test --reporter xunit --reporter-option output=report.xml'],
+    ['mocha with yarn', { test: 'mocha' }, 'yarn.lock', 'yarn test --reporter xunit --reporter-option output=report.xml'],
+  ] as const) {
+    test(`JS, ${label}: runs the test command with a JUnit report and reads report.xml`, () => {
+      writeFileSync(join(testDir, 'package.json'), JSON.stringify({ name: 'x', scripts }));
+      if (lock) {writeFileSync(join(testDir, lock), '');}
+      taf('setup', { write: true });
+      const wf = readFileSync(wfPath(), 'utf-8');
+      expect(wf).toContain(run);
+      expect(wf).not.toContain('TODO');
+      const receipt = steps().find((s) => s.name === 'Print the receipt') as { with: Record<string, string> };
+      expect(receipt.with['test-output-file']).toBe('report.xml');
+    });
+  }
+
+  test('JS, node:test or mocha that pick their own reporter, or come after another command: the placeholder', () => {
+    for (const script of ['node --test --test-reporter=tap', 'mocha --reporter dot', 'tsc && mocha', 'node --test && echo done']) {
       rmSync(join(testDir, '.github'), { recursive: true, force: true });
       writeFileSync(join(testDir, 'package.json'), JSON.stringify({ name: 'x', scripts: { test: script } }));
       taf('setup', { write: true });
       const wf = readFileSync(wfPath(), 'utf-8');
-      expect(wf).toContain('npm ci');
       expect(wf).toContain('TODO: your test command');
-      expect(wf).toContain('faf-taf-git reads Jest, Vitest and Bun output, or JUnit XML');
+      expect(wf).toContain('node --test: --test-reporter=junit; mocha: --reporter xunit');
     }
   });
 
   // The test script decides, not the dependencies (review W3).
   for (const [label, pkg, step] of [
-    ['jest installed, the script runs mocha', '{"devDependencies":{"jest":"1","mocha":"1"},"scripts":{"test":"mocha"}}', false],
+    ['jest installed, the script runs mocha', '{"devDependencies":{"jest":"1","mocha":"1"},"scripts":{"test":"mocha"}}', true],
     ['vitest installed, no test script', '{"devDependencies":{"vitest":"1"}}', false],
     ['jest-junit is not jest', '{"scripts":{"test":"node --test --test-reporter=jest-junit"}}', false],
     ['the script hands over to one that runs jest', '{"scripts":{"test":"npm run test:unit","test:unit":"jest --ci"}}', true],
-    ['the script hands over to one that runs mocha', '{"devDependencies":{"jest":"1"},"scripts":{"test":"pnpm test:unit","test:unit":"mocha"}}', false],
+    ['the script hands over to one that runs mocha (mocha flags would skip pretest)', '{"devDependencies":{"jest":"1"},"scripts":{"test":"pnpm test:unit","test:unit":"mocha"}}', false],
     ['the script hands over to one that is not there; jest installed', '{"devDependencies":{"jest":"1"},"scripts":{"test":"npm run unit"}}', true],
     ['jest after another command', '{"scripts":{"test":"tsc && jest"}}', true],
   ] as const) {
