@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- `faf taf setup` pins faf-taf-git v2.4.6: a report with no tests says "no tests ran" instead of "could not parse".
+
 ## [8.7.1] - 2026-11-02
 
 **`faf taf setup` writes the test step for node:test and mocha, and installs Python test extras; colour follows `FORCE_COLOR` and stderr.** 2362 tests.
