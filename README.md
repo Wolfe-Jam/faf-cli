@@ -135,7 +135,16 @@ faf memory etch "a durable fact" --id my-fact
 faf memory show
 ```
 
-### What's New in v8.7.0 — The Receipts Edition
+### What's New in v8.8.0 — The Polyglot Edition
+
+**`faf taf setup` writes the Test Receipt workflow for Rust, Java (Maven, Gradle) and .NET too: each run joins its reports into one JUnit file, and faf-taf-git counts it.**
+
+- **Rust** (`Cargo.toml`): `cargo nextest run`, every test (`--no-fail-fast`), across the workspace. The workflow adds nextest's JUnit profile only when your repo has no nextest config.
+- **Java**: Maven (`pom.xml`) and Gradle (`build.gradle`, `settings.gradle`), with the wrapper when you have one. A failing module doesn't stop the others, and the per-class reports are joined into one file.
+- **.NET** (`.sln`, `.slnx`, `.csproj`, `.fsproj`): the JUnit logger is added in CI only, so your project files don't change. It installs the SDKs your projects target, and names the solution when there's more than one at the top.
+- **Proved in faf-cli's own CI**: for each language, a fixture with passing, failing and skipped tests runs the written recipe, and the receipt must match the runner's own counts.
+
+### The Receipts Edition (8.7)
 
 **Your Test Receipts, in your terminal: `faf taf receipts` shows them, `taf setup` writes the recipe for JavaScript (Jest, Vitest, Bun), Python and Go, and every test run on your default branch gets one, red ones too.**
 
@@ -249,6 +258,7 @@ npx faf-cli@latest card init     # seven questions → agent.fafa → A2A card, 
 
 **Recent sprint**
 
+- ✪ [8.8.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.8.0) The Polyglot Edition — `taf setup` for Rust, Java (Maven, Gradle) and .NET
 - ✪ [8.7.1](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.7.1) `taf setup` for node:test and mocha; Python test extras; colour follows `FORCE_COLOR` and stderr
 - ✪ [8.7.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.7.0) The Receipts Edition — `faf taf receipts`; `taf setup` for JavaScript, Python and Go; red runs get a receipt
 - ✪ [8.6.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.6.0) The Birth Certificate Edition — `init --new` keeps `.faf-dna`; `go`/`edit` record growth; `faf dna --json`
