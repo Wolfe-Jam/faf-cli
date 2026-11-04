@@ -359,6 +359,89 @@ jobs:
           echo "$OUT"
           echo "$OUT" | grep -qE '[0-9]+%' || { echo "::error::${{ matrix.manager }}: faf score printed no score"; exit 1; }
 
+  # TAF recipes — `faf taf setup` for Rust, Java (Maven, Gradle) and .NET, run
+  # for real. For each fixture (2 passing, 1 failing, 1 skipped), faf writes the
+  # recipe; prove-recipe.mjs checks its setup steps are the ones below, runs its
+  # run steps, and reads the report with faf-taf-git's parser (the version faf
+  # pins). The receipt's counts must match the runner's own summary line.
+  taf-recipes:
+    name: taf setup recipe (${{ matrix.lang }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        lang: [rust, maven, gradle, dotnet]
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      # The toolchain steps the recipe writes, with the same inputs
+      # (prove-recipe.mjs fails when they differ).
+      - if: matrix.lang == 'rust'
+        uses: dtolnay/rust-toolchain@stable
+      - if: matrix.lang == 'rust'
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-nextest@0.9.151
+      - if: matrix.lang == 'maven'
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - if: matrix.lang == 'gradle'
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+      - if: matrix.lang == 'gradle'
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: '9.8.2'
+      - if: matrix.lang == 'dotnet'
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: faf taf setup on the fixture
+        run: |
+          set -euo pipefail
+          PROJECT="$RUNNER_TEMP/taf-${{ matrix.lang }}"
+          cp -R "tests/fixtures/taf-setup/${{ matrix.lang }}" "$PROJECT"
+          git -C "$PROJECT" init -q -b main
+          (cd "$PROJECT" && node "$GITHUB_WORKSPACE/dist/cli.js" taf setup --write)
+          cat "$PROJECT/.github/workflows/taf.yml"
+          echo "PROJECT=$PROJECT" >> "$GITHUB_ENV"
+
+      - name: faf-taf-git's parser, the version faf pins
+        run: |
+          set -euo pipefail
+          VERSION=$(grep -oE "Wolfe-Jam/faf-taf-git@v[0-9.]+" src/commands/taf.ts | head -1 | sed 's/.*@v//')
+          TAF_GIT="$RUNNER_TEMP/faf-taf-git"
+          mkdir -p "$TAF_GIT"
+          npm install --prefix "$TAF_GIT" --no-save --no-audit --no-fund "faf-taf-git@$VERSION"
+          echo "TAF_GIT=$TAF_GIT/node_modules/faf-taf-git" >> "$GITHUB_ENV"
+
+      - name: Run the recipe and check the receipt
+        run: node tests/fixtures/taf-setup/prove-recipe.mjs "${{ matrix.lang }}" "$PROJECT" "$TAF_GIT"
+
   # Code Quality
   quality:
     name: Code Quality
@@ -420,7 +503,7 @@ jobs:
   status:
     name: Championship Status
     runs-on: ubuntu-latest
-    needs: [security, test, node-compat, windows, package-managers, quality]
+    needs: [security, test, node-compat, windows, package-managers, taf-recipes, quality]
     if: always()
 
     steps:
@@ -464,6 +547,13 @@ jobs:
             failed=1
           else
             echo "PASS Package managers: npm, pnpm, bun"
+          fi
+
+          if [ "${{ needs.taf-recipes.result }}" != "success" ]; then
+            echo "FAIL taf setup recipes: ${{ needs.taf-recipes.result }}"
+            failed=1
+          else
+            echo "PASS taf setup recipes: rust, maven, gradle, dotnet"
           fi
 
           if [ "${{ needs.quality.result }}" != "success" ]; then

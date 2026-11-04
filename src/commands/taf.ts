@@ -1,9 +1,9 @@
 import { spawnSync } from 'child_process';
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, readdirSync, readFileSync, type Dirent } from 'fs';
 import { dirname, join, resolve } from 'path';
 import { findFafFile, readFaf, readFafRaw, withKernel } from '../interop/faf.js';
 import { scoreFafYaml } from '../core/scorer.js';
-import { makeDirInside, repoExists, safeWriteFile } from '../core/safe-write.js';
+import { makeDirInside, readRepoFile, repoExists, safeWriteFile } from '../core/safe-write.js';
 import { writeRendered } from '../core/render-hash.js';
 import { refuseMissingOutputFolder } from '../core/refusal.js';
 import { fafCyan, dim, bold } from '../ui/colors.js';
@@ -174,12 +174,33 @@ const RUNTIME: Record<Runner, { setup: string; install: string; test: string }> 
 };
 
 // Not JavaScript: faf-taf-git reads JUnit XML (its README's runner table), so
-// each recipe has its runner write a report (both checked end to end against
-// faf-taf-git's parser). Checked in this order.
-type Language = 'go' | 'python';
+// each recipe has its runner write one report (every runner checked end to end
+// against faf-taf-git's parser). Checked in this order: Go first, as before;
+// then Rust, Java (Maven, then Gradle) and .NET, whose build files say what the
+// project is; Python last, because a requirements.txt or pyproject.toml is often
+// only tooling in a repo written in another language.
+type Language = 'go' | 'rust' | 'maven' | 'gradle' | 'dotnet' | 'python';
+
+const GRADLE_FILES = ['build.gradle', 'build.gradle.kts', 'settings.gradle', 'settings.gradle.kts'];
+const DOTNET_FILE = /\.(?:sln|slnx|csproj|fsproj)$/i;
+
+/** A solution or project file at the top of the repo (`*.sln`, `*.slnx`, `*.csproj`, `*.fsproj`). */
+function hasDotnetProject(dir: string): boolean {
+  let entries: string[];
+  try {
+    entries = readdirSync(dir);
+  } catch {
+    return false;
+  }
+  return entries.some((f) => DOTNET_FILE.test(f) && repoExists(dir, f));
+}
 
 function detectLanguage(dir: string): Language | null {
   if (repoExists(dir, 'go.mod')) {return 'go';}
+  if (repoExists(dir, 'Cargo.toml')) {return 'rust';}
+  if (repoExists(dir, 'pom.xml')) {return 'maven';}
+  if (GRADLE_FILES.some((f) => repoExists(dir, f))) {return 'gradle';}
+  if (hasDotnetProject(dir)) {return 'dotnet';}
   if (['pyproject.toml', 'setup.py', 'setup.cfg', 'requirements.txt', 'pytest.ini'].some((f) => repoExists(dir, f))) {return 'python';}
   return null;
 }
@@ -252,10 +273,162 @@ ${note}      - run: |
           if [ -f pyproject.toml ] || [ -f setup.py ]; then pip install -e ${extra ? `".[${extra}]"` : '.'}; fi${groupLine}`;
 }
 
-const LANGUAGE: Record<Language, { setup: (dir: string) => string; test: string; report: string }> = {
+// ── Rust: cargo nextest ─────────────────────────────────────────────────────
+// nextest writes JUnit only from a profile that asks for it. The recipe writes
+// `.config/nextest.toml` with a `ci` profile when the repo has none, and never
+// touches one the repo has. It leaves `#[ignore]` tests out of the report (a
+// known nextest gap: faf-taf-git's fixtures README).
+const NEXTEST = 'cargo-nextest@0.9.151';
+const NEXTEST_CONFIG = '.config/nextest.toml';
+
+/** True when the text has a `[profile.ci.junit]` table with a `path`. */
+const hasCiJunit = (toml: string) => {
+  const body = tableBody(toml, 'profile.ci.junit');
+  return body !== null && /^\s*path\s*=/m.test(body);
+};
+
+function rustSetup(dir: string): string {
+  const own = readRepoFile(dir, NEXTEST_CONFIG);
+  const note = own !== null && !hasCiJunit(own)
+    ? `      # ${NEXTEST_CONFIG} has no [profile.ci.junit]: add one with path = "junit.xml", or there is no report to read.\n`
+    : '';
+  return `      - uses: dtolnay/rust-toolchain@stable
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: ${NEXTEST}
+${note}      - name: Configure the nextest JUnit report
+        # Only when the repo has no ${NEXTEST_CONFIG}: yours is never overwritten.
+        run: |
+          if [ ! -e ${NEXTEST_CONFIG} ]; then
+            mkdir -p .config
+            printf '[profile.ci.junit]\\npath = "junit.xml"\\n' > ${NEXTEST_CONFIG}
+          fi`;
+}
+
+// ── Java: Maven and Gradle ──────────────────────────────────────────────────
+// Both write one JUnit file per test class. One class's file can read PASSED
+// for a run that failed, so the recipe joins them into report.xml.
+// Gradle's cache comes from setup-gradle, so setup-java caches Maven only.
+const JAVA_SETUP = (cache?: 'maven') =>
+  `      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'          # your project's Java version${cache ? `\n          cache: ${cache}` : ''}`;
+
+/** A Maven build with `<modules>`: reports are in each module's target/. */
+const mavenModules = (dir: string) => /<modules\s*>/.test(readRepoFile(dir, 'pom.xml') ?? '');
+
+/** A Gradle build that includes subprojects: reports are in each one's build/. */
+const gradleModules = (dir: string) =>
+  ['settings.gradle', 'settings.gradle.kts'].some((f) => /^\s*include\b/m.test(readRepoFile(dir, f) ?? ''));
+
+/** Join the per-class files into one report: one folder, or every module's. */
+const joinReports = (folder: string, multi: boolean) =>
+  multi
+    ? `find . -path '*/${folder}/TEST-*.xml' -exec cat {} + > report.xml`
+    : `cat ${folder}/TEST-*.xml > report.xml`;
+
+const GRADLE_VERSION = '9.8.2';
+
+function gradleSetup(dir: string): string {
+  const wrapper = repoExists(dir, 'gradlew');
+  return `${JAVA_SETUP()}
+      - uses: gradle/actions/setup-gradle@v6${wrapper ? '' : `\n        with:\n          gradle-version: '${GRADLE_VERSION}'   # no gradlew in the repo`}`;
+}
+
+// ── .NET: dotnet test with JunitXml.TestLogger ──────────────────────────────
+// `dotnet test` writes JUnit through the JunitXml.TestLogger package. The
+// recipe adds it to each test project in CI (the projects that reference
+// Microsoft.NET.Test.Sdk), so your repo needs no change and a first run gets
+// a receipt; a project that already references it keeps its version. Each
+// test assembly writes its own file, and the recipe joins them.
+const JUNIT_LOGGER_VERSION = '8.1.0';
+
+/** Project files below the top, skipping build output and tool folders. */
+function dotnetProjectFiles(dir: string, rel = '', depth = 0): string[] {
+  if (depth > 6) {return [];}
+  let entries: Dirent[];
+  try {
+    entries = readdirSync(join(dir, rel), { withFileTypes: true });
+  } catch {
+    return [];
+  }
+  const out: string[] = [];
+  for (const e of entries) {
+    const r = rel ? `${rel}/${e.name}` : e.name;
+    if (e.isDirectory()) {
+      if (!/^(?:\.|bin$|obj$|node_modules$)/.test(e.name)) {out.push(...dotnetProjectFiles(dir, r, depth + 1));}
+    } else if (/\.(?:csproj|fsproj)$|^Directory\.Build\.props$/i.test(e.name)) {
+      out.push(r);
+    }
+  }
+  return out;
+}
+
+/** The SDK channels the projects target (`net8.0` → `8.0.x`), oldest first. */
+function dotnetVersions(dir: string): string[] {
+  const found = new Set<string>();
+  for (const rel of dotnetProjectFiles(dir)) {
+    const text = readRepoFile(dir, rel) ?? '';
+    for (const m of text.matchAll(/<TargetFrameworks?>([^<]*)<\/TargetFrameworks?>/g)) {
+      for (const tfm of m[1].split(';')) {
+        // net8.0, net9.0-windows; net48 (.NET Framework) and netstandard2.0 have no SDK channel.
+        const v = /^\s*net(\d+\.\d+)/.exec(tfm)?.[1];
+        if (v) {found.add(`${v}.x`);}
+      }
+    }
+  }
+  return [...found].sort((a, b) => parseFloat(a) - parseFloat(b));
+}
+
+function dotnetSetup(dir: string): string {
+  // A net8.0 test project needs the .NET 8 runtime to run, not only a newer
+  // SDK to build: install every channel the projects target.
+  const versions = dotnetVersions(dir);
+  const globalJson = repoExists(dir, 'global.json');
+  const lines: string[] = [];
+  if (versions.length === 1) {lines.push(`dotnet-version: '${versions[0]}'`);}
+  if (versions.length > 1) {lines.push(`dotnet-version: |\n${versions.map((v) => `            ${v}`).join('\n')}`);}
+  if (globalJson) {lines.push('global-json-file: global.json');}
+  if (!lines.length) {lines.push("dotnet-version: '10.0.x'      # your SDK version (or add a global.json)");}
+  return `      - uses: actions/setup-dotnet@v6
+        with:
+          ${lines.join('\n          ')}
+      - name: Add the JUnit logger to each test project
+        # In CI only: your project files are not changed in the repo.
+        run: |
+          grep -rlE --include='*.csproj' --include='*.fsproj' 'Microsoft\\.NET\\.Test\\.Sdk|<IsTestProject>[[:space:]]*true' . | while read -r p; do
+            grep -q 'JunitXml.TestLogger' "$p" || dotnet add "$p" package JunitXml.TestLogger --version ${JUNIT_LOGGER_VERSION}
+          done`;
+}
+
+/** `dotnet test` stops with MSB1011 when the top holds more than one solution
+ *  or project, so name one then: the first solution, else the first project. */
+function dotnetTarget(dir: string): string {
+  let entries: string[];
+  try {
+    entries = readdirSync(dir);
+  } catch {
+    return '';
+  }
+  const top = entries.filter((f) => DOTNET_FILE.test(f) && repoExists(dir, f)).sort();
+  if (top.length <= 1) {return '';}
+  const pick = top.find((f) => /\.slnx?$/i.test(f)) ?? top[0];
+  return /^[\w.+-]+$/.test(pick) ? ` ${pick}` : ` '${pick.replace(/'/g, `'\\''`)}'`;
+}
+
+interface Recipe {
+  setup: (dir: string) => string;
+  test: (dir: string) => string;
+  /** A step that turns the runner's files into the one report faf-taf-git reads. */
+  join?: (dir: string) => string;
+  report: string;
+}
+
+const LANGUAGE: Record<Language, Recipe> = {
   python: {
     setup: pythonSetup,
-    test: 'pytest --junitxml=report.xml',
+    test: () => 'pytest --junitxml=report.xml',
     report: 'report.xml',
   },
   go: {
@@ -264,10 +437,42 @@ const LANGUAGE: Record<Language, { setup: (dir: string) => string; test: string;
       // setup-go sets GOTOOLCHAIN=local, and gotestsum needs Go 1.24: auto
       // fetches a newer toolchain for this install only.
       '      - run: GOTOOLCHAIN=auto go install gotest.tools/gotestsum@v1.13.0',
-    test: 'gotestsum --junitfile report.xml -- ./...',
+    test: () => 'gotestsum --junitfile report.xml -- ./...',
+    report: 'report.xml',
+  },
+  rust: {
+    setup: rustSetup,
+    // --no-fail-fast: every test runs, so the receipt counts the whole suite.
+    test: () => 'cargo nextest run --profile ci --workspace --no-fail-fast',
+    report: 'target/nextest/ci/junit.xml',
+  },
+  maven: {
+    setup: () => JAVA_SETUP('maven'),
+    // --fail-at-end: a failing module doesn't stop the others' tests.
+    test: (dir) => `${repoExists(dir, 'mvnw') ? './mvnw' : 'mvn'} -B --fail-at-end test`,
+    join: (dir) => joinReports('target/surefire-reports', mavenModules(dir)),
+    report: 'report.xml',
+  },
+  gradle: {
+    setup: gradleSetup,
+    // --continue: a failing subproject doesn't stop the others' tests.
+    test: (dir) => `${repoExists(dir, 'gradlew') ? './gradlew' : 'gradle'} test --continue`,
+    join: (dir) => joinReports('build/test-results/test', gradleModules(dir)),
+    report: 'report.xml',
+  },
+  dotnet: {
+    setup: dotnetSetup,
+    test: (dir) => `dotnet test${dotnetTarget(dir)} --logger "junit;LogFilePath=$GITHUB_WORKSPACE/junit-reports/{assembly}.{framework}.xml"`,
+    join: () => 'cat junit-reports/*.xml > report.xml',
     report: 'report.xml',
   },
 };
+
+/** The join step: runs after a red test run too (the test step keeps going). */
+const joinStep = (cmd: string) =>
+  '      - name: Join the reports into one file\n' +
+  '        # One file per test class or assembly; one alone can read PASSED for a run that failed.\n' +
+  `        run: ${cmd}\n`;
 
 const runTests = (cmd: string) =>
   '      - name: Run tests\n' +
@@ -386,7 +591,7 @@ function buildTafWorkflow(dir: string, branch: string): string {
     // faf-taf-git reads JUnit XML for these: each recipe writes one.
     const l = LANGUAGE[lang];
     report = l.report;
-    body = `${l.setup(dir)}\n${runTests(l.test)}`;
+    body = `${l.setup(dir)}\n${runTests(l.test(dir))}${l.join ? joinStep(l.join(dir)) : ''}`;
   } else {
     // No runner faf knows. TAF is language-agnostic; leave a clear, honest placeholder.
     const placeholder = 'echo "TODO: your test command" 2>&1 | tee test-output.txt   # or any runner that writes JUnit XML';
