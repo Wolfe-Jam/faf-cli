@@ -91,7 +91,8 @@ for (const step of steps) {
   process.stderr.write(r.stderr);
   console.log('::endgroup::');
   if (step.id === 'tests') {
-    log = r.stdout + r.stderr;
+    // Runners colour their output in CI (nextest does): read the text, not the escapes.
+    log = (r.stdout + r.stderr).replace(/\x1b\[[0-9;]*m/g, '');
     testsFailed = r.status !== 0;
     if (!step['continue-on-error']) {fail('the test step does not keep going on a red run');}
   } else if (r.status !== 0) {
