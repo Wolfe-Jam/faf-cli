@@ -204,10 +204,227 @@ describe('PIT: faf taf setup', () => {
     expect(wf).not.toContain('pytest');
   });
 
-  test('Rust (Cargo.toml) keeps the placeholder: no recipe faf has checked yet', () => {
+  const wf = () => readFileSync(wfPath(), 'utf-8');
+  const receiptFile = () => (steps().find((s) => s.name === 'Print the receipt') as { with: Record<string, string> }).with['test-output-file'];
+  const stepNamed = (name: string) => steps().find((s) => s.name === name) as Record<string, unknown> | undefined;
+
+  // ── Rust: cargo nextest ──
+  test('Rust (Cargo.toml): the exact nextest recipe, and the receipt reads its JUnit file', () => {
     writeFileSync(join(testDir, 'Cargo.toml'), '[package]\nname = "x"\n');
     taf('setup', { write: true });
-    expect(readFileSync(wfPath(), 'utf-8')).toContain('TODO: your test command');
+    expect(wf()).toContain(`      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-nextest@0.9.151
+      - name: Configure the nextest JUnit report
+        # Only when the repo has no .config/nextest.toml: yours is never overwritten.
+        run: |
+          if [ ! -e .config/nextest.toml ]; then
+            mkdir -p .config
+            printf '[profile.ci.junit]\\npath = "junit.xml"\\n' > .config/nextest.toml
+          fi
+      - name: Run tests
+        id: tests
+        continue-on-error: true    # keep going, so a failed run still gets a receipt
+        run: |
+          set -o pipefail
+          cargo nextest run --profile ci --workspace --no-fail-fast
+      - name: Print the receipt
+`);
+    expect(receiptFile()).toBe('target/nextest/ci/junit.xml');
+    expect(wf()).not.toContain('TODO');
+    expect(stepNamed('Join the reports into one file')).toBeUndefined();
+  });
+
+  test('Rust: the config step writes a ci profile with a JUnit path, and never over a nextest.toml', () => {
+    writeFileSync(join(testDir, 'Cargo.toml'), '[package]\nname = "x"\n');
+    taf('setup', { write: true });
+    const run = stepNamed('Configure the nextest JUnit report')!.run as string;
+    // Run the step itself: no config → it writes one; a config → left byte for byte.
+    const sh = (cwd: string) => spawnSync('bash', ['-e', '-c', run], { cwd, encoding: 'utf-8' });
+    const fresh = join(testDir, 'fresh');
+    mkdirSync(fresh);
+    expect(sh(fresh).status).toBe(0);
+    expect(readFileSync(join(fresh, '.config', 'nextest.toml'), 'utf-8')).toBe('[profile.ci.junit]\npath = "junit.xml"\n');
+    const own = join(testDir, 'own');
+    mkdirSync(join(own, '.config'), { recursive: true });
+    const mine = '[profile.default]\nretries = 2\n\n[profile.ci.junit]\npath = "junit.xml"\n';
+    writeFileSync(join(own, '.config', 'nextest.toml'), mine);
+    expect(sh(own).status).toBe(0);
+    expect(readFileSync(join(own, '.config', 'nextest.toml'), 'utf-8')).toBe(mine);
+  });
+
+  test('Rust: a nextest.toml without [profile.ci.junit] gets a note, not a rewrite', () => {
+    writeFileSync(join(testDir, 'Cargo.toml'), '[package]\nname = "x"\n');
+    mkdirSync(join(testDir, '.config'));
+    writeFileSync(join(testDir, '.config', 'nextest.toml'), '[profile.default]\nretries = 2\n');
+    taf('setup', { write: true });
+    expect(wf()).toContain('# .config/nextest.toml has no [profile.ci.junit]: add one with path = "junit.xml", or there is no report to read.');
+    expect(readFileSync(join(testDir, '.config', 'nextest.toml'), 'utf-8')).toBe('[profile.default]\nretries = 2\n');
+  });
+
+  test('Rust: a nextest.toml with [profile.ci.junit] gets no note', () => {
+    writeFileSync(join(testDir, 'Cargo.toml'), '[package]\nname = "x"\n');
+    mkdirSync(join(testDir, '.config'));
+    writeFileSync(join(testDir, '.config', 'nextest.toml'), '[profile.ci.junit]\npath = "junit.xml"\n');
+    taf('setup', { write: true });
+    expect(wf()).not.toContain('has no [profile.ci.junit]');
+  });
+
+  // ── Java: Maven ──
+  const javaSetup = (cache: boolean) => `      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'          # your project's Java version${cache ? '\n          cache: maven' : ''}
+`;
+
+  test('Maven (pom.xml): mvn test, then the per-class files are joined into report.xml', () => {
+    writeFileSync(join(testDir, 'pom.xml'), '<project></project>');
+    taf('setup', { write: true });
+    expect(wf()).toContain(`      - uses: actions/checkout@v7\n${javaSetup(true)}      - name: Run tests`);
+    expect(wf()).toContain('          mvn -B --fail-at-end test\n');
+    expect(wf()).toContain(`      - name: Join the reports into one file
+        # One file per test class or assembly; one alone can read PASSED for a run that failed.
+        run: cat target/surefire-reports/TEST-*.xml > report.xml
+      - name: Print the receipt`);
+    expect(receiptFile()).toBe('report.xml');
+    expect(steps().map((s) => s.name).filter(Boolean)).toEqual(['Run tests', 'Join the reports into one file', 'Print the receipt', 'Fail the job if the tests failed']);
+  });
+
+  test('Maven with the wrapper (mvnw): ./mvnw', () => {
+    writeFileSync(join(testDir, 'pom.xml'), '<project></project>');
+    writeFileSync(join(testDir, 'mvnw'), '#!/bin/sh\n');
+    taf('setup', { write: true });
+    expect(wf()).toContain('          ./mvnw -B --fail-at-end test\n');
+    expect(wf()).not.toMatch(/^\s+mvn /m);
+  });
+
+  test('Maven with <modules>: every module\'s reports are joined', () => {
+    writeFileSync(join(testDir, 'pom.xml'), '<project><modules><module>a</module></modules></project>');
+    taf('setup', { write: true });
+    expect(wf()).toContain("run: find . -path '*/target/surefire-reports/TEST-*.xml' -exec cat {} + > report.xml");
+  });
+
+  // ── Java: Gradle ──
+  for (const marker of ['build.gradle', 'build.gradle.kts', 'settings.gradle', 'settings.gradle.kts']) {
+    test(`Gradle (${marker}) without a wrapper: setup-gradle installs Gradle, gradle test, the join`, () => {
+      writeFileSync(join(testDir, marker), '');
+      taf('setup', { write: true });
+      expect(wf()).toContain(`      - uses: actions/checkout@v7\n${javaSetup(false)}      - uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: '9.8.2'   # no gradlew in the repo
+      - name: Run tests`);
+      expect(wf()).toContain('          gradle test --continue\n');
+      expect(wf()).toContain('        run: cat build/test-results/test/TEST-*.xml > report.xml\n');
+      expect(receiptFile()).toBe('report.xml');
+    });
+  }
+
+  test('Gradle with the wrapper (gradlew): ./gradlew, and setup-gradle installs nothing', () => {
+    writeFileSync(join(testDir, 'build.gradle.kts'), '');
+    writeFileSync(join(testDir, 'gradlew'), '#!/bin/sh\n');
+    taf('setup', { write: true });
+    expect(wf()).toContain('      - uses: gradle/actions/setup-gradle@v6\n      - name: Run tests');
+    expect(wf()).toContain('          ./gradlew test --continue\n');
+    expect(wf()).not.toContain('gradle-version');
+  });
+
+  test('Gradle with subprojects (include in settings): every subproject\'s reports are joined', () => {
+    writeFileSync(join(testDir, 'settings.gradle.kts'), 'rootProject.name = "x"\ninclude("app", "lib")\n');
+    taf('setup', { write: true });
+    expect(wf()).toContain("run: find . -path '*/build/test-results/test/TEST-*.xml' -exec cat {} + > report.xml");
+  });
+
+  // ── .NET ──
+  for (const marker of ['App.sln', 'App.slnx', 'App.csproj', 'App.fsproj']) {
+    test(`.NET (${marker}): the JUnit logger is added in CI, dotnet test writes one file per assembly, joined`, () => {
+      writeFileSync(join(testDir, marker), '');
+      taf('setup', { write: true });
+      expect(wf()).toContain(`      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'      # your SDK version (or add a global.json)
+      - name: Add the JUnit logger to each test project
+        # In CI only: your project files are not changed in the repo.
+        run: |
+          grep -rlE --include='*.csproj' --include='*.fsproj' 'Microsoft\\.NET\\.Test\\.Sdk' . | while read -r p; do
+            grep -q 'JunitXml.TestLogger' "$p" || dotnet add "$p" package JunitXml.TestLogger --version 8.1.0
+          done
+      - name: Run tests`);
+      expect(wf()).toContain('          dotnet test --logger "junit;LogFilePath=$GITHUB_WORKSPACE/junit-reports/{assembly}.{framework}.xml"\n');
+      expect(wf()).toContain('        run: cat junit-reports/*.xml > report.xml\n');
+      expect(receiptFile()).toBe('report.xml');
+    });
+  }
+
+  test('.NET with global.json: setup-dotnet reads the SDK version from it', () => {
+    writeFileSync(join(testDir, 'App.sln'), '');
+    writeFileSync(join(testDir, 'global.json'), '{"sdk":{"version":"8.0.100"}}');
+    taf('setup', { write: true });
+    expect(wf()).toContain('          global-json-file: global.json\n');
+    expect(wf()).not.toContain('dotnet-version');
+  });
+
+  test('.NET: the logger step adds the package only to test projects without it', () => {
+    writeFileSync(join(testDir, 'App.sln'), '');
+    taf('setup', { write: true });
+    const run = stepNamed('Add the JUnit logger to each test project')!.run as string;
+    for (const [rel, body] of [
+      ['src/App/App.csproj', '<Project><ItemGroup><PackageReference Include="Newtonsoft.Json" /></ItemGroup></Project>'],
+      ['tests/A.Tests/A.Tests.csproj', '<Project><ItemGroup><PackageReference Include="Microsoft.NET.Test.Sdk" /></ItemGroup></Project>'],
+      ['tests/B.Tests/B.Tests.fsproj', '<Project><ItemGroup><PackageReference Include="Microsoft.NET.Test.Sdk" /><PackageReference Include="JunitXml.TestLogger" Version="7.0.0" /></ItemGroup></Project>'],
+    ]) {
+      mkdirSync(join(testDir, rel, '..'), { recursive: true });
+      writeFileSync(join(testDir, rel), body);
+    }
+    // A stand-in `dotnet` records what the step asks it to add.
+    const bin = join(testDir, 'bin');
+    mkdirSync(bin);
+    writeFileSync(join(bin, 'dotnet'), '#!/bin/sh\necho "$@" >> "$DOTNET_LOG"\n', { mode: 0o755 });
+    const log = join(testDir, 'dotnet.log');
+    const r = spawnSync('bash', ['-e', '-c', run], { cwd: testDir, encoding: 'utf-8', env: { ...process.env, PATH: `${bin}:${process.env.PATH}`, DOTNET_LOG: log } });
+    expect(r.status).toBe(0);
+    expect(readFileSync(log, 'utf-8')).toBe('add ./tests/A.Tests/A.Tests.csproj package JunitXml.TestLogger --version 8.1.0\n');
+  });
+
+  test('.NET: a solution only in a subfolder is not detected (top-level files only)', () => {
+    mkdirSync(join(testDir, 'src'));
+    writeFileSync(join(testDir, 'src', 'App.sln'), '');
+    taf('setup', { write: true });
+    expect(wf()).toContain('TODO: your test command');
+  });
+
+  // ── Detection order ──
+  for (const [label, files, want] of [
+    ['a Rust repo with a requirements.txt is Rust', ['Cargo.toml', 'requirements.txt'], 'cargo nextest run'],
+    ['a Rust repo with a pyproject.toml (maturin) is Rust', ['Cargo.toml', 'pyproject.toml'], 'cargo nextest run'],
+    ['a Maven repo with a requirements.txt is Maven', ['pom.xml', 'requirements.txt'], 'mvn -B'],
+    ['a Gradle repo with a pyproject.toml is Gradle', ['build.gradle', 'pyproject.toml'], 'gradle test'],
+    ['a .NET repo with a requirements.txt is .NET', ['App.sln', 'requirements.txt'], 'dotnet test'],
+    ['Go keeps first place (go.mod and Cargo.toml)', ['go.mod', 'Cargo.toml'], 'gotestsum'],
+    ['Rust before Java (Cargo.toml and pom.xml)', ['Cargo.toml', 'pom.xml'], 'cargo nextest run'],
+    ['Maven before Gradle (pom.xml and build.gradle)', ['pom.xml', 'build.gradle'], 'mvn -B'],
+    ['Gradle before .NET (build.gradle and App.sln)', ['build.gradle', 'App.sln'], 'gradle test'],
+    ['package.json still decides first (package.json and Cargo.toml)', ['package.json', 'Cargo.toml'], 'npm ci'],
+  ] as const) {
+    test(`detection: ${label}`, () => {
+      for (const f of files) {writeFileSync(join(testDir, f), f === 'package.json' ? '{"name":"x"}' : '');}
+      taf('setup', { write: true });
+      expect(wf()).toContain(want);
+    });
+  }
+
+  test('the new recipes keep the red-run recipe and are valid YAML', () => {
+    for (const file of ['Cargo.toml', 'pom.xml', 'build.gradle', 'App.sln']) {
+      rmSync(join(testDir, '.github'), { recursive: true, force: true });
+      writeFileSync(join(testDir, file), '');
+      taf('setup', { write: true });
+      rmSync(join(testDir, file));
+      const names = steps().map((s) => s.name).filter(Boolean);
+      expect(names.slice(-2)).toEqual(['Print the receipt', 'Fail the job if the tests failed']);
+      expect((stepNamed('Run tests') as { 'continue-on-error'?: boolean })['continue-on-error']).toBe(true);
+    }
   });
 
   // faf-taf-git reads Jest, Vitest and Bun output. Any other JS runner gets the
@@ -388,7 +605,17 @@ describe('PIT: faf taf setup', () => {
   });
 
   test('every action in every recipe is on its current major', () => {
-    const recipes: Array<[string, string]> = [['package.json', '{"name":"x"}'], ['go.mod', 'module x\n'], ['pyproject.toml', '']];
+    // The current major of each action a recipe uses (checked 2026-11-04).
+    const CURRENT: Record<string, string> = {
+      'actions/checkout': 'v7', 'actions/setup-node': 'v7', 'actions/setup-python': 'v7', 'actions/setup-go': 'v7',
+      'actions/setup-java': 'v6', 'actions/setup-dotnet': 'v6', 'gradle/actions/setup-gradle': 'v6',
+      'pnpm/action-setup': 'v6', 'oven-sh/setup-bun': 'v2', 'taiki-e/install-action': 'v2',
+      'dtolnay/rust-toolchain': 'stable', 'Wolfe-Jam/faf-taf-git': ciPin()!.split('@')[1],
+    };
+    const recipes: Array<[string, string]> = [
+      ['package.json', '{"name":"x"}'], ['go.mod', 'module x\n'], ['pyproject.toml', ''],
+      ['Cargo.toml', ''], ['pom.xml', ''], ['build.gradle', ''], ['App.sln', ''],
+    ];
     for (const [file, body] of recipes) {
       // Never remove testDir itself: it is the cwd, and Windows refuses that.
       rmSync(join(testDir, '.github'), { recursive: true, force: true });
@@ -397,7 +624,9 @@ describe('PIT: faf taf setup', () => {
       const wf = readFileSync(wfPath(), 'utf-8');
       rmSync(join(testDir, file));
       expect(wf).toContain('actions/checkout@v7');
-      expect(wf).not.toMatch(/actions\/[a-z-]+@v6/);
+      for (const [, action, ref] of wf.matchAll(/uses: ([\w./-]+)@([\w.]+)/g)) {
+        expect(`${action}@${ref}`).toBe(`${action}@${CURRENT[action]}`);
+      }
     }
   });
 

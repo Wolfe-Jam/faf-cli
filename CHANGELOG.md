@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`faf taf setup` writes real test steps for Rust, Java (Maven, Gradle) and .NET.** Each writes one JUnit file faf-taf-git reads. Rust (`Cargo.toml`): `cargo nextest run --profile ci --workspace --no-fail-fast` (nextest 0.9.151 through `taiki-e/install-action`), reading `target/nextest/ci/junit.xml`; the workflow writes `.config/nextest.toml` with `[profile.ci.junit]` only when the repo has none, and a repo config without that table gets a note, never a rewrite. Maven (`pom.xml`): `mvn -B --fail-at-end test` (`./mvnw` with the wrapper); Gradle (`build.gradle`, `build.gradle.kts`, `settings.gradle*`): `gradle test --continue` (`./gradlew` with the wrapper, else setup-gradle installs Gradle 9.8.2). Both join the per-class files into `report.xml` (`find` across modules when `pom.xml` has `<modules>` or settings has `include`), since one class's file can read PASSED for a run that failed. .NET (`*.sln`, `*.slnx`, `*.csproj`, `*.fsproj` at the top): the workflow adds `JunitXml.TestLogger` 8.1.0 to each test project in CI (your project files are not changed), `dotnet test` writes one file per assembly and the recipe joins them. Setup: `dtolnay/rust-toolchain@stable`, `actions/setup-java@v6` (Temurin 21), `gradle/actions/setup-gradle@v6`, `actions/setup-dotnet@v6` (10.0.x, or `global.json`). Detection order: package.json, Go, Rust, Maven, Gradle, .NET, Python: a Rust or Java repo with a `requirements.txt` is not Python. Known gap: nextest leaves `#[ignore]` tests out of its JUnit file, so their skips are not on the receipt.
+- faf-cli CI job `taf-recipes`: for a fixture per language (2 passing, 1 failing, 1 skipped), `faf taf setup` writes the recipe, its steps run, and faf-taf-git's parser must give the runner's own counts.
+
 ### Changed
 - `faf taf setup` pins faf-taf-git v2.4.6: a report with no tests says "no tests ran" instead of "could not parse".
 
