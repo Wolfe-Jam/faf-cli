@@ -1,5 +1,5 @@
 import { spawnSync } from 'child_process';
-import { existsSync, readdirSync, readFileSync } from 'fs';
+import { existsSync, readdirSync, readFileSync, type Dirent } from 'fs';
 import { dirname, join, resolve } from 'path';
 import { findFafFile, readFaf, readFafRaw, withKernel } from '../interop/faf.js';
 import { scoreFafYaml } from '../core/scorer.js';
@@ -344,19 +344,77 @@ function gradleSetup(dir: string): string {
 // test assembly writes its own file, and the recipe joins them.
 const JUNIT_LOGGER_VERSION = '8.1.0';
 
+/** Project files below the top, skipping build output and tool folders. */
+function dotnetProjectFiles(dir: string, rel = '', depth = 0): string[] {
+  if (depth > 6) {return [];}
+  let entries: Dirent[];
+  try {
+    entries = readdirSync(join(dir, rel), { withFileTypes: true });
+  } catch {
+    return [];
+  }
+  const out: string[] = [];
+  for (const e of entries) {
+    const r = rel ? `${rel}/${e.name}` : e.name;
+    if (e.isDirectory()) {
+      if (!/^(?:\.|bin$|obj$|node_modules$)/.test(e.name)) {out.push(...dotnetProjectFiles(dir, r, depth + 1));}
+    } else if (/\.(?:csproj|fsproj)$|^Directory\.Build\.props$/i.test(e.name)) {
+      out.push(r);
+    }
+  }
+  return out;
+}
+
+/** The SDK channels the projects target (`net8.0` → `8.0.x`), oldest first. */
+function dotnetVersions(dir: string): string[] {
+  const found = new Set<string>();
+  for (const rel of dotnetProjectFiles(dir)) {
+    const text = readRepoFile(dir, rel) ?? '';
+    for (const m of text.matchAll(/<TargetFrameworks?>([^<]*)<\/TargetFrameworks?>/g)) {
+      for (const tfm of m[1].split(';')) {
+        // net8.0, net9.0-windows; net48 (.NET Framework) and netstandard2.0 have no SDK channel.
+        const v = /^\s*net(\d+\.\d+)/.exec(tfm)?.[1];
+        if (v) {found.add(`${v}.x`);}
+      }
+    }
+  }
+  return [...found].sort((a, b) => parseFloat(a) - parseFloat(b));
+}
+
 function dotnetSetup(dir: string): string {
-  const version = repoExists(dir, 'global.json')
-    ? 'global-json-file: global.json'
-    : "dotnet-version: '10.0.x'      # your SDK version (or add a global.json)";
+  // A net8.0 test project needs the .NET 8 runtime to run, not only a newer
+  // SDK to build: install every channel the projects target.
+  const versions = dotnetVersions(dir);
+  const globalJson = repoExists(dir, 'global.json');
+  const lines: string[] = [];
+  if (versions.length === 1) {lines.push(`dotnet-version: '${versions[0]}'`);}
+  if (versions.length > 1) {lines.push(`dotnet-version: |\n${versions.map((v) => `            ${v}`).join('\n')}`);}
+  if (globalJson) {lines.push('global-json-file: global.json');}
+  if (!lines.length) {lines.push("dotnet-version: '10.0.x'      # your SDK version (or add a global.json)");}
   return `      - uses: actions/setup-dotnet@v6
         with:
-          ${version}
+          ${lines.join('\n          ')}
       - name: Add the JUnit logger to each test project
         # In CI only: your project files are not changed in the repo.
         run: |
-          grep -rlE --include='*.csproj' --include='*.fsproj' 'Microsoft\\.NET\\.Test\\.Sdk' . | while read -r p; do
+          grep -rlE --include='*.csproj' --include='*.fsproj' 'Microsoft\\.NET\\.Test\\.Sdk|<IsTestProject>[[:space:]]*true' . | while read -r p; do
             grep -q 'JunitXml.TestLogger' "$p" || dotnet add "$p" package JunitXml.TestLogger --version ${JUNIT_LOGGER_VERSION}
           done`;
+}
+
+/** `dotnet test` stops with MSB1011 when the top holds more than one solution
+ *  or project, so name one then: the first solution, else the first project. */
+function dotnetTarget(dir: string): string {
+  let entries: string[];
+  try {
+    entries = readdirSync(dir);
+  } catch {
+    return '';
+  }
+  const top = entries.filter((f) => DOTNET_FILE.test(f) && repoExists(dir, f)).sort();
+  if (top.length <= 1) {return '';}
+  const pick = top.find((f) => /\.slnx?$/i.test(f)) ?? top[0];
+  return /^[\w.+-]+$/.test(pick) ? ` ${pick}` : ` '${pick.replace(/'/g, `'\\''`)}'`;
 }
 
 interface Recipe {
@@ -404,7 +462,7 @@ const LANGUAGE: Record<Language, Recipe> = {
   },
   dotnet: {
     setup: dotnetSetup,
-    test: () => 'dotnet test --logger "junit;LogFilePath=$GITHUB_WORKSPACE/junit-reports/{assembly}.{framework}.xml"',
+    test: (dir) => `dotnet test${dotnetTarget(dir)} --logger "junit;LogFilePath=$GITHUB_WORKSPACE/junit-reports/{assembly}.{framework}.xml"`,
     join: () => 'cat junit-reports/*.xml > report.xml',
     report: 'report.xml',
   },

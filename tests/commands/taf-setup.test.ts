@@ -348,7 +348,7 @@ describe('PIT: faf taf setup', () => {
       - name: Add the JUnit logger to each test project
         # In CI only: your project files are not changed in the repo.
         run: |
-          grep -rlE --include='*.csproj' --include='*.fsproj' 'Microsoft\\.NET\\.Test\\.Sdk' . | while read -r p; do
+          grep -rlE --include='*.csproj' --include='*.fsproj' 'Microsoft\\.NET\\.Test\\.Sdk|<IsTestProject>[[:space:]]*true' . | while read -r p; do
             grep -q 'JunitXml.TestLogger' "$p" || dotnet add "$p" package JunitXml.TestLogger --version 8.1.0
           done
       - name: Run tests`);
@@ -374,6 +374,8 @@ describe('PIT: faf taf setup', () => {
       ['src/App/App.csproj', '<Project><ItemGroup><PackageReference Include="Newtonsoft.Json" /></ItemGroup></Project>'],
       ['tests/A.Tests/A.Tests.csproj', '<Project><ItemGroup><PackageReference Include="Microsoft.NET.Test.Sdk" /></ItemGroup></Project>'],
       ['tests/B.Tests/B.Tests.fsproj', '<Project><ItemGroup><PackageReference Include="Microsoft.NET.Test.Sdk" /><PackageReference Include="JunitXml.TestLogger" Version="7.0.0" /></ItemGroup></Project>'],
+      // The test SDK comes from a shared Directory.Build.props: only IsTestProject marks it.
+      ['tests/C Tests/C.Tests.csproj', '<Project><PropertyGroup><IsTestProject>true</IsTestProject></PropertyGroup></Project>'],
     ]) {
       mkdirSync(join(testDir, rel, '..'), { recursive: true });
       writeFileSync(join(testDir, rel), body);
@@ -385,7 +387,44 @@ describe('PIT: faf taf setup', () => {
     const log = join(testDir, 'dotnet.log');
     const r = spawnSync('bash', ['-e', '-c', run], { cwd: testDir, encoding: 'utf-8', env: { ...process.env, PATH: `${bin}:${process.env.PATH}`, DOTNET_LOG: log } });
     expect(r.status).toBe(0);
-    expect(readFileSync(log, 'utf-8')).toBe('add ./tests/A.Tests/A.Tests.csproj package JunitXml.TestLogger --version 8.1.0\n');
+    expect(readFileSync(log, 'utf-8').split('\n').filter(Boolean).sort()).toEqual([
+      'add ./tests/A.Tests/A.Tests.csproj package JunitXml.TestLogger --version 8.1.0',
+      'add ./tests/C Tests/C.Tests.csproj package JunitXml.TestLogger --version 8.1.0',
+    ]);
+  });
+
+  test('.NET: the SDK channels come from the target frameworks (build output and .NET Framework ignored)', () => {
+    writeFileSync(join(testDir, 'App.sln'), '');
+    for (const [rel, body] of [
+      ['src/App/App.csproj', '<Project><PropertyGroup><TargetFramework>net9.0</TargetFramework></PropertyGroup></Project>'],
+      ['tests/App.Tests/App.Tests.csproj', '<Project><PropertyGroup><TargetFrameworks>net8.0;net48</TargetFrameworks></PropertyGroup></Project>'],
+      ['src/App/bin/Debug/Old.csproj', '<Project><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup></Project>'],
+    ]) {
+      mkdirSync(join(testDir, rel, '..'), { recursive: true });
+      writeFileSync(join(testDir, rel), body);
+    }
+    taf('setup', { write: true });
+    expect(wf()).toContain('          dotnet-version: |\n            8.0.x\n            9.0.x\n      - name: Add the JUnit logger');
+  });
+
+  test('.NET: one target framework and a global.json: both are passed to setup-dotnet', () => {
+    writeFileSync(join(testDir, 'App.csproj'), '<Project><PropertyGroup><TargetFramework>net8.0</TargetFramework></PropertyGroup></Project>');
+    writeFileSync(join(testDir, 'global.json'), '{"sdk":{"version":"10.0.100"}}');
+    taf('setup', { write: true });
+    expect(wf()).toContain("          dotnet-version: '8.0.x'\n          global-json-file: global.json\n");
+  });
+
+  test('.NET: a solution and a project at the top: dotnet test names the solution (MSB1011)', () => {
+    writeFileSync(join(testDir, 'App.csproj'), '');
+    writeFileSync(join(testDir, 'App.sln'), '');
+    taf('setup', { write: true });
+    expect(wf()).toContain('          dotnet test App.sln --logger ');
+  });
+
+  test('.NET: one entry at the top: dotnet test names nothing', () => {
+    writeFileSync(join(testDir, 'My App.sln'), '');
+    taf('setup', { write: true });
+    expect(wf()).toContain('          dotnet test --logger ');
   });
 
   test('.NET: a solution only in a subfolder is not detected (top-level files only)', () => {
