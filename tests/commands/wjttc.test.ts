@@ -469,3 +469,32 @@ describe('WJTTC BRAKE: outer', () => {
     expect(findings[0].tier).toBe('BRAKE');
   });
 });
+
+describe('WJTTC ENGINE: modifier blocks and fixtures', () => {
+  test('describe.skipIf(...) passes its tier to the tests inside', () => {
+    const src = `describe.skipIf(windowsPr)('TYRE: real git', () => {\n  test('commits', () => {});\n});\n`;
+    expect(extractTestNames(src, 'typescript')).toEqual(['TYRE: real git > commits']);
+  });
+
+  test('describe.each with braces in its table: the body still opens at the arrow', () => {
+    const src = `describe.each([{ a: 1 }, { a: 2 }])('BRAKE: case %o', ({ a }) => {\n  it.only('holds', () => {});\n});\ntest('after', () => {});\n`;
+    expect(extractTestNames(src, 'typescript')).toEqual(['BRAKE: case %o > holds', 'after']);
+  });
+
+  test('test.each, it.skip and it.todo are tests too', () => {
+    const src = `describe('AERO: x', () => {\n  test.each(['a', 'b'])('each %s', () => {});\n  it.skip('skipped', () => {});\n  it.todo('later');\n});\n`;
+    expect(extractTestNames(src, 'typescript')).toEqual(['AERO: x > each %s', 'AERO: x > skipped', 'AERO: x > later']);
+  });
+
+  test('a fixtures folder is test data, not the suite', () => {
+    const root = join(tmpdir(), `wjttc-fixtures-${process.pid}-${Date.now()}`);
+    mkdirSync(join(root, 'fixtures', 'sample'), { recursive: true });
+    writeFileSync(join(root, 'real.test.ts'), `test('ENGINE: counted', () => {});\n`);
+    writeFileSync(join(root, 'fixtures', 'sample', 'meant-to-fail.test.ts'), `test('fails on purpose', () => {});\n`);
+    try {
+      expect(scanTests(root).map((f) => f.testName)).toEqual(['ENGINE: counted']);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+});
