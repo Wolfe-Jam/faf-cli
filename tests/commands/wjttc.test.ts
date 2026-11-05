@@ -481,8 +481,8 @@ describe('WJTTC ENGINE: modifier blocks and fixtures', () => {
     expect(extractTestNames(src, 'typescript')).toEqual(['BRAKE: case %o > holds', 'after']);
   });
 
-  test('test.each, test.skip and it.todo are tests too', () => {
-    const src = `describe('AERO: x', () => {\n  test.each(['a', 'b'])('each %s', () => {});\n  test.skip('skipped', () => {});\n  it.todo('later');\n});\n`;
+  test('test.each, it.skip and it.todo are tests too', () => {
+    const src = `describe('AERO: x', () => {\n  test.each(['a', 'b'])('each %s', () => {});\n  it.skip('skipped', () => {});\n  it.todo('later');\n});\n`;
     expect(extractTestNames(src, 'typescript')).toEqual(['AERO: x > each %s', 'AERO: x > skipped', 'AERO: x > later']);
   });
 
