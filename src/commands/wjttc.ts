@@ -78,6 +78,49 @@ export function classifyTestFile(filename: string): { ok: boolean; lang?: Langua
   return { ok: false };
 }
 
+/** The quoted name a test call starts with, reading from just after its `(`.
+ *  With modifiers (`.skipIf(cond)`, `.each(table)`), their argument lists are
+ *  stepped over first. Null when the call has no literal name. A plain scan,
+ *  not one regex: JavaScriptCore gives up on deep backtracking and returns
+ *  "no match" (a trailing newline was enough). */
+function callName(content: string, from: number, modified: boolean): { name: string; end: number } | null {
+  let j = from;
+  for (let hop = 0; hop < 4; hop++) {
+    while (j < content.length && /\s/.test(content[j])) {j++;}
+    const q = content[j];
+    if (q === "'" || q === '"' || q === '`') {
+      let e = j + 1;
+      while (e < content.length && content[e] !== q) {
+        if (content[e] === '\\') {e++;}
+        else if (q !== '`' && content[e] === '\n') {return null;}
+        e++;
+      }
+      return e < content.length ? { name: content.slice(j + 1, e), end: e } : null;
+    }
+    if (!modified) {return null;}
+    const close = closingParen(content, j - 1);
+    if (close < 0) {return null;}
+    j = close + 1;
+    while (j < content.length && /\s/.test(content[j])) {j++;}
+    if (content[j] !== '(') {return null;}
+    j++;
+  }
+  return null;
+}
+
+/** Index of the `)` that closes the `(` at `open`, skipping quoted strings; -1 if none. */
+function closingParen(content: string, open: number): number {
+  let depth = 0;
+  for (let i = open; i < content.length; i++) {
+    const ch = content[i];
+    if (ch === "'" || ch === '"' || ch === '`') {
+      for (i++; i < content.length && content[i] !== ch; i++) {if (content[i] === '\\') {i++;}}
+    } else if (ch === '(') {depth++;}
+    else if (ch === ')' && --depth === 0) {return i;}
+  }
+  return -1;
+}
+
 /** Extract test names from file content per language.
  *
  *  For TypeScript/JS, the tier marker typically lives on the parent `describe`
@@ -94,15 +137,16 @@ export function extractTestNames(content: string, lang: Language): string[] {
       // Tests inherit the full describe-stack path so tier markers on parent
       // describes propagate to nested tests. Handles same-line describe+test
       // and multiple sibling describes correctly.
-      const callRe = /\b(describe|test|it)\s*\(\s*(['"`])((?:\\.|(?!\2).)*)\2/g;
+      // Modifiers count too: `describe.skipIf(windowsPr)('TYRE: …', …)`,
+      // `test.each([...])('…')`, `it.only('…')`. A modifier's own arguments may
+      // hold braces, so a call is placed at the END of its name: braces before
+      // it are counted for depth but never taken as the describe's body.
       const calls: { idx: number; type: 'describe' | 'test'; name: string }[] = [];
+      const headRe = /\b(describe|test|it)((?:\.[A-Za-z]+)*)\s*\(/g;
       let m: RegExpExecArray | null;
-      while ((m = callRe.exec(content)) !== null) {
-        calls.push({
-          idx: m.index,
-          type: m[1] === 'describe' ? 'describe' : 'test',
-          name: m[3],
-        });
+      while ((m = headRe.exec(content)) !== null) {
+        const named = callName(content, m.index + m[0].length, m[2] !== '');
+        if (named) {calls.push({ idx: named.end, type: m[1] === 'describe' ? 'describe' : 'test', name: named.name });}
       }
 
       type Frame = { name: string; openDepth: number };
@@ -129,7 +173,8 @@ export function extractTestNames(content: string, lang: Language): string[] {
         const ch = content[i];
         if (ch === '{') {
           depth++;
-          if (pendingDescribe !== null) {
+          // The body opens at `=> {` or `) {`, not at a destructured parameter `({ a })`.
+          if (pendingDescribe !== null && /(?:=>|\))\s*$/.test(content.slice(Math.max(0, i - 40), i))) {
             stack.push({ name: pendingDescribe, openDepth: depth });
             pendingDescribe = null;
           }
@@ -174,7 +219,9 @@ export function extractTestNames(content: string, lang: Language): string[] {
   return names;
 }
 
-const SKIP_DIRS = new Set(['node_modules', '.git', 'target', 'dist', 'build', '.next', '.nuxt', 'coverage']);
+// fixtures / __fixtures__: test data (sample projects whose tests are meant to
+// fail or skip), not the suite being audited.
+const SKIP_DIRS = new Set(['node_modules', '.git', 'target', 'dist', 'build', '.next', '.nuxt', 'coverage', 'fixtures', '__fixtures__']);
 
 function walk(dir: string, results: string[] = []): string[] {
   let entries: { name: string; isDirectory(): boolean; isFile(): boolean }[];
