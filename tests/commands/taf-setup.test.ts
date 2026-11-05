@@ -52,7 +52,7 @@ describe('PIT: faf taf setup', () => {
     taf('setup', { write: true });
     expect(existsSync(wfPath())).toBe(true);
     const wf = readFileSync(wfPath(), 'utf-8');
-    expect(wf).toContain('Wolfe-Jam/faf-taf-git@v2.4.6');
+    expect(wf).toContain('Wolfe-Jam/faf-taf-git@v2.5.0');
     expect(wf).toContain('test-output.txt');
     expect(wf).toContain('target-branch: taf-receipts');
   });

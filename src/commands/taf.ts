@@ -33,7 +33,7 @@ export function isTafSnapshot(bytes: Uint8Array): boolean {
   }
 }
 
-const FAF_TAF_GIT = 'Wolfe-Jam/faf-taf-git@v2.4.6';
+const FAF_TAF_GIT = 'Wolfe-Jam/faf-taf-git@v2.5.0';
 
 /**
  * `faf taf [subcommand]`

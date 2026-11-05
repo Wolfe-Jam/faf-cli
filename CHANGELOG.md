@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `faf taf receipts` reads the `skipped_tests` block that faf-taf-git 2.5.0 writes: a receipt that names a newly skipped test shows `+N newly skipped` after its counts, and `--json` carries the names, hash, `newly_skipped` and `no_longer_skipped`. Older receipts read as before.
 
 ### Changed
+- `faf taf setup` pins faf-taf-git v2.5.0 (Named Skips Edition): receipts name the skipped tests, with a hash of the full set and what changed since the previous receipt. faf-cli's own CI uses the same pin.
 - **The birth certificate is write-once.** `FafDNAManager.birth()` writes `.faf-dna` only when there is none; with one there, in any shape, it refuses (`SafePathError` reason `exists`, a new reason) and writes nothing. Growth copies the birth block unchanged (tested).
 - **Breaking: `faf init --force` no longer starts a new birth.** It replaces `project.faf` as `--new` does and keeps `.faf-dna` byte for byte, with a one-line note. `--new` and `--force` together are no longer refused. Files that already hold earlier lives (`priorLineage`, from resets before this change) are still read, shown by `faf dna` and kept as they grow.
 
