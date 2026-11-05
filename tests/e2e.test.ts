@@ -42,7 +42,7 @@ describe.skipIf(windowsPr)('TYRE: faf e2e — full lifecycle', () => {
   // --- Phase 1: Create ---
 
   test('init creates project.faf', () => {
-    run('init --yolo');
+    run('init');
     expect(existsSync(join(testDir, 'project.faf'))).toBe(true);
     const faf = parse(readFileSync(join(testDir, 'project.faf'), 'utf-8'));
     expect(faf.faf_version).toBe(FAF_VERSION);
@@ -223,7 +223,7 @@ describe.skipIf(windowsPr)('TYRE: faf e2e — full lifecycle', () => {
 
   test('full golden path lifecycle', () => {
     // 1. Init
-    run('init --yolo');
+    run('init');
     expect(existsSync(join(testDir, 'project.faf'))).toBe(true);
 
     // 2. Auto-enrich

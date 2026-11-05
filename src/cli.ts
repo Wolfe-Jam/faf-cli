@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { Command } from 'commander';
+import { Command, Option } from 'commander';
 import { scoreCommand } from './commands/score.js';
 import { initCommand } from './commands/init.js';
 import { dnaCommand } from './commands/dna.js';
@@ -61,8 +61,9 @@ program
 program
   .command('init')
   .description('Create .faf from your project')
-  .option('--yolo', 'Quick init with sensible defaults')
-  .option('--quick', 'Alias for --yolo')
+  // --yolo / --quick: init asks nothing anyway. Accepted for old scripts, not shown in --help.
+  .addOption(new Option('--yolo').hideHelp())
+  .addOption(new Option('--quick').hideHelp())
   .option('--new', 'Replace project.faf with a fresh one; .faf-dna is kept as it is')
   .option('--force', 'Same as --new: replace project.faf; .faf-dna is kept (a birth certificate is written once)')
   .option('--output <path>', 'Output path')
@@ -265,9 +266,6 @@ program
   .command('check [file]')
   .description('Validate .faf file')
   .option('--strict', 'Require 100% score')
-  .option('--fix', 'Auto-fix issues')
-  .option('--doctor', 'Full diagnostic')
-  .option('--trust', 'Verify trust chain')
   .option('--verbose', 'Show slot breakdown')
   .action((file, options) => checkCommand(file, options));
 
@@ -275,9 +273,6 @@ program
   .command('info')
   .description('Show version and system info')
   .option('--version', 'Show version')
-  .option('--faq', 'Show FAQ')
-  .option('--index', 'Show command index')
-  .option('--stacks', 'Show supported stacks')
   .action((options) => infoCommand(options));
 
 // === Phase A Commands ===
@@ -407,7 +402,7 @@ program.command('gemini', { hidden: true }).action(() => exportCommand({ gemini:
 program.command('grok', { hidden: true }).action(() => exportCommand({ grok: true }));
 program.command('llms', { hidden: true }).action(() => exportCommand({ llms: true }));
 program.command('validate [file]', { hidden: true }).action((file?: string) => checkCommand(file));
-program.command('yolo', { hidden: true }).action(() => initCommand({ yolo: true }));
+program.command('yolo', { hidden: true }).action(() => initCommand());
 
 // === Parse and run ===
 

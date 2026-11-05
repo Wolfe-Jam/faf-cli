@@ -12,8 +12,6 @@ import { assertProjectCwd } from '../core/cwd-guard.js';
 import { refuseMissingOutputFolder } from '../core/refusal.js';
 
 export interface InitOptions {
-  yolo?: boolean;
-  quick?: boolean;
   force?: boolean;
   new?: boolean;
   output?: string;

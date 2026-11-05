@@ -10,9 +10,6 @@ import { bold, dim, fafCyan } from '../ui/colors.js';
 
 export interface CheckOptions {
   strict?: boolean;
-  fix?: boolean;
-  doctor?: boolean;
-  trust?: boolean;
   verbose?: boolean;
 }
 

@@ -3,15 +3,11 @@ import * as kernel from '../wasm/kernel.js';
 
 export interface InfoOptions {
   version?: boolean;
-  faq?: boolean;
-  index?: boolean;
-  stacks?: boolean;
 }
 
-export function infoCommand(options: InfoOptions = {}): void {
-  if (options.version || Object.keys(options).length === 0) {
-    showVersion();
-  }
+/** `faf info` and `faf info --version` print the same: the version, kernel and media type. */
+export function infoCommand(_options: InfoOptions = {}): void {
+  showVersion();
 }
 
 function showVersion(): void {
