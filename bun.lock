@@ -11,6 +11,7 @@
         "yaml": "^2.9.0",
       },
       "devDependencies": {
+        "@anthropic-ai/sdk": "^0.91.1",
         "@faf/specification": "github:Wolfe-Jam/faf",
         "@types/bun": "^1.3.14",
         "@types/node": "^22.20.1",
@@ -21,9 +22,6 @@
         "prettier": "^3.9.6",
         "typescript": "^5.9.3",
         "typescript-eslint": "^8.66.0",
-      },
-      "optionalDependencies": {
-        "@anthropic-ai/sdk": "^0.91.1",
       },
     },
   },
