@@ -250,7 +250,10 @@ export async function cardInitCommand(options: CardInitOptions = {}, ask?: Ask):
       process.exit(2);
     }
 
-    safeWriteFile(out, text, { root: dir });
+    // The check above ran before the questions: a file that appeared while they
+    // were answered is kept (SafePathError `changed`), never written over.
+    // --force replaces whatever is there.
+    safeWriteFile(out, text, { root: dir, ...(options.force ? {} : { expect: null }) });
     console.log(`${fafCyan('✓')} ${out}`);
     if ((answers.example_requests ?? []).length < 2) {
       console.error(`${dim('note')} add 2-5 questions people ask it (metadata.cards.examples) — search finds it by these.`);

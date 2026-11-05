@@ -149,6 +149,28 @@ describe('TYRE: faf card init', () => {
     expect(fromQuestions).toEqual(fromFlags);
   });
 
+  test('BRAKE: an agent.fafa written while the questions were answered is kept, not overwritten', async () => {
+    const hand = 'agent:\n  name: Written by hand meanwhile\n';
+    const queue = ['Answers questions about the weather anywhere.'];
+    let first = true;
+    const ask: Ask = async () => {
+      if (first) {
+        first = false;
+        writeFileSync(join(dir, 'agent.fafa'), hand);
+      }
+      return queue.shift() ?? '';
+    };
+    const errSpy = spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      // No description: the one question card init has to ask.
+      const { description: _asked, ...rest } = WEATHER;
+      await expect(cardInitCommand({ ...rest, dir }, ask)).rejects.toMatchObject({ reason: 'changed' });
+    } finally {
+      errSpy.mockRestore();
+    }
+    expect(readFileSync(join(dir, 'agent.fafa'), 'utf-8')).toBe(hand);
+  });
+
   test('flags that cover everything ask nothing', async () => {
     const { ask, asked } = scripted([]);
     await cardInitCommand({ ...WEATHER, dir }, ask);
