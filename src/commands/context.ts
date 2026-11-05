@@ -1,6 +1,6 @@
 import { findFafFile, readFaf } from '../interop/faf.js';
 import { SLOTS, isPlaceholder } from '../core/slots.js';
-import { dim, fafCyan } from '../ui/colors.js';
+import { dim } from '../ui/colors.js';
 
 /** Generate compact context dump for AI prompts */
 export function contextCommand(): void {

@@ -74,7 +74,7 @@ describe('TYRE: git command', () => {
       throw new Error(`__exit_${code}__`);
     }) as never);
     try {
-      // Use a guaranteed-bogus host. .invalid is RFC 2606 reserved — never
+      // Use a host that cannot exist. .invalid is RFC 2606 reserved — never
       // resolves anywhere, so DNS will fail fast (no internet needed).
       gitCommand('https://this-host-does-not-exist.invalid/never/ever');
       throw new Error('expected process.exit');

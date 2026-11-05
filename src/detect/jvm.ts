@@ -366,10 +366,10 @@ function classifyModule(sig: ModuleSignals): Omit<JvmProject, 'buildTool' | 'mai
   const arts = sig.artifacts;
 
   const isKmp = KMP_PLUGINS.some(p => hasPlugin(plugins, p)) || sig.sourceHints.has('commonMain');
+  // Any plugin in jvm-detection.json's androidPlugins makes it Android; the
+  // application plugin alone makes it an app, every other one a library.
   const isAndroidApp = hasPlugin(plugins, 'com.android.application');
-  const isAndroidLib =
-    hasPlugin(plugins, 'com.android.library') ||
-    hasPlugin(plugins, 'com.android.kotlin.multiplatform.library');
+  const isAndroidLib = !isAndroidApp && ANDROID_PLUGINS.some(p => hasPlugin(plugins, p));
   if (isAndroidApp || isAndroidLib) {facets.push('android');}
   if (isKmp) {facets.push('multiplatform');}
 

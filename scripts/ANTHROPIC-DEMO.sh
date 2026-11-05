@@ -69,12 +69,12 @@ echo ""
 # Install FAF CLI if not present
 if ! command -v faf &> /dev/null; then
     echo "Installing FAF CLI..."
-    npm install -g @faf/cli@latest &> /dev/null
+    npm install -g faf-cli@latest &> /dev/null
 fi
 
 # Show initial score
 echo "Initial FAF Score:"
-faf init --force --quiet
+faf init --new
 faf score | grep -E "Score:|Status:" || true
 
 echo ""
@@ -156,7 +156,7 @@ EOF
 echo "✅ Context enhanced! Running FAF analysis..."
 echo ""
 
-faf bi-sync &> /dev/null
+faf sync &> /dev/null
 faf score | grep -E "Score:|Status:" || true
 
 echo ""
@@ -196,7 +196,7 @@ echo "Want to see the extracted intelligence?"
 echo "Run: faf formats"
 echo ""
 echo "Want to try on your own project?"
-echo "Run: cd /your/project && npx @faf/cli init"
+echo "Run: cd /your/project && npx faf-cli init"
 echo "-----------------------------------------------------------"
 
 # Cleanup

@@ -1,6 +1,6 @@
-import type { ScoreResult, SlotState } from '../core/types.js';
+import type { ScoreResult } from '../core/types.js';
 import { tierBadge } from '../core/tiers.js';
-import { bold, dim, fafCyan, orange } from './colors.js';
+import { bold, dim, fafCyan } from './colors.js';
 import { maybeStarNudge } from './star-nudge.js';
 
 /** Display a score result to stdout. `notes` are printed, one per line,

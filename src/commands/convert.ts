@@ -1,5 +1,4 @@
 import { findFafFile, readFaf, readFafRaw } from '../interop/faf.js';
-import { dim, fafCyan } from '../ui/colors.js';
 
 export interface ConvertOptions {
   json?: boolean;
