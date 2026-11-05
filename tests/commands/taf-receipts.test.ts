@@ -62,6 +62,24 @@ describe('ENGINE: receiptsFrom', () => {
     for (const o of order) {expect(o).toEqual(['LATER', 'NOZONE', 'EARLIER']);}
   });
 
+  test('faf-taf-git 2.5.0 skipped_tests: names and what changed; older receipts have none', () => {
+    const taf =
+      'test_history:\n' +
+      receipt('2026-11-05T06:02:21Z', 'PASSED', 8, 10, 2) +
+      receipt('2026-11-05T06:02:22Z', 'PASSED', 8, 10, 2) +
+      '    skipped_tests:\n      names:\n        - a > one\n        - a > three\n      hash: sha256:abc\n' +
+      '      newly_skipped:\n        - a > three\n      no_longer_skipped:\n        - a > two\n';
+    const [newest, older] = receiptsFrom(taf).receipts;
+    expect(newest.skipped_tests).toEqual({
+      names: ['a > one', 'a > three'],
+      truncated: false,
+      hash: 'sha256:abc',
+      newly_skipped: ['a > three'],
+      no_longer_skipped: ['a > two'],
+    });
+    expect(older.skipped_tests).toBeUndefined();
+  });
+
   test('a .taf with no test_history has no receipts', () => {
     expect(receiptsFrom('format_version: 1.0.0\n').receipts).toEqual([]);
   });
@@ -102,6 +120,20 @@ describe('BRAKE: faf taf receipts', () => {
     expect(lines[2]).toBe('  2026-10-30 10:00  FAILED    9/12  3 failed');
     expect(lines[4]).toBe('  2025-10-27 14:32  IMPROVED  —');
     expect(lines[5]).toBe('  last 4: 2 PASSED · 1 FAILED · 1 IMPROVED');
+  });
+
+  test('shows "+N newly skipped" when the receipt names a new skip', () => {
+    onBranch(
+      'project: demo\ntest_history:\n' +
+      receipt('2026-11-05T06:02:22Z', 'PASSED', 8, 10, 2) +
+      '    skipped_tests:\n      names:\n        - a > one\n        - a > three\n      hash: sha256:abc\n' +
+      '      newly_skipped:\n        - a > three\n',
+    );
+    const r = faf(dir, 'receipts');
+    expect(r.status).toBe(0);
+    expect(r.stdout.trim().split('\n')[1]).toBe('  2026-11-05 06:02  PASSED    8/10  2 skipped, +1 newly skipped');
+    const j = JSON.parse(faf(dir, 'receipts', '--json').stdout);
+    expect(j.receipts[0].skipped_tests.newly_skipped).toEqual(['a > three']);
   });
 
   test('--limit shows that many; --json is the same data', () => {

@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `faf taf receipts` reads the `skipped_tests` block that faf-taf-git 2.5.0 writes: a receipt that names a newly skipped test shows `+N newly skipped` after its counts, and `--json` carries the names, hash, `newly_skipped` and `no_longer_skipped`. Older receipts read as before.
+
 ## [8.8.0] - 2026-11-04 — The Polyglot Edition
 
 `faf taf setup` writes the Test Receipt workflow for Rust, Java (Maven, Gradle) and .NET too: each run joins its reports into one JUnit file, and faf-taf-git counts it.

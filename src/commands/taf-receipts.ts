@@ -14,6 +14,17 @@ export interface Receipt {
   skipped: number | null;
   total: number | null;
   trigger: string | null;
+  /** faf-taf-git 2.5.0+: which tests were skipped, and what changed since the
+   *  receipt before. Absent on older receipts. */
+  skipped_tests?: SkippedTests;
+}
+
+export interface SkippedTests {
+  names: string[];
+  truncated: boolean;
+  hash: string | null;
+  newly_skipped: string[];
+  no_longer_skipped: string[];
 }
 
 export interface ReceiptsOptions {
@@ -24,6 +35,20 @@ export interface ReceiptsOptions {
 
 const num = (v: unknown): number | null => (typeof v === 'number' && Number.isFinite(v) ? v : null);
 const str = (v: unknown): string | null => (typeof v === 'string' && v !== '' ? v : null);
+const strings = (v: unknown): string[] => (Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : []);
+
+/** The skipped_tests block (RECEIPT-FORMAT v1.1), or undefined. */
+function skippedTestsOf(v: unknown): SkippedTests | undefined {
+  if (typeof v !== 'object' || v === null) {return undefined;}
+  const b = v as Record<string, unknown>;
+  return {
+    names: strings(b.names),
+    truncated: b.truncated === true,
+    hash: str(b.hash),
+    newly_skipped: strings(b.newly_skipped),
+    no_longer_skipped: strings(b.no_longer_skipped),
+  };
+}
 
 /** One test_history entry as a Receipt, or null when it has no timestamp. */
 function toReceipt(raw: unknown): Receipt | null {
@@ -40,6 +65,7 @@ function toReceipt(raw: unknown): Receipt | null {
     skipped: num(t.skipped),
     total: num(t.total),
     trigger: str(r.trigger),
+    skipped_tests: skippedTestsOf(r.skipped_tests),
   };
 }
 
@@ -97,7 +123,12 @@ const day = (stamp: string) => {
 };
 const counts = (r: Receipt) => {
   if (r.passed === null || r.total === null) {return '—';}
-  const extra = [r.failed ? `${r.failed} failed` : '', r.skipped ? `${r.skipped} skipped` : ''].filter(Boolean).join(', ');
+  const newly = r.skipped_tests?.newly_skipped.length ?? 0;
+  const extra = [
+    r.failed ? `${r.failed} failed` : '',
+    r.skipped ? `${r.skipped} skipped` : '',
+    newly ? `+${newly} newly skipped` : '',
+  ].filter(Boolean).join(', ');
   return `${r.passed}/${r.total}${extra ? `  ${extra}` : ''}`;
 };
 
