@@ -498,3 +498,12 @@ describe('WJTTC ENGINE: modifier blocks and fixtures', () => {
     }
   });
 });
+
+describe('BRAKE: faf-cli\'s own suite has no untiered tests', () => {
+  // `faf wjttc --strict` on this repo: a test added without a tier fails here,
+  // not at the next release (8.9.0's review found 5 that had slipped in).
+  test('every test under tests/ carries a tier', () => {
+    const untiered = scanTests(join(import.meta.dir, '..')).filter((f) => f.tier === null);
+    expect(untiered.map((f) => `${f.file}: ${f.testName}`)).toEqual([]);
+  });
+});

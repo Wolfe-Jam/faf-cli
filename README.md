@@ -121,7 +121,7 @@ Run `faf` with no arguments:
 
 Run `faf --help` for the full command set and options.
 
-### Memory (`.fafm`) — new in 7.2.0
+### Memory (`.fafm`)
 
 Portable agent memory in the IANA-registered [`.fafm`](https://www.iana.org/assignments/media-types/application/vnd.fafm+yaml) format. Same INTEROP as [claude-fafm-sdk 1.0](https://pypi.org/project/claude-fafm-sdk/).
 
@@ -135,160 +135,18 @@ faf memory etch "a durable fact" --id my-fact
 faf memory show
 ```
 
-### What's New in v8.8.0 — The Polyglot Edition
+### What's New in v8.9.0 — The Write-Once Edition
 
-**`faf taf setup` writes the Test Receipt workflow for Rust, Java (Maven, Gradle) and .NET too: each run joins its reports into one JUnit file, and faf-taf-git counts it.**
+**A birth certificate that can't be reissued. `faf dna --verify` checks it against the commit that first saved it. Plus a lighter install, and every command documented.**
 
-- **Rust** (`Cargo.toml`): `cargo nextest run`, every test (`--no-fail-fast`), across the workspace. The workflow adds nextest's JUnit profile only when your repo has no nextest config.
-- **Java**: Maven (`pom.xml`) and Gradle (`build.gradle`, `settings.gradle`), with the wrapper when you have one. A failing module doesn't stop the others, and the per-class reports are joined into one file.
-- **.NET** (`.sln`, `.slnx`, `.csproj`, `.fsproj`): the JUnit logger is added in CI only, so your project files don't change. It installs the SDKs your projects target, and names the solution when there's more than one at the top.
-- **Proved in faf-cli's own CI**: for each language, a fixture with passing, failing and skipped tests runs the written recipe, and the receipt must match the runner's own counts.
+- **Write-once.** `.faf-dna`, your project's birth certificate, is written once. Nothing in faf replaces it, and `faf init --force` now works like `--new`: a fresh `project.faf`, the certificate kept.
+- **`faf dna --verify`** compares the certificate with the commit that first added `.faf-dna`. Exit 0 if they match, 1 if they differ, 2 if there is nothing to check against yet. `faf init` and `faf dna` tell you when it isn't committed yet, with the command to run. faf never commits for you.
+- **A lighter install.** The package is under half its old size (2.35 MB unpacked, was 5.34 MB), and npm no longer installs an unused 6.4 MB copy of the Anthropic SDK.
+- **Every command documented**: the ones the README doesn't cover are on [docs.faf.one/more-commands](https://docs.faf.one/more-commands).
+- **Named skips.** `faf taf receipts` shows `+N newly skipped` when a receipt names a test that wasn't skipped before (faf-taf-git 2.5.0).
+- **Cleaned up.** Help flags that did nothing are gone, `init --output` keeps `.faf-dna` beside its file, `card init` won't overwrite a card written during its questions, and `faf wjttc` sees tiers on `.skipIf` / `.each` blocks.
 
-### The Receipts Edition (8.7)
-
-**Your Test Receipts, in your terminal: `faf taf receipts` shows them, `taf setup` writes the recipe for JavaScript (Jest, Vitest, Bun), Python and Go, and every test run on your default branch gets one, red ones too.**
-
-A Test Receipt is one line of proof that your tests ran: when, the result, passed/total. [faf-taf-git](https://github.com/Wolfe-Jam/faf-taf-git) appends one to `.taf` on a `taf-receipts` branch for every CI run, so the record stays in git after the CI logs expire.
-
-- **`faf taf receipts`** shows them in your terminal, newest first, with a tally. `--limit`, `--json` and `--ref`. It reads git and never fetches or writes.
-- **`faf taf setup`** writes the workflow: JavaScript with Jest, Vitest or Bun, Python with pytest, and Go with gotestsum. Any other repo gets a placeholder to fill in.
-- **Red runs get a receipt too**, and the job still goes red. Only your default branch is recorded; pull requests run the tests and print none.
-- **Plain text when piped.** Colour shows only in a terminal; `NO_COLOR` and `FORCE_COLOR` are respected.
-
-### The Birth Certificate Edition (8.6)
-
-**One birth certificate per project, protected: `init --new` rebuilds project.faf without touching it, `go` and `edit` record every climb, and `faf dna --json` shows the lineage.**
-
-`.faf-dna` is the project's birth certificate: its first score, recorded once, the way a baby's birth weight is. A project gets one. faf keeps it, and records what happens after.
-
-- **`faf init --new`** replaces a stale project.faf with a fresh one from the repo. `.faf-dna` stays exactly as it is.
-- **`faf go` and `faf edit` record every climb** on the DNA, alongside `faf auto` and `faf refresh`. `faf dna` shows the whole journey.
-- **`faf dna --json`** gives the lineage as data: birth, certificate, current score, growth, peak, every version, and any earlier lives.
-- **Gitignored? faf says so.** If `.faf-dna` is gitignored, a fresh clone loses it. `faf init` and `faf dna` name the rule. Put the reason in a `#` comment above it, and faf stays quiet.
-- **Protected, never reissued.** A `.faf-dna` faf didn't write is read and left as it is. faf no longer suggests replacing it.
-
-### The Agent Skills Edition (8.5)
-
-**faf knows a skills repo when it sees one, and the skills types name their framework: `skills` is 10 slots, `skills-plugin` is 14.**
-
-- **`faf init` detects skills repos**: `SKILL.md` folders make a repo `skills`; add a Claude Code plugin manifest and it's `skills-plugin`. A CLI or library that ships a skill keeps its type.
-- **`skills`**: project + human, plus the framework (the skills format, such as Agent Skills or a Claude Code plugin).
-- **`skills-plugin`**: project + human + universal, plus the framework and the runtime.
-- **`faf auto` fills a slot the type adds**, even where an older file says `slotignored`.
-- **Check the skills themselves with [skills-ladder](https://www.npmjs.com/package/skills-ladder):** it rates each `SKILL.md` GOOD, BETTER or BEST. `npx skills-ladder .`
-
-### The Skills Edition (8.4)
-
-FAF has known Skills for a while; we both speak YAML. Now it's official: FAF adds Skills to the CLI.
-
-**faf knows skills: a SKILL.md repo is `skills` (9 slots), one shipped as a plugin is `skills-plugin` (12).**
-
-```yaml
-project:
-  type: skills-plugin   # or: skills
-```
-
-- **`skills`**: plain-English instructions for AI, `SKILL.md` folders with no pipeline. Project + human context: 9 slots.
-- **`skills-plugin`**: skills published as a plugin, with a build and CI. Adds hosting, build and CI/CD: 12 slots.
-- **App-types are types of projects, not types of file.** Write the type's own name (`cli`, not `cli-tool`); see [What goes in a slot](docs/GUIDE.md).
-- **A .faf whose aliases expand too far** is now one line, not a stack trace.
-
-### The Business Card Edition (8.3)
-
-**Business cards say what the repo is: a package can be a CLI or a library, from npm, PyPI or crates.io, and only an MCP server gets MCP cards.**
-
-```bash
-npx faf-cli@latest card init --package pypi:my-lib --kind library
-```
-
-- **`--kind mcp|cli|library`** says what `--package` is. `mcp` stays the default.
-- **`npm:`, `pypi:` and `crates:`** name the registry. A bare name is still npm.
-- **`--homepage <url>`** sets the business card's homepage.
-- **`faf cards` writes MCP cards only for an MCP server.** A CLI or a library gets its plain cards and a one-line reason.
-- **`faf init` offers the business card** when the repo has none: `next: 'faf card init'`. It writes nothing for it.
-
-### The Ladder Edition (8.2)
-
-**One ladder for every card: agent.fafa builds the plain cards, and project.faf adds FAF's context.**
-
-| You have | `faf cards` gives you |
-|---|---|
-| `agent.fafa` (BETTER) | the plain cards its endpoints allow: A2A card, MCP Server Card, registry entry, AI Catalog and ARD rows |
-| + `project.faf` (BEST) | the same cards, with FAF's context in each |
-
-- **A card's identity comes from the `.fafa`.** An existing `server.json` keeps the name it was published under; renaming it takes `--force`.
-- **The pack projector writes the same cards as `faf cards`** (`projectPack`, `buildPack`).
-- **The full test suite runs on Windows** before every merge, alongside Ubuntu and macOS.
-
-### The Always33+ Edition (8.1)
-
-**From nothing to listed in one command: `faf card init` asks seven questions and writes your agent.fafa, your AI Catalog entry and your ARD entry.**
-
-The same always-33 engine, plus cards.
-
-```bash
-npx faf-cli@latest card init     # seven questions → agent.fafa → A2A card, AI Catalog, ARD
-```
-
-| You have | `faf cards` gives you | Rung |
-|---|---|---|
-| `agent.fafa` | A2A card, MCP Server Card, registry, AI Catalog, ARD (as its endpoints allow) | BETTER |
-| + `project.faf` | the same cards, with FAF context | BEST |
-
-- **Scripts ask nothing:** every answer is a flag (`--name`, `--domain`, `--url` or `--package`, `--skill`, `--example`, `--set-version`).
-- **Help says what each command touches,** with a "What touches what" footer and [docs.faf.one/side-effects](https://docs.faf.one/side-effects).
-
-### The Always33 Edition (8.0)
-
-**One engine, one number: faf-cli v8 scores with the always-33 kernel — the same score faf-kernel, faf-rust-sdk and rust-faf-mcp give.**
-
-- **The always-33 engine.** Every `.faf` is scored against all 33 Mk4 slots by one Rust kernel (`faf-scoring-kernel` 3.0.0, WASM). Verified identical to the reference always-33 scorer on the `project.faf` of all 80 FAF repos.
-- **Your 21 slots, and the 12 enterprise slots in view.** faf-cli fills the 21 base slots. The 12 enterprise slots — infra, app, ops — are marked `slotignored` unless your app-type uses them, and `faf score` shows all 33.
-- **Upgrading from 7.x:** a `.faf` without the 12 enterprise markers now scores against 33, so its number can drop (21 filled = 64%). **Run `faf auto`** — it writes the markers and your score returns.
-
-```text
-✪ TROPHY 100% 21/21 slots — project.faf
-  ● project.name
-  …
-  ● stack.cicd
-  — stack.monorepo_tool: slotignored
-  …
-  — monorepo.remote_cache: slotignored
-```
-
-**Recent sprint**
-
-- ✪ [8.8.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.8.0) The Polyglot Edition — `taf setup` for Rust, Java (Maven, Gradle) and .NET
-- ✪ [8.7.1](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.7.1) `taf setup` for node:test and mocha; Python test extras; colour follows `FORCE_COLOR` and stderr
-- ✪ [8.7.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.7.0) The Receipts Edition — `faf taf receipts`; `taf setup` for JavaScript, Python and Go; red runs get a receipt
-- ✪ [8.6.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.6.0) The Birth Certificate Edition — `init --new` keeps `.faf-dna`; `go`/`edit` record growth; `faf dna --json`
-- ✪ [8.5.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.5.0) The Agent Skills Edition — faf detects skills repos; `skills` (10) and `skills-plugin` (14) name their framework
-- ✪ [8.4.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.4.0) The Skills Edition — `skills` (9) and `skills-plugin` (12) app-types
-- ✪ [8.3.2](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.3.2) `faf check` warns when a key_files path no longer exists
-- ✪ [8.3.1](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.3.1) `faf cards` gives MCP cards to a project.faf alone only when its type is mcp
-- ✪ [8.3.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.3.0) The Business Card Edition — CLI, library or MCP server, from npm, PyPI or crates.io
-- ✪ [8.2.2](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.2.2) Markdown never writes project.faf — `sync` is one way, `recover` is gone
-- ✪ [8.2.1](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.2.1) Cards stay honest — `updatedAt` moves only on a change; whole http(s) URLs
-- ✪ [8.2.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.2.0) The Ladder Edition — one ladder for every card
-- ✪ [8.1.1](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.1.1) SvelteKit 3 read in full — kit, adapter, Vite 8
-- ✪ [8.1.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.1.0) The Always33+ Edition — from nothing to listed in one command
-- ✪ [8.0.1](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.0.1) pnpm installs work — faf-scoring-kernel from npm
-- ✪ [8.0.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v8.0.0) The Always33 Edition — one engine, one number
-- 🧱 [7.16.2](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.16.2) `faf compile` emits FAFb wire v2 — same bytes as the faf-fafb golden
-- 🧭 [7.16.1](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.16.1) `faf` back in step with `faf-cli`
-- 🧭 [7.16.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.16.0) The Discoverable Edition
-- 🎴 [7.15.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.15.0) The Pack Edition
-- 🛂 [7.14.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.14.0) The Passport Edition
-- 🛡️ [7.13.1](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.13.1) security: detection reads stay inside the project
-- 🤝 [7.13.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.13.0) The Co-Author Edition
-- 🧩 [7.12.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.12.0) The Open Renderers Edition
-- 🖥️ [7.11.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.11.0) The VS Code Edition
-- 📚 [7.10.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.10.0) The Full-Facts Edition
-- 🌱 [7.9.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.9.0) The Git-Flow Edition
-- 🎬 [7.8.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.8.0) The Projector Edition
-- 🐦 [7.7.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.7.0) The Swift Edition
-- 💎 [7.6.0](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.6.0) The Ruby Edition
-- ☕ [7.5.1](https://github.com/Wolfe-Jam/faf-cli/releases/tag/v7.5.1) The JVM Edition
+Earlier editions: [CHANGELOG.md](./CHANGELOG.md) · [Releases](https://github.com/Wolfe-Jam/faf-cli/releases)
 
 ---
 
@@ -346,6 +204,7 @@ For a specific agent: [Grok, xAI & Cursor 👀](docs/faf-cli-for-agents.md) · [
 
 Pivotal releases — full history in [CHANGELOG.md](./CHANGELOG.md):
 
+- **v8.9 — Write-Once** — a birth certificate that can't be reissued, checked against its birth commit.
 - **v8.0 — Always33** — one engine, one number: the same score everywhere.
 - **v7.1 — AGENTS.md** — `faf export --agents` authors a complete, non-destructive `AGENTS.md`.
 - **v7.0 — GIT** — context goes git-native: `faf diff` / `log` / `hooks`.
