@@ -93,6 +93,7 @@ export type SafePathReason =
   | 'git'
   | 'not-utf8'
   | 'changed'
+  | 'exists'
   | 'not-owned'
   | 'not-yaml'
   | 'unplaceable';
@@ -105,6 +106,8 @@ export type SafePathReason =
  *   - `not-utf8`: the file is not UTF-8 (see {@link readUtf8}).
  *   - `changed`: the file changed on disk after faf read it — its bytes, or its
  *     mode (see the `expect` option of {@link safeWriteFile}).
+ *   - `exists`: a write-once file is already there, so faf does not write it
+ *     again (`.faf-dna`, the birth certificate).
  *   - `not-owned`: a whole file faf renders is already there and faf cannot
  *     prove it wrote every byte of it — it has no faf mark, or it was edited
  *     since faf wrote it, or it is from before faf recorded a render hash (see

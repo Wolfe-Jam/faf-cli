@@ -1,6 +1,7 @@
 import { FafDNAManager, type FafDNA } from '../core/faf-dna.js';
 import { bold, dim, fafCyan, orange } from '../ui/colors.js';
 import { dnaGitignoreWarning, dnaIgnoredWithoutReason } from '../core/dna-gitignore.js';
+import { commitHint, verifyBirth } from '../core/birth-commit.js';
 
 /** After recording growth: when the `.faf-dna` is one faf did not write (and
  *  so was left as it is), say why on stderr, in one line. */
@@ -11,6 +12,24 @@ export function sayWhyDnaIsLeft(dna: FafDNAManager): void {
 
 export interface DnaOptions {
   json?: boolean;
+  verify?: boolean;
+}
+
+/** `faf dna --verify`: the birth certificate in `.faf-dna` against the one in
+ *  the commit that first added it. Exit 0 the same, 1 changed (or the file is
+ *  gone), 2 cannot check (no git, shallow clone, not committed yet). */
+function verifyCommand(dna: FafDNAManager, json: boolean): void {
+  const check = verifyBirth(process.cwd(), dna.load()?.birthCertificate ?? null);
+  if (json) {
+    console.log(JSON.stringify(check, null, 2));
+  } else if (check.state === 'same') {
+    console.log(`${fafCyan('✓')} Birth certificate matches the commit that first added .faf-dna (${check.commit}, ${check.date}).`);
+  } else if (check.state === 'changed') {
+    console.error(`${bold('×')} The birth certificate differs from the commit that first added .faf-dna (${check.commit}, ${check.date}): ${check.fields.join(', ')}. The original: git show ${check.commit}:.faf-dna`);
+  } else {
+    console.error(`faf: cannot verify: ${check.why}`);
+  }
+  process.exit(check.state === 'same' ? 0 : check.state === 'changed' ? 1 : 2);
 }
 
 /** The lineage as data: `faf dna --json`. Birth, where it is now, every
@@ -51,6 +70,10 @@ export function dnaJson(dna: FafDNAManager, data: FafDNA): Record<string, unknow
 /** `faf dna` — show your FAF DNA journey at a glance: 22% → 85% → 99% ← 92%. */
 export function dnaCommand(options: DnaOptions = {}): void {
   const dna = new FafDNAManager(process.cwd());
+  if (options.verify) {
+    verifyCommand(dna, options.json === true);
+    return;
+  }
   const data = dna.load();
   if (!data) {
     // A .faf-dna that is there but cannot be read (not UTF-8, not JSON, …) says why.
@@ -88,6 +111,8 @@ export function dnaCommand(options: DnaOptions = {}): void {
 
   const ignored = dnaGitignoreWarning(process.cwd());
   if (ignored) {console.log(dim(`   ⚠ ${ignored}`));}
+  const hint = commitHint(process.cwd());
+  if (hint) {console.log(dim(`   ⚠ ${hint}`));}
 
   const log = dna.getLog();
   if (log.length > 1) {
@@ -96,8 +121,9 @@ export function dnaCommand(options: DnaOptions = {}): void {
     for (const line of log) {console.log(dim(`   ${line}`));}
   }
 
-  // Lives a `faf init --force` ended. Kept in the file since a3b400d6, and shown
-  // here because a record nothing displays is a record nobody trusts.
+  // Lives a `faf init --force` ended before birth was write-once.
+  // Kept in the file since a3b400d6, and shown here because a record nothing
+  // displays is a record nobody trusts.
   const prior = dna.load()?.priorLineage ?? [];
   if (prior.length > 0) {
     console.log();

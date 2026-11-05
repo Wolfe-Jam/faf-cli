@@ -64,7 +64,7 @@ program
   .option('--yolo', 'Quick init with sensible defaults')
   .option('--quick', 'Alias for --yolo')
   .option('--new', 'Replace project.faf with a fresh one; .faf-dna is kept as it is')
-  .option('--force', 'Start over: replace project.faf and start a new birth in .faf-dna')
+  .option('--force', 'Same as --new: replace project.faf; .faf-dna is kept (a birth certificate is written once)')
   .option('--output <path>', 'Output path')
   .action((options) => initCommand(options));
 
@@ -72,6 +72,7 @@ program
   .command('dna')
   .description('🧬 Show your FAF DNA journey (birth → growth)')
   .option('--json', 'Output the lineage as JSON')
+  .option('--verify', 'Check the birth certificate against the commit that first added .faf-dna (exit 0 same, 1 changed, 2 cannot check)')
   .action((options) => dnaCommand(options));
 
 program

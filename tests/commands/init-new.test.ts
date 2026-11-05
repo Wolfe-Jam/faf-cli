@@ -45,14 +45,15 @@ describe('BRAKE: faf init --new keeps .faf-dna', () => {
     expect(r.stdout).toContain('.faf-dna kept as it is');
   });
 
-  test('--force still starts a new birth and keeps the life it ends', () => {
-    const born = JSON.parse(readFileSync(dnaFile(), 'utf-8')).birthCertificate;
+  test('--force replaces project.faf as --new does, and leaves .faf-dna byte for byte', () => {
+    const before = readFileSync(dnaFile(), 'utf-8');
 
-    expect(run(dir, ['init', '--force']).status).toBe(0);
+    const r = run(dir, ['init', '--force']);
 
-    const after = JSON.parse(readFileSync(dnaFile(), 'utf-8'));
-    expect(after.birthCertificate.born).not.toBe(born.born);
-    expect(after.priorLineage?.[0]).toMatchObject({ born: born.born, birthDNA: 22 });
+    expect(r.status).toBe(0);
+    expect(readFileSync(fafFile(), 'utf-8')).not.toContain('stale_block');
+    expect(readFileSync(dnaFile(), 'utf-8')).toBe(before);
+    expect(r.stderr).toContain('no longer starts a new birth');
   });
 
   test('--new in a project with no .faf-dna gives it its first birth', () => {
@@ -66,15 +67,13 @@ describe('BRAKE: faf init --new keeps .faf-dna', () => {
     expect(r.stdout).toContain('Birth DNA');
   });
 
-  test('--new and --force together are refused, and nothing is written', () => {
-    const faf = readFileSync(fafFile(), 'utf-8');
+  test('--new and --force together: project.faf replaced, .faf-dna byte for byte', () => {
     const dna = readFileSync(dnaFile(), 'utf-8');
 
     const r = run(dir, ['init', '--new', '--force']);
 
-    expect(r.status).toBe(1);
-    expect(r.stderr).toContain('Pick one');
-    expect(readFileSync(fafFile(), 'utf-8')).toBe(faf);
+    expect(r.status).toBe(0);
+    expect(readFileSync(fafFile(), 'utf-8')).not.toContain('stale_block');
     expect(readFileSync(dnaFile(), 'utf-8')).toBe(dna);
   });
 
@@ -88,8 +87,8 @@ describe('BRAKE: faf init --new keeps .faf-dna', () => {
 });
 
 describe('BRAKE: faf never offers to reissue a birth certificate', () => {
-  // --force still works until 9.0, but no message suggests it: a birth
-  // certificate is one per project, never changed or reissued.
+  // A birth certificate is one per project, never changed or reissued: birth
+  // is write-once, and no message suggests --force.
   let dir: string;
 
   beforeEach(() => {

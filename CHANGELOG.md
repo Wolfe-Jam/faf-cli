@@ -11,7 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **`faf dna --verify`** checks the birth certificate in `.faf-dna` against the commit that first added it: `certificate`, `born`, `birthDNA` and `projectDNA` must be the same. Exit 0 the same, 1 changed (or `.faf-dna` gone), 2 cannot check (not a git repo, a shallow clone, or not committed yet). `--json` gives the result as data. A certificate deleted and born again is still checked against the first commit.
+- `faf init` and `faf dna` say when the birth certificate is not committed yet, with the exact command: `git add .faf-dna && git commit -m "faf: birth certificate"`. faf never commits for you. Nothing is said for a gitignored `.faf-dna` (the gitignore warning covers it) or outside git.
 - `faf taf receipts` reads the `skipped_tests` block that faf-taf-git 2.5.0 writes: a receipt that names a newly skipped test shows `+N newly skipped` after its counts, and `--json` carries the names, hash, `newly_skipped` and `no_longer_skipped`. Older receipts read as before.
+
+### Changed
+- **The birth certificate is write-once.** `FafDNAManager.birth()` writes `.faf-dna` only when there is none; with one there, in any shape, it refuses (`SafePathError` reason `exists`, a new reason) and writes nothing. Growth copies the birth block unchanged (tested).
+- **Breaking: `faf init --force` no longer starts a new birth.** It replaces `project.faf` as `--new` does and keeps `.faf-dna` byte for byte, with a one-line note. `--new` and `--force` together are no longer refused. Files that already hold earlier lives (`priorLineage`, from resets before this change) are still read, shown by `faf dna` and kept as they grow.
 
 ## [8.8.0] - 2026-11-04 — The Polyglot Edition
 

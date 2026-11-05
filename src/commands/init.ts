@@ -5,6 +5,7 @@ import { writeFaf, readFafRaw, withKernel } from '../interop/faf.js';
 import { scoreFafYaml } from '../core/scorer.js';
 import { FafDNAManager } from '../core/faf-dna.js';
 import { dnaGitignoreWarning } from '../core/dna-gitignore.js';
+import { commitHint } from '../core/birth-commit.js';
 import { displayScore } from '../ui/display.js';
 import { bold, dim, fafCyan } from '../ui/colors.js';
 import { assertProjectCwd } from '../core/cwd-guard.js';
@@ -25,10 +26,6 @@ export function initCommand(options: InitOptions = {}): void {
     ? (options.output.endsWith('.faf') ? options.output : join(dir, options.output))
     : join(dir, 'project.faf');
 
-  if (options.new && options.force) {
-    console.error(`Pick one: ${bold('--new')} keeps .faf-dna, ${bold('--force')} starts a new birth.`);
-    process.exit(1);
-  }
   const replace = options.force === true || options.new === true;
   if (existsSync(outputPath) && !replace) {
     console.error(`project.faf already exists. Use ${bold('--new')} for a fresh one; .faf-dna is kept as it is.`);
@@ -40,6 +37,7 @@ export function initCommand(options: InitOptions = {}): void {
   // Full slot-filling pipeline (shared with `faf auto` + `faf git`).
   const data = assembleFreshFaf(dir);
   // --new and --force are the explicit overwrite: a fresh file, not an update of the old one.
+  // Neither touches .faf-dna: --force no longer starts a new birth.
   writeFaf(outputPath, data, { replace });
 
   const yaml = readFafRaw(outputPath);
@@ -47,10 +45,10 @@ export function initCommand(options: InitOptions = {}): void {
 
   // Birth DNA — the first heartbeat. Records the honest first score (even 0%)
   // in a separate .faf-dna lineage file (keeps the .faf itself clean).
-  // A .faf-dna that is there is the birth certificate, which cannot be
-  // recreated: only --force starts a new birth. --new never touches it.
+  // A .faf-dna that is there is the birth certificate: written once, never
+  // replaced. faf births only when there is none.
   const dna = new FafDNAManager(dir);
-  const born = !dna.exists() || options.force === true;
+  const born = !dna.exists();
   if (born) {
     dna.birth(result.score);
   }
@@ -60,13 +58,24 @@ export function initCommand(options: InitOptions = {}): void {
   console.log(dim(born
     ? `  🧬 Birth DNA ${result.score}% — your journey starts here (faf dna)`
     : '  🧬 .faf-dna kept as it is — your birth certificate (faf dna)'));
-  const ignored = dnaGitignoreWarning(dir);
-  if (ignored) {console.error(`faf: ${ignored}`);}
+  sayAfterBirth(dir, born, options.force === true);
 
   if (result.score < 100) {
     console.log(dim(`\n  run ${bold("'faf go'")} to fill empty slots`));
   }
   offerBusinessCard(dir, result.score < 100);
+}
+
+/** After the birth line: the --force note when a certificate was kept, the
+ *  gitignore warning, and the commit hint after a new birth. */
+function sayAfterBirth(dir: string, born: boolean, force: boolean): void {
+  if (!born && force) {
+    console.error(`faf: ${bold('--force')} no longer starts a new birth: the birth certificate is written once. project.faf was replaced, as ${bold('--new')} does.`);
+  }
+  const ignored = dnaGitignoreWarning(dir);
+  if (ignored) {console.error(`faf: ${ignored}`);}
+  const hint = born ? commitHint(dir) : null;
+  if (hint) {console.log(dim(`  ${hint}`));}
 }
 
 /** The business card is the step after project.faf, offered only to a repo
