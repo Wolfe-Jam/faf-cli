@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `faf init` and `faf dna` say when the birth certificate is not committed yet, with the exact command: `git add .faf-dna && git commit -m "faf: birth certificate"`. faf never commits for you. Nothing is said for a gitignored `.faf-dna` (the gitignore warning covers it) or outside git.
 - `faf taf receipts` reads the `skipped_tests` block that faf-taf-git 2.5.0 writes: a receipt that names a newly skipped test shows `+N newly skipped` after its counts, and `--json` carries the names, hash, `newly_skipped` and `no_longer_skipped`. Older receipts read as before.
 
+### Security
+- Dev only: `minimatch` under `@typescript-eslint/typescript-estree` is overridden to `^11.0.1` (GHSA-g3hv-75wg-m249, a denial of service through glob patterns). eslint's own `minimatch` 3.x is outside the affected range and is unchanged. Nothing in the published package uses it.
+
 ### Changed
 - `faf taf setup` pins faf-taf-git v2.5.0 (Named Skips Edition): receipts name the skipped tests, with a hash of the full set and what changed since the previous receipt. faf-cli's own CI uses the same pin.
 - **The birth certificate is write-once.** `FafDNAManager.birth()` writes `.faf-dna` only when there is none; with one there, in any shape, it refuses (`SafePathError` reason `exists`, a new reason) and writes nothing. Growth copies the birth block unchanged (tested).
