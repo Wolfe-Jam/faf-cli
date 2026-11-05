@@ -5,7 +5,7 @@
  */
 
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { spawnSync } from 'child_process';
 import { tmpdir } from 'os';
 import { join } from 'path';
@@ -83,6 +83,33 @@ describe('BRAKE: faf init --new keeps .faf-dna', () => {
     expect(r.status).toBe(1);
     expect(r.stderr).toContain('--new');
     expect(readFileSync(fafFile(), 'utf-8')).toContain('stale_block');
+  });
+});
+
+describe('faf init --output: .faf-dna sits beside the file it belongs to', () => {
+  let dir: string;
+
+  beforeEach(() => {
+    dir = mkdtempSync(join(tmpdir(), 'faf-init-output-'));
+    writeFileSync(join(dir, 'package.json'), '{"name":"p","version":"1.0.0"}');
+    mkdirSync(join(dir, 'sub'));
+  });
+
+  afterEach(() => {
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  test('--output sub/x.faf births sub/.faf-dna, not one in the folder faf ran from', () => {
+    const r = run(dir, ['init', '--output', 'sub/x.faf']);
+    expect(r.status).toBe(0);
+    expect(existsSync(join(dir, 'sub', 'x.faf'))).toBe(true);
+    expect(existsSync(join(dir, 'sub', '.faf-dna'))).toBe(true);
+    expect(existsSync(join(dir, '.faf-dna'))).toBe(false);
+  });
+
+  test('--output x.faf in the same folder: the .faf-dna there, as before', () => {
+    expect(run(dir, ['init', '--output', 'x.faf']).status).toBe(0);
+    expect(existsSync(join(dir, '.faf-dna'))).toBe(true);
   });
 });
 
