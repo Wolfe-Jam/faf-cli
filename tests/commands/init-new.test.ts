@@ -86,7 +86,7 @@ describe('BRAKE: faf init --new keeps .faf-dna', () => {
   });
 });
 
-describe('faf init --output: .faf-dna sits beside the file it belongs to', () => {
+describe('BRAKE: faf init --output: .faf-dna sits beside the file it belongs to', () => {
   let dir: string;
 
   beforeEach(() => {

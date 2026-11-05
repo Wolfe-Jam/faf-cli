@@ -15,7 +15,7 @@ const CLI = join(import.meta.dir, '../../src/cli.ts');
 const run = (cwd: string, ...args: string[]) =>
   spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf-8', env: { ...process.env, NO_COLOR: '1' } });
 
-describe('help flags do what they say', () => {
+describe('ENGINE: help flags do what they say', () => {
   let dir: string;
 
   beforeEach(() => {

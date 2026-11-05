@@ -141,7 +141,7 @@ faf memory show
 
 - **Write-once.** `.faf-dna`, your project's birth certificate, is written once. Nothing in faf replaces it, and `faf init --force` now works like `--new`: a fresh `project.faf`, the certificate kept.
 - **`faf dna --verify`** compares the certificate with the commit that first added `.faf-dna`. Exit 0 if they match, 1 if they differ, 2 if there is nothing to check against yet. `faf init` and `faf dna` tell you when it isn't committed yet, with the command to run. faf never commits for you.
-- **A lighter install.** The package is under half its old size (2.37 MB, was 5.35 MB), and npm no longer installs an unused 6.4 MB copy of the Anthropic SDK.
+- **A lighter install.** The package is under half its old size (2.35 MB unpacked, was 5.34 MB), and npm no longer installs an unused 6.4 MB copy of the Anthropic SDK.
 - **Every command documented**: the ones the README doesn't cover are on [docs.faf.one/more-commands](https://docs.faf.one/more-commands).
 - **Named skips.** `faf taf receipts` shows `+N newly skipped` when a receipt names a test that wasn't skipped before (faf-taf-git 2.5.0).
 - **Cleaned up.** Help flags that did nothing are gone, `init --output` keeps `.faf-dna` beside its file, `card init` won't overwrite a card written during its questions, and `faf wjttc` sees tiers on `.skipIf` / `.each` blocks.
