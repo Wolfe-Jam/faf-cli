@@ -535,7 +535,7 @@ function diffMap(ctx: Ctx, a: YAMLMap, b: YAMLMap): boolean {
     last = ai;
   }
   if (!flush(pending, last)) {return false;}
-  return a.items.every((p, i) => matched.has(i) || deletePair(ctx, a, i));
+  return a.items.every((_p, i) => matched.has(i) || deletePair(ctx, a, i));
 }
 
 /** Remove pair `i` of `map`. The first pair of a map that is a list item

@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, readdirSync } from 'fs';
-import { join, basename } from 'path';
+import { join } from 'path';
 import { aliasKeptNote, findFafFile, readFaf, writeFaf } from '../interop/faf.js';
 import { FAF_VERSION } from '../core/version.js';
 import { parse } from 'yaml';

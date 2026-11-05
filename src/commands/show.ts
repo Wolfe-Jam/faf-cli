@@ -1,5 +1,4 @@
 import { join } from 'path';
-import open from 'open';
 import { findFafFile, readFaf, readFafRaw, withKernel } from '../interop/faf.js';
 import { writeProjectHtml } from '../interop/projecthtml.js';
 import { scoreFafYaml } from '../core/scorer.js';
@@ -19,7 +18,8 @@ import { dim, fafCyan } from '../ui/colors.js';
 function openInBrowser(file: string): boolean {
   if (process.env.CI) {return false;} // headless/CI — don't launch a browser
   try {
-    void open(file).catch(() => undefined); // best-effort, never throws
+    // Loaded only here: a static import made every `faf` command load `open`.
+    void import('open').then(({ default: open }) => open(file)).catch(() => undefined); // best-effort, never throws
     return true;
   } catch {
     return false;

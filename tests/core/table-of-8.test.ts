@@ -10,7 +10,7 @@ import { buildTableOf8 } from '../../src/core/interview';
 
 const PATHS = ['project.name', 'project.goal', 'human_context.who', 'human_context.what', 'human_context.why', 'human_context.where', 'human_context.when', 'human_context.how'];
 
-describe('BRAKE — shape + the never-seed guarantee', () => {
+describe('BRAKE — shape + the never-seed rule', () => {
   test('B1 — always exactly 8 rows, in canonical flow order', () => {
     const t = buildTableOf8({ project: { goal: 'X CLI for developers' } });
     expect(t.rows.length).toBe(8);

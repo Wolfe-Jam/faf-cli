@@ -15,7 +15,7 @@ faf-cli follows [Semantic Versioning](https://semver.org). The **latest publishe
 
 ## What to expect
 
-faf-cli is free, open-source software maintained in the open — no guarantees, but reports are taken seriously and triaged as promptly as is reasonable. Confirmed issues are fixed in a patched release and disclosed via a published GitHub Security Advisory (GHSA), crediting the reporter where they wish.
+faf-cli is free, open-source software maintained in the open, on a best-effort basis: reports are taken seriously and triaged as promptly as is reasonable. Confirmed issues are fixed in a patched release and disclosed via a published GitHub Security Advisory (GHSA), crediting the reporter where they wish.
 
 ## Security posture
 

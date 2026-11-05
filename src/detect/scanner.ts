@@ -159,7 +159,7 @@ function detectHtmlSignal(dir: string, pkg: PackageJson | null): string | null {
 }
 
 /** Documentation / spec-only repo signal. */
-function detectDocumentationSignal(dir: string, pkg: PackageJson | null): string | null {
+function detectDocumentationSignal(_dir: string, pkg: PackageJson | null): string | null {
   // Strong signal: name or keywords contains 'specification'
   if (pkg?.name && /specification|^@.*\/spec/i.test(pkg.name)) {
     return `package name "${pkg.name}" → documentation`;
@@ -190,7 +190,7 @@ function detectDocumentationSignal(dir: string, pkg: PackageJson | null): string
 }
 
 /** Marketing / website signal — Astro/Gatsby static OR pkg keywords. */
-function detectWebsiteSignal(dir: string, pkg: PackageJson | null, frameworks: DetectedFramework[]): string | null {
+function detectWebsiteSignal(_dir: string, pkg: PackageJson | null, frameworks: DetectedFramework[]): string | null {
   // Astro/Gatsby are typically used for content/marketing sites
   const astroOrGatsby = frameworks.find(f => f.slug === 'astro' || f.slug === 'gatsby');
   if (astroOrGatsby) {return `${astroOrGatsby.name} (static-site framework)`;}
@@ -202,7 +202,7 @@ function detectWebsiteSignal(dir: string, pkg: PackageJson | null, frameworks: D
 }
 
 /** SAAS shape — auth + payments + database + dashboard. */
-function detectSaasSignal(dir: string, pkg: PackageJson | null): string | null {
+function detectSaasSignal(_dir: string, pkg: PackageJson | null): string | null {
   if (!pkg) {return null;}
   const allDeps = { ...(pkg.dependencies ?? {}), ...(pkg.devDependencies ?? {}) };
   const authDeps = ['@clerk/nextjs', '@clerk/clerk-react', 'next-auth', '@auth/core', 'auth0', '@auth0/nextjs-auth0'];
@@ -216,7 +216,7 @@ function detectSaasSignal(dir: string, pkg: PackageJson | null): string | null {
 }
 
 /** MCPaaS (post-MCP platform) shape — multiple MCP signals + hosting + DB. */
-function detectMcpaasSignal(dir: string, pkg: PackageJson | null, frameworks: DetectedFramework[]): string | null {
+function detectMcpaasSignal(_dir: string, pkg: PackageJson | null, frameworks: DetectedFramework[]): string | null {
   // pkg.keywords contains 'mcpaas' is the strongest signal
   if (pkg?.keywords?.some(k => /mcpaas/i.test(k))) {
     return 'package keywords contains "mcpaas"';

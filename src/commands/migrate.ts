@@ -1,6 +1,5 @@
 import { aliasKeptNote, findFafFile, readFaf, writeFaf } from '../interop/faf.js';
-import { SLOTS } from '../core/slots.js';
-import { fafCyan, dim, bold } from '../ui/colors.js';
+import { fafCyan, dim } from '../ui/colors.js';
 import { FAF_VERSION } from '../core/version.js';
 
 const CURRENT_VERSION = FAF_VERSION;

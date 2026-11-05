@@ -214,7 +214,7 @@ function updateFaf(
 /** Options for {@link writeFaf}. */
 export interface WriteFafOptions {
   /** Write a fresh file from `data` even when one exists — the explicit
-   *  overwrite (`faf init --force`, `faf git --force`). Default: an existing
+   *  overwrite (`faf init --new` / `--force`, `faf git --force`). Default: an existing
    *  file is updated in place with {@link updateFafFile}. */
   replace?: boolean;
   /** Called for each alias of an existing file that `data` would change
