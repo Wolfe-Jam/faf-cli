@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v8.8.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v8.9.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [8.9.0] - 2026-11-05 — The Write-Once Edition
+
+A birth certificate that can't be reissued. `faf dna --verify` checks it against the commit that first saved it. Plus a lighter install, and every command documented.
 
 ### Added
 - **`faf dna --verify`** checks the birth certificate in `.faf-dna` against the commit that first added it: `certificate`, `born`, `birthDNA` and `projectDNA` must be the same. Exit 0 the same, 1 changed (or `.faf-dna` gone), 2 cannot check (not a git repo, a shallow clone, or not committed yet). `--json` gives the result as data. A certificate deleted and born again is still checked against the first commit.
@@ -22,6 +26,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `faf taf setup` pins faf-taf-git v2.5.0 (Named Skips Edition): receipts name the skipped tests, with a hash of the full set and what changed since the previous receipt. faf-cli's own CI uses the same pin.
 - **The birth certificate is write-once.** `FafDNAManager.birth()` writes `.faf-dna` only when there is none; with one there, in any shape, it refuses (`SafePathError` reason `exists`, a new reason) and writes nothing. Growth copies the birth block unchanged (tested).
 - **Breaking: `faf init --force` no longer starts a new birth.** It replaces `project.faf` as `--new` does and keeps `.faf-dna` byte for byte, with a one-line note. `--new` and `--force` together are no longer refused. Files that already hold earlier lives (`priorLineage`, from resets before this change) are still read, shown by `faf dna` and kept as they grow.
+- **A lighter install.** `@anthropic-ai/sdk` moves from `optionalDependencies` to `devDependencies`: the build already bundles it into `dist/cli.js`, so npm was installing a second, unused 6.4 MB copy for every user (`faf ai analyze` works as before). The build strips `sourcesContent` from the source maps, which still map stack traces to file:line. The package goes from 5.35 MB to 2.37 MB unpacked (1.39 MB to 0.65 MB packed).
+- `faf show` loads `open` only when it opens a file. Before, every command loaded it at startup.
+- `faf init --output sub/x.faf` writes `.faf-dna` beside the file it belongs to (`sub/.faf-dna`), where `faf edit` and `faf go` look for it. It used to land in the folder faf ran from.
+- `init --yolo` and `init --quick` still work but are no longer in `--help`: `init` asks nothing anyway.
+- `faf info` always prints the version, kernel and media type.
+- project.faf's `why` no longer carries an unmeasured "91%".
+
+### Fixed
+- **`faf card init` never writes over an `agent.fafa` that appeared while its questions were answered.** It checked before asking and wrote without checking again. Without `--force` the write is now create-only (`SafePathError` `changed`, file kept).
+- **`faf wjttc` sees the tier of tests inside modifier blocks:** `describe.skipIf(...)`, `test.each(...)`, `.only`, `.skip`, `.todo`. Those tests read as untiered, or were not counted, so `faf wjttc --strict` failed on faf-cli's own suite. `fixtures/` and `__fixtures__/` folders are skipped as test data. faf-cli: 1973 tests, 0 untiered.
+- `faf ai analyze`: a network or API failure is one line on stderr (exit 1), not the SDK's stack trace.
+- `scripts/ANTHROPIC-DEMO.sh` installed `@faf/cli` (no such package) and ran `--quiet` and `bi-sync` (neither exists).
+
+### Removed
+- **Help flags that did nothing:** `check --fix`, `--doctor`, `--trust` and `info --faq`, `--index`, `--stacks` were listed in `--help` but read by no code (`check --fix` fixed nothing; `info --faq` printed nothing). They are now refused as unknown options.
+- **33 unused files in `scripts/`**, archived in the tag `archive/scripts-2026-11` with notes (`git show archive/scripts-2026-11:scripts/<file>`).
+- 14 unused imports and parameters. `jvm.ts` uses the `androidPlugins` list from `jvm-detection.json` instead of repeating its ids.
+- "guarantee" from `SECURITY.md` and two test texts.
+
+**Tests:** 2427 pass, 0 fail.
 
 ## [8.8.0] - 2026-11-04 — The Polyglot Edition
 
