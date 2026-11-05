@@ -200,3 +200,21 @@ describe('PIT: ai command — read-only contract', () => {
     expect(true).toBe(true);
   });
 });
+
+describe('BRAKE: faf ai analyze when the API cannot be reached', () => {
+  test('one line on stderr, exit 1, no stack trace, nothing written', () => {
+    const dir = tempFolders.mkdtemp(join(tmpdir(), 'faf-ai-unreachable-'));
+    writeFileSync(join(dir, 'project.faf'), 'project:\n  name: demo\n');
+    const r = spawnSync(process.execPath, [CLI, 'ai', 'analyze'], {
+      cwd: dir,
+      encoding: 'utf-8',
+      // A port nothing listens on: no request leaves the machine.
+      env: { ...process.env, NO_COLOR: '1', ANTHROPIC_API_KEY: 'sk-test', ANTHROPIC_BASE_URL: 'http://127.0.0.1:9' },
+      timeout: 60_000,
+    });
+    expect(r.status).toBe(1);
+    expect(plain(r.stderr)).toMatch(/^Error: the Anthropic API call failed \(.+\)\. Nothing was written\.\n$/);
+    expect(r.stderr).not.toContain('    at ');
+    expect(readdirSync(dir)).toEqual(['project.faf']);
+  });
+});

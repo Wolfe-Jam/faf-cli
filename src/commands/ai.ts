@@ -53,14 +53,21 @@ async function analyzeCommand(): Promise<void> {
 
   const client = await getClient();
 
-  const response = await client.messages.create({
-    model: 'claude-haiku-4-5-20251001',
-    max_tokens: 1024,
-    messages: [{
-      role: 'user',
-      content: `Analyze this .faf project context file and provide 3-5 specific suggestions for improvement. Focus on completeness, accuracy, and best practices.\n\n${yaml}\n\nBe concise. One line per suggestion.`,
-    }],
-  });
+  let response;
+  try {
+    response = await client.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 1024,
+      messages: [{
+        role: 'user',
+        content: `Analyze this .faf project context file and provide 3-5 specific suggestions for improvement. Focus on completeness, accuracy, and best practices.\n\n${yaml}\n\nBe concise. One line per suggestion.`,
+      }],
+    });
+  } catch (e) {
+    // A network or API failure is one line, not the SDK's stack trace.
+    console.error(`Error: the Anthropic API call failed (${e instanceof Error ? e.message : String(e)}). Nothing was written.`);
+    process.exit(1);
+  }
 
   console.log('');
   console.log(response.content[0].text);
