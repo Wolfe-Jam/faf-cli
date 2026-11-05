@@ -24,14 +24,19 @@
  * formatting, CRLF, reordered keys, a repeated key or a number JSON cannot hold
  * exactly (a 20-digit id) would all be lost in a rewrite, so such a file — like
  * one in another shape — is read and left exactly as it is, and
- * `readOnlyReason()` says why in one line. `faf init --force` starts a fresh
- * lineage when you ask it to.
+ * `readOnlyReason()` says why in one line.
+ *
+ * Write-once. The birth certificate is written once and never replaced: birth()
+ * writes `.faf-dna` only when there is none, and refuses (SafePathError
+ * `exists`) when one is there, in any shape. recordGrowth copies the birth
+ * block unchanged. Its permanent record is the commit that first added
+ * `.faf-dna`; `faf dna --verify` checks the file against it (birth-commit.ts).
  */
 
 import { existsSync, lstatSync } from 'fs';
 import { join, basename } from 'path';
 import { createHash } from 'crypto';
-import { readBytesIfPresent, readUtf8, resolveInside, safeWriteFile } from './safe-write.js';
+import { readUtf8, resolveInside, safeWriteFile, SafePathError } from './safe-write.js';
 
 export interface BirthCertificate {
   born: string; // ISO timestamp
@@ -62,10 +67,10 @@ export interface Milestone {
 }
 
 /**
- * A lineage a reset ended. `faf init --force` starts a fresh certificate, and
- * the life before it is kept here rather than erased — a birth score is the one
- * value in this format that cannot be recreated, so a reset is a REBIRTH, not a
- * deletion. Chains: a project reset twice keeps both earlier lives, oldest first.
+ * A lineage a reset ended. Before birth was write-once, `faf init --force` started a fresh
+ * certificate and kept the life before it here. faf no longer resets a
+ * certificate (birth is write-once), but files that hold earlier lives are
+ * still read and shown, oldest first.
  */
 export interface PriorLineage {
   born: string; // ISO — when that life started
@@ -255,14 +260,25 @@ function readableView(raw: unknown): FafDNA | null {
   };
 }
 
+/** The birth certificate in a `.faf-dna` text, in any shape faf can read
+ *  (including the `birthWeight` files faf wrote before 2026-05-21), or null
+ *  when it is not JSON or has none. Used to read the one in the birth commit. */
+export function birthCertificateOf(text: string): BirthCertificate | null {
+  try {
+    return readableView(JSON.parse(text) as unknown)?.birthCertificate ?? null;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * The `.faf-dna` lineage of one project: birth, growth and the journey line.
  * This is the API `faf init` (birth), `faf auto` / `faf refresh` (recordGrowth)
  * and `faf dna` (getJourney, getBirthDNADisplay, getLog) use.
  *
- *   - `birth(score)` starts a new lineage and writes it, replacing any
- *     `.faf-dna` there (check `exists()` first unless a fresh start is meant —
- *     `faf init` births only when there is none, or with `--force`).
+ *   - `birth(score)` writes the birth certificate when there is no `.faf-dna`.
+ *     It is write-once: with a `.faf-dna` there, in any shape, it refuses
+ *     (SafePathError `exists`) and writes nothing.
  *   - `recordGrowth(score, changes)` adds a version when the score changed.
  *     It adds only to a file faf can prove it wrote (see the file header);
  *     for any other file it writes nothing and returns null, and
@@ -286,10 +302,6 @@ export class FafDNAManager {
   private text: string | undefined;
   /** Why the file is read only, when it is; null when faf may add to it. */
   private reason: string | null = null;
-  /** True once this manager found no `.faf-dna` (exists / load / birth) and
-   *  has not written one since: a birth then refuses a file that appeared
-   *  meanwhile instead of writing over it. */
-  private sawNoFile = false;
 
   constructor(projectPath: string) {
     this.projectPath = projectPath;
@@ -297,50 +309,24 @@ export class FafDNAManager {
   }
 
   exists(): boolean {
-    const there = existsSync(this.dnaPath);
-    if (!there && !present(this.dnaPath)) {this.sawNoFile = true;}
-    return there;
+    return existsSync(this.dnaPath);
   }
 
-  /** Birth — the first heartbeat. Writes the birth certificate with the honest first score.
-   *  When this manager found no `.faf-dna` (now, or at an earlier exists() /
-   *  load()), a file that appeared since is refused (SafePathError `changed`)
-   *  rather than written over; over a `.faf-dna` that is there, birth starts a
-   *  fresh lineage (`faf init --force`). */
-  /** The lives this birth is about to end, oldest first — the one already on
-   *  disk, plus any it had itself inherited. Empty when there is no readable
-   *  `.faf-dna`, so a first birth writes no `priorLineage` key at all. */
-  private endingLineage(): PriorLineage[] {
-    // Deliberately NOT load(): that records what this manager has read, and
-    // save()'s guard uses exactly that to refuse a write over a `.faf-dna` which
-    // appeared since. Reading here to carry a lineage forward must not make the
-    // manager believe it has seen the file (owner rule T11).
-    const on = this.dna ?? (() => {
-      const r = this.read();
-      return r === null ? null : readableView(r.raw);
-    })();
-    const view = on;
-    if (!view) {return [];}
-    const bc = view.birthCertificate;
-    return [
-      ...(view.priorLineage ?? []),
-      {
-        born: bc.born,
-        birthDNA: bc.birthDNA,
-        certificate: bc.certificate,
-        projectDNA: bc.projectDNA,
-        lastScore: view.current.score,
-        endedAt: new Date().toISOString(),
-      },
-    ];
-  }
-
+  /** Birth — the first heartbeat. Writes the birth certificate with the honest
+   *  first score. Write-once: a `.faf-dna` that is there (any shape, even one
+   *  faf cannot read) is refused with SafePathError `exists`, and one that
+   *  appears while faf writes is refused with `changed`. Nothing is written
+   *  either way; the file on disk is exactly as it was. A `.faf-dna` link that
+   *  leads out of the project or dangles is refused as `outside` / `dangling`. */
   birth(birthDNA: number): FafDNA {
-    // Read what is here BEFORE overwriting it: a reset ends a life, it does not
-    // unhappen one. Any shape faf can read contributes, including the
-    // `birthWeight` files faf itself wrote before 2026-05-21.
-    const priorLineage = this.endingLineage();
-    if (!present(this.dnaPath)) {this.sawNoFile = true;}
+    resolveInside(this.projectPath, '.faf-dna');
+    if (present(this.dnaPath)) {
+      throw new SafePathError(
+        'exists',
+        this.dnaPath,
+        `${this.dnaPath} is already there: a birth certificate is written once and never replaced — not written; original kept`,
+      );
+    }
     const now = new Date().toISOString();
     this.own = true;
     this.dna = {
@@ -360,8 +346,9 @@ export class FafDNAManager {
       },
       lastModified: now,
       format: 'faf-dna-v1',
-      ...(priorLineage.length > 0 ? { priorLineage } : {}),
     };
+    // The file must still be absent at the rename: one that appears meanwhile is kept.
+    this.text = undefined;
     this.save();
     return this.dna;
   }
@@ -448,10 +435,7 @@ export class FafDNAManager {
    *  (see the file header). */
   load(): FafDNA | null {
     if (this.dna) {return this.dna;}
-    if (!existsSync(this.dnaPath)) {
-      if (!present(this.dnaPath)) {this.sawNoFile = true;}
-      return null;
-    }
+    if (!existsSync(this.dnaPath)) {return null;}
     const read = this.read();
     if (read === null) {return null;}
     const { text, raw } = read;
@@ -490,14 +474,13 @@ export class FafDNAManager {
     if (!this.dna) {return;}
     this.dna.lastModified = new Date().toISOString();
     const text = serialise(this.dna);
-    // The file must still be what this manager read (or, when it found none,
-    // still be absent; before any read, what is there now): another process's
-    // growth — or a .faf-dna that appeared meanwhile — is never written over.
-    const expect = this.text ?? (this.sawNoFile ? null : readBytesIfPresent(resolveInside(this.projectPath, '.faf-dna')));
+    // The file must still be what this manager read, or, for a birth, still be
+    // absent: another process's growth, or a .faf-dna that appeared meanwhile,
+    // is never written over.
+    const expect = this.text ?? null;
     // Atomic, and never through a link that leaves the project or dangles.
     safeWriteFile(this.dnaPath, text, { root: this.projectPath, expect });
     this.text = text;
-    this.sawNoFile = false;
   }
 
   private generateProjectDNA(): string {

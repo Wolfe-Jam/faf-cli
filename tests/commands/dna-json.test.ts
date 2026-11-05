@@ -50,9 +50,15 @@ describe('ENGINE: faf dna --json', () => {
     expect(run(dir, '--json').stdout).toBe(run(dir, '--json').stdout);
   });
 
-  test('earlier lives a reset ended are listed, oldest first', () => {
-    new FafDNAManager(dir).birth(30);
-    new FafDNAManager(dir).birth(60); // a reset: the 30% life is kept
+  test('earlier lives a reset ended (before birth was write-once) are listed, oldest first', () => {
+    new FafDNAManager(dir).birth(60);
+    const path = join(dir, '.faf-dna');
+    const onDisk = JSON.parse(readFileSync(path, 'utf-8'));
+    onDisk.priorLineage = [{
+      born: '2026-01-01T00:00:00.000Z', birthDNA: 30, certificate: 'FAF-2026-DEMO-AAAA',
+      projectDNA: 'abc', lastScore: 45, endedAt: '2026-02-01T00:00:00.000Z',
+    }];
+    writeFileSync(path, `${JSON.stringify(onDisk, null, 2)}\n`);
     const j = JSON.parse(run(dir, '--json').stdout);
     expect(j.birth_dna).toBe(60);
     expect(j.prior_lives).toHaveLength(1);

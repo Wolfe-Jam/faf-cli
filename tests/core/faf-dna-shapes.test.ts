@@ -16,6 +16,7 @@ import { spawnSync } from 'child_process';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { FafDNAManager } from '../../src/core/faf-dna.js';
+import { SafePathError } from '../../src/core/safe-write.js';
 import * as api from '../../src/index.js';
 
 const CLI = join(import.meta.dir, '../../src/cli.ts');
@@ -127,33 +128,32 @@ describe('BRAKE: a .faf-dna in another shape is read, never rewritten', () => {
   });
 
 
-  test('a reset is a rebirth: `faf init --force` keeps the life it ends', () => {
+  /** The reason birth() refused with, or null when it wrote. */
+  const refusedWith = (fn: () => unknown): string | null => {
+    try {
+      fn();
+      return null;
+    } catch (e) {
+      return e instanceof SafePathError ? e.reason : `not a SafePathError: ${String(e)}`;
+    }
+  };
+
+  test('birth is write-once: a second birth is refused and .faf-dna is byte for byte', () => {
     const first = new FafDNAManager(dir);
     first.birth(12);
     first.recordGrowth(62, ['faf auto']);
-    const born = JSON.parse(readFileSync(dnaFile(), 'utf-8')).birthCertificate;
+    const before = readFileSync(dnaFile(), 'utf-8');
 
-    // The reset.
-    const reborn = new FafDNAManager(dir).birth(80);
-
-    expect(reborn.birthCertificate.birthDNA).toBe(80);
-    expect(reborn.priorLineage).toHaveLength(1);
-    expect(reborn.priorLineage?.[0]).toMatchObject({
-      born: born.born,
-      birthDNA: 12,
-      certificate: born.certificate,
-      lastScore: 62, // where it had reached, not where it started
-    });
-    expect(typeof reborn.priorLineage?.[0].endedAt).toBe('string');
+    expect(refusedWith(() => new FafDNAManager(dir).birth(80))).toBe('exists');
+    expect(readFileSync(dnaFile(), 'utf-8')).toBe(before);
   });
 
-  test('rebirths chain: reset twice and both earlier lives survive, oldest first', () => {
-    new FafDNAManager(dir).birth(10);
-    new FafDNAManager(dir).birth(40);
-    const third = new FafDNAManager(dir).birth(90);
-
-    expect(third.priorLineage?.map((l) => l.birthDNA)).toEqual([10, 40]);
-    expect(new FafDNAManager(dir).load()?.priorLineage).toHaveLength(2);
+  test('birth refuses a .faf-dna in any shape: another tool\'s, a birthWeight file, not even JSON', () => {
+    for (const text of [BIRTHWEIGHT_DNA, '{"hand": "HAND-DNA"}\n', 'not json\n']) {
+      writeFileSync(dnaFile(), text);
+      expect(refusedWith(() => new FafDNAManager(dir).birth(62))).toBe('exists');
+      expect(readFileSync(dnaFile(), 'utf-8')).toBe(text);
+    }
   });
 
   test('a first birth writes no priorLineage key at all', () => {
@@ -161,16 +161,33 @@ describe('BRAKE: a .faf-dna in another shape is read, never rewritten', () => {
     expect('priorLineage' in JSON.parse(readFileSync(dnaFile(), 'utf-8'))).toBe(false);
   });
 
-  test('a birthWeight file resets without losing its 2025 birth score', () => {
-    writeFileSync(dnaFile(), BIRTHWEIGHT_DNA);
-    const reborn = new FafDNAManager(dir).birth(62);
+  test('growth keeps the birth certificate exactly as it was born', () => {
+    const m = new FafDNAManager(dir);
+    m.birth(20);
+    const born = JSON.stringify(JSON.parse(readFileSync(dnaFile(), 'utf-8')).birthCertificate);
+    for (const score of [35, 70, 55, 99]) {
+      new FafDNAManager(dir).recordGrowth(score, ['faf auto']);
+    }
+    const after = JSON.parse(readFileSync(dnaFile(), 'utf-8'));
+    expect(after.current.score).toBe(99);
+    expect(JSON.stringify(after.birthCertificate)).toBe(born);
+  });
 
-    // The shape faf could not even read a commit ago still survives its own reset.
-    expect(reborn.priorLineage?.[0]).toMatchObject({
-      born: '2025-09-29T17:26:24.539Z',
-      birthDNA: 12,
-      certificate: 'FAF-2025-GALLERYS-VNAZ',
-    });
+  test('earlier lives from before birth was write-once are still read, and kept as it grows', () => {
+    const m = new FafDNAManager(dir);
+    m.birth(40);
+    const onDisk = JSON.parse(readFileSync(dnaFile(), 'utf-8'));
+    onDisk.priorLineage = [{
+      born: '2025-09-29T17:26:24.539Z', birthDNA: 12, certificate: 'FAF-2025-GALLERYS-VNAZ',
+      projectDNA: 'abc', lastScore: 62, endedAt: '2026-10-01T00:00:00.000Z',
+    }];
+    writeFileSync(dnaFile(), `${JSON.stringify(onDisk, null, 2)}\n`);
+
+    new FafDNAManager(dir).recordGrowth(75, ['faf auto']);
+
+    const after = new FafDNAManager(dir).load();
+    expect(after?.current.score).toBe(75);
+    expect(after?.priorLineage?.map((l) => l.certificate)).toEqual(['FAF-2025-GALLERYS-VNAZ']);
   });
 
   test('faf\'s own shape still grows, and an extra key in it is kept', () => {

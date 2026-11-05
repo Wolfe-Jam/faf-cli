@@ -221,13 +221,13 @@ describe('BRAKE: a Soul or a .faf-dna made with no file never writes over one th
     const mgr = new FafDNAManager(d);
     expect(mgr.exists()).toBe(false);
     writeFileSync(join(d, '.faf-dna'), '{"hand": "HAND-DNA"}\n');
-    changed(() => mgr.birth(42));
+    expect(() => mgr.birth(42)).toThrow(SafePathError);
     expect(readFileSync(join(d, '.faf-dna'), 'utf-8')).toBe('{"hand": "HAND-DNA"}\n');
-    // With a .faf-dna there from the start, birth is the explicit fresh lineage (faf init --force).
+    // Birth is write-once: with a .faf-dna there from the start, it is refused too.
     const again = new FafDNAManager(d);
     expect(again.exists()).toBe(true);
-    again.birth(42);
-    expect(JSON.parse(readFileSync(join(d, '.faf-dna'), 'utf-8')).birthCertificate.birthDNA).toBe(42);
+    expect(() => again.birth(42)).toThrow(SafePathError);
+    expect(readFileSync(join(d, '.faf-dna'), 'utf-8')).toBe('{"hand": "HAND-DNA"}\n');
   });
 
   test('writeGrokConfig: a config.toml that appears while faf creates one is kept', () => {
