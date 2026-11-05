@@ -1,5 +1,5 @@
 import { existsSync } from 'fs';
-import { join } from 'path';
+import { dirname, join, resolve } from 'path';
 import { assembleFreshFaf } from '../detect/assemble.js';
 import { writeFaf, readFafRaw, withKernel } from '../interop/faf.js';
 import { scoreFafYaml } from '../core/scorer.js';
@@ -44,8 +44,11 @@ export function initCommand(options: InitOptions = {}): void {
   // Birth DNA — the first heartbeat. Records the honest first score (even 0%)
   // in a separate .faf-dna lineage file (keeps the .faf itself clean).
   // A .faf-dna that is there is the birth certificate: written once, never
-  // replaced. faf births only when there is none.
-  const dna = new FafDNAManager(dir);
+  // replaced. faf births only when there is none. It sits beside the .faf it
+  // belongs to (--output sub/x.faf → sub/.faf-dna), where faf edit and faf go
+  // look for it.
+  const dnaDir = dirname(resolve(outputPath));
+  const dna = new FafDNAManager(dnaDir);
   const born = !dna.exists();
   if (born) {
     dna.birth(result.score);
@@ -56,7 +59,7 @@ export function initCommand(options: InitOptions = {}): void {
   console.log(dim(born
     ? `  🧬 Birth DNA ${result.score}% — your journey starts here (faf dna)`
     : '  🧬 .faf-dna kept as it is — your birth certificate (faf dna)'));
-  sayAfterBirth(dir, born, options.force === true);
+  sayAfterBirth(dnaDir, born, options.force === true);
 
   if (result.score < 100) {
     console.log(dim(`\n  run ${bold("'faf go'")} to fill empty slots`));
