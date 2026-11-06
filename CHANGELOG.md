@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- `faf taf setup` pins faf-taf-git v2.6.0 (Safe Receipts Edition): receipts are never lost, and your checkout is never touched (receipts written in a separate worktree, writers locked, a failed push reported). faf-cli's own CI uses the same pin.
+
 ## [8.9.0] - 2026-11-05 — The Write-Once Edition
 
 A birth certificate that can't be reissued. `faf dna --verify` checks it against the commit that first saved it. Plus a lighter install, and every command documented.
