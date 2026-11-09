@@ -41,17 +41,23 @@ describe('WJTTC ENGINE: Relentless 6-W extractor', () => {
     expect(relentlessContext(dir).what).toContain('context re-discovery');
   });
 
-  test('who ← target AUDIENCE pattern, NOT package author', () => {
+  test('who ← the named AUDIENCE section, NOT package author', () => {
     pkg({ author: 'James Wolfe' });
-    readme('# X\n\nBuilt for developers who pair with AI coding assistants daily.\n');
+    readme('# X\n\n## Audience\n\nDevelopers who pair with AI coding assistants daily.\n');
     const who = relentlessContext(dir).who ?? '';
-    expect(who).toContain('developers who pair');
+    expect(who).toContain('Developers who pair');
     expect(who).not.toContain('James Wolfe');
   });
 
-  test('why ← mission pattern (relentless tier)', () => {
+  test('who ← a "built for <role>" sentence is a guess: no suggestion (Relentless cut)', () => {
+    pkg({ author: 'James Wolfe' });
+    readme('# X\n\nBuilt for developers who pair with AI coding assistants daily.\n');
+    expect(relentlessContext(dir).who).toBeUndefined();
+  });
+
+  test('why ← an "our mission is" sentence is a guess: no suggestion (Relentless cut)', () => {
     readme('# X\n\nOur mission is to eliminate the context tax that wastes hours every week.\n');
-    expect(relentlessContext(dir).why).toContain('eliminate the context tax');
+    expect(relentlessContext(dir).why).toBeUndefined();
   });
 
   test('why ← declarative only: bare "goal" in a parenthetical does NOT match (regression)', () => {
@@ -61,14 +67,14 @@ describe('WJTTC ENGINE: Relentless 6-W extractor', () => {
     expect(relentlessContext(dir).why).toBeUndefined();
   });
 
-  test('why ← "the goal is …" declarative still matches', () => {
+  test('why ← "the goal is …" sentence is a guess too: no suggestion (Relentless cut)', () => {
     readme('# X\n\nThe goal is to make every project legible to any AI in one shared format.\n');
-    expect(relentlessContext(dir).why).toContain('make every project legible');
+    expect(relentlessContext(dir).why).toBeUndefined();
   });
 
-  test('where ← repository.url (strips git+ and .git)', () => {
+  test('where ← repository.url is where the code is kept, not where it runs: no suggestion (Relentless cut)', () => {
     pkg({ repository: { url: 'git+https://github.com/Wolfe-Jam/x.git' } });
-    expect(relentlessContext(dir).where).toBe('https://github.com/Wolfe-Jam/x');
+    expect(relentlessContext(dir).where).toBeUndefined();
   });
 
   test('where ← README deployment mention (relentless tier)', () => {
@@ -82,11 +88,9 @@ describe('WJTTC ENGINE: Relentless 6-W extractor', () => {
     expect(relentlessContext(dir).where).toContain('npm');
   });
 
-  test('who ← "for <qualifier> teams" matches, not just a bare role — regression', () => {
-    // "for backend teams" used to slip past (role not adjacent to "for").
+  test('who ← "for <qualifier> teams" sentence: no suggestion (Relentless cut)', () => {
     readme('# X\n\nBuilt for backend teams maintaining many internal services.\n');
-    const who = relentlessContext(dir).who ?? '';
-    expect(who).toContain('backend teams');
+    expect(relentlessContext(dir).who).toBeUndefined();
   });
 
   test('when ← "production since" pattern (the 6th W v6 was missing)', () => {
@@ -94,11 +98,9 @@ describe('WJTTC ENGINE: Relentless 6-W extractor', () => {
     expect(relentlessContext(dir).when).toContain('since September 2025');
   });
 
-  test('how ← package.json scripts', () => {
+  test('how ← package.json scripts are commands, not how: no suggestion (Relentless cut)', () => {
     pkg({ scripts: { build: 'tsc', start: 'node x' } });
-    const how = relentlessContext(dir).how ?? '';
-    expect(how).toContain('npm run start');
-    expect(how).toContain('npm run build');
+    expect(relentlessContext(dir).how).toBeUndefined();
   });
 });
 
@@ -132,12 +134,13 @@ describe('WJTTC ENGINE: Relentless provenance (the auditable form)', () => {
   });
 
   test('source names the artifact + locus (package.json field vs README heading)', () => {
-    pkg({ scripts: { build: 'tsc', start: 'node x' }, repository: { url: 'git+https://github.com/Wolfe-Jam/x.git' } });
     readme('# X\n\n## Why\nOur mission is to eliminate the context tax that wastes hours every week.\n');
+    pkg({ description: 'A tool that transforms project files into AI context', scripts: { build: 'tsc', start: 'node x' }, repository: { url: 'git+https://github.com/Wolfe-Jam/x.git' } });
     const d = relentlessContextDetailed(dir);
-    expect(d.how?.source).toBe('package.json:scripts');
-    expect(d.where?.source).toBe('package.json:repository');
+    expect(d.what?.source).toBe('package.json:description');
     expect(d.why?.source).toBe('README:## Why');     // the matched heading rides the label
+    expect(d.how).toBeUndefined();                   // scripts: cut
+    expect(d.where).toBeUndefined();                 // repository: cut
   });
 
   test('confidence ranks by source quality: structured field > named section > heuristic', () => {

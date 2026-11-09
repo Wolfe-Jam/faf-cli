@@ -16,9 +16,6 @@ import { readRepoFile } from '../core/safe-write.js';
 
 interface PkgJson {
   description?: string;
-  repository?: string | { url?: string };
-  homepage?: string;
-  scripts?: Record<string, string>;
   keywords?: string[];
 }
 
@@ -63,7 +60,7 @@ const sv = (value: string, source: string, confidence: number): SourcedValue => 
  * human WHERE a value was relocated from before they accept it.
  */
 /** `toolingRoot`: the repo root's package.json is a tooling shell (polyglot repo
- *  — real code is in sibling dirs), so its description/repo/scripts describe the
+ *  — real code is in sibling dirs), so its description describes the
  *  tooling, not the product. Skip package.json-sourced context; README only. */
 export interface RelentlessOpts { toolingRoot?: boolean }
 
@@ -78,9 +75,9 @@ export function relentlessContextDetailed(dir: string, opts: RelentlessOpts = {}
   set('what', extractWhat(pkg, readme));
   set('who', extractWho(readme));
   set('why', extractWhy(readme));
-  set('where', extractWhere(pkg, readme));
+  set('where', extractWhere(readme));
   set('when', extractWhen(readme));
-  set('how', extractHow(pkg, readme));
+  set('how', extractHow(readme));
 
   return out;
 }
@@ -190,39 +187,22 @@ function extractWhat(pkg: PkgJson | null, readme: string): SourcedValue | null {
 }
 
 function extractWho(readme: string): SourcedValue | null {
+  // A named section only. A "built for <role>" sentence is a guess: it gave
+  // fragments like "any developer;" — the human names the audience in faf go.
   const sec = section(readme, 'Audience|Who|Who is this for|Who it.s for');
-  if (sec) {return sv(sec.body, `README:## ${sec.heading}`, 0.8);}
-  const fm = firstMatch(
-    readme,
-    [
-      // optional qualifier before the role word, so "for backend teams" /
-      // "for indie developers" match — not just a bare role. Dogfood-caught.
-      /\b(?:designed|built|made)\s+for\s+((?:[a-z][a-z-]*\s+)?(?:developers?|teams?|engineers?|builders?|founders?)[^.\n]{0,80})/i,
-      /\bfor\s+((?:[a-z][a-z-]*\s+)?(?:developers?|teams?|engineers?|builders?|founders?)[^.\n]{0,80})/i,
-    ],
-    8,
-  );
-  return fm ? sv(fm, 'README:audience-heuristic', 0.6) : null;
+  return sec ? sv(sec.body, `README:## ${sec.heading}`, 0.8) : null;
 }
 
 function extractWhy(readme: string): SourcedValue | null {
+  // A named section only. The "our mission is" sentence pattern was a guess
+  // that matched "Permission is hereby granted" in MIT licence text.
   const sec = section(readme, 'Why|Mission|Motivation|Rationale|Vision');
-  if (sec) {return sv(sec.body, `README:## ${sec.heading}`, 0.8);}
-  // DECLARATIVE only — "our mission is X", "the goal is X", "Mission: X". The
-  // bare noun is NOT enough: "(name + goal + the six Ws)" must not match (it did,
-  // and grabbed the rest of the line — a real bug the provenance dogfood caught).
-  const fm = firstMatch(readme, [
-    /(?:our\s+|the\s+)?(?:mission|purpose|goal)\s+is\s+([^.\n]{30,})/i,
-    /\b(?:mission|purpose|goal)\s*:\s*([^.\n]{30,})/i,
-    /(?:built|created|designed)\s+(?:because|to)\s+([^.\n]{30,})/i,
-  ]);
-  return fm ? sv(fm, 'README:mission-heuristic', 0.6) : null;
+  return sec ? sv(sec.body, `README:## ${sec.heading}`, 0.8) : null;
 }
 
-function extractWhere(pkg: PkgJson | null, readme: string): SourcedValue | null {
-  const repo = typeof pkg?.repository === 'string' ? pkg.repository : pkg?.repository?.url;
-  if (repo) {return sv(clean(repo.replace(/^git\+/, '').replace(/\.git$/, '')), 'package.json:repository', 0.95);}
-  if (pkg?.homepage) {return sv(clean(pkg.homepage), 'package.json:homepage', 0.9);}
+function extractWhere(readme: string): SourcedValue | null {
+  // Where it RUNS. package.json repository / homepage say where the code is
+  // kept or documented, not where it runs, so they never suggest this slot.
   const fm = firstMatch(
     readme,
     // {3,80} + minLen 3 so short platform names ("npm", "AWS") match —
@@ -248,10 +228,9 @@ function extractWhen(readme: string): SourcedValue | null {
   return fm ? sv(fm, 'README:since-heuristic', 0.6) : null;
 }
 
-function extractHow(pkg: PkgJson | null, readme: string): SourcedValue | null {
-  const scripts = pkg?.scripts ? Object.keys(pkg.scripts) : [];
-  const run = ['start', 'dev', 'build'].filter((s) => scripts.includes(s));
-  if (run.length) {return sv(clean(run.map((s) => `npm run ${s}`).join(', ')), 'package.json:scripts', 0.9);}
+function extractHow(readme: string): SourcedValue | null {
+  // How it's built or used, in prose. package.json scripts are commands —
+  // they have their own slot (commands.*) and never suggest this one.
   const usage = section(readme, 'Usage|Getting Started|Install|Installation|Quick Start');
   if (usage) {return sv(usage.body, `README:## ${usage.heading}`, 0.8);}
   const arch = section(readme, 'Architecture|Approach|How it works|Methodology|How');
