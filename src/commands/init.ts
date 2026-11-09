@@ -10,6 +10,7 @@ import { displayScore } from '../ui/display.js';
 import { bold, dim, fafCyan } from '../ui/colors.js';
 import { assertProjectCwd } from '../core/cwd-guard.js';
 import { refuseMissingOutputFolder } from '../core/refusal.js';
+import { suggestionNote } from '../core/suggest.js';
 
 export interface InitOptions {
   force?: boolean;
@@ -61,8 +62,11 @@ export function initCommand(options: InitOptions = {}): void {
     : '  🧬 .faf-dna kept as it is — your birth certificate (faf dna)'));
   sayAfterBirth(dnaDir, born, options.force === true);
 
+  // The goal and the six W's are the human's: init suggests, `faf go` confirms.
+  const note = suggestionNote(dir, data);
+  if (note) {console.log(dim(`\n  ${note}`));}
   if (result.score < 100) {
-    console.log(dim(`\n  run ${bold("'faf go'")} to fill empty slots`));
+    console.log(dim(`${note ? '' : '\n'}  run ${bold("'faf go'")} to fill empty slots`));
   }
   offerBusinessCard(dir, result.score < 100);
 }

@@ -1,7 +1,8 @@
 /**
  * Shared .faf assembly pipeline. The full slot-filling flow used to build a
  * FRESH .faf for a directory:
- *   detect → interrogate → slotignore inactive categories → Turbo-Cat → Relentless
+ *   detect → interrogate → slotignore inactive categories → Turbo-Cat
+ * (the goal and six W's stay empty — suggestions, confirmed in `faf go`)
  *
  * Used by BOTH `faf auto` (new-file path) and `faf git` (cloned repo) so they
  * can't drift — `faf git` previously ran detectStack alone (~33% vs ~75%).
@@ -10,7 +11,6 @@
 import { detectStack, detectStackWithFacts } from './stack.js';
 import { interrogateRepo } from '../interrogate/index.js';
 import { turboCatSlots } from './turbo-cat.js';
-import { relentlessContext } from './relentless.js';
 import {
   APP_TYPE_ADDS,
   APP_TYPE_CATEGORIES,
@@ -38,24 +38,32 @@ export function assembleFreshFaf(dir: string): Record<string, unknown> {
   if (facts.stack) {factLayer.stack = facts.stack;}
   if (facts.commands) {factLayer.commands = facts.commands;}
   if (facts.security) {factLayer.security = facts.security;}
-  // Prose (goal / 6Ws — README, Cargo.toml) fills empties only.
-  const proseLayer: Record<string, unknown> = {};
-  if (facts.project) {proseLayer.project = facts.project;}
-  if (facts.human_context) {proseLayer.human_context = facts.human_context;}
-
-  const seeded = fillEmpties(fillEmpties(factLayer, detected), proseLayer);
+  // The goal and the six W's are the human's: README prose and the
+  // package.json description are suggestions (core/suggest.ts), confirmed in
+  // `faf go` — never written here. The slots are left empty.
+  const seeded = fillEmpties(factLayer, blankIntent(detected));
   applySlotIgnore(seeded);
-  // Polyglot repos: the root package.json is a tooling shell — don't let its
-  // description/scripts seed the product's 6Ws.
-  const found = (detected._meta as { found?: string[] } | undefined)?.found ?? [];
-  const toolingRoot = found.some(f => f.startsWith('polyglot:'));
-  const withFormats = fillEmpties(seeded, turboCatSlots(dir) as Record<string, unknown>);
-  return fillEmpties(withFormats, { human_context: relentlessContext(dir, { toolingRoot }) } as Record<string, unknown>);
+  return fillEmpties(seeded, turboCatSlots(dir) as Record<string, unknown>);
+}
+
+/** A copy of `layer` with the goal and every six-W slot it carries set to
+ *  `''`: the keys stay (so the file shows the empty slot and `faf go` asks
+ *  for it), the words don't. Only a human fills these slots. */
+function blankIntent(layer: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = { ...layer };
+  if (isMapping(out.project) && 'goal' in out.project) {
+    out.project = { ...out.project, goal: '' };
+  }
+  if (isMapping(out.human_context)) {
+    out.human_context = Object.fromEntries(Object.keys(out.human_context).map(k => [k, '']));
+  }
+  return out;
 }
 
 /**
  * Update an EXISTING .faf for `dir`. Existing values win; interrogated → detected
- * → Turbo-Cat (formats) → Relentless (6 W's) fill only the remaining empties.
+ * → Turbo-Cat (formats) fill only the remaining empties. The goal and the six
+ * W's are never filled: they're suggested (core/suggest.ts) and `faf go` asks.
  * This is exactly the chain `faf auto` runs on an existing file — exported so
  * consumers (faf-mcp's faf_auto) compose it instead of re-deriving it and
  * drifting (they used to merge assembleFreshFaf's slotignore'd output over the
@@ -98,10 +106,12 @@ export function updateExistingFaf(dir: string, existing: Record<string, unknown>
   const base = liftScalarProject(asFafMapping(existing, 'updateExistingFaf: the existing .faf'));
   const { data, facts } = detectStackWithFacts(dir);
   const detected = data as Record<string, unknown>;
-  const withInterrogated = fillEmpties(base, interrogateRepo(dir) as Record<string, unknown>);
-  const merged = fillEmpties(withInterrogated, detected);
-  const withFormats = fillEmpties(merged, turboCatSlots(dir) as Record<string, unknown>);
-  const filled = useFileSlotNames(fillEmpties(withFormats, { human_context: relentlessContext(dir) } as Record<string, unknown>), base);
+  // Interrogated file-facts only: its goal / six-W prose is a suggestion
+  // (core/suggest.ts) for `faf go`, never a fill.
+  const { project: _prose, human_context: _sixWs, ...fileFacts } = interrogateRepo(dir);
+  const withInterrogated = fillEmpties(base, fileFacts as Record<string, unknown>);
+  const merged = fillEmpties(withInterrogated, blankIntent(detected));
+  const filled = useFileSlotNames(fillEmpties(merged, turboCatSlots(dir) as Record<string, unknown>), base);
   const decided = scoredNamesInStep(appTypeIsFact(existing, base, detected)
     ? applyAppType(keepNotApplicable(filled, base), base, facts)
     : keepNotApplicable(filled, base), base);

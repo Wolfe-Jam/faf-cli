@@ -251,3 +251,30 @@ describe('ENGINE: go command — the interview is recorded on the DNA', () => {
     }
   }, 60_000);
 });
+
+describe('BRAKE: go with no TTY never applies a suggestion', () => {
+  // README suggestions exist for the goal and the six W's, but stdin is a pipe:
+  // nothing is written without a human. Empty answers skip, as before.
+  const CLI = join(import.meta.dir, '../../src/cli.ts');
+
+  test('piped Enters leave project.faf byte-for-byte unchanged', async () => {
+    const dir = join(tmpdir(), `faf-test-go-notty-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    mkdirSync(dir, { recursive: true });
+    try {
+      writeFileSync(join(dir, 'README.md'), '# notty\n\nNotty turns piped input into nothing at all, on purpose.\n\n## Status\n\nEarly. Working, not yet published anywhere.\n');
+      writeFileSync(join(dir, 'project.faf'), 'faf_version: 2.5.0\nproject:\n  name: notty\n  goal: ""\nhuman_context:\n  when: ""\n');
+      const before = readFileSync(join(dir, 'project.faf'), 'utf-8');
+      const proc = Bun.spawn([process.execPath, CLI, 'go'], {
+        cwd: dir, stdin: 'pipe', stdout: 'pipe', stderr: 'pipe', env: { ...process.env, NO_COLOR: '1' },
+      });
+      proc.stdin.write('\n'.repeat(40));
+      proc.stdin.end();
+      const out = await new Response(proc.stdout).text();
+      await proc.exited;
+      expect(readFileSync(join(dir, 'project.faf'), 'utf-8')).toBe(before);
+      expect(out).not.toContain('Notty turns piped input');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});

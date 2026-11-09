@@ -11,6 +11,15 @@ import { readRepoFile, repoExists } from '../core/safe-write.js';
 import { type ExtractedContext, isValidExtraction } from './types.js';
 
 /** Strip badge / image lines + blank lines from the top of a README */
+/** Section headings each slot reads from. */
+const GOAL_SECTION = /^(use\s+cases?|goal)\b/i;
+const WHAT_SECTION = /^(about|description|overview|what(\s+is\s+this)?)\b/i;
+const WHO_SECTION = /^(audience|users?|for\s+whom|who(\s+is\s+this\s+for)?)\b/i;
+const WHY_SECTION = /^(why|motivation|problem|rationale)\b/i;
+const WHERE_SECTION = /^(deployment|where(\s+it\s+runs)?|hosting)\b/i;
+const WHEN_SECTION = /^(status|history|timeline|since|launched)\b/i;
+const HOW_SECTION = /^(architecture|how(\s+it\s+works)?|approach|design)\b/i;
+
 function stripPreamble(content: string): string {
   const lines = content.split('\n');
   let i = 0;
@@ -55,6 +64,12 @@ function firstProseParagraph(content: string): string | null {
 
 /** Extract content following a heading whose text matches `pattern` */
 function sectionContent(content: string, pattern: RegExp): string | null {
+  return sectionWithHeading(content, pattern)?.text ?? null;
+}
+
+/** The first section whose heading matches `pattern`: its prose and the
+ *  heading as written (`Status`, `Who is this for`), for a suggestion's source. */
+function sectionWithHeading(content: string, pattern: RegExp): { text: string; heading: string } | null {
   const lines = content.split('\n');
   let i = 0;
   while (i < lines.length) {
@@ -76,7 +91,7 @@ function sectionContent(content: string, pattern: RegExp): string | null {
         i++;
       }
       if (buf.length === 0) {return null;}
-      return buf.join(' ').trim();
+      return { text: buf.join(' ').trim(), heading: m[2].trim() };
     }
     i++;
   }
@@ -86,7 +101,7 @@ function sectionContent(content: string, pattern: RegExp): string | null {
 /** Extract `project.goal` — first prose paragraph or ## Use Case / ## Goal */
 export function extractGoal(content: string): string | undefined {
   // Anchor 1: explicit "## Use Case" / "## Use Cases" / "## Goal" section
-  const explicit = sectionContent(content, /^(use\s+cases?|goal)\b/i);
+  const explicit = sectionContent(content, GOAL_SECTION);
   if (explicit && isValidExtraction(explicit)) {return explicit;}
 
   // Anchor 2: first prose paragraph after title/badges
@@ -98,21 +113,21 @@ export function extractGoal(content: string): string | undefined {
 
 /** Extract `human_context.what` — ## About / ## Description / ## Overview */
 export function extractWhat(content: string): string | undefined {
-  const text = sectionContent(content, /^(about|description|overview|what(\s+is\s+this)?)\b/i);
+  const text = sectionContent(content, WHAT_SECTION);
   if (text && isValidExtraction(text)) {return text;}
   return undefined;
 }
 
 /** Extract `human_context.who` — ## Audience / ## For Whom / ## Users */
 export function extractWho(content: string): string | undefined {
-  const text = sectionContent(content, /^(audience|users?|for\s+whom|who(\s+is\s+this\s+for)?)\b/i);
+  const text = sectionContent(content, WHO_SECTION);
   if (text && isValidExtraction(text)) {return text;}
   return undefined;
 }
 
 /** Extract `human_context.why` — ## Why / ## Motivation / ## Problem */
 export function extractWhy(content: string): string | undefined {
-  const text = sectionContent(content, /^(why|motivation|problem|rationale)\b/i);
+  const text = sectionContent(content, WHY_SECTION);
   if (text && isValidExtraction(text)) {return text;}
   return undefined;
 }
@@ -120,21 +135,21 @@ export function extractWhy(content: string): string | undefined {
 /** Extract `human_context.where` — ## Deployment / ## Where it runs / ## Install */
 export function extractWhere(content: string): string | undefined {
   // Prefer specific "where it runs" / "deployment" over generic "install"
-  const specific = sectionContent(content, /^(deployment|where(\s+it\s+runs)?|hosting)\b/i);
+  const specific = sectionContent(content, WHERE_SECTION);
   if (specific && isValidExtraction(specific)) {return specific;}
   return undefined;
 }
 
 /** Extract `human_context.when` — ## Status / ## History / "Production since" */
 export function extractWhen(content: string): string | undefined {
-  const text = sectionContent(content, /^(status|history|timeline|since|launched)\b/i);
+  const text = sectionContent(content, WHEN_SECTION);
   if (text && isValidExtraction(text)) {return text;}
   return undefined;
 }
 
 /** Extract `human_context.how` — ## Architecture / ## How it works / ## Approach */
 export function extractHow(content: string): string | undefined {
-  const text = sectionContent(content, /^(architecture|how(\s+it\s+works)?|approach|design)\b/i);
+  const text = sectionContent(content, HOW_SECTION);
   if (text && isValidExtraction(text)) {return text;}
   return undefined;
 }
@@ -170,4 +185,39 @@ export function interrogateReadme(dir: string): ExtractedContext {
   if (Object.keys(human).length > 0) {result.human_context = human;}
 
   return result;
+}
+
+/** A README find with where it came from: `README.md § Status`. */
+export interface ReadmeFind { value: string; source: string }
+
+/** The README's goal and six W's, each with its source — suggestions for the
+ *  human to confirm in `faf go`, never written to project.faf by init or auto.
+ *  Same anchors and slop rules as the extractors above. {} if no README. */
+export function interrogateReadmeSourced(dir: string): Record<string, ReadmeFind> {
+  const name = ['README.md', 'README.MD', 'Readme.md', 'readme.md'].find(n => repoExists(dir, n));
+  if (!name) {return {};}
+  const raw = readRepoFile(dir, name);
+  if (raw === null) {return {};}
+  const content = raw.replace(/<!--[\s\S]*?-->/g, '');
+  const out: Record<string, ReadmeFind> = {};
+  const take = (path: string, pattern: RegExp): boolean => {
+    const s = sectionWithHeading(content, pattern);
+    if (s && isValidExtraction(s.text)) {
+      out[path] = { value: s.text, source: `${name} § ${s.heading}` };
+      return true;
+    }
+    return false;
+  };
+
+  if (!take('project.goal', GOAL_SECTION)) {
+    const tagline = firstProseParagraph(content);
+    if (tagline && isValidExtraction(tagline)) {out['project.goal'] = { value: tagline, source: `${name} § first paragraph` };}
+  }
+  take('human_context.what', WHAT_SECTION);
+  take('human_context.who', WHO_SECTION);
+  take('human_context.why', WHY_SECTION);
+  take('human_context.where', WHERE_SECTION);
+  take('human_context.when', WHEN_SECTION);
+  take('human_context.how', HOW_SECTION);
+  return out;
 }

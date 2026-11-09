@@ -10,6 +10,7 @@ import { mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { assembleFreshFaf, fillEmpties } from '../../src/detect/assemble.js';
+import { suggestIntent } from '../../src/core/suggest.js';
 
 let dir: string;
 beforeEach(() => {
@@ -22,14 +23,16 @@ afterEach(() => {
 const write = (name: string, body: string): void => writeFileSync(join(dir, name), body);
 
 describe('WJTTC AERO: shared assembly pipeline (auto + git)', () => {
-  test('fills human_context (Relentless) — not detectStack-only', () => {
+  test('suggests human_context (Relentless) — never writes it', () => {
     write('package.json', JSON.stringify({ description: 'A drop-in checkout flow for fast payment integration' }));
     write('README.md', '# Kit\n\n## Why\nOur mission is to remove payment-integration friction for teams.\n\nBuilt for developers who ship commerce features.\n');
     const faf = assembleFreshFaf(dir);
     const hc = faf.human_context as Record<string, string>;
-    expect(hc.what).toContain('drop-in checkout');
-    expect(hc.why).toContain('remove payment-integration friction');
-    expect(hc.who).toContain('developers who ship commerce');
+    expect(Object.values(hc).every(v => v === '')).toBe(true);
+    const s = suggestIntent(dir);
+    expect(s['human_context.what']?.value).toContain('drop-in checkout');
+    expect(s['human_context.why']?.value).toContain('remove payment-integration friction');
+    expect(s['human_context.who']?.value).toContain('developers who ship commerce');
   });
 
   test('fills stack from Turbo-Cat for non-npm stacks (the git gap)', () => {

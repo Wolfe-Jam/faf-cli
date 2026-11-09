@@ -26,6 +26,7 @@ import { basename, dirname, join } from 'path';
 import { tmpdir } from 'os';
 import { execFileSync, spawnSync } from 'child_process';
 import { assembleFreshFaf, updateExistingFaf } from '../../src/detect/assemble.js';
+import { suggestIntent } from '../../src/core/suggest.js';
 import { authorFafFromRepo } from '../../src/detect/git-repo.js';
 import { enrichFromRepo } from '../../src/detect/enrich.js';
 import { relentlessContextDetailed } from '../../src/detect/relentless.js';
@@ -218,12 +219,15 @@ describe('BRAKE: detection never reads a file through a link out of the project'
     const dir = project(['package.json'], { 'docs/README.md': inProject });
     symlinkSync(join('docs', 'README.md'), join(dir, 'README.md'));
 
+    // The README is read through its link — as a suggestion for the goal;
+    // init writes no goal (the human confirms it in faf go).
+    expect(suggestIntent(dir)['project.goal']?.value).toBe('An in-project README that faf reads through its link, as before.');
     const fresh = assembleFreshFaf(dir) as FafData;
-    expect(fresh.project?.goal).toBe('An in-project README that faf reads through its link, as before.');
+    expect(fresh.project?.goal).toBe('');
     expect(leaks(serializeFaf(fresh))).toEqual([]);
 
     expectCleanRun(run(dir, ['init']), 'faf init');
-    expect(readFileSync(join(dir, 'project.faf'), 'utf-8')).toContain('An in-project README that faf reads through its link');
+    expect(readFileSync(join(dir, 'project.faf'), 'utf-8')).not.toContain('An in-project README that faf reads through its link');
     expectCleanFiles(dir);
   });
 
