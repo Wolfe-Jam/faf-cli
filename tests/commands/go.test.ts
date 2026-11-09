@@ -278,3 +278,30 @@ describe('BRAKE: go with no TTY never applies a suggestion', () => {
     }
   });
 });
+
+describe('BRAKE: go with no TTY keeps every piped answer', () => {
+  // All lines arrive in one chunk. Each is the answer to the next question,
+  // in order; none are dropped (reviews W6 / 8b).
+  const CLI = join(import.meta.dir, '../../src/cli.ts');
+
+  test('printf "G1\\nW1\\nquit\\n" writes goal and who, and saves the session', async () => {
+    const dir = join(tmpdir(), `faf-test-go-fastpipe-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    mkdirSync(dir, { recursive: true });
+    try {
+      writeFileSync(join(dir, 'project.faf'), 'faf_version: 2.5.0\nproject:\n  name: pipe\n  goal: ""\n  main_language: TypeScript\nhuman_context:\n  who: ""\n');
+      const proc = Bun.spawn([process.execPath, CLI, 'go'], {
+        cwd: dir, stdin: 'pipe', stdout: 'pipe', stderr: 'pipe', env: { ...process.env, NO_COLOR: '1' },
+      });
+      proc.stdin.write('G1\nW1\nquit\n');
+      proc.stdin.end();
+      await new Response(proc.stdout).text();
+      await proc.exited;
+      const after = readFileSync(join(dir, 'project.faf'), 'utf-8');
+      expect(after).toContain('goal: G1');
+      expect(after).toContain('who: W1');
+      expect(existsSync(join(dir, '.faf-session.json'))).toBe(true);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
