@@ -5,6 +5,7 @@ import { join } from 'path';
 import { SLOTS, isPlaceholder } from '../../src/core/slots.js';
 import { writeFaf } from '../../src/interop/faf.js';
 import { FafDNAManager } from '../../src/core/faf-dna.js';
+import { parse as parseYaml } from 'yaml';
 
 describe('ENGINE: go command — slot helpers (contract)', () => {
   test('isPlaceholder detects empty values', () => {
@@ -296,9 +297,9 @@ describe('BRAKE: go with no TTY keeps every piped answer', () => {
       proc.stdin.end();
       await new Response(proc.stdout).text();
       await proc.exited;
-      const after = readFileSync(join(dir, 'project.faf'), 'utf-8');
-      expect(after).toContain('goal: G1');
-      expect(after).toContain('who: W1');
+      const after = parseYaml(readFileSync(join(dir, 'project.faf'), 'utf-8')) as { project: { goal: string }; human_context: { who: string } };
+      expect(after.project.goal).toBe('G1');
+      expect(after.human_context.who).toBe('W1');
       expect(existsSync(join(dir, '.faf-session.json'))).toBe(true);
     } finally {
       rmSync(dir, { recursive: true, force: true });

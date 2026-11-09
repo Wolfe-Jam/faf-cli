@@ -10,6 +10,8 @@
  * With no TTY there is no field — suggestions are never applied.
  */
 
+import { dropLastGrapheme, wellFormed } from './text-width.js';
+
 export interface FieldState {
   /** What the person has typed (or Tab'd in). */
   buffer: string;
@@ -36,7 +38,8 @@ export function startField(suggestion: string): FieldState {
 
 /** What Enter does with the field as it stands. */
 function submit(state: FieldState): FieldDone {
-  const typed = state.buffer.trim();
+  // Never write half a character (a lone surrogate) — it breaks the YAML.
+  const typed = wellFormed(state.buffer).trim();
   if (typed.toLowerCase() === 'quit') {return { kind: 'quit' };}
   if (typed.toLowerCase() === 'skip') {return { kind: 'skip' };}
   if (typed) {return { kind: 'value', value: typed };}
@@ -55,7 +58,9 @@ function isPrintable(key: FieldKey): boolean {
 /** Editing keys, by name. */
 const EDITS: Record<string, (s: FieldState) => FieldState> = {
   tab: (s) => (s.buffer === '' && s.suggestion ? { ...s, buffer: s.suggestion } : s),
-  backspace: (s) => ({ ...s, buffer: s.buffer.slice(0, -1) }),
+  // One Backspace removes one character as a person sees it: a whole emoji,
+  // a letter with its accent, one CJK character.
+  backspace: (s) => ({ ...s, buffer: dropLastGrapheme(s.buffer) }),
   escape: (s) => ({ ...s, buffer: '' }),
 };
 

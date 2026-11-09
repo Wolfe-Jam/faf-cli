@@ -73,10 +73,9 @@ describe('ENGINE: displayWidth counts terminal columns', () => {
 describe('BRAKE: typed words get no help and no suggestion; plain slots use readline', () => {
   const sugg = { 'human_context.who': { value: 'Backend teams', source: 'README.md § Who' } };
 
-  test('an empty intent slot gets its suggestion and help', () => {
-    const p = fieldPlan('human_context.who', '', sugg);
-    expect(p?.suggestion).toBe('Backend teams');
-    expect(p?.help).toBeTruthy();
+  test('an empty intent slot gets the field, with its suggestion', () => {
+    expect(fieldPlan('human_context.who', '', sugg)).toEqual({ suggestion: 'Backend teams' });
+    expect(fieldPlan('human_context.why', '', sugg)).toEqual({ suggestion: '' });
   });
 
   test('typed words: no suggestion, no help — plain readline, Enter keeps them', () => {
@@ -110,7 +109,8 @@ describe('ENGINE: the suggestion line', () => {
   test('one suggestion: "confirm it"', () => {
     const dir = mkdtempSync(join(tmpdir(), 'faf-note-'));
     try {
-      writeFileSync(join(dir, 'README.md'), '# X\n\n## Status\n\nEarly. Working, not yet published anywhere.\n');
+      // One source, one slot: a Cargo.toml description suggests the goal only.
+      writeFileSync(join(dir, 'Cargo.toml'), '[package]\nname = "x"\nversion = "0.1.0"\ndescription = "Typed API clients from one schema file"\n');
       const note = suggestionNote(dir) ?? '';
       expect(note).toStartWith('1 suggestion ');
       expect(note).toContain("confirm it in 'faf go'");

@@ -20,7 +20,7 @@ import { interrogateReadmeSourced } from '../interrogate/readme.js';
 import { interrogateCargo } from '../interrogate/cargo.js';
 import { relentlessContextDetailed } from '../detect/relentless.js';
 import { detectStack } from '../detect/stack.js';
-import { isPlaceholder } from './slots.js';
+import { isPlaceholder, isTypedWords } from './slots.js';
 import { getNestedValue } from './dot-path.js';
 
 /** The human-authored slots: the goal and the six W's. */
@@ -98,7 +98,9 @@ export function suggestIntent(dir: string, faf?: Record<string, unknown>): Inten
   if (faf) {
     for (const p of INTENT_PATHS) {
       const cur = getNestedValue(faf, p);
-      if (typeof cur === 'string' && cur.trim() && !isPlaceholder(cur)) {delete out[p];}
+      // Real words and typed words (None, N/A, unknown) are the person's:
+      // no suggestion competes with either.
+      if (isTypedWords(cur) || (typeof cur === 'string' && cur.trim() && !isPlaceholder(cur))) {delete out[p];}
     }
   }
   return out;
@@ -116,6 +118,6 @@ export function suggestionNote(dir: string, faf?: Record<string, unknown>): stri
     return f === 'README' ? 'README.md' : f;
   };
   const files = [...new Set(s.map(v => fileOf(v.source)))].join(', ');
-  const noun = s.length === 1 ? 'suggestion' : 'suggestions';
-  return `${s.length} ${noun} for the goal and the six W's (${files}) — confirm them in 'faf go'`;
+  const [noun, them] = s.length === 1 ? ['suggestion', 'it'] : ['suggestions', 'them'];
+  return `${s.length} ${noun} for the goal and the six W's (${files}) — confirm ${them} in 'faf go'`;
 }
