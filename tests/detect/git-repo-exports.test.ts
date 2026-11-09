@@ -40,7 +40,7 @@ describe('BRAKE: the function form of faf git', () => {
 
     const data = api.authorFafFromRepo(dir, { repoUrl: 'https://github.com/acme/demo.git' });
     expect(data.project?.name).toBe('acme-web'); // a real package.json name is kept
-    expect(data.project?.goal).toBe('The Acme storefront');
+    expect(data.project?.goal).toBe(''); // a description is a suggestion, never a written goal
     expect(typeof data.project?.main_language).toBe('string');
     expect(data.human_context).toBeDefined();
     expect(readdirSync(dir).sort()).toEqual(before);

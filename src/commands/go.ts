@@ -1,9 +1,11 @@
-import { createInterface } from 'readline';
+import { createInterface, emitKeypressEvents } from 'readline';
 import { dirname, join } from 'path';
 import { aliasKeptNote, findFafFile, readFaf, readFafRaw, withKernel, writeFaf } from '../interop/faf.js';
 import { SLOTS, SLOTIGNORED, isPlaceholder, isTypedWords } from '../core/slots.js';
 import type { SlotDef } from '../core/types.js';
 import { questionForSlot } from '../core/interview.js';
+import { suggestIntent, isIntentPath, type IntentSuggestions } from '../core/suggest.js';
+import { startField, fieldKey, renderField, type FieldDone, type FieldKey } from '../ui/suggest-field.js';
 import { getNestedValue, setNestedValue, blockingStep, blockedMessage } from '../core/dot-path.js';
 import * as kernel from '../wasm/kernel.js';
 import { enrichScore } from '../core/scorer.js';
@@ -156,10 +158,12 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
   const noun = emptySlots.length === 1 ? 'slot' : 'slots';
   console.log(dim(`  ${emptySlots.length} ${noun} from Trophy. Enter a value, "skip" to skip, or "quit" to stop.\n`));
 
-  const rl = createInterface({ input: process.stdin, output: process.stdout });
-
-  const ask = (prompt: string): Promise<string> =>
-    new Promise(resolve => rl.question(prompt, resolve));
+  // A person at a terminal sees the repo's suggestions for the goal and the
+  // six W's in gray, and confirms them. With no TTY (CI, a pipe) there are no
+  // suggestions: nothing is written that a human didn't confirm.
+  const tty = Boolean(process.stdin.isTTY && process.stdout.isTTY);
+  const suggestions: IntentSuggestions = tty ? suggestIntent(dir, data as Record<string, unknown>) : {};
+  const answerer = tty ? ttyAnswerer() : pipeAnswerer();
 
   let filled = 0;
   let quit = false;
@@ -167,9 +171,13 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
 
   for (let i = 0; i < slotsToProcess.length; i++) {
     const slot = slotsToProcess[i];
-    const answer = await ask(questionLine(slot, getNestedValue(data as Record<string, unknown>, slot.path)));
+    const cur = getNestedValue(data as Record<string, unknown>, slot.path);
+    // Typed words (None, N/A) are the person's: Enter keeps them, so no suggestion competes.
+    const suggestion = isIntentPath(slot.path) && !isTypedWords(cur) ? suggestions[slot.path] : undefined;
+    if (suggestion) {console.log(dim(`  suggested from ${suggestion.source}`));}
+    const done = await answerer.ask(questionLine(slot, cur), suggestion?.value ?? '');
 
-    if (answer.toLowerCase() === 'quit') {
+    if (done.kind === 'quit') {
       // Save session for resume
       quit = true;
       if (saveSession(dir, { slotIndex: startIndex + i, fafPath })) {
@@ -178,15 +186,15 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
       break;
     }
 
-    if (answer.toLowerCase() === 'skip' || answer.trim() === '') {
+    if (done.kind === 'skip') {
       continue;
     }
 
-    setNestedValue(data as Record<string, unknown>, slot.path, answer.trim());
+    setNestedValue(data as Record<string, unknown>, slot.path, done.value);
     filled++;
   }
 
-  rl.close();
+  answerer.close();
 
   if (filled > 0) {
     writeFaf(fafPath, data, { onAliasKept: k => console.log(dim(`  ${aliasKeptNote(k)}`)) });
@@ -212,4 +220,81 @@ function recordGoGrowth(fafPath: string, score: number, filled: number): void {
   if (!dna.exists()) {return;}
   dna.recordGrowth(score, [`faf go — filled ${filled} slot${filled === 1 ? '' : 's'}`]);
   sayWhyDnaIsLeft(dna);
+}
+
+interface Answerer {
+  ask(prompt: string, suggestion: string): Promise<FieldDone>;
+  close(): void;
+}
+
+/** No TTY: readline, line by line, as always. Suggestions are never shown or
+ *  applied; an empty line or "skip" skips, "quit" stops. When the input ends,
+ *  every question left is skipped (no session is saved for a closed pipe). */
+function pipeAnswerer(): Answerer {
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
+  let ended = false;
+  rl.on('close', () => { ended = true; });
+  return {
+    ask: (prompt) => new Promise<FieldDone>(resolve => {
+      if (ended) { resolve({ kind: 'skip' }); return; }
+      const onClose = (): void => resolve({ kind: 'skip' });
+      rl.once('close', onClose);
+      rl.question(prompt, (answer) => {
+        rl.off('close', onClose);
+        const a = answer.trim();
+        if (a.toLowerCase() === 'quit') {resolve({ kind: 'quit' });}
+        else if (a === '' || a.toLowerCase() === 'skip') {resolve({ kind: 'skip' });}
+        else {resolve({ kind: 'value', value: a });}
+      });
+    }),
+    close: () => rl.close(),
+  };
+}
+
+/** Visible width of `s` (ANSI colour codes take no columns). */
+function visibleLength(s: string): number {
+  // eslint-disable-next-line no-control-regex
+  return s.replace(/\u001b\[[0-9;]*m/g, '').length;
+}
+
+/** A TTY: raw keypresses through the suggestion field (ui/suggest-field.ts),
+ *  redrawn in place — the suggestion in gray until the person types or Tabs. */
+function ttyAnswerer(): Answerer {
+  emitKeypressEvents(process.stdin);
+  const out = process.stdout;
+  let rows = 1;
+  const draw = (prompt: string, line: string): void => {
+    // Back to the start of what was drawn last time, clear it, draw again.
+    if (rows > 1) {out.write(`\u001b[${rows - 1}A`);}
+    out.write(`\r\u001b[J${prompt}${line}`);
+    const cols = out.columns || 80;
+    rows = Math.max(1, Math.ceil(visibleLength(prompt + line) / cols));
+  };
+  return {
+    ask: (prompt, suggestion) => new Promise<FieldDone>(resolve => {
+      let state = startField(suggestion);
+      rows = 1;
+      draw(prompt, renderField(state, { gray: dim }));
+      process.stdin.setRawMode(true);
+      process.stdin.resume();
+      const onKey = (_s: string | undefined, key: FieldKey | undefined): void => {
+        const r = fieldKey(state, key ?? { sequence: _s });
+        state = r.state;
+        if (r.done) {
+          process.stdin.off('keypress', onKey);
+          process.stdin.setRawMode(false);
+          process.stdin.pause();
+          // Leave the answer on screen as it was decided.
+          const shown = r.done.kind === 'value' ? r.done.value : dim(r.done.kind);
+          draw(prompt, shown);
+          out.write('\n');
+          resolve(r.done);
+          return;
+        }
+        draw(prompt, renderField(state, { gray: dim }));
+      };
+      process.stdin.on('keypress', onKey);
+    }),
+    close: () => { /* raw mode is released after every answer */ },
+  };
 }

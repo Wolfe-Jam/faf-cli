@@ -121,8 +121,9 @@ describe('ENGINE: suggestions carry their source', () => {
 
   test('README sections and package.json become sourced suggestions', () => {
     const s = suggestIntent(dir);
-    expect(s['project.goal']?.value).toContain('Widget Kit turns plain YAML');
-    expect(s['project.goal']?.source).toBe('README.md § first paragraph');
+    // package.json description leads for the goal, as it did when init filled it
+    expect(s['project.goal']?.value).toBe('Accessible web widgets from plain YAML');
+    expect(s['project.goal']?.source).toBe('package.json description');
     expect(s['human_context.who']?.value).toContain('Front-end developers');
     expect(s['human_context.who']?.source).toBe('README.md § Who is this for');
     expect(s['human_context.why']?.source).toBe('README.md § Why');
@@ -131,6 +132,24 @@ describe('ENGINE: suggestions carry their source', () => {
     expect(s['human_context.how']?.source).toBe('README.md § How it works');
     expect(s['human_context.what']?.value).toBe('Accessible web widgets from plain YAML');
     expect(s['human_context.what']?.source).toBe('package.json description');
+  });
+
+  test('with no package.json description, the README first paragraph suggests the goal', () => {
+    writeFileSync(join(dir, 'package.json'), JSON.stringify({ ...PKG, description: undefined }));
+    const s = suggestIntent(dir);
+    expect(s['project.goal']?.value).toContain('Widget Kit turns plain YAML');
+    expect(s['project.goal']?.source).toBe('README.md § first paragraph');
+  });
+
+  test('no README and no description: no suggestions, nothing invented', () => {
+    const bare = join(tmpdir(), `faf-suggest-bare-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    mkdirSync(bare, { recursive: true });
+    writeFileSync(join(bare, 'package.json'), JSON.stringify({ name: 'bare', version: '1.0.0' }));
+    try {
+      expect(suggestIntent(bare)).toEqual({});
+    } finally {
+      rmSync(bare, { recursive: true, force: true });
+    }
   });
 
   test('every suggestion names a source — sourced or nothing', () => {

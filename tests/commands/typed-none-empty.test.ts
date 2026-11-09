@@ -89,14 +89,14 @@ describe('BRAKE: faf auto — no fact, the typed words stay; a 6W typed none is 
     expect(r.out).not.toContain('stack.database says');
   });
 
-  test('a 6W `who: None` stays as typed although the README names the audience; an empty 6W is filled from it', () => {
+  test('a 6W `who: None` stays as typed although the README names the audience; an empty 6W stays empty (faf go suggests)', () => {
     const dir = webRepo();
     writeFileSync(join(dir, 'project.faf'), 'project:\n  name: web\n  type: frontend\nhuman_context:\n  who: None # WHO-COMMENT\n  what: ""\n');
     const r = faf(dir, 'auto');
     expect(r.status).toBe(0);
     const after = readFileSync(join(dir, 'project.faf'), 'utf-8');
     expect(after.split('\n')).toContain('  who: None # WHO-COMMENT');
-    expect((parse(after) as { human_context: Record<string, string> }).human_context.what).toBe('A deploy dashboard');
+    expect((parse(after) as { human_context: Record<string, string> }).human_context.what).toBe('');
     expect(r.lines.filter(l => l === hint('human_context.who', 'None'))).toHaveLength(1);
   });
 });

@@ -156,6 +156,10 @@ export type { TurboCatResult, DiscoveredFormat } from './detect/turbo-cat.js';
 export { relentlessContext, relentlessContextDetailed } from './detect/relentless.js';
 export type { SeededContext, SeededContextDetailed, SourcedValue } from './detect/relentless.js';
 export { assembleFreshFaf, updateExistingFaf, fillEmpties } from './detect/assemble.js';
+// Intent suggestions — the goal + six W's the repo suggests; faf go (and the
+// /faf-go skill, CFM's faf_go via buildTableOf8) confirm them. Never written by init/auto.
+export { suggestIntent, suggestionNote, isIntentPath, INTENT_PATHS } from './core/suggest.js';
+export type { Suggestion, IntentSuggestions, IntentPath } from './core/suggest.js';
 // The pure parts of `faf git` — no git, no network, no child process. Fetch the
 // repo your own way, then `authorFafFromRepo(dir, { repoUrl })` returns the
 // same FafData `faf git` writes (write it with writeFaf, score it with

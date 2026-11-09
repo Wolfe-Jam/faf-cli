@@ -10,6 +10,7 @@ import { sayWhyDnaIsLeft } from './dna.js';
 import { displayScore } from '../ui/display.js';
 import { bold, dim, fafCyan } from '../ui/colors.js';
 import { assertProjectCwd } from '../core/cwd-guard.js';
+import { suggestionNote } from '../core/suggest.js';
 
 export function autoCommand(): void {
   assertProjectCwd(process.cwd(), 'faf auto');
@@ -56,7 +57,10 @@ export function autoCommand(): void {
   // score, one line per slot. Slots the app-type leaves out are marked by now.
   displayScore(result, fafPath, false, typedNoneHints(yaml, result, { outOfType: false }));
 
+  // The goal and the six W's are the human's: auto suggests, `faf go` confirms.
+  const note = suggestionNote(dir, readFaf(fafPath) as Record<string, unknown>);
+  if (note) {console.log(dim(`\n  ${note}`));}
   if (result.score < 100) {
-    console.log(dim(`\n  run ${bold("'faf go'")} to reach ✪ Trophy`));
+    console.log(dim(`${note ? '' : '\n'}  run ${bold("'faf go'")} to reach ✪ Trophy`));
   }
 }
