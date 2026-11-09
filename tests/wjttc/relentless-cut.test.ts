@@ -56,6 +56,32 @@ describe('BRAKE: Relentless suggests only what means the slot', () => {
   });
 });
 
+describe('BRAKE: no sentence-pattern guesses at all (zero slop)', () => {
+  test('a "solves the problem of" sentence never suggests `what`', () => {
+    // Only a heading line carries it, so the first-paragraph rule can't take it:
+    // the pattern guess is the only thing that could.
+    readme('# X solves the problem of context re-discovery on every new chat session\n');
+    expect(relentlessContextDetailed(dir).what).toBeUndefined();
+  });
+
+  test('a "published on" sentence never suggests `where` (seen: "https://kitchen-table-mcp")', () => {
+    readme('# X\n\n## Notes\n\n- Deployed at https://kitchen-table-mcp for the demo.\n');
+    expect(relentlessContextDetailed(dir).where).toBeUndefined();
+  });
+
+  test('a "production since" sentence never suggests `when`', () => {
+    readme('# X\n\n## Notes\n\n- In production since September 2025, battle-tested across teams.\n');
+    expect(relentlessContextDetailed(dir).when).toBeUndefined();
+  });
+
+  test('no Relentless source is a heuristic', () => {
+    readme('# X\n\nIt solves the problem of context re-discovery on every new chat session.\n\nPublished on npm and Homebrew for everyone.\n\nIn production since September 2025, across teams.\n');
+    for (const v of Object.values(relentlessContextDetailed(dir))) {
+      expect(v!.source).not.toContain('heuristic');
+    }
+  });
+});
+
 describe('ENGINE: what still suggests', () => {
   test('a named README section still suggests who / why / how', () => {
     readme('# X\n\n## Who is this for\n\nBackend teams who ship APIs every week.\n\n## Why\n\nIntegrations drift and nobody notices until production.\n\n## How it works\n\nA compiler reads the schema and emits typed clients.\n');
