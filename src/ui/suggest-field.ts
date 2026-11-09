@@ -17,6 +17,8 @@ export interface FieldState {
   buffer: string;
   /** The suggestion, '' when there is none. */
   suggestion: string;
+  /** Help text shown when there's no suggestion — never written. */
+  help: string;
 }
 
 /** A keypress as readline's emitKeypressEvents reports it. */
@@ -32,8 +34,8 @@ export type FieldDone =
   | { kind: 'skip' }
   | { kind: 'quit' };
 
-export function startField(suggestion: string): FieldState {
-  return { buffer: '', suggestion: suggestion.trim() };
+export function startField(suggestion: string, help = ''): FieldState {
+  return { buffer: '', suggestion: suggestion.trim(), help: help.trim() };
 }
 
 /** What Enter does with the field as it stands. */
@@ -73,9 +75,13 @@ export function fieldKey(state: FieldState, key: FieldKey): { state: FieldState;
   return { state };
 }
 
-/** The field as drawn after the question: the typed words, or — when nothing
- *  is typed — the suggestion in gray, marked "suggested". */
+/** The field as drawn after the question: the typed words; or, when nothing
+ *  is typed, the suggestion in gray marked "suggested"; or, with no
+ *  suggestion, the help text in gray between ‹ ›. */
 export function renderField(state: FieldState, paint: { gray: (s: string) => string }): string {
-  if (state.buffer !== '' || !state.suggestion) {return state.buffer;}
-  return paint.gray(`${state.suggestion}  (suggested · Tab to edit · Enter to confirm)`);
+  if (state.buffer !== '') {return state.buffer;}
+  if (state.suggestion) {return paint.gray(`${state.suggestion}  (suggested · Tab to edit · Enter to confirm)`);}
+  // Help: what a good answer looks like. Enter skips and Tab does nothing,
+  // so it can never be written.
+  return state.help ? paint.gray(`‹${state.help}›`) : '';
 }

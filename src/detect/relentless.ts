@@ -196,10 +196,10 @@ function extractWhen(readme: string): SourcedValue | null {
 }
 
 function extractHow(readme: string): SourcedValue | null {
-  // How it's built or used, in prose. package.json scripts are commands —
-  // they have their own slot (commands.*) and never suggest this one.
-  const usage = section(readme, 'Usage|Getting Started|Install|Installation|Quick Start');
-  if (usage) {return sv(usage.body, `README:## ${usage.heading}`, 0.8);}
+  // How it works: the mechanism (the faf schema's meaning). How to use or
+  // install it (## Usage, ## Install) and package.json scripts are misplaced
+  // here — they belong to commands.* — so only a section about how it works
+  // suggests this slot.
   const arch = section(readme, 'Architecture|Approach|How it works|Methodology|How');
   return arch ? sv(arch.body, `README:## ${arch.heading}`, 0.7) : null;
 }

@@ -46,9 +46,9 @@ describe('ENGINE: WJTTC — the 8-Q core', () => {
     sixWs.forEach((q) => expect(q.question).toContain('3-4 words'));
   });
 
-  test('the canonical `how` semantic is built/used — NOT "how should AI assist" (the CFM drift this file kills)', () => {
+  test('the canonical `how` semantic is how it works (faf schema) — NOT "how should AI assist" (the CFM drift this file kills)', () => {
     const how = INTERVIEW_BY_PATH.get('human_context.how')!;
-    expect(how.question.toLowerCase()).toContain('built');
+    expect(how.question.toLowerCase()).toContain('how does it work');
     expect(how.question.toLowerCase()).not.toContain('assist');
   });
 });

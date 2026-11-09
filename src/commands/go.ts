@@ -3,7 +3,7 @@ import { dirname, join } from 'path';
 import { aliasKeptNote, findFafFile, readFaf, readFafRaw, withKernel, writeFaf } from '../interop/faf.js';
 import { SLOTS, SLOTIGNORED, isPlaceholder, isTypedWords } from '../core/slots.js';
 import type { SlotDef } from '../core/types.js';
-import { questionForSlot } from '../core/interview.js';
+import { helpForSlot, questionForSlot } from '../core/interview.js';
 import { suggestIntent, isIntentPath, type IntentPath, type IntentSuggestions } from '../core/suggest.js';
 import { displayWidth } from '../ui/text-width.js';
 import { startField, fieldKey, renderField, type FieldDone, type FieldKey } from '../ui/suggest-field.js';
@@ -223,18 +223,22 @@ function recordGoGrowth(fafPath: string, score: number, filled: number): void {
   sayWhyDnaIsLeft(dna);
 }
 
-/** How a slot is asked on a terminal: the suggestion field (`{ suggestion }`,
- *  '' when there is none) for an empty goal or W, or null for plain readline —
+/** How a slot is asked on a terminal: the suggestion field (`{ suggestion,
+ *  help }`, each '' when there is none) for an empty goal or W, or null for
+ *  plain readline —
  *  every other slot, and a W holding typed words (None, N/A: Enter keeps them,
  *  so nothing competes with them). Readline keeps cursor keys, Ctrl-U/W and
  *  history where the field has nothing to offer. */
-export function fieldPlan(path: string, cur: unknown, suggestions: IntentSuggestions): { suggestion: string } | null {
+export function fieldPlan(path: string, cur: unknown, suggestions: IntentSuggestions): FieldPlan | null {
   if (!isIntentPath(path) || isTypedWords(cur)) {return null;}
-  return { suggestion: suggestions[path]?.value ?? '' };
+  return { suggestion: suggestions[path]?.value ?? '', help: helpForSlot(path) };
 }
 
+/** What the field shows: the suggestion, else the help (never written). */
+export interface FieldPlan { suggestion: string; help: string }
+
 interface Answerer {
-  ask(prompt: string, plan: { suggestion: string } | null): Promise<FieldDone>;
+  ask(prompt: string, plan: FieldPlan | null): Promise<FieldDone>;
   close(): void;
 }
 
@@ -314,7 +318,7 @@ function ttyAnswerer(): Answerer {
   };
   return {
     ask: (prompt, plan) => plan === null ? askReadline(prompt) : new Promise<FieldDone>(resolve => {
-      let state = startField(plan.suggestion);
+      let state = startField(plan.suggestion, plan.help);
       rows = 1;
       draw(prompt, renderField(state, { gray: dim }));
       process.stdin.setRawMode(true);

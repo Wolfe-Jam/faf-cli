@@ -13,7 +13,7 @@ export const SLOTS: SlotDef[] = [
   { index: 6, path: 'human_context.why', label: 'Why', description: 'Why does it exist', category: 'human' },
   { index: 7, path: 'human_context.where', label: 'Where', description: 'Where does it run', category: 'human' },
   { index: 8, path: 'human_context.when', label: 'When', description: 'When was it started / timeline', category: 'human' },
-  { index: 9, path: 'human_context.how', label: 'How', description: 'How is it built', category: 'human' },
+  { index: 9, path: 'human_context.how', label: 'How', description: 'How it works', category: 'human' },
 
   // Frontend Stack (4)
   { index: 10, path: 'stack.frontend',         canonical: 'stack.framework', label: 'Framework',  description: 'Framework (React, Svelte, etc.)', category: 'frontend' },
