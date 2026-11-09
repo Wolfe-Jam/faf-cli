@@ -77,15 +77,14 @@ describe('WJTTC ENGINE: Relentless 6-W extractor', () => {
     expect(relentlessContext(dir).where).toBeUndefined();
   });
 
-  test('where ← README deployment mention (relentless tier)', () => {
+  test('where ← a "published on" sentence is a guess: no suggestion (zero slop)', () => {
     readme('# X\n\nPublished on npm and available via Homebrew for macOS users.\n');
-    expect(relentlessContext(dir).where).toContain('npm');
+    expect(relentlessContext(dir).where).toBeUndefined();
   });
 
-  test('where ← short platform name alone ("Published on npm.") — regression', () => {
-    // The 4-char floor used to drop "npm" (3 chars). Showcase-dogfood caught it.
+  test('where ← short platform sentence ("Published on npm.") — no suggestion (zero slop)', () => {
     readme('# X\n\nPublished on npm. Run with npm start.\n');
-    expect(relentlessContext(dir).where).toContain('npm');
+    expect(relentlessContext(dir).where).toBeUndefined();
   });
 
   test('who ← "for <qualifier> teams" sentence: no suggestion (Relentless cut)', () => {
@@ -93,8 +92,10 @@ describe('WJTTC ENGINE: Relentless 6-W extractor', () => {
     expect(relentlessContext(dir).who).toBeUndefined();
   });
 
-  test('when ← "production since" pattern (the 6th W v6 was missing)', () => {
+  test('when ← the named Status section; a "production since" sentence is a guess (zero slop)', () => {
     readme('# X\n\nIn production since September 2025, battle-tested across teams.\n');
+    expect(relentlessContext(dir).when).toBeUndefined();
+    readme('# X\n\n## Status\n\nIn production since September 2025, battle-tested across teams.\n');
     expect(relentlessContext(dir).when).toContain('since September 2025');
   });
 
@@ -143,7 +144,7 @@ describe('WJTTC ENGINE: Relentless provenance (the auditable form)', () => {
     expect(d.where).toBeUndefined();                 // repository: cut
   });
 
-  test('confidence ranks by source quality: structured field > named section > heuristic', () => {
+  test('confidence ranks by source quality: structured field > named section > first paragraph', () => {
     // structured field
     pkg({ description: 'A tool that transforms project files into AI context for assistants' });
     const structured = relentlessContextDetailed(dir).what!.confidence;
@@ -152,7 +153,7 @@ describe('WJTTC ENGINE: Relentless provenance (the auditable form)', () => {
     readme('# X\n\n## Purpose\nGives AI assistants permanent project memory across every session.\n');
     const section = relentlessContextDetailed(dir).what!.confidence;
     rmSync(join(dir, 'README.md'), { force: true });
-    // heuristic match
+    // first paragraph (no named section, no description)
     readme('# X\n\nIt solves the problem of context re-discovery on every new chat session.\n');
     const heuristic = relentlessContextDetailed(dir).what!.confidence;
     expect(structured).toBeGreaterThan(section);

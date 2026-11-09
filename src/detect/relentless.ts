@@ -35,7 +35,8 @@ export interface SeededContext {
  *     'package.json:description' or 'README:## Why'. If we can't name a source,
  *     we don't emit a value — sourced-or-empty, never invented.
  *   - `confidence`: 0..1 by source quality (structured field > named section >
- *     heuristic match). A signal for the seeded/confirm UI, not a score.
+ *     first paragraph). A signal for the seeded/confirm UI, not a score.
+ *     No sentence-pattern guesses: a guess is slop, and no suggestion beats one.
  */
 export interface SourcedValue {
   value: string;
@@ -75,7 +76,8 @@ export function relentlessContextDetailed(dir: string, opts: RelentlessOpts = {}
   set('what', extractWhat(pkg, readme));
   set('who', extractWho(readme));
   set('why', extractWhy(readme));
-  set('where', extractWhere(readme));
+  // No `where`: nothing Relentless reads says where a project runs. The README
+  // interrogator's named ## Deployment / ## Hosting section suggests it.
   set('when', extractWhen(readme));
   set('how', extractHow(readme));
 
@@ -161,15 +163,6 @@ function isNonProseIntro(p: string): boolean {
   return false;
 }
 
-/** First capturing-group match across patterns whose capture meets minLen. */
-function firstMatch(text: string, patterns: RegExp[], minLen = 30): string | null {
-  for (const re of patterns) {
-    const m = text.match(re);
-    if (m && m[1] && m[1].trim().length >= minLen) {return clean(m[1]);}
-  }
-  return null;
-}
-
 function extractWhat(pkg: PkgJson | null, readme: string): SourcedValue | null {
   if (pkg?.description && pkg.description.length > 20) {return sv(clean(pkg.description), 'package.json:description', 0.95);}
   const sec = section(readme, 'Purpose|What|About|Overview|Description');
@@ -178,12 +171,8 @@ function extractWhat(pkg: PkgJson | null, readme: string): SourcedValue | null {
     .split(/\n\s*\n/)
     .map((p) => p.replace(/\s+/g, ' ').trim())
     .find((p) => p.length > 30 && !p.startsWith('#') && !isNonProseIntro(p));
-  if (firstReal) {return sv(clean(firstReal), 'README:first-paragraph', 0.5);}
-  const fm = firstMatch(readme, [
-    /(?:core|main|primary)\s+(?:problem|challenge)(?:\s+is)?\s*:?\s*([^.\n]{30,})/i,
-    /solves?\s+(?:the\s+)?(?:problem\s+of\s+)?([^.\n]{30,})/i,
-  ]);
-  return fm ? sv(fm, 'README:problem-heuristic', 0.6) : null;
+  // No sentence-pattern fallback ("solves the problem of…"): a guess is slop.
+  return firstReal ? sv(clean(firstReal), 'README:first-paragraph', 0.5) : null;
 }
 
 function extractWho(readme: string): SourcedValue | null {
@@ -200,32 +189,10 @@ function extractWhy(readme: string): SourcedValue | null {
   return sec ? sv(sec.body, `README:## ${sec.heading}`, 0.8) : null;
 }
 
-function extractWhere(readme: string): SourcedValue | null {
-  // Where it RUNS. package.json repository / homepage say where the code is
-  // kept or documented, not where it runs, so they never suggest this slot.
-  const fm = firstMatch(
-    readme,
-    // {3,80} + minLen 3 so short platform names ("npm", "AWS") match —
-    // "Published on npm." used to slip past the 4-char floor. Dogfood-caught.
-    [/\b(?:deployed|hosted|available|published)\s+(?:on|at|via)\s+([^.\n]{3,80})/i],
-    3,
-  );
-  return fm ? sv(fm, 'README:deploy-heuristic', 0.6) : null;
-}
-
 function extractWhen(readme: string): SourcedValue | null {
+  // A named section only. The "production since…" sentence pattern was a guess.
   const sec = section(readme, 'Timeline|Status|Release|Roadmap');
-  if (sec) {return sv(sec.body, `README:## ${sec.heading}`, 0.8);}
-  const fm = firstMatch(
-    readme,
-    [
-      /\b(production\s+since\s+[^.\n]{4,60})/i,
-      /\b((?:in\s+)?(?:production|beta|alpha|development)\s+since\s+[^.\n]{4,60})/i,
-      /\bsince\s+((?:[A-Z][a-z]+\s+)?\d{4}[^.\n]{0,40})/,
-    ],
-    4,
-  );
-  return fm ? sv(fm, 'README:since-heuristic', 0.6) : null;
+  return sec ? sv(sec.body, `README:## ${sec.heading}`, 0.8) : null;
 }
 
 function extractHow(readme: string): SourcedValue | null {
