@@ -8,7 +8,7 @@
  */
 
 import { readRepoFile, repoExists } from '../core/safe-write.js';
-import { type ExtractedContext, isValidExtraction, SECTION_HEADINGS } from './types.js';
+import { type ExtractedContext, firstSentence, isValidExtraction, EXTRACTION_LIMITS, SECTION_HEADINGS } from './types.js';
 
 /** Strip badge / image lines + blank lines from the top of a README */
 /** Section headings each slot reads from. */
@@ -227,7 +227,13 @@ export function interrogateReadmeSourced(dir: string): Record<string, ReadmeFind
 
   if (!take('project.goal', GOAL_SECTION)) {
     const tagline = firstProseParagraph(content);
-    if (tagline && isValidExtraction(tagline)) {out['project.goal'] = { value: tagline, source: `${name} § first paragraph` };}
+    if (tagline && isValidExtraction(tagline)) {
+      out['project.goal'] = { value: tagline, source: `${name} § first paragraph` };
+    } else if (tagline && tagline.length > EXTRACTION_LIMITS.MAX_LENGTH) {
+      // Too long to be the goal: its first sentence, whole, may be.
+      const sentence = firstSentence(tagline);
+      if (sentence && isValidExtraction(sentence)) {out['project.goal'] = { value: sentence, source: `${name} § first sentence` };}
+    }
   }
   take('human_context.what', WHAT_SECTION);
   take('human_context.who', WHO_SECTION);

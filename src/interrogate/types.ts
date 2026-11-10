@@ -102,6 +102,17 @@ export function isValidExtraction(text: string): boolean {
   return true;
 }
 
+/** The first sentence of `text` — whole, ending at its own full stop — or
+ *  null when there is no sentence end. For a first paragraph too long to be
+ *  a slot: its opening sentence is usually the fact ("Flask is a lightweight
+ *  WSGI web application framework."), and a whole sentence is never a cut. */
+export function firstSentence(text: string): string | null {
+  // Any word may start the next sentence: tool names are often lowercase
+  // ("ripgrep is…", "yq uses…").
+  const m = text.trim().match(/^([\s\S]+?[.!?])(?=\s+\S|\s*$)/);
+  return m ? m[1].trim() : null;
+}
+
 /** Markup, not prose: HTML, a code fence, a setext underline, a list or a
  *  numbered item, a link row, or a list intro ending in ":". None of these is
  *  ever the fact for a slot. */

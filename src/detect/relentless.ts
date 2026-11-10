@@ -13,7 +13,7 @@
  */
 
 import { readRepoFile } from '../core/safe-write.js';
-import { isValidExtraction, SECTION_HEADINGS } from '../interrogate/types.js';
+import { firstSentence, isValidExtraction, EXTRACTION_LIMITS, SECTION_HEADINGS } from '../interrogate/types.js';
 
 interface PkgJson {
   description?: string;
@@ -184,7 +184,12 @@ function extractWhat(pkg: PkgJson | null, readme: string): SourcedValue | null {
     .map((p) => p.replace(/\s+/g, ' ').trim())
     .find((p) => p.length > 30 && !p.startsWith('#') && !isNonProseIntro(p));
   // No sentence-pattern fallback ("solves the problem of…"): a guess is slop.
-  return firstReal ? sv(clean(firstReal), 'README:first-paragraph', 0.5) : null;
+  if (!firstReal) {return null;}
+  const para = clean(firstReal);
+  if (para.length <= EXTRACTION_LIMITS.MAX_LENGTH) {return sv(para, 'README:first-paragraph', 0.5);}
+  // Too long to be `what`: its first sentence, whole, may be.
+  const sentence = firstSentence(para);
+  return sentence ? sv(sentence, 'README:first-sentence', 0.5) : null;
 }
 
 function extractWho(readme: string): SourcedValue | null {

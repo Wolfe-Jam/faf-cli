@@ -89,9 +89,11 @@ export function suggestIntent(dir: string, faf?: Record<string, unknown>): Inten
   const offer = (path: IntentPath, value: string | undefined | null, source: string): void => {
     if (out[path] || theirs.has(path) || !value) {return;}
     const v = asProse(value);
-    // One gate for every source; and one text, one slot.
-    if (!isValidExtraction(v) || offered.has(v.toLowerCase())) {return;}
-    offered.add(v.toLowerCase());
+    // One gate for every source; and one text, one slot — a text that holds
+    // an offered one (or is held by it) is the same text.
+    const key = v.toLowerCase();
+    if (!isValidExtraction(v) || [...offered].some(o => o.includes(key) || key.includes(o))) {return;}
+    offered.add(key);
     out[path] = { value: v, source: sourceName(source) };
   };
 
@@ -124,6 +126,7 @@ function asProse(text: string): string {
   return text
     .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
     .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+    .replace(/\[([^\]]+)\](?:\[[^\]]*\])?/g, '$1')
     .replace(/(\*\*|__|`)/g, '')
     .replace(/\s+/g, ' ')
     .trim();
@@ -135,6 +138,7 @@ function asProse(text: string): string {
  *  `package.json description`. */
 function sourceName(source: string): string {
   if (source === 'README:first-paragraph') {return 'README.md § first paragraph';}
+  if (source === 'README:first-sentence') {return 'README.md § first sentence';}
   const heading = source.match(/^README:##\s*(.+)$/);
   if (heading) {return `README.md § ${heading[1].trim()}`;}
   return source.replace(/^package\.json:description$/, 'package.json description');

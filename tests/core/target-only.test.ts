@@ -101,6 +101,14 @@ describe('ENGINE: an over-long first paragraph gives its first sentence — whol
     expect(s['project.goal']?.value).toBe('A lightweight and portable command-line YAML, JSON, INI and XML processor.');
   });
 
+  test('a next sentence starting lowercase (a tool name) still ends the first one; no near-copy for `what`', () => {
+    const s = suggestIntent(repo(`# yq\n\n${LONG('A lightweight and portable command-line YAML, JSON, INI and XML processor. `yq` uses jq like syntax but works with YAML files.')}\n`));
+    expect(s['project.goal']?.value).toBe('A lightweight and portable command-line YAML, JSON, INI and XML processor.');
+    for (const v of values(s).filter(v => v !== s['project.goal']?.value)) {
+      expect(v).not.toContain('A lightweight and portable command-line YAML');
+    }
+  });
+
   test('a first sentence that is itself over 280 characters gives nothing', () => {
     const s = suggestIntent(repo(`# X\n\n${'word '.repeat(70)}ends here. Then more text follows on.\n`));
     expect(s['project.goal']).toBeUndefined();
