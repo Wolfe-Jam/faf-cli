@@ -92,7 +92,7 @@ describe('ENGINE: an over-long first paragraph gives its first sentence — whol
   });
 
   test('flask: banner, # title, long paragraph with [refs] → the first sentence, as prose', () => {
-    const s = suggestIntent(repo(`<div align="center"><img src="flask-name.svg" alt=""></div>\n\n# Flask\n\n${LONG('Flask is a lightweight [WSGI] web application framework.')}\n`));
+    const s = suggestIntent(repo(`<div align="center"><img src="flask-name.svg" alt=""></div>\n\n# Flask\n\n${LONG('Flask is a lightweight [WSGI] web application framework.')}\n\n[WSGI]: https://wsgi.readthedocs.io/\n`));
     expect(s['project.goal']?.value).toBe('Flask is a lightweight WSGI web application framework.');
   });
 

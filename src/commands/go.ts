@@ -286,7 +286,9 @@ function pipeAnswerer(): Answerer {
  *  Ctrl-U/W and history. Ctrl-C or Ctrl-D stops the interview. */
 function askReadline(prompt: string): Promise<FieldDone> {
   return new Promise<FieldDone>(resolve => {
-    const rl = createInterface({ input: process.stdin, output: process.stdout, terminal: true });
+    // A new interface per question, so earlier answers are passed in: Up
+    // recalls them.
+    const rl = createInterface({ input: process.stdin, output: process.stdout, terminal: true, history: [...answered], historySize: 100 });
     let done = false;
     const finish = (d: FieldDone): void => {
       if (done) {return;}
@@ -297,9 +299,15 @@ function askReadline(prompt: string): Promise<FieldDone> {
     };
     rl.on('SIGINT', () => { process.stdout.write('\n'); finish({ kind: 'quit' }); });
     rl.on('close', () => finish({ kind: 'quit' }));
-    rl.question(prompt, (answer) => finish(lineAnswer(answer)));
+    rl.question(prompt, (answer) => {
+      if (answer.trim()) {answered.unshift(answer);}
+      finish(lineAnswer(answer));
+    });
   });
 }
+
+/** This session's readline answers, newest first: the history Up walks. */
+const answered: string[] = [];
 
 /** Terminal rows `text` takes at `cols` columns — by column, not UTF-16 unit. */
 export function rowsFor(text: string, cols: number): number {

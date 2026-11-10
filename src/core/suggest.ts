@@ -22,7 +22,7 @@
  * only the CLI's `faf go` reads it.
  */
 
-import { readRepoFile } from './safe-write.js';
+import { readRepoFile, repoExists } from './safe-write.js';
 import { interrogateReadmeSourced } from '../interrogate/readme.js';
 import { interrogateCargo } from '../interrogate/cargo.js';
 import { relentlessContextDetailed } from '../detect/relentless.js';
@@ -85,15 +85,15 @@ export function suggestIntent(dir: string, faf?: Record<string, unknown>): Inten
   // Real words and typed words (None, N/A, unknown) are the person's: no
   // suggestion competes with either — and their slot takes no text from another.
   const theirs = new Set<string>(faf ? INTENT_PATHS.filter(p => isTheirs(getNestedValue(faf, p))) : []);
-  const offered = new Set<string>();
+  const offered: string[] = [];
+  const refs = readmeRefs(dir);
   const offer = (path: IntentPath, value: string | undefined | null, source: string): void => {
     if (out[path] || theirs.has(path) || !value) {return;}
-    const v = asProse(value);
-    // One gate for every source; and one text, one slot — a text that holds
-    // an offered one (or is held by it) is the same text.
-    const key = v.toLowerCase();
-    if (!isValidExtraction(v) || [...offered].some(o => o.includes(key) || key.includes(o))) {return;}
-    offered.add(key);
+    const v = asProse(value, refs);
+    // One gate for every source; and one text, one slot.
+    const key = words(v);
+    if (!isValidExtraction(v) || offered.some(o => sameText(o, key))) {return;}
+    offered.push(key);
     out[path] = { value: v, source: sourceName(source) };
   };
 
@@ -101,9 +101,7 @@ export function suggestIntent(dir: string, faf?: Record<string, unknown>): Inten
   offer('project.goal', desc, 'package.json description');
   offer('human_context.what', desc, 'package.json description');
 
-  for (const [path, find] of Object.entries(interrogateReadmeSourced(dir))) {
-    if (isIntentPath(path)) {offer(path, find.value, find.source);}
-  }
+  offerReadme(dir, offer);
 
   offer('project.goal', interrogateCargo(dir).project?.goal, 'Cargo.toml description');
 
@@ -120,16 +118,70 @@ function isTheirs(cur: unknown): boolean {
   return isTypedWords(cur) || (typeof cur === 'string' && cur.trim() !== '' && !isPlaceholder(cur));
 }
 
-/** Text as a person reads it: inline links as their words, no emphasis
- *  markers, one line. */
-function asProse(text: string): string {
-  return text
+/** Text as a person reads it: markdown links as their words, no emphasis
+ *  markers or inline HTML tags, entities as characters, one line. Real
+ *  brackets and underscores stay: `arr[i]`, `Foo[T]`, `[WIP]`, `__init__.py`. */
+export function asProse(text: string, refs: ReadonlySet<string> = new Set()): string {
+  return decodeEntities(text
     .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
-    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
-    .replace(/\[([^\]]+)\](?:\[[^\]]*\])?/g, '$1')
-    .replace(/(\*\*|__|`)/g, '')
+    .replace(/(?<![\w\]])\[([^\]]+)\]\([^)]*\)/g, '$1')
+    // [text][ref] and a bare [ref] — only after a space, never an index (arr[i])
+    .replace(/(?<![\w\]])\[([^\]]+)\]\[[^\]]*\]/g, '$1')
+    .replace(/(?<![\w\]])\[([^\]]+)\](?![[(:])/g, (all: string, t: string) => refs.has(t.toLowerCase()) ? t : all)
+    .replace(/<\/?(?:a|b|i|em|strong|code|kbd|span|sup|sub|mark|small|u|s)\b[^>]*>/gi, '')
+    // Emphasis only around words, never inside an identifier
+    .replace(/(^|[^\w])(\*\*|__)(?=\S)(.+?)(?<=\S)\2(?!\w|\.\w)/g, '$1$3')
+    .replace(/(^|[^\w])([*_])(?=[^\s*_])(.+?)(?<=[^\s*_])\2(?!\w|\.\w)/g, '$1$3')
+    .replace(/`([^`]+)`/g, '$1'))
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+const ENTITIES: Record<string, string> = {
+  amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', mdash: '—', ndash: '–', hellip: '…', copy: '©', reg: '®', trade: '™',
+};
+
+function decodeEntities(t: string): string {
+  return t.replace(/&(#\d+|[a-z]+);/gi, (all: string, e: string) =>
+    e.startsWith('#') ? String.fromCodePoint(Number(e.slice(1))) : ENTITIES[e.toLowerCase()] ?? all);
+}
+
+/** The labels the README defines for reference links (`[WSGI]: https://…`). */
+function readmeRefs(dir: string): Set<string> {
+  const name = ['README.md', 'README.MD', 'Readme.md', 'readme.md'].find(n => repoExists(dir, n));
+  const raw = name ? readRepoFile(dir, name) ?? '' : '';
+  return new Set([...raw.matchAll(/^ {0,3}\[([^\]]+)\]:\s*\S/gm)].map(m => m[1].toLowerCase()));
+}
+
+/** The README's finds, each for its slot. When the description took the
+ *  goal, the README's own tagline (its first paragraph or sentence) is what
+ *  the project is, in its words: offered for `what` too — blocked if it is
+ *  the same text. */
+function offerReadme(dir: string, offer: (path: IntentPath, value: string | undefined, source: string) => void): void {
+  const readme = interrogateReadmeSourced(dir);
+  for (const [path, find] of Object.entries(readme)) {
+    if (isIntentPath(path)) {offer(path, find.value, find.source);}
+  }
+  const g = readme['project.goal'];
+  if (g && /§ first (paragraph|sentence)$/.test(g.source)) {offer('human_context.what', g.value, g.source);}
+}
+
+/** Letters and digits only, lower case: the words of a text. */
+function words(t: string): string {
+  return t.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+}
+
+/** The same text: one holds the other and the shorter is most of the longer
+ *  ("Fast, minimalist web framework" / "…web framework for Node.js"), or most
+ *  words are shared ("…command-line programs" / "…command-line interfaces").
+ *  A short phrase inside a longer, different sentence is not the same text. */
+function sameText(a: string, b: string): boolean {
+  const [short, long] = a.length <= b.length ? [a, b] : [b, a];
+  if (long.includes(short) && short.length >= 0.6 * long.length) {return true;}
+  const wa = new Set(a.split(' '));
+  const wb = new Set(b.split(' '));
+  const shared = [...wa].filter(w => wb.has(w)).length;
+  return shared / new Set([...wa, ...wb]).size >= 0.7;
 }
 
 /** One way to name a source, whichever reader found it: Relentless says

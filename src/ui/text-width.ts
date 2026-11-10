@@ -32,7 +32,10 @@ function isWide(cp: number): boolean {
   );
 }
 
-const EMOJI = /\p{Extended_Pictographic}/u;
+// Emoji shown as emoji take two columns: emoji-presentation characters (and
+// flags), or any character with the emoji variation selector U+FE0F. Symbols
+// such as ©, ™, ‼ and ↔ are text by default and take one.
+const EMOJI = /\p{Emoji_Presentation}|\uFE0F/u;
 // Combining marks (accents, variation selectors) and format characters
 // (zero-width space, joiners, direction marks) take no column.
 const ZERO_WIDTH = /^[\p{M}\p{Cf}]+$/u;

@@ -102,6 +102,12 @@ describe('BRAKE 3c: one text, one slot means the same text, not a shared phrase'
     expect(s['human_context.what']).toBeUndefined();
   });
 
+  test('commander: the same words, one changed, are the same text', () => {
+    const s = suggestIntent(repo('# commander\n\nThe complete solution for node.js command-line interfaces.\n', { description: 'the complete solution for node.js command-line programs' }));
+    expect(s['project.goal']?.value).toBe('the complete solution for node.js command-line programs');
+    expect(s['human_context.what']).toBeUndefined();
+  });
+
   test('when the description takes the goal, the README tagline is offered for what', () => {
     const s = suggestIntent(repo('# notes\n\nTurn a folder of markdown notes into a fast static site in one command.\n', { description: 'Static site generator for markdown notes' }));
     expect(s['project.goal']?.value).toBe('Static site generator for markdown notes');
@@ -160,6 +166,10 @@ describe('BRAKE 3b: slop the structural gate let through', () => {
     ['install line', '# c\n\nC parses widgets for small teams.\n\n## How it works\n\nInstall with npm install c-widgets, then import it.\n', 'human_context.how'],
     ['please line', '# c\n\nC parses widgets for small teams.\n\n## Why\n\nPlease read the contributing guide before opening issues.\n', 'human_context.why'],
     ['question', '# L8\n\nWhat is L8?\n', 'project.goal'],
+    ['astro: a line broken after a dash', '<p align="center">\n  <a href="https://astro.build">Astro</a> is a website build tool for the modern web &mdash;\n  <br/>\n  powerful developer experience meets lightweight output.\n</p>\n', 'human_context.what'],
+    ['a fragment ending in a comma', '# c\n\nC parses widgets for small teams.\n\n## Why\n\nBecause widget specs drift between teams,\n', 'human_context.why'],
+    ['black: a quotation is not a fact', '# Black\n\n> “Any color you like.”\n\nBlack is the uncompromising Python code formatter.\n', 'project.goal'],
+    ['kit: a call to action', '# SvelteKit\n\nWeb development, streamlined. Read the [documentation](https://svelte.dev/docs/kit) to get started.\n', 'project.goal'],
     ['plain-text nav row', '# n\n\nDocumentation | Discord | Blog | Examples\n', 'project.goal'],
   ])('%s', (_name, readme, path) => {
     expect(suggestIntent(repo(readme))[path as 'project.goal']).toBeUndefined();

@@ -8,7 +8,7 @@
  */
 
 import { readRepoFile, repoExists } from '../core/safe-write.js';
-import { type ExtractedContext, firstSentence, isValidExtraction, EXTRACTION_LIMITS, SECTION_HEADINGS } from './types.js';
+import { type ExtractedContext, dropSetextTitle, firstSentence, isCallout, isValidExtraction, EXTRACTION_LIMITS, SECTION_HEADINGS } from './types.js';
 
 /** Strip badge / image lines + blank lines from the top of a README */
 /** Section headings each slot reads from. */
@@ -35,8 +35,10 @@ function stripPreamble(content: string): string {
     if (/^\[!\[/.test(line)) { i++; continue; }
     // Standalone images: ![alt](url)
     if (/^!\[/.test(line)) { i++; continue; }
-    // HTML (banners: <p align="center">, <div>, <img>, <h1>, closing tags)
-    if (/^<\/?[a-z][\w-]*/i.test(line)) { i++; continue; }
+    // HTML banners (<p align="center">, <div>, <img>, <h1>, closing tags):
+    // a block tag, or a line that is only tags. A prose line that opens with
+    // inline HTML ("<b>pa</b> is a fast search tool…") is the paragraph.
+    if (/^<\/?[a-z][\w-]*/i.test(line) && (BANNER_TAG.test(line) || line.replace(/<[^>]*>/g, '').trim() === '')) { i++; continue; }
     // The # title, when a banner came before it
     if (/^#\s/.test(line)) { i++; continue; }
     // Link rows: [Docs](…) | [Blog](…) — navigation, not prose
@@ -48,21 +50,26 @@ function stripPreamble(content: string): string {
   return lines.slice(i).join('\n');
 }
 
-/** Get the first prose paragraph (single block, no headings/lists/code) */
-/** Lines without a setext title at the top ("Title" over "-----" or
- *  "=====") — it is the title, not the first paragraph. */
-function dropSetextTitle(lines: string[]): string[] {
-  const first = lines.findIndex((l) => l.trim() !== '');
-  if (first >= 0 && /^[-=]{3,}\s*$/.test(lines[first + 1] ?? '')) {return lines.slice(first + 2);}
-  return lines;
+const BANNER_TAG = /^<\/?(?:p|div|img|h[1-6]|picture|source|table|center|details|summary|video|svg|br|hr)\b/i;
+
+/** A one-line blockquote's text when it is a tagline, else null (a callout,
+ *  or a quote that runs on to the next line). */
+function quoteTagline(line: string, next: string | undefined): string | null {
+  const quote = line.replace(/^>\s*/, '');
+  const oneLine = !/^>/.test((next ?? '').trim());
+  return oneLine && quote && !isCallout(quote) ? quote : null;
 }
 
+/** Get the first prose paragraph (single block, no headings/lists/code) */
 function firstProseParagraph(content: string): string | null {
   const stripped = stripPreamble(content);
   const lines = stripped.split('\n');
   const buf: string[] = [];
-  for (const raw of lines) {
+  for (const [n, raw] of lines.entries()) {
     const line = raw.trim();
+    // A one-line blockquote tagline under the title ("> Next Generation
+    // Frontend Tooling") — not a callout (> [!NOTE], > ⚠️ Nightly release…).
+    if (buf.length === 0 && /^>/.test(line)) {return quoteTagline(line, lines[n + 1]);}
     if (line === '') {
       if (buf.length > 0) {break;}
       continue;
@@ -218,8 +225,13 @@ export function interrogateReadmeSourced(dir: string): Record<string, ReadmeFind
   const out: Record<string, ReadmeFind> = {};
   const take = (path: string, pattern: RegExp): boolean => {
     const s = sectionWithHeading(content, pattern);
-    if (s && isValidExtraction(s.text)) {
-      out[path] = { value: s.text, source: `${name} § ${s.heading}` };
+    if (!s) {return false;}
+    // A body that ends in a list intro ("…a few major components:") gives
+    // its first sentence, whole, when that sentence is the fact.
+    const value = isValidExtraction(s.text) ? s.text
+      : /:\s*$/.test(s.text) ? firstSentence(s.text) : null;
+    if (value && isValidExtraction(value)) {
+      out[path] = { value, source: `${name} § ${s.heading}` };
       return true;
     }
     return false;

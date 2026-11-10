@@ -13,7 +13,7 @@
  */
 
 import { readRepoFile } from '../core/safe-write.js';
-import { firstSentence, isValidExtraction, EXTRACTION_LIMITS, SECTION_HEADINGS } from '../interrogate/types.js';
+import { dropSetextTitle, firstSentence, isCallout, isValidExtraction, EXTRACTION_LIMITS, SECTION_HEADINGS } from '../interrogate/types.js';
 
 interface PkgJson {
   description?: string;
@@ -117,9 +117,10 @@ function readPkg(dir: string): PkgJson | null {
 function cleanReadme(dir: string): string {
   const txt = readRepoFile(dir, 'README.md');
   if (txt === null) {return '';}
-  return txt
+  // A setext title ("Title" over "---") is the title, not the first paragraph.
+  return dropSetextTitle(txt
     .replace(/<!--[\s\S]*?-->/g, '') // HTML comment blocks (asset notes, TODOs — not prose)
-    .split('\n')
+    .split('\n'))
     .filter((l) => !/^\s*\[!\[/.test(l) && !/^\s*!\[/.test(l)) // badge lines
     .join('\n')
     .replace(/<[^>]+>/g, '') // HTML tags
@@ -165,7 +166,7 @@ function isNonProseIntro(p: string): boolean {
   // Code fence, list, numbered item or table: structure, not prose
   if (/^(```|~~~|[-*+]\s|\d+\.\s|\|)/.test(t)) {return true;}
   // Pre-release / status banner phrasing
-  if (/\b(nightly (release|build)|pre-?release|work[-\s]in[-\s]progress|rough edges|early (access|testing|preview)|use at your own risk|not (yet )?production[-\s]?ready|expect (rough|breaking)|experimental release)\b/i.test(t)) {return true;}
+  if (isCallout(t)) {return true;}
   // Nav / link row: 3+ short fragments split on · or |
   const frags = t.split(/[·|]/).map((s) => s.trim()).filter(Boolean);
   if (frags.length >= 3 && frags.every((f) => f.length <= 24)) {return true;}
