@@ -4,7 +4,8 @@ import { aliasKeptNote, findFafFile, readFaf, readFafRaw, withKernel, writeFaf }
 import { SLOTS, SLOTIGNORED, isPlaceholder, isTypedWords } from '../core/slots.js';
 import type { SlotDef } from '../core/types.js';
 import { questionForSlot } from '../core/interview.js';
-import { suggestIntent, isIntentPath, type IntentSuggestions } from '../core/suggest.js';
+import { suggestIntent, isIntentPath, type IntentPath, type IntentSuggestions } from '../core/suggest.js';
+import { displayWidth } from '../ui/text-width.js';
 import { startField, fieldKey, renderField, type FieldDone, type FieldKey } from '../ui/suggest-field.js';
 import { getNestedValue, setNestedValue, blockingStep, blockedMessage } from '../core/dot-path.js';
 import * as kernel from '../wasm/kernel.js';
@@ -172,10 +173,10 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
   for (let i = 0; i < slotsToProcess.length; i++) {
     const slot = slotsToProcess[i];
     const cur = getNestedValue(data as Record<string, unknown>, slot.path);
-    // Typed words (None, N/A) are the person's: Enter keeps them, so no suggestion competes.
-    const suggestion = isIntentPath(slot.path) && !isTypedWords(cur) ? suggestions[slot.path] : undefined;
-    if (suggestion) {console.log(dim(`  suggested from ${suggestion.source}`));}
-    const done = await answerer.ask(questionLine(slot, cur), suggestion?.value ?? '');
+    const plan = fieldPlan(slot.path, cur, suggestions);
+    const source = suggestions[slot.path as IntentPath]?.source;
+    if (plan?.suggestion && source) {console.log(dim(`  suggested from ${source}`));}
+    const done = await answerer.ask(questionLine(slot, cur), plan);
 
     if (done.kind === 'quit') {
       // Save session for resume
@@ -222,43 +223,84 @@ function recordGoGrowth(fafPath: string, score: number, filled: number): void {
   sayWhyDnaIsLeft(dna);
 }
 
+/** How a slot is asked on a terminal: the suggestion field (`{ suggestion }`,
+ *  '' when there is none) for an empty goal or W, or null for plain readline —
+ *  every other slot, and a W holding typed words (None, N/A: Enter keeps them,
+ *  so nothing competes with them). Readline keeps cursor keys, Ctrl-U/W and
+ *  history where the field has nothing to offer. */
+export function fieldPlan(path: string, cur: unknown, suggestions: IntentSuggestions): { suggestion: string } | null {
+  if (!isIntentPath(path) || isTypedWords(cur)) {return null;}
+  return { suggestion: suggestions[path]?.value ?? '' };
+}
+
 interface Answerer {
-  ask(prompt: string, suggestion: string): Promise<FieldDone>;
+  ask(prompt: string, plan: { suggestion: string } | null): Promise<FieldDone>;
   close(): void;
 }
 
-/** No TTY: readline, line by line, as always. Suggestions are never shown or
- *  applied; an empty line or "skip" skips, "quit" stops. When the input ends,
- *  every question left is skipped (no session is saved for a closed pipe). */
+/** A typed line as an answer: "quit" stops, empty or "skip" skips. */
+function lineAnswer(answer: string): FieldDone {
+  const a = answer.trim();
+  if (a.toLowerCase() === 'quit') {return { kind: 'quit' };}
+  if (a === '' || a.toLowerCase() === 'skip') {return { kind: 'skip' };}
+  return { kind: 'value', value: a };
+}
+
+/** No TTY: each piped line answers the next question, in order. Lines are
+ *  queued, so a pipe that sends them all at once loses none. Suggestions are
+ *  never shown or applied. When the input ends, every question left is
+ *  skipped (no session is saved for a closed pipe). */
 function pipeAnswerer(): Answerer {
-  const rl = createInterface({ input: process.stdin, output: process.stdout });
+  const rl = createInterface({ input: process.stdin, terminal: false });
+  const lines: string[] = [];
+  const waiting: ((line: string | null) => void)[] = [];
   let ended = false;
-  rl.on('close', () => { ended = true; });
+  rl.on('line', (line) => {
+    const next = waiting.shift();
+    if (next) {next(line);} else {lines.push(line);}
+  });
+  rl.on('close', () => {
+    ended = true;
+    for (const next of waiting.splice(0)) {next(null);}
+  });
   return {
     ask: (prompt) => new Promise<FieldDone>(resolve => {
-      if (ended) { resolve({ kind: 'skip' }); return; }
-      const onClose = (): void => resolve({ kind: 'skip' });
-      rl.once('close', onClose);
-      rl.question(prompt, (answer) => {
-        rl.off('close', onClose);
-        const a = answer.trim();
-        if (a.toLowerCase() === 'quit') {resolve({ kind: 'quit' });}
-        else if (a === '' || a.toLowerCase() === 'skip') {resolve({ kind: 'skip' });}
-        else {resolve({ kind: 'value', value: a });}
-      });
+      process.stdout.write(prompt);
+      const take = (line: string | null): void => {
+        process.stdout.write('\n');
+        resolve(line === null ? { kind: 'skip' } : lineAnswer(line));
+      };
+      if (lines.length > 0) {take(lines.shift()!);}
+      else if (ended) {take(null);}
+      else {waiting.push(take);}
     }),
     close: () => rl.close(),
   };
 }
 
-/** Visible width of `s` (ANSI colour codes take no columns). */
-function visibleLength(s: string): number {
-  // eslint-disable-next-line no-control-regex
-  return s.replace(/\u001b\[[0-9;]*m/g, '').length;
+/** A terminal, a slot with no field: one readline question, with cursor keys,
+ *  Ctrl-U/W and history. Ctrl-C or Ctrl-D stops the interview. */
+function askReadline(prompt: string): Promise<FieldDone> {
+  return new Promise<FieldDone>(resolve => {
+    const rl = createInterface({ input: process.stdin, output: process.stdout, terminal: true });
+    let done = false;
+    const finish = (d: FieldDone): void => {
+      if (done) {return;}
+      done = true;
+      rl.close();
+      process.stdin.pause();
+      resolve(d);
+    };
+    rl.on('SIGINT', () => { process.stdout.write('\n'); finish({ kind: 'quit' }); });
+    rl.on('close', () => finish({ kind: 'quit' }));
+    rl.question(prompt, (answer) => finish(lineAnswer(answer)));
+  });
 }
 
-/** A TTY: raw keypresses through the suggestion field (ui/suggest-field.ts),
- *  redrawn in place — the suggestion in gray until the person types or Tabs. */
+/** A TTY: the goal and six W's go through the suggestion field
+ *  (ui/suggest-field.ts), redrawn in place by terminal column — the suggestion
+ *  in gray until the person types or Tabs. Every other slot is a readline
+ *  question (askReadline). */
 function ttyAnswerer(): Answerer {
   emitKeypressEvents(process.stdin);
   const out = process.stdout;
@@ -268,11 +310,11 @@ function ttyAnswerer(): Answerer {
     if (rows > 1) {out.write(`\u001b[${rows - 1}A`);}
     out.write(`\r\u001b[J${prompt}${line}`);
     const cols = out.columns || 80;
-    rows = Math.max(1, Math.ceil(visibleLength(prompt + line) / cols));
+    rows = Math.max(1, Math.ceil(displayWidth(prompt + line) / cols));
   };
   return {
-    ask: (prompt, suggestion) => new Promise<FieldDone>(resolve => {
-      let state = startField(suggestion);
+    ask: (prompt, plan) => plan === null ? askReadline(prompt) : new Promise<FieldDone>(resolve => {
+      let state = startField(plan.suggestion);
       rows = 1;
       draw(prompt, renderField(state, { gray: dim }));
       process.stdin.setRawMode(true);
