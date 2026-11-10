@@ -82,6 +82,41 @@ describe('BRAKE: slop never passes, whatever the source', () => {
   });
 });
 
+describe('ENGINE: an over-long first paragraph gives its first sentence — whole, never cut', () => {
+  const LONG = (first: string): string => `${first} ${'It also does many other things that matter to its users in practice. '.repeat(5)}`;
+
+  test('ripgrep: setext title, long paragraph → the first sentence is the goal', () => {
+    const s = suggestIntent(repo(`ripgrep (rg)\n------------\n\n${LONG('ripgrep is a line-oriented search tool that recursively searches the current directory for a regex pattern.')}\n`));
+    expect(s['project.goal']?.value).toBe('ripgrep is a line-oriented search tool that recursively searches the current directory for a regex pattern.');
+    expect(s['project.goal']?.source).toBe('README.md § first sentence');
+  });
+
+  test('flask: banner, # title, long paragraph with [refs] → the first sentence, as prose', () => {
+    const s = suggestIntent(repo(`<div align="center"><img src="flask-name.svg" alt=""></div>\n\n# Flask\n\n${LONG('Flask is a lightweight [WSGI] web application framework.')}\n`));
+    expect(s['project.goal']?.value).toBe('Flask is a lightweight WSGI web application framework.');
+  });
+
+  test('yq: badges, long paragraph with inline code and links → the first sentence', () => {
+    const s = suggestIntent(repo(`# yq\n\n![Build](https://x/badge.svg) ![Pulls](https://x/pulls.svg)\n\n${LONG('A lightweight and portable command-line YAML, JSON, INI and XML processor.')}\n`));
+    expect(s['project.goal']?.value).toBe('A lightweight and portable command-line YAML, JSON, INI and XML processor.');
+  });
+
+  test('a first sentence that is itself over 280 characters gives nothing', () => {
+    const s = suggestIntent(repo(`# X\n\n${'word '.repeat(70)}ends here. Then more text follows on.\n`));
+    expect(s['project.goal']).toBeUndefined();
+  });
+
+  test('a first sentence that is a list intro gives nothing', () => {
+    const s = suggestIntent(repo(`# X\n\nThis repository holds the following things: ${'and more of them, listed. '.repeat(14)}\n`));
+    for (const v of values(s)) {expect(v).not.toMatch(/:$/);}
+  });
+
+  test('a short first paragraph is kept whole (first sentence only when too long)', () => {
+    const s = suggestIntent(repo('# X\n\nX scores context files. It runs anywhere Node runs.\n'));
+    expect(s['project.goal']?.value).toBe('X scores context files. It runs anywhere Node runs.');
+  });
+});
+
 describe('BRAKE: headings match whole — a heading that starts with the word is misplaced', () => {
   const misplaced: [string, string][] = [
     ['How to install', 'human_context.how'],
