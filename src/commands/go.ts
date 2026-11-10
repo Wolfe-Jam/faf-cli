@@ -301,6 +301,11 @@ function askReadline(prompt: string): Promise<FieldDone> {
   });
 }
 
+/** Terminal rows `text` takes at `cols` columns — by column, not UTF-16 unit. */
+export function rowsFor(text: string, cols: number): number {
+  return Math.max(1, Math.ceil(displayWidth(text) / cols));
+}
+
 /** A TTY: the goal and six W's go through the suggestion field
  *  (ui/suggest-field.ts), redrawn in place by terminal column — the suggestion
  *  in gray until the person types or Tabs. Every other slot is a readline
@@ -313,8 +318,7 @@ function ttyAnswerer(): Answerer {
     // Back to the start of what was drawn last time, clear it, draw again.
     if (rows > 1) {out.write(`\u001b[${rows - 1}A`);}
     out.write(`\r\u001b[J${prompt}${line}`);
-    const cols = out.columns || 80;
-    rows = Math.max(1, Math.ceil(displayWidth(prompt + line) / cols));
+    rows = rowsFor(prompt + line, out.columns || 80);
   };
   return {
     ask: (prompt, plan) => plan === null ? askReadline(prompt) : new Promise<FieldDone>(resolve => {

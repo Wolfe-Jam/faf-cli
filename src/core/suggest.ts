@@ -136,7 +136,7 @@ function asProse(text: string): string {
  *  `README:## Why` / `README:first-paragraph` / `package.json:description`;
  *  people read `README.md § Why` / `README.md § first paragraph` /
  *  `package.json description`. */
-function sourceName(source: string): string {
+export function sourceName(source: string): string {
   if (source === 'README:first-paragraph') {return 'README.md § first paragraph';}
   if (source === 'README:first-sentence') {return 'README.md § first sentence';}
   const heading = source.match(/^README:##\s*(.+)$/);
