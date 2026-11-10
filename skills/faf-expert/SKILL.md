@@ -130,7 +130,7 @@ human_context:
   why: the problem this solves
   where: where it ships
   when: production since YYYY-MM
-  how: install/usage command
+  how: how it works — the mechanism, and the choice that shapes the code
 ```
 
 v6.6.0 uses **Mk4 canonical slot names** in user-facing docs: `db` (was `database`), `framework` (was `frontend`), `css` (was `css_framework`), `state` (was `state_management`), `api` (was `api_type`), `pkg_manager` (was `package_manager`). 36k+ existing `.faf` files continue scoring correctly via read-time aliasing.

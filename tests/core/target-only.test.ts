@@ -45,6 +45,11 @@ describe('BRAKE: slop never passes, whatever the source', () => {
     expect(s['project.goal']?.value).toBe('X turns plain YAML into accessible web widgets for small teams.');
   });
 
+  test('an HTML banner then the # title: the tagline after the title is the goal (flask)', () => {
+    const s = suggestIntent(repo('<div align="center"><img src="flask-name.svg" alt="" height="150"></div>\n\n# Flask\n\nFlask is a lightweight WSGI web application framework.\n'));
+    expect(s['project.goal']?.value).toBe('Flask is a lightweight WSGI web application framework.');
+  });
+
   test('a link row first is never the goal', () => {
     const s = suggestIntent(repo('# X\n\n[**Docs**](https://x.dev) | [**Playground**](https://x.dev/play)\n\nX turns plain YAML into accessible web widgets for small teams.\n'));
     for (const v of values(s)) {expect(v).not.toContain('](');}

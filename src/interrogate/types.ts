@@ -55,6 +55,20 @@ export interface ExtractedContext {
   };
 }
 
+/** The README headings that hold each slot's fact — one list, shared by the
+ *  README interrogator and Relentless. Each is matched as the whole heading
+ *  (regex source, case-insensitive). Release / Roadmap are not here: they are
+ *  the release process and future plans, not the stage. */
+export const SECTION_HEADINGS = {
+  goal: ['use\\s+cases?', 'goal'],
+  what: ['about', 'description', 'overview', 'purpose', 'what', 'what\\s+is\\s+this', 'what\\s+it\\s+does'],
+  who: ['audience', 'users', 'for\\s+whom', 'who', 'who\\s+is\\s+this\\s+for', 'who\\s+it.s\\s+for'],
+  why: ['why', 'motivation', 'problem', 'rationale', 'mission', 'vision'],
+  where: ['deployment', 'where', 'where\\s+it\\s+runs', 'hosting'],
+  when: ['status', 'history', 'timeline', 'since', 'launched'],
+  how: ['architecture', 'how', 'how\\s+it\\s+works', 'approach', 'design', 'methodology'],
+} as const;
+
 /** Confidence threshold rules for extracted text — empty if violated */
 export const EXTRACTION_LIMITS = {
   /** Minimum length for a slot to be considered worth filling (in chars) */
@@ -78,10 +92,30 @@ export const SLOP_PATTERNS: readonly RegExp[] = [
 export function isValidExtraction(text: string): boolean {
   const trimmed = text.trim();
   if (trimmed.length < EXTRACTION_LIMITS.MIN_LENGTH) {return false;}
+  // Too long is documentation, not a slot: rejected, never cut.
   if (trimmed.length > EXTRACTION_LIMITS.MAX_LENGTH) {return false;}
   if (SLOP_PATTERNS.some((re) => re.test(trimmed))) {return false;}
   // Reject if text is mostly markdown structure (links, lists, tables)
   if (/^[\s|\-*+]/.test(trimmed)) {return false;}
   if (trimmed.split('\n').length > 4) {return false;} // multi-paragraph blob
+  if (isStructure(trimmed)) {return false;}
   return true;
+}
+
+/** Markup, not prose: HTML, a code fence, a setext underline, a list or a
+ *  numbered item, a link row, or a list intro ending in ":". None of these is
+ *  ever the fact for a slot. */
+function isStructure(t: string): boolean {
+  if (/<\/?[a-z][\w-]*(\s[^>]*)?\/?>/i.test(t) || /&(?:[a-z]{2,8}|#\d+);/i.test(t)) {return true;}
+  if (t.includes('```')) {return true;}
+  if (/(^|\s)[-=]{4,}(\s|$)/.test(t)) {return true;}
+  if (/^\d+\.\s/.test(t)) {return true;}
+  if (/:\s*$/.test(t)) {return true;}
+  return linkShare(t) > 0.4;
+}
+
+/** The share of `t` taken by markdown links and images. */
+function linkShare(t: string): number {
+  const links = t.match(/!?\[[^\]]*\]\([^)]*\)/g) ?? [];
+  return links.join('').length / t.length;
 }

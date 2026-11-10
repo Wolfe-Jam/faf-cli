@@ -13,6 +13,7 @@
  */
 
 import { readRepoFile } from '../core/safe-write.js';
+import { isValidExtraction, SECTION_HEADINGS } from '../interrogate/types.js';
 
 interface PkgJson {
   description?: string;
@@ -69,8 +70,10 @@ export function relentlessContextDetailed(dir: string, opts: RelentlessOpts = {}
   const pkg = opts.toolingRoot ? null : readPkg(dir);
   const readme = cleanReadme(dir);
   const out: SeededContextDetailed = {};
+  // One gate for every source (interrogate/types.ts): slop and markup never
+  // become a suggestion, whichever extractor found them.
   const set = (k: keyof SeededContextDetailed, v: SourcedValue | null): void => {
-    if (v) {out[k] = v;}
+    if (v && isValidExtraction(v.value)) {out[k] = v;}
   };
 
   set('what', extractWhat(pkg, readme));
@@ -125,7 +128,9 @@ function cleanReadme(dir: string): string {
 }
 
 function clean(text: string): string {
-  return text.replace(/\s+/g, ' ').replace(/[#*`>]/g, '').trim().slice(0, 280);
+  // No cut at 280: text that long is rejected by the gate, never trimmed
+  // mid-word into a suggestion.
+  return text.replace(/\s+/g, ' ').replace(/[#*`>]/g, '').trim();
 }
 
 /** Share of a string's characters that sit inside markdown/inline links. */
@@ -138,8 +143,10 @@ function linkDensity(s: string): number {
 /** First `## Section` body matching any of the pipe-listed names (min 20 chars).
  *  Returns the cleaned body AND the matched heading (for provenance labels).
  *  Rejects link-list bodies (nav / roadmap-link rows are not prose). */
-function section(readme: string, names: string): { body: string; heading: string } | null {
-  const re = new RegExp(`##?\\s+(${names})\\s*\\n+([\\s\\S]+?)(?:\\n\\n|\\n##?|$)`, 'i');
+function section(readme: string, names: readonly string[]): { body: string; heading: string } | null {
+  // The whole heading line must be one of `names` (a trailing ':' or '?'
+  // allowed) — "How to install" is not "How".
+  const re = new RegExp(`^#{1,6}\\s+(${names.join('|')})\\s*[:?]?\\s*\\n+([\\s\\S]+?)(?:\\n\\n|\\n#|(?![\\s\\S]))`, 'im');
   const m = readme.match(re);
   if (!m || !m[2] || m[2].trim().length <= 20 || linkDensity(m[2]) > 0.4) {return null;}
   return { body: clean(m[2]), heading: m[1].trim() };
@@ -155,6 +162,8 @@ function isNonProseIntro(p: string): boolean {
   const t = p.trim();
   // Blockquote callout — GitHub admonitions (> [!NOTE] / > [!WARNING]) included
   if (/^>/.test(t)) {return true;}
+  // Code fence, list, numbered item or table: structure, not prose
+  if (/^(```|~~~|[-*+]\s|\d+\.\s|\|)/.test(t)) {return true;}
   // Pre-release / status banner phrasing
   if (/\b(nightly (release|build)|pre-?release|work[-\s]in[-\s]progress|rough edges|early (access|testing|preview)|use at your own risk|not (yet )?production[-\s]?ready|expect (rough|breaking)|experimental release)\b/i.test(t)) {return true;}
   // Nav / link row: 3+ short fragments split on · or |
@@ -165,9 +174,12 @@ function isNonProseIntro(p: string): boolean {
 
 function extractWhat(pkg: PkgJson | null, readme: string): SourcedValue | null {
   if (pkg?.description && pkg.description.length > 20) {return sv(clean(pkg.description), 'package.json:description', 0.95);}
-  const sec = section(readme, 'Purpose|What|About|Overview|Description');
+  const sec = section(readme, SECTION_HEADINGS.what);
   if (sec) {return sv(sec.body, `README:## ${sec.heading}`, 0.8);}
-  const firstReal = readme
+  // Only the prose before the first section: a short tagline must not let a
+  // ## Why or ## Usage body stand in as `what`.
+  const intro = readme.split(/^#{2,6}\s/m)[0];
+  const firstReal = intro
     .split(/\n\s*\n/)
     .map((p) => p.replace(/\s+/g, ' ').trim())
     .find((p) => p.length > 30 && !p.startsWith('#') && !isNonProseIntro(p));
@@ -178,20 +190,20 @@ function extractWhat(pkg: PkgJson | null, readme: string): SourcedValue | null {
 function extractWho(readme: string): SourcedValue | null {
   // A named section only. A "built for <role>" sentence is a guess: it gave
   // fragments like "any developer;" — the human names the audience in faf go.
-  const sec = section(readme, 'Audience|Who|Who is this for|Who it.s for');
+  const sec = section(readme, SECTION_HEADINGS.who);
   return sec ? sv(sec.body, `README:## ${sec.heading}`, 0.8) : null;
 }
 
 function extractWhy(readme: string): SourcedValue | null {
   // A named section only. The "our mission is" sentence pattern was a guess
   // that matched "Permission is hereby granted" in MIT licence text.
-  const sec = section(readme, 'Why|Mission|Motivation|Rationale|Vision');
+  const sec = section(readme, SECTION_HEADINGS.why);
   return sec ? sv(sec.body, `README:## ${sec.heading}`, 0.8) : null;
 }
 
 function extractWhen(readme: string): SourcedValue | null {
   // A named section only. The "production since…" sentence pattern was a guess.
-  const sec = section(readme, 'Timeline|Status|Release|Roadmap');
+  const sec = section(readme, SECTION_HEADINGS.when);
   return sec ? sv(sec.body, `README:## ${sec.heading}`, 0.8) : null;
 }
 
@@ -200,6 +212,6 @@ function extractHow(readme: string): SourcedValue | null {
   // install it (## Usage, ## Install) and package.json scripts are misplaced
   // here — they belong to commands.* — so only a section about how it works
   // suggests this slot.
-  const arch = section(readme, 'Architecture|Approach|How it works|Methodology|How');
+  const arch = section(readme, SECTION_HEADINGS.how);
   return arch ? sv(arch.body, `README:## ${arch.heading}`, 0.7) : null;
 }

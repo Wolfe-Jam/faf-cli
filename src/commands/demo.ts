@@ -52,7 +52,7 @@ human_context:
   why: Replace fragmented team tools
   where: Cloud (Vercel + AWS)
   when: "2026"
-  how: Agile sprints with CI/CD
+  how: Edits sync live over WebSockets; Postgres holds each document
 `;
 
   const fafPath = join(demoDir, 'project.faf');

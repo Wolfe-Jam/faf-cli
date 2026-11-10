@@ -103,10 +103,10 @@ describe('ENGINE — it DOES seed the facts a goal states', () => {
     expect(seedSixWsFromGoal('Ships on npm and Cloudflare edge').where).toContain('npm');
   });
 
-  test('E3 — WHO only on an explicit audience ROLE, not a target', () => {
-    expect(seedSixWsFromGoal('Chat for developers building AI apps').who).toContain('developers building AI apps');
-    expect(seedSixWsFromGoal('CLI for Rust developers and integrators').who).toContain('Rust developers');
-    // targets, not audiences → no who:
+  test('E3 — no WHO from a goal: "for <role>" is a guess at the audience, not a fact', () => {
+    expect(seedSixWsFromGoal('Chat for developers building AI apps').who).toBeUndefined();
+    expect(seedSixWsFromGoal('CLI for Rust developers and integrators').who).toBeUndefined();
+    // targets, not audiences → no who either:
     expect(seedSixWsFromGoal('MCP server for Cursor, Windsurf').who).toBeUndefined();
     expect(seedSixWsFromGoal('Engine for FAF').who).toBeUndefined();
     expect(seedSixWsFromGoal('Context for xAI Grok').who).toBeUndefined();

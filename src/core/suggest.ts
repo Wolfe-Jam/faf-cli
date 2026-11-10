@@ -11,8 +11,15 @@
  * Sourced or nothing: every suggestion names where it came from
  * (`README.md § Status`, `package.json description`).
  *
- * One source for every surface — the CLI's `faf go`, the `/faf-go` skill and
- * CFM's `faf_go` (feed it to buildTableOf8 as `detailed` + `goal`).
+ * Target only. Every slot has three outcomes — Target (the validated fact for
+ * that slot), Slop (waffle, nonsense, markup) and Misplaced (good info, wrong
+ * slot) — and only a Target is suggested: every candidate passes the one gate
+ * (isValidExtraction), headings match whole, and no text is offered for two
+ * slots.
+ *
+ * Exported so other surfaces can show the same suggestions (the `/faf-go`
+ * skill and CFM's `faf_go`, via buildTableOf8 as `detailed` + `goal`); today
+ * only the CLI's `faf go` reads it.
  */
 
 import { readRepoFile } from './safe-write.js';
@@ -21,6 +28,7 @@ import { interrogateCargo } from '../interrogate/cargo.js';
 import { relentlessContextDetailed } from '../detect/relentless.js';
 import { detectStack } from '../detect/stack.js';
 import { isPlaceholder, isTypedWords } from './slots.js';
+import { isValidExtraction } from '../interrogate/types.js';
 import { getNestedValue } from './dot-path.js';
 
 /** The human-authored slots: the goal and the six W's. */
@@ -74,9 +82,17 @@ export function suggestIntent(dir: string, faf?: Record<string, unknown>): Inten
   const found = ((detectStack(dir) as { _meta?: { found?: string[] } })._meta?.found) ?? [];
   const toolingRoot = found.some(f => f.startsWith('polyglot:'));
   const out: IntentSuggestions = {};
+  // Real words and typed words (None, N/A, unknown) are the person's: no
+  // suggestion competes with either — and their slot takes no text from another.
+  const theirs = new Set<string>(faf ? INTENT_PATHS.filter(p => isTheirs(getNestedValue(faf, p))) : []);
+  const offered = new Set<string>();
   const offer = (path: IntentPath, value: string | undefined | null, source: string): void => {
-    if (out[path] || !value || !value.trim()) {return;}
-    out[path] = { value: value.trim(), source };
+    if (out[path] || theirs.has(path) || !value) {return;}
+    const v = asProse(value);
+    // One gate for every source; and one text, one slot.
+    if (!isValidExtraction(v) || offered.has(v.toLowerCase())) {return;}
+    offered.add(v.toLowerCase());
+    out[path] = { value: v, source: sourceName(source) };
   };
 
   const desc = packageDescription(dir, toolingRoot);
@@ -94,16 +110,34 @@ export function suggestIntent(dir: string, faf?: Record<string, unknown>): Inten
     const r = relentless[w];
     if (r) {offer(`human_context.${w}`, r.value, r.source);}
   }
-
-  if (faf) {
-    for (const p of INTENT_PATHS) {
-      const cur = getNestedValue(faf, p);
-      // Real words and typed words (None, N/A, unknown) are the person's:
-      // no suggestion competes with either.
-      if (isTypedWords(cur) || (typeof cur === 'string' && cur.trim() && !isPlaceholder(cur))) {delete out[p];}
-    }
-  }
   return out;
+}
+
+/** True when the slot holds the person's words: real words or typed words. */
+function isTheirs(cur: unknown): boolean {
+  return isTypedWords(cur) || (typeof cur === 'string' && cur.trim() !== '' && !isPlaceholder(cur));
+}
+
+/** Text as a person reads it: inline links as their words, no emphasis
+ *  markers, one line. */
+function asProse(text: string): string {
+  return text
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+    .replace(/(\*\*|__|`)/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/** One way to name a source, whichever reader found it: Relentless says
+ *  `README:## Why` / `README:first-paragraph` / `package.json:description`;
+ *  people read `README.md § Why` / `README.md § first paragraph` /
+ *  `package.json description`. */
+function sourceName(source: string): string {
+  if (source === 'README:first-paragraph') {return 'README.md § first paragraph';}
+  const heading = source.match(/^README:##\s*(.+)$/);
+  if (heading) {return `README.md § ${heading[1].trim()}`;}
+  return source.replace(/^package\.json:description$/, 'package.json description');
 }
 
 /** The one line init and auto print when suggestions are waiting, or null:

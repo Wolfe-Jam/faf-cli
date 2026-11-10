@@ -139,11 +139,11 @@ export const SIX_WS_INTERVIEW: InterviewQuestion<HumanSlotPath>[] = [
     header: 'When',
     type: 'text',
     required: true,
-    help: 'stage or timeline: since when, alpha, beta, production',
+    help: 'the stage it is at, or since when',
   },
   {
     path: 'human_context.how',
-    question: `How does it work? ${TERSE}`,
+    question: 'How does it work? (one line)',
     header: 'How',
     type: 'text',
     required: true,
@@ -379,8 +379,8 @@ export interface GoalSeed {
 
 /**
  * Seed the human-context slots from the Goal sentence — verbatim facts only.
- * Returns a partial { what?, where?, who? }; absent keys = "no fact, ask the
- * human". Never returns why/when/how (not verbatim-extractable from a goal).
+ * Returns a partial { what?, where? }; absent keys = "no fact, ask the
+ * human". Never returns who/why/when/how (not verbatim-extractable from a goal).
  */
 export function seedSixWsFromGoal(goal: string): GoalSeed {
   const seed: GoalSeed = {};
@@ -402,16 +402,9 @@ export function seedSixWsFromGoal(goal: string): GoalSeed {
   const wheres = WHERE_SIGNALS.filter(([, re]) => re.test(g)).map(([label]) => label);
   if (wheres.length) {seed.where = wheres.slice(0, 4).join(', ');}
 
-  // WHO — ONLY an explicit audience ROLE: `for developers/teams/engineers/…`,
-  // captured to the sentence boundary, qualifier kept. A bare `for <ProperNoun>`
-  // is NOT seeded: in a goal that names the TARGET it serves (the AI/tool/format),
-  // not the audience — too ambiguous to be a fact. Bare role-word (= generic)
-  // dropped. Empty beats wrong; the human states the audience.
-  const forAud = g.match(/\bfor ((?:[A-Za-z][\w./+-]* )?(?:any |all )?(?:developers?|teams?|engineers?|builders?|users?|integrators?)\b[^.,;:—]*)/i);
-  const whoTerse = tersify((forAud?.[1] || '').trim().replace(/\s+/g, ' '));  // cap <6
-  if (whoTerse && !seedIsGeneric(whoTerse)) {
-    seed.who = whoTerse;
-  }
+  // No WHO: "for developers/teams/…" in a sentence is a guess at the
+  // audience, not a fact (the same pattern Relentless no longer uses).
+  // The human names the audience.
 
   return seed;
 }

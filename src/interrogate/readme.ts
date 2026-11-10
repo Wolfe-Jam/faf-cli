@@ -8,20 +8,24 @@
  */
 
 import { readRepoFile, repoExists } from '../core/safe-write.js';
-import { type ExtractedContext, isValidExtraction } from './types.js';
+import { type ExtractedContext, isValidExtraction, SECTION_HEADINGS } from './types.js';
 
 /** Strip badge / image lines + blank lines from the top of a README */
 /** Section headings each slot reads from. */
-const GOAL_SECTION = /^(use\s+cases?|goal)\b/i;
-const WHAT_SECTION = /^(about|description|overview|what(\s+is\s+this)?)\b/i;
-const WHO_SECTION = /^(audience|users?|for\s+whom|who(\s+is\s+this\s+for)?)\b/i;
-const WHY_SECTION = /^(why|motivation|problem|rationale)\b/i;
-const WHERE_SECTION = /^(deployment|where(\s+it\s+runs)?|hosting)\b/i;
-const WHEN_SECTION = /^(status|history|timeline|since|launched)\b/i;
-const HOW_SECTION = /^(architecture|how(\s+it\s+works)?|approach|design)\b/i;
+// The WHOLE heading must be one of these (a trailing ':' or '?' allowed): a
+// heading that only starts with the word is about something else —
+// "How to install", "Status codes", "Who is using X?", "Why not Y?".
+const whole = (names: readonly string[]): RegExp => new RegExp(`^(${names.join('|')})\\s*[:?]?$`, 'i');
+const GOAL_SECTION = whole(SECTION_HEADINGS.goal);
+const WHAT_SECTION = whole(SECTION_HEADINGS.what);
+const WHO_SECTION = whole(SECTION_HEADINGS.who);
+const WHY_SECTION = whole(SECTION_HEADINGS.why);
+const WHERE_SECTION = whole(SECTION_HEADINGS.where);
+const WHEN_SECTION = whole(SECTION_HEADINGS.when);
+const HOW_SECTION = whole(SECTION_HEADINGS.how);
 
 function stripPreamble(content: string): string {
-  const lines = content.split('\n');
+  const lines = dropSetextTitle(content.split('\n'));
   let i = 0;
   // Skip the title line (first H1) and any blank/badge lines after it
   while (i < lines.length && /^(#\s|$)/.test(lines[i].trim())) {i++;}
@@ -31,8 +35,12 @@ function stripPreamble(content: string): string {
     if (/^\[!\[/.test(line)) { i++; continue; }
     // Standalone images: ![alt](url)
     if (/^!\[/.test(line)) { i++; continue; }
-    // HTML img tags
-    if (/^<img\s/i.test(line)) { i++; continue; }
+    // HTML (banners: <p align="center">, <div>, <img>, <h1>, closing tags)
+    if (/^<\/?[a-z][\w-]*/i.test(line)) { i++; continue; }
+    // The # title, when a banner came before it
+    if (/^#\s/.test(line)) { i++; continue; }
+    // Link rows: [Docs](…) | [Blog](…) — navigation, not prose
+    if (/^(\*\*)?\[[^\]]+\]\([^)]*\)/.test(line) && /[|·•]/.test(line)) { i++; continue; }
     // Blank lines
     if (line === '') { i++; continue; }
     break;
@@ -41,6 +49,14 @@ function stripPreamble(content: string): string {
 }
 
 /** Get the first prose paragraph (single block, no headings/lists/code) */
+/** Lines without a setext title at the top ("Title" over "-----" or
+ *  "=====") — it is the title, not the first paragraph. */
+function dropSetextTitle(lines: string[]): string[] {
+  const first = lines.findIndex((l) => l.trim() !== '');
+  if (first >= 0 && /^[-=]{3,}\s*$/.test(lines[first + 1] ?? '')) {return lines.slice(first + 2);}
+  return lines;
+}
+
 function firstProseParagraph(content: string): string | null {
   const stripped = stripPreamble(content);
   const lines = stripped.split('\n');

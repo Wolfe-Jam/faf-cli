@@ -31,7 +31,7 @@ The first 3 describe the idea. The next 3 describe the implementation:
 |---|----------|----------------|
 | **4W** | **WHERE** does it live? | Developer |
 | **5W** | **WHEN** is it shipping? | Developer |
-| **6W** | **HOW** is it built? | Developer |
+| **6W** | **HOW** does it work? | Developer |
 
 All 6 answers live in one file: `project.faf`. Learn more: **[faf.one/6ws](https://faf.one/6ws)**
 
