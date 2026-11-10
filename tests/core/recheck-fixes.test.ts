@@ -153,7 +153,7 @@ describe('BRAKE 3f: the preamble skips markup, never a prose line', () => {
 
   test('a setext title is never part of what (Relentless too)', () => {
     const r = relentlessContextDetailed(repo('A fast search tool for large monorepos.\n---\n\nMore text that is long enough to count as a paragraph here.\n'));
-    expect(r.what?.value ?? '').not.toContain('---');
+    expect(r.what?.value).toBe('More text that is long enough to count as a paragraph here.');
   });
 });
 
@@ -170,6 +170,7 @@ describe('BRAKE 3b: slop the structural gate let through', () => {
     ['a fragment ending in a comma', '# c\n\nC parses widgets for small teams.\n\n## Why\n\nBecause widget specs drift between teams,\n', 'human_context.why'],
     ['black: a quotation is not a fact', '# Black\n\n> “Any color you like.”\n\nBlack is the uncompromising Python code formatter.\n', 'project.goal'],
     ['kit: a call to action', '# SvelteKit\n\nWeb development, streamlined. Read the [documentation](https://svelte.dev/docs/kit) to get started.\n', 'project.goal'],
+    ['a call to action, alone', '# k\n\nWeb development, streamlined. Head over to the site to get started.\n', 'project.goal'],
     ['plain-text nav row', '# n\n\nDocumentation | Discord | Blog | Examples\n', 'project.goal'],
   ])('%s', (_name, readme, path) => {
     expect(suggestIntent(repo(readme))[path as 'project.goal']).toBeUndefined();
