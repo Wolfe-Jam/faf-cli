@@ -86,3 +86,16 @@ describe('ENGINE: when is the stage it is at, and since when', () => {
     expect(SLOTS.find(s => s.path === 'human_context.when')?.description).toBe('The stage it is at, and since when');
   });
 });
+
+describe('TYRE: faf git says where the goal and six W\'s get filled', () => {
+  test('with suggestions: how many, and where to confirm them', async () => {
+    const { gitIntentNote } = await import('../../src/commands/git.js');
+    expect(gitIntentNote(3)).toBe("The goal and six W's are empty: 3 suggestions wait in the repo. Run 'faf go' in a clone to confirm them.");
+    expect(gitIntentNote(1)).toBe("The goal and six W's are empty: 1 suggestion waits in the repo. Run 'faf go' in a clone to confirm it.");
+  });
+
+  test('with none: the slots are still the owner\'s to fill', async () => {
+    const { gitIntentNote } = await import('../../src/commands/git.js');
+    expect(gitIntentNote(0)).toBe("The goal and six W's are empty: fill them with 'faf go' in a clone.");
+  });
+});
