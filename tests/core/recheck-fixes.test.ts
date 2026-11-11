@@ -210,6 +210,8 @@ describe('BRAKE 3b: slop the structural gate let through', () => {
     ['kit: a call to action', '# SvelteKit\n\nWeb development, streamlined. Read the [documentation](https://svelte.dev/docs/kit) to get started.\n', 'project.goal'],
     ['a call to action, alone', '# k\n\nWeb development, streamlined. Head over to the site to get started.\n', 'project.goal'],
     ['plain-text nav row', '# n\n\nDocumentation | Discord | Blog | Examples\n', 'project.goal'],
+    ['dual-licensed intro', '> Command Line Argument Parser for Rust\n\nDual-licensed under Apache 2.0 or MIT.\n\nClap parses CLI arguments for Rust projects.\n', 'human_context.what'],
+    ['prisma CTA tail', 'Prisma 8 is a TypeScript rewrite of Prisma ORM, designed to be extensible. Read the announcement or start with the docs.\n', 'human_context.what'],
   ])('%s', (_name, readme, path) => {
     expect(suggestIntent(repo(readme))[path as 'project.goal']).toBeUndefined();
   });

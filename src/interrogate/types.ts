@@ -94,12 +94,12 @@ export const SLOP_PATTERNS: readonly RegExp[] = [
   // Legal lines: the licence file says them
   /^(copyright\b|\(c\)|©)/i,
   /\ball\s+rights\s+reserved\b/i,
-  /^(licen[cs]ed\s+under|permission\s+is\s+hereby)\b/i,
+  /^(?:(?:dual-)?licen[cs]ed\s+under|permission\s+is\s+hereby)\b/i,
   // Install and contribute lines: misplaced (commands.*, CONTRIBUTING)
   /\b(npm|pnpm|yarn|bun)\s+(i|install|add)\s|\bpip3?\s+install\s|\bcargo\s+(add|install)\s|\bgo\s+(get|install)\s|\bbrew\s+install\s/i,
   /^please\b/i,
   // A call to action: where to read next, not what the project is
-  /\bto get started\b|\bread the (docs|documentation|guide)\b|\bcheck out (the|our)\b/i,
+  /\bto get started\b|\bread the (docs|documentation|guide)\b|\bstart with the (docs|documentation|guide)\b|\bread the announcement\b|\bcheck out (the|our)\b/i,
   // A quotation (a motto), not a fact
   /^["“'‘][\s\S]*["”'’]$/,
   // A question is not a fact; a text that runs on (a line broken after a
