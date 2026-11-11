@@ -82,6 +82,18 @@ describe('BRAKE: one text, one slot, and only prose', () => {
     expect(s['human_context.what']).toBeUndefined();
   });
 
+  test('typer, reversed: a what that opens with the goal sentence is the same text', () => {
+    const s = suggestIntent(repo('# typer\n\n## Goal\n\nTyper, build great CLIs.\n\n## What\n\nTyper, build great CLIs. Easy to code. Based on Python type hints.\n'));
+    expect(s['project.goal']?.value).toBe('Typer, build great CLIs.');
+    expect(s['human_context.what']).toBeUndefined();
+  });
+
+  test('jest: a bold emoji-led feature label is a notice, not the goal', () => {
+    const s = suggestIntent(repo('# jest\n\n**👩🏻‍💻 Developer Ready**: A comprehensive JavaScript testing solution.\n', { description: 'Delightful JavaScript Testing.' }));
+    expect(s['project.goal']?.value).toBe('Delightful JavaScript Testing.');
+    expect(asProse('**👩🏻‍💻 Developer Ready**: works')).toBe('👩🏻‍💻 Developer Ready: works');
+  });
+
   test('a longer text that extends a short one is still offered', () => {
     const s = suggestIntent(repo('# l\n\n## What\n\nLog parser that streams alerts to Slack from edge workers.\n', { description: 'Log parser' }));
     expect(s['human_context.what']?.value).toBe('Log parser that streams alerts to Slack from edge workers.');

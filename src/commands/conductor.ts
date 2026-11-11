@@ -81,7 +81,7 @@ function conductorImport(configPath?: string): void {
     console.log(`${fafCyan('◆')} conductor import  created ${outPath}`);
   }
   if (description) {
-    console.log(dim(`  The config's description was not written: the goal is yours to fill in 'faf go' or 'faf edit project.goal'.\n  It said: ${description}`));
+    console.log(dim(`  The config's description was not written: the goal is yours to fill: 'faf go', or 'faf edit project.goal "<goal>"'.\n  It said: ${description}`));
   }
 }
 

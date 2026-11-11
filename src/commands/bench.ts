@@ -51,7 +51,7 @@ const PHRASINGS: Record<string, string> = {
   'human_context.what': 'What are they building?',
   'human_context.why': 'Why does this project exist?',
   'human_context.where': 'Where does it run or get distributed?',
-  'human_context.when': "When — what is the project's timeline or stage?",
+  'human_context.when': 'When — what stage is it at, and since when?',
   'human_context.how': 'How does it work?',
 };
 

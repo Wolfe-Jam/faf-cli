@@ -108,6 +108,32 @@ export const SLOP_PATTERNS: readonly RegExp[] = [
   /(&mdash;|&ndash;|[—–,;]|\s-)\s*$/,
   // A monorepo root's description says where the code is, not the goal
   /^(the\s+)?mono-?repo\s+(for|of|containing|with)\b/i,
+  /\bmono-?repo(\s+root)?\.?$/i,
+  // Lines joined without a space ("break nothing.End-to-end"): a fragment
+  /[a-z]{2,}\.[A-Z][a-z]{2,}/,
+  // A heading line
+  /^#{1,6}\s/,
+];
+
+/** A notice, not a description of the project: maintenance status,
+ *  sponsors, hiring, where the docs are, requirements, a move or a mirror,
+ *  merch, a question, a status label or an emoji-led feature label. Fine in
+ *  `when` (## Status: "No longer maintained since 2024"), never the goal. */
+export function isNotice(t: string): boolean {
+  return NOTICES.some((re) => re.test(t));
+}
+
+const NOTICES: readonly RegExp[] = [
+  /\b(no longer (maintained|supported|developed)|unmaintained|deprecated|archived|end[- ]of[- ]life)\b/i,
+  /^(sponsored|supported|funded|backed|brought to you) by\b/i,
+  /\b(we['’]re|we are) hiring\b|^join (us|our)\b/i,
+  /\b(documentation|docs) (is |are )?(available|can be found|lives?) (at|on|in)\b/i,
+  /^looking for\b|\?\s/i,
+  /^moved to\b|\b(has )?moved to\b|\bmirror of\b/i,
+  /^(requires?|needs)\b/i,
+  /^status\s*:/i,
+  /\b(t-?shirts?|mugs|stickers|merch(andise)?|donate|sponsor (us|me))\b/i,
+  /^(?:\p{Extended_Pictographic}|\p{Emoji_Modifier}|\u200d|\ufe0f|\s)+[\p{L}\p{N} '-]{1,30}:\s/u,
 ];
 
 /** A callout or banner, not a description: a GitHub admonition, a warning

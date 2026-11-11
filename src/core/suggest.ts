@@ -28,7 +28,7 @@ import { interrogateCargo } from '../interrogate/cargo.js';
 import { relentlessContextDetailed } from '../detect/relentless.js';
 import { detectStack } from '../detect/stack.js';
 import { isPlaceholder, isTypedWords } from './slots.js';
-import { isValidExtraction } from '../interrogate/types.js';
+import { firstSentence, isNotice, isValidExtraction } from '../interrogate/types.js';
 import { getNestedValue } from './dot-path.js';
 
 /** The human-authored slots: the goal and the six W's. */
@@ -92,8 +92,12 @@ export function suggestIntent(dir: string, faf?: Record<string, unknown>): Inten
     const v = asProse(value, refs);
     // One gate for every source; and one text, one slot.
     const key = words(v);
-    if (!isValidExtraction(v) || offered.some(o => sameText(o, key))) {return;}
+    // The same text, or one that opens with an offered text as its first sentence
+    const first = firstSentence(v);
+    const firstKey = first && first !== v ? words(first) : null;
+    if (!isValidExtraction(v) || wrongSlot(path, v) || offered.some(o => sameText(o, key) || o === firstKey)) {return;}
     offered.push(key);
+    if (firstKey) {offered.push(firstKey);}
     out[path] = { value: v, source: sourceName(source) };
   };
 
@@ -125,7 +129,11 @@ function isTheirs(cur: unknown): boolean {
  *  markers or inline HTML tags, entities as characters, one line. Real
  *  brackets and underscores stay: `arr[i]`, `Foo[T]`, `[WIP]`, `__init__.py`. */
 export function asProse(text: string, refs: ReadonlySet<string> = new Set()): string {
-  return decodeEntities(text
+  // Code spans keep their text as written (`src/**/*.ts`, `*`): set aside
+  // while markers are stripped, then put back without the backticks.
+  const code: string[] = [];
+  const held = text.replace(/`([^`]+)`/g, (_all: string, c: string) => `\uE000${code.push(c) - 1}\uE000`);
+  return decodeEntities(held
     .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
     .replace(/(?<![\w\]])\[([^\]]+)\]\([^)]*\)/g, '$1')
     // [text][ref] and a bare [ref] — only after a space, never an index (arr[i])
@@ -140,18 +148,19 @@ export function asProse(text: string, refs: ReadonlySet<string> = new Set()): st
     // never inside an identifier (snake_case, __init__.py).
     .replace(/[\s\S]*/, stripStars)
     .replace(/(^|[^\w])(__)(?=\S)(.+?)(?<=\S)\2(?!\w|\.\w)/g, '$1$3')
-    .replace(/(^|[^\w])(_)(?=[^\s_])(.+?)(?<=[^\s_])\2(?!\w|\.\w)/g, '$1$3')
-    .replace(/`([^`]+)`/g, '$1'))
+    .replace(/(^|[^\w])(_)(?=[^\s_])(.+?)(?<=[^\s_])\2(?!\w|\.\w)/g, '$1$3'))
+    .replace(/\uE000(\d+)\uE000/g, (_all: string, n: string) => code[Number(n)])
     .replace(/\s+/g, ' ')
     .trim();
 }
 
-/** `t` without `*` / `**` emphasis markers, nested ones too. */
+/** `t` without `*` / `**` emphasis markers, nested ones too. A marker is
+ *  emphasis only when it opens on a letter, digit or emoji, after a space or the
+ *  start (not maths such as a*b*c or x**2, not a path or glob star), and
+ *  closes on a letter, digit or full stop. */
 function stripStars(t: string): string {
   for (let i = 0; i < 4; i++) {
-    const next = t
-      .replace(/\*\*(?=\S)([^*\n]+?)(?<=\S)\*\*/g, '$1')
-      .replace(/\*(?=[^\s*])([^*\n]+?)(?<=[^\s*])\*/g, '$1');
+    const next = t.replace(/(?<![\w/.*\\])(\*\*?)(?=[\p{L}\p{N}\p{Extended_Pictographic}])([^*\n]*?[\p{L}\p{N}.!?)])\1(?!\*)/gu, '$2');
     if (next === t) {break;}
     t = next;
   }
@@ -179,16 +188,21 @@ function readmeRefs(dir: string): Set<string> {
   return new Set([...raw.matchAll(/^ {0,3}\[([^\]]+)\]:\s*\S/gm)].map(m => m[1].toLowerCase()));
 }
 
-/** The README's finds, each for its slot. When a `## Goal` / `## Use cases`
- *  section took the goal, the README's tagline (its first paragraph or
- *  sentence) is offered for `what` — blocked if it is the same text. */
+/** True when `v` is not a fact for `path`: a notice (deprecated, sponsored
+ *  by, requires Node 18, docs at…) says nothing about what the project is,
+ *  so it is never the goal or `what`; "Viper is a complete configuration
+ *  solution" is a `what`, not a `why`. */
+function wrongSlot(path: IntentPath, v: string): boolean {
+  if (path === 'project.goal' || path === 'human_context.what') {return isNotice(v);}
+  if (path === 'human_context.why') {return /^[\p{L}\p{N}._-]+ (is|are) (a|an|the)\b/iu.test(v);}
+  return false;
+}
+
+/** The README's finds, each for its slot. */
 function offerReadme(dir: string, offer: (path: IntentPath, value: string | undefined, source: string) => void): void {
-  const readme = interrogateReadmeSourced(dir);
-  for (const [path, find] of Object.entries(readme)) {
+  for (const [path, find] of Object.entries(interrogateReadmeSourced(dir))) {
     if (isIntentPath(path)) {offer(path, find.value, find.source);}
   }
-  const g = readme['project.goal'];
-  if (g && /§ first (paragraph|sentence)$/.test(g.source)) {offer('human_context.what', g.value, g.source);}
 }
 
 /** Letters and digits only, lower case: the words of a text. */

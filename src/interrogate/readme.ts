@@ -105,14 +105,14 @@ function sectionWithHeading(content: string, pattern: RegExp): { text: string; h
     const line = lines[i].trim();
     const m = line.match(/^(#{1,6})\s+(.+)$/);
     if (m && pattern.test(m[2])) {
-      const headingLevel = m[1].length;
-      // Read prose lines until next heading of same-or-higher level
+      // Read prose lines until the next heading
       const buf: string[] = [];
       i++;
       while (i < lines.length) {
         const next = lines[i].trim();
         const nextHeading = next.match(/^(#{1,6})\s+/);
-        if (nextHeading && nextHeading[1].length <= headingLevel) {break;}
+        // Any heading ends the body: a sub-heading (### TypeScript) is not prose
+        if (nextHeading) {break;}
         if (next === '') { if (buf.length > 0) {break;} i++; continue; }
         // Stop at structural elements (code blocks, lists, tables)
         if (/^(>|```|---|\||\s*[-*+]\s|\d+\.\s)/.test(next)) {break;}
