@@ -53,14 +53,14 @@ describe('BRAKE — shape + the never-seed rule', () => {
 });
 
 describe('ENGINE — filled / seeded / empty', () => {
-  test('E1 — goal-only .faf: name+goal filled, who/what/where seeded, why/when/how empty', () => {
+  test('E1 — goal-only .faf: name+goal filled, what/where seeded, who/why/when/how empty', () => {
     const t = buildTableOf8({ project: { name: 'faf-mcp', goal: 'Universal .faf MCP server for developers using Cursor. npm, Cloudflare.' } });
     const byPath = Object.fromEntries(t.rows.map((r) => [r.path, r]));
     expect(byPath['project.name'].status).toBe('filled');
     expect(byPath['project.goal'].status).toBe('filled');
     expect(byPath['human_context.what'].status).toBe('seeded');
     expect(byPath['human_context.where'].status).toBe('seeded');
-    expect(byPath['human_context.who'].status).toBe('seeded');
+    expect(byPath['human_context.who'].status).toBe('empty'); // no audience guess from the goal
     expect(byPath['human_context.why'].status).toBe('empty');
     expect(byPath['human_context.when'].status).toBe('empty');
     expect(byPath['human_context.how'].status).toBe('empty');
@@ -83,7 +83,7 @@ describe('ENGINE — filled / seeded / empty', () => {
     expect(byPath['project.goal'].status).toBe('seeded');
     expect(byPath['human_context.what'].value).toBe('Rust CLI');
     expect(byPath['human_context.where'].value).toBe('crates.io');
-    expect(byPath['human_context.who'].value).toContain('Rust developers');
+    expect(byPath['human_context.who'].status).toBe('empty'); // no audience guess from the goal
   });
 
   test('E4 — an existing .faf value WINS over a goal seed', () => {
@@ -130,10 +130,10 @@ describe('PIT: PROVENANCE — seeded rows carry their source (auditable confirm)
 
   test('P1 — goal-seeded rows are sourced to "project goal"', () => {
     const t = buildTableOf8({ project: { goal: 'A .faf MCP server for developers using Cursor. npm.' } });
-    const who = get(t, 'human_context.who');
-    expect(who.status).toBe('seeded');
-    expect(who.source).toBe('project goal');
-    expect(who.confidence).toBeGreaterThan(0);
+    const where = get(t, 'human_context.where');
+    expect(where.status).toBe('seeded');
+    expect(where.source).toBe('project goal');
+    expect(where.confidence).toBeGreaterThan(0);
   });
 
   test('P2 — detailed README extraction seeds WHY/WHEN/HOW with their own provenance', () => {
@@ -151,11 +151,16 @@ describe('PIT: PROVENANCE — seeded rows carry their source (auditable confirm)
   });
 
   test('P3 — goal wins over README where both have a fact (deliberate sentence beats extraction)', () => {
-    const detailed = { who: { value: 'from the readme', source: 'README:## Audience', confidence: 0.8 } };
-    const t = buildTableOf8({ project: { goal: 'A CLI for developers and teams' } }, { detailed });
-    const who = get(t, 'human_context.who');
-    expect(who.source).toBe('project goal');       // goal-seed, not the README fallback
-    expect(who.value.toLowerCase()).toContain('developers');
+    const detailed = {
+      what: { value: 'from the readme', source: 'README:## About', confidence: 0.8 },
+      who: { value: 'backend teams', source: 'README:## Audience', confidence: 0.8 },
+    };
+    const t = buildTableOf8({ project: { goal: 'Rust CLI for developers. crates.io.' } }, { detailed });
+    const what = get(t, 'human_context.what');
+    expect(what.source).toBe('project goal');      // goal-seed, not the README fallback
+    expect(what.value).toBe('Rust CLI');
+    // The goal gives no audience, so who comes from the README's own section.
+    expect(get(t, 'human_context.who').source).toBe('README:## Audience');
   });
 
   test('P4 — filled and empty rows carry NO source/confidence', () => {

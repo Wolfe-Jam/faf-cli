@@ -13,12 +13,10 @@
  */
 
 import { readRepoFile } from '../core/safe-write.js';
+import { dropSetextTitle, firstSentence, isCallout, isValidExtraction, EXTRACTION_LIMITS, SECTION_HEADINGS } from '../interrogate/types.js';
 
 interface PkgJson {
   description?: string;
-  repository?: string | { url?: string };
-  homepage?: string;
-  scripts?: Record<string, string>;
   keywords?: string[];
 }
 
@@ -38,7 +36,8 @@ export interface SeededContext {
  *     'package.json:description' or 'README:## Why'. If we can't name a source,
  *     we don't emit a value — sourced-or-empty, never invented.
  *   - `confidence`: 0..1 by source quality (structured field > named section >
- *     heuristic match). A signal for the seeded/confirm UI, not a score.
+ *     first paragraph). A signal for the seeded/confirm UI, not a score.
+ *     No sentence-pattern guesses: a guess is slop, and no suggestion beats one.
  */
 export interface SourcedValue {
   value: string;
@@ -63,7 +62,7 @@ const sv = (value: string, source: string, confidence: number): SourcedValue => 
  * human WHERE a value was relocated from before they accept it.
  */
 /** `toolingRoot`: the repo root's package.json is a tooling shell (polyglot repo
- *  — real code is in sibling dirs), so its description/repo/scripts describe the
+ *  — real code is in sibling dirs), so its description describes the
  *  tooling, not the product. Skip package.json-sourced context; README only. */
 export interface RelentlessOpts { toolingRoot?: boolean }
 
@@ -71,16 +70,19 @@ export function relentlessContextDetailed(dir: string, opts: RelentlessOpts = {}
   const pkg = opts.toolingRoot ? null : readPkg(dir);
   const readme = cleanReadme(dir);
   const out: SeededContextDetailed = {};
+  // One gate for every source (interrogate/types.ts): slop and markup never
+  // become a suggestion, whichever extractor found them.
   const set = (k: keyof SeededContextDetailed, v: SourcedValue | null): void => {
-    if (v) {out[k] = v;}
+    if (v && isValidExtraction(v.value)) {out[k] = v;}
   };
 
   set('what', extractWhat(pkg, readme));
   set('who', extractWho(readme));
   set('why', extractWhy(readme));
-  set('where', extractWhere(pkg, readme));
+  // No `where`: nothing Relentless reads says where a project runs. The README
+  // interrogator's named ## Deployment / ## Hosting section suggests it.
   set('when', extractWhen(readme));
-  set('how', extractHow(pkg, readme));
+  set('how', extractHow(readme));
 
   return out;
 }
@@ -115,10 +117,11 @@ function readPkg(dir: string): PkgJson | null {
 function cleanReadme(dir: string): string {
   const txt = readRepoFile(dir, 'README.md');
   if (txt === null) {return '';}
-  return txt
+  // A setext title ("Title" over "---") is the title, not the first paragraph.
+  return dropSetextTitle(txt
     .replace(/<!--[\s\S]*?-->/g, '') // HTML comment blocks (asset notes, TODOs — not prose)
-    .split('\n')
-    .filter((l) => !/^\s*\[!\[/.test(l) && !/^\s*!\[/.test(l)) // badge lines
+    .split('\n'))
+    .filter((l) => !/^\s*\[!\[/.test(l) && !/^\s*!\[/.test(l) && !/^\s*\[[^\]]+\]:\s*\S/.test(l) && !/^\s*https?:\/\/\S*\)?\s*$/.test(l)) // badges, ref-defs, wrapped badge URL tails
     .join('\n')
     .replace(/<[^>]+>/g, '') // HTML tags
     .replace(/!\[[^\]]*\]\([^)]*\)/g, '') // inline images/badges
@@ -126,7 +129,9 @@ function cleanReadme(dir: string): string {
 }
 
 function clean(text: string): string {
-  return text.replace(/\s+/g, ' ').replace(/[#*`>]/g, '').trim().slice(0, 280);
+  // No cut at 280: text that long is rejected by the gate, never trimmed
+  // mid-word into a suggestion.
+  return text.replace(/\s+/g, ' ').replace(/[#*`>]/g, '').trim();
 }
 
 /** Share of a string's characters that sit inside markdown/inline links. */
@@ -139,8 +144,10 @@ function linkDensity(s: string): number {
 /** First `## Section` body matching any of the pipe-listed names (min 20 chars).
  *  Returns the cleaned body AND the matched heading (for provenance labels).
  *  Rejects link-list bodies (nav / roadmap-link rows are not prose). */
-function section(readme: string, names: string): { body: string; heading: string } | null {
-  const re = new RegExp(`##?\\s+(${names})\\s*\\n+([\\s\\S]+?)(?:\\n\\n|\\n##?|$)`, 'i');
+function section(readme: string, names: readonly string[]): { body: string; heading: string } | null {
+  // The whole heading line must be one of `names` (a trailing ':' or '?'
+  // allowed) — "How to install" is not "How".
+  const re = new RegExp(`^#{1,6}\\s+(${names.join('|')})\\s*[:?]?\\s*\\n+([\\s\\S]+?)(?:\\n\\n|\\n#|(?![\\s\\S]))`, 'im');
   const m = readme.match(re);
   if (!m || !m[2] || m[2].trim().length <= 20 || linkDensity(m[2]) > 0.4) {return null;}
   return { body: clean(m[2]), heading: m[1].trim() };
@@ -152,108 +159,81 @@ function section(readme: string, names: string): { body: string; heading: string
  * many repos (future-agi opens with a `> ⚠️ Nightly release…` blockquote) and
  * must not seed `human_context.what`.
  */
+/** Markdown reference-definition block (`[label]: url`), not prose. */
+function isReferenceDefinitionBlock(p: string): boolean {
+  const lines = p.split('\n').map((l) => l.trim()).filter(Boolean);
+  return lines.length > 0 && lines.every((l) => /^\[[^\]]+\]:\s*\S/.test(l));
+}
+
+/** Folded badge continuation: one or more bare `https://…)` tokens, no real sentence. */
+function isBadgeUrlMash(p: string): boolean {
+  const t = p.trim();
+  if (!/^https?:\/\//.test(t)) {return false;}
+  return t.replace(/https?:\/\/\S+\)?/g, ' ').replace(/\s+/g, ' ').trim() === '';
+}
+
 function isNonProseIntro(p: string): boolean {
   const t = p.trim();
+  if (isReferenceDefinitionBlock(t)) {return true;}
+  if (isBadgeUrlMash(t)) {return true;}
   // Blockquote callout — GitHub admonitions (> [!NOTE] / > [!WARNING]) included
   if (/^>/.test(t)) {return true;}
+  // Code fence, list, numbered item or table: structure, not prose
+  if (/^(```|~~~|[-*+]\s|\d+\.\s|\|)/.test(t)) {return true;}
   // Pre-release / status banner phrasing
-  if (/\b(nightly (release|build)|pre-?release|work[-\s]in[-\s]progress|rough edges|early (access|testing|preview)|use at your own risk|not (yet )?production[-\s]?ready|expect (rough|breaking)|experimental release)\b/i.test(t)) {return true;}
-  // Nav / link row: 3+ short fragments split on · or |
-  const frags = t.split(/[·|]/).map((s) => s.trim()).filter(Boolean);
+  if (isCallout(t)) {return true;}
+  // Nav / link row: 3+ short fragments split on · | • &bull;
+  const navish = t.replace(/&nbsp;/gi, ' ');
+  const frags = navish.split(/\s*(?:\||·|•|&bull;)\s*/i).map((s) => s.trim()).filter(Boolean);
   if (frags.length >= 3 && frags.every((f) => f.length <= 24)) {return true;}
   return false;
 }
 
-/** First capturing-group match across patterns whose capture meets minLen. */
-function firstMatch(text: string, patterns: RegExp[], minLen = 30): string | null {
-  for (const re of patterns) {
-    const m = text.match(re);
-    if (m && m[1] && m[1].trim().length >= minLen) {return clean(m[1]);}
-  }
-  return null;
-}
-
 function extractWhat(pkg: PkgJson | null, readme: string): SourcedValue | null {
   if (pkg?.description && pkg.description.length > 20) {return sv(clean(pkg.description), 'package.json:description', 0.95);}
-  const sec = section(readme, 'Purpose|What|About|Overview|Description');
+  const sec = section(readme, SECTION_HEADINGS.what);
   if (sec) {return sv(sec.body, `README:## ${sec.heading}`, 0.8);}
-  const firstReal = readme
+  // Only the prose before the first section: a short tagline must not let a
+  // ## Why or ## Usage body stand in as `what`.
+  const intro = readme.split(/^#{2,6}\s/m)[0];
+  const firstReal = intro
     .split(/\n\s*\n/)
     .map((p) => p.replace(/\s+/g, ' ').trim())
     .find((p) => p.length > 30 && !p.startsWith('#') && !isNonProseIntro(p));
-  if (firstReal) {return sv(clean(firstReal), 'README:first-paragraph', 0.5);}
-  const fm = firstMatch(readme, [
-    /(?:core|main|primary)\s+(?:problem|challenge)(?:\s+is)?\s*:?\s*([^.\n]{30,})/i,
-    /solves?\s+(?:the\s+)?(?:problem\s+of\s+)?([^.\n]{30,})/i,
-  ]);
-  return fm ? sv(fm, 'README:problem-heuristic', 0.6) : null;
+  // No sentence-pattern fallback ("solves the problem of…"): a guess is slop.
+  if (!firstReal) {return null;}
+  const para = clean(firstReal);
+  if (para.length <= EXTRACTION_LIMITS.MAX_LENGTH) {return sv(para, 'README:first-paragraph', 0.5);}
+  // Too long to be `what`: its first sentence, whole, may be.
+  const sentence = firstSentence(para);
+  return sentence ? sv(sentence, 'README:first-sentence', 0.5) : null;
 }
 
 function extractWho(readme: string): SourcedValue | null {
-  const sec = section(readme, 'Audience|Who|Who is this for|Who it.s for');
-  if (sec) {return sv(sec.body, `README:## ${sec.heading}`, 0.8);}
-  const fm = firstMatch(
-    readme,
-    [
-      // optional qualifier before the role word, so "for backend teams" /
-      // "for indie developers" match — not just a bare role. Dogfood-caught.
-      /\b(?:designed|built|made)\s+for\s+((?:[a-z][a-z-]*\s+)?(?:developers?|teams?|engineers?|builders?|founders?)[^.\n]{0,80})/i,
-      /\bfor\s+((?:[a-z][a-z-]*\s+)?(?:developers?|teams?|engineers?|builders?|founders?)[^.\n]{0,80})/i,
-    ],
-    8,
-  );
-  return fm ? sv(fm, 'README:audience-heuristic', 0.6) : null;
+  // A named section only. A "built for <role>" sentence is a guess: it gave
+  // fragments like "any developer;" — the human names the audience in faf go.
+  const sec = section(readme, SECTION_HEADINGS.who);
+  return sec ? sv(sec.body, `README:## ${sec.heading}`, 0.8) : null;
 }
 
 function extractWhy(readme: string): SourcedValue | null {
-  const sec = section(readme, 'Why|Mission|Motivation|Rationale|Vision');
-  if (sec) {return sv(sec.body, `README:## ${sec.heading}`, 0.8);}
-  // DECLARATIVE only — "our mission is X", "the goal is X", "Mission: X". The
-  // bare noun is NOT enough: "(name + goal + the six Ws)" must not match (it did,
-  // and grabbed the rest of the line — a real bug the provenance dogfood caught).
-  const fm = firstMatch(readme, [
-    /(?:our\s+|the\s+)?(?:mission|purpose|goal)\s+is\s+([^.\n]{30,})/i,
-    /\b(?:mission|purpose|goal)\s*:\s*([^.\n]{30,})/i,
-    /(?:built|created|designed)\s+(?:because|to)\s+([^.\n]{30,})/i,
-  ]);
-  return fm ? sv(fm, 'README:mission-heuristic', 0.6) : null;
-}
-
-function extractWhere(pkg: PkgJson | null, readme: string): SourcedValue | null {
-  const repo = typeof pkg?.repository === 'string' ? pkg.repository : pkg?.repository?.url;
-  if (repo) {return sv(clean(repo.replace(/^git\+/, '').replace(/\.git$/, '')), 'package.json:repository', 0.95);}
-  if (pkg?.homepage) {return sv(clean(pkg.homepage), 'package.json:homepage', 0.9);}
-  const fm = firstMatch(
-    readme,
-    // {3,80} + minLen 3 so short platform names ("npm", "AWS") match —
-    // "Published on npm." used to slip past the 4-char floor. Dogfood-caught.
-    [/\b(?:deployed|hosted|available|published)\s+(?:on|at|via)\s+([^.\n]{3,80})/i],
-    3,
-  );
-  return fm ? sv(fm, 'README:deploy-heuristic', 0.6) : null;
+  // A named section only. The "our mission is" sentence pattern was a guess
+  // that matched "Permission is hereby granted" in MIT licence text.
+  const sec = section(readme, SECTION_HEADINGS.why);
+  return sec ? sv(sec.body, `README:## ${sec.heading}`, 0.8) : null;
 }
 
 function extractWhen(readme: string): SourcedValue | null {
-  const sec = section(readme, 'Timeline|Status|Release|Roadmap');
-  if (sec) {return sv(sec.body, `README:## ${sec.heading}`, 0.8);}
-  const fm = firstMatch(
-    readme,
-    [
-      /\b(production\s+since\s+[^.\n]{4,60})/i,
-      /\b((?:in\s+)?(?:production|beta|alpha|development)\s+since\s+[^.\n]{4,60})/i,
-      /\bsince\s+((?:[A-Z][a-z]+\s+)?\d{4}[^.\n]{0,40})/,
-    ],
-    4,
-  );
-  return fm ? sv(fm, 'README:since-heuristic', 0.6) : null;
+  // A named section only. The "production since…" sentence pattern was a guess.
+  const sec = section(readme, SECTION_HEADINGS.when);
+  return sec ? sv(sec.body, `README:## ${sec.heading}`, 0.8) : null;
 }
 
-function extractHow(pkg: PkgJson | null, readme: string): SourcedValue | null {
-  const scripts = pkg?.scripts ? Object.keys(pkg.scripts) : [];
-  const run = ['start', 'dev', 'build'].filter((s) => scripts.includes(s));
-  if (run.length) {return sv(clean(run.map((s) => `npm run ${s}`).join(', ')), 'package.json:scripts', 0.9);}
-  const usage = section(readme, 'Usage|Getting Started|Install|Installation|Quick Start');
-  if (usage) {return sv(usage.body, `README:## ${usage.heading}`, 0.8);}
-  const arch = section(readme, 'Architecture|Approach|How it works|Methodology|How');
+function extractHow(readme: string): SourcedValue | null {
+  // How it works: the mechanism (the faf schema's meaning). How to use or
+  // install it (## Usage, ## Install) and package.json scripts are misplaced
+  // here — they belong to commands.* — so only a section about how it works
+  // suggests this slot.
+  const arch = section(readme, SECTION_HEADINGS.how);
   return arch ? sv(arch.body, `README:## ${arch.heading}`, 0.7) : null;
 }

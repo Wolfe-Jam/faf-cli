@@ -145,10 +145,11 @@ describe('WJTTC ENGINE: extractGoal — first prose paragraph or explicit sectio
 });
 
 describe('WJTTC ENGINE: 6W extractors — per-slot anchors', () => {
-  test('extractWhat from ## About', () => {
-    expect(extractWhat('# x\n\n## About\n\nA tool for managing project context.')).toBe(
+  test('extractWhat from ## Overview; ## About (usually the author) is not read', () => {
+    expect(extractWhat('# x\n\n## Overview\n\nA tool for managing project context.')).toBe(
       'A tool for managing project context.',
     );
+    expect(extractWhat('# x\n\n## About\n\nA tool for managing project context.')).toBeUndefined();
   });
 
   test('extractWho from ## Audience', () => {

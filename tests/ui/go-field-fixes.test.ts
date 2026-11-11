@@ -74,8 +74,8 @@ describe('BRAKE: typed words get no help and no suggestion; plain slots use read
   const sugg = { 'human_context.who': { value: 'Backend teams', source: 'README.md § Who' } };
 
   test('an empty intent slot gets the field, with its suggestion', () => {
-    expect(fieldPlan('human_context.who', '', sugg)).toEqual({ suggestion: 'Backend teams' });
-    expect(fieldPlan('human_context.why', '', sugg)).toEqual({ suggestion: '' });
+    expect(fieldPlan('human_context.who', '', sugg)).toEqual({ suggestion: 'Backend teams', help: 'the people who use it, not the author' });
+    expect(fieldPlan('human_context.why', '', sugg)).toEqual({ suggestion: '', help: 'the problem it removes' });
   });
 
   test('typed words: no suggestion, no help — plain readline, Enter keeps them', () => {

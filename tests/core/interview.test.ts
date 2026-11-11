@@ -40,15 +40,16 @@ describe('ENGINE: WJTTC — the 8-Q core', () => {
     expect(SIX_WS_INTERVIEW.every((q) => q.required)).toBe(true);
   });
 
-  test('6W prompts carry the terse-label doctrine (3-4 words)', () => {
+  test('6W prompts carry the terse-label doctrine (3-4 words) — except how, which asks for one line (the mechanism)', () => {
     const sixWs = SIX_WS_INTERVIEW.filter((q) => q.path.startsWith('human_context.'));
     expect(sixWs.length).toBe(6);
-    sixWs.forEach((q) => expect(q.question).toContain('3-4 words'));
+    sixWs.filter((q) => q.path !== 'human_context.how').forEach((q) => expect(q.question).toContain('3-4 words'));
+    expect(sixWs.find((q) => q.path === 'human_context.how')!.question).toContain('one line');
   });
 
-  test('the canonical `how` semantic is built/used — NOT "how should AI assist" (the CFM drift this file kills)', () => {
+  test('the canonical `how` semantic is how it works (faf schema) — NOT "how should AI assist" (the CFM drift this file kills)', () => {
     const how = INTERVIEW_BY_PATH.get('human_context.how')!;
-    expect(how.question.toLowerCase()).toContain('built');
+    expect(how.question.toLowerCase()).toContain('how does it work');
     expect(how.question.toLowerCase()).not.toContain('assist');
   });
 });

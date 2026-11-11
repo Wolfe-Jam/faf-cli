@@ -28,6 +28,16 @@ describe('ENGINE: suggestion field', () => {
     expect(r.done).toEqual({ kind: 'value', value: 'Front-end devs' });
   });
 
+  test('a second Tab does nothing: Tab takes, it never rotates', () => {
+    const r = run('Front-end devs', [k('tab'), k('tab'), k('return')]);
+    expect(r.done).toEqual({ kind: 'value', value: 'Front-end devs' });
+  });
+
+  test('Tab after typing does nothing: typed words stay', () => {
+    const r = run('Front-end devs', [...type('Da'), k('tab'), k('return')]);
+    expect(r.done).toEqual({ kind: 'value', value: 'Da' });
+  });
+
   test('Tab then edit: the edited words are written', () => {
     const r = run('Front-end devs', [k('tab'), k('backspace'), k('backspace'), k('backspace'), k('backspace'), ...type('teams'), k('return')]);
     expect(r.done).toEqual({ kind: 'value', value: 'Front-end teams' });

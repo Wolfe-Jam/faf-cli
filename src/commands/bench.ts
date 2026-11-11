@@ -52,7 +52,7 @@ const PHRASINGS: Record<string, string> = {
   'human_context.why': 'Why does this project exist?',
   'human_context.where': 'Where does it run or get distributed?',
   'human_context.when': "When — what is the project's timeline or stage?",
-  'human_context.how': 'How is it built or used?',
+  'human_context.how': 'How does it work?',
 };
 
 function questionFor(path: string, description: string): string {

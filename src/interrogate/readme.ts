@@ -8,20 +8,24 @@
  */
 
 import { readRepoFile, repoExists } from '../core/safe-write.js';
-import { type ExtractedContext, isValidExtraction } from './types.js';
+import { type ExtractedContext, dropSetextTitle, firstSentence, isCallout, isValidExtraction, EXTRACTION_LIMITS, SECTION_HEADINGS } from './types.js';
 
 /** Strip badge / image lines + blank lines from the top of a README */
 /** Section headings each slot reads from. */
-const GOAL_SECTION = /^(use\s+cases?|goal)\b/i;
-const WHAT_SECTION = /^(about|description|overview|what(\s+is\s+this)?)\b/i;
-const WHO_SECTION = /^(audience|users?|for\s+whom|who(\s+is\s+this\s+for)?)\b/i;
-const WHY_SECTION = /^(why|motivation|problem|rationale)\b/i;
-const WHERE_SECTION = /^(deployment|where(\s+it\s+runs)?|hosting)\b/i;
-const WHEN_SECTION = /^(status|history|timeline|since|launched)\b/i;
-const HOW_SECTION = /^(architecture|how(\s+it\s+works)?|approach|design)\b/i;
+// The WHOLE heading must be one of these (a trailing ':' or '?' allowed): a
+// heading that only starts with the word is about something else —
+// "How to install", "Status codes", "Who is using X?", "Why not Y?".
+const whole = (names: readonly string[]): RegExp => new RegExp(`^(${names.join('|')})\\s*[:?]?$`, 'i');
+const GOAL_SECTION = whole(SECTION_HEADINGS.goal);
+const WHAT_SECTION = whole(SECTION_HEADINGS.what);
+const WHO_SECTION = whole(SECTION_HEADINGS.who);
+const WHY_SECTION = whole(SECTION_HEADINGS.why);
+const WHERE_SECTION = whole(SECTION_HEADINGS.where);
+const WHEN_SECTION = whole(SECTION_HEADINGS.when);
+const HOW_SECTION = whole(SECTION_HEADINGS.how);
 
 function stripPreamble(content: string): string {
-  const lines = content.split('\n');
+  const lines = dropSetextTitle(content.split('\n'));
   let i = 0;
   // Skip the title line (first H1) and any blank/badge lines after it
   while (i < lines.length && /^(#\s|$)/.test(lines[i].trim())) {i++;}
@@ -31,8 +35,18 @@ function stripPreamble(content: string): string {
     if (/^\[!\[/.test(line)) { i++; continue; }
     // Standalone images: ![alt](url)
     if (/^!\[/.test(line)) { i++; continue; }
-    // HTML img tags
-    if (/^<img\s/i.test(line)) { i++; continue; }
+    // HTML banners (<p align="center">, <div>, <img>, <h1>, closing tags):
+    // a block tag, or a line that is only tags. A prose line that opens with
+    // inline HTML ("<b>pa</b> is a fast search tool…") is the paragraph.
+    if (/^<\/?[a-z][\w-]*/i.test(line) && (BANNER_TAG.test(line) || line.replace(/<[^>]*>/g, '').trim() === '')) { i++; continue; }
+    // The # title, when a banner came before it
+    if (/^#\s/.test(line)) { i++; continue; }
+    // Link rows: [Docs](…) | [Blog](…) — navigation, not prose
+    if (/^(\*\*)?\[[^\]]+\]\([^)]*\)/.test(line) && /[|·•]|&bull;/i.test(line)) { i++; continue; }
+    // Reference definitions: [circleci-image]: https://… (not [text](url) links)
+    if (/^\[[^\]]+\]:\s*\S/.test(line)) { i++; continue; }
+    // Wrapped badge URL continuation lines (after a [![… line was dropped)
+    if (/^https?:\/\/\S*\)?\s*$/.test(line)) { i++; continue; }
     // Blank lines
     if (line === '') { i++; continue; }
     break;
@@ -40,19 +54,34 @@ function stripPreamble(content: string): string {
   return lines.slice(i).join('\n');
 }
 
+const BANNER_TAG = /^<\/?(?:p|div|img|h[1-6]|picture|source|table|center|details|summary|video|svg|br|hr)\b/i;
+
+/** A one-line blockquote's text when it is a tagline, else null (a callout,
+ *  or a quote that runs on to the next line). */
+function quoteTagline(line: string, next: string | undefined): string | null {
+  const quote = line.replace(/^>\s*/, '');
+  const oneLine = !/^>/.test((next ?? '').trim());
+  return oneLine && quote && !isCallout(quote) ? quote : null;
+}
+
 /** Get the first prose paragraph (single block, no headings/lists/code) */
 function firstProseParagraph(content: string): string | null {
   const stripped = stripPreamble(content);
   const lines = stripped.split('\n');
   const buf: string[] = [];
-  for (const raw of lines) {
+  for (const [n, raw] of lines.entries()) {
     const line = raw.trim();
+    // A one-line blockquote tagline under the title ("> Next Generation
+    // Frontend Tooling") — not a callout (> [!NOTE], > ⚠️ Nightly release…).
+    if (buf.length === 0 && /^>/.test(line)) {return quoteTagline(line, lines[n + 1]);}
     if (line === '') {
       if (buf.length > 0) {break;}
       continue;
     }
     // Stop at next heading / list / code / quote / table
     if (/^(#|>|```|---|\||\s*[-*+]\s|\d+\.\s)/.test(line)) {break;}
+    if (/^\[[^\]]+\]:\s*\S/.test(line)) {continue;}
+    if (/^https?:\/\/\S*\)?\s*$/.test(line)) {continue;}
     // Skip pure-bold-tagline lines like "**For Grok. For the rockets.**"
     // (these are punchy spirit lines, not informative goal content)
     if (/^\*\*[^*]+\*\*\s*$/.test(line) && buf.length === 0) {continue;}
@@ -202,8 +231,13 @@ export function interrogateReadmeSourced(dir: string): Record<string, ReadmeFind
   const out: Record<string, ReadmeFind> = {};
   const take = (path: string, pattern: RegExp): boolean => {
     const s = sectionWithHeading(content, pattern);
-    if (s && isValidExtraction(s.text)) {
-      out[path] = { value: s.text, source: `${name} § ${s.heading}` };
+    if (!s) {return false;}
+    // A body that ends in a list intro ("…a few major components:") gives
+    // its first sentence, whole, when that sentence is the fact.
+    const value = isValidExtraction(s.text) ? s.text
+      : /:\s*$/.test(s.text) ? firstSentence(s.text) : null;
+    if (value && isValidExtraction(value)) {
+      out[path] = { value, source: `${name} § ${s.heading}` };
       return true;
     }
     return false;
@@ -211,7 +245,13 @@ export function interrogateReadmeSourced(dir: string): Record<string, ReadmeFind
 
   if (!take('project.goal', GOAL_SECTION)) {
     const tagline = firstProseParagraph(content);
-    if (tagline && isValidExtraction(tagline)) {out['project.goal'] = { value: tagline, source: `${name} § first paragraph` };}
+    if (tagline && isValidExtraction(tagline)) {
+      out['project.goal'] = { value: tagline, source: `${name} § first paragraph` };
+    } else if (tagline && tagline.length > EXTRACTION_LIMITS.MAX_LENGTH) {
+      // Too long to be the goal: its first sentence, whole, may be.
+      const sentence = firstSentence(tagline);
+      if (sentence && isValidExtraction(sentence)) {out['project.goal'] = { value: sentence, source: `${name} § first sentence` };}
+    }
   }
   take('human_context.what', WHAT_SECTION);
   take('human_context.who', WHO_SECTION);

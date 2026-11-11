@@ -130,8 +130,8 @@ describe('ENGINE: suggestions carry their source', () => {
     expect(s['human_context.when']?.value).toContain('Early. Working');
     expect(s['human_context.when']?.source).toBe('README.md § Status');
     expect(s['human_context.how']?.source).toBe('README.md § How it works');
-    expect(s['human_context.what']?.value).toBe('Accessible web widgets from plain YAML');
-    expect(s['human_context.what']?.source).toBe('package.json description');
+    // One text, one slot: the description is the goal's, so it is not offered as `what` too.
+    expect(s['human_context.what']?.value ?? '').not.toBe('Accessible web widgets from plain YAML');
   });
 
   test('with no package.json description, the README first paragraph suggests the goal', () => {

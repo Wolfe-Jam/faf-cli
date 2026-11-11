@@ -30,9 +30,12 @@ describe('WJTTC AERO: shared assembly pipeline (auto + git)', () => {
     const hc = faf.human_context as Record<string, string>;
     expect(Object.values(hc).every(v => v === '')).toBe(true);
     const s = suggestIntent(dir);
-    expect(s['human_context.what']?.value).toContain('drop-in checkout');
+    // One text, one slot: the description is suggested for the goal, not again as `what`.
+    expect(s['project.goal']?.value).toContain('drop-in checkout');
+    expect(s['human_context.what']).toBeUndefined();
     expect(s['human_context.why']?.value).toContain('remove payment-integration friction');
-    expect(s['human_context.who']?.value).toContain('developers who ship commerce');
+    // "Built for developers who…" is a sentence pattern, not a named section: no suggestion (Relentless cut)
+    expect(s['human_context.who']).toBeUndefined();
   });
 
   test('fills stack from Turbo-Cat for non-npm stacks (the git gap)', () => {

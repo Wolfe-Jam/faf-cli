@@ -6,8 +6,8 @@
  * siblings, UIs) IMPORT it — never reimplement, never copy. Decided
  * 2026-06-10: the CLI exports, CFM consumes, zero drift. (CFM's previous
  * hand-maintained registry had already drifted — e.g. its `how` asked "How
- * should AI assist?" while the canonical slot semantic is "How is it built /
- * used?". This file is the arbiter; slots.ts is its spine.)
+ * should AI assist?" while the canonical slot semantic is "How does it work?"
+ * (the faf schema). This file is the arbiter; slots.ts is its spine.)
  *
  * Shape carries what interactive consumers need: question text, a short
  * header chip, input type, required flag, select options where a closed-ish
@@ -39,6 +39,10 @@ export interface InterviewQuestion<P extends string = string> {
   type: 'text' | 'select';
   required: boolean;
   options?: InterviewOption[];
+  /** What a good answer looks like — shown in gray when there's no
+   *  suggestion. The shape of an answer, never a sample answer (sample words
+   *  get copied). Never written to the .faf. */
+  help?: string;
 }
 
 /**
@@ -95,6 +99,7 @@ export const SIX_WS_INTERVIEW: InterviewQuestion<HumanSlotPath>[] = [
     header: 'Goal',
     type: 'text',
     required: true,
+    help: 'one sentence: what it does, and for whom',
   },
   {
     path: 'human_context.who',
@@ -102,6 +107,7 @@ export const SIX_WS_INTERVIEW: InterviewQuestion<HumanSlotPath>[] = [
     header: 'Who',
     type: 'text',
     required: true,
+    help: 'the people who use it, not the author',
   },
   {
     path: 'human_context.what',
@@ -109,6 +115,7 @@ export const SIX_WS_INTERVIEW: InterviewQuestion<HumanSlotPath>[] = [
     header: 'What',
     type: 'text',
     required: true,
+    help: 'what they make or do with it',
   },
   {
     path: 'human_context.why',
@@ -116,6 +123,7 @@ export const SIX_WS_INTERVIEW: InterviewQuestion<HumanSlotPath>[] = [
     header: 'Why',
     type: 'text',
     required: true,
+    help: 'the problem it removes',
   },
   {
     path: 'human_context.where',
@@ -123,6 +131,7 @@ export const SIX_WS_INTERVIEW: InterviewQuestion<HumanSlotPath>[] = [
     header: 'Where',
     type: 'text',
     required: true,
+    help: 'where it runs or ships: platform, store, registry',
   },
   {
     path: 'human_context.when',
@@ -130,13 +139,15 @@ export const SIX_WS_INTERVIEW: InterviewQuestion<HumanSlotPath>[] = [
     header: 'When',
     type: 'text',
     required: true,
+    help: 'the stage it is at, or since when',
   },
   {
     path: 'human_context.how',
-    question: `How is it built or used? ${TERSE}`,
+    question: 'How does it work? (one line)',
     header: 'How',
     type: 'text',
     required: true,
+    help: 'the mechanism, and the choice that shapes the code',
   },
 ];
 
@@ -260,6 +271,12 @@ export const INTERVIEW_PATHS: Record<string, InterviewQuestion> = Object.fromEnt
  * otherwise derived from the slot's canonical description — so slot-driven
  * flows (faf go) and registry-driven flows (faf_go) speak the same language.
  */
+/** The help text for a slot (what a good answer looks like), or '' when the
+ *  registry has none. Shown in gray by `faf go`; never written. */
+export function helpForSlot(path: string): string {
+  return INTERVIEW_BY_PATH.get(path)?.help ?? '';
+}
+
 export function questionForSlot(path: string): string {
   const q = INTERVIEW_BY_PATH.get(path);
   if (q) {return q.question;}
@@ -362,8 +379,8 @@ export interface GoalSeed {
 
 /**
  * Seed the human-context slots from the Goal sentence — verbatim facts only.
- * Returns a partial { what?, where?, who? }; absent keys = "no fact, ask the
- * human". Never returns why/when/how (not verbatim-extractable from a goal).
+ * Returns a partial { what?, where? }; absent keys = "no fact, ask the
+ * human". Never returns who/why/when/how (not verbatim-extractable from a goal).
  */
 export function seedSixWsFromGoal(goal: string): GoalSeed {
   const seed: GoalSeed = {};
@@ -385,16 +402,9 @@ export function seedSixWsFromGoal(goal: string): GoalSeed {
   const wheres = WHERE_SIGNALS.filter(([, re]) => re.test(g)).map(([label]) => label);
   if (wheres.length) {seed.where = wheres.slice(0, 4).join(', ');}
 
-  // WHO — ONLY an explicit audience ROLE: `for developers/teams/engineers/…`,
-  // captured to the sentence boundary, qualifier kept. A bare `for <ProperNoun>`
-  // is NOT seeded: in a goal that names the TARGET it serves (the AI/tool/format),
-  // not the audience — too ambiguous to be a fact. Bare role-word (= generic)
-  // dropped. Empty beats wrong; the human states the audience.
-  const forAud = g.match(/\bfor ((?:[A-Za-z][\w./+-]* )?(?:any |all )?(?:developers?|teams?|engineers?|builders?|users?|integrators?)\b[^.,;:—]*)/i);
-  const whoTerse = tersify((forAud?.[1] || '').trim().replace(/\s+/g, ' '));  // cap <6
-  if (whoTerse && !seedIsGeneric(whoTerse)) {
-    seed.who = whoTerse;
-  }
+  // No WHO: "for developers/teams/…" in a sentence is a guess at the
+  // audience, not a fact (the same pattern Relentless no longer uses).
+  // The human names the audience.
 
   return seed;
 }

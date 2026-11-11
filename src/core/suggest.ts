@@ -11,16 +11,24 @@
  * Sourced or nothing: every suggestion names where it came from
  * (`README.md § Status`, `package.json description`).
  *
- * One source for every surface — the CLI's `faf go`, the `/faf-go` skill and
- * CFM's `faf_go` (feed it to buildTableOf8 as `detailed` + `goal`).
+ * Target only. Every slot has three outcomes — Target (the validated fact for
+ * that slot), Slop (waffle, nonsense, markup) and Misplaced (good info, wrong
+ * slot) — and only a Target is suggested: every candidate passes the one gate
+ * (isValidExtraction), headings match whole, and no text is offered for two
+ * slots.
+ *
+ * Exported so other surfaces can show the same suggestions (the `/faf-go`
+ * skill and CFM's `faf_go`, via buildTableOf8 as `detailed` + `goal`); today
+ * only the CLI's `faf go` reads it.
  */
 
-import { readRepoFile } from './safe-write.js';
+import { readRepoFile, repoExists } from './safe-write.js';
 import { interrogateReadmeSourced } from '../interrogate/readme.js';
 import { interrogateCargo } from '../interrogate/cargo.js';
 import { relentlessContextDetailed } from '../detect/relentless.js';
 import { detectStack } from '../detect/stack.js';
 import { isPlaceholder, isTypedWords } from './slots.js';
+import { isValidExtraction } from '../interrogate/types.js';
 import { getNestedValue } from './dot-path.js';
 
 /** The human-authored slots: the goal and the six W's. */
@@ -74,18 +82,26 @@ export function suggestIntent(dir: string, faf?: Record<string, unknown>): Inten
   const found = ((detectStack(dir) as { _meta?: { found?: string[] } })._meta?.found) ?? [];
   const toolingRoot = found.some(f => f.startsWith('polyglot:'));
   const out: IntentSuggestions = {};
+  // Real words and typed words (None, N/A, unknown) are the person's: no
+  // suggestion competes with either — and their slot takes no text from another.
+  const theirs = new Set<string>(faf ? INTENT_PATHS.filter(p => isTheirs(getNestedValue(faf, p))) : []);
+  const offered: string[] = [];
+  const refs = readmeRefs(dir);
   const offer = (path: IntentPath, value: string | undefined | null, source: string): void => {
-    if (out[path] || !value || !value.trim()) {return;}
-    out[path] = { value: value.trim(), source };
+    if (out[path] || theirs.has(path) || !value) {return;}
+    const v = asProse(value, refs);
+    // One gate for every source; and one text, one slot.
+    const key = words(v);
+    if (!isValidExtraction(v) || offered.some(o => sameText(o, key))) {return;}
+    offered.push(key);
+    out[path] = { value: v, source: sourceName(source) };
   };
 
   const desc = packageDescription(dir, toolingRoot);
   offer('project.goal', desc, 'package.json description');
   offer('human_context.what', desc, 'package.json description');
 
-  for (const [path, find] of Object.entries(interrogateReadmeSourced(dir))) {
-    if (isIntentPath(path)) {offer(path, find.value, find.source);}
-  }
+  offerReadme(dir, offer);
 
   offer('project.goal', interrogateCargo(dir).project?.goal, 'Cargo.toml description');
 
@@ -94,16 +110,98 @@ export function suggestIntent(dir: string, faf?: Record<string, unknown>): Inten
     const r = relentless[w];
     if (r) {offer(`human_context.${w}`, r.value, r.source);}
   }
-
-  if (faf) {
-    for (const p of INTENT_PATHS) {
-      const cur = getNestedValue(faf, p);
-      // Real words and typed words (None, N/A, unknown) are the person's:
-      // no suggestion competes with either.
-      if (isTypedWords(cur) || (typeof cur === 'string' && cur.trim() && !isPlaceholder(cur))) {delete out[p];}
-    }
-  }
   return out;
+}
+
+/** True when the slot holds the person's words: real words or typed words. */
+function isTheirs(cur: unknown): boolean {
+  return isTypedWords(cur) || (typeof cur === 'string' && cur.trim() !== '' && !isPlaceholder(cur));
+}
+
+/** Text as a person reads it: markdown links as their words, no emphasis
+ *  markers or inline HTML tags, entities as characters, one line. Real
+ *  brackets and underscores stay: `arr[i]`, `Foo[T]`, `[WIP]`, `__init__.py`. */
+export function asProse(text: string, refs: ReadonlySet<string> = new Set()): string {
+  return decodeEntities(text
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+    .replace(/(?<![\w\]])\[([^\]]+)\]\([^)]*\)/g, '$1')
+    // [text][ref] and a bare [ref] — only after a space, never an index (arr[i])
+    .replace(/(?<![\w\]])\[([^\]]+)\]\[[^\]]*\]/g, '$1')
+    .replace(/(?<![\w\]])\[([^\]]+)\](?![[(:])/g, (all: string, t: string) => refs.has(t.toLowerCase()) ? t : all)
+    .replace(/<\/?(?:a|b|i|em|strong|code|kbd|span|sup|sub|mark|small|u|s)\b[^>]*>/gi, '')
+    // Nested mixed markers (_**bold**_, **italic**) — strip before single/double passes
+    .replace(/_\*\*(.+?)\*\*_/g, '$1')
+    .replace(/\*\*_(.+?)_\*\*/g, '$1')
+    // Emphasis only around words, never inside an identifier
+    .replace(/(^|[^\w])(\*\*|__)(?=\S)(.+?)(?<=\S)\2(?!\w|\.\w)/g, '$1$3')
+    .replace(/(^|[^\w])([*_])(?=[^\s*_])(.+?)(?<=[^\s*_])\2(?!\w|\.\w)/g, '$1$3')
+    .replace(/`([^`]+)`/g, '$1'))
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+const ENTITIES: Record<string, string> = {
+  amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', bull: '•', mdash: '—', ndash: '–', hellip: '…', copy: '©', reg: '®', trade: '™',
+};
+
+/** Decode numeric/named entities; leave token on invalid or unsafe code points (no throw). */
+function decodeEntities(t: string): string {
+  return t.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (all: string, e: string) => {
+    if (e[0] !== '#') {return ENTITIES[e.toLowerCase()] ?? all;}
+    const cp = e[1].toLowerCase() === 'x' ? Number.parseInt(e.slice(2), 16) : Number(e.slice(1));
+    if (!Number.isFinite(cp) || cp <= 0x1f || cp > 0x10ffff || (cp >= 0xd800 && cp <= 0xdfff)) {return all;}
+    return String.fromCodePoint(cp);
+  });
+}
+
+/** The labels the README defines for reference links (`[WSGI]: https://…`). */
+function readmeRefs(dir: string): Set<string> {
+  const name = ['README.md', 'README.MD', 'Readme.md', 'readme.md'].find(n => repoExists(dir, n));
+  const raw = name ? readRepoFile(dir, name) ?? '' : '';
+  return new Set([...raw.matchAll(/^ {0,3}\[([^\]]+)\]:\s*\S/gm)].map(m => m[1].toLowerCase()));
+}
+
+/** The README's finds, each for its slot. When the description took the
+ *  goal, the README's own tagline (its first paragraph or sentence) is what
+ *  the project is, in its words: offered for `what` too — blocked if it is
+ *  the same text. */
+function offerReadme(dir: string, offer: (path: IntentPath, value: string | undefined, source: string) => void): void {
+  const readme = interrogateReadmeSourced(dir);
+  for (const [path, find] of Object.entries(readme)) {
+    if (isIntentPath(path)) {offer(path, find.value, find.source);}
+  }
+  const g = readme['project.goal'];
+  if (g && /§ first (paragraph|sentence)$/.test(g.source)) {offer('human_context.what', g.value, g.source);}
+}
+
+/** Letters and digits only, lower case: the words of a text. */
+function words(t: string): string {
+  return t.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+}
+
+/** The same text: one holds the other and the shorter is most of the longer
+ *  ("Fast, minimalist web framework" / "…web framework for Node.js"), or most
+ *  words are shared ("…command-line programs" / "…command-line interfaces").
+ *  A short phrase inside a longer, different sentence is not the same text. */
+function sameText(a: string, b: string): boolean {
+  const [short, long] = a.length <= b.length ? [a, b] : [b, a];
+  if (long.includes(short) && short.length >= 0.6 * long.length) {return true;}
+  const wa = new Set(a.split(' '));
+  const wb = new Set(b.split(' '));
+  const shared = [...wa].filter(w => wb.has(w)).length;
+  return shared / new Set([...wa, ...wb]).size >= 0.7;
+}
+
+/** One way to name a source, whichever reader found it: Relentless says
+ *  `README:## Why` / `README:first-paragraph` / `package.json:description`;
+ *  people read `README.md § Why` / `README.md § first paragraph` /
+ *  `package.json description`. */
+export function sourceName(source: string): string {
+  if (source === 'README:first-paragraph') {return 'README.md § first paragraph';}
+  if (source === 'README:first-sentence') {return 'README.md § first sentence';}
+  const heading = source.match(/^README:##\s*(.+)$/);
+  if (heading) {return `README.md § ${heading[1].trim()}`;}
+  return source.replace(/^package\.json:description$/, 'package.json description');
 }
 
 /** The one line init and auto print when suggestions are waiting, or null:
