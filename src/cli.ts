@@ -78,7 +78,7 @@ program
 
 program
   .command('auto')
-  .description('Fill every tech slot from the repo, then score')
+  .description('Fill the tech slots from the repo, then score')
   .action(() => autoCommand());
 
 program

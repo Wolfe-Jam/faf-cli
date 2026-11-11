@@ -5,7 +5,7 @@
 | Skill | What it does |
 |-------|-------------|
 | `/faf-score` | Score your `.faf` (0-100%) — runs in background while you work |
-| `/faf-auto` | Fill every tech slot from the repo, then score |
+| `/faf-auto` | Fill the tech slots from the repo, then score |
 | `/faf-go` | Guided interview to Gold Code |
 | `/faf-init` | Create `.faf` from your project |
 | `/faf-sync` | `.faf` → CLAUDE.md (pull: Trophy-gated backfill) |

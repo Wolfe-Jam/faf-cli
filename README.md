@@ -82,7 +82,7 @@ bunx faf-cli git https://github.com/facebook/react
 
 # Your own project
 bunx faf-cli init              # Create .faf
-bunx faf-cli auto              # Fill the stack slots from the repo, then score
+bunx faf-cli auto              # Fill the tech slots from the repo, then score
 bunx faf-cli go                # Confirm the goal and six W's, suggested in gray
 ```
 
