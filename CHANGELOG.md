@@ -10,8 +10,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+AI cannot fill human slots, it can only suggest. `faf init` and `faf auto` leave the goal and the six W's empty and suggest them; you confirm each one in `faf go`.
+
+### Added
+- **`faf go` shows a suggestion in gray** for the goal and each of the six W's, with where it came from (`README.md § Why`, `package.json description`). Tab puts it in the field to edit, Enter confirms it, typing replaces it, `skip` leaves the slot empty. A slot with no suggestion shows help text between `‹ ›` (for `how`: "the mechanism, and the choice that shapes the code"). Help is never written: Enter skips and Tab does nothing.
+- `faf git` ends with one line on the goal and six W's: they are empty, and how many suggestions wait in the repo, for `faf go` in a clone (the temporary clone is gone by then).
+- `faf init` and `faf auto` print one line when suggestions are waiting: `3 suggestions for the goal and the six W's (README.md, package.json) — confirm them in 'faf go'`.
+- Library: `suggestIntent(dir, faf?)` returns the suggestions with their sources, and `suggestionNote(dir, faf?)` returns that line. Suggestions are worked out from the repo each time; nothing is stored.
+
 ### Changed
+- **Breaking for library users: `faf init` and `faf auto` no longer write `project.goal` or `human_context.*`.** Both were filled from the README and package.json, which put guesses in human slots. `assembleFreshFaf`, `updateExistingFaf` and `authorFafFromRepo` now return those slots empty. The score counts only what is in `project.faf`, so a fresh `init` scores lower and honestly. Files you already have are not changed: words in those slots, typed or filled by an earlier `init`, stay as they are.
+- **Only a fact is suggested.** Every source goes through one check: no markup, link rows, lists, TODOs, greetings, licence or install lines, calls to action, quotations, questions or fragments, and nothing over 280 characters (rejected, never cut). A long first paragraph gives its first sentence, whole. README headings match whole (`## How to install` is not `how`), and the same text is never offered for two slots.
+- **The README leads the goal**, then the package.json description, then Cargo.toml. A monorepo root's description (`monorepo for …`) is not offered.
+- **Relentless no longer suggests misplaced facts or guesses:** no package.json scripts as `how`, no repository URL as `where`, no "built for …" or "our mission is …" sentence patterns.
+- **`how` means how it works:** the mechanism, and the choice that shapes the code. The question is "How does it work? (one line)", in line with the format (Wolfe-Jam/faf#20).
+- **`when` is the stage it is at, and since when** (e.g. "Stable since January 2026; adding Windows support"), not a version and not a usage line.
+- `faf conductor import` no longer writes `project.goal` from a config's `description`. It shows the description and says where to fill in the goal.
+- `faf go` on a terminal: questions other than the goal and empty W's use readline again (cursor keys, Ctrl-U/W, and Up for this run's earlier answers). With no terminal, piped answers are read in order, and nothing is suggested or written for a piped Enter.
+- `@faf/specification` pin moves to `5ca91b1` (faf#20: the `how` description).
 - `faf taf setup` pins faf-taf-git v2.6.0 (Safe Receipts Edition): receipts are never lost, and your checkout is never touched (receipts written in a separate worktree, writers locked, a failed push reported). faf-cli's own CI uses the same pin.
+
+### Fixed
+- **`faf go` no longer writes half a character.** Backspace after an emoji removed one UTF-16 unit, so the file got a lone surrogate. Backspace now removes a whole character, the field redraws by terminal column (CJK and emoji 2, combining marks 0), and any lone surrogate is dropped before writing.
+- `faf go` with piped input kept only the first line when lines arrived together.
+- A suggestion no longer competes with words already in the slot (`None`, `N/A`, `unknown`), and the `init`/`auto` count matches what `faf go` offers.
+
+**Tests:** 2661 pass, 0 fail.
 
 ## [8.9.0] - 2026-11-05 — The Write-Once Edition
 
