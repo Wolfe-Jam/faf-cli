@@ -40,6 +40,17 @@ describe('BRAKE 3e: asProse keeps real text — only markdown links and emphasis
     expect(goalOf('A **fast** and __small__ parser for _plain_ YAML files')).toBe('A fast and small parser for plain YAML files');
   });
 
+  test('hono: nested _** emphasis leaves no stray markers', () => {
+    const line = 'Hono - _**means flame🔥 in Japanese**_ - is a small, simple, and ultrafast web framework built on Web Standards.';
+    expect(asProse(line)).toBe(
+      'Hono - means flame🔥 in Japanese - is a small, simple, and ultrafast web framework built on Web Standards.',
+    );
+    const s = suggestIntent(repo(`${line}\n`, { description: 'Web framework for any JavaScript runtime.' }));
+    const w = s['human_context.what']?.value ?? '';
+    expect(w).not.toContain('_*');
+    expect(w).toContain('means flame🔥 in Japanese');
+  });
+
   test('an inline link and a [text][ref] link become their words', () => {
     expect(goalOf('A tiny client built on [Fetch](https://x.dev/fetch) and [Undici][u] for teams')).toBe('A tiny client built on Fetch and Undici for teams');
   });

@@ -129,6 +129,9 @@ export function asProse(text: string, refs: ReadonlySet<string> = new Set()): st
     .replace(/(?<![\w\]])\[([^\]]+)\]\[[^\]]*\]/g, '$1')
     .replace(/(?<![\w\]])\[([^\]]+)\](?![[(:])/g, (all: string, t: string) => refs.has(t.toLowerCase()) ? t : all)
     .replace(/<\/?(?:a|b|i|em|strong|code|kbd|span|sup|sub|mark|small|u|s)\b[^>]*>/gi, '')
+    // Nested mixed markers (_**bold**_, **italic**) — strip before single/double passes
+    .replace(/_\*\*(.+?)\*\*_/g, '$1')
+    .replace(/\*\*_(.+?)_\*\*/g, '$1')
     // Emphasis only around words, never inside an identifier
     .replace(/(^|[^\w])(\*\*|__)(?=\S)(.+?)(?<=\S)\2(?!\w|\.\w)/g, '$1$3')
     .replace(/(^|[^\w])([*_])(?=[^\s*_])(.+?)(?<=[^\s*_])\2(?!\w|\.\w)/g, '$1$3')
