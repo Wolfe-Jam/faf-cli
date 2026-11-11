@@ -121,7 +121,7 @@ function cleanReadme(dir: string): string {
   return dropSetextTitle(txt
     .replace(/<!--[\s\S]*?-->/g, '') // HTML comment blocks (asset notes, TODOs — not prose)
     .split('\n'))
-    .filter((l) => !/^\s*\[!\[/.test(l) && !/^\s*!\[/.test(l)) // badge lines
+    .filter((l) => !/^\s*\[!\[/.test(l) && !/^\s*!\[/.test(l) && !/^\s*\[[^\]]+\]:\s*\S/.test(l)) // badge + ref-def lines
     .join('\n')
     .replace(/<[^>]+>/g, '') // HTML tags
     .replace(/!\[[^\]]*\]\([^)]*\)/g, '') // inline images/badges
@@ -159,8 +159,15 @@ function section(readme: string, names: readonly string[]): { body: string; head
  * many repos (future-agi opens with a `> ⚠️ Nightly release…` blockquote) and
  * must not seed `human_context.what`.
  */
+/** Markdown reference-definition block (`[label]: url`), not prose. */
+function isReferenceDefinitionBlock(p: string): boolean {
+  const lines = p.split('\n').map((l) => l.trim()).filter(Boolean);
+  return lines.length > 0 && lines.every((l) => /^\[[^\]]+\]:\s*\S/.test(l));
+}
+
 function isNonProseIntro(p: string): boolean {
   const t = p.trim();
+  if (isReferenceDefinitionBlock(t)) {return true;}
   // Blockquote callout — GitHub admonitions (> [!NOTE] / > [!WARNING]) included
   if (/^>/.test(t)) {return true;}
   // Code fence, list, numbered item or table: structure, not prose

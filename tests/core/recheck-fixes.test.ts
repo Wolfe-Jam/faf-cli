@@ -166,6 +166,21 @@ describe('BRAKE 3f: the preamble skips markup, never a prose line', () => {
     expect(suggestIntent(repo('# n\n\n[Documentation](https://n.dev/docs) and [Discord](https://n.dev/chat)\n'))['project.goal']).toBeUndefined();
   });
 
+  test('reference-definition lines are not the first paragraph', () => {
+    const readme = '[circleci-image]: https://example.com/badge\n[circleci-url]: https://circleci.com/gh/x/y\n\nModern, fast, powerful node.js web framework\n';
+    const s = suggestIntent(repo(readme, { description: 'Modern, fast, powerful node.js web framework' }));
+    expect(s['project.goal']?.value).toBe('Modern, fast, powerful node.js web framework');
+    expect(JSON.stringify(s)).not.toMatch(/circleci/i);
+    expect(s['human_context.what']?.value ?? '').not.toMatch(/circleci|\[.*\]:/);
+  });
+
+  test('a ref-definition preamble does not become the goal or what', () => {
+    const s = suggestIntent(repo('[bad-ref]: https://example.com/badge\n\nReal project does one thing well.\n'));
+    expect(s['project.goal']?.value).toBe('Real project does one thing well.');
+    expect(s['human_context.what']?.value ?? s['project.goal']?.value).toBe('Real project does one thing well.');
+    expect(JSON.stringify(s)).not.toContain('bad-ref');
+  });
+
   test('a setext title is never part of what (Relentless too)', () => {
     const r = relentlessContextDetailed(repo('A fast search tool for large monorepos.\n---\n\nMore text that is long enough to count as a paragraph here.\n'));
     expect(r.what?.value).toBe('More text that is long enough to count as a paragraph here.');
