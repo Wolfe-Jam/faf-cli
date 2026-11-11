@@ -138,7 +138,7 @@ export function asProse(text: string, refs: ReadonlySet<string> = new Set()): st
 }
 
 const ENTITIES: Record<string, string> = {
-  amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', mdash: '—', ndash: '–', hellip: '…', copy: '©', reg: '®', trade: '™',
+  amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', bull: '•', mdash: '—', ndash: '–', hellip: '…', copy: '©', reg: '®', trade: '™',
 };
 
 /** Decode numeric/named entities; leave token on invalid or unsafe code points (no throw). */

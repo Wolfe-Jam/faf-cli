@@ -182,8 +182,9 @@ function isNonProseIntro(p: string): boolean {
   if (/^(```|~~~|[-*+]\s|\d+\.\s|\|)/.test(t)) {return true;}
   // Pre-release / status banner phrasing
   if (isCallout(t)) {return true;}
-  // Nav / link row: 3+ short fragments split on · or |
-  const frags = t.split(/[·|]/).map((s) => s.trim()).filter(Boolean);
+  // Nav / link row: 3+ short fragments split on · | • &bull;
+  const navish = t.replace(/&nbsp;/gi, ' ');
+  const frags = navish.split(/\s*(?:\||·|•|&bull;)\s*/i).map((s) => s.trim()).filter(Boolean);
   if (frags.length >= 3 && frags.every((f) => f.length <= 24)) {return true;}
   return false;
 }

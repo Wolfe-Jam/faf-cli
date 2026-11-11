@@ -8,7 +8,7 @@ import { describe, test, expect, afterEach } from 'bun:test';
 import { mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { suggestIntent, sourceName } from '../../src/core/suggest.js';
+import { asProse, suggestIntent, sourceName } from '../../src/core/suggest.js';
 import { firstSentence, isValidExtraction } from '../../src/interrogate/types.js';
 import { relentlessContextDetailed } from '../../src/detect/relentless.js';
 import { displayWidth } from '../../src/ui/text-width.js';
@@ -51,6 +51,10 @@ describe('BRAKE 3e: asProse keeps real text — only markdown links and emphasis
 
   test('HTML entities read as their characters', () => {
     expect(goalOf('Fast &amp; small HTTP client for edge workers')).toBe('Fast & small HTTP client for edge workers');
+  });
+
+  test('&bull; reads as a bullet', () => {
+    expect(asProse('Docs &bull; Changelog &bull; Blog')).toBe('Docs • Changelog • Blog');
   });
 
   test('invalid numeric entities do not throw and stay literal', () => {
@@ -210,6 +214,7 @@ describe('BRAKE 3b: slop the structural gate let through', () => {
     ['kit: a call to action', '# SvelteKit\n\nWeb development, streamlined. Read the [documentation](https://svelte.dev/docs/kit) to get started.\n', 'project.goal'],
     ['a call to action, alone', '# k\n\nWeb development, streamlined. Head over to the site to get started.\n', 'project.goal'],
     ['plain-text nav row', '# n\n\nDocumentation | Discord | Blog | Examples\n', 'project.goal'],
+    ['nx &bull; nav row', '# Nx\n\n[**Docs**](https://nx.dev/docs) &nbsp;&bull;&nbsp; [**Changelog**](https://nx.dev/changelog) &nbsp;&bull;&nbsp; [**Blog**](https://nx.dev/blog)\n\nNx is a monorepo solution for TypeScript codebases.\n', 'human_context.what'],
     ['dual-licensed intro', '> Command Line Argument Parser for Rust\n\nDual-licensed under Apache 2.0 or MIT.\n\nClap parses CLI arguments for Rust projects.\n', 'human_context.what'],
     ['prisma CTA tail', 'Prisma 8 is a TypeScript rewrite of Prisma ORM, designed to be extensible. Read the announcement or start with the docs.\n', 'human_context.what'],
   ])('%s', (_name, readme, path) => {

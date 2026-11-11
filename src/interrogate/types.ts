@@ -177,8 +177,9 @@ function isStructure(t: string): boolean {
   if (/(^|\s)[-=]{3,}(\s|$)/.test(t)) {return true;}
   if (/^\d+\.\s/.test(t)) {return true;}
   if (/:\s*$/.test(t)) {return true;}
-  // A nav row: 3+ short fragments split on | · •
-  const frags = t.split(/\s[|·•]\s/).map((f) => f.trim()).filter(Boolean);
+  // A nav row: 3+ short fragments split on | · • &bull;
+  const navish = t.replace(/&nbsp;/gi, ' ');
+  const frags = navish.split(/\s*(?:\||·|•|&bull;)\s*/i).map((f) => f.trim()).filter(Boolean);
   if (frags.length >= 3 && frags.every((f) => f.length <= 24)) {return true;}
   return linkShare(t) > 0.5;
 }

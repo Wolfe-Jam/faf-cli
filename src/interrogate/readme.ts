@@ -42,7 +42,7 @@ function stripPreamble(content: string): string {
     // The # title, when a banner came before it
     if (/^#\s/.test(line)) { i++; continue; }
     // Link rows: [Docs](…) | [Blog](…) — navigation, not prose
-    if (/^(\*\*)?\[[^\]]+\]\([^)]*\)/.test(line) && /[|·•]/.test(line)) { i++; continue; }
+    if (/^(\*\*)?\[[^\]]+\]\([^)]*\)/.test(line) && /[|·•]|&bull;/i.test(line)) { i++; continue; }
     // Reference definitions: [circleci-image]: https://… (not [text](url) links)
     if (/^\[[^\]]+\]:\s*\S/.test(line)) { i++; continue; }
     // Wrapped badge URL continuation lines (after a [![… line was dropped)
