@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v8.9.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v8.10.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -8,9 +8,9 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [8.10.0] - 2026-11-11 — The Human Slots Edition
 
-AI cannot fill human slots, it can only suggest. `faf init` and `faf auto` leave the goal and the six W's empty and suggest them; you confirm each one in `faf go`.
+AI suggests, you confirm. faf no longer writes your project's goal or six W's: it suggests them, and you confirm each one in `faf go`.
 
 ### Added
 - **`faf go` shows a suggestion in gray** for the goal and each of the six W's, with where it came from (`README.md § Why`, `package.json description`). Tab puts it in the field to edit, Enter confirms it, typing replaces it, `skip` leaves the slot empty. A slot with no suggestion shows help text between `‹ ›` (for `how`: "the mechanism, and the choice that shapes the code"). Help is never written: Enter skips and Tab does nothing.
