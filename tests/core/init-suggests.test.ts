@@ -121,17 +121,18 @@ describe('ENGINE: suggestions carry their source', () => {
 
   test('README sections and package.json become sourced suggestions', () => {
     const s = suggestIntent(dir);
-    // package.json description leads for the goal, as it did when init filled it
-    expect(s['project.goal']?.value).toBe('Accessible web widgets from plain YAML');
-    expect(s['project.goal']?.source).toBe('package.json description');
+    // The README leads the goal: the project in its own words (8.10)
+    expect(s['project.goal']?.value).toBe('Widget Kit turns plain YAML into accessible web widgets for small teams.');
+    expect(s['project.goal']?.source).toBe('README.md § first paragraph');
     expect(s['human_context.who']?.value).toContain('Front-end developers');
     expect(s['human_context.who']?.source).toBe('README.md § Who is this for');
     expect(s['human_context.why']?.source).toBe('README.md § Why');
     expect(s['human_context.when']?.value).toContain('Early. Working');
     expect(s['human_context.when']?.source).toBe('README.md § Status');
     expect(s['human_context.how']?.source).toBe('README.md § How it works');
-    // One text, one slot: the description is the goal's, so it is not offered as `what` too.
-    expect(s['human_context.what']?.value ?? '').not.toBe('Accessible web widgets from plain YAML');
+    // One text, one slot: each text is offered once
+    const values = Object.values(s).map(v => v!.value);
+    expect(new Set(values).size).toBe(values.length);
   });
 
   test('with no package.json description, the README first paragraph suggests the goal', () => {

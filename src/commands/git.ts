@@ -9,6 +9,7 @@ import * as kernel from '../wasm/kernel.js';
 import { enrichScore } from '../core/scorer.js';
 import { displayScore } from '../ui/display.js';
 import { dim, fafCyan } from '../ui/colors.js';
+import { suggestIntent } from '../core/suggest.js';
 
 // The pure helpers (URL gate, repo name, authoring from a fetched folder) live
 // in detect/git-repo.ts, which runs no git; they are re-exported here for the
@@ -152,7 +153,18 @@ export function gitCommand(
     const yaml = readFafRaw(target.outputPath);
     const result = withKernel(target.outputPath, () => enrichScore(kernel.score(yaml)));
     displayScore(result, target.outputPath);
+    // The clone is deleted next, so 'faf go' here has nothing to suggest from.
+    console.log(dim(gitIntentNote(Object.keys(suggestIntent(cloneDir)).length)));
   } finally {
     removeTempDir(tmpDir);
   }
+}
+
+/** What `faf git` says about the goal and six W's: they're empty, and the
+ *  repo's suggestions are confirmed with `faf go` in a clone (the temporary
+ *  clone is gone once `faf git` ends). */
+export function gitIntentNote(suggestions: number): string {
+  if (suggestions === 0) {return "The goal and six W's are empty: fill them with 'faf go' in a clone.";}
+  const [noun, verb, them] = suggestions === 1 ? ['suggestion', 'waits', 'it'] : ['suggestions', 'wait', 'them'];
+  return `The goal and six W's are empty: ${suggestions} ${noun} ${verb} in the repo. Run 'faf go' in a clone to confirm ${them}.`;
 }

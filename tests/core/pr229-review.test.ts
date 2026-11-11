@@ -1,0 +1,120 @@
+/**
+ * BRAKE: the independent review of #229. README-first must not move a notice
+ * into the goal; emphasis stripping must not touch code, globs or maths; each
+ * text is offered once; a heading line is never a suggestion.
+ */
+import { describe, test, expect, afterEach } from 'bun:test';
+import { mkdtempSync, rmSync, writeFileSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
+import { suggestIntent, asProse } from '../../src/core/suggest.js';
+
+const dirs: string[] = [];
+afterEach(() => { for (const d of dirs.splice(0)) {rmSync(d, { recursive: true, force: true });} });
+
+function repo(readme: string | null, pkg?: object): string {
+  const d = mkdtempSync(join(tmpdir(), 'faf-229-'));
+  dirs.push(d);
+  if (readme !== null) {writeFileSync(join(d, 'README.md'), readme);}
+  if (pkg) {writeFileSync(join(d, 'package.json'), JSON.stringify(pkg));}
+  return d;
+}
+
+describe('BRAKE D1: emphasis stripping leaves code, globs and maths alone', () => {
+  test.each([
+    'Computes a*b*c fast',
+    '2*x*y is a term',
+    'Matches **/*.ts globs',
+    'glob src/*.js and lib/*.js',
+    'x**2 + y**2',
+    'Takes *args, **kwargs in Python',
+    '5 * 3 * 2 is thirty',
+  ])('unchanged: %s', (t) => {
+    expect(asProse(t)).toBe(t);
+  });
+
+  test('a code span keeps its stars, and loses only its backticks', () => {
+    expect(asProse('Expands `src/**/*.ts` patterns')).toBe('Expands src/**/*.ts patterns');
+    expect(asProse('The `*` operator, made *fast*')).toBe('The * operator, made fast');
+  });
+
+  test('emphasis still goes: inside a word, nested, bold', () => {
+    expect(asProse('Serde is for *ser*ializing and **bold**ly data')).toBe('Serde is for serializing and boldly data');
+    expect(asProse('**Serde is a framework for *ser*ializing data.**')).toBe('Serde is a framework for serializing data.');
+  });
+});
+
+describe('BRAKE D2: a notice is never the goal (or what), so the description keeps the goal', () => {
+  test.each([
+    'This project is no longer maintained.',
+    'This project is deprecated, use bar instead.',
+    'Sponsored by Acme Corp and Globex.',
+    "We're hiring engineers in Berlin.",
+    'Documentation is available at docs.foo.dev.',
+    'Looking for v1? See the v1 branch.',
+    'Moved to github.com/acme/foo.',
+    'Requires Node.js 18 or later.',
+    'Status: beta.',
+    'This repo is a mirror of the upstream project.',
+    'Show your love for foo -- T-shirts, mugs and stickers.',
+    '👩🏻‍💻 Developer Ready: a comprehensive solution that works out of the box.',
+  ])('%s', (notice) => {
+    const s = suggestIntent(repo(`# foo\n\n${notice}\n`, { description: 'Fast HTTP client for Node.js' }));
+    expect(s['project.goal']).toEqual({ value: 'Fast HTTP client for Node.js', source: 'package.json description' });
+    expect(s['human_context.what']).toBeUndefined();
+  });
+
+  test('a real tagline still leads', () => {
+    const s = suggestIntent(repo('# foo\n\nFoo is a fast HTTP client for Node.js and browsers.\n', { description: 'HTTP client' }));
+    expect(s['project.goal']?.source).toBe('README.md § first paragraph');
+  });
+
+  test('"no longer maintained" in ## Status is still a when', () => {
+    const s = suggestIntent(repo('# foo\n\nFoo is a fast HTTP client for Node.js.\n\n## Status\n\nNo longer maintained since March 2024.\n'));
+    expect(s['human_context.when']?.value).toBe('No longer maintained since March 2024.');
+  });
+});
+
+describe('BRAKE: one text, one slot, and only prose', () => {
+  test('typer: what that opens with the goal sentence is the same text', () => {
+    const s = suggestIntent(repo('# typer\n\nTyper, build great CLIs. Easy to code. Based on Python type hints.\n\n## What\n\nTyper, build great CLIs. Easy to code, based on Python type hints, with completion.\n'));
+    expect(s['project.goal']?.value).toBe('Typer, build great CLIs. Easy to code. Based on Python type hints.');
+    expect(s['human_context.what']).toBeUndefined();
+  });
+
+  test('typer, reversed: a what that opens with the goal sentence is the same text', () => {
+    const s = suggestIntent(repo('# typer\n\n## Goal\n\nTyper, build great CLIs.\n\n## What\n\nTyper, build great CLIs. Easy to code. Based on Python type hints.\n'));
+    expect(s['project.goal']?.value).toBe('Typer, build great CLIs.');
+    expect(s['human_context.what']).toBeUndefined();
+  });
+
+  test('jest: a bold emoji-led feature label is a notice, not the goal', () => {
+    const s = suggestIntent(repo('# jest\n\n**👩🏻‍💻 Developer Ready**: A comprehensive JavaScript testing solution.\n', { description: 'Delightful JavaScript Testing.' }));
+    expect(s['project.goal']?.value).toBe('Delightful JavaScript Testing.');
+    expect(asProse('**👩🏻‍💻 Developer Ready**: works')).toBe('👩🏻‍💻 Developer Ready: works');
+  });
+
+  test('a longer text that extends a short one is still offered', () => {
+    const s = suggestIntent(repo('# l\n\n## What\n\nLog parser that streams alerts to Slack from edge workers.\n', { description: 'Log parser' }));
+    expect(s['human_context.what']?.value).toBe('Log parser that streams alerts to Slack from edge workers.');
+  });
+
+  test('yargs: a sub-heading inside a section is not its body', () => {
+    const s = suggestIntent(repo('# y\n\nY parses arguments for command-line tools.\n\n## Deployment\n### TypeScript\n\nTypes ship with the package.\n'));
+    expect(s['human_context.where']?.value ?? '').not.toMatch(/^#/);
+  });
+
+  test('viper: a why that says what the project is, is misplaced', () => {
+    const s = suggestIntent(repo('# viper\n\nGo configuration with fangs.\n\n## Why Viper?\n\nViper is a complete configuration solution for Go applications.\n'));
+    expect(s['human_context.why']).toBeUndefined();
+  });
+
+  test('trpc: lines joined without a space are a fragment', () => {
+    const s = suggestIntent(repo('# t\n\ntRPC Move fast and break nothing.End-to-end typesafe APIs made easy.\n'));
+    expect(s['project.goal']).toBeUndefined();
+  });
+
+  test.each(['date-fns monorepo root', 'The monorepo for acme tools'])('a monorepo description: %s', (d) => {
+    expect(suggestIntent(repo(null, { description: d }))['project.goal']).toBeUndefined();
+  });
+});

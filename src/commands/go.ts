@@ -284,7 +284,7 @@ function pipeAnswerer(): Answerer {
 
 /** A terminal, a slot with no field: one readline question, with cursor keys,
  *  Ctrl-U/W and history. Ctrl-C or Ctrl-D stops the interview. */
-function askReadline(prompt: string): Promise<FieldDone> {
+function askReadline(prompt: string, answered: string[]): Promise<FieldDone> {
   return new Promise<FieldDone>(resolve => {
     // A new interface per question, so earlier answers are passed in: Up
     // recalls them.
@@ -306,8 +306,6 @@ function askReadline(prompt: string): Promise<FieldDone> {
   });
 }
 
-/** This session's readline answers, newest first: the history Up walks. */
-const answered: string[] = [];
 
 /** Terminal rows `text` takes at `cols` columns — by column, not UTF-16 unit. */
 export function rowsFor(text: string, cols: number): number {
@@ -322,6 +320,9 @@ function ttyAnswerer(): Answerer {
   emitKeypressEvents(process.stdin);
   const out = process.stdout;
   let rows = 1;
+  // This run's readline answers, newest first: the history Up walks. One per
+  // `faf go`, so a second run in the same process starts clean.
+  const answered: string[] = [];
   const draw = (prompt: string, line: string): void => {
     // Back to the start of what was drawn last time, clear it, draw again.
     if (rows > 1) {out.write(`\u001b[${rows - 1}A`);}
@@ -329,7 +330,7 @@ function ttyAnswerer(): Answerer {
     rows = rowsFor(prompt + line, out.columns || 80);
   };
   return {
-    ask: (prompt, plan) => plan === null ? askReadline(prompt) : new Promise<FieldDone>(resolve => {
+    ask: (prompt, plan) => plan === null ? askReadline(prompt, answered) : new Promise<FieldDone>(resolve => {
       let state = startField(plan.suggestion, plan.help);
       rows = 1;
       draw(prompt, renderField(state, { gray: dim }));

@@ -2,7 +2,7 @@ faf_version: "3.0"
 project:
   name: faf-cli
   version: "8.9.0"
-  goal: "CLI for IANA-registered `.faf` + `.fafm` — context DNA and portable agent memory. TypeScript, Bun-native since v6. package faf-cli v8.9.0 The Write-Once Edition — scored by the always-33 engine."
+  goal: "CLI for IANA-registered .faf + .fafm — context DNA and portable agent memory, scored by the always-33 engine"
   main_language: TypeScript
   type: cli  # found: package.json bin
 # Commands + key_files feed `faf export --agents` (hand values win over detection).
@@ -58,11 +58,11 @@ stack:
   storage: slotignored
 human_context:
   who: Developers and teams using AI coding assistants
-  what: Persistent AI Context Standard — project DNA for AI. IANA-registered. Anthropic-merged.
+  what: IANA-registered CLI for persistent project context and agent memory
   why: Ends context re-discovery — define once, AI remembers forever
   where: npm registry, Homebrew, GitHub
-  when: Production since September 2025; Bun-native since v6; current package 8.9.0 (always-33 engine)
-  how: bunx faf-cli auto, then project.faf versions with your code — faf show renders it human-visible
+  when: Production since September 2025; Bun-native since v6
+  how: Detects the stack from repo files and scores with the always-33 WASM kernel; the goal and six W's are only suggested, never written
 monorepo:
   packages_count: slotignored
   build_orchestrator: slotignored
