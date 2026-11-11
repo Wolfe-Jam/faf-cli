@@ -14,8 +14,10 @@
  * vocabulary exists. Question SEMANTICS align to core/slots.ts descriptions —
  * the slot is the meaning, the question is just its interview voice.
  *
- * Authoring doctrine baked into the prompts: 6Ws answers are terse LABELS
- * (3-4 words, hard cap <6) — a scannable spec card, not prose.
+ * Authoring rule baked into the prompts — faf-facts: every word earns its
+ * place. Count facts, not words: one line, at most one sentence, no waffle. Short when
+ * the fact is short (where: "npm, Homebrew, GitHub"); a full line when it
+ * needs one (how: the mechanism and the choice that shapes the code).
  */
 
 import { SLOTS, SLOT_BY_PATH, isPlaceholder } from './slots.js';
@@ -78,7 +80,7 @@ export type SourcedSlotPath =
   | 'stack.build'
   | 'stack.cicd';
 
-const TERSE = '(terse — 3-4 words)';
+const TERSE = '(one line, every word earns its place)';
 
 /**
  * THE 8-Q 6Ws INTERVIEW — the core. Project identity (name + goal) plus the
@@ -143,7 +145,7 @@ export const SIX_WS_INTERVIEW: InterviewQuestion<HumanSlotPath>[] = [
   },
   {
     path: 'human_context.how',
-    question: 'How does it work? (one line)',
+    question: `How does it work? ${TERSE}`,
     header: 'How',
     type: 'text',
     required: true,
@@ -358,13 +360,15 @@ const WHERE_SIGNALS: Array<[label: string, re: RegExp]> = [
 
 const seedIsGeneric = (s: string): boolean => GENERIC_SEED_BAN.has(s.toLowerCase().trim());
 
-// The 6Ws terse rule: 3-4 words, HARD CAP <6 (max 5) — generous enough for a
-// double-barrel name / compound term, never a sentence. Seeds obey it: take the
-// first ≤5 words, then trim any trailing connective/preposition so a cap never
-// leaves a dangling "with"/"and"/"the".
+// faf-facts for seeds: a phrase is taken whole, never cut to a word count
+// (a cut gave fragments). Longer than one line (12 words) is a sentence, not
+// a phrase: nothing is seeded. A trailing connective ("with", "and", "the")
+// is trimmed so a phrase never dangles.
 const TERSE_TAIL = /^(?:with|and|or|using|for|to|that|who|whom|whose|the|a|an|in|on|of|via|by|&)$/i;
-function tersify(s: string, max = 5): string {
-  const words = s.trim().split(/\s+/).filter(Boolean).slice(0, max);
+const PHRASE_MAX_WORDS = 12;
+function wholePhrase(s: string): string {
+  const words = s.trim().split(/\s+/).filter(Boolean);
+  if (words.length > PHRASE_MAX_WORDS) {return '';}
   while (words.length && TERSE_TAIL.test(words[words.length - 1].replace(/[.,;:]+$/, ''))) {
     words.pop();
   }
@@ -388,12 +392,12 @@ export function seedSixWsFromGoal(goal: string): GoalSeed {
   const g = goal.trim();
 
   // WHAT — the leading noun phrase: drop a leading emoji/symbol, cut at the first
-  // structural delimiter, keep a clean 2-6 word verbatim phrase that isn't generic.
+  // structural delimiter, keep the whole verbatim phrase (2+ words) if it isn't generic.
   const lead = g
     .replace(/^[^A-Za-z0-9]+/, '')
     .split(/\s+(?:for|that|which|to)\s+|\s+[—–]\s+|\s-\s|:\s|\.\s|,\s/)[0]
     .trim();
-  const whatTerse = tersify(lead);                       // 3-4 words, cap <6
+  const whatTerse = wholePhrase(lead);                   // whole, never cut
   if (whatTerse.split(/\s+/).filter(Boolean).length >= 2 && !seedIsGeneric(whatTerse)) {
     seed.what = whatTerse;
   }

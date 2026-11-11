@@ -40,11 +40,11 @@ describe('ENGINE: WJTTC — the 8-Q core', () => {
     expect(SIX_WS_INTERVIEW.every((q) => q.required)).toBe(true);
   });
 
-  test('6W prompts carry the faf-facts rule: one line of facts, no waffle (not a word count)', () => {
+  test('6W prompts carry the faf-facts rule: one line, every word earns its place (not a word count)', () => {
     const sixWs = SIX_WS_INTERVIEW.filter((q) => q.path.startsWith('human_context.'));
     expect(sixWs.length).toBe(6);
     sixWs.forEach((q) => {
-      expect(q.question).toContain('(one line of facts, no waffle)');
+      expect(q.question).toContain('(one line, every word earns its place)');
       expect(q.question).not.toMatch(/3-4 words|terse/);
     });
   });

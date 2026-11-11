@@ -57,7 +57,7 @@ describe('BRAKE — facts only, generic banned, empty beats wrong', () => {
     expect(seedSixWsFromGoal('A fast incremental TypeScript type checker and language server for editors').what)
       .toBe('A fast incremental TypeScript type checker and language server');
     // Too long to be a phrase (over one line of 12 words): rejected, never cut.
-    expect(seedSixWsFromGoal('One tool that does a great many things across many different kinds of projects and teams every day').what).toBeUndefined();
+    expect(seedSixWsFromGoal('One tool doing a great many things across many different kinds of projects and teams every day').what).toBeUndefined();
     const goals = [
       'High-performance Rust CLI for Rust developers and xAI integrators who need fast compilation',
       'Token-Optimized AI Chat for developers building AI apps with Next.js and Vercel',

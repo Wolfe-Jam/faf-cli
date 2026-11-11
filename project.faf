@@ -58,7 +58,7 @@ stack:
   storage: slotignored
 human_context:
   who: Developers and teams using AI coding assistants
-  what: Persistent AI Context Standard — project DNA for AI. IANA-registered. Anthropic-merged.
+  what: IANA-registered CLI for persistent project context and agent memory
   why: Ends context re-discovery — define once, AI remembers forever
   where: npm registry, Homebrew, GitHub
   when: Production since September 2025; Bun-native since v6
