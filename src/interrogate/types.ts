@@ -113,6 +113,8 @@ export const SLOP_PATTERNS: readonly RegExp[] = [
   /[a-z]{2,}\.[A-Z][a-z]{2,}/,
   // A heading line
   /^#{1,6}\s/,
+  // Two or more bold labels ("**Docs:** … **Chat:** …"): a label row
+  /\*\*[^*\n]{1,30}:\*\*[\s\S]*\*\*[^*\n]{1,30}:\*\*/,
 ];
 
 /** A notice, not a description of the project: maintenance status,
