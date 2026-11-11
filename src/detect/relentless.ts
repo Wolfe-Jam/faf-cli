@@ -121,7 +121,7 @@ function cleanReadme(dir: string): string {
   return dropSetextTitle(txt
     .replace(/<!--[\s\S]*?-->/g, '') // HTML comment blocks (asset notes, TODOs — not prose)
     .split('\n'))
-    .filter((l) => !/^\s*\[!\[/.test(l) && !/^\s*!\[/.test(l) && !/^\s*\[[^\]]+\]:\s*\S/.test(l)) // badge + ref-def lines
+    .filter((l) => !/^\s*\[!\[/.test(l) && !/^\s*!\[/.test(l) && !/^\s*\[[^\]]+\]:\s*\S/.test(l) && !/^\s*https?:\/\/\S*\)?\s*$/.test(l)) // badges, ref-defs, wrapped badge URL tails
     .join('\n')
     .replace(/<[^>]+>/g, '') // HTML tags
     .replace(/!\[[^\]]*\]\([^)]*\)/g, '') // inline images/badges
@@ -165,9 +165,17 @@ function isReferenceDefinitionBlock(p: string): boolean {
   return lines.length > 0 && lines.every((l) => /^\[[^\]]+\]:\s*\S/.test(l));
 }
 
+/** Folded badge continuation: one or more bare `https://…)` tokens, no real sentence. */
+function isBadgeUrlMash(p: string): boolean {
+  const t = p.trim();
+  if (!/^https?:\/\//.test(t)) {return false;}
+  return t.replace(/https?:\/\/\S+\)?/g, ' ').replace(/\s+/g, ' ').trim() === '';
+}
+
 function isNonProseIntro(p: string): boolean {
   const t = p.trim();
   if (isReferenceDefinitionBlock(t)) {return true;}
+  if (isBadgeUrlMash(t)) {return true;}
   // Blockquote callout — GitHub admonitions (> [!NOTE] / > [!WARNING]) included
   if (/^>/.test(t)) {return true;}
   // Code fence, list, numbered item or table: structure, not prose

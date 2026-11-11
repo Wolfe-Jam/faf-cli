@@ -45,6 +45,8 @@ function stripPreamble(content: string): string {
     if (/^(\*\*)?\[[^\]]+\]\([^)]*\)/.test(line) && /[|·•]/.test(line)) { i++; continue; }
     // Reference definitions: [circleci-image]: https://… (not [text](url) links)
     if (/^\[[^\]]+\]:\s*\S/.test(line)) { i++; continue; }
+    // Wrapped badge URL continuation lines (after a [![… line was dropped)
+    if (/^https?:\/\/\S*\)?\s*$/.test(line)) { i++; continue; }
     // Blank lines
     if (line === '') { i++; continue; }
     break;
@@ -79,6 +81,7 @@ function firstProseParagraph(content: string): string | null {
     // Stop at next heading / list / code / quote / table
     if (/^(#|>|```|---|\||\s*[-*+]\s|\d+\.\s)/.test(line)) {break;}
     if (/^\[[^\]]+\]:\s*\S/.test(line)) {continue;}
+    if (/^https?:\/\/\S*\)?\s*$/.test(line)) {continue;}
     // Skip pure-bold-tagline lines like "**For Grok. For the rockets.**"
     // (these are punchy spirit lines, not informative goal content)
     if (/^\*\*[^*]+\*\*\s*$/.test(line) && buf.length === 0) {continue;}

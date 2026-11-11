@@ -174,6 +174,14 @@ describe('BRAKE 3f: the preamble skips markup, never a prose line', () => {
     expect(s['human_context.what']?.value ?? '').not.toMatch(/circleci|\[.*\]:/);
   });
 
+  test('wrapped badge URL lines are not the first paragraph', () => {
+    const readme = '[![pypi](https://pypi.org)](https://pypi.org/project/numpy/)\nhttps://numfocus.org)\nhttps://pypi.org/project/numpy/)\n\nNumPy is the fundamental package for scientific computing with Python.\n';
+    const s = suggestIntent(repo(readme));
+    expect(JSON.stringify(s)).not.toMatch(/numfocus\.org\)/);
+    const what = s['human_context.what']?.value ?? s['project.goal']?.value ?? '';
+    expect(what).toContain('fundamental package');
+  });
+
   test('a ref-definition preamble does not become the goal or what', () => {
     const s = suggestIntent(repo('[bad-ref]: https://example.com/badge\n\nReal project does one thing well.\n'));
     expect(s['project.goal']?.value).toBe('Real project does one thing well.');
