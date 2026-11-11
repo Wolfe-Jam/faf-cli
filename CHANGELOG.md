@@ -20,7 +20,7 @@ AI suggests, you confirm. faf no longer writes your project's goal or six W's: i
 
 ### Changed
 - **Breaking for library users: `faf init` and `faf auto` no longer write `project.goal` or `human_context.*`.** Both were filled from the README and package.json, which put guesses in human slots. `assembleFreshFaf`, `updateExistingFaf` and `authorFafFromRepo` now return those slots empty. The score counts only what is in `project.faf`, so a fresh `init` scores lower and honestly. Files you already have are not changed: words in those slots, typed or filled by an earlier `init`, stay as they are.
-- **Suggestions are checked before they are shown.** Every source goes through one check that rejects markup, headings, link and nav rows, lists, TODOs, greetings, licence and install lines, calls to action, quotations, fragments, and anything over 280 characters (rejected, never cut). A long first paragraph gives its first sentence, whole. README headings match whole (`## How to install` is not `how`). A text is offered for one slot only, and so is a text that opens with it.
+- **Suggestions are checked before they are shown.** Every source goes through one check that rejects markup, headings, link, nav and label rows, lists, TODOs, greetings, licence and install lines, calls to action, quotations, fragments, and anything over 280 characters (rejected, never cut). A long first paragraph gives its first sentence, whole. README headings match whole (`## How to install` is not `how`). A text is offered for one slot only, and so is a text that opens with it.
 - **The README leads the goal**, then the package.json description, then Cargo.toml. A notice is never the goal or `what`: deprecated or unmaintained, sponsored by, hiring, where the docs are, requirements, moved or mirrored, merch, a question or a status label. A monorepo root's description (`monorepo for …`, `… monorepo root`) is not offered.
 - **Relentless no longer suggests misplaced facts or guesses:** no package.json scripts as `how`, no repository URL as `where`, no "built for …" or "our mission is …" sentence patterns.
 - **`how` means how it works:** the mechanism, and the choice that shapes the code. The question is "How does it work? (one line)", in line with the format (Wolfe-Jam/faf#20).
@@ -36,7 +36,7 @@ AI suggests, you confirm. faf no longer writes your project's goal or six W's: i
 - `faf go` with piped input kept only the first line when lines arrived together.
 - A suggestion no longer competes with words already in the slot (`None`, `N/A`, `unknown`), and the `init`/`auto` count matches what `faf go` offers.
 
-**Tests:** 2693 pass, 0 fail.
+**Tests:** 2696 pass, 0 fail.
 
 ## [8.9.0] - 2026-11-05 — The Write-Once Edition
 
