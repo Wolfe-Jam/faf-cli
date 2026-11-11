@@ -135,11 +135,11 @@ export const SIX_WS_INTERVIEW: InterviewQuestion<HumanSlotPath>[] = [
   },
   {
     path: 'human_context.when',
-    question: `When — timeline or stage? ${TERSE}`,
+    question: `When — what stage is it at, and since when? ${TERSE}`,
     header: 'When',
     type: 'text',
     required: true,
-    help: 'the stage it is at, or since when',
+    help: 'the stage it is at, and since when',
   },
   {
     path: 'human_context.how',

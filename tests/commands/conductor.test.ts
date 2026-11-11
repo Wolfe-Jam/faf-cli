@@ -34,7 +34,8 @@ describe('TYRE: conductor command', () => {
     expect(existsSync(join(testDir, 'project.faf'))).toBe(true);
     const content = parse(readFileSync(join(testDir, 'project.faf'), 'utf-8'));
     expect(content.project.name).toBe('conductor-app');
-    expect(content.project.goal).toBe('My conductor project');
+    // The goal is a human slot: the config description is shown, never written
+    expect(content.project.goal ?? '').toBe('');
     expect(content.project.main_language).toBe('Python');
   });
 

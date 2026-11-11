@@ -36,6 +36,12 @@ describe('BRAKE 3e: asProse keeps real text — only markdown links and emphasis
     expect(goalOf(d)).toBe(d);
   });
 
+  test('serde: * emphasis inside a word goes (markdown allows it); _ inside a word stays', () => {
+    expect(goalOf('Serde is a framework for *ser*ializing and *de*serializing Rust data')).toBe('Serde is a framework for serializing and deserializing Rust data');
+    expect(goalOf('Reads snake_case_names and **bold**ly a_b_c widget specs')).toBe('Reads snake_case_names and boldly a_b_c widget specs');
+    expect(goalOf('**Serde is a framework for *ser*ializing Rust data structures.**')).toBe('Serde is a framework for serializing Rust data structures.');
+  });
+
   test('emphasis markers go, the words stay', () => {
     expect(goalOf('A **fast** and __small__ parser for _plain_ YAML files')).toBe('A fast and small parser for plain YAML files');
   });
@@ -46,7 +52,7 @@ describe('BRAKE 3e: asProse keeps real text — only markdown links and emphasis
       'Hono - means flame🔥 in Japanese - is a small, simple, and ultrafast web framework built on Web Standards.',
     );
     const s = suggestIntent(repo(`${line}\n`, { description: 'Web framework for any JavaScript runtime.' }));
-    const w = s['human_context.what']?.value ?? '';
+    const w = s['project.goal']?.value ?? '';
     expect(w).not.toContain('_*');
     expect(w).toContain('means flame🔥 in Japanese');
   });
@@ -128,19 +134,19 @@ describe('BRAKE 3c: one text, one slot means the same text, not a shared phrase'
 
   test('the same text, give or take a full stop, is offered once', () => {
     const s = suggestIntent(repo('# Y\n\nFast YAML parser for widget teams.\n', { description: 'Fast YAML parser for widget teams' }));
-    expect(s['project.goal']?.value).toBe('Fast YAML parser for widget teams');
+    expect(s['project.goal']?.value).toBe('Fast YAML parser for widget teams.');
     expect(s['human_context.what']).toBeUndefined();
   });
 
   test('commander: the same words, one changed, are the same text', () => {
     const s = suggestIntent(repo('# commander\n\nThe complete solution for node.js command-line interfaces.\n', { description: 'the complete solution for node.js command-line programs' }));
-    expect(s['project.goal']?.value).toBe('the complete solution for node.js command-line programs');
+    expect(s['project.goal']?.value).toBe('The complete solution for node.js command-line interfaces.');
     expect(s['human_context.what']).toBeUndefined();
   });
 
-  test('when the description takes the goal, the README tagline is offered for what', () => {
-    const s = suggestIntent(repo('# notes\n\nTurn a folder of markdown notes into a fast static site in one command.\n', { description: 'Static site generator for markdown notes' }));
-    expect(s['project.goal']?.value).toBe('Static site generator for markdown notes');
+  test('when a ## Goal section takes the goal, the README tagline is offered for what', () => {
+    const s = suggestIntent(repo('# notes\n\nTurn a folder of markdown notes into a fast static site in one command.\n\n## Goal\n\nPublish a notes folder as a site with no setup at all.\n'));
+    expect(s['project.goal']).toEqual({ value: 'Publish a notes folder as a site with no setup at all.', source: 'README.md § Goal' });
     expect(s['human_context.what']).toEqual({ value: 'Turn a folder of markdown notes into a fast static site in one command.', source: 'README.md § first paragraph' });
   });
 });

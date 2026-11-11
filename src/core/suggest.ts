@@ -74,9 +74,9 @@ function packageDescription(dir: string, toolingRoot: boolean): string | null {
 /**
  * Suggestions for the goal and the six W's in `dir`. When `faf` (the current
  * .faf data) is given, a slot it already fills gets no suggestion — the
- * human's words are never second-guessed. Precedence is the order init used
- * to fill in: package.json description → README sections → Cargo.toml
- * description → Relentless (README + manifest, sourced).
+ * human's words are never second-guessed. Precedence: README (sections, then
+ * the tagline) → package.json description → Cargo.toml description →
+ * Relentless (README + manifest, sourced).
  */
 export function suggestIntent(dir: string, faf?: Record<string, unknown>): IntentSuggestions {
   const found = ((detectStack(dir) as { _meta?: { found?: string[] } })._meta?.found) ?? [];
@@ -97,11 +97,14 @@ export function suggestIntent(dir: string, faf?: Record<string, unknown>): Inten
     out[path] = { value: v, source: sourceName(source) };
   };
 
+  // The README leads: the project in its own words. The package.json
+  // description follows; it often describes the repo, not the project
+  // ("monorepo for svelte.dev").
+  offerReadme(dir, offer);
+
   const desc = packageDescription(dir, toolingRoot);
   offer('project.goal', desc, 'package.json description');
   offer('human_context.what', desc, 'package.json description');
-
-  offerReadme(dir, offer);
 
   offer('project.goal', interrogateCargo(dir).project?.goal, 'Cargo.toml description');
 
@@ -132,12 +135,27 @@ export function asProse(text: string, refs: ReadonlySet<string> = new Set()): st
     // Nested mixed markers (_**bold**_, **italic**) — strip before single/double passes
     .replace(/_\*\*(.+?)\*\*_/g, '$1')
     .replace(/\*\*_(.+?)_\*\*/g, '$1')
-    // Emphasis only around words, never inside an identifier
-    .replace(/(^|[^\w])(\*\*|__)(?=\S)(.+?)(?<=\S)\2(?!\w|\.\w)/g, '$1$3')
-    .replace(/(^|[^\w])([*_])(?=[^\s*_])(.+?)(?<=[^\s*_])\2(?!\w|\.\w)/g, '$1$3')
+    // `*` emphasis may sit inside a word (*ser*ializing, **bold**ly) and nest
+    // (**…*ser*…**): stripped until nothing changes. `_` only around words,
+    // never inside an identifier (snake_case, __init__.py).
+    .replace(/[\s\S]*/, stripStars)
+    .replace(/(^|[^\w])(__)(?=\S)(.+?)(?<=\S)\2(?!\w|\.\w)/g, '$1$3')
+    .replace(/(^|[^\w])(_)(?=[^\s_])(.+?)(?<=[^\s_])\2(?!\w|\.\w)/g, '$1$3')
     .replace(/`([^`]+)`/g, '$1'))
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+/** `t` without `*` / `**` emphasis markers, nested ones too. */
+function stripStars(t: string): string {
+  for (let i = 0; i < 4; i++) {
+    const next = t
+      .replace(/\*\*(?=\S)([^*\n]+?)(?<=\S)\*\*/g, '$1')
+      .replace(/\*(?=[^\s*])([^*\n]+?)(?<=[^\s*])\*/g, '$1');
+    if (next === t) {break;}
+    t = next;
+  }
+  return t;
 }
 
 const ENTITIES: Record<string, string> = {
@@ -161,10 +179,9 @@ function readmeRefs(dir: string): Set<string> {
   return new Set([...raw.matchAll(/^ {0,3}\[([^\]]+)\]:\s*\S/gm)].map(m => m[1].toLowerCase()));
 }
 
-/** The README's finds, each for its slot. When the description took the
- *  goal, the README's own tagline (its first paragraph or sentence) is what
- *  the project is, in its words: offered for `what` too — blocked if it is
- *  the same text. */
+/** The README's finds, each for its slot. When a `## Goal` / `## Use cases`
+ *  section took the goal, the README's tagline (its first paragraph or
+ *  sentence) is offered for `what` — blocked if it is the same text. */
 function offerReadme(dir: string, offer: (path: IntentPath, value: string | undefined, source: string) => void): void {
   const readme = interrogateReadmeSourced(dir);
   for (const [path, find] of Object.entries(readme)) {

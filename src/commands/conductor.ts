@@ -31,17 +31,19 @@ function conductorImport(configPath?: string): void {
   }
 
   const data: FafData = { faf_version: FAF_VERSION, project: {} };
+  // The goal is a human slot: a config description is shown, never written.
+  let description: string | undefined;
 
   // Try to read YAML/JSON files from the config directory or file
   if (existsSync(configPath) && configPath.endsWith('.json')) {
     const raw = JSON.parse(readFileSync(configPath, 'utf-8'));
     if (raw.name) {data.project!.name = raw.name;}
-    if (raw.description) {data.project!.goal = raw.description;}
+    if (raw.description) {description = raw.description;}
     if (raw.language) {data.project!.main_language = raw.language;}
   } else if (existsSync(configPath) && (configPath.endsWith('.yml') || configPath.endsWith('.yaml'))) {
     const raw = parse(readFileSync(configPath, 'utf-8'));
     if (raw.name) {data.project!.name = raw.name;}
-    if (raw.description) {data.project!.goal = raw.description;}
+    if (raw.description) {description = raw.description;}
     if (raw.language) {data.project!.main_language = raw.language;}
   } else {
     // Directory: scan for config files
@@ -53,7 +55,7 @@ function conductorImport(configPath?: string): void {
           try {
             const raw = JSON.parse(readFileSync(filePath, 'utf-8'));
             if (raw.name && !data.project!.name) {data.project!.name = raw.name;}
-            if (raw.description && !data.project!.goal) {data.project!.goal = raw.description;}
+            if (raw.description && !description) {description = raw.description;}
           } catch { /* skip malformed files */ }
         }
       }
@@ -70,7 +72,6 @@ function conductorImport(configPath?: string): void {
     const prev = readFaf(existing);
     if (!prev.project) {prev.project = {};}
     if (data.project!.name && !prev.project.name) {prev.project.name = data.project!.name;}
-    if (data.project!.goal && !prev.project.goal) {prev.project.goal = data.project!.goal;}
     if (data.project!.main_language && !prev.project.main_language) {prev.project.main_language = data.project!.main_language;}
     writeFaf(existing, prev, { onAliasKept: k => console.log(dim(`  ${aliasKeptNote(k)}`)) });
     console.log(`${fafCyan('◆')} conductor import  merged into ${existing}`);
@@ -78,6 +79,9 @@ function conductorImport(configPath?: string): void {
     const outPath = join(dir, 'project.faf');
     writeFaf(outPath, data);
     console.log(`${fafCyan('◆')} conductor import  created ${outPath}`);
+  }
+  if (description) {
+    console.log(dim(`  The config's description was not written: the goal is yours to fill in 'faf go' or 'faf edit project.goal'.\n  It said: ${description}`));
   }
 }
 
