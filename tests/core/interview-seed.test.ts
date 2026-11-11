@@ -52,19 +52,22 @@ describe('BRAKE — facts only, generic banned, empty beats wrong', () => {
     expect(seedSixWsFromGoal('Cloud platform for development teams')).toEqual({});
   });
 
-  test('B5 — seeded what/who obey the terse rule: <6 words, no dangling connective', () => {
+  test('B5 — faf-facts: a seeded what is the whole leading phrase, never cut; a sentence seeds nothing', () => {
+    // Facts, not words: the phrase before the first delimiter, whole.
+    expect(seedSixWsFromGoal('A fast incremental TypeScript type checker and language server for editors').what)
+      .toBe('A fast incremental TypeScript type checker and language server');
+    // Too long to be a phrase (over one line of 12 words): rejected, never cut.
+    expect(seedSixWsFromGoal('One tool that does a great many things across many different kinds of projects and teams every day').what).toBeUndefined();
     const goals = [
       'High-performance Rust CLI for Rust developers and xAI integrators who need fast compilation',
       'Token-Optimized AI Chat for developers building AI apps with Next.js and Vercel',
       'Universal .faf MCP server for software engineers using many different IDE tools daily',
     ];
     for (const goal of goals) {
-      const s = seedSixWsFromGoal(goal);
-      for (const v of [s.what, s.who]) {
-        if (!v) continue;
-        expect(v.split(/\s+/).filter(Boolean).length, `"${v}" <6 words`).toBeLessThan(6);
-        expect(/\b(?:with|and|or|using|for|to|that|the|of|by|via)$/i.test(v), `"${v}" dangling connective`).toBe(false);
-      }
+      const v = seedSixWsFromGoal(goal).what;
+      if (!v) continue;
+      expect(goal.startsWith(v) || goal.includes(v), `"${v}" verbatim`).toBe(true);
+      expect(/\b(?:with|and|or|using|for|to|that|the|of|by|via)$/i.test(v), `"${v}" dangling connective`).toBe(false);
     }
   });
 
