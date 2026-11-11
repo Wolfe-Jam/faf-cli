@@ -14,10 +14,13 @@
  * vocabulary exists. Question SEMANTICS align to core/slots.ts descriptions —
  * the slot is the meaning, the question is just its interview voice.
  *
- * Authoring rule baked into the prompts — faf-facts: every word earns its
- * place. Count facts, not words: one line, at most one sentence, no waffle. Short when
- * the fact is short (where: "npm, Homebrew, GitHub"); a full line when it
- * needs one (how: the mechanism and the choice that shapes the code).
+ * faf-facts: succinct, factual definitions for AI agents — every word earns
+ * its place. They are the human slots (the goal and six W's), not repo or
+ * stack slots: AI may only suggest them; a human reads, confirms and approves
+ * each one. Count facts, not words: one line, at most one sentence, no
+ * waffle. Short when the fact is short (where: "npm, Homebrew, GitHub"); a
+ * full line when it needs one (how: the mechanism and the choice that shapes
+ * the code).
  */
 
 import { SLOTS, SLOT_BY_PATH, isPlaceholder } from './slots.js';
