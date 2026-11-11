@@ -53,6 +53,21 @@ describe('BRAKE 3e: asProse keeps real text — only markdown links and emphasis
     expect(goalOf('Fast &amp; small HTTP client for edge workers')).toBe('Fast & small HTTP client for edge workers');
   });
 
+  test('invalid numeric entities do not throw and stay literal', () => {
+    const d = repo('A fast search tool &#1114112; for large codebases.\n');
+    expect(() => suggestIntent(d)).not.toThrow();
+    const g = suggestIntent(d)['project.goal']?.value ?? '';
+    expect(g).toContain('&#1114112;');
+    expect(g).not.toMatch(/[\uD800-\uDFFF]/);
+  });
+
+  test('lone-surrogate code points are not decoded into suggestions', () => {
+    const d = repo('Surrogate &#55296; test\n');
+    const g = suggestIntent(d)['project.goal']?.value ?? '';
+    expect(g).toContain('&#55296;');
+    expect(g).not.toMatch(/[\uD800-\uDFFF]/);
+  });
+
   test('Vec<u8> and Result<T> are type names, not HTML', () => {
     expect(goalOf('Fast Vec<u8> buffers for network code in Rust')).toBe('Fast Vec<u8> buffers for network code in Rust');
     expect(goalOf('Generic Result<T> types for TypeScript projects')).toBe('Generic Result<T> types for TypeScript projects');

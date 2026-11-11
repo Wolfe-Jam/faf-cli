@@ -45,7 +45,7 @@ function submit(state: FieldState): FieldDone {
   if (typed.toLowerCase() === 'quit') {return { kind: 'quit' };}
   if (typed.toLowerCase() === 'skip') {return { kind: 'skip' };}
   if (typed) {return { kind: 'value', value: typed };}
-  if (state.suggestion) {return { kind: 'value', value: state.suggestion };}
+  if (state.suggestion) {return { kind: 'value', value: wellFormed(state.suggestion) };}
   return { kind: 'skip' };
 }
 

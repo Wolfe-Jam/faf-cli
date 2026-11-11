@@ -141,9 +141,14 @@ const ENTITIES: Record<string, string> = {
   amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', mdash: '—', ndash: '–', hellip: '…', copy: '©', reg: '®', trade: '™',
 };
 
+/** Decode numeric/named entities; leave token on invalid or unsafe code points (no throw). */
 function decodeEntities(t: string): string {
-  return t.replace(/&(#\d+|[a-z]+);/gi, (all: string, e: string) =>
-    e.startsWith('#') ? String.fromCodePoint(Number(e.slice(1))) : ENTITIES[e.toLowerCase()] ?? all);
+  return t.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (all: string, e: string) => {
+    if (e[0] !== '#') {return ENTITIES[e.toLowerCase()] ?? all;}
+    const cp = e[1].toLowerCase() === 'x' ? Number.parseInt(e.slice(2), 16) : Number(e.slice(1));
+    if (!Number.isFinite(cp) || cp <= 0x1f || cp > 0x10ffff || (cp >= 0xd800 && cp <= 0xdfff)) {return all;}
+    return String.fromCodePoint(cp);
+  });
 }
 
 /** The labels the README defines for reference links (`[WSGI]: https://…`). */
