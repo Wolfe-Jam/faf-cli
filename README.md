@@ -70,7 +70,7 @@ pnpm dlx faf auto             # pnpm — zero install
 brew install wolfe-jam/faf/faf-cli && faf auto   # Homebrew (auto-taps)
 ```
 
-> `faf` with no arguments shows your project's score; `faf auto` detects and fills.
+> `faf` with no arguments shows your project's score. `faf auto` fills what it detects in the repo, and suggests the goal and six W's for you to confirm in `faf go`.
 
 ---
 
@@ -82,8 +82,8 @@ bunx faf-cli git https://github.com/facebook/react
 
 # Your own project
 bunx faf-cli init              # Create .faf
-bunx faf-cli auto              # Fill every tech slot from the repo, then score
-bunx faf-cli go                # Interactive interview to gold code
+bunx faf-cli auto              # Fill the tech slots from the repo, then score
+bunx faf-cli go                # Confirm the goal and six W's, suggested in gray
 ```
 
 ---
@@ -102,17 +102,17 @@ Run `faf` with no arguments:
 
 | Command | What it does |
 |---------|--------------|
-| `faf init` | Create `project.faf` from your local project |
+| `faf init` | Create `project.faf` from your local project; suggest the goal and six W's |
 | `faf git <url>` | Instant `.faf` from any GitHub repo (a shallow clone) |
-| `faf auto` | Detect stack, fill every slot it can, score |
-| `faf go` | Guided interview to fill the human-only slots |
+| `faf auto` | Detect the stack, fill the slots it detects, score; suggest the goal and six W's |
+| `faf go` | Fill the human slots: each suggestion in gray, Tab to edit, Enter to confirm |
 | `faf score` | Check AI-readiness (0–100%) |
 | `faf export` | Author `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.cursorrules` |
-| `faf sync` | `.faf` → `CLAUDE.md` (pull: Trophy-gated backfill) |
+| `faf sync` | `.faf` → `CLAUDE.md`, one way (faf's block only) |
 | `faf memory` | `.fafm` soul ops — convert Claude memory, etch, recall, ls, show |
 | `faf diff` / `log` | Semantic context diff + score timeline across git history |
 | `faf hooks --install` | Pre-commit guard against context regression |
-| `faf taf setup` | Write the CI workflow that prints a Test Receipt for every run (JavaScript with Jest, Vitest or Bun; Python; Go) |
+| `faf taf setup` | Write the CI workflow that prints a Test Receipt for every run (JavaScript with Jest, Vitest or Bun; Python; Go; Rust; Java with Maven or Gradle; .NET) |
 | `faf taf receipts` | Your Test Receipts in the terminal, newest first |
 | `faf compile` / `decompile` | `.faf` → `.fafb` **v2** sealed brick; `decompile` shows sections as JSON |
 | `faf check` | Validate a `.faf` file |
@@ -135,16 +135,15 @@ faf memory etch "a durable fact" --id my-fact
 faf memory show
 ```
 
-### What's New in v8.9.0 — The Write-Once Edition
+### What's New in v8.10.0 — The Human Slots Edition
 
-**A birth certificate that can't be reissued. `faf dna --verify` checks it against the commit that first saved it. Plus a lighter install, and every command documented.**
+**AI suggests, you confirm. faf no longer writes your project's goal or six W's: it suggests them, and you confirm each one in `faf go`.**
 
-- **Write-once.** `.faf-dna`, your project's birth certificate, is written once. Nothing in faf replaces it, and `faf init --force` now works like `--new`: a fresh `project.faf`, the certificate kept.
-- **`faf dna --verify`** compares the certificate with the commit that first added `.faf-dna`. Exit 0 if they match, 1 if they differ, 2 if there is nothing to check against yet. `faf init` and `faf dna` tell you when it isn't committed yet, with the command to run. faf never commits for you.
-- **A lighter install.** The package is under half its old size (2.35 MB unpacked, was 5.34 MB), and npm no longer installs an unused 6.4 MB copy of the Anthropic SDK.
-- **Every command documented**: the ones the README doesn't cover are on [docs.faf.one/more-commands](https://docs.faf.one/more-commands).
-- **Named skips.** `faf taf receipts` shows `+N newly skipped` when a receipt names a test that wasn't skipped before (faf-taf-git 2.5.0).
-- **Cleaned up.** Help flags that did nothing are gone, `init --output` keeps `.faf-dna` beside its file, `card init` won't overwrite a card written during its questions, and `faf wjttc` sees tiers on `.skipIf` / `.each` blocks.
+- **Suggestions in gray.** `faf go` shows each suggestion with where it came from (`README.md § Why`, `package.json description`). Tab to edit, Enter to confirm, type to replace, `skip` to leave it empty. `faf init`, `faf auto` and `faf git` say how many are waiting.
+- **Only facts are suggested.** Markup, greetings, install lines and fragments are rejected; a notice (deprecated, sponsored by, requires…) is never the goal; a long first paragraph gives its first sentence, whole. The README leads the goal.
+- **faf-facts.** The six W's ask for one line where every word earns its place. `how` is how it works; `when` is the stage it is at, and since when.
+- **Breaking for library users:** `assembleFreshFaf`, `updateExistingFaf` and `authorFafFromRepo` return the goal and six W's empty. Files you already have are not changed.
+- **`faf go` input.** Backspace removes a whole character (emoji, CJK), other questions use readline again, and piped answers are read in order.
 
 Earlier editions: [CHANGELOG.md](./CHANGELOG.md) · [Releases](https://github.com/Wolfe-Jam/faf-cli/releases)
 
@@ -182,8 +181,8 @@ Your own rules for the AI — *"use full words in identifiers," "use bun, not np
 ## Sync
 
 ```
-sync:      .faf  ──── 8ms ───→  CLAUDE.md   (pull: Trophy-gated backfill)
-tri-sync:  .faf  ──── 8ms ───→  CLAUDE.md + Claude Code's MEMORY.md   (Pro: faf's block only; Claude's notes kept)
+sync:      .faf  ───→  CLAUDE.md   (one way: faf's block only)
+tri-sync:  .faf  ───→  CLAUDE.md + Claude Code's MEMORY.md   (Pro: faf's block only; Claude's notes kept)
 ```
 
 ---
@@ -204,6 +203,7 @@ For a specific agent: [Grok, xAI & Cursor 👀](docs/faf-cli-for-agents.md) · [
 
 Pivotal releases — full history in [CHANGELOG.md](./CHANGELOG.md):
 
+- **v8.10 — Human Slots** — AI suggests the goal and six W's; you confirm each one in `faf go`.
 - **v8.9 — Write-Once** — a birth certificate that can't be reissued, checked against its birth commit.
 - **v8.0 — Always33** — one engine, one number: the same score everywhere.
 - **v7.1 — AGENTS.md** — `faf export --agents` authors a complete, non-destructive `AGENTS.md`.
@@ -252,7 +252,7 @@ src/
 > **Robust. Reliable. Next-level WJTTC tested.** — The Foundation Edition.
 
 ```bash
-bun test                       # extensive WJTTC + e2e suite
+npm test                       # extensive WJTTC + e2e suite
 ```
 
 - **WJTTC Build Resilience** — regression classes locked.

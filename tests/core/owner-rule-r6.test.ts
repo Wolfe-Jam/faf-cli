@@ -404,12 +404,12 @@ describe('BRAKE R6-7: faf decompile --output writes the file, by the render-hash
 // ── copy: the help, the TAF workflow, the README and the docs it links ────────
 
 describe('AERO R6-copy: what faf and faf auto do, in the words users read', () => {
-  test('faf auto --help and faf --help: "Fill every tech slot from the repo, then score"', () => {
+  test('faf auto --help and faf --help: "Fill the tech slots from the repo, then score"', () => {
     const d = mk('help');
     for (const args of [['auto', '--help'], ['--help']]) {
       const r = run(d, args);
       expect(r.status).toBe(0);
-      expect(r.out).toContain('Fill every tech slot from the repo, then score');
+      expect(r.out).toContain('Fill the tech slots from the repo, then score');
       expect(r.out).not.toContain('Zero to 100%');
     }
   });
@@ -423,9 +423,9 @@ describe('AERO R6-copy: what faf and faf auto do, in the words users read', () =
 
   test('the README and the agent guides it links: bare faf shows the score; the auto examples run faf auto; the hero badge is ✪', () => {
     const readme = read(join(ROOT, 'README.md'));
-    expect(readme).toContain("> `faf` with no arguments shows your project's score; `faf auto` detects and fills.");
+    expect(readme).toContain("> `faf` with no arguments shows your project's score. `faf auto` fills what it detects in the repo, and suggests the goal and six W's for you to confirm in `faf go`.");
     expect(readme).not.toContain('shorthand for `faf-cli auto`');
-    expect(readme).toContain('bunx faf-cli auto              # Fill every tech slot from the repo, then score');
+    expect(readme).toContain('bunx faf-cli auto              # Fill the tech slots from the repo, then score');
     expect(readme).toContain('https://img.shields.io/badge/FAF-%E2%9C%AA%20100%25-000000?labelColor=FF6B35');
     expect(readme).not.toContain('FAF-%F0%9F%8F%86%20100%25');
     for (const doc of ['faf-cli-for-agents.md', 'faf-cli-for-bun.md', 'faf-cli-for-claude.md']) {
