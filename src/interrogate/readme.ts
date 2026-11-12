@@ -24,6 +24,12 @@ const WHERE_SECTION = whole(SECTION_HEADINGS.where);
 const WHEN_SECTION = whole(SECTION_HEADINGS.when);
 const HOW_SECTION = whole(SECTION_HEADINGS.how);
 
+/** A short label, bold/italic markers paired ("**Home:**", "*Home*:", "__Home:__", "Home:"). */
+const LABEL = String.raw`(?:(\*\*|__|\*|_)[^*_[\]:]{1,30}(?::\1|\1:)|[^*_[\]:]{1,30}:)`;
+const LINK = String.raw`\[[^\]]+\]\([^)]*\)`;
+const LABEL_LINK = new RegExp(String.raw`^${LABEL}\s*(?:${LINK}|https?:\/\/\S+)\s*$`);
+const LINK_ROW = new RegExp(String.raw`^(?:${LABEL}\s*)?(?:\*\*)?${LINK}`);
+
 function stripPreamble(content: string): string {
   const lines = dropSetextTitle(content.split('\n'));
   let i = 0;
@@ -42,9 +48,9 @@ function stripPreamble(content: string): string {
     // The # title, when a banner came before it
     if (/^#\s/.test(line)) { i++; continue; }
     // A label and a link alone ("**Home:** [faf.one/grok](…)"): navigation
-    if (/^(\*\*)?[^*[\]]{1,30}:(\*\*)?\s*(\[[^\]]+\]\([^)]*\)|https?:\/\/\S+)\s*$/.test(line)) { i++; continue; }
-    // Link rows: [Docs](…) | [Blog](…) — navigation, not prose
-    if (/^(\*\*)?\[[^\]]+\]\([^)]*\)/.test(line) && /[|·•]|&bull;/i.test(line)) { i++; continue; }
+    if (LABEL_LINK.test(line)) { i++; continue; }
+    // Link rows, with or without a label: [Docs](…) | [Blog](…) — navigation, not prose
+    if (LINK_ROW.test(line) && /[|·•]|&bull;/i.test(line)) { i++; continue; }
     // Reference definitions: [circleci-image]: https://… (not [text](url) links)
     if (/^\[[^\]]+\]:\s*\S/.test(line)) { i++; continue; }
     // Wrapped badge URL continuation lines (after a [![… line was dropped)
