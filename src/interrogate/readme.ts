@@ -41,6 +41,8 @@ function stripPreamble(content: string): string {
     if (/^<\/?[a-z][\w-]*/i.test(line) && (BANNER_TAG.test(line) || line.replace(/<[^>]*>/g, '').trim() === '')) { i++; continue; }
     // The # title, when a banner came before it
     if (/^#\s/.test(line)) { i++; continue; }
+    // A label and a link alone ("**Home:** [faf.one/grok](…)"): navigation
+    if (/^(\*\*)?[^*[\]]{1,30}:(\*\*)?\s*(\[[^\]]+\]\([^)]*\)|https?:\/\/\S+)\s*$/.test(line)) { i++; continue; }
     // Link rows: [Docs](…) | [Blog](…) — navigation, not prose
     if (/^(\*\*)?\[[^\]]+\]\([^)]*\)/.test(line) && /[|·•]|&bull;/i.test(line)) { i++; continue; }
     // Reference definitions: [circleci-image]: https://… (not [text](url) links)

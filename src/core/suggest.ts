@@ -157,10 +157,10 @@ export function asProse(text: string, refs: ReadonlySet<string> = new Set()): st
 /** `t` without `*` / `**` emphasis markers, nested ones too. A marker is
  *  emphasis only when it opens on a letter, digit or emoji, after a space or the
  *  start (not maths such as a*b*c or x**2, not a path or glob star), and
- *  closes on a letter, digit or full stop. */
+ *  closes on a letter, digit, full stop or colon (**Zed:**). */
 function stripStars(t: string): string {
   for (let i = 0; i < 4; i++) {
-    const next = t.replace(/(?<![\w/.*\\])(\*\*?)(?=[\p{L}\p{N}\p{Extended_Pictographic}])([^*\n]*?[\p{L}\p{N}.!?)])\1(?!\*)/gu, '$2');
+    const next = t.replace(/(?<![\w/.*\\])(\*\*?)(?=[\p{L}\p{N}\p{Extended_Pictographic}])([^*\n]*?[\p{L}\p{N}.!?):])\1(?!\*)/gu, '$2');
     if (next === t) {break;}
     t = next;
   }

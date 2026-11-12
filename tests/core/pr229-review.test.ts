@@ -118,3 +118,20 @@ describe('BRAKE: one text, one slot, and only prose', () => {
     expect(suggestIntent(repo(null, { description: d }))['project.goal']).toBeUndefined();
   });
 });
+
+describe('BRAKE: label-and-link rows are not prose (grok-faf-mcp, found at the 8.10.0 gate)', () => {
+  test('**Home:** [link] / **Live demo:** [link] under the title is not the goal', () => {
+    const s = suggestIntent(repo('# grok-faf-mcp\n\n**Home:** [faf.one/grok](https://faf.one/grok)\n**Live demo:** [grok.faf.one](https://grok.faf.one)\n\nPersistent project context for xAI Grok, as an MCP server on a URL.\n'));
+    expect(s['project.goal']?.value).toBe('Persistent project context for xAI Grok, as an MCP server on a URL.');
+  });
+
+  test('two bold labels in one text are a label row', () => {
+    const s = suggestIntent(repo('# g\n\n**Docs:** see the site **Chat:** join us on Discord today\n', { description: 'A widget parser for small teams' }));
+    expect(s['project.goal']?.value).toBe('A widget parser for small teams');
+  });
+
+  test('a bold lead-in label on a real sentence is still prose', () => {
+    const s = suggestIntent(repo('# z\n\n**Zed:** a parser for widget specs in small teams.\n'));
+    expect(s['project.goal']?.value).toBe('Zed: a parser for widget specs in small teams.');
+  });
+});
