@@ -24,11 +24,18 @@ const WHERE_SECTION = whole(SECTION_HEADINGS.where);
 const WHEN_SECTION = whole(SECTION_HEADINGS.when);
 const HOW_SECTION = whole(SECTION_HEADINGS.how);
 
-/** A short label, bold/italic markers paired ("**Home:**", "*Home*:", "__Home:__", "Home:"). */
-const LABEL = String.raw`(?:(\*\*|__|\*|_)[^*_[\]:]{1,30}(?::\1|\1:)|[^*_[\]:]{1,30}:)`;
+/**
+ * A short label, with or without bold/italic markers ("**Home:**", "*Home*:",
+ * "__Home:__", "my_pkg:", even a half-bold "Home:**"), after an optional emoji.
+ * Only ever matched with links after it, so a lead-in on prose is untouched.
+ */
+const MARK = String.raw`(?:\*\*|__|\*|_)`;
+const EMOJI = String.raw`(?:(?:\p{Extended_Pictographic}|\p{Emoji_Modifier}|\u200d|\ufe0f)+\s*)?`;
+const LABEL = String.raw`${EMOJI}${MARK}?[^*[\]:]{1,30}(?::${MARK}?|${MARK}:)`;
 const LINK = String.raw`\[[^\]]+\]\([^)]*\)`;
-const LABEL_LINK = new RegExp(String.raw`^${LABEL}\s*(?:${LINK}|https?:\/\/\S+)\s*$`);
-const LINK_ROW = new RegExp(String.raw`^(?:${LABEL}\s*)?(?:\*\*)?${LINK}`);
+// A link alone, or with a short note in brackets after it ("(mirror)")
+const LABEL_LINK = new RegExp(String.raw`^${LABEL}\s*(?:${LINK}|https?:\/\/\S+)(?:\s*\([^()]{1,30}\))?\s*$`, 'u');
+const LINK_ROW = new RegExp(String.raw`^(?:${LABEL}\s*)?(?:\*\*)?${LINK}`, 'u');
 
 function stripPreamble(content: string): string {
   const lines = dropSetextTitle(content.split('\n'));
