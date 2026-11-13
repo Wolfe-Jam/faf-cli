@@ -6,7 +6,7 @@
 |-------|-------------|
 | `/faf-score` | Score your `.faf` (0-100%) — runs in background while you work |
 | `/faf-auto` | Fill the tech slots from the repo, then score |
-| `/faf-go` | Guided interview to Gold Code |
+| `/faf-go` | Guided interview to Trophy ✪: the goal and six W's suggested, you confirm |
 | `/faf-init` | Create `.faf` from your project |
 | `/faf-sync` | `.faf` → CLAUDE.md (pull: Trophy-gated backfill) |
 | `/faf-status` | Quick health check (<200ms) |

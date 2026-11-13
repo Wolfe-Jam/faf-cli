@@ -1,4 +1,4 @@
-# FAF GO Demo - Guided Path to Gold Code
+# FAF GO Demo - Guided Path to Trophy
 # VHS tape file - renders to GIF
 
 # Configuration
@@ -10,7 +10,7 @@ Set Theme "Catppuccin Mocha"
 Set Padding 20
 
 # Show the terminal
-Type "# FAF GO - Guided Interview to Gold Code"
+Type "# FAF GO - Guided Interview to Trophy"
 Enter
 Sleep 1s
 
@@ -38,6 +38,6 @@ Sleep 2s
 
 Type "# Try it: just type 'faf go' and answer questions"
 Enter
-Type "# till you hit Gold Code (100%)"
+Type "# till you hit Trophy (100%)"
 Enter
 Sleep 2s

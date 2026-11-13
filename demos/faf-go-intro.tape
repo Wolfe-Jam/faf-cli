@@ -1,4 +1,4 @@
-# FAF GO - Guided Path to Gold Code
+# FAF GO - Guided Path to Trophy
 # Demo: Introduction to faf go command
 
 Output demos/faf-go-intro.gif
@@ -10,7 +10,7 @@ Set Padding 20
 Set TypingSpeed 50ms
 
 # Title
-Type "# faf go - Your Guide to Gold Code"
+Type "# faf go - Your Guide to Trophy"
 Enter
 Sleep 1s
 
@@ -31,6 +31,6 @@ Sleep 3s
 # Outro
 Type ""
 Enter
-Type "# Answer questions -> Reach 100% -> Gold Code!"
+Type "# Confirm the suggestions -> Reach 100% -> Trophy"
 Enter
 Sleep 2s
