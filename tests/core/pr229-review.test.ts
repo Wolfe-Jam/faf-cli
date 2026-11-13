@@ -165,3 +165,27 @@ describe('BRAKE: label rows with several links, any emphasis, and callouts (late
     expect(s['project.goal']?.value).toBe('Zed: a parser for widget specs in small teams.');
   });
 });
+
+describe('BRAKE: review of #233 — stray markers, emoji labels, underscores, bracket notes', () => {
+  const PROSE = 'A tiny parser for widget config files.';
+  test.each([
+    ['half-bold label', 'Home:** [faf.one](https://faf.one)'],
+    ['emoji before a bold label', '🏠 **Home:** [faf.one](https://faf.one)'],
+    ['emoji before a plain label', '📖 Docs: https://docs.example.com'],
+    ['underscore in a label', 'my_pkg: [docs](https://a.io) · [src](https://b.io)'],
+    ['a short bracket note after the link', '**Home:** [faf.one](https://faf.one) (mirror)'],
+  ])('%s is navigation, not the goal', (_name, row) => {
+    const s = suggestIntent(repo(`# demo\n\n${row}\n\n${PROSE}\n`));
+    expect(s['project.goal']?.value).toBe(PROSE);
+  });
+
+  test('a suggestion that still carries ** after cleaning is never offered', () => {
+    const s = suggestIntent(repo('# demo\n\n*Home:** a parser for widget specs in small teams.\n', { description: 'A widget parser for small teams' }));
+    expect(s['project.goal']?.value).toBe('A widget parser for small teams');
+  });
+
+  test('a dunder inside a code span is not a stray marker', () => {
+    const s = suggestIntent(repo('# demo\n\nA parser that reads `__init__.py` files for small teams.\n'));
+    expect(s['project.goal']?.value).toContain('__init__.py');
+  });
+});
