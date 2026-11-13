@@ -1,7 +1,7 @@
 {
   "name": "faf-cli",
   "version": "8.10.0",
-  "description": "Persistent AI context + memory — .faf and .fafm, IANA-registered. Anthropic-merged.",
+  "description": "Persistent AI context + memory — .faf and .fafm, IANA-registered. AI suggests your goal and six W's; you confirm. Anthropic-merged.",
   "type": "module",
   "icon": "https://faf.one/orange-smiley.svg",
   "logo": "https://faf.one/orange-smiley.svg",
