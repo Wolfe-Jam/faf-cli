@@ -94,7 +94,7 @@ Run `faf` with no arguments:
 
 ![faf](./nelly.png)
 
-> **faf-cli dogfoods itself** — [project.faf](./project.faf) is source DNA; [CLAUDE.md](./CLAUDE.md) and [GEMINI.md](./GEMINI.md) are authored from it via `faf`. [AGENTS.md](./AGENTS.md) is the **BETTER** ops briefing (hand-kept for agents; `faf export --agents` still authors AGENTS.md for other repos).
+> **faf-cli dogfoods itself** — [project.faf](./project.faf) is source DNA; [CLAUDE.md](./CLAUDE.md), [GEMINI.md](./GEMINI.md) and [AGENTS.md](./AGENTS.md) are authored from it via `faf export`; AGENTS.md keeps a hand-written section below faf's block.
 
 ---
 
@@ -140,7 +140,7 @@ faf memory show
 **AI suggests, you confirm. faf no longer writes your project's goal or six W's: it suggests them, and you confirm each one in `faf go`.**
 
 - **Suggestions in gray.** `faf go` shows each suggestion with where it came from (`README.md § Why`, `package.json description`). Tab to edit, Enter to confirm, type to replace, `skip` to leave it empty. `faf init`, `faf auto` and `faf git` say how many are waiting.
-- **Only facts are suggested.** Markup, greetings, install lines and fragments are rejected; a notice (deprecated, sponsored by, requires…) is never the goal; a long first paragraph gives its first sentence, whole. The README leads the goal.
+- **Only facts are suggested.** Markup, link and label rows, greetings, install lines and fragments are rejected; a notice or callout (deprecated, sponsored by, `Warning:`…) is never the goal; a long first paragraph gives its first sentence, whole. The README leads the goal.
 - **faf-facts.** The six W's ask for one line where every word earns its place. `how` is how it works; `when` is the stage it is at, and since when.
 - **Breaking for library users:** `assembleFreshFaf`, `updateExistingFaf` and `authorFafFromRepo` return the goal and six W's empty. Files you already have are not changed.
 - **`faf go` input.** Backspace removes a whole character (emoji, CJK), other questions use readline again, and piped answers are read in order.
