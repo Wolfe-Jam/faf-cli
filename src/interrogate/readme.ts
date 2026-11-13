@@ -24,6 +24,19 @@ const WHERE_SECTION = whole(SECTION_HEADINGS.where);
 const WHEN_SECTION = whole(SECTION_HEADINGS.when);
 const HOW_SECTION = whole(SECTION_HEADINGS.how);
 
+/**
+ * A short label, with or without bold/italic markers ("**Home:**", "*Home*:",
+ * "__Home:__", "my_pkg:", even a half-bold "Home:**"), after an optional emoji.
+ * Only ever matched with links after it, so a lead-in on prose is untouched.
+ */
+const MARK = String.raw`(?:\*\*|__|\*|_)`;
+const EMOJI = String.raw`(?:(?:\p{Extended_Pictographic}|\p{Emoji_Modifier}|\u200d|\ufe0f)+\s*)?`;
+const LABEL = String.raw`${EMOJI}${MARK}?[^*[\]:]{1,30}(?::${MARK}?|${MARK}:)`;
+const LINK = String.raw`\[[^\]]+\]\([^)]*\)`;
+// A link alone, or with a short note in brackets after it ("(mirror)")
+const LABEL_LINK = new RegExp(String.raw`^${LABEL}\s*(?:${LINK}|https?:\/\/\S+)(?:\s*\([^()]{1,30}\))?\s*$`, 'u');
+const LINK_ROW = new RegExp(String.raw`^(?:${LABEL}\s*)?(?:\*\*)?${LINK}`, 'u');
+
 function stripPreamble(content: string): string {
   const lines = dropSetextTitle(content.split('\n'));
   let i = 0;
@@ -42,9 +55,9 @@ function stripPreamble(content: string): string {
     // The # title, when a banner came before it
     if (/^#\s/.test(line)) { i++; continue; }
     // A label and a link alone ("**Home:** [faf.one/grok](…)"): navigation
-    if (/^(\*\*)?[^*[\]]{1,30}:(\*\*)?\s*(\[[^\]]+\]\([^)]*\)|https?:\/\/\S+)\s*$/.test(line)) { i++; continue; }
-    // Link rows: [Docs](…) | [Blog](…) — navigation, not prose
-    if (/^(\*\*)?\[[^\]]+\]\([^)]*\)/.test(line) && /[|·•]|&bull;/i.test(line)) { i++; continue; }
+    if (LABEL_LINK.test(line)) { i++; continue; }
+    // Link rows, with or without a label: [Docs](…) | [Blog](…) — navigation, not prose
+    if (LINK_ROW.test(line) && /[|·•]|&bull;/i.test(line)) { i++; continue; }
     // Reference definitions: [circleci-image]: https://… (not [text](url) links)
     if (/^\[[^\]]+\]:\s*\S/.test(line)) { i++; continue; }
     // Wrapped badge URL continuation lines (after a [![… line was dropped)

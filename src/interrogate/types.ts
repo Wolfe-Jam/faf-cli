@@ -134,6 +134,7 @@ const NOTICES: readonly RegExp[] = [
   /^moved to\b|\b(has )?moved to\b|\bmirror of\b/i,
   /^(requires?|needs)\b/i,
   /^status\s*:/i,
+  /^(warning|important|note|caution|attention|heads[- ]up|disclaimer|notice|danger)\s*:/i,
   /\b(t-?shirts?|mugs|stickers|merch(andise)?|donate|sponsor (us|me))\b/i,
   /^(?:\p{Extended_Pictographic}|\p{Emoji_Modifier}|\u200d|\ufe0f|\s)+[\p{L}\p{N} '-]{1,30}:\s/u,
 ];

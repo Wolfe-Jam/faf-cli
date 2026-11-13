@@ -95,7 +95,7 @@ export function suggestIntent(dir: string, faf?: Record<string, unknown>): Inten
     // The same text, or one that opens with an offered text as its first sentence
     const first = firstSentence(v);
     const firstKey = first && first !== v ? words(first) : null;
-    if (!isValidExtraction(v) || wrongSlot(path, v) || offered.some(o => sameText(o, key) || o === firstKey)) {return;}
+    if (!isValidExtraction(v) || strayMarkers(value, refs) || wrongSlot(path, v) || offered.some(o => sameText(o, key) || o === firstKey)) {return;}
     offered.push(key);
     if (firstKey) {offered.push(firstKey);}
     out[path] = { value: v, source: sourceName(source) };
@@ -203,6 +203,11 @@ function offerReadme(dir: string, offer: (path: IntentPath, value: string | unde
   for (const [path, find] of Object.entries(interrogateReadmeSourced(dir))) {
     if (isIntentPath(path)) {offer(path, find.value, find.source);}
   }
+}
+
+/** "**" left after cleaning: broken markdown, never prose. Code spans don't count. */
+function strayMarkers(value: string, refs: ReadonlySet<string>): boolean {
+  return asProse(value.replace(/`[^`]*`/g, ' '), refs).includes('**');
 }
 
 /** Letters and digits only, lower case: the words of a text. */

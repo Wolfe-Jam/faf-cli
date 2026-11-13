@@ -135,3 +135,57 @@ describe('BRAKE: label-and-link rows are not prose (grok-faf-mcp, found at the 8
     expect(s['project.goal']?.value).toBe('Zed: a parser for widget specs in small teams.');
   });
 });
+
+describe('BRAKE: label rows with several links, any emphasis, and callouts (late check of #232)', () => {
+  const PROSE = 'A tiny parser for widget config files.';
+  test.each([
+    '**Docs:** [a](https://a.io) · [b](https://b.io)',
+    '**Links:** [Docs](https://a.io) | [Discord](https://b.io)',
+    'Links: [Docs](https://a.io) • [Blog](https://b.io)',
+    '*Home:* [faf.one](https://faf.one)',
+    '__Home:__ [faf.one](https://faf.one)',
+    '_Home:_ [faf.one](https://faf.one)',
+  ])('%s under the title is navigation, not the goal', (row) => {
+    const s = suggestIntent(repo(`# demo\n\n${row}\n\n${PROSE}\n`));
+    expect(s['project.goal']?.value).toBe(PROSE);
+  });
+
+  test.each([
+    '**Warning:** this breaks on Windows.',
+    '**Important:** read the migration guide before you upgrade.',
+    '> **Note:** the API changes in the next major release.',
+    'Caution: this package rewrites your config files.',
+  ])('a callout (%s) is never the goal', (callout) => {
+    const s = suggestIntent(repo(`# demo\n\n${callout}\n`, { description: 'A widget parser for small teams' }));
+    expect(s['project.goal']?.value).toBe('A widget parser for small teams');
+  });
+
+  test('a lead-in label on a real sentence is still prose', () => {
+    const s = suggestIntent(repo('# z\n\n*Zed:* a parser for widget specs in small teams.\n'));
+    expect(s['project.goal']?.value).toBe('Zed: a parser for widget specs in small teams.');
+  });
+});
+
+describe('BRAKE: review of #233 — stray markers, emoji labels, underscores, bracket notes', () => {
+  const PROSE = 'A tiny parser for widget config files.';
+  test.each([
+    ['half-bold label', 'Home:** [faf.one](https://faf.one)'],
+    ['emoji before a bold label', '🏠 **Home:** [faf.one](https://faf.one)'],
+    ['emoji before a plain label', '📖 Docs: https://docs.example.com'],
+    ['underscore in a label', 'my_pkg: [docs](https://a.io) · [src](https://b.io)'],
+    ['a short bracket note after the link', '**Home:** [faf.one](https://faf.one) (mirror)'],
+  ])('%s is navigation, not the goal', (_name, row) => {
+    const s = suggestIntent(repo(`# demo\n\n${row}\n\n${PROSE}\n`));
+    expect(s['project.goal']?.value).toBe(PROSE);
+  });
+
+  test('a suggestion that still carries ** after cleaning is never offered', () => {
+    const s = suggestIntent(repo('# demo\n\n*Home:** a parser for widget specs in small teams.\n', { description: 'A widget parser for small teams' }));
+    expect(s['project.goal']?.value).toBe('A widget parser for small teams');
+  });
+
+  test('a dunder inside a code span is not a stray marker', () => {
+    const s = suggestIntent(repo('# demo\n\nA parser that reads `__init__.py` files for small teams.\n'));
+    expect(s['project.goal']?.value).toContain('__init__.py');
+  });
+});
