@@ -89,7 +89,7 @@ program
 
 program
   .command('go')
-  .description('Guided interview to gold code')
+  .description('Confirm the goal and six W\'s, suggested in gray, then fill the rest')
   .option('--resume', 'Resume previous session')
   .action((options) => goCommand(options));
 

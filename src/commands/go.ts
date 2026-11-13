@@ -113,7 +113,7 @@ function questionLine(slot: SlotDef, current: unknown): string {
   return `  ${bold(`#${slot.index}`)} ${questionForSlot(slot.path)} ${dim(`(${slot.path})`)}${keep}: `;
 }
 
-/** Guided interview to gold code */
+/** Guided interview to Trophy ✪: the goal and six W's suggested, the user confirms */
 export async function goCommand(options: GoOptions = {}): Promise<void> {
   assertProjectCwd(process.cwd(), 'faf go');
   const fafPath = findFafFile();

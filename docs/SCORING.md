@@ -10,7 +10,7 @@
 
 | Tier | Score | Status |
 |------|-------|--------|
-| ✪ **Trophy** | 100% | AI never has to guess — Gold Code (work glyph; social 🏆) |
+| ✪ **Trophy** | 100% | AI never has to guess — AI is optimized to code (work glyph; social 🏆) |
 | ★ **Gold** | 99%+ | 1 slot from Trophy |
 | ◆ **Silver** | 95%+ | Close — keep going |
 | ◇ **Bronze** | 85%+ | Interim — keep going |

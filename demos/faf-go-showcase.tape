@@ -1,4 +1,4 @@
-# FAF GO - Guided Path to Gold Code
+# FAF GO - Guided Path to Trophy
 # The new 2026 feature for reaching 100% AI-Readiness
 
 Output "faf-go-showcase.gif"
@@ -11,7 +11,7 @@ Set Padding 20
 Set TypingSpeed 35ms
 
 # Title
-Type "# faf go - Your Guide to Gold Code"
+Type "# faf go - Your Guide to Trophy"
 Enter
 Sleep 1s
 
