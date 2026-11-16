@@ -1,0 +1,29 @@
+name: Refresh Context7 docs
+
+# Asks Context7 to re-index this library after a push to main, so agents get
+# the current docs without waiting for Context7's own schedule.
+# Docs: https://context7.com/docs/integrations/github-actions
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Context7 refresh
+        env:
+          CONTEXT7_API_KEY: ${{ secrets.CONTEXT7_API_KEY }}
+          LIBRARY: /${{ github.repository }}
+        run: |
+          if [ -z "$CONTEXT7_API_KEY" ]; then
+            echo "::notice::CONTEXT7_API_KEY is not set; skipping the Context7 refresh."
+            exit 0
+          fi
+          curl -sS --fail-with-body -X POST https://context7.com/api/v1/refresh \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $CONTEXT7_API_KEY" \
+            -d "{\"libraryName\": \"${LIBRARY,,}\"}"
