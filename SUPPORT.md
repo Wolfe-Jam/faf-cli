@@ -23,7 +23,7 @@ In-terminal help:
 ```bash
 faf --help              # global help
 faf <command> --help    # per-command help
-faf info                # version + system info
+faf info                # faf and kernel versions
 ```
 
 ---
@@ -91,23 +91,11 @@ Supported types, and the slots each one counts, are listed in [docs/SCORING.md](
 
 ```bash
 faf check                      # validate .faf file
-ls CLAUDE.md                   # confirm target exists in cwd
-faf sync                       # one-way push: .faf → CLAUDE.md
-faf sync --watch               # continuous push on file change
+faf sync                       # one way: .faf → CLAUDE.md (creates CLAUDE.md if missing)
+faf sync --watch               # the same, on every change
 ```
 
-Default sync is one-way (`.faf → CLAUDE.md`). The `.faf` is the canonical Foundational Context Layer; MD files never write back automatically.
-
-**MD → .faf direction (`faf sync --direction pull`) blocked**
-
-v6.6.0+ requires ✪ Trophy before allowing MD-to-`.faf` backfill. Below 100%, the gate refuses the operation:
-
-```
-× sync --pull blocked: requires ✪ Trophy (currently 81%)
-  MD → .faf backfill only runs at 100%. Reach Trophy with 'faf go', then retry.
-```
-
-Reach Trophy first (`faf go`), then `--direction pull` unlocks. See [docs/SYNC.md](docs/SYNC.md).
+Sync runs one way only (`.faf → CLAUDE.md`). faf writes its own block in CLAUDE.md and keeps your text around it; CLAUDE.md never writes back into the `.faf`. To change a fact, edit `project.faf` (or `faf edit <path> <value>`), then run `faf sync`. See [docs/SYNC.md](docs/SYNC.md).
 
 ### Terminal output
 
@@ -115,7 +103,7 @@ Reach Trophy first (`faf go`), then `--direction pull` unlocks. See [docs/SYNC.m
 
 ```bash
 echo $TERM                     # check terminal type
-faf score --no-color           # disable colors if your terminal can't render them
+NO_COLOR=1 faf score           # turn colors off (no-color.org)
 ```
 
 Windows users: use Windows Terminal or WSL — legacy `cmd.exe` doesn't render ANSI correctly.
@@ -128,8 +116,8 @@ Issues live at [github.com/Wolfe-Jam/faf-cli/issues](https://github.com/Wolfe-Ja
 
 **Include in a bug report:**
 
-- `faf info` output (version + system)
-- Node / Bun version
+- `faf info` output (faf and kernel versions)
+- Node / Bun version and OS
 - The exact command you ran
 - The full error message
 - What you expected vs what happened
@@ -138,7 +126,8 @@ Issues live at [github.com/Wolfe-Jam/faf-cli/issues](https://github.com/Wolfe-Ja
 
 ```markdown
 **faf info**:
-  faf-cli 6.6.0 · Node v20.10.0 · darwin-arm64
+  faf v8.10.0 · kernel 3.1.0
+**Node / OS**: Node v22.12.0 · macOS (arm64)
 
 **Command**: faf auto
 **Error**: "Cannot read property 'score' of undefined"
@@ -171,21 +160,9 @@ Do not file security issues publicly. See [SECURITY.md](SECURITY.md) for the pri
 
 ---
 
-## Debug mode
+## Command reference
 
-Enable verbose output when filing a bug:
-
-```bash
-DEBUG=faf:* faf score
-```
-
-The trace tells maintainers exactly what fired and where.
-
----
-
-## Command reference (v6)
-
-The full list lives in [README.md](README.md). Most-used:
+The full list lives in [README.md](README.md#commands). Most-used:
 
 ```bash
 faf init               # Create .faf from your project
@@ -195,12 +172,12 @@ faf score              # Check AI-readiness (0–100%)
 faf sync               # .faf → CLAUDE.md
 faf compile            # .faf → .fafb binary
 faf check              # Validate .faf
-faf info               # Version + system info
+faf info               # faf and kernel versions
 ```
 
 Workflow: **`init` → `auto` → `go` → 100%**.
 
-Run `faf --help` for the full 26-command list.
+Run `faf --help` for the full list, `faf <command> --help` for one command.
 
 ---
 
@@ -219,18 +196,14 @@ If commands are significantly slower, check disk I/O and project size first; lar
 
 ## Version support
 
-| Version line | Support |
-|--------------|---------|
-| **v6.x (current)** | Full support — patches, fixes, new features |
-| **v5.x** | Critical fixes only |
-| **v4.x and older** | No longer supported — upgrade to v6 |
-
-Always update to the latest:
+Fixes and new features ship in the latest 8.x release. On an older version, update first; the issue may already be fixed:
 
 ```bash
 npm update -g faf-cli
-faf info                       # confirm 6.x
+faf info                       # confirm 8.x
 ```
+
+faf-cli needs Node.js 22 or newer (or Bun).
 
 ---
 
@@ -255,7 +228,7 @@ Common contributions:
 - Bug fixes
 - Documentation improvements
 - Test coverage
-- New app-type detections (with real-world repo evidence — see `v6.6.md` doctrine memory)
+- New app-type detections (with real-world repo evidence)
 
 ---
 

@@ -52,7 +52,7 @@ faf init → faf auto → faf go → 🏆 Trophy 100%
 | `faf check` | Validate `.faf` structure |
 | `faf info` | Version + system info |
 
-Run `faf --help` for the full 26-command set.
+Run `faf --help` for the full command set.
 
 ## Scoring — Trophy 100% all-or-nothing
 
@@ -146,7 +146,7 @@ v6.6.0 uses **Mk4 canonical slot names** in user-facing docs: `db` (was `databas
                      GEMINI.md
 ```
 
-`faf sync --direction pull` (CLAUDE.md → .faf backfill of name, goal and language) is **Trophy-gated** — blocked below 100% to prevent overwriting canonical slots with prose drift.
+Sync runs one way only: nothing flows back from CLAUDE.md into `.faf`. Facts change in `.faf`, then `faf sync` writes them out.
 
 ## Receipts ladder
 
