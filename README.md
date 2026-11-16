@@ -77,7 +77,7 @@ brew install wolfe-jam/faf/faf-cli && faf auto   # Homebrew (auto-taps)
 ## Quick Start
 
 ```bash
-# ANY GitHub repo — one shallow clone, no install, 2 seconds
+# Any public GitHub repo — one shallow clone, no install (fills the tech slots)
 bunx faf-cli git https://github.com/facebook/react
 
 # Your own project
