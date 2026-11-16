@@ -33,7 +33,7 @@ project.faf  → structure for any AI  ← the scored source the others project 
 
 Claude Code reads `CLAUDE.md` (and `AGENTS.md`) at the start of every session. FAF makes those a projection of one scored source, not hand-kept files:
 
-1. **One-way sync** — `faf sync` writes faf's block in `CLAUDE.md` from `project.faf`: edit the `.faf` and `CLAUDE.md` follows. Nothing flows back into the `.faf` on its own; `faf sync --direction pull` backfills name, goal and language from `CLAUDE.md`, and only at ✪ Trophy.
+1. **One-way sync** — `faf sync` writes faf's block in `CLAUDE.md` from `project.faf`: edit the `.faf` and `CLAUDE.md` follows. Nothing flows back from `CLAUDE.md` into the `.faf`; facts change in the `.faf`.
 2. **Non-destructive** — FAF maintains a labeled block and preserves everything you wrote by hand.
 3. **Scored, not guessed** — `faf score` tells you whether Claude is starting from complete context or filling gaps by hallucination. Target the Trophy (100%) and every session starts from a full picture.
 4. **Git-native** — the `.faf` versions with your code, so context travels with the branch and matches the commit Claude is working on.

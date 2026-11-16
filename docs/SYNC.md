@@ -17,15 +17,7 @@ faf export --agents      # .faf → AGENTS.md (also --cursor, --gemini, --copilo
 
 **One direction:** `.faf → CLAUDE.md`. The `.faf` is the canonical Foundational Context Layer (FCL); CLAUDE.md is a downstream prose render. faf writes only its own block in CLAUDE.md — your text around it stays as you wrote it — and CLAUDE.md never writes back on its own.
 
-**The way back (`faf sync --direction pull`, CLAUDE.md → .faf) is Trophy-gated** (v6.6.0+). Backfilling from CLAUDE.md into a sub-Trophy `.faf` would overwrite canonical slots with prose that wasn't derived from `.faf` in the first place. The gate refuses the operation below 100%:
-
-```bash
-$ faf sync --direction pull
-× sync --pull blocked: requires ✪ Trophy (currently 81%)
-  MD → .faf backfill only runs at 100%. Reach Trophy with 'faf go', then retry.
-```
-
-Reach Trophy (`faf go`) first; then `--direction pull` backfills name, goal and language into `.faf`.
+There is no way back from CLAUDE.md into the `.faf`. To change a fact, edit `project.faf` (or `faf edit <path> <value>`, or `faf go` for the human slots), then run `faf sync`.
 
 ## tri-sync — free forever (ROM meets RAM)
 
