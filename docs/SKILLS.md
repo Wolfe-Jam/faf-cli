@@ -1,34 +1,33 @@
-# Claude Code Skills
+# Claude Code plugin: `/faf` and the faf-expert skill
 
-**FAF ships 16 skills** that run inside Claude Code sessions. Type `/` and go — no install, no setup.
+faf-cli is also a Claude Code plugin. It ships one slash command and one skill; everything else is the CLI.
 
-| Skill | What it does |
-|-------|-------------|
-| `/faf-score` | Score your `.faf` (0-100%) — runs in background while you work |
-| `/faf-auto` | Fill the tech slots from the repo, then score |
-| `/faf-go` | Guided interview to Trophy ✪: the goal and six W's suggested, you confirm |
-| `/faf-init` | Create `.faf` from your project |
-| `/faf-sync` | `.faf` → CLAUDE.md (pull: Trophy-gated backfill) |
-| `/faf-status` | Quick health check (<200ms) |
-| `/faf-formats` | TURBO-CAT discovers all formats |
-| `/faf-expert` | Deep `.faf` knowledge on demand |
-| `/commit` | Context-aware git commits powered by FAF |
-| `/pr` | Context-aware pull requests powered by FAF |
-| `/review` | Context-aware code reviews powered by FAF |
-| `/wjttc-builder` | Author championship-grade test suites |
-| `/wjttc-tester` | F1-inspired testing expert |
-| `/mcp-builder` | Guide for creating MCP servers |
-| `/pubblog` | Write release blog posts |
-| `/pubpro` | npm + MCP Registry publish protocol |
+| In the plugin | What it does |
+|---------------|--------------|
+| `/faf` | Runs `bunx faf` in the current folder and shows the output, then lists the ways to install the CLI |
+| `faf-expert` skill | Lets Claude answer questions about the `.faf` format, scoring, app-types and sync |
 
-## Why skills matter
+## Install
 
-Claude Code runs `faf score` in the background while you're coding. No context switch, no terminal tab, no waiting. The skill tells Claude what to do — the CLI does the work. You get a score without lifting a finger.
+In Claude Code:
 
-```
-You: "check the score"
-Claude: runs /faf-score in background, continues helping you code
-Claude: "100/100 ✪ — Trophy. Born at 33%, now 100% over 59 days."
+```text
+/plugin marketplace add Wolfe-Jam/faf-cli
+/plugin install faf@faf-marketplace
 ```
 
-Skills are defined in your Claude Code config. [Learn more about Claude Code skills](https://code.claude.com/docs/en/skills). Publish and discover skills on the [Anthropic Skills Registry](https://github.com/anthropics/skills).
+## Use
+
+```text
+/faf
+```
+
+For everything else, use the CLI from the terminal, or ask Claude to run it:
+
+```bash
+faf init     # create project.faf
+faf go       # fill the goal and six W's
+faf sync     # write CLAUDE.md from project.faf
+```
+
+Every command, with an example: [COMMANDS.md](COMMANDS.md).

@@ -181,19 +181,6 @@ Run `faf --help` for the full list, `faf <command> --help` for one command.
 
 ---
 
-## Performance expectations
-
-| Command | Target time |
-|---------|-------------|
-| `faf init` | < 50 ms |
-| `faf score` | < 50 ms |
-| `faf auto` | < 200 ms (varies with project size) |
-| `faf sync` | < 10 ms |
-
-If commands are significantly slower, check disk I/O and project size first; large monorepos legitimately take longer to scan.
-
----
-
 ## Version support
 
 Fixes and new features ship in the latest 8.x release. On an older version, update first; the issue may already be fixed:

@@ -8,10 +8,10 @@ Every README should answer these questions. Here's ours:
 |----------|--------|
 | **👥 WHO** is this for? | Developers using AI coding assistants (Claude, Gemini, Cursor, Grok, ChatGPT) |
 | **📦 WHAT** is it? | The package.json for AI context - IANA-registered format |
-| **🎯 WHY** do you need it? | 100% context (AI-scored), persists forever, syncs automatically - saves $1000s/developer |
+| **🎯 WHY** do you need it? | AI reads your project's facts from one scored file instead of rediscovering them each session |
 | **🌍 WHERE** does it work? | Everywhere AI needs context (Claude Code, Gemini CLI, Cursor, etc.) |
 | **⏰ WHEN** should you use it? | New projects (day one), existing projects (now), exploring repos (instantly) |
-| **🚀 HOW** does it work? | `bunx faf-cli git <url>`, `npx faf-cli git <url>` or `pnpm dlx faf git <url>` - No install, one shallow clone, 2 seconds |
+| **🚀 HOW** does it work? | `faf init` detects the stack, `faf go` asks for the goal and six W's, `faf sync` writes CLAUDE.md |
 
 **For AI:** Read the detailed sections below for full context.
 **For humans:** Use this pattern in YOUR README. Answer these 6 questions clearly.
@@ -44,17 +44,6 @@ Like `package.json` tells npm about dependencies, `project.faf` tells AI about y
 
 **IANA-registered format:** `application/vnd.faf+yaml` — An official standard, not just another .md file.
 
-### 💎 The Math
-
-| Without `project.faf` | With `project.faf` |
-|-----------------------|-------------------|
-| ~1,750 tokens/session verifying context | ~150 tokens once |
-| Risk: wrong guess = 7,500+ tokens rework | Zero risk |
-| Context drift accumulates | Drift impossible |
-| Hope | Trust |
-
-**91% fewer tokens. Zero risk. No drift.**
-
 ### What goes in a slot
 
 There are always 33 slots. Each one holds **one succinct fact**: text, or a number.
@@ -78,54 +67,14 @@ Write the app-type's own name: `type: cli`, not `cli-tool`; `type: mcp`, not `mc
 
 ### What FAF Actually Does
 
-**1. 100% Context Quality** — AI-scored with facts, not guesswork
-Every field in your `project.faf` is validated and scored. No more "I think this is a React app" — AI **knows** it is.
+**1. Scored context** — facts, not guesswork
+Every slot in your `project.faf` is validated and scored. `faf score` shows which slots are still empty.
 
-**2. Context Persists Forever** — Never lost, never re-explained
-Your project DNA is written once, read forever. No context drift across sessions, team members, or AI tools.
+**2. Context in the repo** — committed and versioned with the code
+`project.faf` lives beside `package.json`, so every session, teammate and AI tool reads the same facts.
 
 **3. Sync Keeps It Current** — One source of truth, one direction
 When your project evolves, `faf sync` rewrites the faf block in `CLAUDE.md` from `project.faf` (`project.faf` → `CLAUDE.md`, never the other way). Your own text in `CLAUDE.md` stays as you wrote it.
-
----
-
-### What That Actually Costs (Or Saves)
-
-**The DAAFT Tax** (Discover, Assume, Ask, Forget, Time+Tokens)
-
-Without `project.faf`, every AI session cycles through rediscovery:
-- ❌ AI re-discovers your project (wastes tokens)
-- ❌ AI asks questions you've answered before (wastes time)
-- ❌ AI makes wrong assumptions → rework (wastes developer hours)
-- ❌ Context drifts → compounding errors → project delays
-
-**The Economics:**
-- **Per developer:** $5,460/year + 84 hours lost productivity
-- **50-developer team:** $273,000–$507,630 annually
-- **91% of tokens** wasted on rediscovery instead of building
-
-**The Real Cost:**
-- Token waste (measurable: 91% wasted)
-- Time waste (expensive: $5,460/year per developer)
-- **Project failure** (catastrophic: 70% of projects fail, with 39% citing poor requirements and 57% citing communication breakdowns — both rooted in context loss)
-
-**Full analysis:** [faf.one/daaft](https://faf.one/daaft)
-
----
-
-### The Truth People Gloss Over
-
-Bad context → wrong assumptions → rework → delays → project failure.
-
-Good context isn't a "nice to have" — it's the foundation of AI-augmented development.
-
-**`project.faf` fixes this permanently.**
-
-At 100% AI Readiness:
-- AI knows your stack, goals, and conventions (scored with facts)
-- Zero clarifying questions needed (context persists)
-- CLAUDE.md stays current (`faf sync` writes it from `project.faf`)
-- Your project ships on time, within budget, with fewer surprises
 
 ---
 
@@ -135,7 +84,7 @@ At 100% AI Readiness:
 
 ### Official Integrations
 - **[Claude Code](https://claude.ai/download)** (Anthropic) — `faf sync` writes CLAUDE.md from project.faf; tri-sync also writes faf's block into the MEMORY.md Claude Code loads (one way: .faf → MEMORY.md)
-- **[Gemini CLI](https://github.com/google/generative-ai-cli)** (Google) — Import/export GEMINI.md
+- **[Gemini CLI](https://github.com/google/generative-ai-cli)** (Google) — `faf export --gemini` writes GEMINI.md
 - **[Antigravity IDE](https://antigravityide.com)** (Google) — Global config support
 - **[Conductor Extension](https://chromewebstore.google.com/detail/conductor)** (Google) — conductor/ directory sync
 
@@ -146,10 +95,10 @@ At 100% AI Readiness:
 
 ### Ecosystem
 - **[MCPaaS](https://mcpaas.live)** — MCP as a Service (The Endpoint for Context)
-- **[claude-faf-mcp](https://npmjs.com/package/claude-faf-mcp)** — MCP server for Claude (33 tools)
+- **[claude-faf-mcp](https://npmjs.com/package/claude-faf-mcp)** — MCP server for Claude (Core 14 tools, 30 with `FAF_TOOLS=all`)
 - **[grok-faf-mcp](https://npmjs.com/package/grok-faf-mcp)** — MCP server for Grok / xAI
 - **[gemini-faf-mcp](https://pypi.org/project/gemini-faf-mcp/)** — MCP server for Gemini / Google
-- **[faf-wasm-sdk](https://www.npmjs.com/package/faf-wasm-sdk)** — WASM SDK (322KB, sub-2ms scoring)
+- **[faf-wasm-sdk](https://www.npmjs.com/package/faf-wasm-sdk)** — WASM SDK
 - **[Chrome Extension](https://chromewebstore.google.com/detail/lnecebepmpjpilldfmndnaofbfjkjlkm)** — Browser integration
 - **[faf.one](https://faf.one)** — Official website
 
@@ -176,11 +125,11 @@ faf auto                    # Fill slots from repo facts
 ```
 
 ### Exploring Repos
-**Instantly.** Author context for ANY GitHub repo from one shallow clone:
+Author context for any public GitHub repo from one shallow clone:
 ```bash
 bunx faf-cli git https://github.com/facebook/react
-# 2 seconds → 95% ◆ Silver score
-# No install. One shallow clone. Just instant context.
+# writes ./project.faf with the tech slots filled from the repo;
+# the goal and six W's stay empty — only the people behind the repo know them
 ```
 
 ### Daily Workflow
@@ -207,12 +156,9 @@ Add to package.json to see FAF status every dev session:
 **Zero install, one shallow clone:**
 
 ```bash
-# Author AI context for ANY GitHub repo
+# Author AI context for any public GitHub repo
 bunx faf-cli git https://github.com/facebook/react
-# ⏱️ 2 seconds → 95% ◆ Silver score
-
-bunx faf-cli git https://github.com/sveltejs/svelte
-# ⏱️ 2 seconds → 95% ◆ Silver score
+bunx faf-cli git https://github.com/sveltejs/svelte --stdout   # print instead of writing ./project.faf
 ```
 
 > **Also works with npx:** Replace `bunx` with `npx` if you prefer npm.
@@ -228,26 +174,12 @@ bunx faf-cli go             # Interactive (completes the 6 Ws)
 
 ```bash
 bun install -g faf-cli    # Bun (recommended)
-npm install -g faf-cli    # or: brew install faf-cli
+npm install -g faf-cli    # or: brew install wolfe-jam/faf/faf-cli
 
-faf git <repo-url>        # 1-Click Context (90%+)
+faf git <repo-url>        # Context for any public repo (tech slots)
 faf go                    # Interactive to 100%
 faf auto                  # Full automation
 faf sync                  # project.faf → CLAUDE.md
 # run faf --help for every command
 ```
 
-### Traditional vs 1-Click Context
-
-**Traditional:**
-```bash
-git clone https://github.com/facebook/react  # 10-30 seconds
-cd react && npm install -g faf-cli && faf init
-# Total: ~45 seconds + local files
-```
-
-**1-Click:**
-```bash
-bunx faf-cli git https://github.com/facebook/react
-# Total: 2 seconds + ZERO local files
-```

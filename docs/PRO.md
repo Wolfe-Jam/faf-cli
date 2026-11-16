@@ -44,7 +44,7 @@ sync: `.faf` → `CLAUDE.md` (project structure). Free.
 tri-sync: also `.faf` → `MEMORY.md` (session memory). Also free.
 
 **Is there a paid tier for faf-cli?**
-No. Every command in faf-cli is free, unlimited, forever. Pro features (the Rust `.fafb` compiler suite — `faf compile`, `faf bench`, Glass Hood diagnostics) live in the separate `rust-faf-cli` package. See [faf.one/pro](https://faf.one/pro).
+No. Every command in faf-cli is free, unlimited, forever.
 
 ## Support
 
