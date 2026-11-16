@@ -102,13 +102,13 @@ Read the rationale; refute by inspection. **Glass Hood doctrine** — the CLI sh
 ## .faf file structure (current schema)
 
 ```yaml
-faf_version: 3.0
-app_type: cli
+faf_version: "3.0"
 
 project:
   name: my-project
   goal: One-line elevator pitch
   main_language: TypeScript
+  type: fullstack
 
 stack:
   framework: React
