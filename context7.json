@@ -2,7 +2,7 @@
   "$schema": "https://context7.com/schema/context7.json",
   "projectTitle": "faf-cli",
   "description": "CLI for .faf, an IANA-registered YAML format (application/vnd.faf+yaml) for a project's facts: stack, goal, commands. Detects them from the repo, scores how complete they are, and syncs or exports them to CLAUDE.md, AGENTS.md and other context files.",
-  "excludeFolders": ["tests", "demos", "public", "reports", ".gemini", "dist", "node_modules", "archive", "deprecated", "legacy"],
+  "excludeFolders": [".github", "tests", "demos", "public", "reports", ".gemini", "dist", "node_modules", "archive", "deprecated", "legacy"],
   "excludeFiles": [
     "CHANGELOG.md",
     "LICENSE.md",

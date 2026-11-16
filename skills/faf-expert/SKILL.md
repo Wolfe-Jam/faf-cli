@@ -1,6 +1,6 @@
 ---
 name: faf-expert
-description: Expert in the .faf format (Persistent Project Context for AI) and the faf-cli toolkit. Use when working with .faf files, scoring AI-readiness, syncing project context to CLAUDE.md, or discussing the Foundational Context Layer (FCL) doctrine. IANA-registered (application/vnd.faf+yaml). Anthropic-listed as "Persistent Project Context Server" (PR #2759, merged Oct 17 2025). Current CLI: v6.6.0 — The Trophy Edition.
+description: Expert in the .faf format (Persistent Project Context for AI) and the faf-cli toolkit. Use when working with .faf files, scoring AI-readiness, syncing project context to CLAUDE.md, or discussing the Foundational Context Layer (FCL) doctrine. IANA-registered (application/vnd.faf+yaml). Anthropic-listed as "Persistent Project Context Server" (PR #2759, merged Oct 17 2025).
 ---
 
 # FAF Expert — Persistent Project Context Specialist
@@ -20,7 +20,7 @@ The credo: **FAF defines. AGENTS.md instructs. AI codes.**
 
 - Creating, editing, or scoring `.faf` files
 - Syncing `.faf` → `CLAUDE.md`, or exporting it to `AGENTS.md`, `.cursorrules`, `GEMINI.md`
-- Diagnosing sub-Trophy scores and reaching 🏆 100%
+- Diagnosing sub-Trophy scores and reaching ✪ Trophy 100%
 - Explaining the FCL, tier system, or app-type ladder
 - Connecting `.faf` work to the broader receipts: IANA, Anthropic PR #2759, MCP Registry
 
@@ -30,7 +30,7 @@ The credo: **FAF defines. AGENTS.md instructs. AI codes.**
 bunx faf                       # Bun — zero install, fastest
 npx faf                        # npm — works everywhere
 npm install -g faf-cli         # global install
-brew install faf-cli           # Homebrew
+brew install wolfe-jam/faf/faf-cli   # Homebrew
 ```
 
 `faf` is the verb across every surface: `bunx faf`, `npx faf`, `/faf` (Claude Code plugin), `faf` (global). Bare `faf` shows your project's score; `faf auto` detects and fills.
@@ -38,7 +38,7 @@ brew install faf-cli           # Homebrew
 ## The workflow
 
 ```
-faf init → faf auto → faf go → 🏆 Trophy 100%
+faf init → faf auto → faf go → ✪ Trophy 100%
 ```
 
 | Command | What it does |
@@ -56,11 +56,11 @@ Run `faf --help` for the full command set.
 
 ## Scoring — Trophy 100% all-or-nothing
 
-From v6.6.0 onward, faf-cli recommends **only 🏆 Trophy**.
+From v6.6.0 onward, faf-cli recommends **only ✪ Trophy**.
 
 | Tier | Score | Status |
 |------|-------|--------|
-| 🏆 **Trophy** | 100% | AI never has to guess |
+| ✪ **Trophy** | 100% | AI never has to guess |
 | ★ **Gold** | 99%+ | 1 slot from Trophy |
 | ◆ **Silver** | 95%+ | Close — keep going |
 | ◇ **Bronze** | 85%+ | Interim — keep going |
@@ -75,12 +75,12 @@ From v6.6.0 onward, faf-cli recommends **only 🏆 Trophy**.
 Layer 4   AI tooling          ← AI optimised by complete FCL
 Layer 3   Agents              ← can act because FCL is complete
 Layer 2   MD instructions     ← can be re-authored correctly
-Layer 1   .faf (FCL)          ← 🏆 Trophy = complete = foundation
+Layer 1   .faf (FCL)          ← ✪ Trophy = complete = foundation
 ```
 
 100% on Layer 1 makes Layers 2–4 work. Sub-100% degrades every layer above — instructions miss context, agents guess, AI optimisation can't happen.
 
-🏆 is the only emoji. Sub-Trophy tiers use geometric Unicode (★ ◆ ◇ ● ○ ♡). The retired medal ladder (🥇🥈🥉🟢🟡🔴🤍) is history.
+✪ marks Trophy. Sub-Trophy tiers use geometric Unicode (★ ◆ ◇ ● ○ ♡). The retired medal ladder (🥇🥈🥉🟢🟡🔴🤍) is history.
 
 ## The app-types
 
