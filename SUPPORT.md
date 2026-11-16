@@ -162,7 +162,7 @@ Do not file security issues publicly. See [SECURITY.md](SECURITY.md) for the pri
 
 ## Command reference
 
-The full list lives in [README.md](README.md#commands). Most-used:
+Every command, with an example: [docs/COMMANDS.md](docs/COMMANDS.md). Most-used:
 
 ```bash
 faf init               # Create .faf from your project
