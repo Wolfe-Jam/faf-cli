@@ -39,6 +39,18 @@ export function filled(v: unknown): v is string {
 }
 
 /**
+ * The six W's that carry real content, in fixed order, as [label, value] pairs
+ * ("Who", "What", "Why", "Where", "When", "How"). Each renderer formats them in
+ * its host file's own style. Empty and slotignored slots are left out.
+ */
+export function sixWsFilled(data: { human_context?: Record<string, unknown> }): [string, string][] {
+  const hc = data.human_context ?? {};
+  return (['who', 'what', 'why', 'where', 'when', 'how'] as const)
+    .filter(k => filled(hc[k]))
+    .map(k => [slotLabel(`human_context.${k}`), (hc[k] as string).trim()]);
+}
+
+/**
  * The canonical display label for a .faf slot path, sourced from the slot
  * registry ("know your stack") — `stack.cicd` → "CI/CD", `stack.api_type` → "API".
  * Resolves legacy OR canonical paths (SLOT_BY_PATH is dual-keyed). Falls back to

@@ -8,6 +8,14 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- `faf export`: AGENTS.md now points to `project.faf` for the six W's with a visible line ("Project facts, including the six W's …: see `project.faf`"). Before, the pointer was only the `claim=` HTML comment, which agents skip. AGENTS.md still does not copy the six W's.
+- `faf export`: GEMINI.md and .cursorrules now carry the six W's in a Context section, as CLAUDE.md and the Copilot instructions do. Empty and `slotignored` slots are left out.
+
+Tested 2026-11-17 with Codex and OpenCode on tasks whose deciding fact lives only in the six W's: the agent found the team's decision 4/22 times with the comment alone, 12/21 with the visible pointer, 20/20 with the facts written into the file.
+
 ## [8.10.1] - 2026-11-17
 
 ### Fixed

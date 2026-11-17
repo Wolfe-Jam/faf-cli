@@ -3,7 +3,7 @@ import type { FafData } from '../core/types.js';
 import { FAF_CONTEXT_FILES } from '../core/safe-write.js';
 import { fafMetaTag } from './claude.js';
 import { injectFafBlock } from './inject.js';
-import { filled, slotLabel } from './labels.js';
+import { filled, sixWsFilled, slotLabel } from './labels.js';
 import { splitCommandNote } from './command-note.js';
 
 /** A value carrying real content — non-empty, not slotignored, non-empty array. */
@@ -98,6 +98,16 @@ export function renderGeminiMd(data: FafData): string {
       lines.push('## Stack');
       for (const s of stack) {lines.push(s);}
     }
+  }
+
+  // Context — the six W's, as in CLAUDE.md. GEMINI.md is a context file like
+  // CLAUDE.md, so it carries the human-confirmed facts, not only a pointer.
+  const ctx = sixWsFilled(data);
+  if (ctx.length > 0) {
+    lines.push('');
+    lines.push('## Context');
+    lines.push('');
+    for (const [label, value] of ctx) {lines.push(`- **${label}:** ${value}`);}
   }
 
   // Universal safety default — always renders, same as AGENTS.md's Guardrails.

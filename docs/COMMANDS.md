@@ -338,6 +338,8 @@ See [SYNC.md](SYNC.md).
 
 Writes agent files from `project.faf`. Bare `faf export` writes AGENTS.md, .cursorrules, GEMINI.md, Copilot instructions and project.html.
 
+AGENTS.md points to `project.faf` for the six W's (who, what, why, where, when, how). .cursorrules, GEMINI.md and the Copilot instructions carry them, as CLAUDE.md does.
+
 ```bash
 $ faf export --agents
   AGENTS.md

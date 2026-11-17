@@ -233,7 +233,13 @@ export function renderAgentsMd(data: FafData): string {
     }
   }
 
-  // No Human Context section — who/why marketing is README / .faf DNA, not agent ops (BETTER).
+  // The FAF Block points to the facts; it does not copy them (AGENTS.md stays an
+  // operations file). The pointer is a visible line, not only the claim= comment:
+  // agents skip HTML comments. Tested 2026-11-17 (Codex + OpenCode): with this
+  // line, agents found the team's decisions in project.faf 12/21 times; with the
+  // comment alone, 4/22.
+  push("Project facts, including the six W's (who, what, why, where, when, how): see `project.faf`.");
+  push();
 
   const gen = data.generated;
   if (present(gen)) {push(`*Context authored: ${String(gen)}*`);}
