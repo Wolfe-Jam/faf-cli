@@ -531,7 +531,7 @@ faf memory recall "json" --limit 5
 
 ### Test receipts in CI: `faf taf`
 
-`faf taf setup` prints a GitHub Actions workflow that writes a test receipt (`.taf`) for every run on main; `--write` creates `.github/workflows/taf.yml`. `faf taf receipts` lists them.
+`faf taf setup` prints a GitHub Actions workflow that writes a test receipt (`.taf`) for every run on main, red runs included; `--write` creates `.github/workflows/taf.yml`. It has two jobs: a test job with a read-only token that uploads its output, and faf-taf-git's receipt job, the only one that can write. `faf taf receipts` lists them.
 
 ```bash
 $ faf taf setup

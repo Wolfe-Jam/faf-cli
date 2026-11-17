@@ -433,7 +433,7 @@ jobs:
       - name: faf-taf-git's parser, the version faf pins
         run: |
           set -euo pipefail
-          VERSION=$(grep -oE "Wolfe-Jam/faf-taf-git@v[0-9.]+" src/commands/taf.ts | head -1 | sed 's/.*@v//')
+          VERSION=$(grep -oE "FAF_TAF_GIT_VERSION = 'v[0-9.]+'" src/commands/taf.ts | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
           TAF_GIT="$RUNNER_TEMP/faf-taf-git"
           mkdir -p "$TAF_GIT"
           npm install --prefix "$TAF_GIT" --no-save --no-audit --no-fund "faf-taf-git@$VERSION"
@@ -443,6 +443,26 @@ jobs:
         run: node tests/fixtures/taf-setup/prove-recipe.mjs "${{ matrix.lang }}" "$PROJECT" "$TAF_GIT"
 
   # Code Quality
+  # Every workflow `faf taf setup` writes: actionlint clean, and the receipt
+  # job's inputs are the ones the pinned receipt.yml declares.
+  taf-workflows:
+    name: taf setup workflows (actionlint + receipt.yml inputs)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24.x'
+      - run: npm ci
+      - run: npm run build
+      - name: Install actionlint
+        run: bash <(curl -sSfL https://raw.githubusercontent.com/rhysd/actionlint/v1.7.12/scripts/download-actionlint.bash) 1.7.12 "$RUNNER_TEMP"
+      - name: Check the generated workflows
+        run: node tests/fixtures/taf-setup/check-workflows.mjs "$RUNNER_TEMP/actionlint"
+
   quality:
     name: Code Quality
     runs-on: ubuntu-latest
@@ -469,41 +489,27 @@ jobs:
         run: npm run format -- --check
         continue-on-error: true
 
-  # TAF - Testing Activity Feed
+  # TAF - Testing Activity Feed: faf-taf-git's receipt job, the setup
+  # `faf taf setup` writes. !cancelled(): runs when the tests fail too, so a red
+  # run gets a FAILED receipt instead of a gap. The output is the ubuntu leg's;
+  # test-result is the whole matrix's, so any red leg records FAILED.
   taf:
     name: TAF Receipt
-    runs-on: ubuntu-latest
     needs: test
-    # !cancelled(): runs when the tests fail too, so a red run gets a FAILED receipt
-    # instead of a gap. The receipt is the test job's own run (ubuntu), not a second one.
     if: "!cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/main'"
     permissions:
       contents: write
-
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Get the test output
-        uses: actions/download-artifact@v7
-        with:
-          name: test-output
-          path: /tmp
-
-      - name: Generate TAF Receipt
-        uses: Wolfe-Jam/faf-taf-git@v2.6.0
-        with:
-          test-output-file: /tmp/test-output.txt
-          auto-commit: 'true'
-          commit-message: 'chore(taf): update .taf receipt [skip ci]'
-          target-branch: taf-receipts
+    uses: Wolfe-Jam/faf-taf-git/.github/workflows/receipt.yml@v2.7.0
+    with:
+      artifact-name: test-output
+      test-output-file: test-output.txt
+      test-result: ${{ needs.test.result }}
 
   # Championship Status
   status:
     name: Championship Status
     runs-on: ubuntu-latest
-    needs: [security, test, node-compat, windows, package-managers, taf-recipes, quality]
+    needs: [security, test, node-compat, windows, package-managers, taf-recipes, taf-workflows, quality]
     if: always()
 
     steps:

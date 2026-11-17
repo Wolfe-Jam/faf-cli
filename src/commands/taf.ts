@@ -33,7 +33,13 @@ export function isTafSnapshot(bytes: Uint8Array): boolean {
   }
 }
 
-const FAF_TAF_GIT = 'Wolfe-Jam/faf-taf-git@v2.6.0';
+/** The faf-taf-git release the workflow uses. faf-cli's own CI pins the same
+ *  version (tests/commands/taf-setup.test.ts checks it). */
+const FAF_TAF_GIT_VERSION = 'v2.7.0';
+/** faf-taf-git's reusable receipt job: the only job with write access. */
+const FAF_TAF_RECEIPT = `Wolfe-Jam/faf-taf-git/.github/workflows/receipt.yml@${FAF_TAF_GIT_VERSION}`;
+/** The artifact the test job uploads and the receipt job reads. */
+const TAF_ARTIFACT = 'taf-test-output';
 
 /**
  * `faf taf [subcommand]`
@@ -468,16 +474,16 @@ const LANGUAGE: Record<Language, Recipe> = {
   },
 };
 
-/** The join step: runs after a red test run too (the test step keeps going). */
+/** The join step: runs after a red test run too, so the receipt has every report. */
 const joinStep = (cmd: string) =>
   '      - name: Join the reports into one file\n' +
   '        # One file per test class or assembly; one alone can read PASSED for a run that failed.\n' +
+  '        if: ${{ !cancelled() }}\n' +
   `        run: ${cmd}\n`;
 
 const runTests = (cmd: string) =>
   '      - name: Run tests\n' +
   '        id: tests\n' +
-  '        continue-on-error: true    # keep going, so a failed run still gets a receipt\n' +
   '        run: |\n' +
   '          set -o pipefail\n' +
   `          ${cmd}\n`;
@@ -566,19 +572,22 @@ function defaultBranch(dir: string): Branch {
 const branchFilter = (name: string) =>
   /^[\w./-]+$/.test(name) ? name : `'${name.replace(/[*?+[\]!]/g, '\\$&')}'`;
 
-// The recipe in the faf-taf-git README: a failed run gets a receipt too (the
-// test step keeps going), only the default branch is recorded, and the job
-// still goes red. No concurrency group: GitHub cancels a waiting run when a
-// newer one joins, so that run would get no receipt. faf-taf-git retries a
-// push that lost a race instead.
+// The setup in the faf-taf-git README: the test job runs the tests with a
+// read-only token and uploads their output; a separate receipt job, the only
+// one that can write, records the run on the default branch, a red one too
+// (!cancelled(), and test-result marks a failed test job FAILED). The test job
+// goes red the normal way. No concurrency group: GitHub cancels a waiting run
+// when a newer one joins, so that run would get no receipt. faf-taf-git
+// retries a push that lost a race instead.
 function buildTafWorkflow(dir: string, branch: string): string {
+  const onBranch = `github.ref == 'refs/heads/${branch}' && github.event_name != 'pull_request'`;
   const head =
     'name: TAF Receipts\n' +
     `# Prints a Test Receipt (.taf) for every run on ${branch}: proof over time.\n` +
     '# Written by `faf taf setup`. Docs: https://github.com/Wolfe-Jam/faf-taf-git\n' +
     `on:\n  push:\n    branches: [${branchFilter(branch)}]\n  pull_request:\n  workflow_dispatch:\n\n` +
-    'jobs:\n  taf:\n    runs-on: ubuntu-latest\n' +
-    '    permissions:\n      contents: write              # lets the action save receipts\n' +
+    'jobs:\n  test:\n    runs-on: ubuntu-latest\n' +
+    '    permissions:\n      contents: read               # the tests never run with write access\n' +
     '    steps:\n' +
     '      - uses: actions/checkout@v7\n';
 
@@ -598,24 +607,42 @@ function buildTafWorkflow(dir: string, branch: string): string {
     body = `      # TODO: set up your toolchain, then run your tests writing output to test-output.txt\n${runTests(placeholder)}`;
   }
 
-  const receipt =
-    '      - name: Print the receipt\n' +
-    `        if: github.ref == 'refs/heads/${branch}' && github.event_name != 'pull_request'\n` +
-    `        uses: ${FAF_TAF_GIT}\n` +
-    '        with:\n' +
-    `          test-output-file: ${report}\n` +
-    '          target-branch: taf-receipts\n' +
-    '      - name: Fail the job if the tests failed\n' +
-    "        if: steps.tests.outcome == 'failure'\n" +
-    '        run: exit 1\n';
+  return head + body + uploadStep(branch, onBranch, report) + receiptJob(onBranch, report);
+}
 
-  return head + body + receipt;
+/** The test job's last step: the output goes to the receipt job, after a red run too. */
+function uploadStep(branch: string, onBranch: string, report: string): string {
+  return '      - name: Upload the test output\n' +
+    `        # ${branch} only, and after a red run too: the receipt job records it.\n` +
+    `        if: \${{ !cancelled() && ${onBranch} }}\n` +
+    '        uses: actions/upload-artifact@v7\n' +
+    '        with:\n' +
+    `          name: ${TAF_ARTIFACT}\n` +
+    `          path: ${report}\n` +
+    '          overwrite: true          # "Re-run failed jobs" uploads it again\n';
+}
+
+/** faf-taf-git's receipt job: the only writer. A failed test job is recorded
+ *  as FAILED, with zero counts when it uploaded no output. */
+function receiptJob(onBranch: string, report: string): string {
+  // One uploaded file sits at the artifact's root, under its own name.
+  const reportName = report.split('/').pop();
+  return '\n  receipt:\n' +
+    '    needs: test\n' +
+    '    # Runs when the tests failed too, so a red run gets a FAILED receipt.\n' +
+    `    if: \${{ !cancelled() && ${onBranch} }}\n` +
+    '    permissions:\n      contents: write              # this job, and only this job, saves receipts\n' +
+    `    uses: ${FAF_TAF_RECEIPT}\n` +
+    '    with:\n' +
+    `      artifact-name: ${TAF_ARTIFACT}\n` +
+    `      test-output-file: ${reportName}\n` +
+    '      test-result: ${{ needs.test.result }}\n';
 }
 
 function tafSetup(options: TafOptions): void {
   const dir = process.cwd();
   const branch = defaultBranch(dir);
-  // A name with a quote can't go in the receipt step's `if:`: never swap it silently.
+  // A name with a quote can't go in the upload step's and the receipt job's `if:`: never swap it silently.
   const usable = !/['\n\r]/.test(branch.name);
   const name = usable ? branch.name : 'main';
   const workflow = buildTafWorkflow(dir, name);
@@ -626,7 +653,7 @@ function tafSetup(options: TafOptions): void {
   if (options.write) {
     if (existsSync(wfPath)) {
       console.error(`${bold('×')} .github/workflows/taf.yml already exists — not overwriting.`);
-      console.error(dim(`  Add the faf-taf-git step to your existing workflow, or remove taf.yml and re-run.`));
+      console.error(dim(`  Add the test upload and the receipt job to your existing workflow, or remove taf.yml and re-run.`));
       process.exitCode = 1; // refused: nothing written, and scripts can tell
       return; // non-destructive: refuse, never clobber
     }
