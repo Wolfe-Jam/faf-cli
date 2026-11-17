@@ -1,13 +1,24 @@
 # faf:start
-<!-- faf: faf-cli v6 | TypeScript | cli | CLI for the `.faf` format — persistent AI context that versions with your code, and (v6.7, The HTML Edition) renders human-visible on-demand via `faf show`. IANA-registered media type: `application/vnd.faf+yaml`. -->
+<!-- faf: faf-cli | TypeScript | cli | CLI for IANA-registered .faf + .fafm — context DNA and portable agent memory, scored by the always-33 engine -->
 <!-- faf: claim=project.faf | family=FAF -->
 
 # .cursorrules
-# Authored from project.faf — faf-cli v6
+# Authored from project.faf — faf-cli
 
 language: TypeScript
 
 # Stack
+# Hosting: npm + Homebrew
+# Build: Bun (bun build) + tsc
+# CI/CD: GitHub Actions
+
+# Context
+# Who: Developers and teams using AI coding assistants
+# What: IANA-registered CLI for persistent project context and agent memory
+# Why: Ends context re-discovery — define once, AI remembers forever
+# Where: npm registry, Homebrew, GitHub
+# When: Production since September 2025; Bun-native since v6
+# How: Detects the stack from repo files and scores with the always-33 WASM kernel; the goal and six W's are only suggested, never written
 # faf:end
 
 # .cursorrules
