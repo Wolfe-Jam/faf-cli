@@ -5,7 +5,7 @@
  */
 
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { spawnSync } from 'child_process';
 import { tmpdir } from 'os';
 import { join } from 'path';
@@ -36,6 +36,7 @@ describe('BRAKE: faf init --new keeps .faf-dna', () => {
 
   test('--new writes a fresh project.faf and leaves .faf-dna byte for byte', () => {
     const before = readFileSync(dnaFile(), 'utf-8');
+    const beforeFaf = readFileSync(fafFile(), 'utf-8');
 
     const r = run(dir, ['init', '--new']);
 
@@ -43,6 +44,10 @@ describe('BRAKE: faf init --new keeps .faf-dna', () => {
     expect(readFileSync(fafFile(), 'utf-8')).not.toContain('stale_block');
     expect(readFileSync(dnaFile(), 'utf-8')).toBe(before);
     expect(r.stdout).toContain('.faf-dna kept as it is');
+    const bak = readdirSync(dir).find((n) => n.startsWith('project.faf.bak-'));
+    expect(bak).toBeDefined();
+    expect(readFileSync(join(dir, bak!), 'utf-8')).toBe(beforeFaf);
+    expect(r.stdout).toContain('kept the previous file at');
   });
 
   test('--force replaces project.faf as --new does, and leaves .faf-dna byte for byte', () => {

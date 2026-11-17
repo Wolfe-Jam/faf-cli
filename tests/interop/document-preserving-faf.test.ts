@@ -9,7 +9,7 @@
  * values that change are rewritten, and a no-op writes nothing.
  */
 import { afterAll, describe, test, expect } from 'bun:test';
-import { readFileSync, realpathSync, statSync, writeFileSync } from 'fs';
+import { readdirSync, readFileSync, realpathSync, statSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { spawnSync } from 'child_process';
@@ -186,9 +186,18 @@ describe('BRAKE: writeFaf on an existing file — the hand-annotated file surviv
   });
 
   test('{ replace: true } is the explicit overwrite (init --force, git --force): a fresh render', () => {
-    const { path } = project();
+    const { path, dir } = project();
+    const before = readFileSync(path, 'utf-8');
     const data = { faf_version: '3.0', project: { name: 'fresh' } };
-    (writeFaf as (p: string, d: unknown, o?: unknown) => unknown)(path, data, { replace: true });
+    let backup: string | undefined;
+    (writeFaf as (p: string, d: unknown, o?: { replace?: boolean; onReplacedBackup?: (b: string) => void }) => unknown)(
+      path,
+      data,
+      { replace: true, onReplacedBackup: (b) => { backup = b; } },
+    );
     expect(readFileSync(path, 'utf-8')).toBe(serializeFaf(data));
+    expect(backup).toBeDefined();
+    expect(readFileSync(backup!, 'utf-8')).toBe(before);
+    expect(readdirSync(dir).some((n) => n.startsWith('project.faf.bak-'))).toBe(true);
   });
 });
