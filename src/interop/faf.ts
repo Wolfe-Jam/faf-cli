@@ -211,12 +211,31 @@ function updateFaf(
   return { written: true, text: result.text, keptAliases: kept };
 }
 
+/** Filename-safe ISO timestamp for a replace-time backup (`project.faf.bak-…`). */
+function fafReplaceBackupStamp(): string {
+  return new Date().toISOString().replace(/[:.]/g, '-');
+}
+
+/** Copy the file at `path` to `path.bak-<stamp>` before an explicit replace. */
+function backupFafBeforeReplace(path: string): string | null {
+  if (!exists(path)) {return null;}
+  const full = resolve(path);
+  const bytes = readBytesIfPresent(resolveInside(dirname(full), full));
+  if (!bytes) {return null;}
+  const backup = `${full}.bak-${fafReplaceBackupStamp()}`;
+  safeWriteFile(backup, bytes);
+  return backup;
+}
+
 /** Options for {@link writeFaf}. */
 export interface WriteFafOptions {
   /** Write a fresh file from `data` even when one exists — the explicit
    *  overwrite (`faf init --new` / `--force`, `faf git --force`). Default: an existing
    *  file is updated in place with {@link updateFafFile}. */
   replace?: boolean;
+  /** Called when `replace` overwrote an existing file after keeping
+   *  `path.bak-<timestamp>`. */
+  onReplacedBackup?: (backupPath: string) => void;
   /** Called for each alias of an existing file that `data` would change
    *  (`stack: *base` while `data.stack` has more keys): faf leaves it as
    *  written — it never replaces or expands an alias — and that path is not
@@ -333,8 +352,10 @@ export function writeFaf(path: string, data: FafData, opts: WriteFafOptions = {}
     return result.written;
   }
   const full = resolve(path);
+  const backup = backupFafBeforeReplace(path);
+  if (backup) {opts.onReplacedBackup?.(backup);}
   const text = serializeFaf(data);
-  const expect = exists(path) ? readBytesIfPresent(resolveInside(dirname(full), full)) : null;
+  const expect = backup && exists(path) ? readBytesIfPresent(resolveInside(dirname(full), full)) : null;
   const real = safeWriteFile(path, text, { expect });
   setFafSource(data, { real, text });
   return true;

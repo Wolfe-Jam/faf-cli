@@ -1,5 +1,5 @@
 import { existsSync } from 'fs';
-import { dirname, join, resolve } from 'path';
+import { dirname, join, relative, resolve } from 'path';
 import { assembleFreshFaf } from '../detect/assemble.js';
 import { writeFaf, readFafRaw, withKernel } from '../interop/faf.js';
 import { scoreFafYaml } from '../core/scorer.js';
@@ -37,7 +37,11 @@ export function initCommand(options: InitOptions = {}): void {
   const data = assembleFreshFaf(dir);
   // --new and --force are the explicit overwrite: a fresh file, not an update of the old one.
   // Neither touches .faf-dna: --force no longer starts a new birth.
-  writeFaf(outputPath, data, { replace });
+  let backupPath: string | undefined;
+  writeFaf(outputPath, data, {
+    replace,
+    onReplacedBackup: (p) => { backupPath = p; },
+  });
 
   const yaml = readFafRaw(outputPath);
   const result = withKernel(outputPath, () => scoreFafYaml(yaml));
@@ -56,6 +60,10 @@ export function initCommand(options: InitOptions = {}): void {
   }
 
   console.log(`${fafCyan('created')} ${outputPath}`);
+  if (backupPath) {
+    const shown = relative(dir, backupPath) || backupPath;
+    console.log(dim(`  kept the previous file at ${shown}`));
+  }
   displayScore(result, outputPath);
   console.log(dim(born
     ? `  🧬 Birth DNA ${result.score}% — your journey starts here (faf dna)`

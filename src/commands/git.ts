@@ -1,5 +1,5 @@
 import { existsSync } from 'fs';
-import { join, resolve } from 'path';
+import { join, relative, resolve } from 'path';
 import { execFileSync } from 'child_process';
 import { makeTempDir, readBytesIfPresent, removeTempDir, safeUnlink } from '../core/safe-write.js';
 import { refuseMissingOutputFolder } from '../core/refusal.js';
@@ -147,8 +147,16 @@ export function gitCommand(
       return;
     }
 
-    writeFaf(target.outputPath, data, { replace: options.force === true }); // --force: a fresh file
+    let backupPath: string | undefined;
+    writeFaf(target.outputPath, data, {
+      replace: options.force === true,
+      onReplacedBackup: (p) => { backupPath = p; },
+    });
     console.log(`${fafCyan('created')} ${target.outputPath}`);
+    if (backupPath) {
+      const shown = relative(cwd, backupPath) || backupPath;
+      console.log(dim(`  kept the previous file at ${shown}`));
+    }
 
     const yaml = readFafRaw(target.outputPath);
     const result = withKernel(target.outputPath, () => enrichScore(kernel.score(yaml)));
