@@ -43,29 +43,42 @@ describe('PIT: faf taf setup', () => {
     expect(pin).toBeDefined();
     writeFileSync(join(testDir, 'package.json'), '{"name":"x","scripts":{"test":"echo ok"}}');
     taf('setup', { write: true });
-    // Red here after a Dependabot bump? Update FAF_TAF_GIT in src/commands/taf.ts.
-    expect(readFileSync(wfPath(), 'utf-8')).toContain(pin!);
+    // Red here after a Dependabot bump? Update FAF_TAF_GIT_VERSION in src/commands/taf.ts.
+    expect(readFileSync(wfPath(), 'utf-8')).toContain(`Wolfe-Jam/faf-taf-git/.github/workflows/receipt.yml@${pin!.split('@')[1]}`);
   });
 
-  test('--write creates a workflow wired to faf-taf-git + the taf-receipts branch', () => {
+  test('--write creates a workflow wired to faf-taf-git\'s receipt job (taf-receipts by default)', () => {
     writeFileSync(join(testDir, 'package.json'), '{"name":"x","scripts":{"test":"echo ok"}}');
     taf('setup', { write: true });
     expect(existsSync(wfPath())).toBe(true);
     const wf = readFileSync(wfPath(), 'utf-8');
-    expect(wf).toContain('Wolfe-Jam/faf-taf-git@v2.6.0');
-    expect(wf).toContain('test-output.txt');
-    expect(wf).toContain('target-branch: taf-receipts');
+    expect(wf).toContain('uses: Wolfe-Jam/faf-taf-git/.github/workflows/receipt.yml@v2.7.0');
+    expect(wf).toContain('artifact-name: taf-test-output');
+    expect(wf).toContain('test-output-file: test-output.txt');
+    // receipt.yml saves to taf-receipts unless told otherwise.
+    expect(wf).not.toContain('target-branch');
   });
 
-  test('the recipe: red runs get a receipt, only main is recorded, the job still goes red', () => {
+  test('the setup: red runs get a receipt, only main is recorded, only the receipt job can write', () => {
     writeFileSync(join(testDir, 'package.json'), '{"name":"x","scripts":{"test":"echo ok"}}');
     taf('setup', { write: true });
     const wf = readFileSync(wfPath(), 'utf-8');
-    expect(wf).toContain('continue-on-error: true');
+    const { parse } = require('yaml');
+    const jobs = parse(wf).jobs;
+    expect(Object.keys(jobs)).toEqual(['test', 'receipt']);
+    // The test job fails the normal way and can't write.
+    expect(wf).not.toContain('continue-on-error');
     expect(wf).toContain('set -o pipefail');
-    expect(wf).toContain("if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'");
-    expect(wf).toContain("if: steps.tests.outcome == 'failure'");
-    expect(wf).toContain('contents: write');
+    expect(jobs.test.permissions).toEqual({ contents: 'read' });
+    // Its output is uploaded after a red run too, on main only.
+    const upload = jobs.test.steps.find((st: { name?: string }) => st.name === 'Upload the test output');
+    expect(upload.if).toBe("${{ !cancelled() && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}");
+    // The receipt job runs after a red run too, on main only, and is the only writer.
+    expect(jobs.receipt.needs).toBe('test');
+    expect(jobs.receipt.if).toBe(upload.if);
+    expect(jobs.receipt.permissions).toEqual({ contents: 'write' });
+    expect(jobs.receipt.with['test-result']).toBe('${{ needs.test.result }}');
+    expect(jobs.receipt.with['artifact-name']).toBe(upload.with.name);
     // No concurrency group: GitHub cancels a waiting run when a newer one
     // joins, and that run gets no receipt. faf-taf-git retries the push instead.
     expect(wf).not.toContain('concurrency');
@@ -76,8 +89,8 @@ describe('PIT: faf taf setup', () => {
     writeFileSync(join(testDir, 'package.json'), '{"name":"x"}');
     taf('setup', { write: true });
     const { parse } = require('yaml');
-    const steps = parse(readFileSync(wfPath(), 'utf-8')).jobs.taf.steps.map((s: { name?: string }) => s.name).filter(Boolean);
-    expect(steps).toEqual(['Run tests', 'Print the receipt', 'Fail the job if the tests failed']);
+    const steps = parse(readFileSync(wfPath(), 'utf-8')).jobs.test.steps.map((s: { name?: string }) => s.name).filter(Boolean);
+    expect(steps).toEqual(['Run tests', 'Upload the test output']);
   });
 
   test('detects the bun runner from bun.lockb', () => {
@@ -122,7 +135,7 @@ describe('PIT: faf taf setup', () => {
   // and points the receipt step at it.
   const steps = () => {
     const { parse } = require('yaml');
-    return parse(readFileSync(wfPath(), 'utf-8')).jobs.taf.steps as Array<Record<string, unknown>>;
+    return parse(readFileSync(wfPath(), 'utf-8')).jobs.test.steps as Array<Record<string, unknown>>;
   };
 
   for (const marker of ['pyproject.toml', 'setup.py', 'setup.cfg', 'requirements.txt', 'pytest.ini']) {
@@ -134,8 +147,8 @@ describe('PIT: faf taf setup', () => {
       expect(wf).toContain('pip install --upgrade pip pytest');
       expect(wf).toContain('pytest --junitxml=report.xml');
       expect(wf).not.toContain('TODO');
-      const receipt = steps().find((s) => s.name === 'Print the receipt') as { with: Record<string, string> };
-      expect(receipt.with['test-output-file']).toBe('report.xml');
+      const receipt = steps().find((s) => s.name === 'Upload the test output') as { with: Record<string, string> };
+      expect(receipt.with.path).toBe('report.xml');
     });
   }
 
@@ -183,16 +196,16 @@ describe('PIT: faf taf setup', () => {
     expect(wf).toContain('GOTOOLCHAIN=auto go install gotest.tools/gotestsum@v1.13.0');
     expect(wf).not.toContain('@latest');
     expect(wf).toContain('gotestsum --junitfile report.xml -- ./...');
-    const receipt = steps().find((s) => s.name === 'Print the receipt') as { with: Record<string, string> };
-    expect(receipt.with['test-output-file']).toBe('report.xml');
+    const receipt = steps().find((s) => s.name === 'Upload the test output') as { with: Record<string, string> };
+    expect(receipt.with.path).toBe('report.xml');
   });
 
   test('Python and Go recipes keep the red-run recipe and are valid YAML', () => {
     writeFileSync(join(testDir, 'go.mod'), 'module x\n');
     taf('setup', { write: true });
     const names = steps().map((s) => s.name).filter(Boolean);
-    expect(names).toEqual(['Run tests', 'Print the receipt', 'Fail the job if the tests failed']);
-    expect(readFileSync(wfPath(), 'utf-8')).toContain('continue-on-error: true');
+    expect(names).toEqual(['Run tests', 'Upload the test output']);
+    expect(readFileSync(wfPath(), 'utf-8')).not.toContain('continue-on-error');
   });
 
   test('package.json wins over a Python marker (a JS repo with a requirements.txt)', () => {
@@ -205,7 +218,13 @@ describe('PIT: faf taf setup', () => {
   });
 
   const wf = () => readFileSync(wfPath(), 'utf-8');
-  const receiptFile = () => (steps().find((s) => s.name === 'Print the receipt') as { with: Record<string, string> }).with['test-output-file'];
+  // The file the test job uploads; the receipt job reads it by its name.
+  const receiptFile = () => {
+    const path = (steps().find((s) => s.name === 'Upload the test output') as { with: Record<string, string> }).with.path;
+    const { parse } = require('yaml');
+    expect(parse(wf()).jobs.receipt.with['test-output-file']).toBe(path.split('/').pop());
+    return path;
+  };
   const stepNamed = (name: string) => steps().find((s) => s.name === name) as Record<string, unknown> | undefined;
 
   // ── Rust: cargo nextest ──
@@ -226,11 +245,10 @@ describe('PIT: faf taf setup', () => {
           fi
       - name: Run tests
         id: tests
-        continue-on-error: true    # keep going, so a failed run still gets a receipt
         run: |
           set -o pipefail
           cargo nextest run --profile ci --workspace --no-fail-fast
-      - name: Print the receipt
+      - name: Upload the test output
 `);
     expect(receiptFile()).toBe('target/nextest/ci/junit.xml');
     expect(wf()).not.toContain('TODO');
@@ -286,10 +304,11 @@ describe('PIT: faf taf setup', () => {
     expect(wf()).toContain('          mvn -B --fail-at-end test\n');
     expect(wf()).toContain(`      - name: Join the reports into one file
         # One file per test class or assembly; one alone can read PASSED for a run that failed.
+        if: \${{ !cancelled() }}
         run: cat target/surefire-reports/TEST-*.xml > report.xml
-      - name: Print the receipt`);
+      - name: Upload the test output`);
     expect(receiptFile()).toBe('report.xml');
-    expect(steps().map((s) => s.name).filter(Boolean)).toEqual(['Run tests', 'Join the reports into one file', 'Print the receipt', 'Fail the job if the tests failed']);
+    expect(steps().map((s) => s.name).filter(Boolean)).toEqual(['Run tests', 'Join the reports into one file', 'Upload the test output']);
   });
 
   test('Maven with the wrapper (mvnw): ./mvnw', () => {
@@ -461,8 +480,10 @@ describe('PIT: faf taf setup', () => {
       taf('setup', { write: true });
       rmSync(join(testDir, file));
       const names = steps().map((s) => s.name).filter(Boolean);
-      expect(names.slice(-2)).toEqual(['Print the receipt', 'Fail the job if the tests failed']);
-      expect((stepNamed('Run tests') as { 'continue-on-error'?: boolean })['continue-on-error']).toBe(true);
+      expect(names.at(-1)).toBe('Upload the test output');
+      expect(stepNamed('Run tests')).not.toHaveProperty('continue-on-error');
+      const joinStep = stepNamed('Join the reports into one file') as { if?: string } | undefined;
+      if (joinStep) {expect(joinStep.if).toBe('${{ !cancelled() }}');}
     }
   });
 
@@ -508,8 +529,8 @@ describe('PIT: faf taf setup', () => {
       const wf = readFileSync(wfPath(), 'utf-8');
       expect(wf).toContain(run);
       expect(wf).not.toContain('TODO');
-      const receipt = steps().find((s) => s.name === 'Print the receipt') as { with: Record<string, string> };
-      expect(receipt.with['test-output-file']).toBe('report.xml');
+      const receipt = steps().find((s) => s.name === 'Upload the test output') as { with: Record<string, string> };
+      expect(receipt.with.path).toBe('report.xml');
     });
   }
 
@@ -578,7 +599,7 @@ describe('PIT: faf taf setup', () => {
     const { parse } = require('yaml');
     const wf = parse(readFileSync(wfPath(), 'utf-8'));
     expect(wf.on.push.branches).toEqual(['trunk']);
-    expect(wf.jobs.taf.steps.find((st: { name?: string }) => st.name === 'Print the receipt').if).toContain("'refs/heads/trunk'");
+    expect(wf.jobs.receipt.if).toContain("'refs/heads/trunk'");
   });
 
   /** A bare origin with these branches, cloned into testDir (origin/HEAD removed when asked). */
@@ -634,7 +655,7 @@ describe('PIT: faf taf setup', () => {
     const { parse } = require('yaml');
     const wf = parse(readFileSync(wfPath(), 'utf-8'));
     expect(wf.on.push.branches).toEqual(['release/v1\\+x']);
-    expect(wf.jobs.taf.steps.find((st: { name?: string }) => st.name === 'Print the receipt').if).toContain("'refs/heads/release/v1+x'");
+    expect(wf.jobs.receipt.if).toContain("'refs/heads/release/v1+x'");
   });
 
   test('outside git it records main', () => {
@@ -649,7 +670,8 @@ describe('PIT: faf taf setup', () => {
       'actions/checkout': 'v7', 'actions/setup-node': 'v7', 'actions/setup-python': 'v7', 'actions/setup-go': 'v7',
       'actions/setup-java': 'v6', 'actions/setup-dotnet': 'v6', 'gradle/actions/setup-gradle': 'v6',
       'pnpm/action-setup': 'v6', 'oven-sh/setup-bun': 'v2', 'taiki-e/install-action': 'v2',
-      'dtolnay/rust-toolchain': 'stable', 'Wolfe-Jam/faf-taf-git': ciPin()!.split('@')[1],
+      'dtolnay/rust-toolchain': 'stable', 'actions/upload-artifact': 'v7',
+      'Wolfe-Jam/faf-taf-git/.github/workflows/receipt.yml': ciPin()!.split('@')[1],
     };
     const recipes: Array<[string, string]> = [
       ['package.json', '{"name":"x"}'], ['go.mod', 'module x\n'], ['pyproject.toml', ''],

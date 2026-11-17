@@ -433,7 +433,7 @@ jobs:
       - name: faf-taf-git's parser, the version faf pins
         run: |
           set -euo pipefail
-          VERSION=$(grep -oE "Wolfe-Jam/faf-taf-git@v[0-9.]+" src/commands/taf.ts | head -1 | sed 's/.*@v//')
+          VERSION=$(grep -oE "FAF_TAF_GIT_VERSION = 'v[0-9.]+'" src/commands/taf.ts | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
           TAF_GIT="$RUNNER_TEMP/faf-taf-git"
           mkdir -p "$TAF_GIT"
           npm install --prefix "$TAF_GIT" --no-save --no-audit --no-fund "faf-taf-git@$VERSION"
@@ -492,7 +492,7 @@ jobs:
           path: /tmp
 
       - name: Generate TAF Receipt
-        uses: Wolfe-Jam/faf-taf-git@v2.6.0
+        uses: Wolfe-Jam/faf-taf-git@v2.7.0
         with:
           test-output-file: /tmp/test-output.txt
           auto-commit: 'true'

@@ -60,7 +60,7 @@ const fail = (msg) => {
 };
 
 const workflow = parse(readFileSync(join(project, '.github', 'workflows', 'taf.yml'), 'utf-8'));
-const steps = workflow.jobs.taf.steps;
+const steps = workflow.jobs.test.steps;
 
 // 1. Setup steps: the same actions, with the same inputs, as CI ran.
 const ci = parse(readFileSync(join(repo, '.github', 'workflows', 'ci.yml'), 'utf-8'));
@@ -68,7 +68,7 @@ const ciSetup = ci.jobs['taf-recipes'].steps
   .filter((s) => s.uses && typeof s.if === 'string' && s.if.includes(`matrix.lang == '${lang}'`))
   .map((s) => ({ uses: s.uses, with: s.with ?? {} }));
 const recipeSetup = steps
-  .filter((s) => s.uses && !s.uses.startsWith('actions/checkout@') && !s.uses.startsWith('Wolfe-Jam/faf-taf-git@'))
+  .filter((s) => s.uses && !s.uses.startsWith('actions/checkout@') && !s.uses.startsWith('actions/upload-artifact@'))
   .map((s) => ({ uses: s.uses, with: s.with ?? {} }));
 if (JSON.stringify(recipeSetup) !== JSON.stringify(ciSetup)) {
   fail(`the recipe's setup steps are not the ones CI ran.\nrecipe: ${JSON.stringify(recipeSetup)}\nci:     ${JSON.stringify(ciSetup)}`);
@@ -78,8 +78,10 @@ console.log(`setup steps match CI: ${recipeSetup.map((s) => s.uses).join(', ')}`
 // 2. The run steps, in order.
 let log = '';
 let testsFailed = false;
+// Steps after the tests (the join) must run after a red run too.
+let afterTests = false;
 for (const step of steps) {
-  if (!step.run || step.name === 'Fail the job if the tests failed') {continue;}
+  if (!step.run) {continue;}
   console.log(`\n::group::${step.name ?? step.run.split('\n')[0]}`);
   const r = spawnSync('bash', ['-e', '-c', step.run], {
     cwd: project,
@@ -94,7 +96,9 @@ for (const step of steps) {
     // Runners colour their output in CI (nextest does): read the text, not the escapes.
     log = (r.stdout + r.stderr).replace(/\x1b\[[0-9;]*m/g, '');
     testsFailed = r.status !== 0;
-    if (!step['continue-on-error']) {fail('the test step does not keep going on a red run');}
+    afterTests = true;
+  } else if (afterTests && (typeof step.if !== 'string' || !step.if.includes('!cancelled()'))) {
+    fail(`step "${step.name ?? step.run}" after the tests does not run after a red run (no !cancelled())`);
   } else if (r.status !== 0) {
     fail(`step "${step.name ?? step.run}" exited ${r.status}`);
   }
@@ -102,13 +106,21 @@ for (const step of steps) {
 if (!testsFailed) {fail('the fixture has a failing test, but the test step passed');}
 
 // 3. The receipt.
-const receiptStep = steps.find((s) => s.name === 'Print the receipt');
-const report = join(project, receiptStep.with['test-output-file']);
-if (!existsSync(report)) {fail(`no report at ${receiptStep.with['test-output-file']}`);}
+// The test job uploads the report; the receipt job reads it by its file name.
+const upload = steps.find((s) => s.name === 'Upload the test output');
+if (!upload?.if?.includes('!cancelled()')) {fail('the upload does not run after a red run (no !cancelled())');}
+const reportPath = upload.with.path;
+const receiptJob = workflow.jobs.receipt;
+if (receiptJob.with['test-output-file'] !== reportPath.split('/').pop()) {
+  fail(`the receipt reads ${receiptJob.with['test-output-file']}, but the upload is ${reportPath}`);
+}
+if (receiptJob.with['test-result'] !== '${{ needs.test.result }}') {fail('the receipt job does not get the test job result');}
+const report = join(project, reportPath);
+if (!existsSync(report)) {fail(`no report at ${reportPath}`);}
 const require = createRequire(join(resolve(tafGitArg), 'package.json'));
 const { parseTestOutput } = require('./dist/parsers/index.js');
 const parsed = parseTestOutput(readFileSync(report, 'utf-8'));
-if (!parsed) {fail(`faf-taf-git could not read ${receiptStep.with['test-output-file']}`);}
+if (!parsed) {fail(`faf-taf-git could not read ${reportPath}`);}
 const receipt = { passed: parsed.passed, failed: parsed.failed, skipped: parsed.skipped ?? 0 };
 
 const m = runner.summary.exec(log);
