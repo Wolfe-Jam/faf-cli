@@ -83,6 +83,10 @@ Ask a clarifying question, propose a short plan, or open a draft PR with notes â
 - **Hosting:** npm + Homebrew
 - **Build:** Bun (bun build) + tsc
 - **CI/CD:** GitHub Actions
+
+## Project facts
+
+The six W's (who, what, why, where, when, how) and the project's other facts are in `project.faf`.
 <!-- faf:end -->
 
 ## Ship-adjacent

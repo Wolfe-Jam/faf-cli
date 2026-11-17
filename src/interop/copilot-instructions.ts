@@ -3,7 +3,7 @@ import type { FafData } from '../core/types.js';
 import { FAF_CONTEXT_FILES, makeDirInside } from '../core/safe-write.js';
 import { fafMetaTag } from './claude.js';
 import { FAF_END, FAF_START, injectFafBlock } from './inject.js';
-import { filled, slotLabel } from './labels.js';
+import { filled, sixWsFilled, slotLabel } from './labels.js';
 
 /**
  * Command slots → the imperative verb that introduces them in "## Build & run".
@@ -86,12 +86,7 @@ export function renderCopilotInstructions(data: FafData): string {
   }
 
   // Project context — the 6Ws, Title-Cased (mirrors CLAUDE.md), as orientation.
-  const hc = data.human_context ?? {};
-  const sixW: [string, unknown][] = [
-    ['who', hc.who], ['what', hc.what], ['why', hc.why],
-    ['where', hc.where], ['when', hc.when], ['how', hc.how],
-  ];
-  const ctx = sixW.filter(([, v]) => filled(v)).map(([k, v]) => `- **${slotLabel(`human_context.${k}`)}:** ${(v as string).trim()}`);
+  const ctx = sixWsFilled(data).map(([label, value]) => `- **${label}:** ${value}`);
   if (ctx.length > 0) {
     lines.push('## Project context', '', ...ctx, '');
   }

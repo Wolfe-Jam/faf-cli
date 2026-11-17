@@ -11,10 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
-- `faf export`: AGENTS.md now points to `project.faf` for the six W's with a visible line ("Project facts, including the six W's …: see `project.faf`"). Before, the pointer was only the `claim=` HTML comment, which agents skip. AGENTS.md still does not copy the six W's.
-- `faf export`: GEMINI.md and .cursorrules now carry the six W's in a Context section, as CLAUDE.md and the Copilot instructions do. Empty and `slotignored` slots are left out.
+- `faf export`: AGENTS.md now points to the facts file under a `## Project facts` heading: "The six W's (who, what, why, where, when, how) and the project's other facts are in `project.faf`." The path is the real one, relative to AGENTS.md (a legacy `.faf`, a `project.faf` one folder up, or `--output` elsewhere). Before, the only pointer was the `claim=` HTML comment, which agents skip. AGENTS.md still does not copy the six W's.
+- `faf export`: GEMINI.md and .cursorrules now carry the six W's in a Context section, as CLAUDE.md and the Copilot instructions do.
+- CLAUDE.md, GEMINI.md, .cursorrules and the Copilot instructions now show the six W's from one shared rule, the scorer's: a slot the score counts as empty (empty, `slotignored`, a placeholder such as TBD or N/A) is left out; numbers, dates and lists render as text; each fact is one line. Fixes CLAUDE.md showing `slotignored`, placeholders and untrimmed values.
 
-Tested 2026-11-17 with Codex and OpenCode on tasks whose deciding fact lives only in the six W's: the agent found the team's decision 4/22 times with the comment alone, 12/21 with the visible pointer, 20/20 with the facts written into the file.
+Evidence: [round 4 of context7-faf-receipt](https://github.com/Wolfe-Jam/context7-faf-receipt#round-4-what-agentsmd-carries-opencode-and-codex) (Codex and OpenCode, 152 runs). On tasks whose deciding fact lives only in the six W's, the agent knew the team's decision 4/22 times with the comment pointer, 12/21 with a visible pointer, 19/20 with the six W's in the file.
 
 ## [8.10.1] - 2026-11-17
 
