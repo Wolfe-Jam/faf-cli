@@ -94,7 +94,7 @@ Run `faf` with no arguments:
 
 ![faf](./nelly.png)
 
-> **faf-cli dogfoods itself** — [project.faf](./project.faf) is source DNA; [CLAUDE.md](./CLAUDE.md), [GEMINI.md](./GEMINI.md) and [AGENTS.md](./AGENTS.md) are authored from it via `faf export`; AGENTS.md keeps a hand-written section below faf's block.
+> **faf-cli dogfoods itself** — [project.faf](./project.faf) is source DNA; [CLAUDE.md](./CLAUDE.md), [GEMINI.md](./GEMINI.md) and [AGENTS.md](./AGENTS.md) are authored from it (`faf export`, and `faf sync` for CLAUDE.md); AGENTS.md keeps a hand-written section below faf's block.
 
 ---
 
@@ -107,12 +107,12 @@ Run `faf` with no arguments:
 | `faf auto` | Detect the stack, fill the slots it detects, score; suggest the goal and six W's |
 | `faf go` | Fill the human slots: each suggestion in gray, Tab to edit, Enter to confirm |
 | `faf score` | Check AI-readiness (0–100%) |
-| `faf export` | Author `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.cursorrules` |
+| `faf export` | Author `AGENTS.md`, `GEMINI.md`, `.cursorrules` and the Copilot instructions |
 | `faf sync` | `.faf` → `CLAUDE.md`, one way (faf's block only) |
 | `faf memory` | `.fafm` soul ops — convert Claude memory, etch, recall, ls, show |
 | `faf diff` / `log` | Semantic context diff + score timeline across git history |
 | `faf hooks --install` | Pre-commit guard against context regression |
-| `faf taf setup` | Write the CI workflow that prints a Test Receipt for every run (JavaScript with Jest, Vitest or Bun; Python; Go; Rust; Java with Maven or Gradle; .NET) |
+| `faf taf setup` | Write the CI workflow that prints a Test Receipt for every run: a test job with a read-only token, then a receipt job (JavaScript with Jest, Vitest or Bun; Python; Go; Rust; Java with Maven or Gradle; .NET) |
 | `faf taf receipts` | Your Test Receipts in the terminal, newest first |
 | `faf compile` / `decompile` | `.faf` → `.fafb` **v2** sealed brick; `decompile` shows sections as JSON |
 | `faf check` | Validate a `.faf` file |
@@ -135,15 +135,15 @@ faf memory etch "a durable fact" --id my-fact
 faf memory show
 ```
 
-### What's New in v8.10.0 — The Human Slots Edition
+### What's New in v8.11.0 — The Project Facts Edition
 
-**AI suggests, you confirm. faf no longer writes your project's goal or six W's: it suggests them, and you confirm each one in `faf go`.**
+**The six W's now reach every agent: AGENTS.md points to project.faf, and CLAUDE.md, GEMINI.md, .cursorrules, Copilot and llms.txt carry them, one rule, one line each.**
 
-- **Suggestions in gray.** `faf go` shows each suggestion with where it came from (`README.md § Why`, `package.json description`). Tab to edit, Enter to confirm, type to replace, `skip` to leave it empty. `faf init`, `faf auto` and `faf git` say how many are waiting.
-- **Only facts are suggested.** Markup, link and label rows, greetings, install lines and fragments are rejected; a notice or callout (deprecated, sponsored by, `Warning:`…) is never the goal; a long first paragraph gives its first sentence, whole. The README leads the goal.
-- **faf-facts.** The six W's ask for one line where every word earns its place. `how` is how it works; `when` is the stage it is at, and since when.
-- **Breaking for library users:** `assembleFreshFaf`, `updateExistingFaf` and `authorFafFromRepo` return the goal and six W's empty. Files you already have are not changed.
-- **`faf go` input.** Backspace removes a whole character (emoji, CJK), other questions use readline again, and piped answers are read in order.
+- **AGENTS.md points to the facts.** A `## Project facts` section names `project.faf`, by its real path from AGENTS.md (a legacy `.faf`, a file one folder up, `--output`). The only pointer before was an HTML comment, which agents skip. AGENTS.md still doesn't copy the six W's.
+- **The six W's in every context file.** GEMINI.md and .cursorrules gain a Context section, as CLAUDE.md and the Copilot instructions have. `llms.txt` and Claude Code's MEMORY.md block (Pro) show the same values.
+- **One rule, the score's.** A slot the score counts as empty (empty, `slotignored`, TBD, N/A) is left out; numbers, dates and lists show as text; each fact is one line. CLAUDE.md no longer shows `slotignored` or placeholders.
+- **`faf taf setup` writes two jobs** (faf-taf-git 2.7.0): the tests run with a read-only token, only the receipt job can write, and a red run on the default branch is recorded as a `FAILED` receipt.
+- **Why:** [the evidence](https://github.com/Wolfe-Jam/context7-faf-receipt#round-4-what-agentsmd-carries-opencode-and-codex). On tasks whose deciding fact was only in the six W's, Codex and OpenCode found the team's decision 4/22 times with the old AGENTS.md, 12/21 with the pointer, 19/20 with the six W's in the file.
 
 Earlier editions: [CHANGELOG.md](./CHANGELOG.md) · [Releases](https://github.com/Wolfe-Jam/faf-cli/releases)
 
@@ -151,7 +151,7 @@ Earlier editions: [CHANGELOG.md](./CHANGELOG.md) · [Releases](https://github.co
 
 ## Custom instructions
 
-Your own rules for the AI — *"use full words in identifiers," "use bun, not npm"* — go in `project.faf` under `ai_instructions.warnings`. They land at the top of every `AGENTS.md` faf writes, verbatim and non-destructive.
+Your own rules for the AI — *"use full words in identifiers," "use bun, not npm"* — go in `project.faf` under `ai_instructions.warnings`. They lead the Guardrails section of every `AGENTS.md` faf writes, verbatim and non-destructive.
 
 **→ [How to add custom rules](https://docs.faf.one/custom-rules)** · [docs.faf.one](https://docs.faf.one)
 
@@ -204,6 +204,7 @@ For a specific agent: [Grok, xAI & Cursor 👀](docs/faf-cli-for-agents.md) · [
 
 Pivotal releases — full history in [CHANGELOG.md](./CHANGELOG.md):
 
+- **v8.11 — Project Facts** — the six W's reach every agent file; AGENTS.md points to project.faf.
 - **v8.10 — Human Slots** — AI suggests the goal and six W's; you confirm each one in `faf go`.
 - **v8.9 — Write-Once** — a birth certificate that can't be reissued, checked against its birth commit.
 - **v8.0 — Always33** — one engine, one number: the same score everywhere.
