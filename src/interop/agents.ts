@@ -237,7 +237,7 @@ export function renderAgentsMd(data: FafData, factsRef = 'project.faf'): string 
   // The FAF Block points to the facts; it does not copy them (AGENTS.md stays an
   // operations file). A visible line under its own heading, not only the claim=
   // comment, which agents skip. factsRef is the facts file's path relative to
-  // this AGENTS.md. Evidence: CHANGELOG 8.11.0 (receipt link).
+  // this AGENTS.md. Evidence: https://github.com/Wolfe-Jam/context7-faf-receipt#round-4-what-agentsmd-carries-opencode-and-codex
   push('## Project facts');
   push();
   push(`The six W's (who, what, why, where, when, how) and the project's other facts are in \`${factsRef}\`.`);

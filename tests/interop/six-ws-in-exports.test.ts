@@ -5,7 +5,8 @@
  * under a `## Project facts` heading and does not copy the six W's. CLAUDE.md,
  * GEMINI.md, .cursorrules and the Copilot instructions carry them, from one
  * shared rule (labels.ts sixWsFilled): the scorer's rule for "filled", one
- * line per fact. Evidence for the design: CHANGELOG 8.11.0.
+ * line per fact. Evidence for the design:
+ * https://github.com/Wolfe-Jam/context7-faf-receipt#round-4-what-agentsmd-carries-opencode-and-codex
  *
  * WJTTC tiers:
  *   ENGINE — the right section in each file, with the real values.
@@ -25,6 +26,9 @@ import { renderCursorrules } from '../../src/interop/cursorrules.js';
 import { renderClaudeMd } from '../../src/interop/claude.js';
 import { renderCopilotInstructions } from '../../src/interop/copilot-instructions.js';
 import { factText, sixWsFilled } from '../../src/interop/labels.js';
+import { renderClaudeMemory } from '../../src/interop/claude-memory.js';
+import { renderLlmsTxt } from '../../src/interop/llms.js';
+import { symlinkSync } from 'fs';
 
 const DATA: any = {
   project: { name: 'inventory-api', goal: 'Inventory API for a small shop', main_language: 'Python', type: 'backend' },
@@ -145,8 +149,27 @@ describe('AERO: the context files agree word for word', () => {
   }
 });
 
+describe('AERO: MEMORY.md (faf sync, Pro) and llms.txt use the same rule', () => {
+  for (const [name, d] of [['clean', DATA], ['edge', EDGE]] as const) {
+    test(`same six W values as CLAUDE.md (${name} values)`, () => {
+      const memory = renderClaudeMemory(d);
+      const llms = renderLlmsTxt(d);
+      for (const [label, value] of sixWsFilled(d)) {
+        expect(memory).toContain(`- **${label}:** ${value}`);
+        expect(llms).toContain(`## ${label}\n\n${value}`);
+      }
+      for (const out of [memory, llms]) {
+        expect(out).not.toContain('slotignored');
+        expect(out).not.toMatch(/\bTBD\b/);
+        expect(out.split('\n').filter(l => l === '## Before changing things')).toHaveLength(0);
+      }
+    });
+  }
+});
+
 describe('AERO: `faf export` points to the real facts file', () => {
   const CLI = resolve(import.meta.dir, '../../src/cli.ts');
+  const CLI_TIMEOUT = 30_000; // each test spawns the CLI; a cold start can pass 5 s
   const FAF = 'faf_version: "3.0"\nproject:\n  name: demo\n  goal: A demo\n  main_language: Go\n';
   let root = '';
   const exportIn = (cwd: string, ...args: string[]) =>
@@ -162,23 +185,30 @@ describe('AERO: `faf export` points to the real facts file', () => {
     writeFileSync(join(d, 'project.faf'), FAF);
     exportIn(d);
     expect(pointer(join(d, 'AGENTS.md'))).toContain('are in `project.faf`.');
-  });
+  }, CLI_TIMEOUT);
   test('a legacy .faf', () => {
     const d = join(root, 'legacy'); mkdirSync(d);
     writeFileSync(join(d, '.faf'), FAF);
     exportIn(d);
     expect(pointer(join(d, 'AGENTS.md'))).toContain('are in `.faf`.');
-  });
+  }, CLI_TIMEOUT);
   test('project.faf one folder up', () => {
     const d = join(root, 'parent'); mkdirSync(join(d, 'sub'), { recursive: true });
     writeFileSync(join(d, 'project.faf'), FAF);
     exportIn(join(d, 'sub'));
     expect(pointer(join(d, 'sub', 'AGENTS.md'))).toContain('are in `../project.faf`.');
-  });
+  }, CLI_TIMEOUT);
+  test('--output through a symlink', () => {
+    const d = join(root, 'linked'); mkdirSync(join(d, 'real', 'x'), { recursive: true });
+    writeFileSync(join(d, 'project.faf'), FAF);
+    symlinkSync(join(d, 'real', 'x'), join(d, 'lnk'));
+    exportIn(d, '--output', 'lnk');
+    expect(pointer(join(d, 'real', 'x', 'AGENTS.md'))).toContain('are in `../../project.faf`.');
+  }, CLI_TIMEOUT);
   test('--output elsewhere', () => {
     const d = join(root, 'out'); mkdirSync(d);
     writeFileSync(join(d, 'project.faf'), FAF);
     exportIn(d, '--output', 'docs');
     expect(pointer(join(d, 'docs', 'AGENTS.md'))).toContain('are in `../project.faf`.');
-  });
+  }, CLI_TIMEOUT);
 });

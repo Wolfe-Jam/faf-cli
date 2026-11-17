@@ -1,3 +1,4 @@
+import { realpathSync } from 'fs';
 import { join, relative, resolve } from 'path';
 import { findFafFile, readFaf, readFafRaw, withKernel } from '../interop/faf.js';
 import { writeAgentsMd } from '../interop/agents.js';
@@ -91,7 +92,9 @@ export function exportCommand(options: ExportOptions = {}): void {
     // lean or stale .faf still yields a complete AGENTS.md. Hand-authored wins.
     // The pointer names the real facts file, relative to where AGENTS.md is
     // written: a legacy .faf, a project.faf one level up, or --output elsewhere.
-    const factsRef = relative(dir, fafPath).split('\\').join('/') || 'project.faf';
+    // Real paths on both sides, so a symlinked --output or cwd still gets a path
+    // that resolves from where AGENTS.md actually lands.
+    const factsRef = relative(realpathSync(dir), realpathSync(fafPath)).split('\\').join('/') || 'project.faf';
     run(() => injected(dir, 'AGENTS.md', () => writeAgentsMd(dir, enrichFromRepo(dir, data), factsRef)));
   }
 

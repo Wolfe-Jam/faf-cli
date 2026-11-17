@@ -54,7 +54,7 @@ import {
   withFafBlock,
   wrapFafBlock,
 } from './inject.js';
-import { filled, slotLabel } from './labels.js';
+import { filled, sixWsFilled, slotLabel } from './labels.js';
 import { commandOnly } from './command-note.js';
 
 /** Claude Code cuts a project id at this length and adds a hash. */
@@ -247,7 +247,6 @@ export function resolveClaudeMemoryPath(dir: string, opts: ClaudeMemoryOptions =
 
 /** Stack keys that are context, not stack (kept out of the Stack list). */
 const NON_STACK = new Set(['target_user', 'core_problem', 'mission_purpose']);
-const SIX_WS = ['who', 'what', 'why', 'where', 'when', 'how'] as const;
 
 /**
  * The block body faf keeps in MEMORY.md, from .faf data: a short project
@@ -258,7 +257,6 @@ const SIX_WS = ['who', 'what', 'why', 'where', 'when', 'how'] as const;
 export function renderClaudeMemory(data: FafData): string {
   const project = data.project ?? {};
   const summary: [string, unknown][] = [['Goal', project.goal], ['Language', project.main_language], ['Type', project.type]];
-  const hc = data.human_context ?? {};
   const keyFiles = Array.isArray(data.key_files) ? data.key_files : [];
 
   const lines = [
@@ -269,7 +267,7 @@ export function renderClaudeMemory(data: FafData): string {
     ...section('Stack', Object.entries(data.stack ?? {})
       .filter(([k, v]) => !NON_STACK.has(k) && filled(v))
       .map(([k, v]) => `- **${slotLabel(`stack.${k}`)}:** ${v as string}`)),
-    ...section('Context', SIX_WS.filter(w => filled(hc[w])).map(w => `- **${slotLabel(`human_context.${w}`)}:** ${hc[w] as string}`)),
+    ...section('Context', sixWsFilled(data).map(([label, value]) => `- **${label}:** ${value}`)),
     ...section('Commands', Object.entries(data.commands ?? {})
       .filter(([, v]) => filled(v))
       .slice(0, LIST_CAP)
