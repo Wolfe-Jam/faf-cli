@@ -2,7 +2,7 @@ import { join } from 'path';
 import type { FafData } from '../core/types.js';
 import { FAF_CONTEXT_FILES } from '../core/safe-write.js';
 import { injectFafBlock } from './inject.js';
-import { filled } from './labels.js';
+import { factText } from './labels.js';
 
 /** Table-of-8 human 6Ws — public WHAT/WHY, never stack/HOW. */
 const SIX_WS: ReadonlyArray<{ key: string; heading: string }> = [
@@ -14,12 +14,16 @@ const SIX_WS: ReadonlyArray<{ key: string; heading: string }> = [
   { key: 'how', heading: 'How' },
 ];
 
-/** A human fact — populated, not slotignored, not none/N/A. */
+/** A human fact: the shared rule (labels.ts factText) — the scorer's idea of
+ *  filled, as one line. Same text CLAUDE.md, GEMINI.md and the others show. */
 function humanFact(v: unknown): string | null {
-  if (!filled(v)) {return null;}
-  const t = v.trim();
-  if (/^(none|n\/a)$/i.test(t)) {return null;}
-  return t;
+  return factText(v);
+}
+
+/** A value written on its own line stays text: a leading Markdown marker (a
+ *  heading #, a quote >, a list item, a fence) is escaped with a backslash. */
+function plainLine(v: string): string {
+  return /^(#|>|[-*+]\s|\d+[.)]\s|```|~~~)/.test(v) ? `\\${v}` : v;
 }
 
 function scalar(map: Record<string, unknown> | undefined, key: string): string | null {
@@ -52,7 +56,7 @@ export function renderLlmsTxt(data: FafData): string {
     if (!value) {continue;}
     lines.push(`## ${heading}`);
     lines.push('');
-    lines.push(value);
+    lines.push(plainLine(value));
     lines.push('');
   }
 

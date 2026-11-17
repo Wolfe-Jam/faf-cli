@@ -9,7 +9,7 @@
  * fallback for off-registry freeform keys.
  */
 
-import { SLOT_BY_PATH } from '../core/slots.js';
+import { SLOT_BY_PATH, isPlaceholder } from '../core/slots.js';
 
 /** All-caps acronym tokens that stay upper-cased inside a Title-Cased label. */
 export const ACRONYMS = new Set([
@@ -36,6 +36,58 @@ export function titleLabel(key: string): string {
 /** A slot value that carries real content (not empty, not slotignored). */
 export function filled(v: unknown): v is string {
   return typeof v === 'string' && v.trim() !== '' && v.trim() !== 'slotignored';
+}
+
+/**
+ * A six-W value as one line of text, or null when the slot does not count as
+ * filled. Same rule as the scorer: empty, `slotignored` and placeholder words
+ * (TBD, None, N/A, …; isPlaceholder) are not facts. Numbers, booleans, dates
+ * and lists are facts and render as text. Line breaks and runs of spaces
+ * become one space, so a value never opens a new line in the host file. Files
+ * that put a bullet or comment marker before each value (CLAUDE.md, GEMINI.md,
+ * .cursorrules, Copilot, MEMORY.md) are then safe; llms.txt writes values on
+ * their own line and escapes a leading Markdown marker itself (llms.ts).
+ * One slot, one fact, one line.
+ */
+export function factText(v: unknown): string | null {
+  if (v === null || v === undefined) {return null;}
+  if (typeof v === 'string') {
+    const t = v.replace(/\s+/g, ' ').trim();
+    if (t === '' || t.toLowerCase() === 'slotignored' || isPlaceholder(t)) {return null;}
+    return t;
+  }
+  if (typeof v === 'number' || typeof v === 'boolean') {return String(v);}
+  if (v instanceof Date) {
+    const iso = v.toISOString();
+    return iso.endsWith('T00:00:00.000Z') ? iso.slice(0, 10) : iso;
+  }
+  if (Array.isArray(v)) {
+    const items = v.map(factText).filter((x): x is string => x !== null);
+    return items.length ? items.join(', ') : null;
+  }
+  if (typeof v === 'object') {
+    const parts = Object.entries(v as Record<string, unknown>)
+      .map(([k, x]) => { const t = factText(x); return t === null ? null : `${k}: ${t}`; })
+      .filter((x): x is string => x !== null);
+    return parts.length ? parts.join('; ') : null;
+  }
+  return null;
+}
+
+/**
+ * The filled six W's, in fixed order, as [label, value] pairs ("Who", "What",
+ * "Why", "Where", "When", "How"). One source for every context file faf writes
+ * (CLAUDE.md, GEMINI.md, .cursorrules, Copilot), so they agree word for word.
+ * Each renderer formats the pairs in its host file's own style.
+ */
+export function sixWsFilled(data: { human_context?: unknown }): [string, string][] {
+  const hc = (data.human_context && typeof data.human_context === 'object' ? data.human_context : {}) as Record<string, unknown>;
+  const out: [string, string][] = [];
+  for (const k of ['who', 'what', 'why', 'where', 'when', 'how'] as const) {
+    const t = factText(hc[k]);
+    if (t !== null) {out.push([slotLabel(`human_context.${k}`), t]);}
+  }
+  return out;
 }
 
 /**

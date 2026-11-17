@@ -2,7 +2,7 @@ import { existsSync, statSync } from 'fs';
 import { join } from 'path';
 import type { FafData } from '../core/types.js';
 import { injectFafBlock } from './inject.js';
-import { slotLabel } from './labels.js';
+import { sixWsFilled, slotLabel } from './labels.js';
 import { FAF_CONTEXT_FILES, readUtf8, resolveInside } from '../core/safe-write.js';
 
 const CLAUDE_MD = FAF_CONTEXT_FILES.claude;
@@ -119,14 +119,8 @@ export function renderClaudeMd(data: FafData): string {
     lines.push('');
   }
 
-  // Context — from human_context (the 6Ws)
-  const hc = data.human_context ?? {};
-  const contextEntries = ([
-    ['who', hc.who], ['what', hc.what], ['why', hc.why],
-    ['where', hc.where], ['when', hc.when], ['how', hc.how],
-  ] as [string, unknown][])
-    .filter(([, v]) => v && String(v).trim())
-    .map(([k, v]) => `- **${slotLabel(`human_context.${k}`)}:** ${v}`);
+  // Context — the six W's, from the one shared rule (labels.ts sixWsFilled).
+  const contextEntries = sixWsFilled(data).map(([label, value]) => `- **${label}:** ${value}`);
 
   if (contextEntries.length > 0) {
     lines.push('## Context');

@@ -27,12 +27,13 @@ const NON_STACK = new Set(['target_user', 'core_problem', 'mission_purpose']);
  * Deterministic projection from curated TRUTH — facts, not hallucinated prose
  * (Gloaguen: LLM freewrite hurts). Sections: orientation · setup · verify ·
  * map · conventions · three-tier guardrails · DoD · when stuck · security ·
- * commit. Human Context (who/why marketing) is intentionally omitted — that
- * belongs in README / project.faf, not agent ops.
+ * commit · project facts. AGENTS.md does not copy the six W's: it points to
+ * the facts file (project.faf), which holds them. GEMINI.md, .cursorrules,
+ * CLAUDE.md and Copilot carry them (labels.ts sixWsFilled).
  *
  * Design: BETTER guide + hand exemplar (faf-cli AGENTS.md) + agents-md-facts.
  */
-export function renderAgentsMd(data: FafData): string {
+export function renderAgentsMd(data: FafData, factsRef = 'project.faf'): string {
   const lines: string[] = [];
   const push = (s = '') => lines.push(s);
 
@@ -233,7 +234,14 @@ export function renderAgentsMd(data: FafData): string {
     }
   }
 
-  // No Human Context section — who/why marketing is README / .faf DNA, not agent ops (BETTER).
+  // The FAF Block points to the facts; it does not copy them (AGENTS.md stays an
+  // operations file). A visible line under its own heading, not only the claim=
+  // comment, which agents skip. factsRef is the facts file's path relative to
+  // this AGENTS.md. Evidence: https://github.com/Wolfe-Jam/context7-faf-receipt#round-4-what-agentsmd-carries-opencode-and-codex
+  push('## Project facts');
+  push();
+  push(`The six W's (who, what, why, where, when, how) and the project's other facts are in \`${factsRef}\`.`);
+  push();
 
   const gen = data.generated;
   if (present(gen)) {push(`*Context authored: ${String(gen)}*`);}
@@ -241,7 +249,8 @@ export function renderAgentsMd(data: FafData): string {
   return lines.join('\n');
 }
 
-/** Write AGENTS.md — non-destructive: injects/updates the faf block, preserves the rest. */
-export function writeAgentsMd(dir: string, data: FafData): void {
-  injectFafBlock(join(dir, FAF_CONTEXT_FILES.agents), renderAgentsMd(data));
+/** Write AGENTS.md — non-destructive: injects/updates the faf block, preserves the rest.
+ *  factsRef: the facts file's path relative to `dir` (default `project.faf`). */
+export function writeAgentsMd(dir: string, data: FafData, factsRef = 'project.faf'): void {
+  injectFafBlock(join(dir, FAF_CONTEXT_FILES.agents), renderAgentsMd(data, factsRef));
 }

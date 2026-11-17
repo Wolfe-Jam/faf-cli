@@ -3,7 +3,7 @@ import type { FafData } from '../core/types.js';
 import { FAF_CONTEXT_FILES } from '../core/safe-write.js';
 import { fafMetaTag } from './claude.js';
 import { injectFafBlock } from './inject.js';
-import { filled, slotLabel } from './labels.js';
+import { filled, sixWsFilled, slotLabel } from './labels.js';
 
 /** Render .cursorrules content from .faf data */
 export function renderCursorrules(data: FafData): string {
@@ -27,6 +27,14 @@ export function renderCursorrules(data: FafData): string {
         lines.push(`# ${slotLabel(`stack.${key}`)}: ${value.trim()}`);
       }
     }
+  }
+
+  // Context — the six W's, as in CLAUDE.md, in this file's comment style.
+  const ctx = sixWsFilled(data);
+  if (ctx.length > 0) {
+    lines.push('');
+    lines.push('# Context');
+    for (const [label, value] of ctx) {lines.push(`# ${label}: ${value}`);}
   }
 
   lines.push('');
