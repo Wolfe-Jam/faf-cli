@@ -1,5 +1,5 @@
 import { realpathSync } from 'fs';
-import { join, relative, resolve } from 'path';
+import { basename, dirname, isAbsolute, join, relative, resolve } from 'path';
 import { findFafFile, readFaf, readFafRaw, withKernel } from '../interop/faf.js';
 import { writeAgentsMd } from '../interop/agents.js';
 import { enrichFromRepo } from '../detect/enrich.js';
@@ -94,7 +94,15 @@ export function exportCommand(options: ExportOptions = {}): void {
     // written: a legacy .faf, a project.faf one level up, or --output elsewhere.
     // Real paths on both sides, so a symlinked --output or cwd still gets a path
     // that resolves from where AGENTS.md actually lands.
-    const factsRef = relative(realpathSync(dir), realpathSync(fafPath)).split('\\').join('/') || 'project.faf';
+    // When AGENTS.md lands outside the project (an --output elsewhere), the path
+    // would climb out of the project and carry this machine's folders into a
+    // file meant to be shared, so the pointer names the file alone.
+    const realDir = realpathSync(dir);
+    const realFaf = realpathSync(fafPath);
+    const insideProject = !relative(dirname(realFaf), realDir).startsWith('..') && !isAbsolute(relative(dirname(realFaf), realDir));
+    const factsRef = insideProject
+      ? relative(realDir, realFaf).split('\\').join('/') || basename(realFaf)
+      : basename(realFaf);
     run(() => injected(dir, 'AGENTS.md', () => writeAgentsMd(dir, enrichFromRepo(dir, data), factsRef)));
   }
 

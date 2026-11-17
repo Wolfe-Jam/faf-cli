@@ -43,8 +43,11 @@ export function filled(v: unknown): v is string {
  * filled. Same rule as the scorer: empty, `slotignored` and placeholder words
  * (TBD, None, N/A, …; isPlaceholder) are not facts. Numbers, booleans, dates
  * and lists are facts and render as text. Line breaks and runs of spaces
- * become one space, so a value can never open a heading, a fence or a new
- * line in the host file. One slot, one fact, one line.
+ * become one space, so a value never opens a new line in the host file. Files
+ * that put a bullet or comment marker before each value (CLAUDE.md, GEMINI.md,
+ * .cursorrules, Copilot, MEMORY.md) are then safe; llms.txt writes values on
+ * their own line and escapes a leading Markdown marker itself (llms.ts).
+ * One slot, one fact, one line.
  */
 export function factText(v: unknown): string | null {
   if (v === null || v === undefined) {return null;}

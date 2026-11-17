@@ -20,6 +20,12 @@ function humanFact(v: unknown): string | null {
   return factText(v);
 }
 
+/** A value written on its own line stays text: a leading Markdown marker (a
+ *  heading #, a quote >, a list item, a fence) is escaped with a backslash. */
+function plainLine(v: string): string {
+  return /^(#|>|[-*+]\s|\d+[.)]\s|```|~~~)/.test(v) ? `\\${v}` : v;
+}
+
 function scalar(map: Record<string, unknown> | undefined, key: string): string | null {
   if (!map) {return null;}
   return humanFact(map[key]);
@@ -50,7 +56,7 @@ export function renderLlmsTxt(data: FafData): string {
     if (!value) {continue;}
     lines.push(`## ${heading}`);
     lines.push('');
-    lines.push(value);
+    lines.push(plainLine(value));
     lines.push('');
   }
 

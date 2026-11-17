@@ -167,6 +167,18 @@ describe('AERO: MEMORY.md (faf sync, Pro) and llms.txt use the same rule', () =>
   }
 });
 
+describe('BRAKE: llms.txt keeps a value as text', () => {
+  test('a leading Markdown marker is escaped, so it opens no heading, quote, list or fence', () => {
+    const d: any = { project: { name: 'md' }, human_context: { who: '# Not a heading', what: '> not a quote', why: '- not a list', how: '``` not a fence' } };
+    const llms = renderLlmsTxt(d).split('\n');
+    expect(llms).toContain('\\# Not a heading');
+    expect(llms).toContain('\\> not a quote');
+    expect(llms).toContain('\\- not a list');
+    expect(llms).toContain('\\``` not a fence');
+    expect(llms.some(l => l.startsWith('# Not'))).toBe(false);
+  });
+});
+
 describe('AERO: `faf export` points to the real facts file', () => {
   const CLI = resolve(import.meta.dir, '../../src/cli.ts');
   const CLI_TIMEOUT = 30_000; // each test spawns the CLI; a cold start can pass 5 s
@@ -204,6 +216,16 @@ describe('AERO: `faf export` points to the real facts file', () => {
     symlinkSync(join(d, 'real', 'x'), join(d, 'lnk'));
     exportIn(d, '--output', 'lnk');
     expect(pointer(join(d, 'real', 'x', 'AGENTS.md'))).toContain('are in `../../project.faf`.');
+  }, CLI_TIMEOUT);
+  test('--output outside the project names the file alone (no machine path)', () => {
+    const d = join(root, 'inside'); mkdirSync(d);
+    writeFileSync(join(d, 'project.faf'), FAF);
+    const outside = join(root, 'elsewhere');
+    exportIn(d, '--output', outside);
+    const line = pointer(join(outside, 'AGENTS.md'));
+    expect(line).toContain('are in `project.faf`.');
+    expect(line).not.toContain('..');
+    expect(line).not.toContain(root);
   }, CLI_TIMEOUT);
   test('--output elsewhere', () => {
     const d = join(root, 'out'); mkdirSync(d);

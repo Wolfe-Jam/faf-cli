@@ -11,11 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
-- `faf export`: AGENTS.md now points to the facts file under a `## Project facts` heading: "The six W's (who, what, why, where, when, how) and the project's other facts are in `project.faf`." The path is the real one, relative to AGENTS.md (a legacy `.faf`, a `project.faf` one folder up, or `--output` elsewhere). Before, the only pointer was the `claim=` HTML comment, which agents skip. AGENTS.md still does not copy the six W's.
+- `faf export`: AGENTS.md now points to the facts file under a `## Project facts` heading: "The six W's (who, what, why, where, when, how) and the project's other facts are in `project.faf`." The path is the real one, relative to AGENTS.md (a legacy `.faf`, a `project.faf` one folder up, `--output` inside the project, symlinks resolved); when `--output` is outside the project, the pointer names the file alone, so no machine path is written. Before, the only pointer was the `claim=` HTML comment, which agents skip. AGENTS.md still does not copy the six W's.
 - `faf export`: GEMINI.md and .cursorrules now carry the six W's in a Context section, as CLAUDE.md and the Copilot instructions do.
 - CLAUDE.md, GEMINI.md, .cursorrules, the Copilot instructions, `llms.txt` and Claude Code's MEMORY.md block (`faf sync`, Pro) now show the six W's from one shared rule, the scorer's: a slot the score counts as empty (empty, `slotignored`, a placeholder such as TBD or N/A) is left out; numbers, booleans, dates and lists render as text; each fact is one line. Fixes CLAUDE.md showing `slotignored`, placeholders and untrimmed values. In `llms.txt` (`--llms`, opt-in) the project name and goal follow the same rule: a placeholder name renders as "Project", and a multi-line value is one line.
 
-Evidence: [round 4 of context7-faf-receipt](https://github.com/Wolfe-Jam/context7-faf-receipt#round-4-what-agentsmd-carries-opencode-and-codex) (Codex and OpenCode, 152 runs). On tasks whose deciding fact lives only in the six W's, the agent knew the team's decision 4/22 times with the comment pointer, 12/21 with a visible pointer, 19/20 with the six W's in the file.
+Evidence: [round 4 of context7-faf-receipt](https://github.com/Wolfe-Jam/context7-faf-receipt#round-4-what-agentsmd-carries-opencode-and-codex) (Codex and OpenCode). Of 152 runs launched, 20 OpenCode runs produced no output (timeouts) and are excluded. The figures come from the 84 runs on the logging and storage tasks, whose deciding fact lives only in the six W's: the agent knew the team's decision 4/22 times with the comment pointer, 12/21 with a visible pointer and 19/20 with the six W's in the file (9/21 with no AGENTS.md).
 
 ## [8.10.1] - 2026-11-17
 
