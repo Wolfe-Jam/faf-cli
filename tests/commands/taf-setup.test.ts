@@ -35,7 +35,8 @@ describe('PIT: faf taf setup', () => {
   // pin `faf taf setup` gives users is a string Dependabot can't see.
   const ciPin = () => {
     const ci = readFileSync(join(import.meta.dir, '..', '..', '.github', 'workflows', 'ci.yml'), 'utf-8');
-    return ci.match(/Wolfe-Jam\/faf-taf-git@v[\d.]+/)?.[0];
+    // faf-cli's own receipt job calls the same receipt.yml.
+    return ci.match(/Wolfe-Jam\/faf-taf-git\/\.github\/workflows\/receipt\.yml@v[\d.]+/)?.[0];
   };
 
   test('setup pins the same faf-taf-git version as faf-cli CI (no drift)', () => {

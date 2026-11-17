@@ -607,19 +607,27 @@ function buildTafWorkflow(dir: string, branch: string): string {
     body = `      # TODO: set up your toolchain, then run your tests writing output to test-output.txt\n${runTests(placeholder)}`;
   }
 
-  // One uploaded file sits at the artifact's root, under its own name.
-  const reportName = report.split('/').pop();
-  const upload =
-    '      - name: Upload the test output\n' +
+  return head + body + uploadStep(branch, onBranch, report) + receiptJob(onBranch, report);
+}
+
+/** The test job's last step: the output goes to the receipt job, after a red run too. */
+function uploadStep(branch: string, onBranch: string, report: string): string {
+  return '      - name: Upload the test output\n' +
     `        # ${branch} only, and after a red run too: the receipt job records it.\n` +
     `        if: \${{ !cancelled() && ${onBranch} }}\n` +
     '        uses: actions/upload-artifact@v7\n' +
     '        with:\n' +
     `          name: ${TAF_ARTIFACT}\n` +
-    `          path: ${report}\n`;
+    `          path: ${report}\n` +
+    '          overwrite: true          # "Re-run failed jobs" uploads it again\n';
+}
 
-  const receipt =
-    '\n  receipt:\n' +
+/** faf-taf-git's receipt job: the only writer. A failed test job is recorded
+ *  as FAILED, with zero counts when it uploaded no output. */
+function receiptJob(onBranch: string, report: string): string {
+  // One uploaded file sits at the artifact's root, under its own name.
+  const reportName = report.split('/').pop();
+  return '\n  receipt:\n' +
     '    needs: test\n' +
     '    # Runs when the tests failed too, so a red run gets a FAILED receipt.\n' +
     `    if: \${{ !cancelled() && ${onBranch} }}\n` +
@@ -629,14 +637,12 @@ function buildTafWorkflow(dir: string, branch: string): string {
     `      artifact-name: ${TAF_ARTIFACT}\n` +
     `      test-output-file: ${reportName}\n` +
     '      test-result: ${{ needs.test.result }}\n';
-
-  return head + body + upload + receipt;
 }
 
 function tafSetup(options: TafOptions): void {
   const dir = process.cwd();
   const branch = defaultBranch(dir);
-  // A name with a quote can't go in the receipt step's `if:`: never swap it silently.
+  // A name with a quote can't go in the upload step's and the receipt job's `if:`: never swap it silently.
   const usable = !/['\n\r]/.test(branch.name);
   const name = usable ? branch.name : 'main';
   const workflow = buildTafWorkflow(dir, name);

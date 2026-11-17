@@ -6,9 +6,10 @@
 //    `taf-recipes` ran for this language, with the same inputs: what CI set up
 //    is what the recipe asks for.
 // 2. Its `run:` steps run in order, in the project, with bash -e. The test step
-//    keeps going when tests fail (continue-on-error), as in the recipe.
+//    fails on a red run, as in the recipe; every step after it must run after
+//    a red run too (!cancelled()).
 // 3. faf-taf-git's own parser (the npm package of the pinned version, the code
-//    the Action runs) reads the report the receipt step names, and its counts
+//    the Action runs) reads the report the test job uploads, and its counts
 //    must match the runner's own summary line.
 import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
