@@ -4,7 +4,7 @@
 
 # AGENTS.md — faf-cli
 
-CLI for IANA-registered .faf + .fafm — context DNA and portable agent memory, scored by the always-33 engine — TypeScript · type: cli · v8.10.0
+CLI for IANA-registered .faf + .fafm — context DNA and portable agent memory, scored by the always-33 engine — TypeScript · type: cli · v8.11.0
 
 > Authored by faf — do not edit the managed block; refresh with `faf export --agents`. Hand-written content outside the managed block is preserved.
 
