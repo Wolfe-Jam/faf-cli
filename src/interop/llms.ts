@@ -20,10 +20,16 @@ function humanFact(v: unknown): string | null {
   return factText(v);
 }
 
-/** A value written on its own line stays text: a leading Markdown marker (a
- *  heading #, a quote >, a list item, a fence) is escaped with a backslash. */
+/** A value written at the start of a line stays text. A leading Markdown
+ *  marker is escaped with a backslash: a heading #, a quote >, a list item, a
+ *  fence, a rule (---, ***, ___), an HTML block (<), a link definition ([x]:).
+ *  An ordered-list number keeps its digits and escapes the dot or bracket
+ *  (1\. x), because a backslash before a digit is not an escape. */
 function plainLine(v: string): string {
-  return /^(#|>|[-*+]\s|\d+[.)]\s|```|~~~)/.test(v) ? `\\${v}` : v;
+  const ordered = /^(\d+)([.)])(\s|$)/.exec(v);
+  if (ordered) {return `${ordered[1]}\\${v.slice(ordered[1].length)}`;}
+  if (/^([-*_])(\s*\1){2,}\s*$/.test(v)) {return `\\${v}`;}
+  return /^(#|>|<|[-*+](\s|$)|```|~~~|\[[^\]]*\]:)/.test(v) ? `\\${v}` : v;
 }
 
 function scalar(map: Record<string, unknown> | undefined, key: string): string | null {
@@ -46,7 +52,7 @@ export function renderLlmsTxt(data: FafData): string {
   lines.push(`# ${name}`);
   lines.push('');
   if (goal) {
-    lines.push(`> ${goal}`);
+    lines.push(`> ${plainLine(goal)}`);
     lines.push('');
   }
 

@@ -8,6 +8,11 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- **`llms.txt` keeps every fact as text.** A six-W value written on its own line no longer turns into a horizontal rule (`---`, `***`, `___`), an HTML block (`<div>`, `<!-- -->`) or a link definition (`[x]: url`). A value that starts with a number and a dot or bracket (`2026. A year`, `1) first`) keeps its digits and escapes the dot or bracket (it was `\2026. A year`, which shows the backslash). The goal in the quote line is escaped the same way.
+
 ## [8.11.0] - 2026-11-17 — The Project Facts Edition
 
 The six W's now reach every agent: AGENTS.md points to project.faf, and CLAUDE.md, GEMINI.md, .cursorrules, Copilot and llms.txt carry them, one rule, one line each.

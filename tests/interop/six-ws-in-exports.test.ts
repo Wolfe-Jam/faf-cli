@@ -177,6 +177,32 @@ describe('BRAKE: llms.txt keeps a value as text', () => {
     expect(llms).toContain('\\``` not a fence');
     expect(llms.some(l => l.startsWith('# Not'))).toBe(false);
   });
+
+  test('a rule, an HTML block or a link definition stays text', () => {
+    for (const v of ['---', '***', '___', '* * *', '<div>x', '<!-- c -->', '[x]: http://e.com', '-']) {
+      const llms = renderLlmsTxt({ project: { name: 'md' }, human_context: { what: v } } as any).split('\n');
+      expect(llms).toContain(`\\${v}`);
+    }
+  });
+
+  test('an ordered-list number keeps its digits: the dot or bracket is escaped, not the number', () => {
+    const llms = renderLlmsTxt({ project: { name: 'md' }, human_context: { what: '2026. A year', how: '1) first' } } as any).split('\n');
+    expect(llms).toContain('2026\\. A year');
+    expect(llms).toContain('1\\) first');
+    expect(llms.some(l => l.startsWith('\\2026') || l.startsWith('\\1'))).toBe(false);
+  });
+
+  test('the goal in the quote line is escaped too', () => {
+    const llms = renderLlmsTxt({ project: { name: 'md', goal: '# Not a heading' }, human_context: {} } as any).split('\n');
+    expect(llms).toContain('> \\# Not a heading');
+  });
+
+  test('plain values are left alone', () => {
+    const llms = renderLlmsTxt({ project: { name: 'md' }, human_context: { what: 'A CLI', when: '2026', how: '+++ not a marker' } } as any).split('\n');
+    expect(llms).toContain('A CLI');
+    expect(llms).toContain('2026');
+    expect(llms).toContain('+++ not a marker');
+  });
 });
 
 describe('AERO: `faf export` points to the real facts file', () => {
