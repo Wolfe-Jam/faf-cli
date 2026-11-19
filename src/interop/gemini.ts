@@ -21,7 +21,7 @@ const NON_STACK = new Set(['target_user', 'core_problem', 'mission_purpose']);
  * required actions — not the AGENTS.md BETTER ladder, which is a different
  * spec for a different reader.
  */
-export function renderGeminiMd(data: FafData): string {
+export function renderGeminiMd(data: FafData, factsRef = 'project.faf'): string {
   const lines: string[] = [];
 
   const instant = data.instant_context as { key_files?: string[] } | undefined;
@@ -45,7 +45,7 @@ export function renderGeminiMd(data: FafData): string {
   const setupCmds = [...setupRaw].sort((a, b) => setupRank(a[0]) - setupRank(b[0]) || a[0].localeCompare(b[0]));
   const verifyCmds = [...testCmds, ...lintCmds];
 
-  lines.push(fafMetaTag(data));
+  lines.push(fafMetaTag(data, { claim: factsRef }));
   lines.push('');
   lines.push(`# GEMINI.md — ${data.project?.name ?? 'Project'}`);
   lines.push('');
@@ -122,6 +122,6 @@ export function renderGeminiMd(data: FafData): string {
 }
 
 /** Write GEMINI.md — non-destructive: injects/updates the faf block, preserves the rest. */
-export function writeGeminiMd(dir: string, data: FafData): void {
-  injectFafBlock(join(dir, FAF_CONTEXT_FILES.gemini), renderGeminiMd(data));
+export function writeGeminiMd(dir: string, data: FafData, factsRef = 'project.faf'): void {
+  injectFafBlock(join(dir, FAF_CONTEXT_FILES.gemini), renderGeminiMd(data, factsRef));
 }

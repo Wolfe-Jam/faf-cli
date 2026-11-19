@@ -1,5 +1,5 @@
-import { lstatSync } from 'fs';
-import { join, dirname, basename, resolve } from 'path';
+import { lstatSync, realpathSync } from 'fs';
+import { join, dirname, basename, resolve, relative, isAbsolute } from 'path';
 import { execFileSync } from 'child_process';
 import { YAMLParseError, isMap, isScalar, parse, stringify, type Document } from 'yaml';
 import type { FafData } from '../core/types.js';
@@ -443,4 +443,22 @@ export function gitRepoRel(fafPath: string, cwd: string = process.cwd()): string
     encoding: 'utf-8',
   }).trim(); // '' at repo root, or 'sub/dir/' (trailing slash)
   return prefix + basename(fafPath);
+}
+
+/**
+ * How the context files faf writes into `dir` name the facts file: the AGENTS.md
+ * pointer and the `claim=` stamp in every file. A path from `dir` to the real
+ * facts file (a legacy `.faf`, a project.faf one folder up), using real paths so
+ * a symlinked folder still resolves. When `dir` is outside the project (an
+ * `--output` elsewhere), the path would climb out and carry this machine's
+ * folders into a file meant to be shared, so it is the file name alone.
+ */
+export function factsRefFor(dir: string, fafPath: string): string {
+  const realDir = realpathSync(dir);
+  const realFaf = realpathSync(fafPath);
+  const fromFaf = relative(dirname(realFaf), realDir);
+  const insideProject = !fromFaf.startsWith('..') && !isAbsolute(fromFaf);
+  return insideProject
+    ? relative(realDir, realFaf).split('\\').join('/') || basename(realFaf)
+    : basename(realFaf);
 }

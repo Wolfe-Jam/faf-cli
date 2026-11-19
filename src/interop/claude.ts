@@ -79,14 +79,14 @@ export function fafMetaTag(data: FafData, opts: FafMetaOpts = {}): string {
 }
 
 /** Render CLAUDE.md content from .faf data */
-export function renderClaudeMd(data: FafData): string {
+export function renderClaudeMd(data: FafData, factsRef = 'project.faf'): string {
   const lines: string[] = [];
   const name = data.project?.name ?? 'Project';
   const lang = data.project?.main_language ?? '';
   const goal = data.project?.goal ?? '';
 
   // Meta tag — project DNA, invisible to renderers, visible to AI
-  lines.push(fafMetaTag(data));
+  lines.push(fafMetaTag(data, { claim: factsRef }));
   lines.push('');
 
   // Title

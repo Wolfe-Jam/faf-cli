@@ -260,3 +260,42 @@ describe('AERO: `faf export` points to the real facts file', () => {
     expect(pointer(join(d, 'docs', 'AGENTS.md'))).toContain('are in `../project.faf`.');
   }, CLI_TIMEOUT);
 });
+
+describe('AERO: the claim= stamp names the same facts file as the pointer', () => {
+  const CLI = resolve(import.meta.dir, '../../src/cli.ts');
+  const CLI_TIMEOUT = 30_000;
+  const FAF = 'faf_version: "3.0"\nproject:\n  name: demo\n  goal: A demo\n  main_language: Go\n';
+  const FILES = ['AGENTS.md', 'GEMINI.md', '.cursorrules', '.github/copilot-instructions.md'];
+  let root = '';
+  const cli = (cwd: string, ...args: string[]) => spawnSync('bun', [CLI, ...args], { cwd, encoding: 'utf-8' });
+  const claim = (file: string) => (/claim=([^ |]+)/.exec(readFileSync(file, 'utf-8')) ?? [])[1];
+
+  beforeAll(() => { root = mkdtempSync(join(tmpdir(), 'faf-claim-')); });
+  afterAll(() => { rmSync(root, { recursive: true, force: true }); });
+
+  test('project.faf: every file says claim=project.faf (unchanged)', () => {
+    const d = join(root, 'plain'); mkdirSync(d);
+    writeFileSync(join(d, 'project.faf'), FAF);
+    cli(d, 'export', '--all'); cli(d, 'sync');
+    for (const f of [...FILES, 'CLAUDE.md']) {expect(claim(join(d, f))).toBe('project.faf');}
+  }, CLI_TIMEOUT);
+  test('a legacy .faf: every file says claim=.faf', () => {
+    const d = join(root, 'legacy'); mkdirSync(d);
+    writeFileSync(join(d, '.faf'), FAF);
+    cli(d, 'export', '--all'); cli(d, 'sync');
+    for (const f of [...FILES, 'CLAUDE.md']) {expect(claim(join(d, f))).toBe('.faf');}
+  }, CLI_TIMEOUT);
+  test('project.faf one folder up: claim=../project.faf, as the pointer says', () => {
+    const d = join(root, 'parent'); mkdirSync(join(d, 'sub'), { recursive: true });
+    writeFileSync(join(d, 'project.faf'), FAF);
+    cli(join(d, 'sub'), 'export', '--all'); cli(join(d, 'sub'), 'sync');
+    for (const f of [...FILES, 'CLAUDE.md']) {expect(claim(join(d, 'sub', f))).toBe('../project.faf');}
+  }, CLI_TIMEOUT);
+  test('--output outside the project: the file name alone, no machine path', () => {
+    const d = join(root, 'inside'); mkdirSync(d);
+    writeFileSync(join(d, 'project.faf'), FAF);
+    const outside = join(root, 'elsewhere');
+    cli(d, 'export', '--all', '--output', outside);
+    for (const f of FILES) {expect(claim(join(outside, f))).toBe('project.faf');}
+  }, CLI_TIMEOUT);
+});

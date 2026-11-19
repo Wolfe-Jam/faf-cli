@@ -1,6 +1,6 @@
 import { existsSync } from 'fs';
 import { join } from 'path';
-import { findFafFile, readFaf, readFafRaw, withKernel } from '../interop/faf.js';
+import { factsRefFor, findFafFile, readFaf, readFafRaw, withKernel } from '../interop/faf.js';
 import { writeClaudeMd, renderClaudeMd } from '../interop/claude.js';
 import { writeClaudeMemory, type ClaudeMemoryAction } from '../interop/claude-memory.js';
 import { legacyStampNoteAt } from '../interop/inject.js';
@@ -41,7 +41,7 @@ export function syncCommand(options: SyncOptions = {}): void {
 
 function pushSync(fafPath: string, dir: string): void {
   const data = readFaf(fafPath);
-  const content = renderClaudeMd(data);
+  const content = renderClaudeMd(data, factsRefFor(dir, fafPath));
   // Read before the write: a CLAUDE.md led by faf's old stamp is prefixed,
   // never reclaimed — say so in one line.
   const note = legacyStampNoteAt(join(dir, 'CLAUDE.md'), 'CLAUDE.md');

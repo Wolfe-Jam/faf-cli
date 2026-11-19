@@ -73,7 +73,7 @@ export function renderAgentsMd(data: FafData, factsRef = 'project.faf'): string 
   const testCmd = testCmds[0] ? commandOnly(testCmds[0][1]) : undefined;
   const buildCmd = buildEntry ? commandOnly(buildEntry[1]) : undefined;
 
-  push(fafMetaTag(data));
+  push(fafMetaTag(data, { claim: factsRef }));
   push();
   push(`# AGENTS.md — ${data.project?.name ?? 'Project'}`);
   push();

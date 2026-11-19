@@ -6,10 +6,10 @@ import { injectFafBlock } from './inject.js';
 import { filled, sixWsFilled, slotLabel } from './labels.js';
 
 /** Render .cursorrules content from .faf data */
-export function renderCursorrules(data: FafData): string {
+export function renderCursorrules(data: FafData, factsRef = 'project.faf'): string {
   const lines: string[] = [];
 
-  lines.push(fafMetaTag(data));
+  lines.push(fafMetaTag(data, { claim: factsRef }));
   lines.push('');
   lines.push('# .cursorrules');
   lines.push(`# Authored from project.faf — ${data.project?.name ?? 'Project'}`);
@@ -42,6 +42,6 @@ export function renderCursorrules(data: FafData): string {
 }
 
 /** Write .cursorrules — non-destructive: injects/updates the faf block (hash-comment markers), preserves the rest. */
-export function writeCursorrules(dir: string, data: FafData): void {
-  injectFafBlock(join(dir, FAF_CONTEXT_FILES.cursorrules), renderCursorrules(data), '# faf:start', '# faf:end');
+export function writeCursorrules(dir: string, data: FafData, factsRef = 'project.faf'): void {
+  injectFafBlock(join(dir, FAF_CONTEXT_FILES.cursorrules), renderCursorrules(data, factsRef), '# faf:start', '# faf:end');
 }

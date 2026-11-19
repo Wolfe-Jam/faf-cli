@@ -41,11 +41,11 @@ const COMMAND_SLOTS = new Set<string>([...COMMAND_VERBS.map(([k]) => k), 'cicd']
  * already consume the richer slots Option B will add (test/lint/run, …), so this
  * emitter is built once and grows with the data.
  */
-export function renderCopilotInstructions(data: FafData): string {
+export function renderCopilotInstructions(data: FafData, factsRef = 'project.faf'): string {
   const lines: string[] = [];
   const name = data.project?.name ?? 'Project';
 
-  lines.push(fafMetaTag(data));
+  lines.push(fafMetaTag(data, { claim: factsRef }));
   lines.push('');
   lines.push(`# GitHub Copilot Instructions — ${name}`);
   lines.push('');
@@ -99,9 +99,9 @@ export function renderCopilotInstructions(data: FafData): string {
  * faf block, preserves the rest). Creates the `.github/` directory if absent.
  * The project folder is the boundary: a `.github` linked outside it is refused.
  */
-export function writeCopilotInstructions(dir: string, data: FafData): void {
+export function writeCopilotInstructions(dir: string, data: FafData, factsRef = 'project.faf'): void {
   makeDirInside(dir, '.github');
-  injectFafBlock(join(dir, '.github', FAF_CONTEXT_FILES.copilot), renderCopilotInstructions(data), FAF_START, FAF_END, {
+  injectFafBlock(join(dir, '.github', FAF_CONTEXT_FILES.copilot), renderCopilotInstructions(data, factsRef), FAF_START, FAF_END, {
     root: dir,
   });
 }
