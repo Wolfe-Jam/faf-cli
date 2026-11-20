@@ -8,11 +8,6 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-
-### Fixed
-- **`llms.txt` keeps every fact as text.** A six-W value written on its own line no longer turns into a horizontal rule (`---`, `***`, `___`), an HTML block (`<div>`, `<!-- -->`) or a link definition (`[x]: url`). A value that starts with a number and a dot or bracket (`2026. A year`, `1) first`) keeps its digits and escapes the dot or bracket (it was `\2026. A year`, which shows the backslash). The goal in the quote line is escaped the same way.
-
 ## [8.11.0] - 2026-11-17 — The Project Facts Edition
 
 The six W's now reach every agent: AGENTS.md points to project.faf, and CLAUDE.md, GEMINI.md, .cursorrules, Copilot and llms.txt carry them, one rule, one line each.
@@ -25,6 +20,9 @@ The six W's now reach every agent: AGENTS.md points to project.faf, and CLAUDE.m
 - CLAUDE.md, GEMINI.md, .cursorrules, the Copilot instructions, `llms.txt` and Claude Code's MEMORY.md block (`faf sync`, Pro) now show the six W's from one shared rule, the scorer's: a slot the score counts as empty (empty, `slotignored`, a placeholder such as TBD or N/A) is left out; numbers, booleans, dates and lists render as text; each fact is one line. Fixes CLAUDE.md showing `slotignored`, placeholders and untrimmed values. In `llms.txt` (`--llms`, opt-in) the project name and goal follow the same rule: a placeholder name renders as "Project", and a multi-line value is one line.
 
 Evidence: [round 4 of context7-faf-receipt](https://github.com/Wolfe-Jam/context7-faf-receipt#round-4-what-agentsmd-carries-opencode-and-codex) (Codex and OpenCode). Of 152 runs launched, 20 OpenCode runs produced no output (timeouts) and are excluded. The figures come from the 84 runs on the logging and storage tasks, whose deciding fact lives only in the six W's: the agent knew the team's decision 4/22 times with the comment pointer, 12/21 with a visible pointer and 19/20 with the six W's in the file (9/21 with no AGENTS.md).
+
+### Fixed
+- **`llms.txt` keeps every fact as text.** A six-W value or the goal that starts with Markdown (a heading `#`, a quote `>`, a list item, a numbered item such as `2026. A year`, a fence, a rule such as `---`, an HTML block such as `<div>`, or a link definition `[x]: url`) is escaped, so it stays text. Before, `llms.txt` wrote the value as it was, and it could become a heading, a list, a rule or vanish.
 
 ## [8.10.1] - 2026-11-17
 
