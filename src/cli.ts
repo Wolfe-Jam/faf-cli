@@ -91,6 +91,7 @@ program
   .command('go')
   .description('Confirm the goal and six W\'s, suggested in gray, then fill the rest')
   .option('--resume', 'Resume previous session')
+  .option('--github', "Also suggest the goal from the repo's GitHub description (one API call; GITHUB_TOKEN for private repos)")
   .action((options) => goCommand(options));
 
 program

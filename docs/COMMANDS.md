@@ -84,7 +84,10 @@ Interactive. Asks for the goal and the six W's (who, what, why, where, when, how
 ```bash
 faf go            # start
 faf go --resume   # continue a session you left
+faf go --github   # also suggest the goal from the repo's GitHub description
 ```
+
+`--github` makes one GitHub API call for the description of the clone's `origin` and offers it as the goal suggestion (source: GitHub description) when the README has none. It is never written unless you confirm it. Set `GITHUB_TOKEN` or `GH_TOKEN` for a private repo.
 
 ### Drive to 100%: `faf loop`
 

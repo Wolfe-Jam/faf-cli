@@ -4,5 +4,5 @@
  * shell); the main `faf-cli` import does not. Author the fetched folder with
  * authorFafFromRepo from `faf-cli`.
  */
-export { fetchRepo, FetchRepoError } from './interop/fetch-repo.js';
-export type { FetchedRepo, FetchRepoOptions } from './interop/fetch-repo.js';
+export { fetchRepo, FetchRepoError, githubDescription } from './interop/fetch-repo.js';
+export type { FetchedRepo, FetchRepoOptions, GithubDescriptionOptions } from './interop/fetch-repo.js';

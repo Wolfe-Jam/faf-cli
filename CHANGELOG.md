@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **`faf-cli/fetch`: the fetch step of `faf git`, for tools that author from a URL** ([#236](https://github.com/Wolfe-Jam/faf-cli/issues/236)). `fetchRepo(url, { ref })` normalizes the URL, shallow-clones it (no shell, links not followed) into a temp folder of faf's own and takes out link placeholders; it returns `{ dir, repoUrl, cleanup() }`. Author the folder with `authorFafFromRepo` from `faf-cli`. A failure is a `FetchRepoError` with `kind` `url` or `clone`. `faf git` uses the same function, so there is one copy of the clone. It is a separate entry: the main `faf-cli` import still runs no git.
+- **The GitHub description as a goal suggestion** ([#237](https://github.com/Wolfe-Jam/faf-cli/issues/237)). `faf go --github` makes one GitHub API call for the description of the clone's `origin` and offers it as the goal suggestion, source `GitHub description`, after the README and before the package.json description. It is a suggestion like the others: never written unless confirmed. `GITHUB_TOKEN` or `GH_TOKEN` is sent when set (private repos, rate limits). For tools: `githubDescription(repo)` in `faf-cli/fetch` (null on any failure, never throws) and a third argument to `suggestIntent(dir, faf, { githubDescription })`. GitHub metadata (stars, forks, topics) is not added: it changes daily and is not a scored slot.
 
 ## [8.11.0] - 2026-11-17 — The Project Facts Edition
 

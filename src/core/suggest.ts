@@ -75,10 +75,18 @@ function packageDescription(dir: string, toolingRoot: boolean): string | null {
  * Suggestions for the goal and the six W's in `dir`. When `faf` (the current
  * .faf data) is given, a slot it already fills gets no suggestion — the
  * human's words are never second-guessed. Precedence: README (sections, then
- * the tagline) → package.json description → Cargo.toml description →
- * Relentless (README + manifest, sourced).
+ * the tagline) → the GitHub description (when given) → package.json
+ * description → Cargo.toml description → Relentless (README + manifest,
+ * sourced).
+ *
+ * `sources.githubDescription` is the repo's GitHub description, fetched by the
+ * caller (githubDescription in `faf-cli/fetch`); this function reads no network.
  */
-export function suggestIntent(dir: string, faf?: Record<string, unknown>): IntentSuggestions {
+export function suggestIntent(
+  dir: string,
+  faf?: Record<string, unknown>,
+  sources: { githubDescription?: string | null } = {},
+): IntentSuggestions {
   const found = ((detectStack(dir) as { _meta?: { found?: string[] } })._meta?.found) ?? [];
   const toolingRoot = found.some(f => f.startsWith('polyglot:'));
   const out: IntentSuggestions = {};
@@ -105,6 +113,8 @@ export function suggestIntent(dir: string, faf?: Record<string, unknown>): Inten
   // description follows; it often describes the repo, not the project
   // ("monorepo for svelte.dev").
   offerReadme(dir, offer);
+
+  offer('project.goal', sources.githubDescription, 'GitHub description');
 
   const desc = packageDescription(dir, toolingRoot);
   offer('project.goal', desc, 'package.json description');
