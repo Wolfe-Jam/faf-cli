@@ -28,6 +28,7 @@ import { renderCopilotInstructions } from '../../src/interop/copilot-instruction
 import { factText, sixWsFilled } from '../../src/interop/labels.js';
 import { renderClaudeMemory } from '../../src/interop/claude-memory.js';
 import { renderLlmsTxt } from '../../src/interop/llms.js';
+import { readFaf } from '../../src/interop/faf.js';
 import { symlinkSync } from 'fs';
 
 const DATA: any = {
@@ -327,5 +328,59 @@ describe('AERO: review of #255', () => {
     const agents = read(join(d, '..cache', 'AGENTS.md'));
     expect(agents).toContain('claim=../project.faf');
     expect(agents).toContain('are in `../project.faf`.');
+  }, CLI_TIMEOUT);
+});
+
+describe('ENGINE: numbers render as written in project.faf', () => {
+  const CLI = resolve(import.meta.dir, '../../src/cli.ts');
+  const CLI_TIMEOUT = 30_000;
+  let root = '';
+  const cli = (cwd: string, ...args: string[]) => spawnSync('bun', [CLI, ...args], { cwd, encoding: 'utf-8' });
+  const read = (f: string) => readFileSync(f, 'utf-8');
+  const FAF = [
+    'faf_version: "3.0"',
+    'project:',
+    '  name: 007',
+    '  goal: 1.50',
+    'human_context:',
+    '  who: 0x1F',
+    '  what: [1.0, two]',
+    '  why: 1e3',
+    '  where: .5',
+    '  when: 2026.10',
+    '  how: ~',
+    '',
+  ].join('\n');
+
+  beforeAll(() => { root = mkdtempSync(join(tmpdir(), 'faf-written-')); });
+  afterAll(() => { rmSync(root, { recursive: true, force: true }); });
+
+  test('sixWsFilled reads each number as written; empty stays out', () => {
+    const f = join(root, 'unit.faf'); writeFileSync(f, FAF);
+    expect(sixWsFilled(readFaf(f))).toEqual([
+      ['Who', '0x1F'], ['What', '1.0, two'], ['Why', '1e3'], ['Where', '.5'], ['When', '2026.10'],
+    ]);
+  });
+  test('data not read from a file renders as before', () => {
+    expect(sixWsFilled({ human_context: { when: 2026.1 } })).toEqual([['When', '2026.1']]);
+  });
+  test('an alias renders the text it points to', () => {
+    const f = join(root, 'alias.faf');
+    writeFileSync(f, 'faf_version: "3.0"\nproject:\n  name: x\nbase: &w 2026.10\nhuman_context:\n  when: *w\n');
+    expect(sixWsFilled(readFaf(f))).toEqual([['When', '2026.10']]);
+  });
+  test('every file faf writes shows 2026.10, not 2026.1', () => {
+    const d = join(root, 'e2e'); mkdirSync(d);
+    writeFileSync(join(d, 'project.faf'), FAF);
+    cli(d, 'export', '--gemini', '--cursor', '--copilot', '--llms'); cli(d, 'sync');
+    for (const f of ['GEMINI.md', '.cursorrules', '.github/copilot-instructions.md', 'llms.txt', 'CLAUDE.md']) {
+      const text = read(join(d, f));
+      expect(text).toContain('2026.10');
+      expect(text).toContain('0x1F');
+      expect(text).not.toContain('2026.1\n');
+    }
+    const llms = read(join(d, 'llms.txt'));
+    expect(llms).toContain('\n# 007\n');
+    expect(llms).toContain('> 1.50');
   }, CLI_TIMEOUT);
 });

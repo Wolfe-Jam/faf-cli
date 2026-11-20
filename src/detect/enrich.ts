@@ -1,4 +1,5 @@
 import type { FafData } from '../core/types.js';
+import { fafSourceOf, setFafSource } from '../core/faf-source.js';
 import { readRepoFile, repoExists } from '../core/safe-write.js';
 import { detectCommands, detectKeyFiles } from './scanner.js';
 
@@ -55,6 +56,9 @@ function detectConventions(dir: string, pkg: Pkg): string[] {
  */
 export function enrichFromRepo(dir: string, data: FafData): FafData {
   const out: FafData = { ...data };
+  // The copy keeps the file it came from, so its facts render as written.
+  const source = fafSourceOf(data);
+  if (source) {setFafSource(out, source);}
 
   let pkg: unknown = null;
   const pj = readRepoFile(dir, 'package.json');
