@@ -2,7 +2,7 @@ import { join } from 'path';
 import type { FafData } from '../core/types.js';
 import { FAF_CONTEXT_FILES } from '../core/safe-write.js';
 import { injectFafBlock } from './inject.js';
-import { factText } from './labels.js';
+import { factAt, factText } from './labels.js';
 
 /** Table-of-8 human 6Ws — public WHAT/WHY, never stack/HOW. */
 const SIX_WS: ReadonlyArray<{ key: string; heading: string }> = [
@@ -46,8 +46,8 @@ function scalar(map: Record<string, unknown> | undefined, key: string): string |
  */
 export function renderLlmsTxt(data: FafData): string {
   const lines: string[] = [];
-  const name = humanFact(data.project?.name) ?? 'Project';
-  const goal = humanFact(data.project?.goal);
+  const name = factAt(data, ['project', 'name']) ?? 'Project';
+  const goal = factAt(data, ['project', 'goal']);
 
   lines.push(`# ${name}`);
   lines.push('');
@@ -56,9 +56,8 @@ export function renderLlmsTxt(data: FafData): string {
     lines.push('');
   }
 
-  const hc = data.human_context;
   for (const { key, heading } of SIX_WS) {
-    const value = scalar(hc, key);
+    const value = factAt(data, ['human_context', key]);
     if (!value) {continue;}
     lines.push(`## ${heading}`);
     lines.push('');
