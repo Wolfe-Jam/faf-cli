@@ -53,7 +53,7 @@ describe('TYRE: git command', () => {
       throw new Error(`__exit_${code}__`);
     }) as never);
     try {
-      gitCommand('');
+      await gitCommand('');
       throw new Error('expected process.exit');
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
@@ -76,7 +76,7 @@ describe('TYRE: git command', () => {
     try {
       // Use a host that cannot exist. .invalid is RFC 2606 reserved — never
       // resolves anywhere, so DNS will fail fast (no internet needed).
-      gitCommand('https://this-host-does-not-exist.invalid/never/ever');
+      await gitCommand('https://this-host-does-not-exist.invalid/never/ever');
       throw new Error('expected process.exit');
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
@@ -103,7 +103,7 @@ describe('TYRE: git command', () => {
     try {
       // .invalid fails fast (no network) — but the progress line prints BEFORE the clone,
       // so we still capture which stream it took. --stdout reserves stdout for the .faf.
-      gitCommand('https://this-host-does-not-exist.invalid/never/ever', { stdout: true });
+      await gitCommand('https://this-host-does-not-exist.invalid/never/ever', { stdout: true });
     } catch { /* exits on clone failure — expected; the progress line already printed */ }
     errSpy.mockRestore();
     logSpy.mockRestore();
@@ -120,7 +120,7 @@ describe('TYRE: git command', () => {
       throw new Error(`__exit_${code}__`);
     }) as never);
     try {
-      gitCommand('not-a-url-at-all');
+      await gitCommand('not-a-url-at-all');
       throw new Error('expected process.exit');
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
