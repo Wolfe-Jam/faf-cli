@@ -8,6 +8,11 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **`faf-cli/fetch`: the fetch step of `faf git`, for tools that author from a URL** ([#236](https://github.com/Wolfe-Jam/faf-cli/issues/236)). `fetchRepo(url, { ref })` normalizes the URL, shallow-clones it (no shell, links not followed) into a temp folder of faf's own and takes out link placeholders; it returns `{ dir, repoUrl, cleanup() }`. Author the folder with `authorFafFromRepo` from `faf-cli`. A failure is a `FetchRepoError` with `kind` `url` or `clone`. `faf git` uses the same function, so there is one copy of the clone. It is a separate entry: the main `faf-cli` import still runs no git.
+
 ## [8.11.0] - 2026-11-17 — The Project Facts Edition
 
 The six W's now reach every agent: AGENTS.md points to project.faf, and CLAUDE.md, GEMINI.md, .cursorrules, Copilot and llms.txt carry them, one rule, one line each.

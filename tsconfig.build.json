@@ -9,6 +9,6 @@
     "outDir": "./dist",
     "noEmit": false
   },
-  "include": ["src/index.ts"],
+  "include": ["src/index.ts", "src/fetch.ts"],
   "exclude": ["node_modules", "dist", "tests"]
 }
