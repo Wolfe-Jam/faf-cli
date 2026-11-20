@@ -1,6 +1,5 @@
-import { realpathSync } from 'fs';
-import { basename, dirname, isAbsolute, join, relative, resolve } from 'path';
-import { findFafFile, readFaf, readFafRaw, withKernel } from '../interop/faf.js';
+import { join, resolve } from 'path';
+import { factsRefFor, findFafFile, readFaf, readFafRaw, withKernel } from '../interop/faf.js';
 import { writeAgentsMd } from '../interop/agents.js';
 import { enrichFromRepo } from '../detect/enrich.js';
 import { writeCursorrules } from '../interop/cursorrules.js';
@@ -67,6 +66,9 @@ export function exportCommand(options: ExportOptions = {}): void {
   const dir = options.output ? resolve(process.cwd(), options.output) : process.cwd();
   if (options.output) {makeDirInside(dir);}
   const data = readFaf(fafPath);
+  // How each file names the facts file (AGENTS.md pointer, every claim= stamp):
+  // the path from where the files land to the real facts file (factsRefFor).
+  const factsRef = factsRefFor(dir, fafPath);
   const exportAll =
     options.all ||
     (!options.agents &&
@@ -90,34 +92,21 @@ export function exportCommand(options: ExportOptions = {}): void {
   if (exportAll || options.agents) {
     // Enrich with facts detected from the repo (commands/key-files/secrets) so a
     // lean or stale .faf still yields a complete AGENTS.md. Hand-authored wins.
-    // The pointer names the real facts file, relative to where AGENTS.md is
-    // written: a legacy .faf, a project.faf one level up, or --output elsewhere.
-    // Real paths on both sides, so a symlinked --output or cwd still gets a path
-    // that resolves from where AGENTS.md actually lands.
-    // When AGENTS.md lands outside the project (an --output elsewhere), the path
-    // would climb out of the project and carry this machine's folders into a
-    // file meant to be shared, so the pointer names the file alone.
-    const realDir = realpathSync(dir);
-    const realFaf = realpathSync(fafPath);
-    const insideProject = !relative(dirname(realFaf), realDir).startsWith('..') && !isAbsolute(relative(dirname(realFaf), realDir));
-    const factsRef = insideProject
-      ? relative(realDir, realFaf).split('\\').join('/') || basename(realFaf)
-      : basename(realFaf);
     run(() => injected(dir, 'AGENTS.md', () => writeAgentsMd(dir, enrichFromRepo(dir, data), factsRef)));
   }
 
   if (exportAll || options.cursor) {
-    run(() => injected(dir, '.cursorrules', () => writeCursorrules(dir, data), ['# faf:start', '# faf:end']));
+    run(() => injected(dir, '.cursorrules', () => writeCursorrules(dir, data, factsRef), ['# faf:start', '# faf:end']));
   }
 
   if (exportAll || options.gemini) {
     // Same repo-enrichment AGENTS.md gets — a lean/stale .faf still yields a
     // complete GEMINI.md (commands/key-files detected from the repo).
-    run(() => injected(dir, 'GEMINI.md', () => writeGeminiMd(dir, enrichFromRepo(dir, data))));
+    run(() => injected(dir, 'GEMINI.md', () => writeGeminiMd(dir, enrichFromRepo(dir, data), factsRef)));
   }
 
   if (exportAll || options.copilot) {
-    run(() => injected(dir, '.github/copilot-instructions.md', () => writeCopilotInstructions(dir, data)));
+    run(() => injected(dir, '.github/copilot-instructions.md', () => writeCopilotInstructions(dir, data, factsRef)));
   }
 
   // Opt-in only: wires an MCP server into the user's .grok/ config, so it

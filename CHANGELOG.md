@@ -23,6 +23,7 @@ Evidence: [round 4 of context7-faf-receipt](https://github.com/Wolfe-Jam/context
 
 ### Fixed
 - **`llms.txt` keeps every fact as text.** A six-W value or the goal that starts with Markdown (a heading `#`, a quote `>`, a list item, a numbered item such as `2026. A year`, a fence, a rule such as `---`, an HTML block such as `<div>`, or a link definition `[x]: url`) is escaped, so it stays text. Before, `llms.txt` wrote the value as it was, and it could become a heading, a list, a rule or vanish.
+- **The `claim=` stamp names the real facts file.** The second stamp line in CLAUDE.md, AGENTS.md, GEMINI.md, .cursorrules and the Copilot instructions said `claim=project.faf` even when the facts were in a legacy `.faf` or in a project.faf one folder up. It now names the same file as the AGENTS.md pointer (`claim=.faf`, `claim=../project.faf`), and so does the "Authored from" line in GEMINI.md, .cursorrules and the Copilot instructions. The path is from the folder faf writes into, for every file; with `--output` outside the project, the file name alone. A folder whose name starts with `..` (such as `..cache`) now counts as inside the project.
 
 ## [8.10.1] - 2026-11-17
 
