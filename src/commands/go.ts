@@ -1,3 +1,4 @@
+import { execFileSync } from 'child_process';
 import { createInterface, emitKeypressEvents } from 'readline';
 import { dirname, join } from 'path';
 import { aliasKeptNote, findFafFile, readFaf, readFafRaw, withKernel, writeFaf } from '../interop/faf.js';
@@ -5,6 +6,8 @@ import { SLOTS, SLOTIGNORED, isPlaceholder, isTypedWords } from '../core/slots.j
 import type { SlotDef } from '../core/types.js';
 import { helpForSlot, questionForSlot } from '../core/interview.js';
 import { suggestIntent, isIntentPath, type IntentPath, type IntentSuggestions } from '../core/suggest.js';
+import { githubDescription } from '../interop/fetch-repo.js';
+import { githubRepoOf } from '../detect/git-url.js';
 import { displayWidth } from '../ui/text-width.js';
 import { startField, fieldKey, renderField, type FieldDone, type FieldKey } from '../ui/suggest-field.js';
 import { getNestedValue, setNestedValue, blockingStep, blockedMessage } from '../core/dot-path.js';
@@ -19,6 +22,8 @@ import { readBytesIfPresent, resolveInside, SafePathError, safeReplaceOwned, saf
 
 export interface GoOptions {
   resume?: boolean;
+  /** Also suggest the goal from the repo's GitHub description (one API call). */
+  github?: boolean;
 }
 
 const SESSION_FILE = '.faf-session.json';
@@ -163,7 +168,10 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
   // six W's in gray, and confirms them. With no TTY (CI, a pipe) there are no
   // suggestions: nothing is written that a human didn't confirm.
   const tty = Boolean(process.stdin.isTTY && process.stdout.isTTY);
-  const suggestions: IntentSuggestions = tty ? suggestIntent(dir, data as Record<string, unknown>) : {};
+  const github = tty && options.github ? await githubSuggestionSource(dir) : null;
+  const suggestions: IntentSuggestions = tty
+    ? suggestIntent(dir, data as Record<string, unknown>, { githubDescription: github })
+    : {};
   const answerer = tty ? ttyAnswerer() : pipeAnswerer();
 
   let filled = 0;
@@ -356,4 +364,24 @@ function ttyAnswerer(): Answerer {
     }),
     close: () => { /* raw mode is released after every answer */ },
   };
+}
+
+/** For `faf go --github`: the GitHub description of this clone's `origin`, or
+ *  null with one line saying why. Opt-in: it is the only network call faf go
+ *  makes. */
+async function githubSuggestionSource(dir: string): Promise<string | null> {
+  let remote = '';
+  try {
+    remote = execFileSync('git', ['-C', dir, 'remote', 'get-url', 'origin'], { stdio: ['ignore', 'pipe', 'ignore'] }).toString();
+  } catch {
+    // No git, no origin: said below.
+  }
+  const repo = githubRepoOf(remote);
+  if (!repo) {
+    console.log(dim("  --github: origin is not a GitHub repo, so there is no GitHub description to suggest."));
+    return null;
+  }
+  const desc = await githubDescription(repo);
+  if (!desc) {console.log(dim(`  --github: no description from GitHub for ${repo} (none set, offline, or private without GITHUB_TOKEN).`));}
+  return desc;
 }
