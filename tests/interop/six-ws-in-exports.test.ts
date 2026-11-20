@@ -299,3 +299,33 @@ describe('AERO: the claim= stamp names the same facts file as the pointer', () =
     for (const f of FILES) {expect(claim(join(outside, f))).toBe('project.faf');}
   }, CLI_TIMEOUT);
 });
+
+describe('AERO: review of #255', () => {
+  const CLI = resolve(import.meta.dir, '../../src/cli.ts');
+  const CLI_TIMEOUT = 30_000;
+  const FAF = 'faf_version: "3.0"\nproject:\n  name: demo\n  goal: A demo\n  main_language: Go\n';
+  let root = '';
+  const cli = (cwd: string, ...args: string[]) => spawnSync('bun', [CLI, ...args], { cwd, encoding: 'utf-8' });
+  const read = (f: string) => readFileSync(f, 'utf-8');
+
+  beforeAll(() => { root = mkdtempSync(join(tmpdir(), 'faf-255-')); });
+  afterAll(() => { rmSync(root, { recursive: true, force: true }); });
+
+  test('the "Authored from" line names the same facts file as the stamp', () => {
+    const d = join(root, 'legacy'); mkdirSync(d);
+    writeFileSync(join(d, '.faf'), FAF);
+    cli(d, 'export', '--gemini', '--cursor', '--copilot');
+    for (const f of ['GEMINI.md', '.cursorrules', '.github/copilot-instructions.md']) {
+      expect(read(join(d, f))).toContain('Authored from .faf');
+      expect(read(join(d, f))).not.toContain('Authored from project.faf');
+    }
+  }, CLI_TIMEOUT);
+  test('a folder whose name starts with .. is inside the project', () => {
+    const d = join(root, 'dotdot'); mkdirSync(join(d, '..cache'), { recursive: true });
+    writeFileSync(join(d, 'project.faf'), FAF);
+    cli(join(d, '..cache'), 'export', '--agents');
+    const agents = read(join(d, '..cache', 'AGENTS.md'));
+    expect(agents).toContain('claim=../project.faf');
+    expect(agents).toContain('are in `../project.faf`.');
+  }, CLI_TIMEOUT);
+});

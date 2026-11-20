@@ -50,7 +50,7 @@ export function renderCopilotInstructions(data: FafData, factsRef = 'project.faf
   lines.push(`# GitHub Copilot Instructions — ${name}`);
   lines.push('');
   lines.push(
-    '> Authored from project.faf by FAF. Copilot reads these instructions on every request in this repository — keep them short and broadly applicable.',
+    `> Authored from ${factsRef} by FAF. Copilot reads these instructions on every request in this repository — keep them short and broadly applicable.`,
   );
   lines.push('');
 

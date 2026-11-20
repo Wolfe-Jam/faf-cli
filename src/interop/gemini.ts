@@ -49,7 +49,7 @@ export function renderGeminiMd(data: FafData, factsRef = 'project.faf'): string 
   lines.push('');
   lines.push(`# GEMINI.md — ${data.project?.name ?? 'Project'}`);
   lines.push('');
-  lines.push('> Authored from project.faf — refresh with `faf export --gemini`.');
+  lines.push(`> Authored from ${factsRef} — refresh with \`faf export --gemini\`.`);
   lines.push('');
 
   if (data.project?.name) {lines.push(`Project: ${data.project.name}`);}

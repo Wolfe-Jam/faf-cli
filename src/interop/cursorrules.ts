@@ -12,7 +12,7 @@ export function renderCursorrules(data: FafData, factsRef = 'project.faf'): stri
   lines.push(fafMetaTag(data, { claim: factsRef }));
   lines.push('');
   lines.push('# .cursorrules');
-  lines.push(`# Authored from project.faf — ${data.project?.name ?? 'Project'}`);
+  lines.push(`# Authored from ${factsRef} — ${data.project?.name ?? 'Project'}`);
   lines.push('');
 
   if (data.project?.main_language) {

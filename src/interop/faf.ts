@@ -1,5 +1,5 @@
 import { lstatSync, realpathSync } from 'fs';
-import { join, dirname, basename, resolve, relative, isAbsolute } from 'path';
+import { join, dirname, basename, resolve, relative, isAbsolute, sep } from 'path';
 import { execFileSync } from 'child_process';
 import { YAMLParseError, isMap, isScalar, parse, stringify, type Document } from 'yaml';
 import type { FafData } from '../core/types.js';
@@ -447,17 +447,22 @@ export function gitRepoRel(fafPath: string, cwd: string = process.cwd()): string
 
 /**
  * How the context files faf writes into `dir` name the facts file: the AGENTS.md
- * pointer and the `claim=` stamp in every file. A path from `dir` to the real
- * facts file (a legacy `.faf`, a project.faf one folder up), using real paths so
- * a symlinked folder still resolves. When `dir` is outside the project (an
- * `--output` elsewhere), the path would climb out and carry this machine's
- * folders into a file meant to be shared, so it is the file name alone.
+ * pointer, the `claim=` stamp and the "Authored from" line. One rule for every
+ * file: the path from `dir` (the folder faf writes into, the project folder by
+ * default) to the real facts file, also for a file in a subfolder such as
+ * `.github/copilot-instructions.md`. It names the facts file; it is not a link
+ * relative to each file. It finds a legacy `.faf` or a project.faf one folder
+ * up, and uses real paths so a symlinked folder still resolves. When `dir` is
+ * outside the project (an `--output` elsewhere), the path would climb out and
+ * carry this machine's folders into a file meant to be shared, so it is the
+ * file name alone.
  */
 export function factsRefFor(dir: string, fafPath: string): string {
   const realDir = realpathSync(dir);
   const realFaf = realpathSync(fafPath);
   const fromFaf = relative(dirname(realFaf), realDir);
-  const insideProject = !fromFaf.startsWith('..') && !isAbsolute(fromFaf);
+  // Climbing out is `..` or `../…`; a folder named `..cache` is inside.
+  const insideProject = fromFaf !== '..' && !fromFaf.startsWith(`..${sep}`) && !isAbsolute(fromFaf);
   return insideProject
     ? relative(realDir, realFaf).split('\\').join('/') || basename(realFaf)
     : basename(realFaf);
