@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Proves a `faf taf setup` recipe end to end, the way CI would run it:
-//   node prove-recipe.mjs <lang> <project dir> <faf-taf-git dir>
+//   node prove-recipe.mjs <lang> <project dir> <taf-git dir>
 //
 // 1. The recipe's `uses:` steps (toolchain setup) must be the ones the CI job
 //    `taf-recipes` ran for this language, with the same inputs: what CI set up
@@ -8,7 +8,7 @@
 // 2. Its `run:` steps run in order, in the project, with bash -e. The test step
 //    fails on a red run, as in the recipe; every step after it must run after
 //    a red run too (!cancelled()).
-// 3. faf-taf-git's own parser (the npm package of the pinned version, the code
+// 3. taf-git's own parser (the npm package of the pinned version, the code
 //    the Action runs) reads the report the test job uploads, and its counts
 //    must match the runner's own summary line.
 import { spawnSync } from 'node:child_process';
@@ -20,7 +20,7 @@ import { parse } from 'yaml';
 
 const [lang, projectArg, tafGitArg] = process.argv.slice(2);
 if (!lang || !projectArg || !tafGitArg) {
-  console.error('usage: prove-recipe.mjs <lang> <project dir> <faf-taf-git dir>');
+  console.error('usage: prove-recipe.mjs <lang> <project dir> <taf-git dir>');
   process.exit(2);
 }
 const project = resolve(projectArg);
@@ -121,7 +121,7 @@ if (!existsSync(report)) {fail(`no report at ${reportPath}`);}
 const require = createRequire(join(resolve(tafGitArg), 'package.json'));
 const { parseTestOutput } = require('./dist/parsers/index.js');
 const parsed = parseTestOutput(readFileSync(report, 'utf-8'));
-if (!parsed) {fail(`faf-taf-git could not read ${reportPath}`);}
+if (!parsed) {fail(`taf-git could not read ${reportPath}`);}
 const receipt = { passed: parsed.passed, failed: parsed.failed, skipped: parsed.skipped ?? 0 };
 
 const m = runner.summary.exec(log);
@@ -147,6 +147,6 @@ const summary = process.env.GITHUB_STEP_SUMMARY;
 if (summary) {
   writeFileSync(summary, `### ${lang}\n\n| | passed | failed | skipped | result |\n|---|---|---|---|---|\n` +
     `| runner (\`${m[0].trim()}\`) | ${own.passed} | ${own.failed} | ${own.skipped} | failed |\n` +
-    `| receipt (faf-taf-git) | ${receipt.passed} | ${receipt.failed} | ${receipt.skipped} | ${parsed.result} |\n`, { flag: 'a' });
+    `| receipt (taf-git) | ${receipt.passed} | ${receipt.failed} | ${receipt.skipped} | ${parsed.result} |\n`, { flag: 'a' });
 }
 console.log(`\n${lang}: the receipt matches the runner.`);
