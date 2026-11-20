@@ -3,7 +3,7 @@
 //   node check-workflows.mjs <actionlint binary>
 //
 // 1. actionlint passes on it (syntax, expressions, job wiring).
-// 2. The receipt job calls faf-taf-git's receipt.yml at the pinned version,
+// 2. The receipt job calls taf-git's receipt.yml at the pinned version,
 //    gives only inputs that version declares, and every input it requires.
 //    The pinned receipt.yml is read from GitHub at that tag, so a release that
 //    renames an input fails here, not in users' repos.
@@ -27,7 +27,7 @@ if (!version) {
   process.exit(1);
 }
 
-const res = await fetch(`https://raw.githubusercontent.com/Wolfe-Jam/faf-taf-git/${version}/.github/workflows/receipt.yml`);
+const res = await fetch(`https://raw.githubusercontent.com/Wolfe-Jam/taf-git/${version}/.github/workflows/receipt.yml`);
 if (!res.ok) {
   console.error(`::error::receipt.yml at ${version}: HTTP ${res.status}`);
   process.exit(1);
@@ -59,7 +59,7 @@ for (const [lang, [file, body]] of Object.entries(RECIPES)) {
     const lint = spawnSync(actionlint, [wfPath], { encoding: 'utf-8' });
     if (lint.status !== 0) { fail(lang, `actionlint:\n${lint.stdout}${lint.stderr}`); }
     const receipt = parse(readFileSync(wfPath, 'utf-8')).jobs.receipt;
-    if (receipt.uses !== `Wolfe-Jam/faf-taf-git/.github/workflows/receipt.yml@${version}`) {
+    if (receipt.uses !== `Wolfe-Jam/taf-git/.github/workflows/receipt.yml@${version}`) {
       fail(lang, `the receipt job uses ${receipt.uses}`);
     }
     const given = Object.keys(receipt.with ?? {});

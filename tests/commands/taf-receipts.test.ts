@@ -100,7 +100,7 @@ describe('BRAKE: faf taf receipts', () => {
     rmSync(dir, { recursive: true, force: true });
   });
 
-  /** Put a .taf on a taf-receipts branch, the way faf-taf-git does, and come back to main. */
+  /** Put a .taf on a taf-receipts branch, the way taf-git does, and come back to main. */
   const onBranch = (text: string) => {
     git(dir, 'checkout', '-q', '--orphan', 'taf-receipts');
     git(dir, 'rm', '-q', '-rf', '.');
@@ -235,7 +235,7 @@ describe('TYRE: an option the form does not read gets a note, not silence', () =
   test('faf taf setup --json says --json does nothing', () => {
     const r = faf(dir, 'setup', '--json');
     expect(r.stderr).toContain('note: --json does nothing with faf taf setup (ignored)');
-    expect(r.stdout).toContain('faf-taf-git');
+    expect(r.stdout).toContain('taf-git');
   });
 
   test('faf taf receipts --write says --write does nothing', () => {

@@ -34,7 +34,7 @@ detected from your real stack, scored, and versioned with your code. No drift. N
 [![DOI: Context paper](https://img.shields.io/badge/DOI-Context%20paper-FF6B35)](https://doi.org/10.5281/zenodo.18251362)
 [![DOI: Memory paper](https://img.shields.io/badge/DOI-Memory%20paper-FF6B35)](https://doi.org/10.5281/zenodo.20348942)
 [![project.faf → faf](https://img.shields.io/badge/project.faf-inside-008B8B)](https://github.com/Wolfe-Jam/faf)
-[![TAF](./badge.svg)](https://github.com/Wolfe-Jam/faf-taf-git)
+[![TAF](./badge.svg)](https://github.com/Wolfe-Jam/taf-git)
 [![CI](https://github.com/Wolfe-Jam/faf-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/Wolfe-Jam/faf-cli/actions/workflows/ci.yml)
 
 FAF defines. AGENTS.md instructs. AI codes.
@@ -142,7 +142,7 @@ faf memory show
 - **AGENTS.md points to the facts.** A `## Project facts` section names `project.faf`, by its real path from AGENTS.md (a legacy `.faf`, a file one folder up, `--output`). The only pointer before was an HTML comment, which agents skip. AGENTS.md still doesn't copy the six W's.
 - **The six W's in every context file.** GEMINI.md and .cursorrules gain a Context section, as CLAUDE.md and the Copilot instructions have. `llms.txt` and Claude Code's MEMORY.md block (Pro) show the same values.
 - **One rule, the score's.** A slot the score counts as empty (empty, `slotignored`, TBD, N/A) is left out; numbers show as written in project.faf, dates and lists as text; each fact is one line. CLAUDE.md no longer shows `slotignored` or placeholders.
-- **`faf taf setup` writes two jobs** (faf-taf-git 2.7.0): the tests run with a read-only token, only the receipt job can write, and a red run on the default branch is recorded as a `FAILED` receipt.
+- **`faf taf setup` writes two jobs** (taf-git 3.0.0, formerly faf-taf-git): the tests run with a read-only token, only the receipt job can write, and a red run on the default branch is recorded as a `FAILED` receipt.
 - **Why:** [the evidence](https://github.com/Wolfe-Jam/context7-faf-receipt#round-4-what-agentsmd-carries-opencode-and-codex). On tasks whose deciding fact was only in the six W's, Codex and OpenCode found the team's decision 4/22 times with the old AGENTS.md, 12/21 with the pointer, 19/20 with the six W's in the file.
 
 Earlier editions: [CHANGELOG.md](./CHANGELOG.md) · [Releases](https://github.com/Wolfe-Jam/faf-cli/releases)

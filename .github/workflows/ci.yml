@@ -362,7 +362,7 @@ jobs:
   # TAF recipes — `faf taf setup` for Rust, Java (Maven, Gradle) and .NET, run
   # for real. For each fixture (2 passing, 1 failing, 1 skipped), faf writes the
   # recipe; prove-recipe.mjs checks its setup steps are the ones below, runs its
-  # run steps, and reads the report with faf-taf-git's parser (the version faf
+  # run steps, and reads the report with taf-git's parser (the version faf
   # pins). The receipt's counts must match the runner's own summary line.
   taf-recipes:
     name: taf setup recipe (${{ matrix.lang }})
@@ -430,14 +430,14 @@ jobs:
           cat "$PROJECT/.github/workflows/taf.yml"
           echo "PROJECT=$PROJECT" >> "$GITHUB_ENV"
 
-      - name: faf-taf-git's parser, the version faf pins
+      - name: taf-git's parser, the version faf pins
         run: |
           set -euo pipefail
           VERSION=$(grep -oE "FAF_TAF_GIT_VERSION = 'v[0-9.]+'" src/commands/taf.ts | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
-          TAF_GIT="$RUNNER_TEMP/faf-taf-git"
+          TAF_GIT="$RUNNER_TEMP/taf-git"
           mkdir -p "$TAF_GIT"
-          npm install --prefix "$TAF_GIT" --no-save --no-audit --no-fund "faf-taf-git@$VERSION"
-          echo "TAF_GIT=$TAF_GIT/node_modules/faf-taf-git" >> "$GITHUB_ENV"
+          npm install --prefix "$TAF_GIT" --no-save --no-audit --no-fund "taf-git@$VERSION"
+          echo "TAF_GIT=$TAF_GIT/node_modules/taf-git" >> "$GITHUB_ENV"
 
       - name: Run the recipe and check the receipt
         run: node tests/fixtures/taf-setup/prove-recipe.mjs "${{ matrix.lang }}" "$PROJECT" "$TAF_GIT"
@@ -489,7 +489,7 @@ jobs:
         run: npm run format -- --check
         continue-on-error: true
 
-  # TAF - Testing Activity Feed: faf-taf-git's receipt job, the setup
+  # TAF - Testing Activity Feed: taf-git's receipt job, the setup
   # `faf taf setup` writes. !cancelled(): runs when the tests fail too, so a red
   # run gets a FAILED receipt instead of a gap. The output is the ubuntu leg's;
   # test-result is the whole matrix's, so any red leg records FAILED.
@@ -499,7 +499,7 @@ jobs:
     if: "!cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/main'"
     permissions:
       contents: write
-    uses: Wolfe-Jam/faf-taf-git/.github/workflows/receipt.yml@v2.7.0
+    uses: Wolfe-Jam/taf-git/.github/workflows/receipt.yml@v3.0.0
     with:
       artifact-name: test-output
       test-output-file: test-output.txt
