@@ -34,7 +34,7 @@ detected from your real stack, scored, and versioned with your code. No drift. N
 [![DOI: Context paper](https://img.shields.io/badge/DOI-Context%20paper-FF6B35)](https://doi.org/10.5281/zenodo.18251362)
 [![DOI: Memory paper](https://img.shields.io/badge/DOI-Memory%20paper-FF6B35)](https://doi.org/10.5281/zenodo.20348942)
 [![project.faf → faf](https://img.shields.io/badge/project.faf-inside-008B8B)](https://github.com/Wolfe-Jam/faf)
-[![TAF](./badge.svg)](https://github.com/Wolfe-Jam/faf-taf-git)
+[![TAF](./badge.svg)](https://github.com/Wolfe-Jam/taf-git)
 [![CI](https://github.com/Wolfe-Jam/faf-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/Wolfe-Jam/faf-cli/actions/workflows/ci.yml)
 
 FAF defines. AGENTS.md instructs. AI codes.

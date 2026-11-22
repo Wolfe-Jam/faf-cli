@@ -8,6 +8,11 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- **`faf taf setup` uses taf-git 3.0.0** (faf-taf-git was renamed): the receipt job is `Wolfe-Jam/taf-git/.github/workflows/receipt.yml@v3.0.0`. A workflow written by faf-cli 8.11.0 names `faf-taf-git` and stops starting once the repo is renamed (GitHub forwards actions but not reusable workflows), so run `faf taf setup` again, or change `faf-taf-git` to `taf-git` and the version to `v3.0.0` in the `uses:` line. faf-cli's own CI uses the same line.
+
 ## [8.11.0] - 2026-11-17 — The Project Facts Edition
 
 The six W's now reach every agent: AGENTS.md points to project.faf, and CLAUDE.md, GEMINI.md, .cursorrules, Copilot and llms.txt carry them, one rule, one line each.
