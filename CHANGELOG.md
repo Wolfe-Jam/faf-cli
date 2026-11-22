@@ -8,13 +8,18 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- **`faf taf setup` uses taf-git 3.0.0** (faf-taf-git was renamed): the receipt job is `Wolfe-Jam/taf-git/.github/workflows/receipt.yml@v3.0.0`. A workflow written by faf-cli 8.11.0 names `faf-taf-git` and stops starting once the repo is renamed (GitHub forwards actions but not reusable workflows), so run `faf taf setup` again, or change `faf-taf-git` to `taf-git` and the version to `v3.0.0` in the `uses:` line. faf-cli's own CI uses the same line.
+
 ## [8.11.0] - 2026-11-17 — The Project Facts Edition
 
 The six W's now reach every agent: AGENTS.md points to project.faf, and CLAUDE.md, GEMINI.md, .cursorrules, Copilot and llms.txt carry them, one rule, one line each.
 
 ### Changed
-- **`faf taf setup` writes the two-job setup from taf-git 3.0.0 (formerly faf-taf-git).** The test job runs with a read-only token and fails the normal way; it uploads its output (or JUnit report) after a red run too. A separate receipt job, taf-git's reusable `receipt.yml@v3.0.0` and the only job with `contents: write`, records every run on the default branch and passes `test-result`, so a red run is recorded as `FAILED` even when no single test failed. The `continue-on-error` test step and the closing "Fail the job" step are gone, and the report-join step runs after a red run (`if: !cancelled()`). Existing `taf.yml` files are never overwritten.
-- faf-cli's own CI receipt uses taf-git v3.0.0.
+- **`faf taf setup` writes the two-job setup from faf-taf-git 2.7.0.** The test job runs with a read-only token and fails the normal way; it uploads its output (or JUnit report) after a red run too. A separate receipt job, faf-taf-git's reusable `receipt.yml@v2.7.0` and the only job with `contents: write`, records every run on the default branch and passes `test-result`, so a red run is recorded as `FAILED` even when no single test failed. The `continue-on-error` test step and the closing "Fail the job" step are gone, and the report-join step runs after a red run (`if: !cancelled()`). Existing `taf.yml` files are never overwritten.
+- faf-cli's own CI receipt uses faf-taf-git v2.7.0.
 - `faf export`: AGENTS.md now points to the facts file under a `## Project facts` heading: "The six W's (who, what, why, where, when, how) and the project's other facts are in `project.faf`." The path is the real one, relative to AGENTS.md (a legacy `.faf`, a `project.faf` one folder up, `--output` inside the project, symlinks resolved); when `--output` is outside the project, the pointer names the file alone, so no machine path is written. Before, the only pointer was the `claim=` HTML comment, which agents skip. AGENTS.md still does not copy the six W's.
 - `faf export`: GEMINI.md and .cursorrules now carry the six W's in a Context section, as CLAUDE.md and the Copilot instructions do.
 - CLAUDE.md, GEMINI.md, .cursorrules, the Copilot instructions, `llms.txt` and Claude Code's MEMORY.md block (`faf sync`, Pro) now show the six W's from one shared rule, the scorer's: a slot the score counts as empty (empty, `slotignored`, a placeholder such as TBD or N/A) is left out; numbers, booleans, dates and lists render as text; each fact is one line. Fixes CLAUDE.md showing `slotignored`, placeholders and untrimmed values. In `llms.txt` (`--llms`, opt-in) the project name and goal follow the same rule: a placeholder name renders as "Project", and a multi-line value is one line.
