@@ -91,9 +91,9 @@ jobs:
           VER=$(node -p "require('./package.json').version")
           for NAME in faf-cli faf; do
             ok=
-            for _ in $(seq 1 20); do
+            for _ in $(seq 1 100); do
               curl -sf -o /dev/null "https://registry.npmjs.org/${NAME}/${VER}" && { echo "npm serves ${NAME} ${VER}"; ok=1; break; }
               sleep 6
             done
-            [ -n "$ok" ] || { echo "::error::${NAME} ${VER} not served by npm after 2 minutes"; exit 1; }
+            [ -n "$ok" ] || { echo "::error::${NAME} ${VER} not served by npm after 10 minutes"; exit 1; }
           done
