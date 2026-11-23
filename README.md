@@ -54,7 +54,8 @@ project/
 
 > **Every building requires a foundation. FAF is AI's foundational layer.**
 >
-> You have a `package.json`. AI needs you to add a `project.faf`. Done.
+> You have a `package.json` for dependencies.<br>
+> AI needs a `project.faf` for project facts.
 
 **Git-Native.** `project.faf` versions with your code — every clone, every fork, every checkout gets full AI context.<br>
 No setup, no drift, no re-explaining.
