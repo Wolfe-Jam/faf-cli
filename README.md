@@ -56,6 +56,8 @@ project/
 >
 > You have a `package.json` for dependencies.<br>
 > AI needs a `project.faf` for project facts.
+>
+> [Context7](https://context7.com) for your libraries. FAF for your project.
 
 **Git-Native.** `project.faf` versions with your code — every clone, every fork, every checkout gets full AI context.<br>
 No setup, no drift, no re-explaining.
