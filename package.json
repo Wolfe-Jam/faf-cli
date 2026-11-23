@@ -1,6 +1,6 @@
 {
   "name": "faf-cli",
-  "version": "8.11.0",
+  "version": "8.11.1",
   "description": "Persistent AI context + memory — .faf and .fafm, IANA-registered. AI suggests your goal and six W's, you confirm, and every agent file faf writes carries them. Anthropic-merged.",
   "type": "module",
   "icon": "https://faf.one/orange-smiley.svg",
