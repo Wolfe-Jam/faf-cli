@@ -46,6 +46,7 @@ FAF defines. AGENTS.md instructs. AI codes.
 
 ```
 project/
+├── AGENTS.md        ← agents follow this
 ├── package.json     ← npm reads this
 ├── project.faf      ← AI reads this
 ├── README.md        ← humans read this
@@ -54,7 +55,11 @@ project/
 
 > **Every building requires a foundation. FAF is AI's foundational layer.**
 >
-> You have a `package.json`. AI needs you to add a `project.faf`. Done.
+> You have a `package.json` for dependencies.<br>
+> AI needs a `project.faf` for project facts.<br>
+> `AGENTS.md` for instructions, written from `project.faf`.
+>
+> [Context7](https://context7.com) for your libraries. FAF for your project.
 
 **Git-Native.** `project.faf` versions with your code — every clone, every fork, every checkout gets full AI context.<br>
 No setup, no drift, no re-explaining.

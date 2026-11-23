@@ -1,4 +1,4 @@
-import { existsSync, statSync } from 'fs';
+import { existsSync, realpathSync, statSync } from 'fs';
 import { join } from 'path';
 import type { FafData } from '../core/types.js';
 import { injectFafBlock } from './inject.js';
@@ -79,7 +79,30 @@ export function fafMetaTag(data: FafData, opts: FafMetaOpts = {}): string {
 }
 
 /** Render CLAUDE.md content from .faf data */
-export function renderClaudeMd(data: FafData, factsRef = 'project.faf'): string {
+/** Options for renderClaudeMd. */
+export interface ClaudeMdOptions {
+  /** Add the `@AGENTS.md` import: an AGENTS.md sits beside CLAUDE.md and is
+   *  a different file (see agentsMdBeside). */
+  importAgentsMd?: boolean;
+}
+
+/** True when `dir` holds an AGENTS.md that CLAUDE.md should import: the file
+ *  exists and CLAUDE.md is not a link to it (a CLAUDE.md that resolves to
+ *  AGENTS.md is already read as AGENTS.md, and would import itself). Claude
+ *  Code reads AGENTS.md only when there is no CLAUDE.md (#266). */
+export function agentsMdBeside(dir: string): boolean {
+  const agents = join(dir, FAF_CONTEXT_FILES.agents);
+  if (!existsSync(agents)) {return false;}
+  const claude = join(dir, CLAUDE_MD);
+  if (!existsSync(claude)) {return true;}
+  try {
+    return realpathSync(claude) !== realpathSync(agents);
+  } catch {
+    return false;
+  }
+}
+
+export function renderClaudeMd(data: FafData, factsRef = 'project.faf', opts: ClaudeMdOptions = {}): string {
   const lines: string[] = [];
   const name = data.project?.name ?? 'Project';
   const lang = data.project?.main_language ?? '';
@@ -126,6 +149,15 @@ export function renderClaudeMd(data: FafData, factsRef = 'project.faf'): string 
     lines.push('## Context');
     lines.push('');
     lines.push(...contextEntries);
+    lines.push('');
+  }
+
+  // Claude Code skips AGENTS.md when a CLAUDE.md exists, so the build, test
+  // and repo rules faf writes there arrive only through this import (#266).
+  if (opts.importAgentsMd) {
+    lines.push('## Build, test and repo rules');
+    lines.push('');
+    lines.push('@AGENTS.md');
     lines.push('');
   }
 
