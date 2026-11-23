@@ -163,7 +163,8 @@ export type { Suggestion, IntentSuggestions, IntentPath } from './core/suggest.j
 // The pure parts of `faf git` — no git, no network, no child process. Fetch the
 // repo your own way, then `authorFafFromRepo(dir, { repoUrl })` returns the
 // same FafData `faf git` writes (write it with writeFaf, score it with
-// scoreFafYaml). The clone itself stays in the CLI and is not exported.
+// scoreFafYaml). The clone is not in this import: it is `fetchRepo` in
+// `faf-cli/fetch`, the same fetch `faf git` runs (#236).
 export { normalizeGitUrl, repoNameFromUrl, authorFafFromRepo } from './detect/git-repo.js';
 export type { AuthorFafFromRepoOptions } from './detect/git-repo.js';
 // FAF DNA — the `.faf-dna` lineage `faf init` births, `faf auto` / `faf refresh`
