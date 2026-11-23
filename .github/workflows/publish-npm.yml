@@ -1,0 +1,99 @@
+name: 📦 npm Publish (OIDC)
+
+# Publishes faf-cli to npm through OIDC Trusted Publishing when a GitHub
+# release is published: no npm token in this repo, no 2FA prompt, and npm adds
+# a provenance statement linking each package to this workflow run.
+#
+# One bumps, both ship: the same build goes out under two names, faf-cli (the
+# canonical name) and faf (what people type: npx faf, bunx faf).
+#
+# npm side (once per name, by the package owner): npmjs.com → <name> →
+# Settings → Trusted Publisher → GitHub Actions: Wolfe-Jam/faf-cli, workflow
+# publish-npm.yml, environment npm. Both faf-cli and faf need it. The
+# filename must match exactly.
+#
+# A name whose version is already on npm (published by hand) is skipped, and
+# the job stays green. release.yml (on the tag) only attaches the package to
+# the release; Homebrew's update waits for faf-cli on npm.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Publish faf-cli + faf to npm
+    runs-on: ubuntu-latest
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: package.json version == release tag
+        if: github.event_name == 'release'
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PV=$(node -p "require('./package.json').version")
+          [ "$TAG" = "$PV" ] || { echo "::error::package.json $PV != tag $TAG"; exit 1; }
+
+      - name: Already on npm?
+        id: exists
+        run: |
+          VER=$(node -p "require('./package.json').version")
+          for NAME in faf-cli faf; do
+            KEY=$(echo "$NAME" | tr - _)
+            if curl -sf -o /dev/null "https://registry.npmjs.org/${NAME}/${VER}"; then
+              echo "::notice::${NAME} ${VER} is already on npm; skipping it"
+              echo "skip_${KEY}=true" >> "$GITHUB_OUTPUT"
+            fi
+          done
+
+      # Trusted Publishing needs npm 11.5.1 or later; Node 24 ships it.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24.x'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+
+      # prepublishOnly runs check:engines + the bun build + check:no-hardcode.
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.3.13'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: npm publish faf-cli (OIDC Trusted Publishing)
+        if: steps.exists.outputs.skip_faf_cli != 'true'
+        run: |
+          unset NODE_AUTH_TOKEN
+          npm publish --access public
+
+      # The same build under the second name. prepublishOnly builds dist; when
+      # faf-cli was skipped above, build it here first.
+      - name: npm publish faf (same build, second name)
+        if: steps.exists.outputs.skip_faf != 'true'
+        run: |
+          unset NODE_AUTH_TOKEN
+          [ -f dist/cli.js ] || bun run prepublishOnly
+          npm pkg set name=faf
+          npm publish --access public --ignore-scripts
+          npm pkg set name=faf-cli
+
+      - name: Confirm both names serve the version
+        run: |
+          VER=$(node -p "require('./package.json').version")
+          for NAME in faf-cli faf; do
+            ok=
+            for _ in $(seq 1 20); do
+              curl -sf -o /dev/null "https://registry.npmjs.org/${NAME}/${VER}" && { echo "npm serves ${NAME} ${VER}"; ok=1; break; }
+              sleep 6
+            done
+            [ -n "$ok" ] || { echo "::error::${NAME} ${VER} not served by npm after 2 minutes"; exit 1; }
+          done

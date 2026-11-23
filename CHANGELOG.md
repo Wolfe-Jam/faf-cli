@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v8.11.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v8.11.1 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -10,8 +10,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.11.1] - 2026-11-22
+
+`faf taf setup` writes taf-git 3.0.0, and faf-cli releases now publish to npm from GitHub Actions.
+
 ### Changed
 - **`faf taf setup` uses taf-git 3.0.0** (faf-taf-git was renamed): the receipt job is `Wolfe-Jam/taf-git/.github/workflows/receipt.yml@v3.0.0`. A workflow written by faf-cli 8.11.0 names `faf-taf-git` and stops starting once the repo is renamed (GitHub forwards actions but not reusable workflows), so run `faf taf setup` again, or change `faf-taf-git` to `taf-git` and the version to `v3.0.0` in the `uses:` line. faf-cli's own CI uses the same line.
+
+### CI
+- **npm publishing moves to GitHub Actions** (`publish-npm.yml`, OIDC Trusted Publishing): a published GitHub release publishes the same build as `faf-cli` and as `faf`, with no npm token in the repo and a provenance statement on each. A name already on npm is skipped. Tested in `tests/publish-npm-oidc.test.ts`.
 
 ## [8.11.0] - 2026-11-17 — The Project Facts Edition
 
