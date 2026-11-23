@@ -31,29 +31,29 @@ describe('PIT: faf taf setup', () => {
   };
   const wfPath = () => join(testDir, '.github', 'workflows', 'taf.yml');
 
-  // faf-cli's own CI pin. Dependabot bumps it on each faf-taf-git release; the
+  // faf-cli's own CI pin. Dependabot bumps it on each taf-git release; the
   // pin `faf taf setup` gives users is a string Dependabot can't see.
   const ciPin = () => {
     const ci = readFileSync(join(import.meta.dir, '..', '..', '.github', 'workflows', 'ci.yml'), 'utf-8');
     // faf-cli's own receipt job calls the same receipt.yml.
-    return ci.match(/Wolfe-Jam\/faf-taf-git\/\.github\/workflows\/receipt\.yml@v[\d.]+/)?.[0];
+    return ci.match(/Wolfe-Jam\/taf-git\/\.github\/workflows\/receipt\.yml@v[\d.]+/)?.[0];
   };
 
-  test('setup pins the same faf-taf-git version as faf-cli CI (no drift)', () => {
+  test('setup pins the same taf-git version as faf-cli CI (no drift)', () => {
     const pin = ciPin();
     expect(pin).toBeDefined();
     writeFileSync(join(testDir, 'package.json'), '{"name":"x","scripts":{"test":"echo ok"}}');
     taf('setup', { write: true });
     // Red here after a Dependabot bump? Update FAF_TAF_GIT_VERSION in src/commands/taf.ts.
-    expect(readFileSync(wfPath(), 'utf-8')).toContain(`Wolfe-Jam/faf-taf-git/.github/workflows/receipt.yml@${pin!.split('@')[1]}`);
+    expect(readFileSync(wfPath(), 'utf-8')).toContain(`Wolfe-Jam/taf-git/.github/workflows/receipt.yml@${pin!.split('@')[1]}`);
   });
 
-  test('--write creates a workflow wired to faf-taf-git\'s receipt job (taf-receipts by default)', () => {
+  test('--write creates a workflow wired to taf-git\'s receipt job (taf-receipts by default)', () => {
     writeFileSync(join(testDir, 'package.json'), '{"name":"x","scripts":{"test":"echo ok"}}');
     taf('setup', { write: true });
     expect(existsSync(wfPath())).toBe(true);
     const wf = readFileSync(wfPath(), 'utf-8');
-    expect(wf).toContain('uses: Wolfe-Jam/faf-taf-git/.github/workflows/receipt.yml@v2.7.0');
+    expect(wf).toContain('uses: Wolfe-Jam/taf-git/.github/workflows/receipt.yml@v3.0.0');
     expect(wf).toContain('artifact-name: taf-test-output');
     expect(wf).toContain('test-output-file: test-output.txt');
     // receipt.yml saves to taf-receipts unless told otherwise.
@@ -81,7 +81,7 @@ describe('PIT: faf taf setup', () => {
     expect(jobs.receipt.with['test-result']).toBe('${{ needs.test.result }}');
     expect(jobs.receipt.with['artifact-name']).toBe(upload.with.name);
     // No concurrency group: GitHub cancels a waiting run when a newer one
-    // joins, and that run gets no receipt. faf-taf-git retries the push instead.
+    // joins, and that run gets no receipt. taf-git retries the push instead.
     expect(wf).not.toContain('concurrency');
     expect(wf).not.toContain('cannot be gamed');
   });
@@ -112,7 +112,7 @@ describe('PIT: faf taf setup', () => {
   test('non-JS repo (no package.json) still emits a workflow with a test placeholder', () => {
     taf('setup', { write: true });
     const wf = readFileSync(wfPath(), 'utf-8');
-    expect(wf).toContain('Wolfe-Jam/faf-taf-git');
+    expect(wf).toContain('Wolfe-Jam/taf-git');
     expect(wf).toContain('TODO: your test command');
   });
 
@@ -132,7 +132,7 @@ describe('PIT: faf taf setup', () => {
     expect(process.exitCode).toBe(0);
   });
 
-  // Not JavaScript: faf-taf-git reads JUnit XML, so each recipe writes a report
+  // Not JavaScript: taf-git reads JUnit XML, so each recipe writes a report
   // and points the receipt step at it.
   const steps = () => {
     const { parse } = require('yaml');
@@ -488,7 +488,7 @@ describe('PIT: faf taf setup', () => {
     }
   });
 
-  // faf-taf-git reads Jest, Vitest and Bun output. Any other JS runner gets the
+  // taf-git reads Jest, Vitest and Bun output. Any other JS runner gets the
   // placeholder, never a step whose output can't be read (red on every run).
   for (const [label, pkg] of [
     ['jest in devDependencies', '{"name":"x","devDependencies":{"jest":"^30.0.0"},"scripts":{"test":"jest"}}'],
@@ -672,7 +672,7 @@ describe('PIT: faf taf setup', () => {
       'actions/setup-java': 'v6', 'actions/setup-dotnet': 'v6', 'gradle/actions/setup-gradle': 'v6',
       'pnpm/action-setup': 'v6', 'oven-sh/setup-bun': 'v2', 'taiki-e/install-action': 'v2',
       'dtolnay/rust-toolchain': 'stable', 'actions/upload-artifact': 'v7',
-      'Wolfe-Jam/faf-taf-git/.github/workflows/receipt.yml': ciPin()!.split('@')[1],
+      'Wolfe-Jam/taf-git/.github/workflows/receipt.yml': ciPin()!.split('@')[1],
     };
     const recipes: Array<[string, string]> = [
       ['package.json', '{"name":"x"}'], ['go.mod', 'module x\n'], ['pyproject.toml', ''],

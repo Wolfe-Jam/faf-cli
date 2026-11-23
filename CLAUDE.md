@@ -24,7 +24,11 @@ CLI for IANA-registered .faf + .fafm — context DNA and portable agent memory, 
 - **When:** Production since September 2025; Bun-native since v6
 - **How:** Detects the stack from repo files and scores with the always-33 WASM kernel; the goal and six W's are only suggested, never written
 
+## Build, test and repo rules
+
+@AGENTS.md
+
 ---
 
-*STATUS: SYNC ACTIVE — 2026-11-17T19:02:36.245Z*
+*STATUS: SYNC ACTIVE — 2026-11-23T18:21:55.481Z*
 <!-- faf:end -->

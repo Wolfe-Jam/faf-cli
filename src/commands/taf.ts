@@ -33,11 +33,11 @@ export function isTafSnapshot(bytes: Uint8Array): boolean {
   }
 }
 
-/** The faf-taf-git release the workflow uses. faf-cli's own CI pins the same
+/** The taf-git release the workflow uses. faf-cli's own CI pins the same
  *  version (tests/commands/taf-setup.test.ts checks it). */
-const FAF_TAF_GIT_VERSION = 'v2.7.0';
-/** faf-taf-git's reusable receipt job: the only job with write access. */
-const FAF_TAF_RECEIPT = `Wolfe-Jam/faf-taf-git/.github/workflows/receipt.yml@${FAF_TAF_GIT_VERSION}`;
+const FAF_TAF_GIT_VERSION = 'v3.0.0';
+/** taf-git's reusable receipt job: the only job with write access. */
+const FAF_TAF_RECEIPT = `Wolfe-Jam/taf-git/.github/workflows/receipt.yml@${FAF_TAF_GIT_VERSION}`;
 /** The artifact the test job uploads and the receipt job reads. */
 const TAF_ARTIFACT = 'taf-test-output';
 
@@ -89,7 +89,7 @@ function warnIgnored(subcommand: string, options: TafOptions): void {
 
 // ── faf taf setup — the activation bridge ──────────────────────────────────
 // Removes the "hand-edit YAML" friction: detects the runner, generates a CI
-// workflow wired to faf-taf-git, prints it (safe default) or writes it
+// workflow wired to taf-git, prints it (safe default) or writes it
 // (`--write`, non-destructive — never clobbers an existing taf.yml). Needs no
 // .faf — TAF runs on any git repo.
 
@@ -131,7 +131,7 @@ function testCommand(scripts: Record<string, unknown>): string | null | undefine
   return typeof script === 'string' ? script : undefined;
 }
 
-/** faf-taf-git reads Jest, Vitest and Bun output (its README's runner table).
+/** taf-git reads Jest, Vitest and Bun output (its README's runner table).
  *  True when the repo's `test` script runs one of them. The script decides;
  *  the dependencies only when it hands over to a script faf can't follow. */
 function readableJsRunner(pkg: Record<string, unknown>, runner: Runner): boolean {
@@ -179,9 +179,9 @@ const RUNTIME: Record<Runner, { setup: string; install: string; test: string }> 
   },
 };
 
-// Not JavaScript: faf-taf-git reads JUnit XML (its README's runner table), so
+// Not JavaScript: taf-git reads JUnit XML (its README's runner table), so
 // each recipe has its runner write one report (every runner checked end to end
-// against faf-taf-git's parser). Checked in this order: Go first, as before;
+// against taf-git's parser). Checked in this order: Go first, as before;
 // then Rust, Java (Maven, then Gradle) and .NET, whose build files say what the
 // project is; Python last, because a requirements.txt or pyproject.toml is often
 // only tooling in a repo written in another language.
@@ -283,7 +283,7 @@ ${note}      - run: |
 // nextest writes JUnit only from a profile that asks for it. The recipe writes
 // `.config/nextest.toml` with a `ci` profile when the repo has none, and never
 // touches one the repo has. It leaves `#[ignore]` tests out of the report (a
-// known nextest gap: faf-taf-git's fixtures README).
+// known nextest gap: taf-git's fixtures README).
 const NEXTEST = 'cargo-nextest@0.9.151';
 const NEXTEST_CONFIG = '.config/nextest.toml';
 
@@ -426,7 +426,7 @@ function dotnetTarget(dir: string): string {
 interface Recipe {
   setup: (dir: string) => string;
   test: (dir: string) => string;
-  /** A step that turns the runner's files into the one report faf-taf-git reads. */
+  /** A step that turns the runner's files into the one report taf-git reads. */
   join?: (dir: string) => string;
   report: string;
 }
@@ -488,7 +488,7 @@ const runTests = (cmd: string) =>
   '          set -o pipefail\n' +
   `          ${cmd}\n`;
 
-/** node:test and mocha print nothing faf-taf-git reads, but each can write
+/** node:test and mocha print nothing taf-git reads, but each can write
  *  JUnit XML. The recipe still runs the project's own test command, so
  *  `pretest` and `posttest` run: node:test takes its reporters from
  *  NODE_OPTIONS (through any hand-off); mocha takes them as arguments, so
@@ -515,7 +515,7 @@ function junitCommand(pkg: Record<string, unknown>, runner: Runner): string | nu
 }
 
 /** Setup, install and test steps for a repo with a package.json, and the
- *  file faf-taf-git reads. */
+ *  file taf-git reads. */
 function jsBody(dir: string): { body: string; report: string } {
   const runner = detectRunner(dir);
   const pkg = readPackageJson(dir);
@@ -524,16 +524,16 @@ function jsBody(dir: string): { body: string; report: string } {
   const junit = readableJsRunner(pkg, runner) ? null : junitCommand(pkg, runner);
   if (junit) {
     return {
-      body: `${setup}\n      - run: ${r.install}\n      # Your test command, with a JUnit report added (faf-taf-git reads it).\n${
+      body: `${setup}\n      - run: ${r.install}\n      # Your test command, with a JUnit report added (taf-git reads it).\n${
         junit.includes('xunit') ? '      # mocha writes only the report: failure details are in report.xml.\n' : ''}${runTests(junit)}`,
       report: 'report.xml',
     };
   }
-  // Not Jest, Vitest or Bun: faf-taf-git can't read the output, and every run
+  // Not Jest, Vitest or Bun: taf-git can't read the output, and every run
   // would go red. Leave the step to the user, like an unknown language.
   const tests = readableJsRunner(pkg, runner)
     ? runTests(`${r.test} 2>&1 | tee test-output.txt`)
-    : `      # TODO: faf-taf-git reads Jest, Vitest and Bun output, or JUnit XML
+    : `      # TODO: taf-git reads Jest, Vitest and Bun output, or JUnit XML
       # (node --test: --test-reporter=junit; mocha: --reporter xunit).
       # Run your tests so they write one of those, and point test-output-file at it.
 ${runTests(`echo "TODO: your test command" 2>&1 | tee test-output.txt   # e.g. ${r.test} 2>&1 | tee test-output.txt`)}`;
@@ -572,19 +572,19 @@ function defaultBranch(dir: string): Branch {
 const branchFilter = (name: string) =>
   /^[\w./-]+$/.test(name) ? name : `'${name.replace(/[*?+[\]!]/g, '\\$&')}'`;
 
-// The setup in the faf-taf-git README: the test job runs the tests with a
+// The setup in the taf-git README: the test job runs the tests with a
 // read-only token and uploads their output; a separate receipt job, the only
 // one that can write, records the run on the default branch, a red one too
 // (!cancelled(), and test-result marks a failed test job FAILED). The test job
 // goes red the normal way. No concurrency group: GitHub cancels a waiting run
-// when a newer one joins, so that run would get no receipt. faf-taf-git
+// when a newer one joins, so that run would get no receipt. taf-git
 // retries a push that lost a race instead.
 function buildTafWorkflow(dir: string, branch: string): string {
   const onBranch = `github.ref == 'refs/heads/${branch}' && github.event_name != 'pull_request'`;
   const head =
     'name: TAF Receipts\n' +
     `# Prints a Test Receipt (.taf) for every run on ${branch}: proof over time.\n` +
-    '# Written by `faf taf setup`. Docs: https://github.com/Wolfe-Jam/faf-taf-git\n' +
+    '# Written by `faf taf setup`. Docs: https://github.com/Wolfe-Jam/taf-git\n' +
     `on:\n  push:\n    branches: [${branchFilter(branch)}]\n  pull_request:\n  workflow_dispatch:\n\n` +
     'jobs:\n  test:\n    runs-on: ubuntu-latest\n' +
     '    permissions:\n      contents: read               # the tests never run with write access\n' +
@@ -597,7 +597,7 @@ function buildTafWorkflow(dir: string, branch: string): string {
   if (repoExists(dir, 'package.json')) {
     ({ body, report } = jsBody(dir));
   } else if (lang) {
-    // faf-taf-git reads JUnit XML for these: each recipe writes one.
+    // taf-git reads JUnit XML for these: each recipe writes one.
     const l = LANGUAGE[lang];
     report = l.report;
     body = `${l.setup(dir)}\n${runTests(l.test(dir))}${l.join ? joinStep(l.join(dir)) : ''}`;
@@ -622,7 +622,7 @@ function uploadStep(branch: string, onBranch: string, report: string): string {
     '          overwrite: true          # "Re-run failed jobs" uploads it again\n';
 }
 
-/** faf-taf-git's receipt job: the only writer. A failed test job is recorded
+/** taf-git's receipt job: the only writer. A failed test job is recorded
  *  as FAILED, with zero counts when it uploaded no output. */
 function receiptJob(onBranch: string, report: string): string {
   // One uploaded file sits at the artifact's root, under its own name.
