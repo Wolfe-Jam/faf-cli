@@ -168,7 +168,9 @@ export async function goCommand(options: GoOptions = {}): Promise<void> {
   // six W's in gray, and confirms them. With no TTY (CI, a pipe) there are no
   // suggestions: nothing is written that a human didn't confirm.
   const tty = Boolean(process.stdin.isTTY && process.stdout.isTTY);
-  const github = tty && options.github ? await githubSuggestionSource(dir) : null;
+  if (options.github && !tty) {console.log(dim('  --github: no terminal, so no suggestions; nothing is fetched.'));}
+  const goalEmpty = emptySlots.some(s => s.path === 'project.goal');
+  const github = tty && options.github && goalEmpty ? await githubSuggestionSource(dir) : null;
   const suggestions: IntentSuggestions = tty
     ? suggestIntent(dir, data as Record<string, unknown>, { githubDescription: github })
     : {};
@@ -376,7 +378,8 @@ async function githubSuggestionSource(dir: string): Promise<string | null> {
   } catch {
     // No git, no origin: said below.
   }
-  const repo = githubRepoOf(remote);
+  // origin is a URL; a bare a/b (a relative local path) is not a GitHub repo.
+  const repo = githubRepoOf(remote, { urlOnly: true });
   if (!repo) {
     console.log(dim("  --github: origin is not a GitHub repo, so there is no GitHub description to suggest."));
     return null;

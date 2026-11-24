@@ -333,6 +333,8 @@ export class FafDNAManager {
       birthCertificate: {
         born: now,
         birthDNA,
+        // 'init' means the first setup, whichever command ran it: a first `faf auto`
+        // is the same birth as `faf init` (his call, 2026-11-24, 8.12.0 review).
         birthDNASource: 'init',
         projectDNA: this.generateProjectDNA(),
         certificate: this.generateCertificate(),
