@@ -11,13 +11,15 @@ import { displayScore } from '../ui/display.js';
 import { bold, dim, fafCyan } from '../ui/colors.js';
 import { assertProjectCwd } from '../core/cwd-guard.js';
 import { suggestionNote } from '../core/suggest.js';
+import { sayAfterBirth } from './init.js';
 
 export function autoCommand(): void {
   assertProjectCwd(process.cwd(), 'faf auto');
   const dir = process.cwd();
   const fafPath = join(dir, 'project.faf');
 
-  if (existsSync(fafPath)) {
+  const created = !existsSync(fafPath);
+  if (!created) {
     // Update: existing wins (preserve user edits), then interrogated → detected →
     // Turbo-Cat (formats) → Relentless (6 W's) fill the remaining empties.
     // Shared with consumers via the public updateExistingFaf export.
@@ -44,10 +46,16 @@ export function autoCommand(): void {
   const yaml = readFafRaw(fafPath);
   const result = withKernel(fafPath, () => enrichScore(kernel.score(yaml)));
 
-  // Record growth on the DNA journey, if a heartbeat exists (faf init births it).
-  // A .faf-dna faf did not write is left as it is — say so in one line.
+  // The birth certificate (#261): when auto creates project.faf and there is no
+  // .faf-dna, this is the first setup, so auto births it at the honest first
+  // score, as init does. An existing project.faf without one is not a first
+  // setup: no birth (a later score is not a birth score). A .faf-dna that is
+  // there is never replaced; it records growth, or is left as it is.
   const dna = new FafDNAManager(dir);
-  if (dna.exists()) {
+  const born = created && !dna.exists();
+  if (born) {
+    dna.birth(result.score);
+  } else if (dna.exists()) {
     dna.recordGrowth(result.score, ['faf auto']);
     sayWhyDnaIsLeft(dna);
   }
@@ -56,6 +64,10 @@ export function autoCommand(): void {
   // unknown — (no repo fact filled it) counts as empty: say so under the
   // score, one line per slot. Slots the app-type leaves out are marked by now.
   displayScore(result, fafPath, false, typedNoneHints(yaml, result, { outOfType: false }));
+  if (born) {
+    console.log(dim(`  🧬 Birth DNA ${result.score}% — your journey starts here (faf dna)`));
+    sayAfterBirth(dir, true, false);
+  }
 
   // The goal and the six W's are the human's: auto suggests, `faf go` confirms.
   const note = suggestionNote(dir, readFaf(fafPath) as Record<string, unknown>);

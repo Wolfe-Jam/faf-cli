@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **The `what` question is now "What is it?"** (was "What are they building?", which read as the users' work and did not fit apps). Same in `faf go`, the slot table and `faf bench`.
 
 ### Fixed
+- **`faf auto` writes the birth certificate on a first setup** ([#261](https://github.com/Wolfe-Jam/faf-cli/issues/261)). When `auto` creates `project.faf` and there is no `.faf-dna`, it births one at that first score, as `faf init` does (and `faf loop`, which runs `auto`). Before, a first setup through `auto` had no birth certificate. An existing `project.faf` without a `.faf-dna` gets none (a later score is not a birth score), and a `.faf-dna` that is there is never replaced.
 - **`faf sync`: CLAUDE.md imports AGENTS.md** (#266). Claude Code reads AGENTS.md only when there is no CLAUDE.md, so in a repo where faf writes both, the build, test and repo rules in AGENTS.md never reached Claude Code (measured with [dokimi](https://github.com/intel/dokimi) `repo reach`: Claude Code 2.1.330 loaded CLAUDE.md only, Codex 0.169.0 AGENTS.md only). When an AGENTS.md sits beside CLAUDE.md, faf's CLAUDE.md block now ends with a `## Build, test and repo rules` section holding one line, `@AGENTS.md`. No AGENTS.md, or a CLAUDE.md that is a link to AGENTS.md: no import.
 
 ## [8.11.1] - 2026-11-22
