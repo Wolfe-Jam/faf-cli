@@ -145,7 +145,7 @@ faf memory show
 **Every agent file keeps to its lane: project.faf holds the facts, AGENTS.md instructs, and CLAUDE.md imports it.**
 
 - **AGENTS.md has no Stack section.** The stack is a fact in `project.faf`, and AGENTS.md points there; AGENTS.md keeps to instructions (setup, layout, conventions, guardrails, done, commits).
-- **CLAUDE.md imports AGENTS.md.** Claude Code reads AGENTS.md only when there is no CLAUDE.md. When both exist, `faf sync` ends faf's CLAUDE.md block with `@AGENTS.md`, so Claude Code gets the build, test and repo rules too.
+- **CLAUDE.md imports AGENTS.md.** By default, Claude Code reads AGENTS.md only when there is no CLAUDE.md. When both exist, `faf sync` ends faf's CLAUDE.md block with `@AGENTS.md`, so Claude Code gets the build, test and repo rules too.
 - **`faf go --github`** suggests the goal from the repo's GitHub description when the README has none. Nothing is written until you confirm it.
 - **`faf auto` writes the birth certificate on a first setup**, as `faf init` does. A `.faf-dna` that is there is never replaced.
 - **The `what` question is "What is it?"** (was "What are they building?").
