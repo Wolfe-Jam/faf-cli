@@ -110,10 +110,10 @@ Run `faf` with no arguments:
 | `faf init` | Create `project.faf` from your local project; suggest the goal and six W's |
 | `faf git <url>` | Instant `.faf` from any GitHub repo (a shallow clone) |
 | `faf auto` | Detect the stack, fill the slots it detects, score; suggest the goal and six W's |
-| `faf go` | Fill the human slots: each suggestion in gray, Tab to edit, Enter to confirm |
+| `faf go` | Fill the human slots: each suggestion in gray, Tab to edit, Enter to confirm (`--github`: also the repo's GitHub description) |
 | `faf score` | Check AI-readiness (0–100%) |
 | `faf export` | Author `AGENTS.md`, `GEMINI.md`, `.cursorrules` and the Copilot instructions |
-| `faf sync` | `.faf` → `CLAUDE.md`, one way (faf's block only) |
+| `faf sync` | `.faf` → `CLAUDE.md`, one way (faf's block only); imports `AGENTS.md` when one sits beside it |
 | `faf memory` | `.fafm` soul ops — convert Claude memory, etch, recall, ls, show |
 | `faf diff` / `log` | Semantic context diff + score timeline across git history |
 | `faf hooks --install` | Pre-commit guard against context regression |
@@ -140,17 +140,16 @@ faf memory etch "a durable fact" --id my-fact
 faf memory show
 ```
 
-### What's New in v8.11.0 — The Project Facts Edition
+### What's New in v8.12.0 — The One Source Edition
 
-**The six W's now reach every agent: AGENTS.md points to project.faf, and CLAUDE.md, GEMINI.md, .cursorrules, Copilot and llms.txt carry them, one rule, one line each.**
+**Every agent file keeps to its lane: project.faf holds the facts, AGENTS.md instructs, and CLAUDE.md imports it.**
 
-**8.11.1:** `faf taf setup` writes taf-git 3.0.0 (faf-taf-git was renamed). A workflow written by 8.11.0 stops starting after the rename: run `faf taf setup` again.
-
-- **AGENTS.md points to the facts.** A `## Project facts` section names `project.faf`, by its real path from AGENTS.md (a legacy `.faf`, a file one folder up, `--output`). The only pointer before was an HTML comment, which agents skip. AGENTS.md still doesn't copy the six W's.
-- **The six W's in every context file.** GEMINI.md and .cursorrules gain a Context section, as CLAUDE.md and the Copilot instructions have. `llms.txt` and Claude Code's MEMORY.md block (Pro) show the same values.
-- **One rule, the score's.** A slot the score counts as empty (empty, `slotignored`, TBD, N/A) is left out; numbers show as written in project.faf, dates and lists as text; each fact is one line. CLAUDE.md no longer shows `slotignored` or placeholders.
-- **`faf taf setup` writes two jobs** (taf-git 3.0.0 since 8.11.1): the tests run with a read-only token, only the receipt job can write, and a red run on the default branch is recorded as a `FAILED` receipt.
-- **Why:** [the evidence](https://github.com/Wolfe-Jam/context7-faf-receipt#round-4-what-agentsmd-carries-opencode-and-codex). On tasks whose deciding fact was only in the six W's, Codex and OpenCode found the team's decision 4/22 times with the old AGENTS.md, 12/21 with the pointer, 19/20 with the six W's in the file.
+- **AGENTS.md has no Stack section.** The stack is a fact in `project.faf`, and AGENTS.md points there; AGENTS.md keeps to instructions (setup, layout, conventions, guardrails, done, commits).
+- **CLAUDE.md imports AGENTS.md.** By default, Claude Code reads AGENTS.md only when there is no CLAUDE.md. When both exist, `faf sync` ends faf's CLAUDE.md block with `@AGENTS.md`, so Claude Code gets the build, test and repo rules too.
+- **`faf go --github`** suggests the goal from the repo's GitHub description when the README has none. Nothing is written until you confirm it.
+- **`faf auto` writes the birth certificate on a first setup**, as `faf init` does. A `.faf-dna` that is there is never replaced.
+- **The `what` question is "What is it?"** (was "What are they building?").
+- **`faf-cli/fetch`** for tools that author from a URL: `fetchRepo(url)` shallow-clones into a temp folder (no shell, links not followed, never waits for a login) and returns `{ dir, repoUrl, cleanup() }`. The main `faf-cli` import runs no git.
 
 Earlier editions: [CHANGELOG.md](./CHANGELOG.md) · [Releases](https://github.com/Wolfe-Jam/faf-cli/releases)
 
@@ -188,7 +187,7 @@ Your own rules for the AI — *"use full words in identifiers," "use bun, not np
 ## Sync
 
 ```
-sync:      .faf  ───→  CLAUDE.md   (one way: faf's block only)
+sync:      .faf  ───→  CLAUDE.md   (one way: faf's block only; @AGENTS.md when it exists)
 tri-sync:  .faf  ───→  CLAUDE.md + Claude Code's MEMORY.md   (Pro: faf's block only; Claude's notes kept)
 ```
 
@@ -211,6 +210,7 @@ For a specific agent: [Grok, xAI & Cursor 👀](docs/faf-cli-for-agents.md) · [
 
 Pivotal releases — full history in [CHANGELOG.md](./CHANGELOG.md):
 
+- **v8.12 — One Source** — every agent file keeps to its lane; CLAUDE.md imports AGENTS.md.
 - **v8.11 — Project Facts** — the six W's reach every agent file; AGENTS.md points to project.faf.
 - **v8.10 — Human Slots** — AI suggests the goal and six W's; you confirm each one in `faf go`.
 - **v8.9 — Write-Once** — a birth certificate that can't be reissued, checked against its birth commit.

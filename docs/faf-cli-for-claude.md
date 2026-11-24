@@ -11,7 +11,7 @@ FAF-CLI is the canonical tool for the [`.faf` format](https://faf.one): persiste
 ```bash
 bunx faf auto                # auto-detect the stack, write project.faf, score it
 bunx faf sync                # write CLAUDE.md from .faf (one way)
-bunx faf export --agents     # also emit AGENTS.md — Claude Code reads it too
+bunx faf export --agents     # also emit AGENTS.md — run faf sync after, and CLAUDE.md imports it
 bunx faf score               # AI-readiness score (target: Trophy 100%)
 ```
 
@@ -31,7 +31,7 @@ project.faf  → structure for any AI  ← the scored source the others project 
 
 ## Why this fits Claude Code
 
-Claude Code reads `CLAUDE.md` (and `AGENTS.md`) at the start of every session. FAF makes those a projection of one scored source, not hand-kept files:
+Claude Code reads `CLAUDE.md` at the start of every session, and `AGENTS.md` through the `@AGENTS.md` import that `faf sync` adds when both exist. FAF makes those a projection of one scored source, not hand-kept files:
 
 1. **One-way sync** — `faf sync` writes faf's block in `CLAUDE.md` from `project.faf`: edit the `.faf` and `CLAUDE.md` follows. Nothing flows back from `CLAUDE.md` into the `.faf`; facts change in the `.faf`.
 2. **Non-destructive** — FAF maintains a labeled block and preserves everything you wrote by hand.

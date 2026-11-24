@@ -4,7 +4,7 @@
 
 # AGENTS.md — faf-cli
 
-CLI for IANA-registered .faf + .fafm — context DNA and portable agent memory, scored by the always-33 engine — TypeScript · type: cli · v8.11.1
+CLI for IANA-registered .faf + .fafm — context DNA and portable agent memory, scored by the always-33 engine — TypeScript · type: cli · v8.12.0
 
 > Authored by faf — do not edit the managed block; refresh with `faf export --agents`. Hand-written content outside the managed block is preserved.
 
@@ -77,12 +77,6 @@ Ask a clarifying question, propose a short plan, or open a draft PR with notes �
 - Conventional Commits preferred (`feat:`, `fix:`, `chore:`, …).
 - Branch off `main` and open a PR — never commit to `main` directly.
 - If build/test scripts or layout change, refresh this file in the **same PR** (`faf export --agents`).
-
-## Stack
-
-- **Hosting:** npm + Homebrew
-- **Build:** Bun (bun build) + tsc
-- **CI/CD:** GitHub Actions
 
 ## Project facts
 
