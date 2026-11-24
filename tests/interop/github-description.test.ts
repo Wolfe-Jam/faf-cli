@@ -42,6 +42,17 @@ describe('BRAKE: githubRepoOf takes GitHub remotes only', () => {
   ])('%s → %s', (remote, want) => {
     expect(githubRepoOf(remote)).toBe(want);
   });
+
+  // 8.12.0 review: `faf go --github` reads `origin`, where a bare a/b is a
+  // relative local path, not a GitHub repo. urlOnly refuses it.
+  test.each([
+    ['backup/thing', null],
+    ['tokio-rs/axum', null],
+    ['https://github.com/tokio-rs/axum.git', 'tokio-rs/axum'],
+    ['git@github.com:tokio-rs/axum.git', 'tokio-rs/axum'],
+  ])('urlOnly: %s → %s', (remote, want) => {
+    expect(githubRepoOf(remote, { urlOnly: true })).toBe(want);
+  });
 });
 
 describe('ENGINE: githubDescription', () => {
@@ -111,4 +122,18 @@ describe('AERO: faf go --github is an opt-in flag', () => {
     const r = spawnSync('bun', [resolve(import.meta.dir, '../../src/cli.ts'), 'go', '--help'], { encoding: 'utf-8' });
     expect(r.stdout).toContain('--github');
   }, 30_000);
+});
+
+describe('TYRE: faf go --github without a terminal says so and fetches nothing', () => {
+  test('piped stdin: one line, no API call', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'faf-gh-notty-'));
+    try {
+      writeFileSync(join(dir, 'project.faf'), 'faf_version: "3.0"\nproject:\n  name: x\n  goal: ""\n  main_language: TypeScript\n');
+      const r = spawnSync('bun', [resolve(import.meta.dir, '../../src/cli.ts'), 'go', '--github'], { cwd: dir, input: 'quit\n', encoding: 'utf-8', env: { ...process.env, NO_COLOR: '1' } });
+      expect(r.stdout).toContain('--github: no terminal, so no suggestions; nothing is fetched.');
+      expect(r.stdout).not.toContain('no description from GitHub');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  }, 60_000);
 });

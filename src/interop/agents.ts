@@ -18,8 +18,6 @@ const HUMAN_PREF = new Set([
   'commit_style', 'communication', 'response_style', 'explanation_level', 'explanations', 'documentation', 'code_first',
 ]);
 
-/** Stack keys that are context/marketing, not actual stack. Kept out of the Stack section. */
-
 /**
  * Author a BETTER-shaped AGENTS.md from .faf data (+ repo enrichment at export).
  *

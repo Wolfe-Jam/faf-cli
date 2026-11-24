@@ -71,6 +71,8 @@ export class FetchRepoError extends Error {
 export interface FetchRepoOptions {
   /** Clone this branch or tag. */
   ref?: string;
+  /** Give up on the clone after this many milliseconds (default 120 000). */
+  timeoutMs?: number;
 }
 
 export interface FetchedRepo {
@@ -122,7 +124,14 @@ export async function fetchRepo(url: string, options: FetchRepoOptions = {}): Pr
   try {
     // execFile runs git directly — NO shell — so the URL can never be
     // interpreted as a command.
-    await execFileAsync('git', cloneArgs(repoUrl, dir, options.ref));
+    // GIT_TERMINAL_PROMPT=0: a private or misspelled repo fails at once instead
+    // of waiting for a username on the terminal (an MCP server has no one there
+    // to answer). The timeout stops a clone that never finishes.
+    await execFileAsync('git', cloneArgs(repoUrl, dir, options.ref), {
+      env: { ...process.env, GIT_TERMINAL_PROMPT: '0' },
+      timeout: options.timeoutMs ?? 120_000,
+      killSignal: 'SIGKILL',
+    });
   } catch (err) {
     cleanup();
     const stderr = String((err as { stderr?: unknown })?.stderr ?? '');

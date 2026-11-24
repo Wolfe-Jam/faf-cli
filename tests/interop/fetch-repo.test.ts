@@ -90,6 +90,12 @@ describe('ENGINE: fetchRepo', () => {
     expect((err as FetchRepoError).kind).toBe('url');
   });
 
+  test('a clone that runs past timeoutMs is stopped: FetchRepoError kind clone', async () => {
+    const err = await fetchRepo('acme/demo', { timeoutMs: 1 }).catch((e: unknown) => e);
+    expect(err).toBeInstanceOf(FetchRepoError);
+    expect((err as FetchRepoError).kind).toBe('clone');
+  });
+
   test('a clone that fails: FetchRepoError kind clone with git\'s reason, temp folder removed', async () => {
     const err = await fetchRepo('acme/no-such-repo').catch((e: unknown) => e);
     expect(err).toBeInstanceOf(FetchRepoError);

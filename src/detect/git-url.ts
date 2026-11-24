@@ -59,12 +59,12 @@ export function repoNameFromUrl(repoUrl: string): string {
  * `ssh://git@github.com/o/r(.git)` and `o/r`. Names use GitHub's characters
  * only (letters, digits, `.`, `_`, `-`), so the result is safe in an API path.
  */
-export function githubRepoOf(remote: string): string | null {
+export function githubRepoOf(remote: string, options: { urlOnly?: boolean } = {}): string | null {
   const t = remote.trim();
   const m =
     /^https?:\/\/(?:www\.)?github\.com\/([^/]+)\/([^/]+?)(?:\.git)?\/?$/i.exec(t) ??
     /^(?:ssh:\/\/)?git@github\.com[:/]([^/]+)\/([^/]+?)(?:\.git)?\/?$/i.exec(t) ??
-    /^([^/:@\s]+)\/([^/:@\s]+?)(?:\.git)?$/.exec(t);
+    (options.urlOnly ? null : /^([^/:@\s]+)\/([^/:@\s]+?)(?:\.git)?$/.exec(t));
   if (!m) {return null;}
   const ok = (s: string): boolean => /^[A-Za-z0-9._-]+$/.test(s) && s !== '.' && s !== '..';
   return ok(m[1]) && ok(m[2]) ? `${m[1]}/${m[2]}` : null;
