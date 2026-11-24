@@ -10,7 +10,7 @@ import { execFile, execFileSync } from 'child_process';
 import { join } from 'path';
 import { promisify } from 'util';
 import { makeTempDir, readBytesIfPresent, removeTempDir, safeUnlink } from '../core/safe-write.js';
-import { normalizeGitUrl } from '../detect/git-url.js';
+import { githubRepoOf, normalizeGitUrl } from '../detect/git-url.js';
 
 const execFileAsync = promisify(execFile);
 
@@ -132,4 +132,39 @@ export async function fetchRepo(url: string, options: FetchRepoOptions = {}): Pr
 
   dropLinkPlaceholders(dir);
   return { dir, repoUrl, cleanup };
+}
+
+export interface GithubDescriptionOptions {
+  /** A GitHub token; default GITHUB_TOKEN, then GH_TOKEN. Needed for a private
+   *  repo, and it raises the rate limit. */
+  token?: string;
+  /** Give up after this many milliseconds (default 10 000). */
+  timeoutMs?: number;
+}
+
+/**
+ * The repo's GitHub description, for a goal suggestion (#237), or null: not a
+ * GitHub repo, no description, no network, a rate limit, a private repo
+ * without a token. Never throws; the description is only ever a suggestion,
+ * so a fetch that fails just means no suggestion. One GitHub API call.
+ */
+export async function githubDescription(repo: string, options: GithubDescriptionOptions = {}): Promise<string | null> {
+  const slug = githubRepoOf(repo);
+  if (!slug) {return null;}
+  const token = options.token ?? process.env.GITHUB_TOKEN ?? process.env.GH_TOKEN;
+  try {
+    const res = await fetch(`https://api.github.com/repos/${slug}`, {
+      headers: {
+        Accept: 'application/vnd.github+json',
+        'User-Agent': 'faf-cli',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      signal: AbortSignal.timeout(options.timeoutMs ?? 10_000),
+    });
+    if (!res.ok) {return null;}
+    const d = ((await res.json()) as { description?: unknown }).description;
+    return typeof d === 'string' && d.trim() ? d.trim() : null;
+  } catch {
+    return null;
+  }
 }

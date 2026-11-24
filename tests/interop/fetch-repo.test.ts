@@ -44,8 +44,8 @@ afterAll(() => {
 });
 
 describe('BRAKE: fetch lives in faf-cli/fetch, not in the main import', () => {
-  test('faf-cli/fetch exports fetchRepo and FetchRepoError, nothing else', () => {
-    expect(Object.keys(fetchApi).sort()).toEqual(['FetchRepoError', 'fetchRepo']);
+  test('faf-cli/fetch exports fetchRepo, FetchRepoError and githubDescription, nothing else', () => {
+    expect(Object.keys(fetchApi).sort()).toEqual(['FetchRepoError', 'fetchRepo', 'githubDescription']);
   });
   test('the main faf-cli import has no fetch', () => {
     for (const name of ['fetchRepo', 'FetchRepoError', 'cloneArgs', 'dropLinkPlaceholders']) {
