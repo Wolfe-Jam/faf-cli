@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **The GitHub description as a goal suggestion** ([#237](https://github.com/Wolfe-Jam/faf-cli/issues/237)). `faf go --github` makes one GitHub API call for the description of the clone's `origin` and offers it as the goal suggestion, source `GitHub description`, after the README and before the package.json description. It is a suggestion like the others: never written unless confirmed. `GITHUB_TOKEN` or `GH_TOKEN` is sent when set (private repos, rate limits). For tools: `githubDescription(repo)` in `faf-cli/fetch` (null on any failure, never throws) and a third argument to `suggestIntent(dir, faf, { githubDescription })`. GitHub metadata (stars, forks, topics) is not added: it changes daily and is not a scored slot.
 
 ### Changed
+- **AGENTS.md no longer has a Stack section.** The stack is a fact in `project.faf`, and AGENTS.md already points there (`## Project facts`); AGENTS.md keeps to instructions (setup, layout, conventions, guardrails, done, commits). This is the BEST rung of agents-md-facts: with project.faf present, nothing is copied. CLAUDE.md now imports AGENTS.md (#266), so the stack is no longer said twice to Claude Code.
 - **The `what` question is now "What is it?"** (was "What are they building?", which read as the users' work and did not fit apps). Same in `faf go`, the slot table and `faf bench`.
 
 ### Fixed

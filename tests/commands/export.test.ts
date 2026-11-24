@@ -30,16 +30,15 @@ describe('TYRE: export command', () => {
     expect(content).toContain('export-test');
   });
 
-  test('AGENTS.md labels are registry-sourced — API, CI/CD, no raw keys', () => {
+  test('AGENTS.md carries no stack: it points to project.faf (#272)', () => {
     writeFileSync(join(testDir, 'project.faf'), `faf_version: 2.5.0\nproject:\n  name: agents-acro\n  goal: x\n  main_language: TypeScript\nstack:\n  api_type: MCP\n  cicd: GitHub Actions\n  runtime: Node.js\n`);
     const { exportCommand } = require('../../src/commands/export.js');
     exportCommand({ agents: true });
     const content = readFileSync(join(testDir, 'AGENTS.md'), 'utf-8');
-    expect(content).toContain('**API:** MCP');              // registry
-    expect(content).toContain('**CI/CD:** GitHub Actions'); // registry
-    expect(content).toContain('**Runtime:** Node.js');
-    expect(content).not.toContain('**api_type:**');         // never a raw key
-    expect(content).not.toContain('**cicd:**');
+    expect(content).not.toContain('## Stack');
+    expect(content).not.toContain('**API:**');
+    expect(content).not.toContain('**api_type:**');           // never a raw key either
+    expect(content).toContain("other facts are in `project.faf`");
   });
 
   test('GEMINI.md + .cursorrules use the same registry labels (one source, every format)', () => {

@@ -3,7 +3,7 @@ import type { FafData } from '../core/types.js';
 import { FAF_CONTEXT_FILES } from '../core/safe-write.js';
 import { fafMetaTag } from './claude.js';
 import { injectFafBlock } from './inject.js';
-import { filled, slotLabel, titleLabel } from './labels.js';
+import { titleLabel } from './labels.js';
 import { splitCommandNote, commandOnly } from './command-note.js';
 
 /** A value carrying real content — non-empty, not slotignored, non-empty array. */
@@ -19,7 +19,6 @@ const HUMAN_PREF = new Set([
 ]);
 
 /** Stack keys that are context/marketing, not actual stack. Kept out of the Stack section. */
-const NON_STACK = new Set(['target_user', 'core_problem', 'mission_purpose']);
 
 /**
  * Author a BETTER-shaped AGENTS.md from .faf data (+ repo enrichment at export).
@@ -219,20 +218,9 @@ export function renderAgentsMd(data: FafData, factsRef = 'project.faf'): string 
   push('- If build/test scripts or layout change, refresh this file in the **same PR** (`faf export --agents`).');
   push();
 
-  // Stack (reference) — actual stack only; omit empty / all-slotignored noise
-  if (data.stack) {
-    const stack: string[] = [];
-    for (const [key, value] of Object.entries(data.stack)) {
-      if (NON_STACK.has(key)) {continue;}
-      if (filled(value)) {stack.push(`- **${slotLabel(`stack.${key}`)}:** ${value.trim()}`);}
-    }
-    if (stack.length) {
-      push('## Stack');
-      push();
-      for (const s of stack) {push(s);}
-      push();
-    }
-  }
+  // No Stack section: the stack is a fact, and facts live in project.faf, which
+  // the Project facts line below points to. AGENTS.md instructs; it does not
+  // restate the definitions (lanes rule). Before 8.12.0 it copied stack.*.
 
   // The FAF Block points to the facts; it does not copy them (AGENTS.md stays an
   // operations file). A visible line under its own heading, not only the claim=
