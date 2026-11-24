@@ -10,6 +10,7 @@
  * scorer — instead of a hand-rolled extractor with its own schema.
  */
 
+import { basename } from 'path';
 import type { FafData } from '../core/types.js';
 import { assembleFreshFaf } from './assemble.js';
 import { readPackageJson } from './scanner.js';
@@ -41,8 +42,8 @@ export function authorFafFromRepo(dir: string, opts: AuthorFafFromRepoOptions = 
   const data = assembleFreshFaf(dir) as FafData;
   // Name the project after the REPO, not the folder it was fetched into — but
   // only when the name IS that folder fallback (detectStack's
-  // `pkg.name ?? dir.split('/').pop()`); a real package.json name is kept.
-  if (opts.repoUrl && data.project && !readPackageJson(dir)?.name && data.project.name === dir.split('/').pop()) {
+  // `pkg.name ?? basename(dir)`); a real package.json name is kept.
+  if (opts.repoUrl && data.project && !readPackageJson(dir)?.name && data.project.name === basename(dir)) {
     data.project.name = repoNameFromUrl(opts.repoUrl);
   }
   return data;

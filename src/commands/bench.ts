@@ -25,7 +25,7 @@
 
 import { createHash } from 'crypto';
 import { readFileSync, existsSync } from 'fs';
-import { join, dirname } from 'path';
+import { basename, dirname, join } from 'path';
 import { findFafFile, readFafFromString, readFafRaw, withKernel } from '../interop/faf.js';
 import { readBytesIfPresent, resolveInside, safeReplaceOwned } from '../core/safe-write.js';
 import { scoreFafYaml } from '../core/scorer.js';
@@ -332,7 +332,7 @@ export function benchCommand(action?: string, answersFile?: string, options: Ben
   readFafFromString(yaml, fafPath);
   const qset = withKernel(fafPath, () => deriveQuestionSet(yaml));
   const dir = dirname(fafPath);
-  const project = (parseYAML(yaml) as Record<string, any>)?.project?.name ?? dir.split('/').pop();
+  const project = (parseYAML(yaml) as Record<string, any>)?.project?.name ?? basename(dir);
 
   if (qset.questions.length === 0) {
     console.error('Error: no populated slots to derive questions from.\n\n  Run `faf go` to fill the .faf first.');

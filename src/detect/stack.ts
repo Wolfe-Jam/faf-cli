@@ -1,4 +1,5 @@
 import type { FafData, SlotDef } from '../core/types.js';
+import { basename } from 'path';
 import { mainCrate } from './cargo.js';
 import { SLOTS, appTypeUsesSlot } from '../core/slots.js';
 import { FAF_VERSION } from '../core/version.js';
@@ -155,7 +156,7 @@ export function detectStackWithFacts(dir: string): { data: FafData; facts: Recor
 
   // Build project section
   const project: Record<string, string> = {
-    name: pkg?.name ?? mainCrate(dir)?.name ?? dir.split('/').pop() ?? 'project',
+    name: pkg?.name ?? mainCrate(dir)?.name ?? (basename(dir) || 'project'),
     // A polyglot repo's root package.json describes the tooling shell, not the
     // product — leave goal for the README interrogator / the human to fill.
     goal: isPolyglot ? '' : (pkg?.description ?? ''),
