@@ -68,7 +68,7 @@ commands:
 
 ### Fill the tech slots: `faf auto`
 
-Fills empty tech slots from what the repo shows, then scores. With no `project.faf` it creates one. It says `unchanged` when there was nothing new to write.
+Fills empty tech slots from what the repo shows, then scores. With no `project.faf` it creates one and, when there is no `.faf-dna`, writes the birth certificate at that first score, as `faf init` does. A `.faf-dna` that is there is never replaced. It says `unchanged` when there was nothing new to write.
 
 ```bash
 $ faf auto

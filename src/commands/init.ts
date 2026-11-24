@@ -81,7 +81,7 @@ export function initCommand(options: InitOptions = {}): void {
 
 /** After the birth line: the --force note when a certificate was kept, the
  *  gitignore warning, and the commit hint after a new birth. */
-function sayAfterBirth(dir: string, born: boolean, force: boolean): void {
+export function sayAfterBirth(dir: string, born: boolean, force: boolean): void {
   if (!born && force) {
     console.error(`faf: ${bold('--force')} no longer starts a new birth: the birth certificate is written once. project.faf was replaced, as ${bold('--new')} does.`);
   }
