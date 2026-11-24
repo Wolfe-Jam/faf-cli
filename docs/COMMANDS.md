@@ -313,6 +313,8 @@ $ faf conductor export
 
 Writes faf's block in `CLAUDE.md` from `project.faf` and keeps your own text around it. One way only: nothing flows back from CLAUDE.md. `--watch` repeats on every change.
 
+When an `AGENTS.md` sits beside it, the block ends with `## Build, test and repo rules` and one line, `@AGENTS.md`. Claude Code reads AGENTS.md only when there is no CLAUDE.md; the import makes it read both.
+
 ```bash
 $ faf sync
 ◆ sync  .faf → CLAUDE.md

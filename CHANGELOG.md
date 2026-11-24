@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v8.11.1 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v8.12.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -8,7 +8,9 @@ All notable changes to faf-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [8.12.0] - 2026-11-24 — The One Source Edition
+
+Every agent file keeps to its lane: project.faf holds the facts, AGENTS.md instructs, and CLAUDE.md imports it.
 
 ### Added
 - **`faf-cli/fetch`: the fetch step of `faf git`, for tools that author from a URL** ([#236](https://github.com/Wolfe-Jam/faf-cli/issues/236)). `fetchRepo(url, { ref })` normalizes the URL, shallow-clones it (no shell, links not followed) into a temp folder of faf's own and takes out link placeholders; it returns `{ dir, repoUrl, cleanup() }`. Author the folder with `authorFafFromRepo` from `faf-cli`. A failure is a `FetchRepoError` with `kind` `url` or `clone`. `faf git` uses the same function, so there is one copy of the clone. It is a separate entry: the main `faf-cli` import still runs no git.
