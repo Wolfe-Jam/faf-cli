@@ -163,9 +163,10 @@ describe('ENGINE: full data renders every section', () => {
     expect(m).toContain('speculative changes to `dev`.');
     expect(m).not.toContain('`main`');
   });
-  test('Stack renders real stack', () => {
-    expect(md).toContain('## Stack');
-    expect(md).toContain('FastAPI');
+  test('no Stack section: the stack lives in project.faf, which AGENTS.md points to', () => {
+    expect(md).not.toContain('## Stack');
+    expect(md).not.toContain('FastAPI');
+    expect(md).toContain('## Project facts');
   });
   test('freshness footer; Human Context omitted from AGENTS', () => {
     expect(md).toContain('Context authored: 2026-07-06');
@@ -219,7 +220,7 @@ describe('AERO: facts-not-bloat curation', () => {
     expect(md).not.toContain('Response Style');
     expect(md).not.toContain('concise_code_first');
   });
-  test('Stack EXCLUDES context/marketing keys', () => {
+  test('no stack keys at all, context/marketing ones included', () => {
     expect(md).not.toContain('Core Problem');
     expect(md).not.toContain('Mission Purpose');
     expect(md).not.toContain('Target User');

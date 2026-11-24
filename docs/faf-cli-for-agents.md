@@ -33,7 +33,7 @@ FAF-CLI gives you one source of truth (`project.faf`) that emits the files these
 
 xAI ships strong agentic capabilities — native tool use, the Agent Tools API, Grok Build's parallel sub-agents, and MCP support. FAF slots in without any changes to those products:
 
-1. **Context layer** — run `bunx faf export --agents` in CI, pre-commit, or agent bootstrap. Every Grok session or parallel agent gets accurate, stack-aware `AGENTS.md`.
+1. **Context layer** — run `bunx faf export --agents` in CI, pre-commit, or agent bootstrap. Every Grok session or parallel agent gets an accurate `AGENTS.md` that points to the stack and the six W's in `project.faf`.
 2. **MCP integration, already wired** — FAF has explicit Grok interop (`src/interop/grok.ts`) that wires the FAF MCP server into `.grok/config.toml`. Agents can call live tools (`faf_score`, `faf_validate`, context ops) instead of only reading static files.
 3. **Hygiene gates** — `faf score` before agents touch a codebase; `faf drift` + `faf log` let long-running agents detect when context has changed.
 4. **Remote / research** — `faf git owner/repo` pulls structured, scored context for external repos instantly.
