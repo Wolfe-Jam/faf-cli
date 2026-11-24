@@ -4,6 +4,7 @@ import { assembleFreshFaf } from '../detect/assemble.js';
 import { writeFaf, readFafRaw, withKernel } from '../interop/faf.js';
 import { scoreFafYaml } from '../core/scorer.js';
 import { FafDNAManager } from '../core/faf-dna.js';
+import { sayWhyDnaIsLeft } from './dna.js';
 import { dnaGitignoreWarning } from '../core/dna-gitignore.js';
 import { commitHint } from '../core/birth-commit.js';
 import { displayScore } from '../ui/display.js';
@@ -57,6 +58,8 @@ export function initCommand(options: InitOptions = {}): void {
   const born = !dna.exists();
   if (born) {
     dna.birth(result.score);
+  } else {
+    sayWhyDnaIsLeft(dna);
   }
 
   console.log(`${fafCyan('created')} ${outputPath}`);

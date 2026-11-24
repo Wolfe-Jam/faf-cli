@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **`faf auto` runs `init` if there is no project.faf** ([#279](https://github.com/Wolfe-Jam/faf-cli/issues/279)). `init` writes the file and the birth certificate, so a first `auto` prints what `faf init` prints. Before, `auto` repeated init's birth step. `faf init` now also says why it leaves a `.faf-dna` it can't update, as `auto` does.
+
 ## [8.12.0] - 2026-11-24 — The One Source Edition
 
 Every agent file keeps to its lane: project.faf holds the facts, AGENTS.md instructs, and CLAUDE.md imports it.

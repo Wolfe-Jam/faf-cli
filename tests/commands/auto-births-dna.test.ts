@@ -1,9 +1,8 @@
 /**
- * WJTTC — #261: `faf auto` writes the birth certificate on a first setup.
+ * WJTTC — #261, #279: `faf auto` runs init if there is no project.faf.
  *
- * A first setup through auto (no project.faf, no .faf-dna) births .faf-dna at
- * the honest first score, as init does. An existing project.faf without one is
- * not a first setup: no birth. A .faf-dna that is there is never replaced.
+ * init writes project.faf and the birth certificate. An existing project.faf
+ * without a .faf-dna gets none. A .faf-dna that is there is never replaced.
  */
 import { afterAll, describe, test, expect } from 'bun:test';
 import { existsSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'fs';
@@ -21,10 +20,24 @@ function repo(): string {
   writeFileSync(join(dir, 'package.json'), JSON.stringify({ name: 'demo', description: 'A demo app' }));
   return dir;
 }
-const auto = (dir: string) => spawnSync('bun', [CLI, 'auto'], { cwd: dir, encoding: 'utf-8', env: { ...process.env, NO_COLOR: '1' } });
+const faf = (dir: string, cmd: string) => spawnSync('bun', [CLI, cmd], { cwd: dir, encoding: 'utf-8', env: { ...process.env, NO_COLOR: '1' } });
+const auto = (dir: string) => faf(dir, 'auto');
 const scoreOf = (out: string): number => Number(/(\d+)%/.exec(out)?.[1]);
 
 describe('BRAKE: the birth certificate on a first setup through auto (#261)', () => {
+  test('no project.faf: auto runs init — the same file, the same .faf-dna birth, the same output (#279)', () => {
+    const a = repo();
+    const b = repo();
+    const viaAuto = auto(a);
+    const viaInit = faf(b, 'init');
+    expect(viaAuto.status).toBe(0);
+    expect(viaInit.status).toBe(0);
+    expect(readFileSync(join(a, 'project.faf'), 'utf-8')).toBe(readFileSync(join(b, 'project.faf'), 'utf-8'));
+    expect(JSON.parse(readFileSync(join(a, '.faf-dna'), 'utf-8')).birthCertificate.birthDNA)
+      .toBe(JSON.parse(readFileSync(join(b, '.faf-dna'), 'utf-8')).birthCertificate.birthDNA);
+    expect(viaAuto.stdout.replaceAll(a, 'DIR')).toBe(viaInit.stdout.replaceAll(b, 'DIR'));
+  }, 60_000);
+
   test('no project.faf, no .faf-dna: auto births .faf-dna at the first score', () => {
     const dir = repo();
     const r = auto(dir);
