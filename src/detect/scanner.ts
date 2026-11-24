@@ -1,4 +1,5 @@
 import { join } from 'path';
+import { mainCrate, crateHasBin, crateIsLib, crateSource } from './cargo.js';
 import { readRepoDir, readRepoFile, repoExists, withRepoRoot } from '../core/safe-write.js';
 import type { DetectedFramework, Signal } from '../core/types.js';
 import { NO_CLASSIFYING_SIGNALS } from '../core/slots.js';
@@ -28,18 +29,10 @@ interface PackageJson {
   files?: string[];
 }
 
-/** Read [package].name field from Cargo.toml — naive but adequate. */
+/** The `[package].name` of the crate that names the project: the root's, or
+ *  a workspace member's (#269). */
 function readCargoName(dir: string): string | null {
-  const content = readRepoFile(dir, 'Cargo.toml');
-  if (content === null) {return null;}
-  const m = content.match(/^\s*\[package\][\s\S]*?^\s*name\s*=\s*"([^"]+)"/m);
-  return m ? m[1] : null;
-}
-
-/** True if Cargo.toml declares one or more `[[bin]]` sections — Rust cli marker. */
-function hasCargoBin(dir: string): boolean {
-  const content = readRepoFile(dir, 'Cargo.toml');
-  return content !== null && /^\s*\[\[bin\]\]/m.test(content);
+  return mainCrate(dir)?.name ?? null;
 }
 
 /** Detect SDK signals — keyword-based per the SDK-priority doctrine.
@@ -646,8 +639,9 @@ export function detectProjectTypeWithRationale(dir: string): ProjectTypeDetectio
     found.push('package.json bin');
     return { type: 'cli', found };
   }
-  if (hasCargoBin(dir)) {
-    found.push('Cargo.toml [[bin]]');
+  const crate = mainCrate(dir);
+  if (crate && crateHasBin(crate)) {
+    found.push(crate.rel ? `${crateSource(crate)} [[bin]]` : 'Cargo.toml [[bin]]');
     return { type: 'cli', found };
   }
 
@@ -764,6 +758,16 @@ export function detectProjectTypeWithRationale(dir: string): ProjectTypeDetectio
   if (pkg?.main && !pkg?.bin) {
     found.push('package.json main (no bin)');
     return { type: 'library', found };
+  }
+
+  // ─── 20b. library — a Rust crate with src/lib.rs or [lib], no src/main.rs
+  //          (a workspace's main member counts, #269) ────────────────────────
+  if (crate && !repoExists(dir, crate.rel ? `${crate.rel}/src/main.rs` : 'src/main.rs')) {
+    const lib = crateIsLib(dir, crate);
+    if (lib) {
+      found.push(`${crateSource(crate)}: ${lib}`);
+      return { type: 'library', found };
+    }
   }
 
   // ─── 21. skills — SKILL.md folders and no code signal above. Last before
