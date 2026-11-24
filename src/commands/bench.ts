@@ -48,7 +48,7 @@ const PHRASINGS: Record<string, string> = {
   'project.goal': "What is the project's goal — what is it for?",
   'project.main_language': 'What is the primary programming language?',
   'human_context.who': 'Who is this project for?',
-  'human_context.what': 'What are they building?',
+  'human_context.what': 'What is it?',
   'human_context.why': 'Why does this project exist?',
   'human_context.where': 'Where does it run or get distributed?',
   'human_context.when': 'When — what stage is it at, and since when?',
