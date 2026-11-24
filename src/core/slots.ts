@@ -9,7 +9,7 @@ export const SLOTS: SlotDef[] = [
 
   // Human Context (6)
   { index: 4, path: 'human_context.who', label: 'Who', description: 'Who is this for?', category: 'human' },
-  { index: 5, path: 'human_context.what', label: 'What', description: 'What are they building', category: 'human' },
+  { index: 5, path: 'human_context.what', label: 'What', description: 'What is it', category: 'human' },
   { index: 6, path: 'human_context.why', label: 'Why', description: 'Why does it exist', category: 'human' },
   { index: 7, path: 'human_context.where', label: 'Where', description: 'Where does it run', category: 'human' },
   { index: 8, path: 'human_context.when', label: 'When', description: 'The stage it is at, and since when', category: 'human' },

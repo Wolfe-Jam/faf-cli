@@ -116,11 +116,11 @@ export const SIX_WS_INTERVIEW: InterviewQuestion<HumanSlotPath>[] = [
   },
   {
     path: 'human_context.what',
-    question: `What are they building? ${TERSE}`,
+    question: `What is it? ${TERSE}`,
     header: 'What',
     type: 'text',
     required: true,
-    help: 'what they make or do with it',
+    help: 'what the project is, in a line',
   },
   {
     path: 'human_context.why',
