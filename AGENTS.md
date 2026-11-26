@@ -24,6 +24,56 @@ bun run lint    # eslint over src
 bun run check:no-hardcode    # fail if a build-machine path leaked into dist
 ```
 
+## Before a release
+
+`npm publish` runs `prepublishOnly` first:
+
+```bash
+bun run check:engines && bun run build && bun run check:no-hardcode
+```
+
+## CI
+
+The repo's own commands each check runs on a change; everything else is in the workflow files.
+
+`.github/workflows/ci.yml` (on push, pull_request)
+
+```bash
+# job test · ubuntu-latest, macos-latest
+npm run lint
+npm run build
+bun test --timeout=120000 2>&1 | tee test-output.txt
+# 3 other steps in the file
+# job node-compat · ubuntu-latest · node 22.x, 24.x
+npm run build
+# 3 other steps in the file
+# job windows · windows-latest · node 22.x, 24.x
+npm run build
+# 6 other steps in the file
+# job package-managers · ubuntu-latest · manager npm, pnpm, bun
+# step "Build and pack"
+  set -euo pipefail
+  npm run build
+  PACK_DIR=$(mktemp -d)
+  npm pack --pack-destination "$PACK_DIR" >/dev/null
+  echo "TARBALL=$(ls "$PACK_DIR"/faf-cli-*.tgz | head -1)" >> "$GITHUB_ENV"
+  echo "EXPECTED=$(node -p "require('./package.json').version")" >> "$GITHUB_ENV"
+# 3 other steps in the file
+# job taf-recipes · ubuntu-latest · lang rust, maven, gradle, dotnet
+npm run build
+# 4 other steps in the file
+# job taf-workflows · ubuntu-latest
+npm run build
+# 3 other steps in the file
+# job quality · ubuntu-latest
+npm run check:engines
+npm run lint
+npm run format -- --check
+# 1 other step in the file
+```
+
+Also: `.github/workflows/claude-code-review.yml` (on pull_request) · `.github/workflows/claude.yml` (on issue_comment, pull_request_review_comment, issues, pull_request_review) · `.github/workflows/context7-refresh.yml` (on push, workflow_dispatch) · `.github/workflows/homebrew.yml` (on push) · `.github/workflows/publish-npm.yml` (on release, workflow_dispatch) · `.github/workflows/release.yml` (on push, workflow_dispatch) · and 1 more in `.github/workflows/`.
+
 ## Where things live
 
 | Path | Role |

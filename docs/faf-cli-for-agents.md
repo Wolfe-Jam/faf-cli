@@ -42,7 +42,7 @@ xAI ships strong agentic capabilities — native tool use, the Agent Tools API, 
 
 Cursor's Composer and background agents rely on exactly the files FAF authors:
 
-1. **Better context files** — `faf export --agents` produces higher-fidelity `AGENTS.md` / `.cursorrules` than hand-rolled versions, because it scans for real build commands, conventions, guardrails, and Definition of Done.
+1. **Better context files** — `faf export --agents` produces higher-fidelity `AGENTS.md` / `.cursorrules` than hand-rolled versions, because it scans for real build commands, the release gate and CI checks, conventions, guardrails, and Definition of Done.
 2. **Non-destructive, one way** — keep editing the parts you care about; FAF rewrites only its own block, from `project.faf`.
 3. **Live tools over MCP** — wire a FAF MCP server so Cursor agents can call `score`, `validate`, `search`, not just read Markdown.
 4. **Team bootstrap** — new projects/teammates run `bunx faf auto` once and have the files Cursor expects.

@@ -5,6 +5,7 @@ import { fafMetaTag } from './claude.js';
 import { injectFafBlock } from './inject.js';
 import { titleLabel } from './labels.js';
 import { splitCommandNote, commandOnly } from './command-note.js';
+import { ciSection, readRepoInstructions, releaseSection, type RepoInstructions } from './agents-release-ci.js';
 
 /** A value carrying real content — non-empty, not slotignored, non-empty array. */
 const present = (v: unknown): boolean =>
@@ -23,14 +24,14 @@ const HUMAN_PREF = new Set([
  *
  * Deterministic projection from curated TRUTH — facts, not hallucinated prose
  * (Gloaguen: LLM freewrite hurts). Sections: orientation · setup · verify ·
- * map · conventions · three-tier guardrails · DoD · when stuck · security ·
+ * before a release · CI · map · conventions · three-tier guardrails · DoD · when stuck · security ·
  * commit · project facts. AGENTS.md does not copy the six W's: it points to
  * the facts file (project.faf), which holds them. GEMINI.md, .cursorrules,
  * CLAUDE.md and Copilot carry them (labels.ts sixWsFilled).
  *
  * Design: BETTER guide + hand exemplar (faf-cli AGENTS.md) + agents-md-facts.
  */
-export function renderAgentsMd(data: FafData, factsRef = 'project.faf'): string {
+export function renderAgentsMd(data: FafData, factsRef = 'project.faf', repo?: RepoInstructions): string {
   const lines: string[] = [];
   const push = (s = '') => lines.push(s);
 
@@ -115,6 +116,13 @@ export function renderAgentsMd(data: FafData, factsRef = 'project.faf'): string 
     }
     push('```');
     push();
+  }
+
+  // §3b Before a release · §3c CI — what the repo declares (package.json
+  // lifecycle scripts, .github/workflows/), as agents-md-facts writes them (#273).
+  // Only when the repo was read (writeAgentsMd); a bare render has neither.
+  if (repo) {
+    for (const l of [...releaseSection(repo.release), ...ciSection(repo.ci, repo.isGitRepo)]) {push(l);}
   }
 
   // §4 Where things live — a `Path | Role` table when any entry carries a
@@ -238,5 +246,7 @@ export function renderAgentsMd(data: FafData, factsRef = 'project.faf'): string 
 /** Write AGENTS.md — non-destructive: injects/updates the faf block, preserves the rest.
  *  factsRef: the facts file's path relative to `dir` (default `project.faf`). */
 export function writeAgentsMd(dir: string, data: FafData, factsRef = 'project.faf'): void {
-  injectFafBlock(join(dir, FAF_CONTEXT_FILES.agents), renderAgentsMd(data, factsRef));
+  const listed = Object.values(data.commands ?? {}).filter((v) => present(v)).map((v) => commandOnly(v));
+  const repo = readRepoInstructions(dir, listed);
+  injectFafBlock(join(dir, FAF_CONTEXT_FILES.agents), renderAgentsMd(data, factsRef, repo));
 }
