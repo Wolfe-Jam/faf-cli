@@ -13,7 +13,7 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
-import { dirname, join, resolve } from 'path';
+import { basename, dirname, join, resolve } from 'path';
 import * as api from '../../src/index.js';
 import { serializeFaf } from '../../src/interop/faf.js';
 
@@ -57,7 +57,7 @@ describe('BRAKE: the function form of faf git', () => {
     const data = api.authorFafFromRepo(dir, { repoUrl: 'acme/ml-pipe' });
     expect(data.project?.name).toBe('ml-pipe');
     // Without a repo URL the folder name stands.
-    expect(api.authorFafFromRepo(dir).project?.name).toBe(dir.split('/').pop());
+    expect(api.authorFafFromRepo(dir).project?.name).toBe(basename(dir));
   });
 
   test('registryTitle is exported: trimmed, ≤100 chars, else undefined', () => {

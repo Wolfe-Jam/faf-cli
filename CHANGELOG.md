@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **A Cargo workspace takes its name, type and goal from the member that names the project** ([#269](https://github.com/Wolfe-Jam/faf-cli/issues/269)). A workspace root has `[workspace]` and no `[package]`, so `faf auto` used the folder name, the type fallback and no goal suggestion. The member is the one named like the folder, else the only member, else the one the members' common prefix names (axum, axum-core, axum-extra → axum). axum now reads `name: axum` and `type: library  # found: axum/Cargo.toml (workspace member axum): src/lib.rs`, and its `description` is the goal suggestion. A single crate also takes its name from `[package].name`, and a library crate says `src/lib.rs` in `# found:` instead of the fallback. Members outside the project (`..`, a link out) are not read.
 - **`faf auto` runs `init` if there is no project.faf** ([#279](https://github.com/Wolfe-Jam/faf-cli/issues/279)). `init` writes the file and the birth certificate, so a first `auto` prints what `faf init` prints. Before, `auto` repeated init's birth step. `faf init` now also says why it leaves a `.faf-dna` it can't update, as `auto` does.
 
 ## [8.12.0] - 2026-11-24 — The One Source Edition
