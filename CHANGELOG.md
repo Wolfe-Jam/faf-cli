@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **AGENTS.md: Before a release and CI** ([#273](https://github.com/Wolfe-Jam/faf-cli/issues/273)). `faf export --agents` now writes the two sections [agents-md-facts](https://github.com/Wolfe-Jam/agents-md-facts) writes, from what the repo declares: what `npm publish` runs first (`prepublishOnly`, `prepack`, a `release` script, or that nothing does), and the repo's own commands each GitHub Actions check runs on a change, main check first, other workflows by name. Ported onto faf-cli's link-safe reader (a workflow reached by a link out of the project is not read); a parity test runs agents-md-facts 0.2.2 on the same repos and fails if either section differs. Instructions only: no stack, no six W's.
+
 ### Changed
 
 - **A Cargo workspace takes its name, type and goal from the member that names the project** ([#269](https://github.com/Wolfe-Jam/faf-cli/issues/269)). A workspace root has `[workspace]` and no `[package]`, so `faf auto` used the folder name, the type fallback and no goal suggestion. The member is the one named like the folder, else the only member, else the one the members' common prefix names (axum, axum-core, axum-extra → axum). axum now reads `name: axum` and `type: library  # found: axum/Cargo.toml (workspace member axum): src/lib.rs`, and its `description` is the goal suggestion. A single crate also takes its name from `[package].name`, and a library crate says `src/lib.rs` in `# found:` instead of the fallback. Members outside the project (`..`, a link out) are not read.
