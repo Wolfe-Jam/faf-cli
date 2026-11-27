@@ -1,5 +1,5 @@
 <!-- faf: faf-cli | TypeScript | cli | CLI for the .faf format — IANA-registered AI context that versions with your code -->
-<!-- faf: doc=changelog | latest=v8.12.0 | canonical=project.faf | family=FAF -->
+<!-- faf: doc=changelog | latest=v8.13.0 | canonical=project.faf | family=FAF -->
 
 # Changelog
 
@@ -10,9 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.13.0] - 2026-11-26 — The Every Repo Edition
+
+faf auto knows Cargo workspaces and Agent Plugins, and AGENTS.md carries the release gate and the CI checks.
+
 ### Added
 
-- **`agent-plugin`: an app-type for Agent Plugins packages** ([#262](https://github.com/Wolfe-Jam/faf-cli/issues/262)). A `plugin.json` or `mcp.json` with the agent-plugins.org `$schema`, at the root or in `plugins/<name>/`, and no code signal is typed `agent-plugin`. Its 11 slots are the 9 of `documentation` plus the format it ships (`stack.frontend: Agent Plugins`) and where it ships (`stack.hosting`); there is nothing to build, so no build, runtime or CI, and a plugin can reach 100%. faf-one/context-plugin's plugin branch, typed `library` before (67%, never above 92%), reaches ✪ 100%, 11/11.
+- **`agent-plugin`: an app-type for Agent Plugins packages** ([#262](https://github.com/Wolfe-Jam/faf-cli/issues/262)). A `plugin.json` or `mcp.json` with the agent-plugins.org `$schema`, at the root or in `plugins/<name>/`, and no code (no other type's signal, no language manifest, no `tsconfig.json`) is typed `agent-plugin`. Its 11 slots are the 9 of `documentation` plus the format it ships (`stack.frontend: Agent Plugins`) and where it ships (`stack.hosting`); there is nothing to build, so no build, runtime or CI, and a plugin can reach 100%. faf-one/context-plugin's plugin branch, typed `library` before (67%, never above 92%), reaches ✪ 100%, 11/11.
 - **AGENTS.md: Before a release and CI** ([#273](https://github.com/Wolfe-Jam/faf-cli/issues/273)). `faf export --agents` now writes the two sections [agents-md-facts](https://github.com/Wolfe-Jam/agents-md-facts) writes, from what the repo declares: what `npm publish` runs first (`prepublishOnly`, `prepack`, a `release` script, or that nothing does), and the repo's own commands each GitHub Actions check runs on a change, main check first, other workflows by name. Ported onto faf-cli's link-safe reader (a workflow reached by a link out of the project is not read); a parity test runs agents-md-facts 0.2.2 on the same repos and fails if either section differs. Instructions only: no stack, no six W's.
 
 ### Changed
@@ -21,6 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **CLAUDE.md's `@AGENTS.md` import, for library callers and `faf export`** ([#276](https://github.com/Wolfe-Jam/faf-cli/issues/276)). New library function `syncClaudeMd(dir, data, factsRef)` writes faf's CLAUDE.md block exactly as `faf sync` does, import included when an AGENTS.md sits beside it, so a tool writing through the library (the MCP servers) and `faf sync` no longer flip the file between two versions; `faf sync` uses it too. `claudeMdImportsAgents(dir)` says whether faf's block imports AGENTS.md. `faf export --agents` writes only AGENTS.md, as before, and when CLAUDE.md's block doesn't import it yet it says so in one line: `run 'faf sync' so CLAUDE.md imports AGENTS.md`.
 - **A Cargo workspace takes its name, type and goal from the member that names the project** ([#269](https://github.com/Wolfe-Jam/faf-cli/issues/269)). A workspace root has `[workspace]` and no `[package]`, so `faf auto` used the folder name, the type fallback and no goal suggestion. The member is the one named like the folder, else the only member, else the one the members' common prefix names (axum, axum-core, axum-extra → axum). axum now reads `name: axum` and `type: library  # found: axum/Cargo.toml (workspace member axum): src/lib.rs`, and its `description` is the goal suggestion. A single crate also takes its name from `[package].name`, and a library crate says `src/lib.rs` in `# found:` instead of the fallback. Members outside the project (`..`, a link out) are not read. A member's `description = { workspace = true }` takes the workspace's `[workspace.package]` description.
 - **`faf auto` runs `init` if there is no project.faf** ([#279](https://github.com/Wolfe-Jam/faf-cli/issues/279)). `init` writes the file and the birth certificate, so a first `auto` prints what `faf init` prints. Before, `auto` repeated init's birth step. `faf init` now also says why it leaves a `.faf-dna` it can't update, as `auto` does.
+
+### Fixed
+
+- **On Windows, a project with no name of its own is named after its folder**, not the folder's whole path (`faf auto`, `faf git`, `faf bench`). The fallback split the path on `/` only ([#281](https://github.com/Wolfe-Jam/faf-cli/pull/281)).
 
 ## [8.12.0] - 2026-11-24 — The One Source Edition
 
