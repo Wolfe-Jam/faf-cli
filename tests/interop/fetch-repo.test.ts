@@ -8,6 +8,7 @@
  */
 import { describe, test, expect, beforeAll, afterAll } from 'bun:test';
 import { execFileSync } from 'child_process';
+import { createServer, type AddressInfo, type Socket } from 'net';
 import { existsSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { dirname, join, resolve } from 'path';
@@ -91,9 +92,30 @@ describe('ENGINE: fetchRepo', () => {
   });
 
   test('a clone that runs past timeoutMs is stopped: FetchRepoError kind clone', async () => {
-    const err = await fetchRepo('acme/demo', { timeoutMs: 1 }).catch((e: unknown) => e);
-    expect(err).toBeInstanceOf(FetchRepoError);
-    expect((err as FetchRepoError).kind).toBe('clone');
+    // A local git:// server that accepts the connection and never answers, so
+    // the clone can only end by the timeout (#289: a 1 ms timeout against the
+    // tiny local clone raced it, and under load the clone won).
+    const sockets: Socket[] = [];
+    const server = createServer((s) => { sockets.push(s); });
+    await new Promise<void>((r) => server.listen(0, '127.0.0.1', r));
+    const port = (server.address() as AddressInfo).port;
+    process.env.GIT_CONFIG_COUNT = '2';
+    process.env.GIT_CONFIG_KEY_1 = `url.git://127.0.0.1:${port}/.insteadOf`;
+    process.env.GIT_CONFIG_VALUE_1 = 'https://github.com/acme-silent/';
+    try {
+      const started = Date.now();
+      const err = await fetchRepo('acme-silent/demo', { timeoutMs: 400 }).catch((e: unknown) => e);
+      expect(err).toBeInstanceOf(FetchRepoError);
+      expect((err as FetchRepoError).kind).toBe('clone');
+      expect(Date.now() - started).toBeLessThan(10_000);
+      expect(sockets.length).toBeGreaterThan(0); // git did reach the silent server
+    } finally {
+      process.env.GIT_CONFIG_COUNT = '1';
+      delete process.env.GIT_CONFIG_KEY_1;
+      delete process.env.GIT_CONFIG_VALUE_1;
+      for (const s of sockets) {s.destroy();}
+      await new Promise<void>((r) => server.close(() => r()));
+    }
   });
 
   test('a clone that fails: FetchRepoError kind clone with git\'s reason, temp folder removed', async () => {
