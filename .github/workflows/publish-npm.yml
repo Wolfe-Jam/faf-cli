@@ -64,7 +64,7 @@ jobs:
       # prepublishOnly runs check:engines + the bun build + check:no-hardcode.
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: '1.3.13'
+          bun-version: '1.4.4'
 
       - name: Install dependencies
         run: npm ci
