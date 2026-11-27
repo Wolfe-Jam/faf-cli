@@ -68,7 +68,7 @@ commands:
 
 ### Fill the tech slots: `faf auto`
 
-Fills empty tech slots from what the repo shows, then scores. With no `project.faf` it creates one and, when there is no `.faf-dna`, writes the birth certificate at that first score, as `faf init` does. A `.faf-dna` that is there is never replaced. It says `unchanged` when there was nothing new to write.
+Fills empty tech slots from what the repo shows, then scores. With no `project.faf` it runs `faf init` first, which writes the file and, when there is no `.faf-dna`, the birth certificate at that first score. A `.faf-dna` that is there is never replaced. It says `unchanged` when there was nothing new to write.
 
 ```bash
 $ faf auto
@@ -343,7 +343,7 @@ See [SYNC.md](SYNC.md).
 
 Writes agent files from `project.faf`. Bare `faf export` writes AGENTS.md, .cursorrules, GEMINI.md, Copilot instructions and project.html.
 
-AGENTS.md points to the facts file for the six W's (who, what, why, where, when, how), under `## Project facts`. .cursorrules, GEMINI.md and the Copilot instructions carry them, as CLAUDE.md does: one line per fact, and slots the score counts as empty are left out.
+AGENTS.md points to the facts file for the six W's (who, what, why, where, when, how), under `## Project facts`. It also carries `## Before a release` (what `npm publish` runs first, from `package.json`) and `## CI` (the repo's own commands each GitHub Actions check runs on a change, from `.github/workflows/`), as agents-md-facts writes them. When CLAUDE.md's faf block doesn't import AGENTS.md yet, `faf export --agents` says so in one line: `run 'faf sync' so CLAUDE.md imports AGENTS.md`. .cursorrules, GEMINI.md and the Copilot instructions carry them, as CLAUDE.md does: one line per fact, and slots the score counts as empty are left out.
 
 ```bash
 $ faf export --agents

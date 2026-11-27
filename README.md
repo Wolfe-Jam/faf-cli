@@ -109,10 +109,10 @@ Run `faf` with no arguments:
 |---------|--------------|
 | `faf init` | Create `project.faf` from your local project; suggest the goal and six W's |
 | `faf git <url>` | Instant `.faf` from any GitHub repo (a shallow clone) |
-| `faf auto` | Detect the stack, fill the slots it detects, score; suggest the goal and six W's |
+| `faf auto` | Detect the stack, fill the slots it detects, score; suggest the goal and six W's (runs `faf init` first if there is no `project.faf`) |
 | `faf go` | Fill the human slots: each suggestion in gray, Tab to edit, Enter to confirm (`--github`: also the repo's GitHub description) |
 | `faf score` | Check AI-readiness (0–100%) |
-| `faf export` | Author `AGENTS.md`, `GEMINI.md`, `.cursorrules` and the Copilot instructions |
+| `faf export` | Author `AGENTS.md` (with the release gate and CI checks), `GEMINI.md`, `.cursorrules` and the Copilot instructions |
 | `faf sync` | `.faf` → `CLAUDE.md`, one way (faf's block only); imports `AGENTS.md` when one sits beside it |
 | `faf memory` | `.fafm` soul ops — convert Claude memory, etch, recall, ls, show |
 | `faf diff` / `log` | Semantic context diff + score timeline across git history |
@@ -140,16 +140,16 @@ faf memory etch "a durable fact" --id my-fact
 faf memory show
 ```
 
-### What's New in v8.12.0 — The One Source Edition
+### What's New in v8.13.0 — The Every Repo Edition
 
-**Every agent file keeps to its lane: project.faf holds the facts, AGENTS.md instructs, and CLAUDE.md imports it.**
+**faf auto knows Cargo workspaces and Agent Plugins, and AGENTS.md carries the release gate and the CI checks.**
 
-- **AGENTS.md has no Stack section.** The stack is a fact in `project.faf`, and AGENTS.md points there; AGENTS.md keeps to instructions (setup, layout, conventions, guardrails, done, commits).
-- **CLAUDE.md imports AGENTS.md.** By default, Claude Code reads AGENTS.md only when there is no CLAUDE.md. When both exist, `faf sync` ends faf's CLAUDE.md block with `@AGENTS.md`, so Claude Code gets the build, test and repo rules too.
-- **`faf go --github`** suggests the goal from the repo's GitHub description when the README has none. Nothing is written until you confirm it.
-- **`faf auto` writes the birth certificate on a first setup**, as `faf init` does. A `.faf-dna` that is there is never replaced.
-- **The `what` question is "What is it?"** (was "What are they building?").
-- **`faf-cli/fetch`** for tools that author from a URL: `fetchRepo(url)` shallow-clones into a temp folder (no shell, links not followed, never waits for a login) and returns `{ dir, repoUrl, cleanup() }`. The main `faf-cli` import runs no git.
+- **Cargo workspaces.** `faf auto` reads the member crate that names the project (named like the folder, the only member, or the members' common prefix): its name, its crate kind for the type, and its `description` as the goal suggestion. On axum: `name: axum`, `type: library  # found: axum/Cargo.toml (workspace member axum): src/lib.rs`.
+- **`agent-plugin`, a new app-type** for Agent Plugins packages (`plugin.json` / `mcp.json` with the agent-plugins.org `$schema`, no code). 11 slots: the project, the six W's, the format and where it ships. Nothing to build, so a plugin can reach ✪ 100%.
+- **AGENTS.md: Before a release and CI.** What `npm publish` runs first, and the repo's own commands each GitHub Actions check runs on a change, read from `package.json` and `.github/workflows/`, never guessed. The same sections [agents-md-facts](https://github.com/Wolfe-Jam/agents-md-facts) writes; a test checks they match.
+- **`faf auto` runs `init` if there is no project.faf**, so a first `auto` prints what `faf init` prints, birth certificate included.
+- **CLAUDE.md's `@AGENTS.md` import everywhere:** `syncClaudeMd()` gives tools that write through the library (the MCP servers) the block `faf sync` writes, and `faf export --agents` says in one line when CLAUDE.md doesn't import AGENTS.md yet.
+- **Windows:** a project with no name of its own is named after its folder, not its whole path.
 
 Earlier editions: [CHANGELOG.md](./CHANGELOG.md) · [Releases](https://github.com/Wolfe-Jam/faf-cli/releases)
 
@@ -210,6 +210,7 @@ For a specific agent: [Grok, xAI & Cursor 👀](docs/faf-cli-for-agents.md) · [
 
 Pivotal releases — full history in [CHANGELOG.md](./CHANGELOG.md):
 
+- **v8.13 — Every Repo** — Cargo workspaces and Agent Plugins; AGENTS.md carries the release gate and the CI checks.
 - **v8.12 — One Source** — every agent file keeps to its lane; CLAUDE.md imports AGENTS.md.
 - **v8.11 — Project Facts** — the six W's reach every agent file; AGENTS.md points to project.faf.
 - **v8.10 — Human Slots** — AI suggests the goal and six W's; you confirm each one in `faf go`.
