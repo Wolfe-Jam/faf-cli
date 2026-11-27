@@ -4,7 +4,7 @@ agent:
   displayName: faf-cli
   id: urn:air:faf.one:agent:faf-cli
   version: 8.13.0
-  description: "CLI for the IANA-registered .faf format: it detects a repo's stack into project.faf, scores it, writes AGENTS.md, GEMINI.md and .cursorrules from it, and CLAUDE.md with faf sync."
+  description: "CLI for the IANA-registered .faf format: it detects a repo's stack into project.faf (Cargo workspaces and Agent Plugins included), scores it, writes AGENTS.md (with the release gate and CI checks), GEMINI.md and .cursorrules from it, and CLAUDE.md with faf sync."
   homepage: https://faf.one
 capabilities:
   - name: init
@@ -14,7 +14,7 @@ capabilities:
       - init
   - name: auto
     type: tool
-    description: Fill every tech slot from the repo, then score
+    description: Fill every tech slot from the repo, then score (runs init first if there is no project.faf)
     tags:
       - auto
   - name: score
