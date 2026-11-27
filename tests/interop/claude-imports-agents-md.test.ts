@@ -4,7 +4,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import { execSync } from 'child_process';
 import { writeFaf } from '../../src/interop/faf.js';
-import { renderClaudeMd, agentsMdBeside } from '../../src/interop/claude.js';
+import { renderClaudeMd, agentsMdBeside, syncClaudeMd, claudeMdImportsAgents } from '../../src/interop/claude.js';
 import { removeTemp, spawnLimit } from '../helpers/windows-timing.js';
 
 /**
@@ -75,5 +75,37 @@ describe('ENGINE: CLAUDE.md imports AGENTS.md (#266)', () => {
     // a second sync keeps exactly one import
     run('sync');
     expect(readFileSync(join(dir, 'CLAUDE.md'), 'utf-8').match(/^@AGENTS\.md$/gm)).toHaveLength(1);
+  });
+
+  test('library: syncClaudeMd writes the block faf sync writes — the import when AGENTS.md is beside it (#276)', () => {
+    expect(claudeMdImportsAgents(dir)).toBeNull(); // no CLAUDE.md
+    syncClaudeMd(dir, DATA);
+    expect(claudeMdImportsAgents(dir)).toBe(false);
+    writeFileSync(join(dir, 'AGENTS.md'), '# AGENTS.md\n');
+    syncClaudeMd(dir, DATA);
+    expect(claudeMdImportsAgents(dir)).toBe(true);
+    const md = readFileSync(join(dir, 'CLAUDE.md'), 'utf-8');
+    expect(md.match(/^@AGENTS\.md$/gm)).toHaveLength(1);
+    // same bytes as the CLI's sync, timestamp line aside
+    const cli = join(__dirname, '../../src/cli.ts');
+    writeFaf(join(dir, 'project.faf'), DATA);
+    execSync(`bun ${cli} sync`, { cwd: dir, encoding: 'utf-8', timeout: spawnLimit(30000) });
+    const strip = (t: string) => t.replace(/STATUS: SYNC ACTIVE — .*\*/, '');
+    expect(strip(readFileSync(join(dir, 'CLAUDE.md'), 'utf-8'))).toBe(strip(md));
+  });
+
+  test('claudeMdImportsAgents: null for a CLAUDE.md with no faf block', () => {
+    writeFileSync(join(dir, 'CLAUDE.md'), '# mine\n\n@AGENTS.md\n');
+    expect(claudeMdImportsAgents(dir)).toBeNull();
+  });
+
+  test('faf export --agents: one line when CLAUDE.md does not import AGENTS.md yet; none after faf sync (#276)', () => {
+    const cli = join(__dirname, '../../src/cli.ts');
+    const run = (cmd: string) => execSync(`bun ${cli} ${cmd}`, { cwd: dir, encoding: 'utf-8', timeout: spawnLimit(30000), env: { ...process.env, NO_COLOR: '1' } });
+    writeFaf(join(dir, 'project.faf'), DATA);
+    run('sync');
+    expect(run('export --agents')).toContain("run 'faf sync' so CLAUDE.md imports AGENTS.md");
+    run('sync');
+    expect(run('export --agents')).not.toContain('faf sync');
   });
 });

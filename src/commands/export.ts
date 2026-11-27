@@ -1,6 +1,7 @@
 import { join, resolve } from 'path';
 import { factsRefFor, findFafFile, readFaf, readFafRaw, withKernel } from '../interop/faf.js';
 import { writeAgentsMd } from '../interop/agents.js';
+import { agentsMdBeside, claudeMdImportsAgents } from '../interop/claude.js';
 import { enrichFromRepo } from '../detect/enrich.js';
 import { writeCursorrules } from '../interop/cursorrules.js';
 import { writeGeminiMd } from '../interop/gemini.js';
@@ -93,6 +94,11 @@ export function exportCommand(options: ExportOptions = {}): void {
     // Enrich with facts detected from the repo (commands/key-files/secrets) so a
     // lean or stale .faf still yields a complete AGENTS.md. Hand-authored wins.
     run(() => injected(dir, 'AGENTS.md', () => writeAgentsMd(dir, enrichFromRepo(dir, data), factsRef)));
+    // faf's CLAUDE.md block imports AGENTS.md (#266), but export writes only
+    // what it was asked for: when the block doesn't import it yet, say so (#276).
+    if (claudeMdImportsAgents(dir) === false && agentsMdBeside(dir)) {
+      console.log(dim("  run 'faf sync' so CLAUDE.md imports AGENTS.md"));
+    }
   }
 
   if (exportAll || options.cursor) {
