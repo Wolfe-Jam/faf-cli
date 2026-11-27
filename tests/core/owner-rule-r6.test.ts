@@ -301,11 +301,13 @@ describe('BRAKE R6-5: faf hooks --install then --uninstall leaves your hook byte
       const { d, home, hook } = repo();
       writeFileSync(hook, body);
       chmodSync(hook, 0o755);
-      expect(run(d, ['hooks', '--install'], { HOME: home }).status).toBe(0);
+      // A failed run shows its stderr in the diff (#289: an exit 2 seen once
+      // under load, cause not caught).
+      const ok = (r: Run) => ({ status: r.status, err: r.status === 0 ? '' : r.err });
+      expect(ok(run(d, ['hooks', '--install'], { HOME: home }))).toEqual({ status: 0, err: '' });
       expect(read(hook)).toContain('# >>> faf >>>');
-      expect(run(d, ['hooks', '--install'], { HOME: home }).status).toBe(0); // updates faf's section in place
-      const u = run(d, ['hooks', '--uninstall'], { HOME: home });
-      expect(u.status).toBe(0);
+      expect(ok(run(d, ['hooks', '--install'], { HOME: home }))).toEqual({ status: 0, err: '' }); // updates faf's section in place
+      expect(ok(run(d, ['hooks', '--uninstall'], { HOME: home }))).toEqual({ status: 0, err: '' });
       expect(read(hook)).toBe(body);
     });
   }
