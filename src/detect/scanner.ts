@@ -799,7 +799,9 @@ export function detectProjectTypeWithRationale(dir: string): ProjectTypeDetectio
 
   // ─── 20c. agent-plugin — Agent Plugins manifests and no code signal above
   //          (#262). Before skills: the plugin is the package. ───────────────
-  const pluginManifests = agentPluginManifests(dir);
+  // A language manifest (pyproject, Cargo, package.json with dependencies…) or
+  // a tsconfig means code: the manifests ship with it, the repo isn't only a plugin.
+  const pluginManifests = hasLanguageManifest(dir) || repoExists(dir, 'tsconfig.json') ? [] : agentPluginManifests(dir);
   if (pluginManifests.length) {
     found.push(`Agent Plugins ${pluginManifests.join(', ')}`);
     return { type: 'agent-plugin', found };
