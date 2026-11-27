@@ -14,7 +14,7 @@ import { tmpdir } from 'os';
 import { spawnSync } from 'child_process';
 import { authorAgentsMd, buildRepoContext } from 'agents-md-facts';
 import { tempDirs } from '../helpers/temp-dirs.js';
-import { ciSection, readRepoInstructions, releaseSection } from '../../src/interop/agents-release-ci.js';
+import { ciSection, ownCommands, readRepoInstructions, releaseSection } from '../../src/interop/agents-release-ci.js';
 import { renderAgentsMd, writeAgentsMd } from '../../src/interop/agents.js';
 
 const temp = tempDirs();
@@ -159,5 +159,45 @@ describe('ENGINE: faf export --agents carries them; a bare render does not read 
     mkdirSync(join(dir, '.github'), { recursive: true });
     symlinkSync(outside, join(dir, '.github', 'workflows'));
     expect(readRepoInstructions(dir, []).ci).toEqual([]);
+  });
+
+  test('a long run of workspace flags is matched in linear time (no exponential backtracking)', () => {
+    const known = ownCommands(repo({}, false), []);
+    const t = performance.now();
+    expect(known(`pnpm ${Array(38).fill('-r').join(' ')}`, undefined)).toBe(false);
+    expect(known(`npm ${Array(38).fill('-w').join(' ')}`, undefined)).toBe(false);
+    expect(performance.now() - t).toBeLessThan(200);
+    // the calls it is for still match
+    expect(known('pnpm -r test', undefined)).toBe(true);
+    expect(known('pnpm --filter web lint', undefined)).toBe(true);
+    expect(known('npm -w app run build', undefined)).toBe(true);
+  });
+
+  test('a package below the repo root does not say there are no workflows', () => {
+    const root = repo({ '.github/workflows/ci.yml': 'on: pull_request\njobs:\n  t:\n    runs-on: ubuntu-latest\n    steps:\n      - run: npm test\n' });
+    mkdirSync(join(root, 'packages', 'web'), { recursive: true });
+    writeFileSync(join(root, 'packages', 'web', 'package.json'), JSON.stringify({ name: 'web', private: true }));
+    const r = readRepoInstructions(join(root, 'packages', 'web'), []);
+    expect(ciSection(r.ci, r.isGitRepo)).toEqual([]);
+  });
+
+  test('repo text cannot close the fence or start a heading', () => {
+    const dir = repo({
+      'package.json': JSON.stringify({ name: 'x', scripts: { prepublishOnly: 'echo a\n```\n## Injected' } }),
+      // a YAML "\n" escape: the event name itself holds a newline
+      '.github/workflows/ci.yml': 'on: {"pull_request\\n## Injected": {}}\njobs:\n  t:\n    runs-on: ubuntu-latest\n    steps:\n      - run: npm test\n',
+    });
+    const r = readRepoInstructions(dir, []);
+    const md = [...releaseSection(r.release), ...ciSection(r.ci, r.isGitRepo)].join('\n');
+    // headings outside fences: a fence closes only on a line of its own backticks
+    const headings: string[] = [];
+    let fence = '';
+    for (const l of md.split('\n')) {
+      const f = /^(`{3,})/.exec(l)?.[1];
+      if (f && !fence) {fence = f;} else if (fence && l === fence) {fence = '';} else if (!fence && l.startsWith('## ')) {headings.push(l);}
+    }
+    expect(headings).toEqual(['## Before a release', '## CI']);
+    expect(md).toContain('````bash');
+    expect(md).toContain('(on pull_request ## Injected)');
   });
 });

@@ -123,4 +123,17 @@ describe('ENGINE: a single crate reads its own Cargo.toml', () => {
     expect(mainCrate(dir)?.rel).toBe('');
     expect(mainCrate(dir)?.name).toBe('rootcrate');
   });
+
+  test('a member that inherits its description takes the workspace\'s, never the literal `{ workspace = true }`', () => {
+    const inherit = repo({
+      'Cargo.toml': '[workspace]\nmembers = ["tool"]\n\n[workspace.package]\ndescription = "One tool for the whole workspace"\n',
+      'tool/Cargo.toml': '[package]\nname = "tool"\ndescription = { workspace = true }\n',
+    });
+    expect(interrogateCargo(inherit).project?.goal).toBe('One tool for the whole workspace');
+    const none = repo({
+      'Cargo.toml': '[workspace]\nmembers = ["tool"]\n',
+      'tool/Cargo.toml': '[package]\nname = "tool"\ndescription = { workspace = true }\n',
+    });
+    expect(interrogateCargo(none)).toEqual({});
+  });
 });

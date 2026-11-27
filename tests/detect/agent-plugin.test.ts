@@ -73,4 +73,15 @@ describe('ENGINE: the agent-plugin slots', () => {
     expect(used).toContain('stack.hosting');
     for (const p of ['stack.build', 'stack.runtime', 'stack.cicd']) {expect(used).not.toContain(p);}
   });
+
+  test('a language manifest means code: a Python or TypeScript project that ships a manifest keeps its own type', () => {
+    expect(detectProjectTypeWithRationale(repo({ 'pyproject.toml': '[project]\nname = "p"\n', 'plugins/p/plugin.json': PLUGIN })).type).not.toBe('agent-plugin');
+    expect(detectProjectTypeWithRationale(repo({ 'tsconfig.json': '{}', 'plugin.json': PLUGIN })).type).not.toBe('agent-plugin');
+  });
+
+  test('a plugin that also carries a SKILL.md: the format is Agent Plugins, as the type says', () => {
+    const dir = repo({ 'plugins/faf/plugin.json': PLUGIN, 'skills/x/SKILL.md': '---\nname: x\ndescription: Does x. Use when testing.\n---\n' });
+    const data = detectStack(dir) as { project: { type: string }; stack: Record<string, string> };
+    if (data.project.type === 'agent-plugin') {expect(data.stack.frontend).toBe('Agent Plugins');}
+  });
 });

@@ -11,7 +11,7 @@
  */
 
 import { existsSync } from 'fs';
-import { dirname, join, resolve } from 'path';
+import { join, resolve } from 'path';
 import { parse } from 'yaml';
 import { readRepoDir, readRepoFile, repoExists } from '../core/safe-write.js';
 
@@ -136,11 +136,12 @@ const cleanDir = (s: string | null): string | null => {
   return d && d !== '.' ? d : null;
 };
 
+/** The events, each on one line (a key with a newline can't start a heading). */
 function triggers(on: unknown): string[] {
-  if (typeof on === 'string') {return [on];}
-  if (Array.isArray(on)) {return on.map(scalar).filter((s): s is string => s !== null);}
-  if (isObj(on)) {return Object.keys(on);}
-  return [];
+  const list = typeof on === 'string' ? [on]
+    : Array.isArray(on) ? on.map(scalar).filter((s): s is string => s !== null)
+      : isObj(on) ? Object.keys(on) : [];
+  return list.map((e) => oneLine(e) ?? '').filter(Boolean);
 }
 
 function asList(v: unknown): unknown[] {
@@ -280,7 +281,10 @@ const BUILTIN = new Set(('add audit bin cache config create dedupe deploy dlx en
 /** Check tools a Node repo runs through npx / bunx / pnpm exec, or directly. */
 const NODE_CHECKS = /^(?:(?:npx|bunx|pnpm exec|pnpm dlx|yarn)(?:\s+-\S+)*\s+)?(?:tsc|eslint|vitest|jest|playwright test|prettier --check|biome (?:check|ci|lint))(?:\s|$)/;
 
-const WORKSPACE_CALL = /^(?:pnpm(?:\s+(?:-r|--recursive|(?:--filter|-F)\s+\S+|-[\w-]+))+|npm(?:\s+(?:-ws|--workspaces|(?:-w|--workspace)\s+\S+|-[\w-]+))+(?:\s+run)?|yarn\s+workspace\s+\S+|yarn\s+workspaces\s+foreach(?:\s+-\S+)*\s+run)\s+([^\s-]\S*)/;
+// Each flag matches one way only (-r, --recursive, -ws are plain flags; a
+// --filter / -w value never starts with '-'), so a long run of flags can't
+// backtrack exponentially. agents-md-facts 0.2.2 has the overlapping form.
+const WORKSPACE_CALL = /^(?:pnpm(?:\s+(?:(?:--filter|-F)\s+[^\s-]\S*|-[\w-]+))+|npm(?:\s+(?:(?:-w|--workspace)\s+[^\s-]\S*|-[\w-]+))+(?:\s+run)?|yarn\s+workspace\s+\S+|yarn\s+workspaces\s+foreach(?:\s+-\S+)*\s+run)\s+([^\s-]\S*)/;
 const WORKSPACE_FLAG = /(?:-r|--recursive|--filter|-F|-ws|--workspaces|-w|--workspace|workspace)\b/;
 const SCRIPT_CALL = /^(npm|pnpm|yarn|bun)(?:\s+-[\w-]+)*\s+(?:(run|run-script)(?:\s+-[\w-]+)*\s+)?([^\s-]\S*)/;
 
@@ -419,13 +423,14 @@ export function releaseSection(release: DetectedRelease | null): string[] {
   }
   if (!release?.scripts.length) {return [];}
   const names = release.scripts.map((r) => `\`${r.name}\``).join(', then ');
-  const out = ['## Before a release', '', release.kind === 'publish' ? `\`npm publish\` runs ${names} first:` : 'The `release` script runs:', '', '```bash'];
+  const body: string[] = [];
   for (const r of release.scripts) {
-    if (release.scripts.length > 1) {out.push(`# ${r.name}`);}
-    out.push(r.command);
+    if (release.scripts.length > 1) {body.push(`# ${r.name}`);}
+    body.push(...r.command.split(/\r?\n/));
   }
-  out.push('```', '');
-  return out;
+  // A fence longer than any backtick run in the scripts, so repo text can't close it.
+  const fence = fenceFor(body);
+  return ['## Before a release', '', release.kind === 'publish' ? `\`npm publish\` runs ${names} first:` : 'The `release` script runs:', '', `${fence}bash`, ...body, fence, ''];
 }
 
 const label = (wf: DetectedWorkflow): string =>
@@ -468,15 +473,10 @@ export interface RepoInstructions {
   isGitRepo: boolean;
 }
 
-/** In a git work tree: a `.git` here or in a folder above. */
-function inGitRepo(dir: string): boolean {
-  let d = resolve(dir);
-  for (;;) {
-    if (existsSync(join(d, '.git'))) {return true;}
-    const up = dirname(d);
-    if (up === d) {return false;}
-    d = up;
-  }
+/** The root of a git work tree: `.git` is here. Workflows are read here only,
+ *  so a package below the root never says there are none. */
+function isRepoRoot(dir: string): boolean {
+  return existsSync(join(resolve(dir), '.git'));
 }
 
 /** Read the release gate and CI for `dir`. `listed`: the commands the file already lists. */
@@ -484,6 +484,6 @@ export function readRepoInstructions(dir: string, listed: string[]): RepoInstruc
   return {
     release: detectRelease(readPkg(dir)),
     ci: detectCi(dir, ownCommands(dir, listed)),
-    isGitRepo: inGitRepo(dir),
+    isGitRepo: isRepoRoot(dir),
   };
 }

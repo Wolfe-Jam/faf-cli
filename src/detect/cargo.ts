@@ -42,7 +42,8 @@ function tableText(content: string, table: string): string | null {
   return seen ? out.join('\n') : null;
 }
 
-/** One string field of a TOML table: `field = "value"` on one line. */
+/** One string field of a TOML table: `field = "value"` on one line; null for
+ *  a value that isn't a string (`description = { workspace = true }`). */
 export function cargoField(content: string, field: string, table = 'package'): string | null {
   const text = tableText(content, table);
   if (text === null) {return null;}
@@ -50,8 +51,10 @@ export function cargoField(content: string, field: string, table = 'package'): s
     const m = line.trim().match(new RegExp(`^${field}\\s*=\\s*(.+)$`));
     if (!m) {continue;}
     const value = m[1].trim().replace(/\s*#.*$/, '').trim();
+    // A string value only: `{ workspace = true }` (inherited) or any other
+    // table, array or number is not the crate's own text.
     const quoted = value.match(/^"((?:[^"\\]|\\.)*)"$/) || value.match(/^'((?:[^'\\]|\\.)*)'$/);
-    return quoted ? quoted[1] : value;
+    return quoted ? quoted[1] : null;
   }
   return null;
 }

@@ -6,6 +6,7 @@
  * `project.goal` (overarching/use-case framing).
  */
 
+import { readRepoFile } from '../core/safe-write.js';
 import { cargoField, mainCrate } from '../detect/cargo.js';
 import { type ExtractedContext, isValidExtraction } from './types.js';
 
@@ -16,7 +17,12 @@ export function interrogateCargo(dir: string): ExtractedContext {
   const crate = mainCrate(dir);
   if (crate === null) {return {};}
 
-  const description = cargoField(crate.content, 'description');
+  // `description = { workspace = true }`: the member inherits the root's
+  // `[workspace.package]` description.
+  const inherits = crate.rel !== '' && /^\s*description\s*=\s*\{\s*workspace\s*=\s*true\s*\}/m.test(crate.content);
+  const description = inherits
+    ? cargoField(readRepoFile(dir, 'Cargo.toml') ?? '', 'description', 'workspace.package')
+    : cargoField(crate.content, 'description');
   if (description && isValidExtraction(description)) {
     return { project: { goal: description } };
   }
