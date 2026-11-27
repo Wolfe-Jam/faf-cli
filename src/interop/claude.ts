@@ -1,7 +1,7 @@
 import { existsSync, realpathSync, statSync } from 'fs';
 import { join } from 'path';
 import type { FafData } from '../core/types.js';
-import { injectFafBlock } from './inject.js';
+import { FAF_END, FAF_START, injectFafBlock } from './inject.js';
 import { sixWsFilled, slotLabel } from './labels.js';
 import { FAF_CONTEXT_FILES, readUtf8, resolveInside } from '../core/safe-write.js';
 
@@ -22,6 +22,30 @@ export function readClaudeMd(dir: string): string | null {
 /** Write CLAUDE.md — non-destructive: injects/updates the faf block, preserves the rest. */
 export function writeClaudeMd(dir: string, content: string): void {
   injectFafBlock(join(dir, CLAUDE_MD), content);
+}
+
+/** Write faf's CLAUDE.md block for `dir` exactly as `faf sync` does: with the
+ *  `@AGENTS.md` import when an AGENTS.md sits beside it (#266, #276). The one
+ *  path for the CLI and for library callers (the MCP servers), so the file
+ *  doesn't flip between the two. */
+export function syncClaudeMd(dir: string, data: FafData, factsRef = 'project.faf'): void {
+  writeClaudeMd(dir, renderClaudeMd(data, factsRef, { importAgentsMd: agentsMdBeside(dir) }));
+}
+
+/** Whether faf's CLAUDE.md block in `dir` imports AGENTS.md: null when there
+ *  is no CLAUDE.md, no faf block, or the file can't be read. */
+export function claudeMdImportsAgents(dir: string): boolean | null {
+  let text: string | null;
+  try {
+    text = readClaudeMd(dir);
+  } catch {
+    return null;
+  }
+  if (!text) {return null;}
+  const start = text.indexOf(FAF_START);
+  const end = start < 0 ? -1 : text.indexOf(FAF_END, start);
+  if (end < 0) {return null;}
+  return /^@AGENTS\.md\s*$/m.test(text.slice(start, end));
 }
 
 /** Get mtime of CLAUDE.md */

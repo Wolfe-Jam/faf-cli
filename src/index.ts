@@ -181,7 +181,7 @@ export { renderAgentsMd, writeAgentsMd } from './interop/agents.js';
 export { renderGeminiMd, writeGeminiMd } from './interop/gemini.js';
 export { renderCursorrules, writeCursorrules } from './interop/cursorrules.js';
 export { renderCopilotInstructions, writeCopilotInstructions } from './interop/copilot-instructions.js';
-export { renderClaudeMd, writeClaudeMd, readClaudeMd, parseClaudeMd, fafMetaTag, agentsMdBeside } from './interop/claude.js';
+export { renderClaudeMd, writeClaudeMd, syncClaudeMd, claudeMdImportsAgents, readClaudeMd, parseClaudeMd, fafMetaTag, agentsMdBeside } from './interop/claude.js';
 export type { ClaudeMdOptions } from './interop/claude.js';
 export type { FafMetaOpts } from './interop/claude.js';
 export { injectFafBlock, findFafBlock, FAF_START, FAF_END } from './interop/inject.js';
