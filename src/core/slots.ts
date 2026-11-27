@@ -186,6 +186,9 @@ const FRAMEWORK_LEAVES_OUT: ReadonlySet<string> = new Set([
 export const APP_TYPE_ADDS: Readonly<Record<string, ReadonlySet<string>>> = {
   skills: new Set(['stack.frontend']),
   'skills-plugin': new Set(['stack.frontend', 'stack.runtime']),
+  // agent-plugin (#262): the format it ships (Agent Plugins) and where it
+  // ships. Nothing is built, so no build, runtime or CI: 9 + 2 = 11.
+  'agent-plugin': new Set(['stack.frontend', 'stack.hosting']),
 };
 
 /** Whether the app-type `type` uses `slot` — the one rule for which slots
@@ -199,7 +202,7 @@ export function appTypeUsesSlot(type: unknown, slot: SlotDef): boolean | null {
   return !(type === 'framework' && FRAMEWORK_LEAVES_OUT.has(slot.path));
 }
 
-/** App-type to active category mapping. The canonical 26-type ladder —
+/** App-type to active category mapping. The canonical 27-type ladder —
  *  detectable apps + `encyclopedia` (curated knowledge) + `intent` (seed).
  *  About is NOT an app_type — it is a repo role (`about.represents`).
  *  (See v6.6.md doctrine memory + fafipedia-vs-grokipedia-architecture.)
@@ -231,6 +234,11 @@ export const APP_TYPE_CATEGORIES: Record<string, SlotCategory[]> = {
   // pipeline. The 9 slots of documentation, plus framework (APP_TYPE_ADDS):
   // 10 slots.
   skills: ['project', 'human'],
+  // agent-plugin: an Agent Plugins package (plugin.json / mcp.json with the
+  // agent-plugins.org $schema) — manifests that point at a server, nothing
+  // built. The 9 slots of documentation, plus framework and hosting
+  // (APP_TYPE_ADDS): 11 slots.
+  'agent-plugin': ['project', 'human'],
 
   // 12 slots — project + human + universal (build/ci/hosting matters)
   cli: ['project', 'human', 'universal'],

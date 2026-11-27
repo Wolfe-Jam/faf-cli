@@ -20,6 +20,7 @@ import {
   detectCommands,
   detectTechStack,
   detectSkillsFormat,
+  detectAgentPluginFormat,
   viteLabel,
 } from './scanner.js';
 
@@ -91,7 +92,7 @@ export function detectStackWithFacts(dir: string): { data: FafData; facts: Recor
     // Detected values (Svelte-aware overrides applied inline)
     switch (field) {
       // The skills app-types name their framework here: the skills format
-      case 'frontend': facts[field] = frontendFw?.name ?? detectSkillsFormat(dir); break;
+      case 'frontend': facts[field] = frontendFw?.name ?? (detectSkillsFormat(dir) || detectAgentPluginFormat(dir)); break;
       case 'css_framework': facts[field] = cssFw?.name ?? ''; break;
       case 'ui_library': facts[field] = uiFw?.name ?? ''; break;
       case 'state_management':
