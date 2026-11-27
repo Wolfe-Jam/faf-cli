@@ -36,6 +36,7 @@ Work surfaces use ✪ for Trophy (not the social emoji 🏆). Sub-Trophy tiers u
 |---|---|---|
 | `documentation` · `intent` · `encyclopedia` | project, human | 9 |
 | `skills` | project, human + framework | 10 |
+| `agent-plugin` | project, human + framework, hosting | 11 |
 | `cli` · `library` · `sdk` · `wasm` · `html` · `server-card` | project, human, universal | 12 |
 | `skills-plugin` | project, human, universal + framework, runtime | 14 |
 | `frontend` · `website` · `mobile` · `app` · `extension` | project, frontend, human, universal | 16 |

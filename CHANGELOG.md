@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`agent-plugin`: an app-type for Agent Plugins packages** ([#262](https://github.com/Wolfe-Jam/faf-cli/issues/262)). A `plugin.json` or `mcp.json` with the agent-plugins.org `$schema`, at the root or in `plugins/<name>/`, and no code signal is typed `agent-plugin`. Its 11 slots are the 9 of `documentation` plus the format it ships (`stack.frontend: Agent Plugins`) and where it ships (`stack.hosting`); there is nothing to build, so no build, runtime or CI, and a plugin can reach 100%. faf-one/context-plugin's plugin branch, typed `library` before (67%, never above 92%), reaches ✪ 100%, 11/11.
 - **AGENTS.md: Before a release and CI** ([#273](https://github.com/Wolfe-Jam/faf-cli/issues/273)). `faf export --agents` now writes the two sections [agents-md-facts](https://github.com/Wolfe-Jam/agents-md-facts) writes, from what the repo declares: what `npm publish` runs first (`prepublishOnly`, `prepack`, a `release` script, or that nothing does), and the repo's own commands each GitHub Actions check runs on a change, main check first, other workflows by name. Ported onto faf-cli's link-safe reader (a workflow reached by a link out of the project is not read); a parity test runs agents-md-facts 0.2.2 on the same repos and fails if either section differs. Instructions only: no stack, no six W's.
 
 ### Changed

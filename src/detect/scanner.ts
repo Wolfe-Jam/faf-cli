@@ -501,6 +501,33 @@ function detectSkillsSignal(dir: string): ProjectTypeDetection | null {
   return { type: 'skills', found };
 }
 
+/** An Agent Plugins schema URL, as the spec's manifests declare it. */
+const AGENT_PLUGINS_SCHEMA = /^https:\/\/agent-plugins\.org\/schemas\/[^/]+\/(plugin|mcp)\.schema\.json$/;
+
+/** The Agent Plugins manifests in `dir` (#262): a `plugin.json` or `mcp.json`
+ *  whose `$schema` is agent-plugins.org's, at the root or in `plugins/<name>/`.
+ *  Declared, not judged: a manifest without that `$schema` is not counted. */
+function agentPluginManifests(dir: string): string[] {
+  const folders = ['', ...(readRepoDir(dir, 'plugins') ?? []).filter(e => e.isDirectory()).map(e => `plugins/${e.name}/`).sort()];
+  const out: string[] = [];
+  for (const folder of folders) {
+    for (const file of ['plugin.json', 'mcp.json']) {
+      const text = readRepoFile(dir, `${folder}${file}`);
+      if (text === null) {continue;}
+      try {
+        const schema = (JSON.parse(text) as { $schema?: unknown }).$schema;
+        if (typeof schema === 'string' && AGENT_PLUGINS_SCHEMA.test(schema)) {out.push(`${folder}${file}`);}
+      } catch { /* not JSON: not a manifest */ }
+    }
+  }
+  return out;
+}
+
+/** The format an Agent Plugins package ships — its framework slot. */
+export function detectAgentPluginFormat(dir: string): string {
+  return agentPluginManifests(dir).length ? 'Agent Plugins' : '';
+}
+
 /** The skills format a repo ships — the framework slot of the skills
  *  app-types: `Claude Code plugin` with a plugin manifest, `Agent Skills`
  *  for SKILL.md files alone, `''` when it ships none. */
@@ -768,6 +795,14 @@ export function detectProjectTypeWithRationale(dir: string): ProjectTypeDetectio
       found.push(`${crateSource(crate)}: ${lib}`);
       return { type: 'library', found };
     }
+  }
+
+  // ─── 20c. agent-plugin — Agent Plugins manifests and no code signal above
+  //          (#262). Before skills: the plugin is the package. ───────────────
+  const pluginManifests = agentPluginManifests(dir);
+  if (pluginManifests.length) {
+    found.push(`Agent Plugins ${pluginManifests.join(', ')}`);
+    return { type: 'agent-plugin', found };
   }
 
   // ─── 21. skills — SKILL.md folders and no code signal above. Last before
